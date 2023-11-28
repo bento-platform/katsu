@@ -10,9 +10,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
-from chord_metadata_service.restapi.utils import iso_duration_to_years
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
+from chord_metadata_service.restapi.utils import iso_duration_to_years
 
 from . import constants as c
 
@@ -344,8 +344,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         ]
         for individual in individuals:
             Individual.objects.create(**individual)
-        p = ph_m.Procedure.objects.create(**ph_c.VALID_PROCEDURE_1)
-        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0], p))
+        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
 
         random.seed(self.random_seed)
 
@@ -644,14 +643,17 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
+        individuals = [
+            c.generate_valid_individual(gen_random_age=(1, 100))
+            for _ in range(self.random_range)
+        ]
         for individual in individuals:
             Individual.objects.create(**individual)
 
         for individual in Individual.objects.all():
-            if individual.age:
-                if "age" in individual.age:
-                    age_numeric, age_unit = iso_duration_to_years(individual.age["age"])
+            if individual.time_at_last_encounter:
+                if "age" in individual.time_at_last_encounter:
+                    age_numeric, age_unit = iso_duration_to_years(individual.time_at_last_encounter["age"])
                     individual.age_numeric = age_numeric
                     individual.age_unit = age_unit if age_unit else ""
                     individual.save()

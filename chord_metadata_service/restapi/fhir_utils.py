@@ -1,4 +1,3 @@
-from datetime import datetime
 from fhirclient.models import (
     observation as obs,
     patient as p,
@@ -12,8 +11,6 @@ from fhirclient.models import (
     range as range_,
     quantity,
     fhirreference,
-    documentreference,
-    attachment,
     fhirdate,
     condition as cond,
     composition as comp,
@@ -28,7 +25,8 @@ from chord_metadata_service.restapi.semantic_mappings.hl7_genomics_mapping impor
 
 def fhir_coding_util(obj):
     """ Generic function to convert object to FHIR Coding. """
-
+    if "ontology_class" in obj:
+        obj = obj["ontology_class"]
     coding = c.Coding()
     coding.display = obj['label']
     coding.code = obj['id']
@@ -64,22 +62,31 @@ def codeable_concepts_fields(field_list, profile, obj):
     return concept_extensions
 
 
-def fhir_age(obj, mapping, field):
-    """ Generic function to convert Age or AgeRange to FHIR Age. """
+def fhir_age(time_element: dict, mapping):
+    """ Generic function to convert Age or AgeRange of TimeElement to FHIR Age. """
 
     age_extension = extension.Extension()
     age_extension.url = mapping
 
-    if "start" in obj[field]:  # Is an age range
+    if "age_range" in time_element:
         age_extension.valueRange = range_.Range()
         age_extension.valueRange.low = quantity.Quantity()
-        age_extension.valueRange.low.unit = obj[field]['start']['age']
+        age_extension.valueRange.low.unit = time_element['start']['age']["iso8601duration"]
         age_extension.valueRange.high = quantity.Quantity()
-        age_extension.valueRange.high.unit = obj[field]['end']['age']
-    else:  # Is a precise age
+        age_extension.valueRange.high.unit = time_element['end']['age']["iso8601duration"]
+    elif "age" in time_element:
         age_extension.valueAge = age.Age()
-        age_extension.valueAge.unit = obj[field]['age']
+        age_extension.valueAge.unit = time_element['age']["iso8601duration"]
+    else:
+        raise ValueError("FHIR age may only be represented from TimeElement.age or TimeElement.age_range")
     return age_extension
+
+
+def fhir_birth_date(obj: dict, mapping):
+    birth_date_extension = extension.Extension()
+    birth_date_extension.url = mapping
+    birth_date_extension.valueDate = fhirdate.FHIRDate(obj.get('date_of_birth', None))
+    return birth_date_extension
 
 
 def check_disease_onset(disease):
@@ -108,10 +115,6 @@ def fhir_patient(obj):
     patient.active = obj.get('active', None)
     patient.deceasedBoolean = obj.get('deceased', None)
     patient.extension = list()
-    # age
-    if 'age' in obj.keys():
-        age_extension = fhir_age(obj, PHENOPACKETS_ON_FHIR_MAPPING['individual']['age'], 'age')
-        patient.extension.append(age_extension)
     # karyotypic_sex
     karyotypic_sex_extension = extension.Extension()
     karyotypic_sex_extension.url = PHENOPACKETS_ON_FHIR_MAPPING['individual']['karyotypic_sex']['url']
@@ -134,6 +137,12 @@ def fhir_patient(obj):
         coding.code = obj.get('taxonomy', None).get('id', None)
         taxonomy_extension.valueCodeableConcept.coding.append(coding)
         patient.extension.append(taxonomy_extension)
+
+    # birthdate
+    birth_date_extension = fhir_birth_date(
+        obj, PHENOPACKETS_ON_FHIR_MAPPING['individual']['birth_date']
+    )
+    patient.extension.append(birth_date_extension)
     return patient.as_json()
 
 
@@ -160,7 +169,7 @@ def fhir_observation(obj):
     observation.code = fhir_codeable_concept(obj['type'])
     # required by FHIR specs but omitted by phenopackets, for now set for unknown
     observation.status = 'unknown'
-    if 'negated' in obj.keys():
+    if 'excluded' in obj.keys():
         observation.interpretation = fhir_codeable_concept(
             {"label": "Positive", "id": "POS"}
         )
@@ -170,7 +179,7 @@ def fhir_observation(obj):
         )
     observation.extension = []
     concept_extensions = codeable_concepts_fields(
-        ['severity', 'modifier', 'onset'], 'phenotypic_feature', obj
+        ['severity', 'modifiers', 'onset'], 'phenotypic_feature', obj
     )
     for ce in concept_extensions:
         observation.extension.append(ce)
@@ -239,11 +248,10 @@ def fhir_specimen(obj):
     # Individuals already contain a taxonomy attribute so this attribute is not needed.
     # extensions
     specimen.extension = []
-    # individual_age_at_collection
-    if 'individual_age_at_collection' in obj.keys():
+    # time_of_collection
+    if 'time_of_collection' in obj.keys():
         ind_age_at_collection_extension = fhir_age(
-            obj, PHENOPACKETS_ON_FHIR_MAPPING['biosample']['individual_age_at_collection'],
-            'individual_age_at_collection'
+            obj['time_of_collection'], PHENOPACKETS_ON_FHIR_MAPPING['biosample']['collected'],
         )
         specimen.extension.append(ind_age_at_collection_extension)
     concept_extensions = codeable_concepts_fields(
@@ -260,31 +268,6 @@ def fhir_specimen(obj):
         specimen.extension.append(control_extension)
     # TODO 2m extensions - references
     return specimen.as_json()
-
-
-def fhir_document_reference(obj):
-    """ Converts HTS file to FHIR DocumentReference. """
-
-    doc_ref = documentreference.DocumentReference()
-    doc_ref.type = fhir_codeable_concept({"label": obj['hts_format'], "id": obj['hts_format']})
-    # GA4GH requires status with the fixed value
-    doc_ref.status = PHENOPACKETS_ON_FHIR_MAPPING['hts_file']['status']
-    doc_ref.content = []
-    doc_content = documentreference.DocumentReferenceContent()
-    doc_content.attachment = attachment.Attachment()
-    doc_content.attachment.url = obj['uri']
-    if 'description' in obj.keys():
-        doc_content.attachment.title = obj.get('description', None)
-    doc_ref.content.append(doc_content)
-    doc_ref.indexed = fhirdate.FHIRDate()
-    # check what date it should be  - when it's retrieved or created
-    doc_ref.indexed.date = datetime.now()
-    doc_ref.extension = []
-    genome_assembly = extension.Extension()
-    genome_assembly.url = PHENOPACKETS_ON_FHIR_MAPPING['hts_file']['genome_assembly']
-    genome_assembly.valueString = obj['genome_assembly']
-    doc_ref.extension.append(genome_assembly)
-    return doc_ref.as_json()
 
 
 def fhir_obs_component_region_studied(obj):
@@ -391,9 +374,9 @@ def fhir_composition(obj):
     })
 
     composition.section = []
-    sections = ['biosamples', 'variants', 'diseases', 'hts_files']
+    sections = ['biosamples', 'variants', 'diseases']
     for section in sections:
-        if obj[section]:
+        if section in obj:
             section_content = _get_section_object(obj.get(section, None), section)
             composition.section.append(section_content)
 

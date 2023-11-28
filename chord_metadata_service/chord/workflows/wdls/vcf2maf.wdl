@@ -2,14 +2,11 @@ version 1.0
 
 workflow vcf2maf {
     input {
-        String chord_url
         String drs_url
         String katsu_url
-        String one_time_token_metadata_ingest
-        String temp_token_drs
-        String auth_host
-        String dataset_id
-        String dataset_name
+        String access_token
+        String validate_ssl
+        String project_dataset
         String vep_cache_dir
         String run_dir
 
@@ -18,9 +15,10 @@ workflow vcf2maf {
     }
 
     call katsu_dataset_export_vcf {
-        input:  dataset_name = dataset_name,
+        input:  project_dataset = project_dataset,
                 drs_url  = drs_url,
-                katsu_url = katsu_url
+                katsu_url = katsu_url,
+                validate_ssl = validate_ssl
     }
 
     call vcf_2_maf {
@@ -29,18 +27,18 @@ workflow vcf2maf {
             vep_species = vep_species,
             vep_cache_dir = vep_cache_dir,
             drs_url = drs_url,
-            temp_token_drs = temp_token_drs,
-            auth_host = auth_host,
+            access_token = access_token,
+            validate_ssl = validate_ssl,
             run_dir = run_dir
     }
 
     call katsu_update_experiment_results_with_maf {
-        input:  dataset_id = dataset_id,
+        input:  project_dataset = project_dataset,
                 experiment_results_json = katsu_dataset_export_vcf.experiment_results_json,
                 maf_list = vcf_2_maf.maf_list,
                 katsu_url  = katsu_url,
-                one_time_token_metadata_ingest = one_time_token_metadata_ingest,
-                auth_host = auth_host,
+                access_token = access_token,
+                validate_ssl = validate_ssl,
                 run_dir = run_dir
     }
 
@@ -51,9 +49,10 @@ workflow vcf2maf {
 
 task katsu_dataset_export_vcf {
     input {
-        String dataset_name
+        String project_dataset
         String drs_url
         String katsu_url
+        Boolean validate_ssl
     }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
@@ -71,16 +70,18 @@ task katsu_dataset_export_vcf {
         # Note: it is not possible to get the corresponding experiments at
         # this step due to the many to many relationship between these objects.
 
+        _, dataset_id = "~{project_dataset}".split(":")
+
         # Beware: results are paginated! 10,000 is supposedly big enough
         # (actually the upper limit)
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
-        metadata_url = "~{katsu_url}/api/experimentresults?datasets=~{dataset_name}&file_format=vcf&page_size=10000"
-        response = requests.get(metadata_url, verify=False)
+        metadata_url = f"~{katsu_url}/api/experimentresults?datasets={dataset_id}&file_format=vcf&page_size=10000"
+        response = requests.get(metadata_url, verify=~{true="True" false="False" validate_ssl})
         r = response.json()
 
         if r["count"] == 0:
-            sys.exit("No VCF file to convert from dataset ~{dataset_name}")
+            sys.exit(f"No VCF file to convert from dataset {dataset_id}")
 
         # Process each VCF from the results
         vcf_dict = dict()   # vcf processed keyed by filename
@@ -101,7 +102,7 @@ task katsu_dataset_export_vcf {
                 # Query DRS with the filename to get the absolute file path in
                 # DRS for processing.
                 drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
-                response = requests.get(drs_url, verify=False)
+                response = requests.get(drs_url, verify=~{true="True" false="False" validate_ssl})
                 if not response.ok:
                     continue
                 drs_resp = response.json()
@@ -140,8 +141,8 @@ task vcf_2_maf {
         String vep_species
         String vep_cache_dir
         String drs_url
-        String temp_token_drs
-        String auth_host
+        String access_token
+        Boolean validate_ssl
         String run_dir
     }
 
@@ -210,13 +211,13 @@ task vcf_2_maf {
             "deduplicate": True
         }
 
-        drs_url = "~{drs_url}/private/ingest"
+        drs_url = "~{drs_url}/ingest"
         try:
             response = requests.post(
                 drs_url,
-                headers={"Host": "~{auth_host}", "X-TT": "~{temp_token_drs}"} if "~{temp_token_drs}" else {},
+                headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
                 json=params,
-                verify=False
+                verify=~{true="True" false="False" validate_ssl},
             )
             response.raise_for_status()
 
@@ -251,10 +252,10 @@ task vcf_2_maf {
 
 task katsu_update_experiment_results_with_maf {
     input {
-        String dataset_id
+        String project_dataset
         String katsu_url
-        String one_time_token_metadata_ingest
-        String auth_host
+        String access_token
+        Boolean validate_ssl
         String run_dir
         File experiment_results_json
         File maf_list
@@ -312,23 +313,25 @@ task katsu_update_experiment_results_with_maf {
         # internally, direct access to the file is guaranteed.
 
         headers = (
-            {"Host": "~{auth_host}", "X-OTT": "~{one_time_token_metadata_ingest}"}
-            if "~{one_time_token_metadata_ingest}"
+            {"Authorization": "Bearer ~{access_token}"}
+            if "~{access_token}"
             else {}
         )
 
         metadata_url = f"~{katsu_url}/private/ingest"
         data = {
-            "table_id": "FROM_DERIVED_DATA",
+            "dataset_id": "FROM_DERIVED_DATA",
             "workflow_id": "maf_derived_from_vcf_json",
-            "workflow_outputs": {
-                "json_document": path.abspath(EXPERIMENT_RESULTS_JSON)
-            },
             "workflow_params": {
                 "derived_from_data_type": "experiment_result"
             }
         }
-        response = requests.post(metadata_url, headers=headers, json=data, verify=False)
+        response = requests.post(
+            metadata_url,
+            headers=headers,
+            json=data,
+            verify=~{true="True" false="False" validate_ssl},
+        )
         response.raise_for_status()
 
         CODE

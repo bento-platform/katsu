@@ -109,15 +109,14 @@ def phenotypic_feature(subject="a subject or biosample"):
         "properties": {
             "description": "Human-readable text describing the phenotypic feature; NOT for structured text.",
             "type": ontology_class("which describes the phenotype"),
-            "negated": "Whether the feature is present (false) or absent (true, feature is negated); default is false.",
+            "excluded": "Whether the feature is present (false) or absent (true, feature is excluded); default false.",
             "severity": ontology_class("that describes the severity of the condition"),
-            "modifier": {  # TODO: Plural?
+            "modifiers": {
                 "description": "A list of ontology terms that provide more expressive / precise descriptions of a "
                                "phenotypic feature, including e.g. positionality or external factors.",
                 "items": ontology_class("that expounds on the phenotypic feature")
             },
-            "onset": ontology_class("that describes the age at which the phenotypic feature was first noticed or "
-                                    "diagnosed, e.g. HP:0003674"),
+            "onset": "Age or time at which the feature was first observed.",
             "evidence": {
                 "description": "One or more pieces of evidence that specify how the phenotype was determined.",
                 "items": EVIDENCE,
@@ -136,22 +135,23 @@ PROCEDURE = {
         "code": ontology_class("that represents a clinical procedure performed on a subject"),
         "body_site": ontology_class("that is specified when it is not possible to represent the procedure with a "
                                     "single ontology class"),
+        "performed": "Age/time when the procedure was performed",
         **EXTRA_PROPERTIES
     }
 }
 
-HTS_FILE = {
+
+FILE = {
     "description": "A link to a High-Throughput Sequencing (HTS) data file.",
     "properties": {
         "uri": "A valid URI to the file",
-        "description": "Human-readable text describing the file.",
-        "hts_format": "The file's format; one of SAM, BAM, CRAM, VCF, BCF, GVCF, FASTQ, or UNKNOWN.",
-        "genome_assembly": "Genome assembly ID for the file, e.g. GRCh38.",
-        "individual_to_sample_identifiers": ("Mapping between individual or biosample IDs and the sample identifier in "
-                                             "the HTS file."),
+        "individual_to_file_identifiers": ("The mapping between the Individual.id or Biosample.id to any "
+                                           "identifier in the file."),
+        "file_attributes": "A map of attributes pertaining to the file or its contents.",
         **EXTRA_PROPERTIES
     }
 }
+
 
 GENE = {
     "description": "A representation of an identifier for a gene.",
@@ -168,6 +168,18 @@ GENE = {
     }
 }
 
+GENE_DESCRIPTOR = {
+    "description": "This element represents an identifier for a gene, using the Gene Descriptor from the VRSATILE "
+                   "Framework.",
+    "properties": {
+        "value_id": "Official identifier of the gene. REQUIRED.",
+        "symbol": "Official gene symbol. REQUIRED.",
+        "description": "A free-text description of the gene",
+        "alternate_ids": "Alternative identifier(s) of the gene",
+        "xrefs": "Related concept IDs (e.g. gene ortholog IDs) may be placed in xrefs",
+        "alternate_symbols": "Alternative symbol(s) of the gene",
+        **EXTRA_PROPERTIES}}
+
 ALLELE = {
     "properties": {
         "id": "An arbitrary identifier.",
@@ -183,6 +195,78 @@ ALLELE = {
         "deleted_sequence": "Deleted sequence , sequence for the deletion, can be empty, e.g. A",
         "inserted_sequence": "Inserted sequence , sequence for the insertion, can be empty, e.g. G",
         "iscn": "E.g. t(8;9;11)(q12;p24;p12)."
+    }
+}
+
+EXPRESSION = {
+    "description": ("The Expression class is designed to enable descriptions based on a specified"
+                    " nomenclature or syntax for representing an object. Common examples of expressions"
+                    " for the description of molecular variation include the HGVS and ISCN nomenclatures."),
+    "properties": {
+        "syntax": "A name for the expression syntax. REQUIRED.",
+        "value": "The concept expression as a string. REQUIRED.",
+        "version": "An optional version of the expression syntax."
+    }
+}
+VCF_RECORD = {
+    "description": ("This element is used to describe variants using the Variant Call Format, which is in near "
+                    "universal use for exome, genome, and other Next-Generation-Sequencing-based variant calling."
+                    " It is an appropriate option to use for variants reported according to their chromosomal "
+                    "location as derived from a VCF file."),
+    "properties": {
+        "genome_assembly": "Identifier for the genome assembly used to call the allele. REQUIRED.",
+        "chrom": "Chromosome or contig identifier. REQUIRED.",
+        "pos": "The reference position, with the 1st base having position 1. REQUIRED.",
+        "id": "Identifier: Semicolon-separated list of unique identifiers where available. If this is a dbSNP variant "
+              "thers number(s) should be used.",
+        "ref": "Reference base. REQUIRED.",
+        "alt": "Alternate base. REQUIRED.",
+        "qual": "Quality: Phred-scaled quality score for the assertion made in ALT.",
+        "filter": "Filter status: PASS if this position has passed all filters.",
+        "info": "Additional information: Semicolon-separated series of additional information fields"
+    }
+}
+
+VARIANT_DESCRIPTOR = {
+    "description": ("Variation Descriptors are part of the VRSATILE framework, a set of conventions extending"
+                    " the GA4GH Variation Representation Specification (VRS)."),
+    "properties": {
+        "id": "Descriptor ID; MUST be unique within document. REQUIRED.",
+        "variation": "The VRS Variation object",
+        "label": "A primary label for the variation",
+        "description": "A free-text description of the variation",
+        "gene_context": GENE_DESCRIPTOR,
+        "expressions": {
+            "description": "",
+            "items": EXPRESSION
+        },
+        "vcf_record": {
+            "description": "",
+            "items": VCF_RECORD
+        },
+        "xrefs": "List of CURIEs representing associated concepts. Allele registry, ClinVar, or other related IDs "
+                 "should be included as xrefs",
+        "alternate_labels": "Common aliases for a variant, e.g. EGFR vIII, are alternate labels",
+        "extensions": "List of resource-specific Extensions needed to describe the variation",
+        "molecule_context": "The molecular context of the vrs variation.",
+        "structural_type": "The structural variant type associated with this variant, such as a substitution, "
+                           "deletion, or fusion.",
+        "vrs_ref_allele_seq": "A Sequence corresponding to a “ref allele”, describing the sequence expected at a "
+                              "SequenceLocation reference.",
+        "allelic_state": ("The zygosity of the variant as determined in all of the samples represented"
+                          "in this Phenopacket is represented using a list of terms taken from the Genotype Ontology "
+                          "(GENO)."),
+    }
+}
+
+VARIANT_INTERPRETATION = {
+    "description": ("This element represents the interpretation of a variant according to the American College of "
+                    " Medical Genetics (ACMG) variant interpretation guidelines."),
+    "properties": {
+        "acmg_pathogenicity_classification": "one of the five ACMG pathogenicity categories, or NOT_PROVIDED. The "
+                                             "default is NOT_PROVIDED",
+        "therapeutic_actionability": "The therapeutic actionability of the variant, default is UNKNOWN_ACTIONABILITY",
+        "variant": VARIANT_DESCRIPTOR
     }
 }
 
@@ -228,17 +312,20 @@ BIOSAMPLE = {
     "properties": {
         "id": "Unique arbitrary, researcher-specified identifier for the biosample.",
         "individual_id": "Identifier for the individual this biosample was sampled from.",
+        "derived_from_id": "id of the biosample from which the current biosample was derived (if applicable)",
         "description": "Human-readable, unstructured text describing the biosample or providing additional "
                        "information.",
         "sampled_tissue": ontology_class("describing the tissue from which the specimen was collected. The use of "
                                          "UBERON is recommended"),
+        "sample_type": "type of material, e.g., RNA, DNA, Cultured cells",
         "phenotypic_features": {
             "description": "A list of phenotypic features / abnormalities of the sample.",
             "items": phenotypic_feature("a biosample")
         },
+        "measurements": "List of measurements of the sample",
         "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
-        "individual_age_at_collection": None,  # TODO: oneOf
+        "time_of_collection": "Age of the proband at the time the sample was taken.",
         "histological_diagnosis": ontology_class("representing a refinement of the clinical diagnosis. Normal samples "
                                                  "could be tagged with NCIT:C38757, representing a negative finding"),
         "tumor_progression": ontology_class("representing if the specimen is from a primary tumour, a metastasis, or a "
@@ -247,6 +334,7 @@ BIOSAMPLE = {
                                             "application specific"),
         "tumor_grade": ontology_class("representing the tumour grade. This should be a child term of NCIT:C28076 "
                                       "(Disease Grade Qualifier) or equivalent"),
+        "pathological_stage": ontology_class("Pathological stage, if applicable."),
         "diagnostic_markers": {
             "description": "A list of ontology terms representing clinically-relevant bio-markers.",
             "items": ontology_class("representing a clinically-relevant bio-marker. Most of the assays, such as "
@@ -255,10 +343,6 @@ BIOSAMPLE = {
                                     "(HER2/Neu Positive), or NCIT:C131711 Human Papillomavirus-18 Positive)")
         },
         "procedure": PROCEDURE,
-        "hts_files": {
-            "description": "A list of HTS files derived from the biosample.",
-            "items": HTS_FILE
-        },
         "variants": {
             "description": "A list of variants determined to be present in the biosample.",
             "items": VARIANT
@@ -268,6 +352,47 @@ BIOSAMPLE = {
     }
 }
 
+MEASUREMENT = {
+    "description": ("The measurement element is used to record individual measurements. "
+                    "It can capture quantitative, ordinal (e.g., absent/present), or categorical measurements."),
+    "properties": {
+        "assay": "OntologyClass that describes the assay used to produce the measurement. REQUIRED.",
+        "description": "Human-readable, unstructured text describing the measurement or providing additional "
+                       "information.",
+        "measurement_value": "Result of the measurement",
+        "time_observed": "Time at which measurement was performed. RECOMMENDED.",
+        "procedure": "Clinical procdure performed to acquire the sample used for the measurement",
+        **EXTRA_PROPERTIES
+    }
+}
+
+MEDICAL_ACTION = {
+    "description": ("This element describes medications, procedures, other actions taken for clinical management."
+                    " The element is a list of options."),
+    "properties": {
+        "action": "One of a list of medical actions. REQUIRED.",
+        "treatment_target": "The condition or disease that this treatment was intended to address",
+        "treatment_intent": "Whether the intention of the treatment was curative, palliative…",
+        "response_to_treatment": "How the patient responded to the treatment",
+        "adverse_events": {
+            "description": "Any adverse effects experienced by the patient attributed to the treatment",
+            "items": ontology_class("Any adverse effects experienced by the patient attributed to the treatment")
+        },
+        "treatment_termination_reason": "The reason that the treatment was stopped."
+    }
+}
+
+INTERPRETATION = {
+    "description": ("This message intends to represent the interpretation of a genomic analysis,"
+                    " such as the report from a diagnostic laboratory."),
+    "properties": {
+        "id": "Arbitrary identifier. REQUIRED.",
+        "progress_status": "The current resolution status. REQUIRED.",
+        "diagnosis": "The diagnosis, if made.",
+        "summary": "Additional data about this interpretation",
+        **EXTRA_PROPERTIES
+    }
+}
 
 PHENOPACKET = {
     "description": "An anonymous phenotypic description of an individual or biosample with potential genes of interest "
@@ -283,6 +408,10 @@ PHENOPACKET = {
             "description": "Samples (e.g. biopsies) taken from the individual, if any.",
             "items": BIOSAMPLE
         },
+        "interpretations": {
+            "description": "Interpretations related to this phenopacket",
+            "items": INTERPRETATION
+        },
         "genes": {
             "description": "Genes deemed to be relevant to the case; application-specific.",
             "items": GENE
@@ -295,15 +424,59 @@ PHENOPACKET = {
             "description": "A list of diseases diagnosed in the proband.",
             "items": DISEASE
         },
-        "hts_files": {
-            "description": "A list of HTS files derived from the individual.",
-            "items": HTS_FILE
+        "measurements": {
+            "description": "Measurements performed in the proband",
+            "items": MEASUREMENT
+        },
+        "medical_actions": {
+            "description": "Medical actions performed",
+            "items": MEDICAL_ACTION
         },
         "meta_data": META_DATA,
         **EXTRA_PROPERTIES
     }
 }
 
-# TODO: Mutually recursive, use functions
-# DIAGNOSIS
-# GENOMIC_INTERPRETATION
+AGE = {
+    "description": ("The Age element allows the age of the subject to be encoded in several"
+                    " different ways that support different use cases. Age is encoded as ISO8601 duration."),
+    "properties": {
+        "iso8601duration": "An ISO8601 string represent age"
+    }
+}
+
+AGE_RANGE = {
+    "description": "The AgeRange element is intended to be used when the age of a subject is represented by a bin, "
+                   "e.g., 5-10 years.",
+    "properties": {
+        "start": AGE,
+        "end": AGE
+    }
+}
+
+GENOMIC_INTERPRETATION = {
+    "description": ("This element is used as a component of the Interpretation element, and describes"
+                    " the interpretation for an individual variant or gene."),
+    "properties": {
+        "subject_or_biosample_id": "The id of the patient or biosample that is the subject being interpreted.",
+        "interpretation_status": "Status of the interpretation.",
+        "call": {
+            "oneOf": [
+                GENE_DESCRIPTOR,
+                VARIANT_INTERPRETATION
+            ]
+        }
+    }
+}
+
+DIAGNOSIS = {
+    "description": ("The diagnosis element is meant to refer to the disease that is inferred to be present in the"
+                    " individual or family being analyzed."),
+    "properties": {
+        "disease": DISEASE,
+        "genomic_interpretations": {
+            "description": "The genomic elements assessed as being responsible for the disease or empty.",
+            "items": GENOMIC_INTERPRETATION
+        }
+    }
+}

@@ -15,6 +15,7 @@ INDIVIDUAL = {
         "age": "The age or age range of the individual.",
         "sex": "The phenotypic sex of an individual, as would be determined by a midwife or physician at birth.",
         "karyotypic_sex": "The karyotypic sex of an individual.",
+        "gender": "Self-identified gender",
         "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
 
@@ -29,5 +30,16 @@ INDIVIDUAL = {
         },
 
         **EXTRA_PROPERTIES
+    }
+}
+
+VITAL_STATUS = {
+    "description": ("This element can be used to report whether the individual is living or dead at the"
+                    " timepoint when the phenopacket was created (or if the status is unknown)."),
+    "properties": {
+        "status": "one of UNKNOWN_STATUS, ALIVE, DECEASED. REQUIRED.",
+        "time_of_death": "Should be left blank if patient not known to be deceased",
+        "cause_of_death": "Should be left blank if patient not known to be deceased",
+        "survival_time_in_days": "Number of days the patient was alive after their primary diagnosis"
     }
 }

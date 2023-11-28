@@ -48,65 +48,6 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
 
 
-class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing procedures
-
-    post:
-    Create a new procedure
-
-    """
-    serializer_class = s.ProcedureSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.ProcedureFilter
-    queryset = m.Procedure.objects.all().order_by("id")
-
-
-class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing HTS files
-
-    post:
-    Create a new HTS file
-
-    """
-    serializer_class = s.HtsFileSerializer
-    filter_backends = [DjangoFilterBackend]
-    queryset = m.HtsFile.objects.all().order_by("uri")
-
-
-class GeneViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing genes
-
-    post:
-    Create a new gene
-
-    """
-    serializer_class = s.GeneSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.GeneFilter
-    queryset = m.Gene.objects.all().order_by("id")
-
-
-class VariantViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing variants
-
-    post:
-    Create a new variant
-
-    """
-    serializer_class = s.VariantSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.VariantFilter
-    queryset = m.Variant.objects.all().order_by("id")
-
-
 class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
     """
     get:
@@ -143,15 +84,8 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 
 
 BIOSAMPLE_PREFETCH = (
-    "hts_files",
     "phenotypic_features",
-    "procedure",
-    "variants",
     "experiment_set",
-)
-
-BIOSAMPLE_SELECT_REL = (
-    "procedure",
 )
 
 
@@ -165,7 +99,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     """
     queryset = m.Biosample.objects.all() \
         .prefetch_related(*BIOSAMPLE_PREFETCH) \
-        .select_related(*BIOSAMPLE_SELECT_REL) \
         .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
@@ -197,7 +130,6 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
             queryset = queryset.filter(id__in=ids_list)
 
         queryset = queryset.prefetch_related(*BIOSAMPLE_PREFETCH) \
-            .select_related(*BIOSAMPLE_SELECT_REL) \
             .order_by("id")
 
         return queryset
@@ -216,13 +148,10 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
 
 PHENOPACKET_PREFETCH = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-    "diseases",
-    "genes",
-    "hts_files",
     *(f"meta_data__{p}" for p in META_DATA_PREFETCH),
     "phenotypic_features",
     "subject",
-    "variants",
+    "interpretations",
 )
 
 PHENOPACKET_SELECT_REL = (

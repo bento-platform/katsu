@@ -1,11 +1,9 @@
 [
   {
+    "id": "pheno-1",
     "subject": {
       "id": "ind:NA20509001",
-      "date_of_birth": "1986-10-22",
-      "age": {
-        "age": "P45Y"
-      },
+      "date_of_birth": "1986-10-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -49,7 +47,8 @@
           "version": "2015-09-01",
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
-      ]
+      ],
+      "phenopacket_schema_version": "2.0.0"
     },
     "biosamples": [
         {
@@ -170,12 +169,10 @@
     ]
   },
   {
+    "id": "pheno-2",
     "subject": {
       "id": "ind:NA20509002",
-      "date_of_birth": "1950-11-22",
-      "age": {
-        "age": "P65Y6M3D"
-      },
+      "date_of_birth": "1950-11-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -219,7 +216,8 @@
           "version": "2015-09-01",
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
-      ]
+      ],
+      "phenopacket_schema_version": "2.0.0"
     },
     "biosamples": [
         {
@@ -314,12 +312,10 @@
     ]
   },
   {
+    "id": "pheno-3",
     "subject": {
       "id": "ind:NA20509003",
-      "date_of_birth": "1930-11-22",
-      "age": {
-        "age": "P75.8Y6M3D"
-      },
+      "date_of_birth": "1930-11-22T00:00:00Z",
       "sex": "MALE",
       "karyotypic_sex": "XY",
       "taxonomy": {
@@ -363,7 +359,8 @@
           "version": "2015-09-01",
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
-      ]
+      ],
+      "phenopacket_schema_version": "2.0.0"
     },
     "biosamples": [
         {

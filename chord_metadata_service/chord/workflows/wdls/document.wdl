@@ -3,11 +3,10 @@ version 1.0
 workflow document {
     input {
         Array[File] document_files
-        String run_dir
         String drs_url
-        String project_id
-        String dataset_id
-        String secret__access_token
+        String project_dataset
+        String access_token
+        Boolean validate_ssl
     }
 
     scatter(file in document_files) {
@@ -15,9 +14,9 @@ workflow document {
             input:
                 file_path = file,
                 drs_url = drs_url,
-                project_id = project_id,
-                dataset_id = dataset_id,
-                token = secret__access_token
+                project_dataset = project_dataset,
+                token = access_token,
+                validate_ssl = validate_ssl
         }
     }
 
@@ -30,18 +29,22 @@ task post_to_drs {
     input {
         File file_path
         String drs_url
-        String project_id
-        String dataset_id
+        String project_dataset
         String token
+        Boolean validate_ssl
     }
-    command {
-        curl -k -X POST \
-             -F "file=@~{file_path}" \
-             -F "project_id=~{project_id}" \
-             -F "dataset_id=~{dataset_id}" \
-             -H "Authorization: Bearer ~{token}" \
-             "~{drs_url}/ingest"
-    }
+    command <<<
+        project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
+        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
+        curl ~{true="" false="-k" validate_ssl} \
+            -X POST \
+            -F "file=@~{file_path}" \
+            -F "project_id=$project_id" \
+            -F "dataset_id=$dataset_id" \
+            -H "Authorization: Bearer ~{token}" \
+            --fail-with-body \
+            "~{drs_url}/ingest"
+    >>>
     output {
         String response_message = read_string(stdout())
     }

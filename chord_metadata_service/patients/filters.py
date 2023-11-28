@@ -1,9 +1,14 @@
 import django_filters
 from django.db.models import Q
-from django.db.models import TextField
+from django.db.models import TextField, BooleanField
 from django.db.models.functions import Cast
 from django.contrib.postgres.search import SearchVector
 from .models import Individual
+
+GENOMIC_INTERPRETATION_QUERY = "phenopackets__interpretations__diagnosis__genomic_interpretations"
+GENE_DESCRIPTOR_QUERY = f"{GENOMIC_INTERPRETATION_QUERY}__gene_descriptor"
+VARIANT_INTERPRETATION_QUERY = f"{GENOMIC_INTERPRETATION_QUERY}__variant_interpretation"
+VARIATION_DESCRIPTOR_QUERY = f"{VARIANT_INTERPRETATION_QUERY}__variation_descriptor"
 
 
 class IndividualFilter(django_filters.rest_framework.FilterSet):
@@ -13,8 +18,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
     disease = django_filters.CharFilter(
         method="filter_disease", field_name="phenopackets__diseases",
-        label="Disease"
-    )
+        label="Disease")
     # e.g. select all patients who have a symptom "dry cough"
     found_phenotypic_feature = django_filters.CharFilter(
         method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
@@ -40,7 +44,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         qs = qs.filter(
             Q(phenopackets__phenotypic_features__pftype__id__icontains=value) |
             Q(phenopackets__phenotypic_features__pftype__label__icontains=value),
-            phenopackets__phenotypic_features__negated=False
+            phenopackets__phenotypic_features__excluded=False
         ).distinct()
         return qs
 
@@ -58,7 +62,13 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         # creates index in db
         qs = qs.annotate(
             search=SearchVector("id", "alternate_ids", "date_of_birth",
-                                Cast("age", TextField()),
+                                Cast("time_at_last_encounter", TextField()),
+                                Cast("time_at_last_encounter__age", TextField()),
+                                Cast("time_at_last_encounter__age_range", TextField()),
+                                Cast("vital_status__status", TextField()),
+                                Cast("vital_status__time_of_death", TextField()),
+                                Cast("vital_status__cause_of_death", TextField()),
+                                Cast("vital_status__survival_time_in_days", TextField()),
                                 "sex", "karyotypic_sex",
                                 Cast("taxonomy", TextField()),
                                 Cast("extra_properties", TextField()),
@@ -67,7 +77,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 "phenopackets__phenotypic_features__description",
                                 Cast("phenopackets__phenotypic_features__pftype", TextField()),
                                 Cast("phenopackets__phenotypic_features__severity", TextField()),
-                                Cast("phenopackets__phenotypic_features__modifier", TextField()),
+                                Cast("phenopackets__phenotypic_features__modifiers", TextField()),
                                 Cast("phenopackets__phenotypic_features__onset", TextField()),
                                 Cast("phenopackets__phenotypic_features__evidence", TextField()),
                                 Cast("phenopackets__phenotypic_features__extra_properties", TextField()),
@@ -77,7 +87,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 "phenopackets__biosamples__description",
                                 Cast("phenopackets__biosamples__sampled_tissue", TextField()),
                                 Cast("phenopackets__biosamples__taxonomy", TextField()),
-                                Cast("phenopackets__biosamples__individual_age_at_collection", TextField()),
+                                Cast("phenopackets__biosamples__time_of_collection", TextField()),
                                 Cast("phenopackets__biosamples__histological_diagnosis", TextField()),
                                 Cast("phenopackets__biosamples__tumor_progression", TextField()),
                                 Cast("phenopackets__biosamples__tumor_grade", TextField()),
@@ -87,46 +97,60 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("phenopackets__biosamples__procedure__body_site", TextField()),
                                 Cast("phenopackets__biosamples__procedure__extra_properties", TextField()),
                                 Cast("phenopackets__biosamples__extra_properties", TextField()),
-                                # Biosample Variant fields
-                                "phenopackets__biosamples__variants__allele_type",
-                                Cast("phenopackets__biosamples__variants__allele", TextField()),
-                                Cast("phenopackets__biosamples__variants__zygosity", TextField()),
-                                Cast("phenopackets__biosamples__variants__extra_properties", TextField()),
-                                # Biosample HTS file fields
-                                "phenopackets__biosamples__hts_files__uri",
-                                "phenopackets__biosamples__hts_files__description",
-                                "phenopackets__biosamples__hts_files__hts_format",
-                                "phenopackets__biosamples__hts_files__genome_assembly",
-                                Cast("phenopackets__biosamples__hts_files__individual_to_sample_identifiers",
-                                     TextField()),
-                                Cast("phenopackets__biosamples__hts_files__extra_properties", TextField()),
 
-                                # Gene fields
-                                "phenopackets__genes__id",
-                                "phenopackets__genes__alternate_ids",
-                                "phenopackets__genes__symbol",
-                                Cast("phenopackets__genes__extra_properties", TextField()),
+                                # Interpretation field
+                                "phenopackets__interpretations__progress_status",
+                                "phenopackets__interpretations__summary",
+                                Cast("phenopackets__interpretations__extra_properties", TextField()),
 
-                                # Variant fields
-                                "phenopackets__variants__allele_type",
-                                Cast("phenopackets__variants__allele", TextField()),
-                                Cast("phenopackets__variants__zygosity", TextField()),
-                                Cast("phenopackets__variants__extra_properties", TextField()),
+                                # Interpretation.Diagnosis
+                                Cast("phenopackets__interpretations__diagnosis__disease", TextField()),
+                                Cast("phenopackets__interpretations__diagnosis__extra_properties", TextField()),
+
+                                # Interpretation.Diagnosis.GenomicInterpretation
+                                f"{GENOMIC_INTERPRETATION_QUERY}__subject__id",
+                                f"{GENOMIC_INTERPRETATION_QUERY}__biosample__id",
+                                f"{GENOMIC_INTERPRETATION_QUERY}__interpretation_status",
+                                Cast(f"{GENOMIC_INTERPRETATION_QUERY}__extra_properties", TextField()),
+
+                                # Interpretation.Diagnosis.GenomicInterpretation.VariantInterpretation fields
+                                f"{VARIANT_INTERPRETATION_QUERY}__acmg_pathogenicity_classification",
+                                f"{VARIANT_INTERPRETATION_QUERY}__therapeutic_actionability",
+
+                                # VariantInterpretation.VariationDescriptor
+                                f"{VARIATION_DESCRIPTOR_QUERY}__id",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__label",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__description",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__molecule_context",
+                                f"{VARIATION_DESCRIPTOR_QUERY}__vrs_ref_allele_seq",
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__variation", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__expressions", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__vcf_record", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__xrefs", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__alternate_labels", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__extensions", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__structural_type", TextField()),
+                                Cast(f"{VARIATION_DESCRIPTOR_QUERY}__allelic_state", TextField()),
+
+                                # Interpretation.Diagnosis.GenomicInterpretation.GeneDescriptor fields
+                                f"{GENE_DESCRIPTOR_QUERY}__value_id",
+                                f"{GENE_DESCRIPTOR_QUERY}__symbol",
+                                f"{GENE_DESCRIPTOR_QUERY}__description",
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__alternate_ids", TextField()),
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__xrefs", TextField()),
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__alternate_symbols", TextField()),
+                                Cast(f"{GENE_DESCRIPTOR_QUERY}__extra_properties", TextField()),
 
                                 # Disease field
                                 Cast("phenopackets__diseases__term", TextField()),
+                                Cast("phenopackets__diseases__excluded", BooleanField()),
                                 Cast("phenopackets__diseases__onset", TextField()),
+                                Cast("phenopackets__diseases__resolution", TextField()),
                                 Cast("phenopackets__diseases__disease_stage", TextField()),
-                                Cast("phenopackets__diseases__tnm_finding", TextField()),
+                                Cast("phenopackets__diseases__clinical_tnm_finding", TextField()),
+                                Cast("phenopackets__diseases__primary_site", TextField()),
+                                Cast("phenopackets__diseases__laterality", TextField()),
                                 Cast("phenopackets__diseases__extra_properties", TextField()),
-
-                                # HTS file fields
-                                "phenopackets__hts_files__uri",
-                                "phenopackets__hts_files__description",
-                                "phenopackets__hts_files__hts_format",
-                                "phenopackets__hts_files__genome_assembly",
-                                Cast("phenopackets__hts_files__individual_to_sample_identifiers", TextField()),
-                                Cast("phenopackets__hts_files__extra_properties", TextField()),
 
                                 # Experiment fields
                                 "phenopackets__biosamples__experiment__study_type",

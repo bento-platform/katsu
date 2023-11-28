@@ -11,8 +11,8 @@ __all__ = [
     "EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS",
 ]
 
-EXAMPLE_INGEST_PHENOPACKET = load_local_json("example_phenopacket.json")
-EXAMPLE_INGEST_PHENOPACKET_UPDATE = load_local_json("example_phenopacket_2.json")
+EXAMPLE_INGEST_PHENOPACKET = load_local_json("example_phenopacket_v2.json")
+EXAMPLE_INGEST_PHENOPACKET_UPDATE = load_local_json("example_phenopacket_2_v2.json")
 
 EXAMPLE_INGEST_EXPERIMENT = load_local_json("example_experiment.json")
 EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE = load_local_json("example_experiment_bad_biosample.json")

@@ -90,12 +90,14 @@ class ExperimentBatchViewSet(BatchViewSet):
     def get_queryset(self):
         experiment_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": experiment_ids} if experiment_ids else {}
-        queryset = Experiment.objects.filter(**filter_by_id)\
-            .select_related(*EXPERIMENT_SELECT_REL)\
-            .prefetch_related(*EXPERIMENT_PREFETCH)\
-            .order_by("id")
 
-        return queryset
+        return (
+            Experiment.objects
+            .filter(**filter_by_id)
+            .select_related(*EXPERIMENT_SELECT_REL)
+            .prefetch_related(*EXPERIMENT_PREFETCH)
+            .order_by("id")
+        )
 
     def create(self, request, *args, **kwargs):
         ids_list = request.data.get('id', [])

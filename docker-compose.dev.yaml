@@ -1,0 +1,21 @@
+services:
+  katsu-db:
+    image: postgres:13-alpine
+    container_name: katsu-db
+    restart: "no"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DATABASE}
+    ports:
+      - 5432:5432
+    ### Un-comment the volume if you want your dev db to persist data after container destruction
+    # volumes:
+    #   - ./postgres:/var/lib/postgresql/data
+  
+  adminer:
+    image: adminer:4.8.1
+    container_name: katsu-adminer
+    restart: "no"
+    ports:
+      - 8080:8080

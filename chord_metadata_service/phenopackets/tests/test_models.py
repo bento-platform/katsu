@@ -1,15 +1,16 @@
 from django.core.exceptions import ValidationError
-from django.db.utils import IntegrityError
 from django.test import TestCase
+from django.db.models import Q
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
+    InterpretationFilter,
     filter_ontology,
     filter_extra_properties_datatype,
     PhenotypicFeatureFilter,
-    DiseaseFilter,
-    PhenopacketFilter
+    PhenopacketFilter,
+    GenomicInterpretationFilter
 )
 from chord_metadata_service.restapi.models import SchemaType
 
@@ -22,11 +23,10 @@ class BiosampleTest(ProjectTestCase):
 
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual, self.procedure))
-        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None, self.procedure))
+        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual))
+        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None))
         self.biosample_3 = m.Biosample.objects.create(**{
-            **c.valid_biosample_2(None, self.procedure),
+            **c.valid_biosample_2(None),
             "id": 'biosample_id:3'
         })
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
@@ -44,7 +44,7 @@ class BiosampleTest(ProjectTestCase):
         biosample_one = m.Biosample.objects.get(
             tumor_progression__label='Primary Malignant Neoplasm',
             sampled_tissue__label__icontains='urinary bladder'
-            )
+        )
         self.assertEqual(biosample_one.id, 'biosample_id:1')
         self.assertEqual(biosample_one.schema_type, SchemaType.BIOSAMPLE)
         self.assertEqual(biosample_one.get_project_id(), self.project.identifier)
@@ -55,7 +55,6 @@ class BiosampleTest(ProjectTestCase):
     def test_string_representations(self):
         # Test __str__
         self.assertEqual(str(self.individual), str(self.individual.pk))
-        self.assertEqual(str(self.procedure), str(self.procedure.pk))
         self.assertEqual(str(self.biosample_1), str(self.biosample_1.pk))
         self.assertEqual(str(self.meta_data), str(self.meta_data.pk))
         self.assertEqual(str(self.phenopacket), str(self.phenopacket.pk))
@@ -67,12 +66,11 @@ class PhenotypicFeatureTest(TestCase):
     def setUp(self):
         self.individual_1 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.individual_2 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_2)
-        self.procedure = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(
-            self.individual_1, self.procedure)
+            self.individual_1)
         )
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(
-            self.individual_2, self.procedure)
+            self.individual_2)
         )
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.phenopacket = m.Phenopacket.objects.create(
@@ -116,100 +114,30 @@ class PhenotypicFeatureTest(TestCase):
         self.assertEqual(len(result), 1)
 
 
-class ProcedureTest(TestCase):
-    """ Test module for Procedure model. """
-
-    def setUp(self):
-        self.procedure_1 = m.Procedure.objects.create(**c.VALID_PROCEDURE_1)
-        self.procedure_2 = m.Procedure.objects.create(**c.VALID_PROCEDURE_2)
-
-    def test_procedure(self):
-        procedure_query_1 = m.Procedure.objects.filter(
-            body_site__label__icontains='arm'
-            )
-        procedure_query_2 = m.Procedure.objects.filter(code__id='NCIT:C28743')
-        self.assertEqual(procedure_query_1.count(), 2)
-        self.assertEqual(procedure_query_2.count(), 2)
-
-
-class HtsFileTest(TestCase):
-    """ Test module for HtsFile model. """
-
-    def setUp(self):
-        self.hts_file = m.HtsFile.objects.create(**c.VALID_HTS_FILE)
-
-    def test_hts_file(self):
-        hts_file = m.HtsFile.objects.get(genome_assembly='GRCh38')
-        self.assertEqual(hts_file.uri, 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-    def test_hts_file_str(self):
-        self.assertEqual(str(self.hts_file), 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-
-class GeneTest(TestCase):
-    """ Test module for Gene model. """
-
-    def setUp(self):
-        self.gene_1 = m.Gene.objects.create(**c.VALID_GENE_1)
-
-    def test_gene(self):
-        gene_1 = m.Gene.objects.get(id='HGNC:347')
-        self.assertEqual(gene_1.symbol, 'ETF1')
-        with self.assertRaises(IntegrityError):
-            m.Gene.objects.create(**c.DUPLICATE_GENE_2)
-
-    def test_gene_str(self):
-        self.assertEqual(str(self.gene_1), "HGNC:347")
-
-
-class VariantTest(TestCase):
-    """ Test module for Variant model. """
-
-    def setUp(self):
-        self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
-
-    def test_variant(self):
-        variant_query = m.Variant.objects.filter(zygosity__id='NCBITaxon:9606')
-        self.assertEqual(variant_query.count(), 1)
-
-    def test_variant_str(self):
-        self.assertEqual(str(self.variant), str(self.variant.id))
-
-
-class DiseaseTest(TestCase):
-    """ Test module for Disease model. """
-
-    def setUp(self):
-        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
-
-    def test_disease(self):
-        disease_query = m.Disease.objects.filter(term__id='OMIM:164400')
-        self.assertEqual(disease_query.count(), 1)
-
-    def test_disease_str(self):
-        self.assertEqual(str(self.disease_1), str(self.disease_1.id))
-
-    def test_filtering(self):
-        f = DiseaseFilter()
-        result = f.filter_extra_properties_cg(m.Disease.objects.all(),
-                                              "extra_properties__comorbidities_group", "immune")
-        self.assertEqual(len(result), 0)
-
-
 class GenomicInterpretationTest(TestCase):
     """ Test module for GenomicInterpretation model. """
 
     def setUp(self):
-        self.gene = m.Gene.objects.create(**c.VALID_GENE_1)
-        self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
+        self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
+        self.variant_descriptor = m.VariationDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
+        self.variant_interpretation = m.VariantInterpretation.objects.create(
+            **c.valid_variant_interpretation(self.variant_descriptor)
+        )
         self.genomic_interpretation = m.GenomicInterpretation.objects.create(
-            **c.valid_genomic_interpretation(self.gene, self.variant)
-            )
+            **c.valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
+        )
 
     def test_genomic_interpretation(self):
-        genomic_interpretation_query = m.GenomicInterpretation.objects.filter(
-            gene='HGNC:347')
-        self.assertEqual(genomic_interpretation_query.count(), 1)
+        self._test_gene_filter("hgnc", 1)
+        self._test_gene_filter("ensembl", 1)
+        self._test_gene_filter("ncbigene", 1)
+        self._test_gene_filter("expect_0", 0)
+
+        self._test_variant_filter("NOT_PROVIDED", 1)
+        self._test_variant_filter("UNKNOWN_ACTIONABILITY", 1)
+        self._test_variant_filter("clinvar:13294", 1)
+        self._test_variant_filter("expect_0", 0)
+
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
     def test_validation_gene_or_variant(self):
@@ -219,43 +147,71 @@ class GenomicInterpretationTest(TestCase):
     def test_genomic_interpretation_str(self):
         self.assertEqual(str(self.genomic_interpretation), str(self.genomic_interpretation.id))
 
+    def _test_gene_filter(self, value, count: int):
+        qs = GenomicInterpretationFilter().filter_gene(
+            m.GenomicInterpretation.objects.all(),
+            "gene_descriptor",
+            value
+        )
+        self.assertEqual(qs.count(), count)
+
+    def _test_variant_filter(self, value, count: int):
+        qs = GenomicInterpretationFilter().filter_variant(
+            m.GenomicInterpretation.objects.all(),
+            "variant_interpretation",
+            value
+        )
+        self.assertEqual(qs.count(), count)
+
 
 class DiagnosisTest(TestCase):
     """ Test module for Diagnosis model. """
 
     def setUp(self):
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        # With GeneDescriptor
+        self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
 
-        self.gene = m.Gene.objects.create(**c.VALID_GENE_1)
-        self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
+        # With VariantInterpretation
+        self.variant_descriptor = m.VariationDescriptor.objects.create(
+            **c.valid_variant_descriptor(self.gene_descriptor))
+        self.variant_interpretation = m.VariantInterpretation.objects.create(**c.valid_variant_interpretation(
+            variant_descriptor=self.variant_descriptor
+        ))
+
         self.genomic_interpretation_1 = m.GenomicInterpretation.objects.create(
-            **c.valid_genomic_interpretation(self.gene, self.variant)
-            )
+            **c.valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
+        )
         self.genomic_interpretation_2 = m.GenomicInterpretation.objects.create(
-            **c.valid_genomic_interpretation(self.gene)
-            )
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(
-            self.disease))
+            **c.valid_genomic_interpretation(self.gene_descriptor)
+        )
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
         self.diagnosis.genomic_interpretations.set([
             self.genomic_interpretation_1,
             self.genomic_interpretation_2
         ])
 
     def test_diagnosis(self):
-        diagnosis = m.Diagnosis.objects.filter(disease__term__id='OMIM:164400')
-        self.assertEqual(diagnosis.count(), 1)
+        self._test_disease_filter(Q(disease__id__icontains="omim"), 1)
+        self._test_disease_filter(Q(disease__id__icontains="Omim:1644"), 1)
+        self._test_disease_filter(Q(disease__id__icontains="should_not_match"), 0)
+
+        self._test_disease_filter(Q(disease__label__icontains="Spinocerebellar ataxia 1"), 1)
+        self._test_disease_filter(Q(disease__label__icontains="should_not_match"), 0)
 
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
+
+    def _test_disease_filter(self, filter: Q, count: int):
+        result = m.Diagnosis.objects.all().filter(filter)
+        self.assertEqual(result.count(), count)
 
 
 class InterpretationTest(TestCase):
     """ Test module for Interpretation model. """
 
     def setUp(self):
-        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(
-            self.disease))
+        self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
+        self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease_ontology))
         self.meta_data_phenopacket = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.meta_data_interpretation = m.MetaData.objects.create(**c.VALID_META_DATA_2)
 
@@ -265,20 +221,27 @@ class InterpretationTest(TestCase):
             subject=self.individual,
             meta_data=self.meta_data_phenopacket,
         )
-        self.interpretation = m.Interpretation.objects.create(**c.valid_interpretation(
-            phenopacket=self.phenopacket,
-            meta_data=self.meta_data_interpretation
-            ))
-        self.interpretation.diagnosis.set([self.diagnosis])
+        self.interpretation = m.Interpretation.objects.create(**c.valid_interpretation(self.diagnosis))
 
     def test_interpretation(self):
-        interpretation_query = m.Interpretation.objects.filter(
-            resolution_status='IN_PROGRESS'
-            )
-        self.assertEqual(interpretation_query.count(), 1)
+        interpretation_qs = m.Interpretation.objects.filter(
+            progress_status='IN_PROGRESS'
+        )
+        self.assertEqual(interpretation_qs.count(), 1)
+
+        self._test_interpretation_filter(self.disease_ontology['id'], 1)
+        self._test_interpretation_filter("MONDO:0005015", 0)
 
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
+
+    def _test_interpretation_filter(self, value, count: int):
+        qs = InterpretationFilter().filter_diagnosis(
+            m.Interpretation.objects.all(),
+            "diagnosis__disease__id",
+            value,
+        )
+        self.assertEqual(qs.count(), count)
 
 
 class MetaDataTest(TestCase):
@@ -291,8 +254,8 @@ class MetaDataTest(TestCase):
         self.metadata.resources.set([self.resource_1, self.resource_2])
 
     def test_metadata(self):
-        metadata = m.MetaData.objects.get(created_by__icontains='ksenia')
-        self.assertEqual(metadata.submitted_by, 'Ksenia Zaytseva')
+        metadata = m.MetaData.objects.get(created_by__icontains='victor')
+        self.assertEqual(metadata.submitted_by, c.VALID_META_DATA_2["submitted_by"])
         self.assertEqual(metadata.resources.count(), 2)
 
     def test_metadata_str(self):
@@ -305,20 +268,31 @@ class PhenopacketTest(ProjectTestCase):
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
+        self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
+        self.interpretation = m.Interpretation.objects.create(
+            **c.valid_interpretation(
+                diagnosis=m.Diagnosis.objects.create(
+                    **c.valid_diagnosis(
+                        disease=c.VALID_DISEASE_ONTOLOGY)
+                )
+            )
+        )
         self.phenopacket = m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
+            measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
+            medical_actions=c.VALID_MEDICAL_ACTIONS,
             dataset=self.dataset,
         )
+        self.phenopacket.diseases.set([self.disease])
+        self.phenopacket.interpretations.set([self.interpretation])
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
-        self.disease_1 = m.Disease.objects.create(**c.VALID_DISEASE_1)
-        self.phenopacket.diseases.set([self.disease_1])
 
     def test_phenopacket(self):
         phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")
@@ -331,8 +305,8 @@ class PhenopacketTest(ProjectTestCase):
 
     def test_filtering(self):
         f = PhenopacketFilter()
-        number_of_found_pf = len(m.Phenopacket.objects.filter(phenotypic_features__negated=False))
-        # all phenotypic feature constants have negated=True
+        number_of_found_pf = len(m.Phenopacket.objects.filter(phenotypic_features__excluded=False))
+        # all phenotypic feature constants have excluded=True
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "proptosis")
         self.assertEqual(len(result), 0)
         result = f.filter_found_phenotypic_feature(m.Phenopacket.objects.all(), "phenotypic_features", "HP:0000520")

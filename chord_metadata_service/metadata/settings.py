@@ -16,7 +16,7 @@ import logging
 import json
 from os.path import exists
 
-from bento_lib.types import GA4GHServiceType
+from bento_lib.service_info import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
@@ -46,6 +46,8 @@ LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").uppe
 
 
 # CHORD-specific settings
+
+BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 
@@ -136,7 +138,6 @@ INSTALLED_APPS = [
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
     'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
-    'chord_metadata_service.mcode.apps.McodeConfig',
     'chord_metadata_service.resources.apps.ResourcesConfig',
     'chord_metadata_service.restapi.apps.RestapiConfig',
 
@@ -276,7 +277,10 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'JSON_UNDERSCOREIZE': {
+        'no_underscore_before_number': True
+    }
 }
 
 # Password validation

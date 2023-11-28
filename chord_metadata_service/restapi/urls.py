@@ -33,7 +33,7 @@ router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls
 router.register(r'experiments', experiment_views.ExperimentViewSet)
-router.register(r'experimentresults', experiment_views.ExperimentResultViewSet)
+router.register(r'experimentresults', experiment_views.ExperimentResultViewSet, basename="experimentresults")
 router.register(r'batch/experiments', experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
 
 # Patients app urls
@@ -45,10 +45,6 @@ router.register(r'batch/biosamples', phenopacket_views.BiosampleBatchViewSet, ba
 
 # Phenopackets app urls
 router.register(r'phenotypicfeatures', phenopacket_views.PhenotypicFeatureViewSet, basename="phenotypicfeatures")
-router.register(r'procedures', phenopacket_views.ProcedureViewSet, basename="procedures")
-router.register(r'htsfiles', phenopacket_views.HtsFileViewSet, basename="htsfiles")
-router.register(r'genes', phenopacket_views.GeneViewSet, basename="genes")
-router.register(r'variants', phenopacket_views.VariantViewSet, basename="variants")
 router.register(r'diseases', phenopacket_views.DiseaseViewSet, basename="diseases")
 router.register(r'metadata', phenopacket_views.MetaDataViewSet, basename="metadata")
 router.register(r'biosamples', phenopacket_views.BiosampleViewSet, basename="biosamples")

@@ -54,13 +54,13 @@ RESOURCE = {
             "description": "Human-readable name for the resource.",
             "help": "The full name of the resource or ontology referred to by the id element."
         },
-        "namespace_prefix": "Prefix for objects from this resource. In the case of ontology resources, this should be "
-                            "the CURIE prefix.",
+        "namespace_prefix": "Prefix for objects from this resource. In the case of ontology resources, "
+                            "this should be the CURIE prefix.",
         "url": "Resource URL. In the case of ontologies, this should be an OBO or OWL file. Other resources should "
                "link to the official or top-level url.",
         "version": "The version of the resource or ontology used to make the annotation.",
-        "iri_prefix":  "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
-                       "or object from the resource in question.",
+        "iri_prefix": "The IRI prefix, when used with the namespace prefix and an object ID, should resolve the term "
+        "or object from the resource in question.",
         **EXTRA_PROPERTIES
     }
 }

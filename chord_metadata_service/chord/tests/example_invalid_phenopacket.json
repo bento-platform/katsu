@@ -14,7 +14,7 @@
                 "label": "Hematuria"
             },
             "negated": false,
-            "modifier": []
+            "modifiers": []
         },
         {
             "description": "",
@@ -27,7 +27,7 @@
                 "id": "HP:0012828",
                 "label": "Severe"
             },
-            "modifier": []
+            "modifiers": []
         }
     ],
     "diseases": [

@@ -116,6 +116,20 @@ def generate_csv_response(data, filename, columns):
     return response
 
 
+def render_individual_age(individual):
+    if "time_at_last_encounter" not in individual:
+        return None
+    time_at_last_encounter = individual["time_at_last_encounter"]
+
+    if "age_range" in time_at_last_encounter:
+        age_range = time_at_last_encounter["age_range"]
+        start = age_range["start"]["iso8601duration"]
+        end = age_range["end"]["iso8601duration"]
+        return f"{start} - {end}"
+    if "age" in time_at_last_encounter:
+        return time_at_last_encounter["age"]["iso8601duration"]
+
+
 class IndividualCSVRenderer(JSONRenderer):
     media_type = 'text/csv'
     format = 'csv'
@@ -132,24 +146,13 @@ class IndividualCSVRenderer(JSONRenderer):
                 'date_of_birth': individual.get('date_of_birth', None),
                 'taxonomy': None,
                 'karyotypic_sex': individual['karyotypic_sex'],
-                'age': None,
+                'age': render_individual_age(individual),
                 'diseases': None,
                 'created': individual['created'],
                 'updated': individual['updated']
             }
             if 'taxonomy' in individual:
                 ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)
-            if 'age' in individual:
-                if 'age' in individual['age']:
-                    ind_obj['age'] = individual['age'].get('age', None)
-                elif 'start' and 'end' in individual['age']:
-                    ind_obj['age'] = str(
-                        individual['age']['start'].get('age', "NA")
-                        + ' - ' +
-                        individual['age']['end'].get('age', "NA")
-                    )
-                else:
-                    ind_obj['age'] = None
             if 'phenopackets' in individual:
                 all_diseases = []
                 for phenopacket in individual['phenopackets']:

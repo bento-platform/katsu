@@ -4,4 +4,4 @@ __all__ = [
     "logger",
 ]
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("katsu")

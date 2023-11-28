@@ -8,6 +8,7 @@ class PreflightRequestMiddleware:
     regular expressions. So, django-cors-headers cannot allow access for all custom headers
     that begin with {'X-CANDIG-LOCAL-', 'X-CANDIG-DAC-', 'X-CANDIG-FED-', 'X-CANDIG-EXT-'}.
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 

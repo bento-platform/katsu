@@ -2,10 +2,9 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import Biosample, Procedure
+from chord_metadata_service.phenopackets.models import Biosample
 from ..models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.phenopackets.tests.constants import (
-    VALID_PROCEDURE_1,
     VALID_INDIVIDUAL_1,
     valid_biosample_1
 )
@@ -17,8 +16,7 @@ class ExperimentTest(TestCase):
 
     def setUp(self):
         i = Individual.objects.create(**VALID_INDIVIDUAL_1)
-        p = Procedure.objects.create(**VALID_PROCEDURE_1)
-        self.biosample = Biosample.objects.create(**valid_biosample_1(i, p))
+        self.biosample = Biosample.objects.create(**valid_biosample_1(i))
         self.experiment = Experiment.objects.create(**valid_experiment(self.biosample))
 
     @staticmethod

@@ -9,35 +9,29 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from typing import Callable, Dict, Optional
+from typing import Callable
 
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 from chord_metadata_service.cleanup import run_all_cleanup
-from chord_metadata_service.experiments.models import Experiment, ExperimentResult
+from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
 
-QUERYSET_FN: Dict[str, Callable] = {
+QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
-    dt.DATA_TYPE_EXPERIMENT_RESULT: lambda dataset_id: ExperimentResult.objects.filter(
-        experiment__dataset_id=dataset_id),
 }
 
 
-async def _filtered_query(data_type: str, project: Optional[str] = None,
-                          dataset: Optional[str] = None) -> Optional[QuerySet]:
+async def _filtered_query(data_type: str, project: str | None = None, dataset: str | None = None) -> QuerySet:
     """
     Returns a filtered query based on the data type, project, and dataset.
     """
-    if data_type == dt.DATA_TYPE_READSET:
-        # No records for readset, it's a fake data type inside Katsu...
-        return None
 
-    q: Optional[QuerySet] = None
+    q: QuerySet | None = None
 
     if data_type in (dt.DATA_TYPE_PHENOPACKET, dt.DATA_TYPE_EXPERIMENT):
         q = (Phenopacket if data_type == dt.DATA_TYPE_PHENOPACKET else Experiment).objects.all()
@@ -52,27 +46,13 @@ async def _filtered_query(data_type: str, project: Optional[str] = None,
             except ValidationError:
                 raise ValueError("Project ID must be a UUID")
 
-    elif data_type == dt.DATA_TYPE_EXPERIMENT_RESULT:
-        q = ExperimentResult.objects.all()
-        if dataset:
-            try:
-                q = q.filter(experiment__dataset_id=dataset)
-            except ValidationError:
-                raise ValueError("Dataset ID must be a UUID")
-        elif project:
-            try:
-                q = q.filter(experiment__dataset__project_id=project)
-            except ValidationError:
-                raise ValueError("Project ID must be a UUID")
-
     if q is None:
         raise ValueError(f"Unsupported data type: {data_type}")
 
     return q
 
 
-async def get_count_for_data_type(data_type: str, project: Optional[str] = None,
-                                  dataset: Optional[str] = None) -> Optional[int]:
+async def get_count_for_data_type(data_type: str, project: str | None = None, dataset: str | None = None) -> int | None:
     """
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
     provided, the count will be for the whole node.
@@ -81,8 +61,8 @@ async def get_count_for_data_type(data_type: str, project: Optional[str] = None,
     return None if q is None else await q.acount()
 
 
-async def get_last_ingested_for_data_type(data_type: str, project: Optional[str] = None,
-                                          dataset: Optional[str] = None) -> Optional[dict]:
+async def get_last_ingested_for_data_type(data_type: str, project: str | None = None,
+                                          dataset: str | None = None) -> dict | None:
 
     q = await _filtered_query(data_type, project, dataset)
     if q is None:
@@ -98,8 +78,8 @@ async def get_last_ingested_for_data_type(data_type: str, project: Optional[str]
 async def make_data_type_response_object(
     data_type_id: str,
     data_type_details: dict,
-    project: Optional[str],
-    dataset: Optional[str],
+    project: str | None,
+    dataset: str | None,
 ) -> dict:
     return {
         **data_type_details,

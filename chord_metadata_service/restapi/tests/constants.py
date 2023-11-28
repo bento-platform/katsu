@@ -36,8 +36,10 @@ INVALID_SUBJECT_NOT_PRESENT = {
 VALID_INDIVIDUAL_1 = {
     "id": "ind:NA19648",
     "date_of_birth": "1993-10-04",
-    "age": {
-        "age": "P28Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P28Y"
+        }
     },
     "sex": "FEMALE",
     "karyotypic_sex": "XX",
@@ -58,8 +60,10 @@ VALID_INDIVIDUAL_1 = {
 VALID_INDIVIDUAL_2 = {
     "id": "ind:HG00096",
     "date_of_birth": "1924-03-29",
-    "age": {
-        "age": "P97Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P97Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -80,8 +84,10 @@ VALID_INDIVIDUAL_2 = {
 VALID_INDIVIDUAL_3 = {
     "id": "ind:HG00100",
     "date_of_birth": "1997-10-29",
-    "age": {
-        "age": "P24Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P24Y"
+        }
     },
     "sex": "FEMALE",
     "karyotypic_sex": "XX",
@@ -102,8 +108,10 @@ VALID_INDIVIDUAL_3 = {
 VALID_INDIVIDUAL_4 = {
     "id": "ind:HG00103",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -124,8 +132,10 @@ VALID_INDIVIDUAL_4 = {
 VALID_INDIVIDUAL_5 = {
     "id": "ind:HG00104",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -146,8 +156,10 @@ VALID_INDIVIDUAL_5 = {
 VALID_INDIVIDUAL_6 = {
     "id": "ind:HG00105",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -168,8 +180,33 @@ VALID_INDIVIDUAL_6 = {
 VALID_INDIVIDUAL_7 = {
     "id": "ind:HG00106",
     "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
+    },
+    "sex": "MALE",
+    "karyotypic_sex": "XY",
+    "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "Homo sapiens"
+    },
+    "extra_properties": {
+        "smoking": "Not specified",
+        "covidstatus": "Indeterminate",
+        "death_dc": "Deceased",
+        "mobility": "I have slight problems in walking about",
+        "date_of_consent": "2021-03-03",
+        "lab_test_result_value": 786.86
+    }
+}
+VALID_INDIVIDUAL_8 = {
+    "id": "ind:HG00107",
+    "date_of_birth": "1972-06-16",
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P49Y"
+        }
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
@@ -187,27 +224,6 @@ VALID_INDIVIDUAL_7 = {
     }
 }
 
-VALID_INDIVIDUAL_8 = {
-    "id": "ind:HG00107",
-    "date_of_birth": "1972-06-16",
-    "age": {
-        "age": "P49Y"
-    },
-    "sex": "MALE",
-    "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
-    "extra_properties": {
-        "smoking": "Not specified",
-        "covidstatus": "Indeterminate",
-        "death_dc": "Deceased",
-        "mobility": "I have slight problems in walking about",
-        "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
-}
 
 VALID_INDIVIDUALS = [
     VALID_INDIVIDUAL_1,
@@ -224,18 +240,22 @@ VALID_PHENOPACKET_1 = {
     "id": "8670db4d-77ad-4bee-b38c-599453510c6a",
     "subject": {
         "id": "patient:1",
-        "date_of_birth": "1967-01-01",
+        "date_of_birth": "1967-01-01T00:00:00Z",
         "sex": "MALE",
-        "age": {
-            "age": "P45Y"
+        "time_at_last_encounter": {
+            "age": {
+                "iso8601duration": "P45Y",
+            }
         },
         "extra_properties": {
             "education": "Bachelor's Degree"
         }
     },
     "meta_data": {
+        "phenopacket_schema_version": "2.0",
+        "created": "2023-09-12T00:25:54.662Z",
         "created_by": "David Lougheed",
-        "submitted_by": "David Lougheed"
+        "submitted_by": "David Lougheed",
     }
 }
 
@@ -243,18 +263,22 @@ VALID_PHENOPACKET_2 = {
     "id": "ae8fbf37-2029-4e07-87c2-f3fecb3c1f89",
     "subject": {
         "id": "patient:2",
-        "date_of_birth": "1967-01-01",
+        "date_of_birth": "1967-01-01T00:00:00Z",
         "sex": "MALE",
-        "age": {
-            "age": "P45Y"
+        "time_at_last_encounter": {
+            "age": {
+                "iso8601duration": "P45Y",
+            }
         },
         "extra_properties": {
             "education": "Bachelor's Degree"
         }
     },
     "meta_data": {
+        "phenopacket_schema_version": "2.0",
+        "created": "2023-09-12T00:25:54.662Z",
         "created_by": "David Lougheed",
-        "submitted_by": "David Lougheed"
+        "submitted_by": "David Lougheed",
     }
 }
 
@@ -312,27 +336,27 @@ VALID_EXTRA_PROPERTIES_EXTENSIONS = {
 }
 
 extra_properties_with_list = {
-        "smoking": "Former smoker",
-        "covidstatus": "Positive",
-        "death_dc": "Alive",
-        "mobility": "I have slight problems in walking about",
-        "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 699.86,
-        "baseline_creatinine": [100, 120]
-    }
+    "smoking": "Former smoker",
+    "covidstatus": "Positive",
+    "death_dc": "Alive",
+    "mobility": "I have slight problems in walking about",
+    "date_of_consent": "2021-03-03",
+    "lab_test_result_value": 699.86,
+    "baseline_creatinine": [100, 120]
+}
 
 extra_properties_with_dict = {
-        "smoking": "Former smoker",
-        "covidstatus": "Positive",
-        "death_dc": "Alive",
-        "mobility": "I have slight problems in walking about",
-        "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 699.86,
-        "baseline_creatinine": {
-            "test_key_1": 120,
-            "test_key_2": "test_value_2"
-        }
+    "smoking": "Former smoker",
+    "covidstatus": "Positive",
+    "death_dc": "Alive",
+    "mobility": "I have slight problems in walking about",
+    "date_of_consent": "2021-03-03",
+    "lab_test_result_value": 699.86,
+    "baseline_creatinine": {
+        "test_key_1": 120,
+        "test_key_2": "test_value_2"
     }
+}
 
 
 INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST = [
@@ -500,37 +524,37 @@ CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS = deepcopy(CONFIG_PUBLIC_TEST)
 CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS["fields"].update([
     ("unset_date",
      {
-        "mapping": "individual/extra_properties/unset_date",
-        "title": "Some date",
-        "description": "Some date",
-        "datatype": "date",
-        "config": {
-            "bin_by": "month"
-        }
+         "mapping": "individual/extra_properties/unset_date",
+         "title": "Some date",
+         "description": "Some date",
+         "datatype": "date",
+         "config": {
+             "bin_by": "month"
+         }
      }),
     ("unset_numeric",
      {
-        "mapping": "individual/extra_properties/unset_numeric",
-        "title": "Some measure",
-        "description": "Some measure",
-        "datatype": "number",
-        "config": {
-            "bin_size": 50,
-            "taper_left": 50,
-            "taper_right": 500,
-            "minimum": 0,
-            "maximum": 600,
-            "units": "mg/L"
-        }
+         "mapping": "individual/extra_properties/unset_numeric",
+         "title": "Some measure",
+         "description": "Some measure",
+         "datatype": "number",
+         "config": {
+             "bin_size": 50,
+             "taper_left": 50,
+             "taper_right": 500,
+             "minimum": 0,
+             "maximum": 600,
+             "units": "mg/L"
+         }
      }),
     ("unset_category",
      {
-        "mapping": "individual/extra_properties/unset_category",
-        "title": "Some things",
-        "description": "Some things",
-        "datatype": "string",
-        "config": {
-            "enum": None
-        }
+         "mapping": "individual/extra_properties/unset_category",
+         "title": "Some things",
+         "description": "Some things",
+         "datatype": "string",
+         "config": {
+             "enum": None
+         }
      })
 ])

@@ -84,36 +84,26 @@ def parse_onset(onset):
         return None
 
 
-def parse_duration(string):
+def parse_duration(duration: str | dict):
     """ Returns years integer. """
-    string = string.split('P')[-1]
+    if isinstance(duration, dict) and "iso8601duration" in duration:
+        duration = duration["iso8601duration"]
+    string = duration.split('P')[-1]
     return int(float(string.split('Y')[0]))
 
 
 def parse_individual_age(age_obj: dict) -> int:
     """ Parses two possible age representations and returns average age or age as integer. """
-    # AGE OPTIONS
-    # "age": {
-    #     "age": "P96Y"
-    # }
-    # AND
-    # "age": {
-    #     "start": {
-    #         "age": "P45Y"
-    #     },
-    #     "end": {
-    #         "age": "P49Y"
-    #     }
-    # }
 
-    if "start" in age_obj:
-        start_age = parse_duration(age_obj["start"]["age"])
-        end_age = parse_duration(age_obj["end"]["age"])
+    if "age_range" in age_obj:
+        age_obj = age_obj["age_range"]
+        start_age = parse_duration(age_obj["start"]["age"]["iso8601duration"])
+        end_age = parse_duration(age_obj["end"]["age"]["iso8601duration"])
         # for the duration calculate the average age
         return (start_age + end_age) // 2
 
     if "age" in age_obj:
-        return parse_duration(age_obj["age"])
+        return parse_duration(age_obj["age"]["iso8601duration"])
 
     raise ValueError(f"Error: {age_obj} format not supported")
 
@@ -122,10 +112,25 @@ def _round_decimal_two_places(d: float) -> Decimal:
     return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
-def iso_duration_to_years(iso_age_duration: str, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+    time_value: Optional[Decimal] = None
+    time_unit: Optional[str] = None
+    if "age" in time_element:
+        return iso_duration_to_years(time_element["age"], unit=unit)
+    elif "age_range" in time_element:
+        start_value, start_unit = iso_duration_to_years(time_element["age_range"]["start"]["age"], unit=unit)
+        end_value, end_unit = iso_duration_to_years(time_element["age_range"]["end"]["age"], unit=unit)
+        time_value = (start_value + end_value) / 2
+        time_unit = start_unit
+    return time_value, time_unit
+
+
+def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
+    if isinstance(iso_age_duration, dict):
+        iso_age_duration = iso_age_duration.get("iso8601duration")
     duration = isodate.parse_duration(iso_age_duration)
 
     # if duration string includes Y and M then the instance is of both types of Duration and datetime.timedelta
@@ -356,12 +361,12 @@ def compute_binned_ages(individual_queryset, bin_size: int) -> list[int]:
     Returns a list of values floored to the closest decade (e.g. 25 --> 20)
     """
 
-    a = individual_queryset.filter(age_numeric__isnull=True).values('age')
+    a = individual_queryset.filter(age_numeric__isnull=True).values('time_at_last_encounter')
     binned_ages = []
     for r in a.iterator():  # reduce memory footprint (no caching)
-        if r["age"] is None:
+        if r["time_at_last_encounter"] is None:
             continue
-        age = parse_individual_age(r["age"])
+        age = parse_individual_age(r["time_at_last_encounter"])
         binned_ages.append(age - age % bin_size)
 
     return binned_ages
