@@ -35,14 +35,12 @@ from chord_metadata_service.mohpackets.models import (  # noqa: E402
 
 
 def ingest_data(path):
-    # Install tqdm if needed
     try:
         from tqdm import tqdm
     except ImportError:
-        import subprocess
-
-        subprocess.check_call(["pip", "install", "tqdm"])
-        from tqdm import tqdm
+        raise ImportError(
+            "tqdm is not installed. This function is not designed to use in production'."
+        )
 
     script_dir = os.path.dirname(__file__)
     synthetic_data_folder = os.path.join(script_dir, f"{path}/synthetic_data")
