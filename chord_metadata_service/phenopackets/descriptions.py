@@ -116,8 +116,7 @@ def phenotypic_feature(subject="a subject or biosample"):
                                "phenotypic feature, including e.g. positionality or external factors.",
                 "items": ontology_class("that expounds on the phenotypic feature")
             },
-            "onset": ontology_class("that describes the age at which the phenotypic feature was first noticed or "
-                                    "diagnosed, e.g. HP:0003674"),
+            "onset": "Age or time at which the feature was first observed.",
             "evidence": {
                 "description": "One or more pieces of evidence that specify how the phenotype was determined.",
                 "items": EVIDENCE,

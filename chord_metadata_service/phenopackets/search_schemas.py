@@ -2,6 +2,7 @@ from . import models, schemas
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
+    SEARCH_DATABASE_JSONB,
     array_of,
     merge_schema_dictionaries,
     search_db_fk,
@@ -182,8 +183,10 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
         },
         "severity": ONTOLOGY_SEARCH_SCHEMA,
         "modifiers": array_of(ONTOLOGY_SEARCH_SCHEMA),
-        "onset": TIME_ELEMENT_SEARCH_SCHEMA,
-        "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
+        # TODO: Add in new search
+        # "onset": TIME_ELEMENT_SEARCH_SCHEMA,
+        # TODO: Add in new search
+        # "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
         "evidence": EVIDENCE_SEARCH_SCHEMA,
     },
     "search": {
@@ -199,8 +202,10 @@ PROCEDURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
     "properties": {
         "code": ONTOLOGY_SEARCH_SCHEMA,
         "body_site": ONTOLOGY_SEARCH_SCHEMA,
-        "performed": TIME_ELEMENT_SEARCH_SCHEMA,
-    }
+        # TODO: Add in new search
+        # "performed": TIME_ELEMENT_SEARCH_SCHEMA,
+    },
+    "search": SEARCH_DATABASE_JSONB
 })
 
 BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_BIOSAMPLE_SCHEMA, {
@@ -298,7 +303,9 @@ GENOMIC_INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas
             BIOSAMPLE_SEARCH_SCHEMA,
             search_db_fk("MANY_TO_ONE", models.GenomicInterpretation, "biosample")
         ),
-        "interpretation_status": search_optional_str(0),
+        "interpretation_status": {
+            "search": search_optional_str(0)
+        },
         "call": {}
     },
     "search": search_table_ref(models.GenomicInterpretation)
@@ -316,15 +323,47 @@ DIAGNOSIS_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
     "search": search_table_ref(models.Diagnosis)
 })
 
+MEASUREMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_MEASUREMENT_SCHEMA, {
+    "properties": {
+        "description": {
+            "search": search_optional_str(0, multiple=True)
+        },
+        "assay": ONTOLOGY_SEARCH_SCHEMA,
+        "procedure": PROCEDURE_SEARCH_SCHEMA,
+        # TODO: Add in new search
+        # "time_observed": TIME_ELEMENT_SEARCH_SCHEMA,
+    },
+    "search": SEARCH_DATABASE_JSONB
+})
+
+MEDICAL_ACTION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_MEDICAL_ACTION_SCHEMA, {
+    "properties": {
+        # TODO: new search with one_of supported medical actions
+        # "action": MEDICAL_ACTION_ITEM_SEARCH_SCHEMA,
+        "treatment_target": ONTOLOGY_SEARCH_SCHEMA,
+        "treatment_intent": ONTOLOGY_SEARCH_SCHEMA,
+        "response_to_treatment": ONTOLOGY_SEARCH_SCHEMA,
+        "adverse_events": {
+            "items": ONTOLOGY_SEARCH_SCHEMA,
+            "search": {"database": {"type": "jsonb"}}
+        },
+        "treatment_termination_reason": ONTOLOGY_SEARCH_SCHEMA,
+    },
+    "search": SEARCH_DATABASE_JSONB
+})
+
 INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_INTERPRETATION_SCHEMA, {
     "properties": {
-        "id": search_db_pk(models.Interpretation),
-        "progress_status": search_optional_str(0),
+        "progress_status": {
+            "search": search_optional_eq(0),
+        },
+        "summary": {
+            "search": search_optional_str(1)
+        },
         "diagnosis": merge_schema_dictionaries(
             DIAGNOSIS_SEARCH_SCHEMA,
             search_db_fk("MANY_TO_ONE", models.Interpretation, "diagnosis")
         ),
-        "summary": search_optional_str(0)
     },
     "search": search_table_ref(models.Interpretation)
 })
@@ -405,6 +444,22 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                         "parent_foreign_key": "phenopacket_id",
                         "parent_primary_key": models.Phenopacket._meta.pk.column
                     }
+                }
+            }
+        },
+        "measurements": {
+            "items": MEASUREMENT_SEARCH_SCHEMA,
+            "search": {
+                "database": {
+                    "type": "jsonb"
+                }
+            }
+        },
+        "medical_actions": {
+            "items": MEDICAL_ACTION_SEARCH_SCHEMA,
+            "search": {
+                "database": {
+                    "type": "jsonb"
                 }
             }
         },

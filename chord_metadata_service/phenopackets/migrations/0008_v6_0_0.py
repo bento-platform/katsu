@@ -200,7 +200,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='diagnosis',
-            name='disease_ontology',
+            name='disease',
             field=models.JSONField(blank=True, null=True, validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator({'$id': '/chord_metadata_service/restapi/ontology_class', '$schema': 'http://json-schema.org/draft-07/schema#', 'additionalProperties': False, 'description': 'An ontology term.', 'help': 'An ontology term.', 'properties': {'id': {'$id': '/chord_metadata_service/restapi/ontology_class/id', 'description': 'A CURIE-style identifier for an ontology term.', 'help': 'A CURIE-style identifier for an ontology term.', 'type': 'string'}, 'label': {'$id': '/chord_metadata_service/restapi/ontology_class/label', 'description': 'A human readable class name for an ontology term.', 'help': 'A human readable class name for an ontology term.', 'type': 'string'}}, 'required': ['id', 'label'], 'title': 'Ontology class schema', 'type': 'object'}, formats=None)]),
         ),
         migrations.AddField(

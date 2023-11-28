@@ -356,7 +356,7 @@ class Diagnosis(BaseTimeStamp):
 
     FHIR: Condition
     """
-    disease_ontology = models.JSONField(null=True, blank=True, validators=[ontology_validator])
+    disease = models.JSONField(null=True, blank=True, validators=[ontology_validator])
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
         help_text='The genomic elements assessed as being responsible for the disease.')
@@ -451,8 +451,6 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
 
     medical_actions = models.JSONField(
         blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
-
-    # TODO: warn users that files will not be ingested in phenopackets
 
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))

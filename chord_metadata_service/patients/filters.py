@@ -104,7 +104,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                 Cast("phenopackets__interpretations__extra_properties", TextField()),
 
                                 # Interpretation.Diagnosis
-                                Cast("phenopackets__interpretations__diagnosis__disease_ontology", TextField()),
+                                Cast("phenopackets__interpretations__diagnosis__disease", TextField()),
                                 Cast("phenopackets__interpretations__diagnosis__extra_properties", TextField()),
 
                                 # Interpretation.Diagnosis.GenomicInterpretation

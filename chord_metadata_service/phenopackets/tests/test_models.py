@@ -191,12 +191,12 @@ class DiagnosisTest(TestCase):
         ])
 
     def test_diagnosis(self):
-        self._test_disease_filter(Q(disease_ontology__id__icontains="omim"), 1)
-        self._test_disease_filter(Q(disease_ontology__id__icontains="Omim:1644"), 1)
-        self._test_disease_filter(Q(disease_ontology__id__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__id__icontains="omim"), 1)
+        self._test_disease_filter(Q(disease__id__icontains="Omim:1644"), 1)
+        self._test_disease_filter(Q(disease__id__icontains="should_not_match"), 0)
 
-        self._test_disease_filter(Q(disease_ontology__label__icontains="Spinocerebellar ataxia 1"), 1)
-        self._test_disease_filter(Q(disease_ontology__label__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__label__icontains="Spinocerebellar ataxia 1"), 1)
+        self._test_disease_filter(Q(disease__label__icontains="should_not_match"), 0)
 
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
@@ -238,7 +238,7 @@ class InterpretationTest(TestCase):
     def _test_interpretation_filter(self, value, count: int):
         qs = InterpretationFilter().filter_diagnosis(
             m.Interpretation.objects.all(),
-            "diagnosis__disease_ontology__id",
+            "diagnosis__disease__id",
             value,
         )
         self.assertEqual(qs.count(), count)

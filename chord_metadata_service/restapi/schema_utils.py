@@ -25,6 +25,12 @@ __all__ = [
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 CURIE_PATTERN = r"^[a-z0-9]+:[A-Za-z0-9.\-:]+$"
 
+SEARCH_DATABASE_JSONB = {
+    "database": {
+        "type": "jsonb"
+    }
+}
+
 
 class SCHEMA_TYPES(Enum):
     STRING = "string"

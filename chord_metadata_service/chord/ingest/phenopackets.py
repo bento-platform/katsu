@@ -273,7 +273,7 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
     ]
     # disease = pm.Disease.objects.get_or_create(diagnosis["disease"])
     diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        disease_ontology=diagnosis.get("disease", {}),
+        disease=diagnosis.get("disease", {}),
         extra_properties=diagnosis.get("extra_properties", {})
     )
     # diag_obj.disease.set(disease)
