@@ -43,11 +43,7 @@ EXTERNAL_REFERENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
             "search": search_optional_str(1, multiple=True)  # TODO: Searchable? may leak
         }
     },
-    "search": {
-        "database": {
-            "type": "jsonb"  # TODO: parameterize?
-        }
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, {
@@ -101,11 +97,7 @@ UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPD
             "search": search_optional_str(1, multiple=True),
         }
     },
-    "search": {
-        "database": {
-            "type": "jsonb"
-        }
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 # noinspection PyProtectedMember
@@ -157,11 +149,7 @@ EVIDENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_E
         "evidence_code": ONTOLOGY_SEARCH_SCHEMA,
         "reference": EXTERNAL_REFERENCE_SEARCH_SCHEMA,
     },
-    "search": {
-        "database": {
-            "type": "jsonb"
-        }
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA, {
@@ -277,11 +265,11 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
         "onset": DISEASE_ONSET_SEARCH_SCHEMA,
         "disease_stage": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "jsonb"}}
+            "search": SEARCH_DATABASE_JSONB
         },
         "clinical_tnm_finding": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "jsonb"}}
+            "search": SEARCH_DATABASE_JSONB
         },
     },
     "search": {
@@ -345,7 +333,7 @@ MEDICAL_ACTION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPA
         "response_to_treatment": ONTOLOGY_SEARCH_SCHEMA,
         "adverse_events": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "jsonb"}}
+            "search": SEARCH_DATABASE_JSONB
         },
         "treatment_termination_reason": ONTOLOGY_SEARCH_SCHEMA,
     },
@@ -449,19 +437,11 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
         },
         "measurements": {
             "items": MEASUREMENT_SEARCH_SCHEMA,
-            "search": {
-                "database": {
-                    "type": "jsonb"
-                }
-            }
+            "search": SEARCH_DATABASE_JSONB
         },
         "medical_actions": {
             "items": MEDICAL_ACTION_SEARCH_SCHEMA,
-            "search": {
-                "database": {
-                    "type": "jsonb"
-                }
-            }
+            "search": SEARCH_DATABASE_JSONB
         },
         "diseases": {  # TODO: Too sensitive for search?
             "items": merge_schema_dictionaries(
