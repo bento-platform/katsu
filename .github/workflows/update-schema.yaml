@@ -6,7 +6,7 @@ on:
 
     
 jobs:
-  generate-moh-schema:
+  first_job:
     name: Update MoH schema
     runs-on: ubuntu-latest
     steps:
@@ -53,10 +53,14 @@ jobs:
             const { commitAndPushChanges } = require("./.github/commitFile.js");
 
             await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
-      
+
+  second_job:
+    name: Update MoH schema
+    runs-on: ubuntu-latest
+    needs: first_job
+    steps:
       - name: Install widdershins
         run: npm install -g widdershins
-        if: success()
 
       - name: Install PyYAML
         run: pip install PyYAML
@@ -83,8 +87,6 @@ jobs:
           for path in "${SCHEMA_PATHS[@]}"; do
             sed -i "s|This is the RESTful API for the MoH Service.|This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/$REPO_NAME/$SHA/$path|" "$path"
           done
-
-
       - name: Commit and push changes
         uses: actions/github-script@v6
         with:
