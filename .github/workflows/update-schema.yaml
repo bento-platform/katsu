@@ -7,8 +7,13 @@ on:
     
 jobs:
   first_job:
-    name: Update MoH schema
+    name: Regenerate schema.json
     runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+      contents: write
+
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
@@ -43,22 +48,31 @@ jobs:
           export DJANGO_SETTINGS_MODULE=config.settings.base
           python manage.py export_openapi_schema --api chord_metadata_service.mohpackets.apis.core.api | python -m json.tool > chord_metadata_service/mohpackets/docs/schema.json
       
-      - name: Commit and push changes to schema.json
-        uses: actions/github-script@v6
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          script: |
-            const fs = require('fs');
-            const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
-            const { commitAndPushChanges } = require("./.github/commitFile.js");
+          commit_message: Regenerate schema.json
+      
+      # - name: Commit and push changes to schema.json
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       const fs = require('fs');
+      #       const { Octokit } = require('@octokit/rest');
+      #       const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
+      #       const { commitAndPushChanges } = require("./.github/commitFile.js");
 
-            await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
+      #       await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
 
   second_job:
     name: Adding schema SHA
     runs-on: ubuntu-latest
     needs: first_job
     steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
       - name: Install Python
         uses: actions/setup-python@v4
         with:
