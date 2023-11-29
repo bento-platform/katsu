@@ -92,7 +92,7 @@ jobs:
         run: |
           REPO_NAME=${{ github.repository }}
           HEAD_REF=${{ github.head_ref }}
-          SHA=$(git rev-parse HEAD)
+          SHA=${{ github.sha }}
 
           DOCS_PATH="chord_metadata_service/mohpackets/docs/"
           SCHEMA_PATHS=(
