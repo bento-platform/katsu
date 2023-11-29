@@ -5648,7 +5648,8 @@ components:
       scheme: bearer
       type: http
 info:
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/d2c81d4b16e312938fca0b3c3c197f71ec6d5491/chord_metadata_service/mohpackets/docs/schema.yml Based on https://raw.githubusercontent.com/CanDIG/katsu/b0b2cf69bc1703f545b231dc4c1ae9292264508e/chord_metadata_service/mohpackets/docs/schema.json
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/ea46369d4794703447a9323b3d1dbd5a890be2ba/chord_metadata_service/mohpackets/docs/schema.yml Based on https://raw.githubusercontent.com/CanDIG/katsu/d2c81d4b16e312938fca0b3c3c197f71ec6d5491/chord_metadata_service/mohpackets/docs/schema.json
+    Based on https://raw.githubusercontent.com/CanDIG/katsu/b0b2cf69bc1703f545b231dc4c1ae9292264508e/chord_metadata_service/mohpackets/docs/schema.json
   title: MoH Service API
   version: 3.0.0
 openapi: 3.1.0
