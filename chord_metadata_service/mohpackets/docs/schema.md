@@ -1,7 +1,7 @@
 
 <h1 id="moh-service-api">MoH Service API v3.0.0</h1>
 
-This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/01a889aa1b4c998bc393a3804bde9932b7a7a9eb/chord_metadata_service/mohpackets/docs/schema.json
+This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/e7a3a0239265af27f286301f98068524e69f3dfa/chord_metadata_service/mohpackets/docs/schema.json
 
 Base URLs:
 
@@ -279,11 +279,11 @@ Base URLs:
 
 ```json
 {
-  "primarydiagnosis": [
+  "primary_diagnoses": [
     {
       "specimens": [
         {
-          "samplesregistrations": [
+          "sample_registrations": [
             {
               "submitter_sample_id": "string",
               "specimen_tissue_source": "string",
@@ -335,7 +335,7 @@ Base URLs:
               "actual_cumulative_drug_dose": 0
             }
           ],
-          "hormonetherapies": [
+          "hormone_therapies": [
             {
               "drug_reference_database": "string",
               "drug_name": "string",
@@ -381,7 +381,24 @@ Base URLs:
             }
           ],
           "followups": [
-            {}
+            {
+              "submitter_follow_up_id": "string",
+              "date_of_followup": "string",
+              "disease_status_at_followup": "string",
+              "relapse_type": "string",
+              "date_of_relapse": "string",
+              "method_of_progression_status": [
+                null
+              ],
+              "anatomic_site_progression_or_recurrence": [
+                null
+              ],
+              "recurrence_tumour_staging_system": "string",
+              "recurrence_t_category": "string",
+              "recurrence_n_category": "string",
+              "recurrence_m_category": "string",
+              "recurrence_stage_group": "string"
+            }
           ],
           "submitter_treatment_id": "string",
           "treatment_type": [
@@ -401,7 +418,24 @@ Base URLs:
         }
       ],
       "followups": [
-        {}
+        {
+          "submitter_follow_up_id": "string",
+          "date_of_followup": "string",
+          "disease_status_at_followup": "string",
+          "relapse_type": "string",
+          "date_of_relapse": "string",
+          "method_of_progression_status": [
+            null
+          ],
+          "anatomic_site_progression_or_recurrence": [
+            null
+          ],
+          "recurrence_tumour_staging_system": "string",
+          "recurrence_t_category": "string",
+          "recurrence_n_category": "string",
+          "recurrence_m_category": "string",
+          "recurrence_stage_group": "string"
+        }
       ],
       "submitter_primary_diagnosis_id": "string",
       "date_of_diagnosis": "string",
@@ -419,9 +453,26 @@ Base URLs:
     }
   ],
   "followups": [
-    {}
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "disease_status_at_followup": "string",
+      "relapse_type": "string",
+      "date_of_relapse": "string",
+      "method_of_progression_status": [
+        null
+      ],
+      "anatomic_site_progression_or_recurrence": [
+        null
+      ],
+      "recurrence_tumour_staging_system": "string",
+      "recurrence_t_category": "string",
+      "recurrence_n_category": "string",
+      "recurrence_m_category": "string",
+      "recurrence_stage_group": "string"
+    }
   ],
-  "biomarkers": [
+  "biomarkerszzzz": [
     {
       "submitter_specimen_id": "string",
       "submitter_primary_diagnosis_id": "string",
@@ -5072,11 +5123,11 @@ or
 
 ```json
 {
-  "primarydiagnosis": [
+  "primary_diagnoses": [
     {
       "specimens": [
         {
-          "samplesregistrations": [
+          "sample_registrations": [
             {
               "submitter_sample_id": "string",
               "specimen_tissue_source": "string",
@@ -5128,7 +5179,7 @@ or
               "actual_cumulative_drug_dose": 0
             }
           ],
-          "hormonetherapies": [
+          "hormone_therapies": [
             {
               "drug_reference_database": "string",
               "drug_name": "string",
@@ -5174,7 +5225,24 @@ or
             }
           ],
           "followups": [
-            {}
+            {
+              "submitter_follow_up_id": "string",
+              "date_of_followup": "string",
+              "disease_status_at_followup": "string",
+              "relapse_type": "string",
+              "date_of_relapse": "string",
+              "method_of_progression_status": [
+                null
+              ],
+              "anatomic_site_progression_or_recurrence": [
+                null
+              ],
+              "recurrence_tumour_staging_system": "string",
+              "recurrence_t_category": "string",
+              "recurrence_n_category": "string",
+              "recurrence_m_category": "string",
+              "recurrence_stage_group": "string"
+            }
           ],
           "submitter_treatment_id": "string",
           "treatment_type": [
@@ -5194,7 +5262,24 @@ or
         }
       ],
       "followups": [
-        {}
+        {
+          "submitter_follow_up_id": "string",
+          "date_of_followup": "string",
+          "disease_status_at_followup": "string",
+          "relapse_type": "string",
+          "date_of_relapse": "string",
+          "method_of_progression_status": [
+            null
+          ],
+          "anatomic_site_progression_or_recurrence": [
+            null
+          ],
+          "recurrence_tumour_staging_system": "string",
+          "recurrence_t_category": "string",
+          "recurrence_n_category": "string",
+          "recurrence_m_category": "string",
+          "recurrence_stage_group": "string"
+        }
       ],
       "submitter_primary_diagnosis_id": "string",
       "date_of_diagnosis": "string",
@@ -5212,9 +5297,26 @@ or
     }
   ],
   "followups": [
-    {}
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "disease_status_at_followup": "string",
+      "relapse_type": "string",
+      "date_of_relapse": "string",
+      "method_of_progression_status": [
+        null
+      ],
+      "anatomic_site_progression_or_recurrence": [
+        null
+      ],
+      "recurrence_tumour_staging_system": "string",
+      "recurrence_t_category": "string",
+      "recurrence_n_category": "string",
+      "recurrence_m_category": "string",
+      "recurrence_stage_group": "string"
+    }
   ],
-  "biomarkers": [
+  "biomarkerszzzz": [
     {
       "submitter_specimen_id": "string",
       "submitter_primary_diagnosis_id": "string",
@@ -5280,9 +5382,9 @@ DonorWithClinicalDataSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|primarydiagnosis|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|true|none|none|
+|primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|true|none|none|
 |followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
-|biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|true|none|none|
+|biomarkerszzzz|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|true|none|none|
 |exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|true|none|none|
 |comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|true|none|none|
 |submitter_donor_id|string|true|none|none|
@@ -6143,7 +6245,24 @@ or
 <a id="tocsnestedfollowupschema"></a>
 
 ```json
-{}
+{
+  "submitter_follow_up_id": "string",
+  "date_of_followup": "string",
+  "disease_status_at_followup": "string",
+  "relapse_type": "string",
+  "date_of_relapse": "string",
+  "method_of_progression_status": [
+    null
+  ],
+  "anatomic_site_progression_or_recurrence": [
+    null
+  ],
+  "recurrence_tumour_staging_system": "string",
+  "recurrence_t_category": "string",
+  "recurrence_n_category": "string",
+  "recurrence_m_category": "string",
+  "recurrence_stage_group": "string"
+}
 
 ```
 
@@ -6151,7 +6270,202 @@ NestedFollowUpSchema
 
 ### Properties
 
-*None*
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|submitter_follow_up_id|string|true|none|none|
+|date_of_followup|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|disease_status_at_followup|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|relapse_type|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|date_of_relapse|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|method_of_progression_status|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[any]|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|anatomic_site_progression_or_recurrence|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[any]|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_tumour_staging_system|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_t_category|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_n_category|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_m_category|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|recurrence_stage_group|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
 
 <h2 id="tocS_NestedHormoneTherapySchema">NestedHormoneTherapySchema</h2>
 
@@ -6441,7 +6755,7 @@ or
 {
   "specimens": [
     {
-      "samplesregistrations": [
+      "sample_registrations": [
         {
           "submitter_sample_id": "string",
           "specimen_tissue_source": "string",
@@ -6493,7 +6807,7 @@ or
           "actual_cumulative_drug_dose": 0
         }
       ],
-      "hormonetherapies": [
+      "hormone_therapies": [
         {
           "drug_reference_database": "string",
           "drug_name": "string",
@@ -6539,7 +6853,24 @@ or
         }
       ],
       "followups": [
-        {}
+        {
+          "submitter_follow_up_id": "string",
+          "date_of_followup": "string",
+          "disease_status_at_followup": "string",
+          "relapse_type": "string",
+          "date_of_relapse": "string",
+          "method_of_progression_status": [
+            null
+          ],
+          "anatomic_site_progression_or_recurrence": [
+            null
+          ],
+          "recurrence_tumour_staging_system": "string",
+          "recurrence_t_category": "string",
+          "recurrence_n_category": "string",
+          "recurrence_m_category": "string",
+          "recurrence_stage_group": "string"
+        }
       ],
       "submitter_treatment_id": "string",
       "treatment_type": [
@@ -6559,7 +6890,24 @@ or
     }
   ],
   "followups": [
-    {}
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "disease_status_at_followup": "string",
+      "relapse_type": "string",
+      "date_of_relapse": "string",
+      "method_of_progression_status": [
+        null
+      ],
+      "anatomic_site_progression_or_recurrence": [
+        null
+      ],
+      "recurrence_tumour_staging_system": "string",
+      "recurrence_t_category": "string",
+      "recurrence_n_category": "string",
+      "recurrence_m_category": "string",
+      "recurrence_stage_group": "string"
+    }
   ],
   "submitter_primary_diagnosis_id": "string",
   "date_of_diagnosis": "string",
@@ -7067,7 +7415,7 @@ or
 
 ```json
 {
-  "samplesregistrations": [
+  "sample_registrations": [
     {
       "submitter_sample_id": "string",
       "specimen_tissue_source": "string",
@@ -7104,7 +7452,7 @@ NestedSpecimenSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|samplesregistrations|[[NestedSampleRegistrationSchema](#schemanestedsampleregistrationschema)]|true|none|none|
+|sample_registrations|[[NestedSampleRegistrationSchema](#schemanestedsampleregistrationschema)]|true|none|none|
 |submitter_specimen_id|string|true|none|none|
 |pathological_tumour_staging_system|any|false|none|none|
 
@@ -7725,7 +8073,7 @@ or
       "actual_cumulative_drug_dose": 0
     }
   ],
-  "hormonetherapies": [
+  "hormone_therapies": [
     {
       "drug_reference_database": "string",
       "drug_name": "string",
@@ -7771,7 +8119,24 @@ or
     }
   ],
   "followups": [
-    {}
+    {
+      "submitter_follow_up_id": "string",
+      "date_of_followup": "string",
+      "disease_status_at_followup": "string",
+      "relapse_type": "string",
+      "date_of_relapse": "string",
+      "method_of_progression_status": [
+        null
+      ],
+      "anatomic_site_progression_or_recurrence": [
+        null
+      ],
+      "recurrence_tumour_staging_system": "string",
+      "recurrence_t_category": "string",
+      "recurrence_n_category": "string",
+      "recurrence_m_category": "string",
+      "recurrence_stage_group": "string"
+    }
   ],
   "submitter_treatment_id": "string",
   "treatment_type": [
@@ -7800,7 +8165,7 @@ NestedTreatmentSchema
 |---|---|---|---|---|
 |chemotherapies|[[NestedChemotherapySchema](#schemanestedchemotherapyschema)]|true|none|none|
 |immunotherapies|[[NestedImmunotherapySchema](#schemanestedimmunotherapyschema)]|true|none|none|
-|hormonetherapies|[[NestedHormoneTherapySchema](#schemanestedhormonetherapyschema)]|true|none|none|
+|hormone_therapies|[[NestedHormoneTherapySchema](#schemanestedhormonetherapyschema)]|true|none|none|
 |radiations|[[NestedRadiationSchema](#schemanestedradiationschema)]|true|none|none|
 |surgeries|[[NestedSurgerySchema](#schemanestedsurgeryschema)]|true|none|none|
 |followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|

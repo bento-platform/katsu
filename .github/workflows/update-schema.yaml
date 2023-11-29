@@ -18,7 +18,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: "3.12"
 
       - name: Install dependencies
         run: python -m pip install -r requirements/base.txt
@@ -28,6 +28,17 @@ jobs:
           export DJANGO_SETTINGS_MODULE=config.settings.base
           python manage.py export_openapi_schema --api chord_metadata_service.mohpackets.apis.core.api | python -m json.tool > chord_metadata_service/mohpackets/docs/schema.json
       
+      - name: Update schema.json with new SHA
+        run: |
+          REPO_OWNER=${{ github.repository_owner }}
+          REPO_NAME=${{ github.repository }}
+          HEAD_REF=${{ github.head_ref }}
+          SHA=$(git rev-parse HEAD)
+
+          SCHEMA_PATH=chord_metadata_service/mohpackets/docs/schema.json
+
+          sed -i 's|"description": "This is the RESTful API for the MoH Service."|"description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/'"$REPO_NAME"'/'"$SHA"'/'"$SCHEMA_PATH"'"|' $SCHEMA_PATH
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -43,72 +54,23 @@ jobs:
       - name: Install octokit/rest
         run: npm install @octokit/rest
 
-      - name: Update schema.json
+      - name: Commit and push changes to schema.json
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
-            octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
+            const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
+            const { commitAndPushChanges } = require("./.github/commitFile.js");
 
-            // get SHA for schema.json
-            const schemaPath = 'chord_metadata_service/mohpackets/docs/schema.json';
-            const getFileSha = async () => {
-              const { data } = await octokit.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: `${schemaPath}`,
-                ref: `${{ github.head_ref }}`
-              });
-              return data.sha;
-            }
-
-            // get last commit sha for repo
-            const getRepoSha = async () => {
-              const { data } = await octokit.rest.repos.getCommit({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                ref: `${{ github.head_ref }}`
-              });
-              return data.sha;
-            }
-
-            const schemaSha = await getFileSha('schema.json');
-            const repoSha = await getRepoSha();
-
-            // Read the content of updated files
-            let schemaJson = fs.readFileSync(`./${schemaPath}`, 'utf8');
-
-            // Update description to include sha of
-            let schemaLines = schemaJson.split('\n');
-            for (let i = 0; i < 10; ++i) {
-              let descStr = '"description": "This is the RESTful API for the MoH Service."';
-              let textLink = 'Based on https://raw.githubusercontent.com/' + context.repo.owner + '/' + context.repo.repo + '/' + repoSha + '/' + schemaPath;
-              if (descStr === schemaLines[i].trim()) {
-              schemaLines[i] = `"description": "This is the RESTful API for the MoH Service. ${textLink}"`;
-
-              }
-            }
-            schemaJson = schemaLines.join('\n');
-            fs.writeFileSync(`./${schemaPath}`, schemaJson, 'utf8');
-
-            // Commit and push changes
-            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${schemaPath}`, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'schema.json',
-              message: 'Update schema.json',
-              content: Buffer.from(schemaJson).toString('base64'),
-              sha: schemaSha,
-              branch: `${{ github.head_ref }}`
-            });
+            await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
 
       - name: Install widdershins
         run: npm install -g widdershins
 
       - name: Convert schema to OpenAPI documentation
         run: |
-          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.json -o ./chord_metadata_service/mohpackets/docs/openapi.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
+          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.json -o ./chord_metadata_service/mohpackets/docs/schema.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
       
       - name: Install PyYAML
         run: pip install PyYAML
@@ -116,50 +78,14 @@ jobs:
       - name: Convert schema.json to schema.yml
         run: python -c 'import json, yaml; json.load(open("chord_metadata_service/mohpackets/docs/schema.json")); print(yaml.dump(json.load(open("chord_metadata_service/mohpackets/docs/schema.json"))))' > chord_metadata_service/mohpackets/docs/schema.yml
 
-      - name: Commit and push changes
+      - name: Commit and push changes to schema.yml and schema.md
         uses: actions/github-script@v6
         with:
           script: |
             const fs = require('fs');
             const { Octokit } = require('@octokit/rest');
             const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
+            const { commitAndPushChanges } = require("./.github/commitFile.js");
 
-            // get SHA from each file
-            const repoPath = 'chord_metadata_service/mohpackets/docs/';
-            const getFileSha = async (path) => {
-              const { data } = await octokit.repos.getContent({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: `${repoPath}${path}`,
-                ref: `${{ github.head_ref }}`
-              });
-              return data.sha;
-            }
-
-            const schemaSha = await getFileSha('schema.yml');
-            const openApiSha = await getFileSha('openapi.md');
-
-            // Read the content of updated files
-            let schemaYml = fs.readFileSync(`./${repoPath}schema.yml`, 'utf8');
-            const openApiMd = fs.readFileSync(`./${repoPath}openapi.md`, 'utf8');
-
-            // Commit and push changes
-            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'schema.yml',
-              message: 'Update schema.yml',
-              content: Buffer.from(schemaYml).toString('base64'),
-              sha: schemaSha,
-              branch: `${{ github.head_ref }}`
-            });
-
-            await octokit.request(`PUT /repos/{owner}/{repo}/contents/${repoPath}{path}`, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              path: 'openapi.md',
-              message: 'Update openapi.md',
-              content: Buffer.from(openApiMd).toString('base64'),
-              sha: openApiSha,
-              branch: `${{ github.head_ref }}`
-            });
+            await commitAndPushChanges('schema.yml', `${{ github.head_ref }}`, fs, octokit, context);
+            await commitAndPushChanges('schema.md', `${{ github.head_ref }}`, fs, octokit, context);

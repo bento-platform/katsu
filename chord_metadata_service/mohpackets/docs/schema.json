@@ -3,7 +3,7 @@
     "info": {
         "title": "MoH Service API",
         "version": "3.0.0",
-"description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/01a889aa1b4c998bc393a3804bde9932b7a7a9eb/chord_metadata_service/mohpackets/docs/schema.json"
+        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/e7a3a0239265af27f286301f98068524e69f3dfa/chord_metadata_service/mohpackets/docs/schema.json"
     },
     "paths": {
         "/v2/service-info": {
@@ -6975,11 +6975,11 @@
             },
             "DonorWithClinicalDataSchema": {
                 "properties": {
-                    "primarydiagnosis": {
+                    "primary_diagnoses": {
                         "items": {
                             "$ref": "#/components/schemas/NestedPrimaryDiagnosisSchema"
                         },
-                        "title": "Primarydiagnosis",
+                        "title": "Primary Diagnoses",
                         "type": "array"
                     },
                     "followups": {
@@ -6989,11 +6989,11 @@
                         "title": "Followups",
                         "type": "array"
                     },
-                    "biomarkers": {
+                    "biomarkerszzzz": {
                         "items": {
                             "$ref": "#/components/schemas/NestedBiomarkerSchema"
                         },
-                        "title": "Biomarkers",
+                        "title": "Biomarkerszzzz",
                         "type": "array"
                     },
                     "exposures": {
@@ -7140,9 +7140,9 @@
                     }
                 },
                 "required": [
-                    "primarydiagnosis",
+                    "primary_diagnoses",
                     "followups",
-                    "biomarkers",
+                    "biomarkerszzzz",
                     "exposures",
                     "comorbidities",
                     "submitter_donor_id",
@@ -7551,7 +7551,148 @@
                 "type": "object"
             },
             "NestedFollowUpSchema": {
-                "properties": {},
+                "properties": {
+                    "submitter_follow_up_id": {
+                        "maxLength": 64,
+                        "title": "Submitter Follow Up Id",
+                        "type": "string"
+                    },
+                    "date_of_followup": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Followup"
+                    },
+                    "disease_status_at_followup": {
+                        "anyOf": [
+                            {
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Disease Status At Followup"
+                    },
+                    "relapse_type": {
+                        "anyOf": [
+                            {
+                                "maxLength": 128,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Relapse Type"
+                    },
+                    "date_of_relapse": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Relapse"
+                    },
+                    "method_of_progression_status": {
+                        "anyOf": [
+                            {
+                                "items": {},
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Method Of Progression Status"
+                    },
+                    "anatomic_site_progression_or_recurrence": {
+                        "anyOf": [
+                            {
+                                "items": {},
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Anatomic Site Progression Or Recurrence"
+                    },
+                    "recurrence_tumour_staging_system": {
+                        "anyOf": [
+                            {
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence Tumour Staging System"
+                    },
+                    "recurrence_t_category": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence T Category"
+                    },
+                    "recurrence_n_category": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence N Category"
+                    },
+                    "recurrence_m_category": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence M Category"
+                    },
+                    "recurrence_stage_group": {
+                        "anyOf": [
+                            {
+                                "maxLength": 64,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Recurrence Stage Group"
+                    }
+                },
+                "required": [
+                    "submitter_follow_up_id"
+                ],
                 "title": "NestedFollowUpSchema",
                 "type": "object"
             },
@@ -8057,11 +8198,11 @@
             },
             "NestedSpecimenSchema": {
                 "properties": {
-                    "samplesregistrations": {
+                    "sample_registrations": {
                         "items": {
                             "$ref": "#/components/schemas/NestedSampleRegistrationSchema"
                         },
-                        "title": "Samplesregistrations",
+                        "title": "Sample Registrations",
                         "type": "array"
                     },
                     "submitter_specimen_id": {
@@ -8275,7 +8416,7 @@
                     }
                 },
                 "required": [
-                    "samplesregistrations",
+                    "sample_registrations",
                     "submitter_specimen_id"
                 ],
                 "title": "NestedSpecimenSchema",
@@ -8468,11 +8609,11 @@
                         "title": "Immunotherapies",
                         "type": "array"
                     },
-                    "hormonetherapies": {
+                    "hormone_therapies": {
                         "items": {
                             "$ref": "#/components/schemas/NestedHormoneTherapySchema"
                         },
-                        "title": "Hormonetherapies",
+                        "title": "Hormone Therapies",
                         "type": "array"
                     },
                     "radiations": {
@@ -8646,7 +8787,7 @@
                 "required": [
                     "chemotherapies",
                     "immunotherapies",
-                    "hormonetherapies",
+                    "hormone_therapies",
                     "radiations",
                     "surgeries",
                     "followups",

@@ -1,6 +1,6 @@
 from typing import List
 
-from ninja import Field, ModelSchema, Schema
+from ninja import Field, ModelSchema
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
@@ -112,7 +112,7 @@ class NestedSurgerySchema(ModelSchema):
         ]
 
 
-class NestedFollowUpSchema(Schema):
+class NestedFollowUpSchema(ModelSchema):
     class Config:
         model = FollowUp
         model_exclude = [
@@ -158,7 +158,7 @@ class NestedTreatmentSchema(ModelSchema):
     immunotherapies: List[NestedImmunotherapySchema] = Field(
         ..., alias="immunotherapy_set"
     )
-    hormonetherapies: List[NestedHormoneTherapySchema] = Field(
+    hormone_therapies: List[NestedHormoneTherapySchema] = Field(
         ..., alias="hormonetherapy_set"
     )
     radiations: List[NestedRadiationSchema] = Field(..., alias="radiation_set")
@@ -178,7 +178,7 @@ class NestedTreatmentSchema(ModelSchema):
 
 
 class NestedSpecimenSchema(ModelSchema):
-    sampleregistrations: List[NestedSampleRegistrationSchema] = Field(
+    sample_registrations: List[NestedSampleRegistrationSchema] = Field(
         ..., alias="sampleregistration_set"
     )
 
@@ -205,7 +205,7 @@ class NestedPrimaryDiagnosisSchema(ModelSchema):
 
 
 class DonorWithClinicalDataSchema(ModelSchema):
-    primarydiagnosis: List[NestedPrimaryDiagnosisSchema] = Field(
+    primary_diagnoses: List[NestedPrimaryDiagnosisSchema] = Field(
         ..., alias="primarydiagnosis_set"
     )
     followups: List[NestedFollowUpSchema] = Field(..., alias="followup_set")
