@@ -22,6 +22,27 @@ jobs:
 
       - name: Install dependencies
         run: python -m pip install -r requirements/base.txt
+      
+      - name: Install PyYAML
+        run: pip install PyYAML
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Create package.json file
+        run: |
+          echo '{"name": "my-project", "version": "1.0.0"}' > package.json
+
+      - name: Install npm
+        run: npm install
+      
+      - name: Install widdershins
+        run: npm install -g widdershins
+
+      - name: Install octokit/rest
+        run: npm install @octokit/rest
 
       - name: Generate new schema.json
         run: |
@@ -39,7 +60,7 @@ jobs:
 
             await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
       
-      - name: Update schema.json with new SHA
+      - name: Update schema.json with last SHA
         run: |
           REPO_OWNER=${{ github.repository_owner }}
           REPO_NAME=${{ github.repository }}
@@ -50,22 +71,7 @@ jobs:
 
           sed -i 's|"description": "This is the RESTful API for the MoH Service."|"description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/'"$REPO_NAME"'/'"$SHA"'/'"$SCHEMA_PATH"'"|' $SCHEMA_PATH
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-
-      - name: Create package.json file
-        run: |
-          echo '{"name": "my-project", "version": "1.0.0"}' > package.json
-
-      - name: Install npm
-        run: npm install
-
-      - name: Install octokit/rest
-        run: npm install @octokit/rest
-
-      - name: Commit and push changes to schema.json with last SHA
+      - name: Commit and push changes to schema.json again
         uses: actions/github-script@v6
         with:
           script: |
@@ -76,15 +82,9 @@ jobs:
 
             await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
 
-      - name: Install widdershins
-        run: npm install -g widdershins
-
       - name: Convert schema to OpenAPI documentation
         run: |
-          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.json -o ./chord_metadata_service/mohpackets/docs/schema.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true
-      
-      - name: Install PyYAML
-        run: pip install PyYAML
+          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.json -o ./chord_metadata_service/mohpackets/docs/schema.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true  
 
       - name: Convert schema.json to schema.yml
         run: python -c 'import json, yaml; json.load(open("chord_metadata_service/mohpackets/docs/schema.json")); print(yaml.dump(json.load(open("chord_metadata_service/mohpackets/docs/schema.json"))))' > chord_metadata_service/mohpackets/docs/schema.yml
