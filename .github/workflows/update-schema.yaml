@@ -79,9 +79,10 @@ jobs:
             "${DOCS_PATH}schema.yml"
             "${DOCS_PATH}schema.md"
           )
-        for path in "${SCHEMA_PATHS[@]}"; do
-          sed -i "s|This is the RESTful API for the MoH Service.|This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/$REPO_NAME/$SHA/$path|" "$path"
-        done
+          for path in "${SCHEMA_PATHS[@]}"; do
+            sed -i "s|This is the RESTful API for the MoH Service.|This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/$REPO_NAME/$SHA/$path|" "$path"
+          done
+
 
       - name: Commit and push changes
         uses: actions/github-script@v6
