@@ -888,10 +888,10 @@ components:
       type: object
     DonorWithClinicalDataSchema:
       properties:
-        biomarkers_this_is_a_test:
+        biomarkers:
           items:
             $ref: '#/components/schemas/NestedBiomarkerSchema'
-          title: Biomarkers This Is A Test
+          title: Biomarkers
           type: array
         cause_of_death:
           anyOf:
@@ -982,7 +982,7 @@ components:
       required:
       - primary_diagnoses
       - followups
-      - biomarkers_this_is_a_test
+      - biomarkers
       - exposures
       - comorbidities
       - submitter_donor_id
@@ -5648,7 +5648,7 @@ components:
       scheme: bearer
       type: http
 info:
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/069c8b43ff9ff5d0a46231461b9de0dc50a8b939/chord_metadata_service/mohpackets/docs/schema.yml
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/194e5c70746e9ad5a5eae193842daca5aaee7cff/chord_metadata_service/mohpackets/docs/schema.yml
   title: MoH Service API
   version: 3.0.0
 openapi: 3.1.0
