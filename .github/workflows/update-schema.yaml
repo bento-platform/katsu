@@ -50,6 +50,7 @@ jobs:
       
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
+          file_pattern: 'chord_metadata_service/mohpackets/docs/schema.json'
           commit_message: Regenerate schema.json
       
       # - name: Commit and push changes to schema.json
