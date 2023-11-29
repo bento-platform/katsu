@@ -22,9 +22,6 @@ jobs:
 
       - name: Install dependencies
         run: python -m pip install -r requirements/base.txt
-      
-      - name: Install PyYAML
-        run: pip install PyYAML
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -37,9 +34,6 @@ jobs:
 
       - name: Install npm
         run: npm install
-      
-      - name: Install widdershins
-        run: npm install -g widdershins
 
       - name: Install octokit/rest
         run: npm install @octokit/rest
@@ -60,18 +54,36 @@ jobs:
 
             await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
       
-      - name: Update schema.json with last SHA
+      - name: Install widdershins
+        run: npm install -g widdershins
+
+      - name: Install PyYAML
+        run: pip install PyYAML
+      
+      - name: Convert schema to OpenAPI documentation
         run: |
-          REPO_OWNER=${{ github.repository_owner }}
+          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.json -o ./chord_metadata_service/mohpackets/docs/schema.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true  
+
+      - name: Convert schema.json to schema.yml
+        run: python -c 'import json, yaml; json.load(open("chord_metadata_service/mohpackets/docs/schema.json")); print(yaml.dump(json.load(open("chord_metadata_service/mohpackets/docs/schema.json"))))' > chord_metadata_service/mohpackets/docs/schema.yml
+
+      - name: Update schema with last SHA
+        run: |
           REPO_NAME=${{ github.repository }}
           HEAD_REF=${{ github.head_ref }}
           SHA=$(git rev-parse HEAD)
 
-          SCHEMA_PATH=chord_metadata_service/mohpackets/docs/schema.json
+          DOCS_PATH="chord_metadata_service/mohpackets/docs/"
+          SCHEMA_PATHS=(
+            "${DOCS_PATH}schema.json"
+            "${DOCS_PATH}schema.yml"
+            "${DOCS_PATH}schema.md"
+          )
+        for path in "${SCHEMA_PATHS[@]}"; do
+          sed -i "s|This is the RESTful API for the MoH Service.|This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/$REPO_NAME/$SHA/$path|" "$path"
+        done
 
-          sed -i 's|"description": "This is the RESTful API for the MoH Service."|"description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/'"$REPO_NAME"'/'"$SHA"'/'"$SCHEMA_PATH"'"|' $SCHEMA_PATH
-
-      - name: Commit and push changes to schema.json again
+      - name: Commit and push changes
         uses: actions/github-script@v6
         with:
           script: |
@@ -81,22 +93,5 @@ jobs:
             const { commitAndPushChanges } = require("./.github/commitFile.js");
 
             await commitAndPushChanges('schema.json', `${{ github.head_ref }}`, fs, octokit, context);
-
-      - name: Convert schema to OpenAPI documentation
-        run: |
-          npx widdershins ./chord_metadata_service/mohpackets/docs/schema.json -o ./chord_metadata_service/mohpackets/docs/schema.md -u ./chord_metadata_service/mohpackets/docs/widdershins/templates/openapi3 -c true --omitHeader true  
-
-      - name: Convert schema.json to schema.yml
-        run: python -c 'import json, yaml; json.load(open("chord_metadata_service/mohpackets/docs/schema.json")); print(yaml.dump(json.load(open("chord_metadata_service/mohpackets/docs/schema.json"))))' > chord_metadata_service/mohpackets/docs/schema.yml
-
-      - name: Commit and push changes to schema.yml and schema.md
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const fs = require('fs');
-            const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ request: { fetch: fetch, }, auth: "${{ secrets.GITHUB_TOKEN }}" });
-            const { commitAndPushChanges } = require("./.github/commitFile.js");
-
             await commitAndPushChanges('schema.yml', `${{ github.head_ref }}`, fs, octokit, context);
             await commitAndPushChanges('schema.md', `${{ github.head_ref }}`, fs, octokit, context);
