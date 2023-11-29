@@ -3,7 +3,7 @@
     "info": {
         "title": "MoH Service API",
         "version": "3.0.0",
-        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/a0820a32c571bd86d42fbff6cc1a70efc904fc97/chord_metadata_service/mohpackets/docs/schema.json"
+        "description": "This is the RESTful API for the MoH Service."
     },
     "paths": {
         "/v2/service-info": {
@@ -6989,11 +6989,11 @@
                         "title": "Followups",
                         "type": "array"
                     },
-                    "biomarkers": {
+                    "biomarkers_this_is_a_test": {
                         "items": {
                             "$ref": "#/components/schemas/NestedBiomarkerSchema"
                         },
-                        "title": "Biomarkers",
+                        "title": "Biomarkers This Is A Test",
                         "type": "array"
                     },
                     "exposures": {
@@ -7142,7 +7142,7 @@
                 "required": [
                     "primary_diagnoses",
                     "followups",
-                    "biomarkers",
+                    "biomarkers_this_is_a_test",
                     "exposures",
                     "comorbidities",
                     "submitter_donor_id",
