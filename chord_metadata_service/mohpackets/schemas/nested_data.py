@@ -178,7 +178,7 @@ class NestedTreatmentSchema(ModelSchema):
 
 
 class NestedSpecimenSchema(ModelSchema):
-    samplesregistrations: List[NestedSampleRegistrationSchema] = Field(
+    sampleregistrations: List[NestedSampleRegistrationSchema] = Field(
         ..., alias="sampleregistration_set"
     )
 
