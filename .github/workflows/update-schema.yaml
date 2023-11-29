@@ -60,9 +60,9 @@ jobs:
     needs: first_job
     steps:
       - name: Check out repo
-          uses: actions/checkout@v4
-          with:
-            submodules: true
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
       - name: Install Python
         uses: actions/setup-python@v4
@@ -83,7 +83,7 @@ jobs:
 
       - name: Install octokit/rest
         run: npm install @octokit/rest
-        
+
       - name: Install widdershins
         run: npm install -g widdershins
 
