@@ -1,7 +1,7 @@
 
 <h1 id="moh-service-api">MoH Service API v3.0.0</h1>
 
-This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/e7a3a0239265af27f286301f98068524e69f3dfa/chord_metadata_service/mohpackets/docs/schema.json
+This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/897aa45d45b00e893d98cd4bdbcd565dd3625cae/chord_metadata_service/mohpackets/docs/schema.json
 
 Base URLs:
 
@@ -472,7 +472,7 @@ Base URLs:
       "recurrence_stage_group": "string"
     }
   ],
-  "biomarkerszzzz": [
+  "biomarkers": [
     {
       "submitter_specimen_id": "string",
       "submitter_primary_diagnosis_id": "string",
@@ -5316,7 +5316,7 @@ or
       "recurrence_stage_group": "string"
     }
   ],
-  "biomarkerszzzz": [
+  "biomarkers": [
     {
       "submitter_specimen_id": "string",
       "submitter_primary_diagnosis_id": "string",
@@ -5384,7 +5384,7 @@ DonorWithClinicalDataSchema
 |---|---|---|---|---|
 |primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|true|none|none|
 |followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
-|biomarkerszzzz|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|true|none|none|
+|biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|true|none|none|
 |exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|true|none|none|
 |comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|true|none|none|
 |submitter_donor_id|string|true|none|none|
