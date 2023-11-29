@@ -1,7 +1,7 @@
 
 <h1 id="moh-service-api">MoH Service API v3.0.0</h1>
 
-This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/ea46369d4794703447a9323b3d1dbd5a890be2ba/chord_metadata_service/mohpackets/docs/schema.md Based on https://raw.githubusercontent.com/CanDIG/katsu/d2c81d4b16e312938fca0b3c3c197f71ec6d5491/chord_metadata_service/mohpackets/docs/schema.json Based on https://raw.githubusercontent.com/CanDIG/katsu/b0b2cf69bc1703f545b231dc4c1ae9292264508e/chord_metadata_service/mohpackets/docs/schema.json
+This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/ebfa9b09fac60e29693dd6f76854ebe47d77e9a1/chord_metadata_service/mohpackets/docs/schema.md
 
 Base URLs:
 
@@ -452,7 +452,7 @@ Base URLs:
       "clinical_stage_group": "string"
     }
   ],
-  "followups_this_is_a_test": [
+  "followups": [
     {
       "submitter_follow_up_id": "string",
       "date_of_followup": "string",
@@ -5296,7 +5296,7 @@ or
       "clinical_stage_group": "string"
     }
   ],
-  "followups_this_is_a_test": [
+  "followups": [
     {
       "submitter_follow_up_id": "string",
       "date_of_followup": "string",
@@ -5383,7 +5383,7 @@ DonorWithClinicalDataSchema
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|true|none|none|
-|followups_this_is_a_test|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
+|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
 |biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|true|none|none|
 |exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|true|none|none|
 |comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|true|none|none|
