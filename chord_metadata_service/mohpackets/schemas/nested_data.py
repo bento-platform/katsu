@@ -153,17 +153,17 @@ class NestedSampleRegistrationSchema(ModelSchema):
 
 class NestedTreatmentSchema(ModelSchema):
     chemotherapies: List[NestedChemotherapySchema] = Field(
-        ..., alias="chemotherapy_set"
+        None, alias="chemotherapy_set"
     )
     immunotherapies: List[NestedImmunotherapySchema] = Field(
-        ..., alias="immunotherapy_set"
+        None, alias="immunotherapy_set"
     )
     hormone_therapies: List[NestedHormoneTherapySchema] = Field(
-        ..., alias="hormonetherapy_set"
+        None, alias="hormonetherapy_set"
     )
-    radiations: List[NestedRadiationSchema] = Field(..., alias="radiation_set")
-    surgeries: List[NestedSurgerySchema] = Field(..., alias="surgery_set")
-    followups: List[NestedFollowUpSchema] = Field(..., alias="followup_set")
+    radiations: List[NestedRadiationSchema] = Field(None, alias="radiation_set")
+    surgeries: List[NestedSurgerySchema] = Field(None, alias="surgery_set")
+    followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
 
     class Config:
         model = Treatment
@@ -179,7 +179,7 @@ class NestedTreatmentSchema(ModelSchema):
 
 class NestedSpecimenSchema(ModelSchema):
     sample_registrations: List[NestedSampleRegistrationSchema] = Field(
-        ..., alias="sampleregistration_set"
+        None, alias="sampleregistration_set"
     )
 
     class Config:
@@ -195,9 +195,9 @@ class NestedSpecimenSchema(ModelSchema):
 
 
 class NestedPrimaryDiagnosisSchema(ModelSchema):
-    specimens: List[NestedSpecimenSchema] = Field(..., alias="specimen_set")
-    treatments: List[NestedTreatmentSchema] = Field(..., alias="treatment_set")
-    followups: List[NestedFollowUpSchema] = Field(..., alias="followup_set")
+    specimens: List[NestedSpecimenSchema] = Field(None, alias="specimen_set")
+    treatments: List[NestedTreatmentSchema] = Field(None, alias="treatment_set")
+    followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
 
     class Config:
         model = PrimaryDiagnosis
@@ -206,12 +206,12 @@ class NestedPrimaryDiagnosisSchema(ModelSchema):
 
 class DonorWithClinicalDataSchema(ModelSchema):
     primary_diagnoses: List[NestedPrimaryDiagnosisSchema] = Field(
-        ..., alias="primarydiagnosis_set"
+        None, alias="primarydiagnosis_set"
     )
-    followups: List[NestedFollowUpSchema] = Field(..., alias="followup_set")
-    biomarkers: List[NestedBiomarkerSchema] = Field(..., alias="biomarker_set")
-    exposures: List[NestedExposureSchema] = Field(..., alias="exposure_set")
-    comorbidities: List[NestedComorbiditySchema] = Field(..., alias="comorbidity_set")
+    followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
+    biomarkers: List[NestedBiomarkerSchema] = Field(None, alias="biomarker_set")
+    exposures: List[NestedExposureSchema] = Field(None, alias="exposure_set")
+    comorbidities: List[NestedComorbiditySchema] = Field(None, alias="comorbidity_set")
 
     class Config:
         model = Donor
