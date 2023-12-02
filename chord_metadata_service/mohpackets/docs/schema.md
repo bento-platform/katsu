@@ -1,7 +1,7 @@
 
 <h1 id="moh-service-api">MoH Service API v3.0.0</h1>
 
-This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/ff7da80a6ccbfceea7dceac21b7e06946ad6ee57/chord_metadata_service/mohpackets/docs/schema.json
+This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/29caaa0842abd9b6b422f77ad9362c61fabb8e13/chord_metadata_service/mohpackets/docs/schema.json
 
 Base URLs:
 
@@ -5382,11 +5382,11 @@ DonorWithClinicalDataSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|true|none|none|
-|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
-|biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|true|none|none|
-|exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|true|none|none|
-|comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|true|none|none|
+|primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|false|none|none|
+|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|false|none|none|
+|biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|false|none|none|
+|exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|false|none|none|
+|comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|false|none|none|
 |submitter_donor_id|string|true|none|none|
 |program_id|string|true|none|none|
 |gender|any|false|none|none|
@@ -6932,9 +6932,9 @@ NestedPrimaryDiagnosisSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimens|[[NestedSpecimenSchema](#schemanestedspecimenschema)]|true|none|none|
-|treatments|[[NestedTreatmentSchema](#schemanestedtreatmentschema)]|true|none|none|
-|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
+|specimens|[[NestedSpecimenSchema](#schemanestedspecimenschema)]|false|none|none|
+|treatments|[[NestedTreatmentSchema](#schemanestedtreatmentschema)]|false|none|none|
+|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|false|none|none|
 |submitter_primary_diagnosis_id|any|false|none|none|
 
 anyOf
@@ -7452,7 +7452,7 @@ NestedSpecimenSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|sample_registrations|[[NestedSampleRegistrationSchema](#schemanestedsampleregistrationschema)]|true|none|none|
+|sample_registrations|[[NestedSampleRegistrationSchema](#schemanestedsampleregistrationschema)]|false|none|none|
 |submitter_specimen_id|string|true|none|none|
 |pathological_tumour_staging_system|any|false|none|none|
 
@@ -8163,12 +8163,12 @@ NestedTreatmentSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|chemotherapies|[[NestedChemotherapySchema](#schemanestedchemotherapyschema)]|true|none|none|
-|immunotherapies|[[NestedImmunotherapySchema](#schemanestedimmunotherapyschema)]|true|none|none|
-|hormone_therapies|[[NestedHormoneTherapySchema](#schemanestedhormonetherapyschema)]|true|none|none|
-|radiations|[[NestedRadiationSchema](#schemanestedradiationschema)]|true|none|none|
-|surgeries|[[NestedSurgerySchema](#schemanestedsurgeryschema)]|true|none|none|
-|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|true|none|none|
+|chemotherapies|[[NestedChemotherapySchema](#schemanestedchemotherapyschema)]|false|none|none|
+|immunotherapies|[[NestedImmunotherapySchema](#schemanestedimmunotherapyschema)]|false|none|none|
+|hormone_therapies|[[NestedHormoneTherapySchema](#schemanestedhormonetherapyschema)]|false|none|none|
+|radiations|[[NestedRadiationSchema](#schemanestedradiationschema)]|false|none|none|
+|surgeries|[[NestedSurgerySchema](#schemanestedsurgeryschema)]|false|none|none|
+|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|false|none|none|
 |submitter_treatment_id|string|true|none|none|
 |treatment_type|any|false|none|none|
 
