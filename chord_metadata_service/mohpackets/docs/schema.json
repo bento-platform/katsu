@@ -3,7 +3,7 @@
     "info": {
         "title": "MoH Service API",
         "version": "3.0.0",
-        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/ff7da80a6ccbfceea7dceac21b7e06946ad6ee57/chord_metadata_service/mohpackets/docs/schema.json"
+        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/29caaa0842abd9b6b422f77ad9362c61fabb8e13/chord_metadata_service/mohpackets/docs/schema.json"
     },
     "paths": {
         "/v2/service-info": {
@@ -7140,11 +7140,6 @@
                     }
                 },
                 "required": [
-                    "primary_diagnoses",
-                    "followups",
-                    "biomarkers",
-                    "exposures",
-                    "comorbidities",
                     "submitter_donor_id",
                     "program_id"
                 ],
@@ -8039,11 +8034,6 @@
                         "title": "Clinical Stage Group"
                     }
                 },
-                "required": [
-                    "specimens",
-                    "treatments",
-                    "followups"
-                ],
                 "title": "NestedPrimaryDiagnosisSchema",
                 "type": "object"
             },
@@ -8416,7 +8406,6 @@
                     }
                 },
                 "required": [
-                    "sample_registrations",
                     "submitter_specimen_id"
                 ],
                 "title": "NestedSpecimenSchema",
@@ -8785,12 +8774,6 @@
                     }
                 },
                 "required": [
-                    "chemotherapies",
-                    "immunotherapies",
-                    "hormone_therapies",
-                    "radiations",
-                    "surgeries",
-                    "followups",
                     "submitter_treatment_id"
                 ],
                 "title": "NestedTreatmentSchema",
