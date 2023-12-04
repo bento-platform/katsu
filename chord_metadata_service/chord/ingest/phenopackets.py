@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import uuid
 from humps import decamelize
 
 from dateutil.parser import isoparse
@@ -320,7 +319,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     if phenopacket_data.get("files", []):
         logger.warning("Found files in phenopacket.files are not ingested by Katsu.")
 
-    new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
+    phenopacket_id = phenopacket_data.get("id")
 
     subject = phenopacket_data.get("subject")
 
@@ -376,18 +375,15 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     # Attach resources to the metadata object
     meta_data_obj.resources.set(resources_db)
 
-    # Create the phenopacket object...
-    new_phenopacket = pm.Phenopacket(
-        id=new_phenopacket_id,
+    # Get the phenopacket if one exists for given ID, or create a new one.
+    new_phenopacket, created = pm.Phenopacket.objects.get_or_create(
+        id=phenopacket_id,
         subject=subject_obj,
         measurements=measurements,
         medical_actions=medical_actions,
         meta_data=meta_data_obj,
         dataset=Dataset.objects.get(identifier=dataset_id),
     )
-
-    # ... save it to the database...
-    new_phenopacket.save()
 
     # ... and attach all the other objects to it.
     new_phenopacket.phenotypic_features.set(phenotypic_features_db)
