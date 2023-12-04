@@ -319,7 +319,12 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     if phenopacket_data.get("files", []):
         logger.warning("Found files in phenopacket.files are not ingested by Katsu.")
 
+    # Abort the ingestion if the phenopacket's ID exists in the DB
     phenopacket_id = phenopacket_data.get("id")
+    if pm.Phenopacket.objects.filter(id=phenopacket_id).exists():
+        error_msg = f"Cannot ingest Phenopacket with ID {phenopacket_id}, ID already exists in the database."
+        logger.error(error_msg)
+        raise IngestError(error_msg)
 
     subject = phenopacket_data.get("subject")
 
@@ -375,8 +380,8 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     # Attach resources to the metadata object
     meta_data_obj.resources.set(resources_db)
 
-    # Get the phenopacket if one exists for given ID, or create a new one.
-    new_phenopacket, created = pm.Phenopacket.objects.get_or_create(
+    # Create the phenopacket object...
+    phenopacket = pm.Phenopacket(
         id=phenopacket_id,
         subject=subject_obj,
         measurements=measurements,
@@ -385,13 +390,16 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
         dataset=Dataset.objects.get(identifier=dataset_id),
     )
 
-    # ... and attach all the other objects to it.
-    new_phenopacket.phenotypic_features.set(phenotypic_features_db)
-    new_phenopacket.interpretations.set(interpretations_db)
-    new_phenopacket.biosamples.set(biosamples_db)
-    new_phenopacket.diseases.set(diseases_db)
+    #  ... save it to the database...
+    phenopacket.save()
 
-    return new_phenopacket
+    # ... and attach all the other objects to it.
+    phenopacket.phenotypic_features.set(phenotypic_features_db)
+    phenopacket.interpretations.set(interpretations_db)
+    phenopacket.biosamples.set(biosamples_db)
+    phenopacket.diseases.set(diseases_db)
+
+    return phenopacket
 
 
 def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
