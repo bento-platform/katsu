@@ -1,9 +1,9 @@
-import factory
+from http import HTTPStatus
+
 from django.conf import settings
-from rest_framework import status
+from django.forms.models import model_to_dict
 
 from chord_metadata_service.mohpackets.models import FollowUp
-from chord_metadata_service.mohpackets.serializers import FollowUpSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import FollowUpFactory
 
@@ -13,7 +13,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import FollowUp
 class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.follow_up_url = "/v2/ingest/follow_ups/"
+        self.follow_up_url = "/v2/ingest/follow_up/"
 
     def test_follow_up_create_authorized(self):
         """
@@ -24,21 +24,19 @@ class IngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for follow-up creation.
         """
-        follow_up_data = FollowUpFactory.build_batch(
-            submitter_treatment_id=factory.Iterator(self.treatments),
-            size=2,
-        )
-        serialized_data = FollowUpSerializer(follow_up_data, many=True).data
+        follow_up = FollowUpFactory.build(treatment_uuid=self.treatments[0])
+        data_dict = model_to_dict(follow_up)
         response = self.client.post(
             self.follow_up_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
@@ -51,18 +49,16 @@ class IngestTestCase(BaseTestCase):
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for follow-up creation.
         """
-        follow_up_data = FollowUpFactory.build_batch(
-            submitter_treatment_id=factory.Iterator(self.treatments),
-            size=2,
-        )
-        serialized_data = FollowUpSerializer(follow_up_data, many=True).data
+        follow_up = FollowUpFactory.build(treatment_uuid=self.treatments[0])
+        data_dict = model_to_dict(follow_up)
         response = self.client.post(
             self.follow_up_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -84,7 +80,7 @@ class GETTestCase(BaseTestCase):
             self.follow_ups_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_follow_ups_301_redirect(self):
         """
@@ -98,7 +94,7 @@ class GETTestCase(BaseTestCase):
             "/v2/authorized/follow_ups",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
 
 # OTHERS
@@ -136,9 +132,9 @@ class OthersTestCase(BaseTestCase):
                 self.follow_ups_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
+            response = response.json()
             response_data = [
-                follow_up["submitter_follow_up_id"]
-                for follow_up in response.data["results"]
+                follow_up["submitter_follow_up_id"] for follow_up in response["items"]
             ]
 
             self.assertEqual(response_data, expected_datasets)
@@ -151,7 +147,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.post(
             self.follow_ups_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -161,7 +157,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.put(
             self.follow_ups_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -171,7 +167,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.patch(
             self.follow_ups_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_delete_request_404(self):
         """
@@ -186,4 +182,4 @@ class OthersTestCase(BaseTestCase):
             f"{self.follow_ups_url}{follow_up_to_delete.submitter_follow_up_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

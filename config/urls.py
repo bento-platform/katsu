@@ -14,21 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.http import HttpResponseRedirect
 from django.urls import include, path
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
 
-from chord_metadata_service.mohpackets import urls as moh_urls
+from chord_metadata_service.mohpackets.apis.core import api
+
+
+def redirect_to_default(request):
+    return HttpResponseRedirect("/v2/docs")
+
 
 urlpatterns = [
-    path("v2/", include(moh_urls)),
-    # OpenAPI 3 documentation with Swagger UI
-    path("", SpectacularSwaggerView.as_view(), name="swagger-ui"),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("", redirect_to_default),
+    path("v2/", api.urls),
 ]
 
 if settings.DEBUG:

@@ -1,9 +1,9 @@
-import factory
+from http import HTTPStatus
+
 from django.conf import settings
-from rest_framework import status
+from django.forms.models import model_to_dict
 
 from chord_metadata_service.mohpackets.models import Treatment
-from chord_metadata_service.mohpackets.serializers import TreatmentSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import TreatmentFactory
 
@@ -13,7 +13,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import Treatmen
 class TreatmentsIngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.treatment_url = "/v2/ingest/treatments/"
+        self.treatment_url = "/v2/ingest/treatment/"
 
     def test_treatment_create_authorized(self):
         """
@@ -24,21 +24,21 @@ class TreatmentsIngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for treatment creation.
         """
-        treatment_data = TreatmentFactory.build_batch(
-            submitter_primary_diagnosis_id=factory.Iterator(self.primary_diagnoses),
-            size=2,
+        treatment = TreatmentFactory.build(
+            primary_diagnosis_uuid=self.primary_diagnoses[0]
         )
-        serialized_data = TreatmentSerializer(treatment_data, many=True).data
+        data_dict = model_to_dict(treatment)
         response = self.client.post(
             self.treatment_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
@@ -51,18 +51,18 @@ class TreatmentsIngestTestCase(BaseTestCase):
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for treatment creation.
         """
-        treatment_data = TreatmentFactory.build_batch(
-            submitter_primary_diagnosis_id=factory.Iterator(self.primary_diagnoses),
-            size=2,
+        treatment = TreatmentFactory.build(
+            primary_diagnosis_uuid=self.primary_diagnoses[0]
         )
-        serialized_data = TreatmentSerializer(treatment_data, many=True).data
+        data_dict = model_to_dict(treatment)
         response = self.client.post(
             self.treatment_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -84,7 +84,7 @@ class GETTestCase(BaseTestCase):
             self.treatments_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_treatments_301_redirect(self):
         """
@@ -98,7 +98,7 @@ class GETTestCase(BaseTestCase):
             "/v2/authorized/treatments",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
 
 # OTHERS
@@ -136,9 +136,9 @@ class TreatmentsOthersTestCase(BaseTestCase):
                 self.treatments_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
+            response = response.json()
             response_data = [
-                treatment["submitter_treatment_id"]
-                for treatment in response.data["results"]
+                treatment["submitter_treatment_id"] for treatment in response["items"]
             ]
 
             self.assertEqual(response_data, expected_datasets)
@@ -151,7 +151,7 @@ class TreatmentsOthersTestCase(BaseTestCase):
         response = self.client.post(
             self.treatments_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -161,7 +161,7 @@ class TreatmentsOthersTestCase(BaseTestCase):
         response = self.client.put(
             self.treatments_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -171,7 +171,7 @@ class TreatmentsOthersTestCase(BaseTestCase):
         response = self.client.patch(
             self.treatments_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_delete_request_404(self):
         """
@@ -186,4 +186,4 @@ class TreatmentsOthersTestCase(BaseTestCase):
             f"{self.treatments_url}{treatment_to_delete.submitter_treatment_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

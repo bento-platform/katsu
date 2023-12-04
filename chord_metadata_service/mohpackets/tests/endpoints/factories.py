@@ -40,6 +40,7 @@ from chord_metadata_service.mohpackets.models import (
         These factories use the Factory Boy library (https://factoryboy.readthedocs.io/)
         to generate test data.
 
+    Author: Son Chau
 """
 
 
@@ -122,12 +123,15 @@ class PrimaryDiagnosisFactory(factory.django.DjangoModelFactory):
     )
 
     # Set the foreign keys
-    program_id = factory.SelfAttribute("submitter_donor_id.program_id")
-    submitter_donor_id = factory.SubFactory(DonorFactory)
+    # program_id = factory.SelfAttribute("submitter_donor_id.program_id")
+    # submitter_donor_id = factory.SubFactory(DonorFactory)
+    program_id = factory.SelfAttribute("donor_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("donor_uuid.submitter_donor_id")
+    donor_uuid = factory.SubFactory(DonorFactory)
 
     @factory.post_generation
     def set_clinical_event_identifier(self, create, extracted, **kwargs):
-        donor = self.submitter_donor_id
+        donor = self.donor_uuid
         if not donor.is_deceased:
             donor.lost_to_followup_after_clinical_event_identifier = (
                 self.submitter_primary_diagnosis_id
@@ -189,11 +193,20 @@ class SpecimenFactory(factory.django.DjangoModelFactory):
     )
 
     # set foregin keys
-    program_id = factory.SelfAttribute("submitter_primary_diagnosis_id.program_id")
+    # program_id = factory.SelfAttribute("submitter_primary_diagnosis_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_primary_diagnosis_id.submitter_donor_id"
+    # )
+    # submitter_primary_diagnosis_id = factory.SubFactory(PrimaryDiagnosisFactory)
+    program_id = factory.SelfAttribute("primary_diagnosis_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute(
-        "submitter_primary_diagnosis_id.submitter_donor_id"
+        "primary_diagnosis_uuid.submitter_donor_id"
     )
-    submitter_primary_diagnosis_id = factory.SubFactory(PrimaryDiagnosisFactory)
+    donor_uuid = factory.SelfAttribute("primary_diagnosis_uuid.donor_uuid")
+    submitter_primary_diagnosis_id = factory.SelfAttribute(
+        "primary_diagnosis_uuid.submitter_primary_diagnosis_id"
+    )
+    primary_diagnosis_uuid = factory.SubFactory(PrimaryDiagnosisFactory)
 
 
 class SampleRegistrationFactory(factory.django.DjangoModelFactory):
@@ -213,11 +226,16 @@ class SampleRegistrationFactory(factory.django.DjangoModelFactory):
     sample_type = factory.Faker("random_element", elements=PERM_VAL.SAMPLE_TYPE)
 
     # set foregin keys
-    program_id = factory.SelfAttribute("submitter_specimen_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_specimen_id.submitter_donor_id"
-    )
-    submitter_specimen_id = factory.SubFactory(SpecimenFactory)
+    # program_id = factory.SelfAttribute("submitter_specimen_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_specimen_id.submitter_donor_id"
+    # )
+    # submitter_specimen_id = factory.SubFactory(SpecimenFactory)
+    program_id = factory.SelfAttribute("specimen_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("specimen_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("specimen_uuid.donor_uuid")
+    submitter_specimen_id = factory.SelfAttribute("specimen_uuid.submitter_specimen_id")
+    specimen_uuid = factory.SubFactory(SpecimenFactory)
 
 
 class TreatmentFactory(factory.django.DjangoModelFactory):
@@ -256,11 +274,20 @@ class TreatmentFactory(factory.django.DjangoModelFactory):
     )
 
     # set foregin keys
-    program_id = factory.SelfAttribute("submitter_primary_diagnosis_id.program_id")
+    # program_id = factory.SelfAttribute("submitter_primary_diagnosis_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_primary_diagnosis_id.submitter_donor_id"
+    # )
+    # submitter_primary_diagnosis_id = factory.SubFactory(PrimaryDiagnosisFactory)
+    program_id = factory.SelfAttribute("primary_diagnosis_uuid.program_id")
     submitter_donor_id = factory.SelfAttribute(
-        "submitter_primary_diagnosis_id.submitter_donor_id"
+        "primary_diagnosis_uuid.submitter_donor_id"
     )
-    submitter_primary_diagnosis_id = factory.SubFactory(PrimaryDiagnosisFactory)
+    donor_uuid = factory.SelfAttribute("primary_diagnosis_uuid.donor_uuid")
+    submitter_primary_diagnosis_id = factory.SelfAttribute(
+        "primary_diagnosis_uuid.submitter_primary_diagnosis_id"
+    )
+    primary_diagnosis_uuid = factory.SubFactory(PrimaryDiagnosisFactory)
 
 
 class ChemotherapyFactory(factory.django.DjangoModelFactory):
@@ -268,7 +295,7 @@ class ChemotherapyFactory(factory.django.DjangoModelFactory):
         model = Chemotherapy
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     drug_reference_database = factory.Faker(
         "random_element", elements=PERM_VAL.DRUG_REFERENCE_DB
     )
@@ -281,11 +308,18 @@ class ChemotherapyFactory(factory.django.DjangoModelFactory):
     actual_cumulative_drug_dose = factory.Faker("random_int", min=1, max=100)
 
     # set foregin keys
-    program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_donor_id"
+    # program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_donor_id"
+    # )
+    # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    program_id = factory.SelfAttribute("treatment_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
     )
-    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
 class HormoneTherapyFactory(factory.django.DjangoModelFactory):
@@ -293,7 +327,7 @@ class HormoneTherapyFactory(factory.django.DjangoModelFactory):
         model = HormoneTherapy
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     drug_reference_database = factory.Faker(
         "random_element", elements=PERM_VAL.DRUG_REFERENCE_DB
     )
@@ -306,11 +340,18 @@ class HormoneTherapyFactory(factory.django.DjangoModelFactory):
     actual_cumulative_drug_dose = factory.Faker("random_int", min=1, max=100)
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_donor_id"
+    # program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_donor_id"
+    # )
+    # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    program_id = factory.SelfAttribute("treatment_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
     )
-    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
 class RadiationFactory(factory.django.DjangoModelFactory):
@@ -318,7 +359,7 @@ class RadiationFactory(factory.django.DjangoModelFactory):
         model = Radiation
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     radiation_therapy_modality = factory.Faker(
         "random_element", elements=PERM_VAL.RADIATION_THERAPY_MODALITY
     )
@@ -334,11 +375,18 @@ class RadiationFactory(factory.django.DjangoModelFactory):
     reference_radiation_treatment_id = factory.Faker("word")
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_donor_id"
+    # program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_donor_id"
+    # )
+    # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    program_id = factory.SelfAttribute("treatment_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
     )
-    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
 class ImmunotherapyFactory(factory.django.DjangoModelFactory):
@@ -346,7 +394,7 @@ class ImmunotherapyFactory(factory.django.DjangoModelFactory):
         model = Immunotherapy
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     drug_reference_database = factory.Faker(
         "random_element", elements=PERM_VAL.DRUG_REFERENCE_DB
     )
@@ -362,11 +410,18 @@ class ImmunotherapyFactory(factory.django.DjangoModelFactory):
     actual_cumulative_drug_dose = factory.Faker("random_int", min=1, max=100)
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_donor_id"
+    # program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_donor_id"
+    # )
+    # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    program_id = factory.SelfAttribute("treatment_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
     )
-    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
 class SurgeryFactory(factory.django.DjangoModelFactory):
@@ -374,7 +429,7 @@ class SurgeryFactory(factory.django.DjangoModelFactory):
         model = Surgery
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     surgery_type = factory.Faker("random_element", elements=PERM_VAL.SURGERY_TYPE)
     surgery_site = factory.Faker("word")
     surgery_location = factory.Faker(
@@ -414,11 +469,18 @@ class SurgeryFactory(factory.django.DjangoModelFactory):
     submitter_specimen_id = None
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_donor_id"
+    # program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_donor_id"
+    # )
+    # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    program_id = factory.SelfAttribute("treatment_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
     )
-    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
 class FollowUpFactory(factory.django.DjangoModelFactory):
@@ -457,14 +519,27 @@ class FollowUpFactory(factory.django.DjangoModelFactory):
     )
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
-    submitter_donor_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_donor_id"
-    )
+    # program_id = factory.SelfAttribute("submitter_treatment_id.program_id")
+    # submitter_donor_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_donor_id"
+    # )
+    # submitter_primary_diagnosis_id = factory.SelfAttribute(
+    #     "submitter_treatment_id.submitter_primary_diagnosis_id"
+    # )
+    # submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    program_id = factory.SelfAttribute("treatment_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("treatment_uuid.submitter_donor_id")
+    donor_uuid = factory.SelfAttribute("treatment_uuid.donor_uuid")
     submitter_primary_diagnosis_id = factory.SelfAttribute(
-        "submitter_treatment_id.submitter_primary_diagnosis_id"
+        "treatment_uuid.submitter_primary_diagnosis_id"
     )
-    submitter_treatment_id = factory.SubFactory(TreatmentFactory)
+    primary_diagnosis_uuid = factory.SelfAttribute(
+        "treatment_uuid.primary_diagnosis_uuid"
+    )
+    submitter_treatment_id = factory.SelfAttribute(
+        "treatment_uuid.submitter_treatment_id"
+    )
+    treatment_uuid = factory.SubFactory(TreatmentFactory)
 
 
 class BiomarkerFactory(factory.django.DjangoModelFactory):
@@ -472,7 +547,7 @@ class BiomarkerFactory(factory.django.DjangoModelFactory):
         model = Biomarker
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     test_date = factory.Faker("word")
     psa_level = factory.Faker("pyint", min_value=0, max_value=100)
     ca125 = factory.Faker("pyint", min_value=0, max_value=100)
@@ -501,8 +576,11 @@ class BiomarkerFactory(factory.django.DjangoModelFactory):
     submitter_follow_up_id = None
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_donor_id.program_id")
-    submitter_donor_id = factory.SubFactory(DonorFactory)
+    # program_id = factory.SelfAttribute("submitter_donor_id.program_id")
+    # submitter_donor_id = factory.SubFactory(DonorFactory)
+    program_id = factory.SelfAttribute("donor_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("donor_uuid.submitter_donor_id")
+    donor_uuid = factory.SubFactory(DonorFactory)
 
 
 class ComorbidityFactory(factory.django.DjangoModelFactory):
@@ -510,7 +588,7 @@ class ComorbidityFactory(factory.django.DjangoModelFactory):
         model = Comorbidity
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     prior_malignancy = factory.Faker("random_element", elements=PERM_VAL.UBOOLEAN)
     laterality_of_prior_malignancy = factory.Faker(
         "random_element", elements=PERM_VAL.MALIGNANCY_LATERALITY
@@ -523,8 +601,11 @@ class ComorbidityFactory(factory.django.DjangoModelFactory):
     comorbidity_treatment = factory.Faker("word")
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_donor_id.program_id")
-    submitter_donor_id = factory.SubFactory(DonorFactory)
+    # program_id = factory.SelfAttribute("submitter_donor_id.program_id")
+    # submitter_donor_id = factory.SubFactory(DonorFactory)
+    program_id = factory.SelfAttribute("donor_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("donor_uuid.submitter_donor_id")
+    donor_uuid = factory.SubFactory(DonorFactory)
 
 
 class ExposureFactory(factory.django.DjangoModelFactory):
@@ -532,7 +613,7 @@ class ExposureFactory(factory.django.DjangoModelFactory):
         model = Exposure
 
     # default values
-    id = factory.LazyFunction(uuid.uuid4)
+    uuid = factory.LazyFunction(uuid.uuid4)
     tobacco_smoking_status = factory.Faker(
         "random_element", elements=PERM_VAL.SMOKING_STATUS
     )
@@ -540,5 +621,8 @@ class ExposureFactory(factory.django.DjangoModelFactory):
     pack_years_smoked = factory.Faker("random_int")
 
     # set foreign keys
-    program_id = factory.SelfAttribute("submitter_donor_id.program_id")
-    submitter_donor_id = factory.SubFactory(DonorFactory)
+    # program_id = factory.SelfAttribute("submitter_donor_id.program_id")
+    # submitter_donor_id = factory.SubFactory(DonorFactory)
+    program_id = factory.SelfAttribute("donor_uuid.program_id")
+    submitter_donor_id = factory.SelfAttribute("donor_uuid.submitter_donor_id")
+    donor_uuid = factory.SubFactory(DonorFactory)

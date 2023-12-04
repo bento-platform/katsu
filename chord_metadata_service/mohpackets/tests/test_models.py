@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db.utils import DataError, IntegrityError
 from django.test import TestCase
+from pydantic import ValidationError as SchemaValidationError
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
@@ -19,20 +20,22 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
-from chord_metadata_service.mohpackets.serializers import (
-    ChemotherapySerializer,
-    ComorbiditySerializer,
-    DonorSerializer,
-    FollowUpSerializer,
-    HormoneTherapySerializer,
-    ImmunotherapySerializer,
-    PrimaryDiagnosisSerializer,
-    ProgramSerializer,
-    RadiationSerializer,
-    SampleRegistrationSerializer,
-    SpecimenSerializer,
-    SurgerySerializer,
-    TreatmentSerializer,
+from chord_metadata_service.mohpackets.schemas.model import (
+    BiomarkerModelSchema,
+    ChemotherapyModelSchema,
+    ComorbidityModelSchema,
+    DonorModelSchema,
+    ExposureModelSchema,
+    FollowUpModelSchema,
+    HormoneTherapyModelSchema,
+    ImmunotherapyModelSchema,
+    PrimaryDiagnosisModelSchema,
+    ProgramModelSchema,
+    RadiationModelSchema,
+    SampleRegistrationModelSchema,
+    SpecimenModelSchema,
+    SurgeryModelSchema,
+    TreatmentModelSchema,
 )
 
 
@@ -65,7 +68,7 @@ def get_invalid_choices():
     """
     Returns the invalid values to test in choice fields. ChoiceFields values
     must be strings and among the permissible values defined for that field
-    in serializers.py or permissible_values.py
+    in permissible_values.py
     """
     return ["foo", 1, True]
 
@@ -95,16 +98,13 @@ class ProgramTest(TestCase):
         with self.assertRaises(IntegrityError):
             self.program = Program.objects.create(program_id=self.program_id)
 
-    # TODO: This test passes with valid values too, the other ID fields don't
-    def test_invalid_program_id(self):
+    def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.program_id = value
-                self.serializer = ProgramSerializer(
-                    instance=self.program, data=self.program_id
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.program_id = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ProgramModelSchema.model_validate(self.program_id)
 
 
 class DonorTest(TestCase):
@@ -112,7 +112,7 @@ class DonorTest(TestCase):
         self.program = Program.objects.create(program_id="SYNTHETIC")
         self.valid_values = {
             "submitter_donor_id": "DONOR_1",
-            "program_id": self.program,
+            "program_id_id": self.program.program_id,
             "is_deceased": True,
             "cause_of_death": "Died of cancer",
             "date_of_birth": "1975-08",
@@ -157,7 +157,7 @@ class DonorTest(TestCase):
     def test_null_optional_fields(self):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
-            excluded_fields=["submitter_donor_id", "program_id"],
+            excluded_fields=["submitter_donor_id", "program_id", "uuid"],
             model_fields=self.donor._meta.fields,
         )
         for field in optional_fields:
@@ -167,7 +167,7 @@ class DonorTest(TestCase):
     def test_blank_optional_fields(self):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
-            excluded_fields=["submitter_donor_id", "program_id"],
+            excluded_fields=["submitter_donor_id", "program_id", "uuid"],
             model_fields=self.donor._meta.fields,
         )
         for field in optional_fields:
@@ -178,25 +178,18 @@ class DonorTest(TestCase):
         with self.assertRaises(IntegrityError):
             self.donor = Donor.objects.create(**self.valid_values)
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            DonorModelSchema.model_validate(self.valid_values), DonorModelSchema
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["submitter_donor_id"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
-
-    def test_invalid_program_id(self):
-        invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["program_id"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_donor_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_is_deceased(self):
         self.donor.is_deceased = "foo"
@@ -205,83 +198,67 @@ class DonorTest(TestCase):
 
     def test_invalid_cause_of_death(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["cause_of_death"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["cause_of_death"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_death(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_death"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_death"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_birth(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_birth"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_birth"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_primary_site(self):
         invalid_values = ["foo", ["foo"]]
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["primary_site"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["primary_site"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_gender(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["gender"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["gender"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_sex_at_birth(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["sex_at_birth"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["sex_at_birth"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_lost_to_followup_reason(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["lost_to_followup_reason"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["lost_to_followup_reason"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_alive_after_lost_to_followup(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_alive_after_lost_to_followup"] = value
-                self.serializer = DonorSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_alive_after_lost_to_followup"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    DonorModelSchema.model_validate(self.valid_values)
 
 
 class PrimaryDiagnosisTest(TestCase):
@@ -290,12 +267,11 @@ class PrimaryDiagnosisTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
             "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_1",
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "date_of_diagnosis": "2019-11",
             "cancer_type_code": "C02.1",
             "basis_of_diagnosis": "Unknown",
@@ -319,7 +295,9 @@ class PrimaryDiagnosisTest(TestCase):
             self.primary_diagnosis.submitter_primary_diagnosis_id, "PRIMARY_DIAGNOSIS_1"
         )
         self.assertEqual(self.primary_diagnosis.program_id, self.program)
-        self.assertEqual(self.primary_diagnosis.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.primary_diagnosis.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.primary_diagnosis.date_of_diagnosis, "2019-11")
         self.assertEqual(self.primary_diagnosis.cancer_type_code, "C02.1")
         self.assertEqual(self.primary_diagnosis.basis_of_diagnosis, "Unknown")
@@ -346,8 +324,10 @@ class PrimaryDiagnosisTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_primary_diagnosis_id",
+                "uuid",
             ],
             model_fields=self.primary_diagnosis._meta.fields,
         )
@@ -360,8 +340,10 @@ class PrimaryDiagnosisTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_primary_diagnosis_id",
+                "uuid",
             ],
             model_fields=self.primary_diagnosis._meta.fields,
         )
@@ -375,119 +357,91 @@ class PrimaryDiagnosisTest(TestCase):
                 **self.valid_values
             )
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            PrimaryDiagnosisModelSchema.model_validate(self.valid_values),
+            PrimaryDiagnosisModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_primary_diagnosis_id"] = value
-            self.serializer = PrimaryDiagnosisSerializer(
-                instance=self.primary_diagnosis, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
-
-    def test_invalid_program_id(self):
-        invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_primary_diagnosis_id"] = value
-            self.serializer = PrimaryDiagnosisSerializer(
-                instance=self.primary_diagnosis, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_primary_diagnosis_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_diagnosis(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_diagnosis"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
-
-    # TODO: write regex for testing
-    # def test_invalid_cancer_type_code(self):
-    #     self.valid_values["cancer_type_code"] = "foo"
-    #     self.serializer = PrimaryDiagnosisSerializer(instance=self.primary_diagnosis, data=self.valid_values)
-    #     self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_diagnosis"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_basis_of_diagnosis(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["basis_of_diagnosis"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["basis_of_diagnosis"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_lymph_nodes_examined_status(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["lymph_nodes_examined_status"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["lymph_nodes_examined_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_clinical_tumour_staging_system(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["clinical_tumour_staging_system"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["clinical_tumour_staging_system"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_clinical_t_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["clinical_t_category"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["clinical_t_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_clinical_n_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["clinical_n_category"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["clinical_n_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_clinical_m_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["clinical_m_category"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["clinical_m_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_clinical_stage_group(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["clinical_stage_group"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["clinical_stage_group"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
     def test_invalid_laterality(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["laterality"] = value
-                self.serializer = PrimaryDiagnosisSerializer(
-                    instance=self.primary_diagnosis, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["laterality"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    PrimaryDiagnosisModelSchema.model_validate(self.valid_values)
 
 
 class SpecimenTest(TestCase):
@@ -496,18 +450,17 @@ class SpecimenTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.valid_values = {
             "submitter_specimen_id": "SPECIMEN_1",
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_primary_diagnosis_id": self.primary_diagnosis,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_primary_diagnosis_id": self.primary_diagnosis.submitter_primary_diagnosis_id,
             "pathological_tumour_staging_system": "AJCC 6th edition",
             "pathological_t_category": "Tis",
             "pathological_n_category": "N0b",
@@ -534,9 +487,12 @@ class SpecimenTest(TestCase):
     def test_specimen_fields(self):
         self.assertEqual(self.specimen.submitter_specimen_id, "SPECIMEN_1")
         self.assertEqual(self.specimen.program_id, self.program)
-        self.assertEqual(self.specimen.submitter_donor_id, self.donor)
         self.assertEqual(
-            self.specimen.submitter_primary_diagnosis_id, self.primary_diagnosis
+            self.specimen.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.specimen.submitter_primary_diagnosis_id,
+            self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.assertEqual(
             self.specimen.pathological_tumour_staging_system, "AJCC 6th edition"
@@ -571,9 +527,12 @@ class SpecimenTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_primary_diagnosis_id",
+                "primary_diagnosis_uuid",
                 "submitter_specimen_id",
+                "uuid",
             ],
             model_fields=self.specimen._meta.fields,
         )
@@ -586,9 +545,12 @@ class SpecimenTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_primary_diagnosis_id",
+                "primary_diagnosis_uuid",
                 "submitter_specimen_id",
+                "uuid",
             ],
             model_fields=self.specimen._meta.fields,
         )
@@ -600,184 +562,161 @@ class SpecimenTest(TestCase):
         with self.assertRaises(IntegrityError):
             self.specimen = Specimen.objects.create(**self.valid_values)
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SpecimenModelSchema.model_validate(self.valid_values),
+            SpecimenModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_specimen_id"] = value
-            self.serializer = SpecimenSerializer(
-                instance=self.specimen, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_specimen_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_pathological_tumour_staging_system(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["pathological_tumour_staging_system"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pathological_tumour_staging_system"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_pathological_t_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["pathological_t_category"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pathological_t_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_pathological_n_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["pathological_n_category"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pathological_n_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_pathological_m_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["pathological_m_category"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pathological_m_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_pathological_stage_group(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["pathological_stage_group"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pathological_stage_group"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_collection_date(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_collection_date"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_collection_date"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_storage(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_storage"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_storage"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_invalid_tumour_histological_type(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["tumour_histological_type"] = value
-    #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_invalid_tumour_histological_type(self):
+        invalid_values = [1, "invalid"]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_histological_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_specimen_anatomic_location(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["specimen_anatomic_location"] = value
-    #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_specimen_anatomic_location(self):
+        invalid_values = [1, "invalid"]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_anatomic_location"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_reference_pathology_confirmed_diagnosis(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["reference_pathology_confirmed_diagnosis"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values[
+                    "reference_pathology_confirmed_diagnosis"
+                ] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_reference_pathology_confirmed_tumour_presence(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
                 self.valid_values[
                     "reference_pathology_confirmed_tumour_presence"
-                ] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+                ] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_tumour_grading_system(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["tumour_grading_system"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_grading_system"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_tumour_grade(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["tumour_grade"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_grade"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_percent_tumour_cells_range(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["percent_tumour_cells_range"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["percent_tumour_cells_range"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_percent_tumour_cells_measurement_method(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["percent_tumour_cells_measurement_method"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values[
+                    "percent_tumour_cells_measurement_method"
+                ] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_processing(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_processing"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_processing"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_laterality(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_laterality"] = value
-                self.serializer = SpecimenSerializer(
-                    instance=self.specimen, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_laterality"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SpecimenModelSchema.model_validate(self.valid_values)
 
 
 class SampleRegistrationTest(TestCase):
@@ -786,25 +725,24 @@ class SampleRegistrationTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.specimen = Specimen.objects.create(
             submitter_specimen_id="SPECIMEN-1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
             "submitter_sample_id": "SAMPLE_REGISTRATION_1",
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_specimen_id": self.specimen,
-            "specimen_tissue_source": "Blood venous",
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_specimen_id": self.specimen.submitter_specimen_id,
+            "specimen_tissue_source": "Abdominal fluid",
             "tumour_normal_designation": "Normal",
             "specimen_type": "Primary tumour - adjacent to normal",
             "sample_type": "Other DNA enrichments",
@@ -821,10 +759,15 @@ class SampleRegistrationTest(TestCase):
             self.sample_registration.submitter_sample_id, "SAMPLE_REGISTRATION_1"
         )
         self.assertEqual(self.sample_registration.program_id, self.program)
-        self.assertEqual(self.sample_registration.submitter_donor_id, self.donor)
-        self.assertEqual(self.sample_registration.submitter_specimen_id, self.specimen)
         self.assertEqual(
-            self.sample_registration.specimen_tissue_source, "Blood venous"
+            self.sample_registration.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.sample_registration.submitter_specimen_id,
+            self.specimen.submitter_specimen_id,
+        )
+        self.assertEqual(
+            self.sample_registration.specimen_tissue_source, "Abdominal fluid"
         )
         self.assertEqual(self.sample_registration.tumour_normal_designation, "Normal")
         self.assertEqual(
@@ -838,9 +781,12 @@ class SampleRegistrationTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_specimen_id",
+                "specimen_uuid",
                 "submitter_sample_id",
+                "uuid",
             ],
             model_fields=self.sample_registration._meta.fields,
         )
@@ -853,9 +799,12 @@ class SampleRegistrationTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_specimen_id",
+                "specimen_uuid",
                 "submitter_sample_id",
+                "uuid",
             ],
             model_fields=self.sample_registration._meta.fields,
         )
@@ -869,71 +818,51 @@ class SampleRegistrationTest(TestCase):
                 **self.valid_values
             )
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SampleRegistrationModelSchema.model_validate(self.valid_values),
+            SampleRegistrationModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_sample_id"] = value
-            self.serializer = SampleRegistrationSerializer(
-                instance=self.sample_registration, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
-
-    def test_invalid_gender(self):
-        invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["gender"] = value
-                self.sample_registration.full_clean()
-
-    def test_invalid_sex_at_birth(self):
-        invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["sex_at_birth"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_sample_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_tissue_source(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_tissue_source"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_tissue_source"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_tumour_normal_designation(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["tumour_normal_designation"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_normal_designation"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_specimen_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["specimen_type"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["specimen_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_sample_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["sample_type"] = value
-                self.serializer = SampleRegistrationSerializer(
-                    instance=self.sample_registration, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["sample_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SampleRegistrationModelSchema.model_validate(self.valid_values)
 
 
 class TreatmentTest(TestCase):
@@ -942,19 +871,18 @@ class TreatmentTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.valid_values = {
             "submitter_treatment_id": "TREATMENT_1",
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_primary_diagnosis_id": self.primary_diagnosis,
-            "treatment_type": ["Endoscopic therapy", "Photodynamic therapy"],
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_primary_diagnosis_id": self.primary_diagnosis.submitter_primary_diagnosis_id,
+            "treatment_type": ["Chemotherapy", "Immunotherapy"],
             "is_primary_treatment": "Yes",
             "treatment_start_date": "2021-02",
             "treatment_end_date": "2022-09",
@@ -975,13 +903,16 @@ class TreatmentTest(TestCase):
     def test_treatment_fields(self):
         self.assertEqual(self.treatment.submitter_treatment_id, "TREATMENT_1")
         self.assertEqual(self.treatment.program_id, self.program)
-        self.assertEqual(self.treatment.submitter_donor_id, self.donor)
         self.assertEqual(
-            self.treatment.submitter_primary_diagnosis_id, self.primary_diagnosis
+            self.treatment.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.treatment.submitter_primary_diagnosis_id,
+            self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.assertCountEqual(
             self.treatment.treatment_type,
-            ["Endoscopic therapy", "Photodynamic therapy"],
+            ["Chemotherapy", "Immunotherapy"],
         )
         self.assertEqual(self.treatment.is_primary_treatment, "Yes")
         self.assertEqual(self.treatment.treatment_start_date, "2021-02")
@@ -1003,9 +934,12 @@ class TreatmentTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
                 "submitter_primary_diagnosis_id",
+                "primary_diagnosis_uuid",
+                "uuid",
             ],
             model_fields=self.treatment._meta.fields,
         )
@@ -1018,9 +952,12 @@ class TreatmentTest(TestCase):
         optional_fields = get_optional_fields(
             excluded_fields=[
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
                 "submitter_primary_diagnosis_id",
+                "primary_diagnosis_uuid",
+                "uuid",
             ],
             model_fields=self.treatment._meta.fields,
         )
@@ -1032,104 +969,93 @@ class TreatmentTest(TestCase):
         with self.assertRaises(IntegrityError):
             self.treatment = Treatment.objects.create(**self.valid_values)
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            TreatmentModelSchema.model_validate(self.valid_values),
+            TreatmentModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_treatment_id"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_treatment_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_treatment_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["treatment_type"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["treatment_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_is_primary_treatment(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["is_primary_treatment"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["is_primary_treatment"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_treatment_start_date(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["treatment_start_date"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["treatment_start_date"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_treatment_end_date(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["treatment_end_date"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["treatment_end_date"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_treatment_setting(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["treatment_setting"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["treatment_setting"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_treatment_intent(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["treatment_intent"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["treatment_intent"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_response_to_treatment_criteria_method(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["response_to_treatment_criteria_method"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values[
+                    "response_to_treatment_criteria_method"
+                ] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_response_to_treatment(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["response_to_treatment"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["response_to_treatment"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
     def test_invalid_status_of_treatment(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["status_of_treatment"] = value
-            self.serializer = TreatmentSerializer(
-                instance=self.treatment, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["status_of_treatment"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    TreatmentModelSchema.model_validate(self.valid_values)
 
 
 class ChemotherapyTest(TestCase):
@@ -1138,23 +1064,22 @@ class ChemotherapyTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "drug_name": "FLUOROURACIL",
             "drug_reference_identifier": "87354",
             "chemotherapy_drug_dose_units": "mg/m2",
@@ -1169,8 +1094,13 @@ class ChemotherapyTest(TestCase):
 
     def test_chemotherapy_fields(self):
         self.assertEqual(self.chemotherapy.program_id, self.program)
-        self.assertEqual(self.chemotherapy.submitter_donor_id, self.donor)
-        self.assertEqual(self.chemotherapy.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.chemotherapy.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.chemotherapy.submitter_treatment_id,
+            self.treatment.submitter_treatment_id,
+        )
         self.assertEqual(self.chemotherapy.drug_name, "FLUOROURACIL")
         self.assertEqual(self.chemotherapy.drug_reference_identifier, "87354")
         self.assertEqual(self.chemotherapy.chemotherapy_drug_dose_units, "mg/m2")
@@ -1182,10 +1112,12 @@ class ChemotherapyTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.chemotherapy._meta.fields,
         )
@@ -1197,10 +1129,12 @@ class ChemotherapyTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.chemotherapy._meta.fields,
         )
@@ -1218,25 +1152,27 @@ class ChemotherapyTest(TestCase):
         with self.assertRaises(DataError):
             self.chemotherapy.save()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            ChemotherapyModelSchema.model_validate(self.valid_values),
+            ChemotherapyModelSchema,
+        )
+
     def test_invalid_chemotherapy_drug_dose_units(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["chemotherapy_drug_dose_units"] = value
-            self.serializer = ChemotherapySerializer(
-                instance=self.chemotherapy, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["chemotherapy_drug_dose_units"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ChemotherapyModelSchema.model_validate(self.valid_values)
 
     def test_invalid_drug_reference_database(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["drug_reference_database"] = value
-            self.serializer = ChemotherapySerializer(
-                instance=self.chemotherapy, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["drug_reference_database"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ChemotherapyModelSchema.model_validate(self.valid_values)
 
 
 class HormoneTherapyTest(TestCase):
@@ -1245,23 +1181,22 @@ class HormoneTherapyTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "drug_name": "exemestane",
             "drug_reference_identifier": "345678",
             "hormone_drug_dose_units": "mg/m2",
@@ -1275,8 +1210,13 @@ class HormoneTherapyTest(TestCase):
 
     def test_hormone_therapy_fields(self):
         self.assertEqual(self.hormone_therapy.program_id, self.program)
-        self.assertEqual(self.hormone_therapy.submitter_donor_id, self.donor)
-        self.assertEqual(self.hormone_therapy.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.hormone_therapy.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.hormone_therapy.submitter_treatment_id,
+            self.treatment.submitter_treatment_id,
+        )
         self.assertEqual(self.hormone_therapy.drug_name, "exemestane")
         self.assertEqual(self.hormone_therapy.drug_reference_identifier, "345678")
         self.assertEqual(self.hormone_therapy.hormone_drug_dose_units, "mg/m2")
@@ -1287,10 +1227,12 @@ class HormoneTherapyTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.hormone_therapy._meta.fields,
         )
@@ -1302,10 +1244,12 @@ class HormoneTherapyTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.hormone_therapy._meta.fields,
         )
@@ -1323,25 +1267,27 @@ class HormoneTherapyTest(TestCase):
         with self.assertRaises(DataError):
             self.hormone_therapy.save()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            HormoneTherapyModelSchema.model_validate(self.valid_values),
+            HormoneTherapyModelSchema,
+        )
+
     def test_invalid_hormone_drug_dose_units(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["hormone_drug_dose_units"] = value
-            self.serializer = HormoneTherapySerializer(
-                instance=self.hormone_therapy, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hormone_drug_dose_units"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    HormoneTherapyModelSchema.model_validate(self.valid_values)
 
     def test_invalid_drug_reference_database(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["drug_reference_database"] = value
-            self.serializer = ChemotherapySerializer(
-                instance=self.hormone_therapy, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["drug_reference_database"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    HormoneTherapyModelSchema.model_validate(self.valid_values)
 
 
 class RadiationTest(TestCase):
@@ -1350,28 +1296,27 @@ class RadiationTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "radiation_therapy_modality": "Brachytherapy (procedure)",
             "radiation_therapy_type": "Internal",
             "radiation_therapy_fractions": "30",
             "radiation_therapy_dosage": "66",
-            "anatomical_site_irradiated": "Chest wall structure",
+            "anatomical_site_irradiated": "Nasopharynx",
             "radiation_boost": True,
             "reference_radiation_treatment_id": "REFERENCE_RADIATION_TREATMENT_1",
         }
@@ -1382,17 +1327,19 @@ class RadiationTest(TestCase):
 
     def test_radiation_fields(self):
         self.assertEqual(self.radiation.program_id, self.program)
-        self.assertEqual(self.radiation.submitter_donor_id, self.donor)
-        self.assertEqual(self.radiation.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.radiation.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.radiation.submitter_treatment_id, self.treatment.submitter_treatment_id
+        )
         self.assertEqual(
             self.radiation.radiation_therapy_modality, "Brachytherapy (procedure)"
         )
         self.assertEqual(self.radiation.radiation_therapy_type, "Internal")
         self.assertEqual(self.radiation.radiation_therapy_fractions, "30")
         self.assertEqual(self.radiation.radiation_therapy_dosage, "66")
-        self.assertEqual(
-            self.radiation.anatomical_site_irradiated, "Chest wall structure"
-        )
+        self.assertEqual(self.radiation.anatomical_site_irradiated, "Nasopharynx")
         self.assertTrue(self.radiation.radiation_boost)
         self.assertEqual(
             self.radiation.reference_radiation_treatment_id,
@@ -1403,10 +1350,12 @@ class RadiationTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.radiation._meta.fields,
         )
@@ -1418,10 +1367,12 @@ class RadiationTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.radiation._meta.fields,
         )
@@ -1429,35 +1380,35 @@ class RadiationTest(TestCase):
             setattr(self.radiation, field, "")
             self.radiation.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            RadiationModelSchema.model_validate(self.valid_values),
+            RadiationModelSchema,
+        )
+
     def test_invalid_radiation_therapy_modality(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["radiation_therapy_modality"] = value
-            self.serializer = RadiationSerializer(
-                instance=self.radiation, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["radiation_therapy_modality"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    RadiationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_radiation_therapy_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["radiation_therapy_type"] = value
-            self.serializer = RadiationSerializer(
-                instance=self.radiation, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["radiation_therapy_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    RadiationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_anatomical_site_irradiated(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["anatomical_site_irradiated"] = value
-            self.serializer = RadiationSerializer(
-                instance=self.radiation, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["anatomical_site_irradiated"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    RadiationModelSchema.model_validate(self.valid_values)
 
     def test_invalid_radiation_boost(self):
         self.radiation.radiation_boost = "foo"
@@ -1476,23 +1427,22 @@ class ImmunotherapyTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "immunotherapy_type": "Cell-based",
             "drug_name": "Necitumumab",
             "drug_reference_identifier": "8756456",
@@ -1507,8 +1457,13 @@ class ImmunotherapyTest(TestCase):
 
     def test_immunotherapy_fields(self):
         self.assertEqual(self.immunotherapy.program_id, self.program)
-        self.assertEqual(self.immunotherapy.submitter_donor_id, self.donor)
-        self.assertEqual(self.immunotherapy.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.immunotherapy.submitter_donor_id, self.donor.submitter_donor_id
+        )
+        self.assertEqual(
+            self.immunotherapy.submitter_treatment_id,
+            self.treatment.submitter_treatment_id,
+        )
         self.assertEqual(self.immunotherapy.immunotherapy_type, "Cell-based")
         self.assertEqual(self.immunotherapy.drug_name, "Necitumumab")
         self.assertEqual(self.immunotherapy.drug_reference_identifier, "8756456")
@@ -1520,10 +1475,12 @@ class ImmunotherapyTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.immunotherapy._meta.fields,
         )
@@ -1535,10 +1492,12 @@ class ImmunotherapyTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
+                "uuid",
             ],
             model_fields=self.immunotherapy._meta.fields,
         )
@@ -1546,15 +1505,19 @@ class ImmunotherapyTest(TestCase):
             setattr(self.immunotherapy, field, "")
             self.immunotherapy.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            ImmunotherapyModelSchema.model_validate(self.valid_values),
+            ImmunotherapyModelSchema,
+        )
+
     def test_invalid_immunotherapy_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["immunotherapy_type"] = value
-            self.serializer = ImmunotherapySerializer(
-                instance=self.immunotherapy, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["immunotherapy_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ImmunotherapyModelSchema.model_validate(self.valid_values)
 
     def test_drug_name_max_length(self):
         self.immunotherapy.drug_name = "f" * 256
@@ -1573,23 +1536,22 @@ class SurgeryTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "surgery_type": "Drainage of abscess",
             "surgery_site": "C06",
             "surgery_location": "Primary",
@@ -1611,8 +1573,10 @@ class SurgeryTest(TestCase):
 
     def test_surgery_fields(self):
         self.assertEqual(self.surgery.program_id, self.program)
-        self.assertEqual(self.surgery.submitter_donor_id, self.donor)
-        self.assertEqual(self.surgery.submitter_treatment_id, self.treatment)
+        self.assertEqual(self.surgery.submitter_donor_id, self.donor.submitter_donor_id)
+        self.assertEqual(
+            self.surgery.submitter_treatment_id, self.treatment.submitter_treatment_id
+        )
         self.assertEqual(self.surgery.surgery_type, "Drainage of abscess")
         self.assertEqual(self.surgery.surgery_site, "C06")
         self.assertEqual(self.surgery.surgery_location, "Primary")
@@ -1636,14 +1600,13 @@ class SurgeryTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
                 "submitter_specimen_id",
-                "margin_types_involved",
-                "margin_types_not_involved",
-                "margin_types_not_assessed",
             ],
             model_fields=self.surgery._meta.fields,
         )
@@ -1655,14 +1618,13 @@ class SurgeryTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
                 "submitter_treatment_id",
+                "treatment_uuid",
                 "submitter_specimen_id",
-                "margin_types_involved",
-                "margin_types_not_involved",
-                "margin_types_not_assessed",
             ],
             model_fields=self.surgery._meta.fields,
         )
@@ -1670,104 +1632,91 @@ class SurgeryTest(TestCase):
             setattr(self.surgery, field, "")
             self.surgery.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            SurgeryModelSchema.model_validate(self.valid_values),
+            SurgeryModelSchema,
+        )
+
     def test_invalid_surgery_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["surgery_type"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["surgery_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_specimen_surgery_site(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["specimen_anatomic_location"] = value
-    #             self.serializer = SpecimenSerializer(instance=self.donor, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_invalid_surgery_site(self):
+        invalid_values = ["invalid", 1]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["surgery_site"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_surgery_location(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["surgery_location"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["surgery_location"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_tumour_focality(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["tumour_focality"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tumour_focality"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_residual_tumour_classification(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["residual_tumour_classification"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["residual_tumour_classification"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_margin_types_involved(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["margin_types_involved"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["margin_types_involved"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_margin_types_not_involved(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["margin_types_not_involved"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["margin_types_not_involved"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_margin_types_not_assessed(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["margin_types_not_assessed"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["margin_types_not_assessed"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_lymphovascular_invasion(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["lymphovascular_invasion"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["lymphovascular_invasion"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
     def test_invalid_perineural_invasion(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["perineural_invasion"] = value
-            self.serializer = SurgerySerializer(
-                instance=self.surgery, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["perineural_invasion"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    SurgeryModelSchema.model_validate(self.valid_values)
 
 
 class FollowUpTest(TestCase):
@@ -1776,25 +1725,24 @@ class FollowUpTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.primary_diagnosis = PrimaryDiagnosis.objects.create(
             submitter_primary_diagnosis_id="PRIMARY_DIAGNOSIS_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
+            submitter_donor_id=self.donor.submitter_donor_id,
         )
         self.treatment = Treatment.objects.create(
             submitter_treatment_id="TREATMENT_1",
             program_id=self.program,
-            submitter_donor_id=self.donor,
-            submitter_primary_diagnosis_id=self.primary_diagnosis,
+            submitter_donor_id=self.donor.submitter_donor_id,
+            submitter_primary_diagnosis_id=self.primary_diagnosis.submitter_primary_diagnosis_id,
         )
         self.valid_values = {
             "submitter_follow_up_id": "FOLLOW_UP_1",
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
-            "submitter_primary_diagnosis_id": self.primary_diagnosis,
-            "submitter_treatment_id": self.treatment,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
+            "submitter_primary_diagnosis_id": self.primary_diagnosis.submitter_primary_diagnosis_id,
+            "submitter_treatment_id": self.treatment.submitter_treatment_id,
             "date_of_followup": "2022-10",
             "disease_status_at_followup": "Loco-regional progression",
             "relapse_type": "Progression (liquid tumours)",
@@ -1818,11 +1766,16 @@ class FollowUpTest(TestCase):
     def test_followup_fields(self):
         self.assertEqual(self.followup.submitter_follow_up_id, "FOLLOW_UP_1")
         self.assertEqual(self.followup.program_id, self.program)
-        self.assertEqual(self.followup.submitter_donor_id, self.donor)
         self.assertEqual(
-            self.followup.submitter_primary_diagnosis_id, self.primary_diagnosis
+            self.followup.submitter_donor_id, self.donor.submitter_donor_id
         )
-        self.assertEqual(self.followup.submitter_treatment_id, self.treatment)
+        self.assertEqual(
+            self.followup.submitter_primary_diagnosis_id,
+            self.primary_diagnosis.submitter_primary_diagnosis_id,
+        )
+        self.assertEqual(
+            self.followup.submitter_treatment_id, self.treatment.submitter_treatment_id
+        )
         self.assertEqual(self.followup.date_of_followup, "2022-10")
         self.assertEqual(
             self.followup.disease_status_at_followup, "Loco-regional progression"
@@ -1847,11 +1800,13 @@ class FollowUpTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
+                "uuid",
                 "submitter_follow_up_id",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
-                "submitter_treatment_id",
-                "submitter_primary_diagnosis_id",
+                "treatment_uuid",
+                "primary_diagnosis_uuid",
             ],
             model_fields=self.followup._meta.fields,
         )
@@ -1863,11 +1818,13 @@ class FollowUpTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
+                "uuid",
                 "submitter_follow_up_id",
                 "submitter_donor_id",
                 "program_id",
-                "submitter_treatment_id",
-                "submitter_primary_diagnosis_id",
+                "donor_uuid",
+                "treatment_uuid",
+                "primary_diagnosis_uuid",
             ],
             model_fields=self.followup._meta.fields,
         )
@@ -1879,123 +1836,109 @@ class FollowUpTest(TestCase):
         with self.assertRaises(IntegrityError):
             self.followup = FollowUp.objects.create(**self.valid_values)
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            FollowUpModelSchema.model_validate(self.valid_values),
+            FollowUpModelSchema,
+        )
+
     def test_invalid_id(self):
         invalid_values = get_invalid_ids()
-        for value in invalid_values:
-            self.valid_values["submitter_follow_up_id"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["submitter_follow_up_id"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_followup(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_followup"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_followup"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_disease_status_at_followup(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["disease_status_at_followup"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["disease_status_at_followup"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_relapse_type(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["relapse_type"] = value
-            self.serializer = FollowUpSerializer(
-                instance=self.followup, data=self.valid_values
-            )
-            self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["relapse_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_date_of_relapse(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["date_of_relapse"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["date_of_relapse"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_method_of_progression_status(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["method_of_progression_status"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["method_of_progression_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_anatomic_site_progression_or_recurrence(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["sanatomic_site_progression_or_recurrence"] = value
-    #             self.serializer = FollowUpSerializer(instance=self.followup, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_anatomic_site_progression_or_recurrence(self):
+        invalid_values = ["invalid", 1]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values[
+                    "anatomic_site_progression_or_recurrence"
+                ] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_tumour_staging_system(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_tumour_staging_system"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_tumour_staging_system"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_t_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_t_category"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_t_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_n_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_n_category"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_n_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_m_category(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_m_category"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.followup, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_m_category"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
     def test_invalid_recurrence_stage_group(self):
         invalid_values = get_invalid_dates()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["recurrence_stage_group"] = value
-                self.serializer = FollowUpSerializer(
-                    instance=self.donor, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["recurrence_stage_group"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    FollowUpModelSchema.model_validate(self.valid_values)
 
 
 class BiomarkerTest(TestCase):
@@ -2004,11 +1947,10 @@ class BiomarkerTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "test_date": "8",
             "psa_level": 230,
             "ca125": 29,
@@ -2030,7 +1972,9 @@ class BiomarkerTest(TestCase):
 
     def test_biomarker_fields(self):
         self.assertEqual(self.biomarker.program_id, self.program)
-        self.assertEqual(self.biomarker.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.biomarker.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.biomarker.test_date, "8")
         self.assertEqual(self.biomarker.psa_level, 230)
         self.assertEqual(self.biomarker.ca125, 29)
@@ -2049,8 +1993,9 @@ class BiomarkerTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.biomarker._meta.fields,
@@ -2063,19 +2008,78 @@ class BiomarkerTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
-                "submitter_specimen_id",
-                "submitter_primary_diagnosis_id",
-                "submitter_treatment_id",
-                "submitter_follow_up_id",
             ],
             model_fields=self.biomarker._meta.fields,
         )
         for field in optional_fields:
             setattr(self.biomarker, field, "")
             self.biomarker.full_clean()
+
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            BiomarkerModelSchema.model_validate(self.valid_values),
+            BiomarkerModelSchema,
+        )
+
+    def test_invalid_er_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["er_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_pr_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["pr_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_her2_ihc_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["her2_ihc_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_her2_ish_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["her2_ish_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_hpv_ihc_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hpv_ihc_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_hpv_pcr_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hpv_pcr_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_hpv_strain(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["hpv_strain"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    BiomarkerModelSchema.model_validate(self.valid_values)
 
 
 class ComorbidityTest(TestCase):
@@ -2084,11 +2088,10 @@ class ComorbidityTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "prior_malignancy": "Yes",
             "laterality_of_prior_malignancy": "Not applicable",
             "age_at_comorbidity_diagnosis": 35,
@@ -2103,7 +2106,9 @@ class ComorbidityTest(TestCase):
 
     def test_comorbitidy_fields(self):
         self.assertEqual(self.comorbidity.program_id, self.program)
-        self.assertEqual(self.comorbidity.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.comorbidity.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.comorbidity.prior_malignancy, "Yes")
         self.assertEqual(
             self.comorbidity.laterality_of_prior_malignancy, "Not applicable"
@@ -2117,8 +2122,9 @@ class ComorbidityTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.comorbidity._meta.fields,
@@ -2131,8 +2137,9 @@ class ComorbidityTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.comorbidity._meta.fields,
@@ -2141,44 +2148,43 @@ class ComorbidityTest(TestCase):
             setattr(self.comorbidity, field, "")
             self.comorbidity.full_clean()
 
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            ComorbidityModelSchema.model_validate(self.valid_values),
+            ComorbidityModelSchema,
+        )
+
     def test_invalid_prior_malignancy(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["prior_malignancy"] = value
-                self.serializer = ComorbiditySerializer(
-                    instance=self.comorbidity, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["prior_malignancy"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
     def test_invalid_laterality_of_prior_malignancy(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["laterality_of_prior_malignancy"] = value
-                self.serializer = ComorbiditySerializer(
-                    instance=self.comorbidity, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["laterality_of_prior_malignancy"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
-    # TODO: fix regular expression
-    # def test_comorbidity_type_code(self):
-    #     invalid_values = ["8260/3", 1]
-    #     for value in invalid_values:
-    #         with self.subTest(value=value):
-    #             self.valid_values["comorbidity_type_code"] = value
-    #             self.serializer = ComorbiditySerializer(instance=self.followup, data=self.valid_values)
-    #             self.assertFalse(self.serializer.is_valid())
+    def test_comorbidity_type_code(self):
+        invalid_values = ["invalid", 1]
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["comorbidity_type_code"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
     def test_invalid_comorbidity_treatment_status(self):
         invalid_values = get_invalid_choices()
-        for value in invalid_values:
-            with self.subTest(value=value):
-                self.valid_values["comorbidity_treatment_status"] = value
-                self.serializer = ComorbiditySerializer(
-                    instance=self.comorbidity, data=self.valid_values
-                )
-                self.assertFalse(self.serializer.is_valid())
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["comorbidity_treatment_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ComorbidityModelSchema.model_validate(self.valid_values)
 
     def test_comorbidity_treatment_max_length(self):
         self.comorbidity.comorbidity_treatment = "f" * 256
@@ -2192,11 +2198,10 @@ class ExposureTest(TestCase):
         self.donor = Donor.objects.create(
             submitter_donor_id="DONOR_1",
             program_id=self.program,
-            primary_site=["Adrenal gland"],
         )
         self.valid_values = {
-            "program_id": self.program,
-            "submitter_donor_id": self.donor,
+            "program_id_id": self.program.program_id,
+            "submitter_donor_id": self.donor.submitter_donor_id,
             "tobacco_smoking_status": "Current smoker",
             "tobacco_type": ["Unknown", "Electronic cigarettes", "Not applicable"],
             "pack_years_smoked": 280,
@@ -2208,7 +2213,9 @@ class ExposureTest(TestCase):
 
     def test_exposure_fields(self):
         self.assertEqual(self.exposure.program_id, self.program)
-        self.assertEqual(self.exposure.submitter_donor_id, self.donor)
+        self.assertEqual(
+            self.exposure.submitter_donor_id, self.donor.submitter_donor_id
+        )
         self.assertEqual(self.exposure.tobacco_smoking_status, "Current smoker")
         self.assertEqual(
             self.exposure.tobacco_type,
@@ -2220,8 +2227,9 @@ class ExposureTest(TestCase):
         """Tests no exceptions are raised when saving null values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.exposure._meta.fields,
@@ -2234,8 +2242,9 @@ class ExposureTest(TestCase):
         """Tests no exceptions are raised when saving blank values in optional fields."""
         optional_fields = get_optional_fields(
             excluded_fields=[
-                "id",
+                "uuid",
                 "submitter_donor_id",
+                "donor_uuid",
                 "program_id",
             ],
             model_fields=self.exposure._meta.fields,
@@ -2243,3 +2252,25 @@ class ExposureTest(TestCase):
         for field in optional_fields:
             setattr(self.exposure, field, "")
             self.exposure.full_clean()
+
+    def test_valid_schema(self):
+        self.assertIsInstance(
+            ExposureModelSchema.model_validate(self.valid_values),
+            ExposureModelSchema,
+        )
+
+    def test_invalid_tobacco_smoking_status(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tobacco_smoking_status"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ExposureModelSchema.model_validate(self.valid_values)
+
+    def test_invalid_tobacco_type(self):
+        invalid_values = get_invalid_choices()
+        for invalid_value in invalid_values:
+            with self.subTest(value=invalid_value):
+                self.valid_values["tobacco_type"] = invalid_value
+                with self.assertRaises(SchemaValidationError):
+                    ExposureModelSchema.model_validate(self.valid_values)

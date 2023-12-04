@@ -1,9 +1,9 @@
-import factory
+from http import HTTPStatus
+
 from django.conf import settings
-from rest_framework import status
+from django.forms.models import model_to_dict
 
 from chord_metadata_service.mohpackets.models import SampleRegistration
-from chord_metadata_service.mohpackets.serializers import SampleRegistrationSerializer
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import (
     SampleRegistrationFactory,
@@ -15,7 +15,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import (
 class SampleRegistrationTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.sample_registration_url = "/v2/ingest/sample_registrations/"
+        self.sample_registration_url = "/v2/ingest/sample_registration/"
 
     def test_sample_registration_create_authorized(self):
         """
@@ -26,23 +26,22 @@ class SampleRegistrationTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for sample registration creation.
         """
-        sample_registration_data = SampleRegistrationFactory.build_batch(
-            submitter_specimen_id=factory.Iterator(self.specimens),
-            size=2,
+        sample_registration = SampleRegistrationFactory.build(
+            specimen_uuid=self.specimens[0]
         )
-        serialized_data = SampleRegistrationSerializer(
-            sample_registration_data, many=True
-        ).data
+        data_dict = model_to_dict(sample_registration)
+
         response = self.client.post(
             self.sample_registration_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
@@ -55,20 +54,18 @@ class SampleRegistrationTestCase(BaseTestCase):
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for sample registration creation.
         """
-        sample_registration_data = SampleRegistrationFactory.build_batch(
-            submitter_specimen_id=factory.Iterator(self.specimens),
-            size=2,
+        sample_registration = SampleRegistrationFactory.build(
+            specimen_uuid=self.specimens[0]
         )
-        serialized_data = SampleRegistrationSerializer(
-            sample_registration_data, many=True
-        ).data
+        data_dict = model_to_dict(sample_registration)
         response = self.client.post(
             self.sample_registration_url,
-            data=serialized_data,
+            data=data_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -90,7 +87,7 @@ class GETTestCase(BaseTestCase):
             self.sample_registrations_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_sample_registrations_301_redirect(self):
         """
@@ -104,7 +101,7 @@ class GETTestCase(BaseTestCase):
             "/v2/authorized/sample_registrations",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
 
 # OTHERS
@@ -142,9 +139,10 @@ class OthersTestCase(BaseTestCase):
                 self.sample_registrations_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
+            response = response.json()
             response_data = [
                 sample_registration["submitter_sample_id"]
-                for sample_registration in response.data["results"]
+                for sample_registration in response["items"]
             ]
 
             self.assertEqual(response_data, expected_datasets)
@@ -158,7 +156,7 @@ class OthersTestCase(BaseTestCase):
             self.sample_registrations_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -169,7 +167,7 @@ class OthersTestCase(BaseTestCase):
             self.sample_registrations_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -180,7 +178,7 @@ class OthersTestCase(BaseTestCase):
             self.sample_registrations_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_delete_request_404(self):
         """
@@ -195,4 +193,4 @@ class OthersTestCase(BaseTestCase):
             f"{self.sample_registrations_url}{sample_registration_to_delete.submitter_sample_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

@@ -1,7 +1,8 @@
-from django.conf import settings
-from rest_framework import status
+from http import HTTPStatus
 
-from chord_metadata_service.mohpackets.serializers import ProgramSerializer
+from django.conf import settings
+from django.forms.models import model_to_dict
+
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 from chord_metadata_service.mohpackets.tests.endpoints.factories import ProgramFactory
 
@@ -18,7 +19,7 @@ from chord_metadata_service.mohpackets.tests.endpoints.factories import ProgramF
 class IngestTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.ingest_url = "/v2/ingest/programs/"
+        self.ingest_url = "/v2/ingest/program/"
 
     def test_ingest_authorized(self):
         """
@@ -28,38 +29,40 @@ class IngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User can perform a POST request for program ingestion.
         """
-        ingest_programs = ProgramFactory.build_batch(2)
-        serialized_data = ProgramSerializer(ingest_programs, many=True).data
+        ingest_program = ProgramFactory.build()
+        program_dict = model_to_dict(ingest_program)
         response = self.client.post(
             self.ingest_url,
-            data=serialized_data,
+            data=program_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         self.assertEqual(
             response.status_code,
-            status.HTTP_201_CREATED,
-            f"Expected status code {status.HTTP_201_CREATED}, but got {response.status_code}. "
+            HTTPStatus.CREATED,
+            f"Expected status code {HTTPStatus.CREATED}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
 
     def test_ingest_unauthorized(self):
         """
-        Test that an non-admin user attempting to ingest programs receives a 403 Forbidden response.
+        Test that an non-admin user attempting to ingest programs receives a 401 response.
 
         Testing Strategy:
         - An unauthorized user (user_0) with no permission.
         - User cannot perform a POST request for program ingestion.
         """
-        ingest_programs = ProgramFactory.build_batch(2)
-        serialized_data = ProgramSerializer(ingest_programs, many=True).data
+        ingest_program = ProgramFactory.build()
+        program_dict = model_to_dict(ingest_program)
         response = self.client.post(
             self.ingest_url,
-            data=serialized_data,
+            data=program_dict,
+            content_type="application/json",
             format="json",
             HTTP_AUTHORIZATION=f"Bearer {self.user_0.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # DELETE API
@@ -67,11 +70,11 @@ class IngestTestCase(BaseTestCase):
 class DeleteTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.authorized_url = "/v2/authorized/programs/"
+        self.authorized_url = "/v2/authorized/program/"
 
     def test_delete_authorized(self):
         """
-        Test an authorized DELETE request to the 'authorized/programs/{program_id}/' endpoint.
+        Test an authorized DELETE request to the 'authorized/program/{program_id}/' endpoint.
 
         Testing Strategy:
         - Create a new program to delete
@@ -83,7 +86,7 @@ class DeleteTestCase(BaseTestCase):
             f"{self.authorized_url}{program_to_delete.program_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.status_code, HTTPStatus.NO_CONTENT)
 
     def test_delete_unauthorized(self):
         """
@@ -92,14 +95,14 @@ class DeleteTestCase(BaseTestCase):
         Testing Strategy:
         - Create a new program to delete
         - Non Admin (user_1) cannot delete
-        - The request should receive a 403 forbidden response.
+        - The request should receive a 401 response.
         """
         program_to_delete = ProgramFactory()
         response = self.client.delete(
             f"{self.authorized_url}{program_to_delete.program_id}/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 # GET API
@@ -121,7 +124,7 @@ class GETTestCase(BaseTestCase):
             self.authorized_url,
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_get_301_redirect(self):
         """
@@ -134,7 +137,7 @@ class GETTestCase(BaseTestCase):
         response = self.client.get(
             "/v2/authorized/programs", HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_301_MOVED_PERMANENTLY)
+        self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
     def test_get_404_not_found(self):
         """
@@ -148,7 +151,7 @@ class GETTestCase(BaseTestCase):
             "/v2/authorized/invalid/",
             HTTP_AUTHORIZATION=f"Bearer {self.user_1.token}",
         )
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
 
 # OTHERS
@@ -171,15 +174,14 @@ class OthersTestCase(BaseTestCase):
                 self.authorized_url,
                 HTTP_AUTHORIZATION=f"Bearer {user.token}",
             )
+            response = response.json()
 
             authorized_datasets = next(
                 user_data["datasets"]
                 for user_data in settings.LOCAL_AUTHORIZED_DATASET
                 if user_data["token"] == user.token
             )
-            response_datasets = [
-                program["program_id"] for program in response.data["results"]
-            ]
+            response_datasets = [program["program_id"] for program in response["items"]]
             self.assertEqual(response_datasets, authorized_datasets)
 
     def test_post_request_405(self):
@@ -190,7 +192,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.post(
             self.authorized_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_put_request_405(self):
         """
@@ -200,7 +202,7 @@ class OthersTestCase(BaseTestCase):
         response = self.client.put(
             self.authorized_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
     def test_patch_request_405(self):
         """
@@ -210,4 +212,4 @@ class OthersTestCase(BaseTestCase):
         response = self.client.patch(
             self.authorized_url, HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
