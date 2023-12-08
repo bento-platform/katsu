@@ -25,7 +25,6 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         },
         "genome_assembly_id": {
             "type": "string",
-            "enum": ["GRCh37", "GRCh38", "GRCm38", "GRCm39"]
         },
         "file_format": {
             "type": "string",
