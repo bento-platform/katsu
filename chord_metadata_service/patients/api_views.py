@@ -8,8 +8,6 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 from django.conf import settings
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django.core.exceptions import ValidationError
 from django.db.models import Count, F, Q
@@ -68,12 +66,6 @@ class IndividualViewSet(viewsets.ModelViewSet):
         *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
         *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
     ).order_by("id")
-
-    # Cache page for the requested url, default to 2 hours.
-
-    @method_decorator(cache_page(settings.CACHE_TIME))
-    def dispatch(self, *args, **kwargs):
-        return super(IndividualViewSet, self).dispatch(*args, **kwargs)
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:

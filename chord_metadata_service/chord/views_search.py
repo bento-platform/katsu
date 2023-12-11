@@ -12,7 +12,6 @@ from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
 from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -298,8 +297,6 @@ def search(request, internal_data=False):
     }, start))
 
 
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_search(request):
@@ -313,8 +310,6 @@ def chord_search(request):
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
