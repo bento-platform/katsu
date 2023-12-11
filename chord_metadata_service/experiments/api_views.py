@@ -97,7 +97,7 @@ class ExperimentBatchViewSet(BatchViewSet):
             .order_by("id")
         )
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *_args, **_kwargs):
         ids_list = request.data.get('id', [])
         request.data["id"] = ids_list
         queryset = self.get_queryset()

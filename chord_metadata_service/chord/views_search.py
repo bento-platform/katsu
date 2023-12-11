@@ -11,10 +11,10 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
-from django.http import HttpRequest
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -544,7 +544,7 @@ def chord_dataset_representation(dataset: Dataset):
     }
 
 
-def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
+def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     start = datetime.now()
     search_params, err = get_chord_search_parameters(request=request)
     if err:
@@ -559,19 +559,19 @@ def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def public_dataset_search(request: HttpRequest, dataset_id: str):
+def public_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id)
 
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def private_dataset_search(request: HttpRequest, dataset_id: str):
+def private_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id, internal=True)
 
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_summary(request: HttpRequest, dataset_id: str):
+def dataset_summary(request: DrfRequest, dataset_id: str):
     dataset = Dataset.objects.get(identifier=dataset_id)
     return Response({
         DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),
