@@ -1,12 +1,9 @@
-from django.conf import settings
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django_filters.rest_framework import DjangoFilterBackend
 
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
@@ -22,11 +19,6 @@ from rest_framework import serializers, status
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
-
-    # Cache response to the requested URL, default to 2 hours.
-    @method_decorator(cache_page(settings.CACHE_TIME))
-    def dispatch(self, *args, **kwargs):
-        return super(PhenopacketsModelViewSet, self).dispatch(*args, **kwargs)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
@@ -97,9 +89,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = m.Biosample.objects.all() \
-        .prefetch_related(*BIOSAMPLE_PREFETCH) \
-        .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter

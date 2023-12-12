@@ -148,7 +148,9 @@ async def data_type_metadata_schema(_request: HttpRequest, data_type: str):
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
 async def dataset_data_type(request: HttpRequest, dataset_id: str, data_type: str):
     if data_type not in QUERYSET_FN:
-        return Response(errors.bad_request_error, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            errors.bad_request_error(f"Data type {data_type} doesn't exist"), status=status.HTTP_400_BAD_REQUEST)
+
     qs = QUERYSET_FN[data_type](dataset_id)
 
     if request.method == "DELETE":
