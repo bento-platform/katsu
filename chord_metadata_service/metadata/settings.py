@@ -333,8 +333,9 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 # Settings related to the Public APIs
 
 # Read project specific config.json that contains custom search fields
-if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
-    with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
+config_path = os.path.join(BASE_DIR, 'config/config.json')
+if os.path.isfile(config_path):
+    with open(config_path) as config_file:
         CONFIG_PUBLIC = json.load(config_file)
 else:
     CONFIG_PUBLIC = {}

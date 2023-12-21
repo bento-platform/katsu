@@ -443,7 +443,7 @@ DJANGO_SETTINGS_MODULE=chord_metadata_service.metadata.settings django-admin she
 There are several public APIs to return data overview and perform a search that returns only objects count.
 The implementation of public APIs relies on a project customized configuration file `config.json` that must be placed in 
 the base directory.  Currently, there is an `example.config.json` located  in `/katsu/chord_metadata_service` directory 
-which is set to be the project base directory. The file can be copied, renamed to `config.json` and modified.
+which is set to be the project base directory. The file can be copied to `/katsu/chord_metadata_service/config`, renamed to `config.json` and modified.
 
 The `config.json` contains fields that data providers would like to make open for public access.
 If the `config.json` is not set up/created it means there is no public data and no data will be available via 
