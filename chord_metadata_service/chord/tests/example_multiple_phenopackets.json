@@ -53,7 +53,7 @@
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
       ],
-      "phenopacket_schema_version": "2.0.0"
+      "phenopacket_schema_version": "2.0"
     }
   },
   {
@@ -84,7 +84,7 @@
     "meta_data": {
       "created_by": "Admin",
       "submitted_by": "Admin",
-      "phenopacket_schema_version": "2.0.0",
+      "phenopacket_schema_version": "2.0",
       "resources": [
         {
           "id": "NCBITaxon:2018-07-27",
@@ -141,7 +141,7 @@
     "meta_data": {
       "created_by": "Admin",
       "submitted_by": "Admin",
-      "phenopacket_schema_version": "2.0.0",
+      "phenopacket_schema_version": "2.0",
       "resources": [
         {
           "id": "NCBITaxon:2018-07-27",
@@ -194,7 +194,7 @@
     "meta_data": {
       "created_by": "Admin",
       "submitted_by": "Admin",
-      "phenopacket_schema_version": "2.0.0",
+      "phenopacket_schema_version": "2.0",
       "resources": [
         {
           "id": "NCBITaxon:2018-07-27",
@@ -253,7 +253,7 @@
     "meta_data": {
       "created_by": "Admin",
       "submitted_by": "Admin",
-      "phenopacket_schema_version": "2.0.0",
+      "phenopacket_schema_version": "2.0",
       "resources": [
         {
           "id": "NCBITaxon:2018-07-27",
@@ -303,7 +303,7 @@
     "meta_data": {
       "created_by": "Admin",
       "submitted_by": "Admin",
-      "phenopacket_schema_version": "2.0.0",
+      "phenopacket_schema_version": "2.0",
       "resources": [
         {
           "id": "NCBITaxon:2018-07-27",
@@ -351,7 +351,7 @@
     "meta_data": {
       "created_by": "Admin",
       "submitted_by": "Admin",
-      "phenopacket_schema_version": "2.0.0",
+      "phenopacket_schema_version": "2.0",
       "resources": [
         {
           "id": "NCBITaxon:2018-07-27",

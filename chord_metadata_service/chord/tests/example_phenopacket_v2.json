@@ -501,7 +501,7 @@
         "iri_prefix": "http://purl.obolibrary.org/obo/NCIT_"
       }
     ],
-    "phenopacket_schema_version": "2.0.0",
+    "phenopacket_schema_version": "2.0",
     "external_references": [
       {
         "id": "PMID:29221636",
