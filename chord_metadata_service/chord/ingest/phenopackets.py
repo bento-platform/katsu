@@ -236,14 +236,14 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
-    gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
+    gen_obj, created = pm.GenomicInterpretation.objects.get_or_create(
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
         extra_properties=gen_interp.get("extra_properties", {}),
     )
 
-    if related_obj:
+    if related_obj and created:
         # Set the link with Biosample/Individual
         related_obj.genomic_interpretations.add(gen_obj)
         related_obj.save()
@@ -263,20 +263,20 @@ def get_or_create_disease(disease) -> pm.Disease:
 
 
 def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
-    # Create GenomicInterpretation
-    genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
-    genomic_interpretations = [
-        get_or_create_genomic_interpretation(gen_interp)
-        for gen_interp
-        in genomic_interpretations_data
-    ]
-    # disease = pm.Disease.objects.get_or_create(diagnosis["disease"])
-    diag_obj, _ = pm.Diagnosis.objects.get_or_create(
+    diag_obj, created = pm.Diagnosis.objects.get_or_create(
         disease=diagnosis.get("disease", {}),
-        extra_properties=diagnosis.get("extra_properties", {})
+        extra_properties=diagnosis.get("extra_properties", {}),
     )
-    # diag_obj.disease.set(disease)
-    diag_obj.genomic_interpretations.set(genomic_interpretations)
+
+    if created:
+        # Create GenomicInterpretation
+        genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
+        genomic_interpretations = [
+            get_or_create_genomic_interpretation(gen_interp)
+            for gen_interp
+            in genomic_interpretations_data
+        ]
+        diag_obj.genomic_interpretations.set(genomic_interpretations)
     return diag_obj
 
 
