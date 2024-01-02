@@ -1,14 +1,14 @@
 """
 Make ER diagram
 
-Date: 2023-10-19
+Date: 2024-01-02
 Author: Marion Shadbolt
 
 Script to generate an ER diagram using mermaid syntax of the katsu moh model defined in
 katsu/chord_metadata_service/mohpackets/models.py.
 
 The script uses automated parsing of class definitions in the models.py file by pyreverse. It then does some string
-replacement to clean up the output and transform into a mermaid ER diagram. Finally, relationships betweem each class
+replacement to clean up the output and transform into a mermaid ER diagram. Finally, relationships between each class
 are manually defined. If relationships change in the future, these should be updated.
 
 Prerequisites:
@@ -24,11 +24,13 @@ Output:
 """
 
 from datetime import datetime
+import os
 
 
 def main():
 
-    with open("classes.mmd", "r") as classes_file:
+    mmd_file = f"{os.path.dirname(os.path.realpath(__file__))}/classes.mmd"
+    with open(mmd_file, "r") as classes_file:
         class_diagram = classes_file.read()
         # Remove unwanted text and transform to erDiagram
         er_diagram = class_diagram.replace("class ", "")
