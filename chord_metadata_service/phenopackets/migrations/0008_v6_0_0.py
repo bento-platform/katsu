@@ -476,7 +476,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='interpretation',
             name='diagnosis',
-            field=models.ForeignKey(blank=True, help_text='One or more diagnoses, if made.', null=True, on_delete=django.db.models.deletion.CASCADE, to='phenopackets.diagnosis'),
+            field=models.OneToOneField(blank=True, help_text='One or more diagnoses, if made.', null=True, on_delete=django.db.models.deletion.CASCADE, to='phenopackets.diagnosis'),
         ),
         migrations.DeleteModel(
             name='Gene',
@@ -490,5 +490,10 @@ class Migration(migrations.Migration):
             model_name='genomicinterpretation',
             name='subject',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='genomic_interpretations', to='patients.individual'),
+        ),
+        migrations.AlterField(
+            model_name='diagnosis',
+            name='id',
+            field=models.CharField(max_length=200, primary_key=True, serialize=False),
         ),
     ]
