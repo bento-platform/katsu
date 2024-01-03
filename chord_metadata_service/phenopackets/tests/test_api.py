@@ -260,11 +260,13 @@ class CreateDiagnosisTest(APITestCase):
 
     def setUp(self):
         self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
-        self.diagnosis = c.valid_diagnosis(self.disease_ontology)
+        self.diagnosis = c.valid_diagnosis(self.disease_ontology, "interpretation:unique_id")
 
     def test_diagnosis(self):
         response = get_post_response('diagnoses-list', self.diagnosis)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_serializer(self):
         serializer = s.DiagnosisSerializer(data=self.diagnosis)
         self.assertEqual(serializer.is_valid(), True)
 

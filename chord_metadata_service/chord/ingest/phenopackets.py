@@ -262,8 +262,16 @@ def get_or_create_disease(disease) -> pm.Disease:
     return d_obj
 
 
-def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
+def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis:
+    diagnosis = interpretation.get("diagnosis")
+
+    if not diagnosis:
+        return
+
+    # If an interpretation has a diagnosis, the diagnosis shares the interpretation's ID
+    id = interpretation.get("id")
     diag_obj, created = pm.Diagnosis.objects.get_or_create(
+        id=id,
         disease=diagnosis.get("disease", {}),
         extra_properties=diagnosis.get("extra_properties", {}),
     )
@@ -281,7 +289,7 @@ def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
 
 
 def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
-    diagnosis = get_or_create_diagnosis(interpretation["diagnosis"])
+    diagnosis = get_or_create_interpretation_diagnosis(interpretation)
     interp_obj, _ = pm.Interpretation.objects.get_or_create(
         id=interpretation["id"],
         diagnosis=diagnosis,

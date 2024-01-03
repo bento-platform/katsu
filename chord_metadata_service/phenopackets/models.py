@@ -356,6 +356,7 @@ class Diagnosis(BaseTimeStamp):
 
     FHIR: Condition
     """
+    id = models.CharField(primary_key=True, max_length=200)
     disease = models.JSONField(null=True, blank=True, validators=[ontology_validator])
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
@@ -389,8 +390,10 @@ class Interpretation(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
     progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
                                        help_text='The current status of work on the case.')
-    diagnosis = models.ForeignKey(Diagnosis, blank=True, null=True, on_delete=models.CASCADE,
-                                  help_text='One or more diagnoses, if made.')
+    # diagnosis = models.ForeignKey(Diagnosis, blank=True, null=True, on_delete=models.CASCADE,
+    #                               help_text='One or more diagnoses, if made.')
+    diagnosis = models.OneToOneField(Diagnosis, blank=True, null=True, on_delete=models.CASCADE,
+                                    help_text='One or more diagnoses, if made.')
     summary = models.CharField(max_length=200, blank=True, help_text='Free text summary of the interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
