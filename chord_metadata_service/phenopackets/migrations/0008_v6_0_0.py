@@ -476,7 +476,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='interpretation',
             name='diagnosis',
-            field=models.OneToOneField(blank=True, help_text='One or more diagnoses, if made.', null=True, on_delete=django.db.models.deletion.CASCADE, to='phenopackets.diagnosis'),
+            field=models.OneToOneField(blank=True, help_text='The diagnosis, if made.', null=True, on_delete=django.db.models.deletion.CASCADE, to='phenopackets.diagnosis'),
         ),
         migrations.DeleteModel(
             name='Gene',
@@ -494,6 +494,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='diagnosis',
             name='id',
-            field=models.CharField(max_length=200, primary_key=True, serialize=False),
+            field=models.CharField(help_text="Unique ID, uses the parent Interpretation's id when ingesting.", max_length=200, primary_key=True, serialize=False),
         ),
     ]
