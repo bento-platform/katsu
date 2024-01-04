@@ -15,6 +15,7 @@ passwords.txt
 env/
 .env
 .venv/
+.tox
 
 # IDE related (intelliJ, vim files)
 .idea/
