@@ -603,8 +603,9 @@ def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=No
     return base
 
 
-def valid_diagnosis(disease):
+def valid_diagnosis(disease, id="interpretation:1"):
     return dict(
+        id=id,
         disease=disease,
         extra_properties={
             "comment": "test data"

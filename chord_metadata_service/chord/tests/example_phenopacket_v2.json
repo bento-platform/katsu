@@ -7,7 +7,8 @@
     "karyotypic_sex": "UNKNOWN_KARYOTYPE",
     "extra_properties": {
       "cool_guy": true,
-      "smoker": false
+      "smoker": false,
+      "__computed": "This extra_property was computed and should not be ingested."
     }
   },
   "phenotypic_features": [

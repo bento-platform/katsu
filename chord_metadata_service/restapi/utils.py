@@ -25,6 +25,8 @@ MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
     "biosample": pheno_models.Biosample,
 }
 
+COMPUTED_PROPERTY_PREFIX = "__"
+
 
 class BinWithValue(TypedDict):
     label: str
@@ -691,3 +693,10 @@ def bento_public_format_count_and_stats_list(annotated_queryset) -> tuple[int, l
             stats_list.append({"label": label, "value": value})
 
     return total, stats_list
+
+
+def computed_property(name: str):
+    """
+    Takes a name and returns it prefixed with "__"
+    """
+    return COMPUTED_PROPERTY_PREFIX + name
