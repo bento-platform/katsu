@@ -15,6 +15,11 @@ ALLOWED_HOSTS = [
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
 
+# Whitenoise
+# ----------
+MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # CANDIG SETTINGS
 # ---------------
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")
