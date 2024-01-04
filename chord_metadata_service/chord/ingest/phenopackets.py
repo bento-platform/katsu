@@ -34,6 +34,16 @@ def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> O
     return obj
 
 
+def _clean_extra_properties(extra_properties: dict) -> Dict:
+    """
+    Removes computed properties from an extra_properties dictionary.
+    Computed extra_properties start with "__" and should never be ingested.
+    """
+    if extra_properties:
+        return {k: v for k, v in extra_properties.items() if not k.startswith("__")}
+    return extra_properties
+
+
 def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     # Below is code for if we want to re-use phenotypic features in the future
     # For now, the lack of a many-to-many relationship doesn't let us do that.
@@ -64,7 +74,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         severity=pf.get("severity"),
         onset=pf.get("onset"),
         evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
-        extra_properties=pf.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(pf.get("extra_properties", {})),
     )
     pf_obj.save()
     return pf_obj
@@ -84,7 +94,7 @@ def validate_phenopacket(phenopacket_data: dict[str, Any],
 
 
 def update_or_create_subject(subject: dict) -> pm.Individual:
-    extra_properties: dict[str, Any] = subject.get("extra_properties", {})
+    extra_properties: dict[str, Any] = _clean_extra_properties(subject.get("extra_properties", {}))
 
     # Pre-process subject data:    ---------------------------------------------------------------------------------
 
@@ -145,7 +155,7 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         pathological_stage=bs.get("pathological_stage", {}),
         is_control_sample=bs.get("is_control_sample", False),
         diagnostic_markers=bs.get("diagnostic_markers", []),
-        extra_properties=bs.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(bs.get("extra_properties", {})),
         **bs_query
     )
 
@@ -240,7 +250,7 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
-        extra_properties=gen_interp.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(gen_interp.get("extra_properties", {})),
     )
 
     if related_obj:
@@ -256,7 +266,7 @@ def get_or_create_disease(disease) -> pm.Disease:
         term=disease["term"],
         disease_stage=disease.get("disease_stage", []),
         clinical_tnm_finding=disease.get("clinical_tnm_finding", []),
-        extra_properties=disease.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(disease.get("extra_properties", {})),
         **query_and_check_nulls(disease, "onset")
     )
     return d_obj
@@ -276,7 +286,7 @@ def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis
     diag_obj, created = pm.Diagnosis.objects.get_or_create(
         id=id,
         disease=diagnosis.get("disease", {}),
-        extra_properties=diagnosis.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(diagnosis.get("extra_properties", {})),
     )
 
     if created:
@@ -298,7 +308,7 @@ def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
         diagnosis=diagnosis,
         progress_status=interpretation["progress_status"],
         summary=interpretation.get("summary", ""),
-        extra_properties=interpretation.get("extra_properties", {})
+        extra_properties=_clean_extra_properties(interpretation.get("extra_properties", {}))
     )
 
     return interp_obj
@@ -384,7 +394,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version=meta_data.get("phenopacket_schema_version"),
         external_references=meta_data.get("external_references", []),
-        extra_properties=meta_data.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(meta_data.get("extra_properties", {})),
     )
     meta_data_obj.save()
 

@@ -164,10 +164,10 @@ class GenomicInterpretationSerializer(GenericSerializer):
         extra_properties = response.get("extra_properties", {})
         if instance.subject:
             response["subject_or_biosample_id"] = instance.subject.id
-            extra_properties["related_type"] = "subject"
+            extra_properties["__related_type"] = "subject"
         elif instance.biosample:
             response["subject_or_biosample_id"] = instance.biosample.id
-            extra_properties["related_type"] = "biosample"
+            extra_properties["__related_type"] = "biosample"
 
         response["extra_properties"] = extra_properties
         return response
