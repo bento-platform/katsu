@@ -10,7 +10,7 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
-from chord_metadata_service.restapi.utils import time_element_to_years
+from chord_metadata_service.restapi.utils import COMPUTED_PROPERTY_PREFIX, time_element_to_years
 
 from .exceptions import IngestError
 from .resources import ingest_resource
@@ -40,7 +40,7 @@ def _clean_extra_properties(extra_properties: dict) -> Dict:
     Computed extra_properties start with "__" and should never be ingested.
     """
     if extra_properties:
-        return {k: v for k, v in extra_properties.items() if not k.startswith("__")}
+        return {k: v for k, v in extra_properties.items() if not k.startswith(COMPUTED_PROPERTY_PREFIX)}
     return extra_properties
 
 

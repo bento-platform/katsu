@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from chord_metadata_service.restapi.utils import computed_property
 from .models import (
     MetaData,
     PhenotypicFeature,
@@ -163,12 +165,13 @@ class GenomicInterpretationSerializer(GenericSerializer):
         # The '__related_type' property is added to extra_properties as a computed value ("__" prefix)
         # This allows us to disambiguate on the client side for links
         extra_properties = response.get("extra_properties", {})
+        computed_related_type = computed_property("related_type")
         if instance.subject:
             response["subject_or_biosample_id"] = instance.subject.id
-            extra_properties["__related_type"] = "subject"
+            extra_properties[computed_related_type] = "subject"
         elif instance.biosample:
             response["subject_or_biosample_id"] = instance.biosample.id
-            extra_properties["__related_type"] = "biosample"
+            extra_properties[computed_related_type] = "biosample"
 
         response["extra_properties"] = extra_properties
         return response
