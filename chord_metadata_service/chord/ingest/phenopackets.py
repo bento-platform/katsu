@@ -236,14 +236,14 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
-    gen_obj, created = pm.GenomicInterpretation.objects.get_or_create(
+    gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
         extra_properties=gen_interp.get("extra_properties", {}),
     )
 
-    if related_obj and created:
+    if related_obj:
         # Set the link with Biosample/Individual
         related_obj.genomic_interpretations.add(gen_obj)
         related_obj.save()
@@ -262,10 +262,11 @@ def get_or_create_disease(disease) -> pm.Disease:
     return d_obj
 
 
-def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis:
+def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis | None:
     diagnosis = interpretation.get("diagnosis")
 
     if not diagnosis:
+        # No diagnosis to create
         return
 
     # One-to-one relation between Interpretation and Diagnosis.
