@@ -297,7 +297,7 @@ def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
         id=interpretation["id"],
         diagnosis=diagnosis,
         progress_status=interpretation["progress_status"],
-        summary=interpretation.get("summary", {}),
+        summary=interpretation.get("summary", ""),
         extra_properties=interpretation.get("extra_properties", {})
     )
 

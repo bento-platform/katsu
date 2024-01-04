@@ -160,10 +160,18 @@ class GenomicInterpretationSerializer(GenericSerializer):
                 instance.variant_interpretation, many=False, required=False).data
 
         # subject_or_biosample_id is obtained from the referenced subject/biosample
+        # the referenced object type is added to extra_properties to disambiguate on the client side
+        extra_properties = response.get("extra_properties", {})
         if instance.subject:
-            response["subject_or_biosample_id"] = instance.subject.id
+            subject_or_biosample_id = instance.subject.id
+            related_type = "subject"
         elif instance.biosample:
-            response["subject_or_biosample_id"] = instance.biosample.id
+            subject_or_biosample_id = instance.biosample.id
+            related_type = "biosample"
+
+        extra_properties["related_type"] = related_type
+        response["subject_or_biosample_id"] = subject_or_biosample_id
+        response["extra_properties"] = extra_properties
 
         return response
 
