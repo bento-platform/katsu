@@ -11,6 +11,7 @@
 
 import os
 from os.path import exists
+import socket
 
 from .base import *
 
@@ -22,6 +23,21 @@ ALLOWED_HOSTS = [
     "candig.docker.internal",
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
+
+# Debug toolbar settings
+# ----------------------
+INSTALLED_APPS.append("debug_toolbar")
+MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + [
+    "127.0.0.1",
+    "10.0.2.2",
+]
+
+# Whitenoise
+# ----------
+MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # CANDIG SETTINGS
 # ---------------
