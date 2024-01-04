@@ -268,7 +268,9 @@ def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis
     if not diagnosis:
         return
 
-    # If an interpretation has a diagnosis, the diagnosis shares the interpretation's ID
+    # One-to-one relation between Interpretation and Diagnosis.
+    # If an Interpretation has a Diagnosis, the created Diagnosis row uses the interpretation's ID as its PK
+    # This ensures unique diagnoses if more than one share the same disease/extra_properties
     id = interpretation.get("id")
     diag_obj, created = pm.Diagnosis.objects.get_or_create(
         id=id,
