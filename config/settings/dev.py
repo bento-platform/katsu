@@ -11,7 +11,6 @@
 
 import os
 from os.path import exists
-import socket
 
 from .base import *
 
