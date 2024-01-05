@@ -34,8 +34,3 @@ To update the markdown file
 ```bash
 python make_er_diagram.py
 ```
-
-```
-
-
-```
