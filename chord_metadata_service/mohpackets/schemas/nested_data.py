@@ -18,6 +18,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
+from chord_metadata_service.mohpackets.schemas.model import DonorModelSchema
 
 
 #####################################################
@@ -204,7 +205,7 @@ class NestedPrimaryDiagnosisSchema(ModelSchema):
         model_exclude = ["uuid", "donor_uuid", "submitter_donor_id", "program_id"]
 
 
-class DonorWithClinicalDataSchema(ModelSchema):
+class DonorWithClinicalDataSchema(DonorModelSchema):
     primary_diagnoses: List[NestedPrimaryDiagnosisSchema] = Field(
         None, alias="primarydiagnosis_set"
     )
