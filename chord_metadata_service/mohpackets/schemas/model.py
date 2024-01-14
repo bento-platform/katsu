@@ -1,6 +1,7 @@
 from typing import List, Optional
 
-from ninja import Field, ModelSchema
+from ninja import Field, ModelSchema, Schema
+from ninja.orm import create_schema
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
@@ -81,6 +82,11 @@ from chord_metadata_service.mohpackets.permissible_values import (
     TumourStagingSystemEnum,
     uBooleanEnum,
 )
+from chord_metadata_service.mohpackets.schemas.base import (
+    BaseDonorSchema,
+    BaseProgramSchema,
+)
+
 
 """
 Module containing schemas for clinical data models.
@@ -98,12 +104,12 @@ Author: Son Chau
 ########################################
 
 
-class ProgramModelSchema(ModelSchema):
-    program_id: str = Field(pattern=ID_REGEX_PATTERNS, max_length=64)
+# class ProgramModelSchema(ModelSchema):
+#     program_id: str = Field(pattern=ID_REGEX_PATTERNS, max_length=64)
 
-    class Config:
-        model = Program
-        model_fields = "__all__"
+#     class Config:
+#         model = Program
+#         model_fields = "__all__"
 
 
 class ExposureModelSchema(ModelSchema):
@@ -262,9 +268,9 @@ class PrimaryDiagnosisModelSchema(ModelSchema):
     clinical_stage_group: Optional[StageGroupEnum] = None
     laterality: Optional[PrimaryDiagnosisLateralityEnum] = None
 
-    class Config:
+    class Meta:
         model = PrimaryDiagnosis
-        model_exclude = ["uuid", "donor_uuid"]
+        exclude = ["uuid", "donor_uuid"]
 
 
 class SampleRegistrationModelSchema(ModelSchema):
@@ -314,23 +320,31 @@ class SpecimenModelSchema(ModelSchema):
         model_exclude = ["uuid", "donor_uuid", "primary_diagnosis_uuid"]
 
 
-class DonorModelSchema(ModelSchema):
-    cause_of_death: Optional[CauseOfDeathEnum] = None
-    submitter_donor_id: str = Field(pattern=ID_REGEX_PATTERNS, max_length=64)
-    date_of_birth: Optional[str] = Field(
-        None, pattern=DATE_REGEX_PATTERNS, max_length=32
-    )
-    date_of_death: Optional[str] = Field(
-        None, pattern=DATE_REGEX_PATTERNS, max_length=32
-    )
-    primary_site: Optional[List[PrimarySiteEnum]] = None
-    gender: Optional[GenderEnum] = None
-    sex_at_birth: Optional[SexAtBirthEnum] = None
-    lost_to_followup_reason: Optional[LostToFollowupReasonEnum] = None
-    date_alive_after_lost_to_followup: Optional[str] = Field(
-        None, pattern=DATE_REGEX_PATTERNS, max_length=32
-    )
+# class DonorModelSchema(ModelSchema):
+#     cause_of_death: Optional[CauseOfDeathEnum] = None
+#     submitter_donor_id: str = Field(pattern=ID_REGEX_PATTERNS, max_length=64)
+#     date_of_birth: Optional[str] = Field(
+#         None, pattern=DATE_REGEX_PATTERNS, max_length=32
+#     )
+#     date_of_death: Optional[str] = Field(
+#         None, pattern=DATE_REGEX_PATTERNS, max_length=32
+#     )
+#     primary_site: Optional[List[PrimarySiteEnum]] = None
+#     gender: Optional[GenderEnum] = None
+#     sex_at_birth: Optional[SexAtBirthEnum] = None
+#     lost_to_followup_reason: Optional[LostToFollowupReasonEnum] = None
+#     date_alive_after_lost_to_followup: Optional[str] = Field(
+#         None, pattern=DATE_REGEX_PATTERNS, max_length=32
+#     )
 
-    class Config:
-        model = Donor
-        model_exclude = ["uuid"]
+#     class Meta:
+#         model = Donor
+#         exclude = ["uuid"]
+
+
+class ProgramModelSchema(BaseProgramSchema):
+    pass
+
+
+class DonorModelSchema(BaseDonorSchema):
+    program_id: str = Field(..., alias="program_id_id")

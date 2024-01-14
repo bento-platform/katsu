@@ -31,6 +31,7 @@ from chord_metadata_service.mohpackets.schemas.ingestion import (
     HormoneTherapyIngestSchema,
     ImmunotherapyIngestSchema,
     PrimaryDiagnosisIngestSchema,
+    ProgramIngestSchema,
     RadiationIngestSchema,
     SampleRegistrationIngestSchema,
     SpecimenIngestSchema,
@@ -64,7 +65,7 @@ def create_instance(payload, model_cls: Type):
 
 
 @router.post("/program/")
-def create_program(request, payload: ProgramModelSchema, response: HttpResponse):
+def create_program(request, payload: ProgramIngestSchema, response: HttpResponse):
     return create_instance(payload, Program)
 
 

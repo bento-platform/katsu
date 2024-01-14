@@ -18,7 +18,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
-from chord_metadata_service.mohpackets.schemas.model import DonorModelSchema
+from chord_metadata_service.mohpackets.schemas.model import DonorModelSchema, PrimaryDiagnosisModelSchema
 
 
 #####################################################
@@ -194,18 +194,18 @@ class NestedSpecimenSchema(ModelSchema):
             "primary_diagnosis_uuid",
         ]
 
-
-class NestedPrimaryDiagnosisSchema(ModelSchema):
+class NestedPrimaryDiagnosisSchema(PrimaryDiagnosisModelSchema):
     specimens: List[NestedSpecimenSchema] = Field(None, alias="specimen_set")
     treatments: List[NestedTreatmentSchema] = Field(None, alias="treatment_set")
     followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
 
-    class Config:
-        model = PrimaryDiagnosis
-        model_exclude = ["uuid", "donor_uuid", "submitter_donor_id", "program_id"]
+
+    class Meta:
+        model = Donor
+        exclude = ["uuid", "donor_uuid", "submitter_donor_id", "program_id"]
 
 
-class DonorWithClinicalDataSchema(DonorModelSchema):
+class DonorWithClinicalDataSchema(ModelSchema):
     primary_diagnoses: List[NestedPrimaryDiagnosisSchema] = Field(
         None, alias="primarydiagnosis_set"
     )
@@ -214,6 +214,8 @@ class DonorWithClinicalDataSchema(DonorModelSchema):
     exposures: List[NestedExposureSchema] = Field(None, alias="exposure_set")
     comorbidities: List[NestedComorbiditySchema] = Field(None, alias="comorbidity_set")
 
-    class Config:
+    
+
+    class Meta:
         model = Donor
-        model_exclude = ["uuid"]
+        exclude = ["uuid"]

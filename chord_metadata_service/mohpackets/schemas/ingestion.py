@@ -1,7 +1,7 @@
 from typing import Optional
 
-from ninja import Field, ModelSchema
-
+from ninja import Field, ModelSchema, Schema
+from ninja.orm import create_schema
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
     Chemotherapy,
@@ -12,11 +12,17 @@ from chord_metadata_service.mohpackets.models import (
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
+    Program,
     Radiation,
     SampleRegistration,
     Specimen,
     Surgery,
     Treatment,
+)
+from chord_metadata_service.mohpackets.permissible_values import GenderEnum
+from chord_metadata_service.mohpackets.schemas.base import (
+    BaseDonorSchema,
+    BaseProgramSchema,
 )
 
 """
@@ -33,13 +39,49 @@ Author: Son Chau
 #           INGEST SCHEMA              #
 #                                      #
 ########################################
-class DonorIngestSchema(ModelSchema):
+
+
+# class ProgramIngestSchema(ModelSchema):
+#     class Meta:
+#         model = Program
+#         fields = "__all__"
+
+# ProgramIngestSchema = create_schema(
+#     Program,
+#     name="ProgramIngestSchema",
+#     custom_fields=PROGRAM_FIELDS_WITH_VALIDATION,
+# )
+
+
+class ProgramIngestSchema(BaseProgramSchema):
+    pass
+
+
+# class DonorIngestSchema(ModelSchema):
+#     program_id_id: str = Field(..., alias="program_id")
+#     uuid: Optional[str] = None
+#     gender: Optional[GenderEnum] = None
+
+#     class Config:
+#         model = Donor
+#         model_exclude = ["uuid", "program_id"]
+#         use_enum_values = True
+
+
+# BaseDonorIngestSchema = create_schema(
+#     Donor,
+#     name="BaseDonorIngestSchema",  # name display in schema
+#     exclude=["uuid", "program_id"],  # need exclude here, cannot do in config
+#     custom_fields=DONOR_FIELDS_WITH_VALIDATION,  # can add more custom fields later
+# )
+
+
+class DonorIngestSchema(BaseDonorSchema):
     program_id_id: str = Field(..., alias="program_id")
     uuid: Optional[str] = None
 
-    class Config:
-        model = Donor
-        model_exclude = ["uuid", "program_id"]
+    class Config(BaseDonorSchema.Config):
+        use_enum_values = True
 
 
 class PrimaryDiagnosisIngestSchema(ModelSchema):

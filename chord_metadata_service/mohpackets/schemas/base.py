@@ -1,0 +1,123 @@
+from typing import List, Optional
+
+from ninja import Field, ModelSchema, Schema
+from ninja.orm import create_schema
+
+from chord_metadata_service.mohpackets.models import (
+    Biomarker,
+    Chemotherapy,
+    Comorbidity,
+    Donor,
+    Exposure,
+    FollowUp,
+    HormoneTherapy,
+    Immunotherapy,
+    PrimaryDiagnosis,
+    Program,
+    Radiation,
+    SampleRegistration,
+    Specimen,
+    Surgery,
+    Treatment,
+)
+from chord_metadata_service.mohpackets.permissible_values import (
+    COMORBIDITY_REGEX_PATTERNS,
+    DATE_REGEX_PATTERNS,
+    GENDER,
+    ID_REGEX_PATTERNS,
+    MORPHOLOGY_REGEX_PATTERNS,
+    TOPOGRAPHY_REGEX_PATTERNS,
+    BasisOfDiagnosisEnum,
+    CauseOfDeathEnum,
+    CellsMeasureMethodEnum,
+    ConfirmedDiagnosisTumourEnum,
+    DiseaseStatusFollowupEnum,
+    DosageUnitsEnum,
+    DrugReferenceDbEnum,
+    ErPrHpvStatusEnum,
+    GenderEnum,
+    Her2StatusEnum,
+    HpvStrainEnum,
+    ImmunotherapyTypeEnum,
+    LostToFollowupReasonEnum,
+    LymphNodeMethodEnum,
+    LymphNodeStatusEnum,
+    LymphovascularInvasionEnum,
+    MalignancyLateralityEnum,
+    MarginTypesEnum,
+    MCategoryEnum,
+    NCategoryEnum,
+    PercentCellsRangeEnum,
+    PerineuralInvasionEnum,
+    PrimaryDiagnosisLateralityEnum,
+    PrimarySiteEnum,
+    ProgressionStatusMethodEnum,
+    RadiationAnatomicalSiteEnum,
+    RadiationTherapyModalityEnum,
+    RelapseTypeEnum,
+    SampleTypeEnum,
+    SexAtBirthEnum,
+    SmokingStatusEnum,
+    SpecimenLateralityEnum,
+    SpecimenProcessingEnum,
+    SpecimenTissueSourceEnum,
+    SpecimenTypeEnum,
+    StageGroupEnum,
+    StorageEnum,
+    SurgeryLocationEnum,
+    SurgeryTypeEnum,
+    TCategoryEnum,
+    TherapyTypeEnum,
+    TobaccoTypeEnum,
+    TreatmentIntentEnum,
+    TreatmentResponseEnum,
+    TreatmentResponseMethodEnum,
+    TreatmentSettingEnum,
+    TreatmentStatusEnum,
+    TreatmentTypeEnum,
+    TumourClassificationEnum,
+    TumourDesginationEnum,
+    TumourFocalityEnum,
+    TumourGradeEnum,
+    TumourGradingSystemEnum,
+    TumourStagingSystemEnum,
+    uBooleanEnum,
+)
+
+
+BaseProgramSchema = create_schema(
+    Program,
+    name="BaseProgramSchema",
+    custom_fields=[
+        ("program_id", str, Field(pattern=ID_REGEX_PATTERNS, max_length=64)),
+    ],
+)
+
+BaseDonorSchema = create_schema(
+    Donor,
+    name="BaseDonorSchema",  # name display in schema
+    exclude=["uuid"],  # need exclude here, cannot do in config
+    custom_fields=[
+        ("cause_of_death", Optional[CauseOfDeathEnum], None),
+        ("submitter_donor_id", str, Field(pattern=ID_REGEX_PATTERNS, max_length=64)),
+        (
+            "date_of_birth",
+            Optional[str],
+            Field(None, pattern=DATE_REGEX_PATTERNS, max_length=32),
+        ),
+        (
+            "date_of_death",
+            Optional[str],
+            Field(None, pattern=DATE_REGEX_PATTERNS, max_length=32),
+        ),
+        ("primary_site", Optional[List[PrimarySiteEnum]], None),
+        ("gender", Optional[GenderEnum], None),
+        ("sex_at_birth", Optional[SexAtBirthEnum], None),
+        ("lost_to_followup_reason", Optional[LostToFollowupReasonEnum], None),
+        (
+            "date_alive_after_lost_to_followup",
+            Optional[str],
+            Field(None, pattern=DATE_REGEX_PATTERNS, max_length=32),
+        ),
+    ],
+)
