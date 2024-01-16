@@ -1,5 +1,4 @@
 import logging
-import json
 
 from asgiref.sync import async_to_sync, sync_to_async
 
@@ -84,7 +83,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         Return the DATS file as a JSON response or an error if not found.
         """
         dataset = self.get_object()
-        return Response(json.loads(dataset.dats_file))
+        return Response(dataset.dats_file)
 
     @action(detail=True, methods=["get"])
     def resources(self, _request, *_args, **_kwargs):

@@ -319,7 +319,7 @@ class PublicDatasetsMetadataTest(APITestCase):
         project = ch_m.Project.objects.create(title="Test project", description="test description")
         dats_path = os.path.join(os.path.dirname(__file__), "example_dats_provenance.json")
         with open(dats_path) as f:
-            dats_content = f.read()
+            dats_content = json.loads(f.read())
 
         ch_m.Dataset.objects.create(
             title="Dataset 1",

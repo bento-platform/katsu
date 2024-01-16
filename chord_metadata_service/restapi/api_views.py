@@ -1,5 +1,3 @@
-import json
-
 from adrf.decorators import api_view as api_view_async
 from drf_spectacular.utils import extend_schema, inline_serializer
 from django.conf import settings
@@ -330,11 +328,11 @@ def public_dataset(_request):
     )
 
     # convert dats_file json content to dict
-    datasets = [
-        {
-            **d,
-            "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None
-        } for d in datasets]
+    # datasets = [
+    #     {
+    #         **d,
+    #         "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None
+    #     } for d in datasets]
 
     return Response({
         "datasets": datasets
