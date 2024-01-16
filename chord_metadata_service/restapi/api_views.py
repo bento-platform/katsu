@@ -327,13 +327,6 @@ def public_dataset(_request):
         "extra_properties", "identifier"
     )
 
-    # convert dats_file json content to dict
-    # datasets = [
-    #     {
-    #         **d,
-    #         "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None
-    #     } for d in datasets]
-
     return Response({
         "datasets": datasets
     })
