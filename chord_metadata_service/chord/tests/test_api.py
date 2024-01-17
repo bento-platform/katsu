@@ -62,7 +62,17 @@ class CreateDatasetTest(APITestCase):
         self.project = r.json()
 
         self.valid_payloads = [
-            valid_dataset_1(self.project["identifier"])
+            valid_dataset_1(self.project["identifier"]),
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 2",
+                "dats_file": {},  # Valid dats_file JSON object
+            },
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 3",
+                "dats_file": "{}",  # Valid dats_file JSON string
+            }
         ]
 
         self.dats_valid_payload = dats_dataset(self.project["identifier"], VALID_DATS_CREATORS)
@@ -78,7 +88,12 @@ class CreateDatasetTest(APITestCase):
                 "title": "Dataset 1",
                 "description": "Test Dataset",
                 "project": None
-            }
+            },
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 4",
+                "dats_file": "INVALID_JSON_STRING",
+            },
         ]
 
     def test_create_dataset(self):
