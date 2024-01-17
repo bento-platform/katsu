@@ -121,3 +121,62 @@ BaseDonorSchema = create_schema(
         ),
     ],
 )
+
+BasePrimaryDiagnosisSchema = create_schema(
+    PrimaryDiagnosis,
+    name="BasePrimaryDiagnosisSchema",
+    exclude=["uuid", "donor_uuid", "submitter_donor_id", "program_id"],
+    custom_fields=[
+        (
+            "submitter_primary_diagnosis_id",
+            str,
+            Field(pattern=ID_REGEX_PATTERNS, max_length=64),
+        ),
+        (
+            "date_of_diagnosis",
+            Optional[str],
+            Field(None, pattern=DATE_REGEX_PATTERNS, max_length=32),
+        ),
+        ("basis_of_diagnosis", Optional[BasisOfDiagnosisEnum], None),
+        ("lymph_nodes_examined_status", Optional[LymphNodeStatusEnum], None),
+        ("lymph_nodes_examined_method", Optional[LymphNodeMethodEnum], None),
+        ("clinical_tumour_staging_system", Optional[TumourStagingSystemEnum], None),
+        ("clinical_t_category", Optional[TCategoryEnum], None),
+        ("clinical_n_category", Optional[NCategoryEnum], None),
+        ("clinical_m_category", Optional[MCategoryEnum], None),
+        ("clinical_stage_group", Optional[StageGroupEnum], None),
+        ("laterality", Optional[PrimaryDiagnosisLateralityEnum], None),
+    ],
+)
+
+BaseSpecimenSchema = create_schema(
+    Specimen,
+    name="BaseSpecimenSchema",
+    exclude=[
+        "uuid",
+        "donor_uuid",
+        "primary_diagnosis_uuid",
+        "submitter_donor_id",
+        "program_id",
+    ],
+    custom_fields=[
+        ("submitter_specimen_id", str, Field(pattern=ID_REGEX_PATTERNS, max_length=64)),
+        ("pathological_tumour_staging_system", Optional[TumourStagingSystemEnum], None),
+        ("pathological_t_category", Optional[TCategoryEnum], None),
+        ("pathological_n_category", Optional[NCategoryEnum], None),
+        ("pathological_m_category", Optional[MCategoryEnum], None),
+        ("pathological_stage_group", Optional[StageGroupEnum], None),
+        ("specimen_collection_date", Optional[str], Field(None, pattern=DATE_REGEX_PATTERNS, max_length=32)),
+        ("specimen_storage", Optional[StorageEnum], None),
+        ("tumour_histological_type", Optional[str], Field(None, max_length=128, pattern=MORPHOLOGY_REGEX_PATTERNS)),
+        ("specimen_anatomic_location", Optional[str], Field(None, max_length=32, pattern=TOPOGRAPHY_REGEX_PATTERNS)),
+        ("reference_pathology_confirmed_diagnosis", Optional[ConfirmedDiagnosisTumourEnum], None),
+        ("reference_pathology_confirmed_tumour_presence", Optional[ConfirmedDiagnosisTumourEnum], None),
+        ("tumour_grading_system", Optional[TumourGradingSystemEnum], None),
+        ("tumour_grade", Optional[TumourGradeEnum], None),
+        ("percent_tumour_cells_range", Optional[PercentCellsRangeEnum], None),
+        ("percent_tumour_cells_measurement_method", Optional[CellsMeasureMethodEnum], None),
+        ("specimen_processing", Optional[SpecimenProcessingEnum], None),
+        ("specimen_laterality", Optional[SpecimenLateralityEnum], None),
+    ],
+)

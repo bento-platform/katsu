@@ -18,6 +18,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
+from chord_metadata_service.mohpackets.schemas.base import BaseDonorSchema, BasePrimaryDiagnosisSchema
 from chord_metadata_service.mohpackets.schemas.model import DonorModelSchema, PrimaryDiagnosisModelSchema
 
 
@@ -194,18 +195,39 @@ class NestedSpecimenSchema(ModelSchema):
             "primary_diagnosis_uuid",
         ]
 
-class NestedPrimaryDiagnosisSchema(PrimaryDiagnosisModelSchema):
+# class NestedPrimaryDiagnosisSchema(PrimaryDiagnosisModelSchema):
+#     specimens: List[NestedSpecimenSchema] = Field(None, alias="specimen_set")
+#     treatments: List[NestedTreatmentSchema] = Field(None, alias="treatment_set")
+#     followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
+
+
+#     class Meta:
+#         model = Donor
+#         exclude = ["uuid", "donor_uuid", "submitter_donor_id", "program_id"]
+
+
+# class DonorWithClinicalDataSchema(ModelSchema):
+#     primary_diagnoses: List[NestedPrimaryDiagnosisSchema] = Field(
+#         None, alias="primarydiagnosis_set"
+#     )
+#     followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
+#     biomarkers: List[NestedBiomarkerSchema] = Field(None, alias="biomarker_set")
+#     exposures: List[NestedExposureSchema] = Field(None, alias="exposure_set")
+#     comorbidities: List[NestedComorbiditySchema] = Field(None, alias="comorbidity_set")
+
+    
+
+#     class Meta:
+#         model = Donor
+#         exclude = ["uuid"]
+
+class NestedPrimaryDiagnosisSchema(BasePrimaryDiagnosisSchema):
     specimens: List[NestedSpecimenSchema] = Field(None, alias="specimen_set")
     treatments: List[NestedTreatmentSchema] = Field(None, alias="treatment_set")
     followups: List[NestedFollowUpSchema] = Field(None, alias="followup_set")
 
-
-    class Meta:
-        model = Donor
-        exclude = ["uuid", "donor_uuid", "submitter_donor_id", "program_id"]
-
-
-class DonorWithClinicalDataSchema(ModelSchema):
+class DonorWithClinicalDataSchema(BaseDonorSchema):
+    program_id: str = Field(..., alias="program_id_id")
     primary_diagnoses: List[NestedPrimaryDiagnosisSchema] = Field(
         None, alias="primarydiagnosis_set"
     )
@@ -214,8 +236,3 @@ class DonorWithClinicalDataSchema(ModelSchema):
     exposures: List[NestedExposureSchema] = Field(None, alias="exposure_set")
     comorbidities: List[NestedComorbiditySchema] = Field(None, alias="comorbidity_set")
 
-    
-
-    class Meta:
-        model = Donor
-        exclude = ["uuid"]
