@@ -85,6 +85,21 @@ from chord_metadata_service.mohpackets.permissible_values import (
 )
 
 
+"""
+Module containing base schemas for clinical data models.
+
+All fields are derived from the model, excluding 'uuid'.
+Custom validations, such as regex and permissible choices, have been included.
+
+Author: Son Chau
+"""
+
+########################################
+#                                      #
+#           MODEL SCHEMA               #
+#                                      #
+########################################
+
 BaseProgramSchema = create_schema(
     Program,
     name="BaseProgramSchema",
