@@ -3,7 +3,7 @@
     "info": {
         "title": "MoH Service API",
         "version": "3.0.0",
-        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/b3e637c47699bf4ed1c137171248f44659cd1868/chord_metadata_service/mohpackets/docs/schema.json"
+        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/d6516a38754bb8841817b1fc2fce1fa53a46b436/chord_metadata_service/mohpackets/docs/schema.json"
     },
     "paths": {
         "/v2/service-info": {
@@ -4822,10 +4822,16 @@
             "ProgramIngestSchema": {
                 "properties": {
                     "program_id": {
-                        "maxLength": 64,
-                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
-                        "title": "Program Id",
-                        "type": "string"
+                        "anyOf": [
+                            {
+                                "maxLength": 64,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Program Id"
                     },
                     "metadata": {
                         "anyOf": [
@@ -4849,32 +4855,25 @@
                         "type": "string"
                     }
                 },
-                "required": [
-                    "program_id"
-                ],
                 "title": "ProgramIngestSchema",
                 "type": "object"
             },
-            "CauseOfDeathEnum": {
-                "enum": [
-                    "Died of cancer",
-                    "Died of other reasons",
-                    "Unknown"
-                ],
-                "title": "CauseOfDeathEnum",
-                "type": "string"
-            },
             "DonorIngestSchema": {
                 "properties": {
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "program_id_id": {
+                    "program_id": {
                         "title": "Program Id",
                         "type": "string"
+                    },
+                    "uuid": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Uuid"
                     },
                     "gender": {
                         "anyOf": [
@@ -4886,15 +4885,22 @@
                             }
                         ]
                     },
+                    "submitter_donor_id": {
+                        "maxLength": 64,
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
                     "sex_at_birth": {
                         "anyOf": [
                             {
-                                "$ref": "#/components/schemas/SexAtBirthEnum"
+                                "maxLength": 32,
+                                "type": "string"
                             },
                             {
                                 "type": "null"
                             }
-                        ]
+                        ],
+                        "title": "Sex At Birth"
                     },
                     "is_deceased": {
                         "anyOf": [
@@ -4922,18 +4928,19 @@
                     "lost_to_followup_reason": {
                         "anyOf": [
                             {
-                                "$ref": "#/components/schemas/LostToFollowupReasonEnum"
+                                "maxLength": 255,
+                                "type": "string"
                             },
                             {
                                 "type": "null"
                             }
-                        ]
+                        ],
+                        "title": "Lost To Followup Reason"
                     },
                     "date_alive_after_lost_to_followup": {
                         "anyOf": [
                             {
                                 "maxLength": 32,
-                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
                                 "type": "string"
                             },
                             {
@@ -4945,18 +4952,19 @@
                     "cause_of_death": {
                         "anyOf": [
                             {
-                                "$ref": "#/components/schemas/CauseOfDeathEnum"
+                                "maxLength": 255,
+                                "type": "string"
                             },
                             {
                                 "type": "null"
                             }
-                        ]
+                        ],
+                        "title": "Cause Of Death"
                     },
                     "date_of_birth": {
                         "anyOf": [
                             {
                                 "maxLength": 32,
-                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
                                 "type": "string"
                             },
                             {
@@ -4969,7 +4977,6 @@
                         "anyOf": [
                             {
                                 "maxLength": 32,
-                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
                                 "type": "string"
                             },
                             {
@@ -4981,9 +4988,7 @@
                     "primary_site": {
                         "anyOf": [
                             {
-                                "items": {
-                                    "$ref": "#/components/schemas/PrimarySiteEnum"
-                                },
+                                "items": {},
                                 "type": "array"
                             },
                             {
@@ -4991,27 +4996,11 @@
                             }
                         ],
                         "title": "Primary Site"
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "uuid": {
-                        "anyOf": [
-                            {
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Uuid"
                     }
                 },
                 "required": [
-                    "submitter_donor_id",
-                    "program_id_id",
-                    "program_id"
+                    "program_id",
+                    "submitter_donor_id"
                 ],
                 "title": "DonorIngestSchema",
                 "type": "object"
@@ -5023,104 +5012,6 @@
                     "Non-binary"
                 ],
                 "title": "GenderEnum",
-                "type": "string"
-            },
-            "LostToFollowupReasonEnum": {
-                "enum": [
-                    "Completed study",
-                    "Discharged to palliative care",
-                    "Lost contact",
-                    "Not applicable",
-                    "Unknown",
-                    "Withdrew from study"
-                ],
-                "title": "LostToFollowupReasonEnum",
-                "type": "string"
-            },
-            "PrimarySiteEnum": {
-                "enum": [
-                    "Accessory sinuses",
-                    "Adrenal gland",
-                    "Anus and anal canal",
-                    "Base of tongue",
-                    "Bladder",
-                    "Bones, joints and articular cartilage of limbs",
-                    "Bones, joints and articular cartilage of other and unspecified sites",
-                    "Brain",
-                    "Breast",
-                    "Bronchus and lung",
-                    "Cervix uteri",
-                    "Colon",
-                    "Connective, subcutaneous and other soft tissues",
-                    "Corpus uteri",
-                    "Esophagus",
-                    "Eye and adnexa",
-                    "Floor of mouth",
-                    "Gallbladder",
-                    "Gum",
-                    "Heart, mediastinum, and pleura",
-                    "Hematopoietic and reticuloendothelial systems",
-                    "Hypopharynx",
-                    "Kidney",
-                    "Larynx",
-                    "Lip",
-                    "Liver and intrahepatic bile ducts",
-                    "Lymph nodes",
-                    "Meninges",
-                    "Nasal cavity and middle ear",
-                    "Nasopharynx",
-                    "Oropharynx",
-                    "Other and ill-defined digestive organs",
-                    "Other and ill-defined sites",
-                    "Other and ill-defined sites in lip, oral cavity and pharynx",
-                    "Other and ill-defined sites within respiratory system and intrathoracic organs",
-                    "Other and unspecified female genital organs",
-                    "Other and unspecified major salivary glands",
-                    "Other and unspecified male genital organs",
-                    "Other and unspecified parts of biliary tract",
-                    "Other and unspecified parts of mouth",
-                    "Other and unspecified parts of tongue",
-                    "Other and unspecified urinary organs",
-                    "Other endocrine glands and related structures",
-                    "Ovary",
-                    "Palate",
-                    "Pancreas",
-                    "Parotid gland",
-                    "Penis",
-                    "Peripheral nerves and autonomic nervous system",
-                    "Placenta",
-                    "Prostate gland",
-                    "Pyriform sinus",
-                    "Rectosigmoid junction",
-                    "Rectum",
-                    "Renal pelvis",
-                    "Retroperitoneum and peritoneum",
-                    "Skin",
-                    "Small intestine",
-                    "Spinal cord, cranial nerves, and other parts of central nervous system",
-                    "Stomach",
-                    "Testis",
-                    "Thymus",
-                    "Thyroid gland",
-                    "Tonsil",
-                    "Trachea",
-                    "Ureter",
-                    "Uterus, NOS",
-                    "Vagina",
-                    "Vulva",
-                    "Unknown primary site"
-                ],
-                "title": "PrimarySiteEnum",
-                "type": "string"
-            },
-            "SexAtBirthEnum": {
-                "enum": [
-                    "Male",
-                    "Female",
-                    "Other",
-                    "Unknown"
-                ],
-                "title": "SexAtBirthEnum",
                 "type": "string"
             },
             "BiomarkerIngestSchema": {
@@ -7106,8 +6997,143 @@
                 "title": "BasisOfDiagnosisEnum",
                 "type": "string"
             },
+            "CauseOfDeathEnum": {
+                "enum": [
+                    "Died of cancer",
+                    "Died of other reasons",
+                    "Unknown"
+                ],
+                "title": "CauseOfDeathEnum",
+                "type": "string"
+            },
             "DonorWithClinicalDataSchema": {
                 "properties": {
+                    "submitter_donor_id": {
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "gender": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/GenderEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "sex_at_birth": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/SexAtBirthEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "is_deceased": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Is Deceased"
+                    },
+                    "lost_to_followup_after_clinical_event_identifier": {
+                        "anyOf": [
+                            {
+                                "maxLength": 255,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Lost To Followup After Clinical Event Identifier"
+                    },
+                    "lost_to_followup_reason": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/LostToFollowupReasonEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "date_alive_after_lost_to_followup": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Alive After Lost To Followup"
+                    },
+                    "cause_of_death": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/CauseOfDeathEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "date_of_birth": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Birth"
+                    },
+                    "date_of_death": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Death"
+                    },
+                    "primary_site": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "$ref": "#/components/schemas/PrimarySiteEnum"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Primary Site"
+                    },
                     "primary_diagnoses": {
                         "items": {
                             "$ref": "#/components/schemas/NestedPrimaryDiagnosisSchema"
@@ -7142,134 +7168,6 @@
                         },
                         "title": "Comorbidities",
                         "type": "array"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "gender": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Gender"
-                    },
-                    "sex_at_birth": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Sex At Birth"
-                    },
-                    "is_deceased": {
-                        "anyOf": [
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Deceased"
-                    },
-                    "lost_to_followup_after_clinical_event_identifier": {
-                        "anyOf": [
-                            {
-                                "maxLength": 255,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Lost To Followup After Clinical Event Identifier"
-                    },
-                    "lost_to_followup_reason": {
-                        "anyOf": [
-                            {
-                                "maxLength": 255,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Lost To Followup Reason"
-                    },
-                    "date_alive_after_lost_to_followup": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Date Alive After Lost To Followup"
-                    },
-                    "cause_of_death": {
-                        "anyOf": [
-                            {
-                                "maxLength": 255,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Cause Of Death"
-                    },
-                    "date_of_birth": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Date Of Birth"
-                    },
-                    "date_of_death": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Date Of Death"
-                    },
-                    "primary_site": {
-                        "anyOf": [
-                            {
-                                "items": {},
-                                "type": "array"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Primary Site"
                     }
                 },
                 "required": [
@@ -7278,6 +7176,18 @@
                 ],
                 "title": "DonorWithClinicalDataSchema",
                 "type": "object"
+            },
+            "LostToFollowupReasonEnum": {
+                "enum": [
+                    "Completed study",
+                    "Discharged to palliative care",
+                    "Lost contact",
+                    "Not applicable",
+                    "Unknown",
+                    "Withdrew from study"
+                ],
+                "title": "LostToFollowupReasonEnum",
+                "type": "string"
             },
             "LymphNodeMethodEnum": {
                 "enum": [
@@ -8084,10 +7994,32 @@
                         ],
                         "title": "Date Of Diagnosis"
                     },
+                    "cancer_type_code": {
+                        "anyOf": [
+                            {
+                                "maxLength": 64,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cancer Type Code"
+                    },
                     "basis_of_diagnosis": {
                         "anyOf": [
                             {
                                 "$ref": "#/components/schemas/BasisOfDiagnosisEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "laterality": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PrimaryDiagnosisLateralityEnum"
                             },
                             {
                                 "type": "null"
@@ -8113,6 +8045,17 @@
                                 "type": "null"
                             }
                         ]
+                    },
+                    "number_lymph_nodes_positive": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Number Lymph Nodes Positive"
                     },
                     "clinical_tumour_staging_system": {
                         "anyOf": [
@@ -8164,55 +8107,6 @@
                             }
                         ]
                     },
-                    "laterality": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/PrimaryDiagnosisLateralityEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "anyOf": [
-                            {
-                                "maxLength": 64,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Submitter Donor Id"
-                    },
-                    "cancer_type_code": {
-                        "anyOf": [
-                            {
-                                "maxLength": 64,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Cancer Type Code"
-                    },
-                    "number_lymph_nodes_positive": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Number Lymph Nodes Positive"
-                    },
                     "specimens": {
                         "items": {
                             "$ref": "#/components/schemas/NestedSpecimenSchema"
@@ -8236,8 +8130,7 @@
                     }
                 },
                 "required": [
-                    "submitter_primary_diagnosis_id",
-                    "program_id"
+                    "submitter_primary_diagnosis_id"
                 ],
                 "title": "NestedPrimaryDiagnosisSchema",
                 "type": "object"
@@ -8995,6 +8888,92 @@
                     "Unknown"
                 ],
                 "title": "PrimaryDiagnosisLateralityEnum",
+                "type": "string"
+            },
+            "PrimarySiteEnum": {
+                "enum": [
+                    "Accessory sinuses",
+                    "Adrenal gland",
+                    "Anus and anal canal",
+                    "Base of tongue",
+                    "Bladder",
+                    "Bones, joints and articular cartilage of limbs",
+                    "Bones, joints and articular cartilage of other and unspecified sites",
+                    "Brain",
+                    "Breast",
+                    "Bronchus and lung",
+                    "Cervix uteri",
+                    "Colon",
+                    "Connective, subcutaneous and other soft tissues",
+                    "Corpus uteri",
+                    "Esophagus",
+                    "Eye and adnexa",
+                    "Floor of mouth",
+                    "Gallbladder",
+                    "Gum",
+                    "Heart, mediastinum, and pleura",
+                    "Hematopoietic and reticuloendothelial systems",
+                    "Hypopharynx",
+                    "Kidney",
+                    "Larynx",
+                    "Lip",
+                    "Liver and intrahepatic bile ducts",
+                    "Lymph nodes",
+                    "Meninges",
+                    "Nasal cavity and middle ear",
+                    "Nasopharynx",
+                    "Oropharynx",
+                    "Other and ill-defined digestive organs",
+                    "Other and ill-defined sites",
+                    "Other and ill-defined sites in lip, oral cavity and pharynx",
+                    "Other and ill-defined sites within respiratory system and intrathoracic organs",
+                    "Other and unspecified female genital organs",
+                    "Other and unspecified major salivary glands",
+                    "Other and unspecified male genital organs",
+                    "Other and unspecified parts of biliary tract",
+                    "Other and unspecified parts of mouth",
+                    "Other and unspecified parts of tongue",
+                    "Other and unspecified urinary organs",
+                    "Other endocrine glands and related structures",
+                    "Ovary",
+                    "Palate",
+                    "Pancreas",
+                    "Parotid gland",
+                    "Penis",
+                    "Peripheral nerves and autonomic nervous system",
+                    "Placenta",
+                    "Prostate gland",
+                    "Pyriform sinus",
+                    "Rectosigmoid junction",
+                    "Rectum",
+                    "Renal pelvis",
+                    "Retroperitoneum and peritoneum",
+                    "Skin",
+                    "Small intestine",
+                    "Spinal cord, cranial nerves, and other parts of central nervous system",
+                    "Stomach",
+                    "Testis",
+                    "Thymus",
+                    "Thyroid gland",
+                    "Tonsil",
+                    "Trachea",
+                    "Ureter",
+                    "Uterus, NOS",
+                    "Vagina",
+                    "Vulva",
+                    "Unknown primary site"
+                ],
+                "title": "PrimarySiteEnum",
+                "type": "string"
+            },
+            "SexAtBirthEnum": {
+                "enum": [
+                    "Male",
+                    "Female",
+                    "Other",
+                    "Unknown"
+                ],
+                "title": "SexAtBirthEnum",
                 "type": "string"
             },
             "StageGroupEnum": {
@@ -9865,10 +9844,32 @@
                         ],
                         "title": "Date Of Diagnosis"
                     },
+                    "cancer_type_code": {
+                        "anyOf": [
+                            {
+                                "maxLength": 64,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Cancer Type Code"
+                    },
                     "basis_of_diagnosis": {
                         "anyOf": [
                             {
                                 "$ref": "#/components/schemas/BasisOfDiagnosisEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "laterality": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PrimaryDiagnosisLateralityEnum"
                             },
                             {
                                 "type": "null"
@@ -9894,6 +9895,17 @@
                                 "type": "null"
                             }
                         ]
+                    },
+                    "number_lymph_nodes_positive": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Number Lymph Nodes Positive"
                     },
                     "clinical_tumour_staging_system": {
                         "anyOf": [
@@ -9945,59 +9957,19 @@
                             }
                         ]
                     },
-                    "laterality": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/PrimaryDiagnosisLateralityEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "anyOf": [
-                            {
-                                "maxLength": 64,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Submitter Donor Id"
-                    },
-                    "cancer_type_code": {
-                        "anyOf": [
-                            {
-                                "maxLength": 64,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Cancer Type Code"
-                    },
-                    "number_lymph_nodes_positive": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Number Lymph Nodes Positive"
+                        "title": "Submitter Donor Id",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "submitter_primary_diagnosis_id",
-                    "program_id"
+                    "program_id",
+                    "submitter_donor_id"
                 ],
                 "title": "PrimaryDiagnosisModelSchema",
                 "type": "object"
@@ -13420,6 +13392,10 @@
                         "title": "Submitter Specimen Id",
                         "type": "string"
                     },
+                    "submitter_primary_diagnosis_id": {
+                        "title": "Submitter Primary Diagnosis Id",
+                        "type": "string"
+                    },
                     "pathological_tumour_staging_system": {
                         "anyOf": [
                             {
@@ -13493,6 +13469,16 @@
                             }
                         ]
                     },
+                    "specimen_processing": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/SpecimenProcessingEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "tumour_histological_type": {
                         "anyOf": [
                             {
@@ -13518,6 +13504,16 @@
                             }
                         ],
                         "title": "Specimen Anatomic Location"
+                    },
+                    "specimen_laterality": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/SpecimenLateralityEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
                     },
                     "reference_pathology_confirmed_diagnosis": {
                         "anyOf": [
@@ -13579,46 +13575,20 @@
                             }
                         ]
                     },
-                    "specimen_processing": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/SpecimenProcessingEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "specimen_laterality": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/SpecimenLateralityEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "maxLength": 64,
                         "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "submitter_primary_diagnosis_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Primary Diagnosis Id",
                         "type": "string"
                     }
                 },
                 "required": [
                     "submitter_specimen_id",
+                    "submitter_primary_diagnosis_id",
                     "program_id",
-                    "submitter_donor_id",
-                    "submitter_primary_diagnosis_id"
+                    "submitter_donor_id"
                 ],
                 "title": "SpecimenModelSchema",
                 "type": "object"

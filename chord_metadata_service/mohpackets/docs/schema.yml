@@ -742,26 +742,25 @@ components:
       properties:
         cause_of_death:
           anyOf:
-          - $ref: '#/components/schemas/CauseOfDeathEnum'
+          - maxLength: 255
+            type: string
           - type: 'null'
+          title: Cause Of Death
         date_alive_after_lost_to_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Alive After Lost To Followup
         date_of_birth:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Birth
         date_of_death:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Death
@@ -782,28 +781,27 @@ components:
           title: Lost To Followup After Clinical Event Identifier
         lost_to_followup_reason:
           anyOf:
-          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
+          - maxLength: 255
+            type: string
           - type: 'null'
+          title: Lost To Followup Reason
         primary_site:
           anyOf:
-          - items:
-              $ref: '#/components/schemas/PrimarySiteEnum'
+          - items: {}
             type: array
           - type: 'null'
           title: Primary Site
         program_id:
           title: Program Id
           type: string
-        program_id_id:
-          title: Program Id
-          type: string
         sex_at_birth:
           anyOf:
-          - $ref: '#/components/schemas/SexAtBirthEnum'
+          - maxLength: 32
+            type: string
           - type: 'null'
+          title: Sex At Birth
         submitter_donor_id:
           maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
           title: Submitter Donor Id
           type: string
         uuid:
@@ -812,9 +810,8 @@ components:
           - type: 'null'
           title: Uuid
       required:
-      - submitter_donor_id
-      - program_id_id
       - program_id
+      - submitter_donor_id
       title: DonorIngestSchema
       type: object
     DonorModelSchema:
@@ -896,10 +893,8 @@ components:
           type: array
         cause_of_death:
           anyOf:
-          - maxLength: 255
-            type: string
+          - $ref: '#/components/schemas/CauseOfDeathEnum'
           - type: 'null'
-          title: Cause Of Death
         comorbidities:
           items:
             $ref: '#/components/schemas/NestedComorbiditySchema'
@@ -908,18 +903,21 @@ components:
         date_alive_after_lost_to_followup:
           anyOf:
           - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Alive After Lost To Followup
         date_of_birth:
           anyOf:
           - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Birth
         date_of_death:
           anyOf:
           - maxLength: 32
+            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Death
@@ -935,10 +933,8 @@ components:
           type: array
         gender:
           anyOf:
-          - maxLength: 32
-            type: string
+          - $ref: '#/components/schemas/GenderEnum'
           - type: 'null'
-          title: Gender
         is_deceased:
           anyOf:
           - type: boolean
@@ -952,10 +948,8 @@ components:
           title: Lost To Followup After Clinical Event Identifier
         lost_to_followup_reason:
           anyOf:
-          - maxLength: 255
-            type: string
+          - $ref: '#/components/schemas/LostToFollowupReasonEnum'
           - type: 'null'
-          title: Lost To Followup Reason
         primary_diagnoses:
           items:
             $ref: '#/components/schemas/NestedPrimaryDiagnosisSchema'
@@ -963,7 +957,8 @@ components:
           type: array
         primary_site:
           anyOf:
-          - items: {}
+          - items:
+              $ref: '#/components/schemas/PrimarySiteEnum'
             type: array
           - type: 'null'
           title: Primary Site
@@ -972,12 +967,11 @@ components:
           type: string
         sex_at_birth:
           anyOf:
-          - maxLength: 32
-            type: string
+          - $ref: '#/components/schemas/SexAtBirthEnum'
           - type: 'null'
-          title: Sex At Birth
         submitter_donor_id:
           maxLength: 64
+          pattern: ^[A-Za-z0-9\-\._]{1,64}
           title: Submitter Donor Id
           type: string
       required:
@@ -2318,20 +2312,11 @@ components:
           - type: integer
           - type: 'null'
           title: Number Lymph Nodes Positive
-        program_id:
-          title: Program Id
-          type: string
         specimens:
           items:
             $ref: '#/components/schemas/NestedSpecimenSchema'
           title: Specimens
           type: array
-        submitter_donor_id:
-          anyOf:
-          - maxLength: 64
-            type: string
-          - type: 'null'
-          title: Submitter Donor Id
         submitter_primary_diagnosis_id:
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
@@ -2344,7 +2329,6 @@ components:
           type: array
       required:
       - submitter_primary_diagnosis_id
-      - program_id
       title: NestedPrimaryDiagnosisSchema
       type: object
     NestedRadiationSchema:
@@ -3433,11 +3417,8 @@ components:
           title: Program Id
           type: string
         submitter_donor_id:
-          anyOf:
-          - maxLength: 64
-            type: string
-          - type: 'null'
           title: Submitter Donor Id
+          type: string
         submitter_primary_diagnosis_id:
           maxLength: 64
           pattern: ^[A-Za-z0-9\-\._]{1,64}
@@ -3446,6 +3427,7 @@ components:
       required:
       - submitter_primary_diagnosis_id
       - program_id
+      - submitter_donor_id
       title: PrimaryDiagnosisModelSchema
       type: object
     PrimarySiteEnum:
@@ -3554,16 +3536,15 @@ components:
           - type: 'null'
           title: Metadata
         program_id:
-          maxLength: 64
-          pattern: ^[A-Za-z0-9\-\._]{1,64}
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
           title: Program Id
-          type: string
         updated:
           format: date-time
           title: Updated
           type: string
-      required:
-      - program_id
       title: ProgramIngestSchema
       type: object
     ProgramModelSchema:
@@ -4539,11 +4520,9 @@ components:
           - $ref: '#/components/schemas/StorageEnum'
           - type: 'null'
         submitter_donor_id:
-          maxLength: 64
           title: Submitter Donor Id
           type: string
         submitter_primary_diagnosis_id:
-          maxLength: 64
           title: Submitter Primary Diagnosis Id
           type: string
         submitter_specimen_id:
@@ -4568,9 +4547,9 @@ components:
           title: Tumour Histological Type
       required:
       - submitter_specimen_id
+      - submitter_primary_diagnosis_id
       - program_id
       - submitter_donor_id
-      - submitter_primary_diagnosis_id
       title: SpecimenModelSchema
       type: object
     SpecimenProcessingEnum:
@@ -5651,7 +5630,7 @@ components:
       scheme: bearer
       type: http
 info:
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/b3e637c47699bf4ed1c137171248f44659cd1868/chord_metadata_service/mohpackets/docs/schema.json
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/d6516a38754bb8841817b1fc2fce1fa53a46b436/chord_metadata_service/mohpackets/docs/schema.json
   title: MoH Service API
   version: 3.0.0
 openapi: 3.1.0

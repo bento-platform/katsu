@@ -1,7 +1,7 @@
 
 <h1 id="moh-service-api">MoH Service API v3.0.0</h1>
 
-This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/b3e637c47699bf4ed1c137171248f44659cd1868/chord_metadata_service/mohpackets/docs/schema.json
+This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/d6516a38754bb8841817b1fc2fce1fa53a46b436/chord_metadata_service/mohpackets/docs/schema.json
 
 Base URLs:
 
@@ -279,23 +279,35 @@ Base URLs:
 
 ```json
 {
+  "submitter_donor_id": "string",
+  "program_id": "string",
+  "gender": "Man",
+  "sex_at_birth": "Male",
+  "is_deceased": true,
+  "lost_to_followup_after_clinical_event_identifier": "string",
+  "lost_to_followup_reason": "Completed study",
+  "date_alive_after_lost_to_followup": "string",
+  "cause_of_death": "Died of cancer",
+  "date_of_birth": "string",
+  "date_of_death": "string",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "primary_diagnoses": [
     {
       "submitter_primary_diagnosis_id": "string",
       "date_of_diagnosis": "string",
+      "cancer_type_code": "string",
       "basis_of_diagnosis": "Clinical investigation",
+      "laterality": "Bilateral",
       "lymph_nodes_examined_status": "Cannot be determined",
       "lymph_nodes_examined_method": "Imaging",
+      "number_lymph_nodes_positive": 0,
       "clinical_tumour_staging_system": "AJCC 8th edition",
       "clinical_t_category": "T0",
       "clinical_n_category": "N0",
       "clinical_m_category": "M0",
       "clinical_stage_group": "Stage 0",
-      "laterality": "Bilateral",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "cancer_type_code": "string",
-      "number_lymph_nodes_positive": 0,
       "specimens": [
         {
           "sample_registrations": [
@@ -515,20 +527,6 @@ Base URLs:
       "comorbidity_treatment_status": "string",
       "comorbidity_treatment": "string"
     }
-  ],
-  "submitter_donor_id": "string",
-  "program_id": "string",
-  "gender": "string",
-  "sex_at_birth": "string",
-  "is_deceased": true,
-  "lost_to_followup_after_clinical_event_identifier": "string",
-  "lost_to_followup_reason": "string",
-  "date_alive_after_lost_to_followup": "string",
-  "cause_of_death": "string",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": [
-    null
   ]
 }
 ```
@@ -666,19 +664,19 @@ Base URLs:
     {
       "submitter_primary_diagnosis_id": "string",
       "date_of_diagnosis": "string",
+      "cancer_type_code": "string",
       "basis_of_diagnosis": "Clinical investigation",
+      "laterality": "Bilateral",
       "lymph_nodes_examined_status": "Cannot be determined",
       "lymph_nodes_examined_method": "Imaging",
+      "number_lymph_nodes_positive": 0,
       "clinical_tumour_staging_system": "AJCC 8th edition",
       "clinical_t_category": "T0",
       "clinical_n_category": "N0",
       "clinical_m_category": "M0",
       "clinical_stage_group": "Stage 0",
-      "laterality": "Bilateral",
       "program_id": "string",
-      "submitter_donor_id": "string",
-      "cancer_type_code": "string",
-      "number_lymph_nodes_positive": 0
+      "submitter_donor_id": "string"
     }
   ],
   "count": 0,
@@ -1209,6 +1207,7 @@ Base URLs:
   "items": [
     {
       "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
       "pathological_tumour_staging_system": "AJCC 8th edition",
       "pathological_t_category": "T0",
       "pathological_n_category": "N0",
@@ -1216,19 +1215,18 @@ Base URLs:
       "pathological_stage_group": "Stage 0",
       "specimen_collection_date": "string",
       "specimen_storage": "Cut slide",
+      "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
       "tumour_histological_type": "string",
       "specimen_anatomic_location": "string",
+      "specimen_laterality": "Left",
       "reference_pathology_confirmed_diagnosis": "Yes",
       "reference_pathology_confirmed_tumour_presence": "Yes",
       "tumour_grading_system": "FNCLCC grading system",
       "tumour_grade": "Low grade",
       "percent_tumour_cells_range": "0-19%",
       "percent_tumour_cells_measurement_method": "Genomics",
-      "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
-      "specimen_laterality": "Left",
       "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
+      "submitter_donor_id": "string"
     }
   ],
   "count": 0,
@@ -1900,7 +1898,24 @@ ProgramIngestSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|program_id|string|true|none|none|
+|program_id|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |metadata|any|false|none|none|
 
 anyOf
@@ -1922,34 +1937,6 @@ continued
 |created|string(date-time)|false|none|none|
 |updated|string(date-time)|false|none|none|
 
-<h2 id="tocS_CauseOfDeathEnum">CauseOfDeathEnum</h2>
-
-<a id="schemacauseofdeathenum"></a>
-<a id="schema_CauseOfDeathEnum"></a>
-<a id="tocScauseofdeathenum"></a>
-<a id="tocscauseofdeathenum"></a>
-
-```json
-"Died of cancer"
-
-```
-
-CauseOfDeathEnum
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|CauseOfDeathEnum|string|false|none|none|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|CauseOfDeathEnum|Died of cancer|
-|CauseOfDeathEnum|Died of other reasons|
-|CauseOfDeathEnum|Unknown|
-
 <h2 id="tocS_DonorIngestSchema">DonorIngestSchema</h2>
 
 <a id="schemadonoringestschema"></a>
@@ -1959,22 +1946,21 @@ CauseOfDeathEnum
 
 ```json
 {
-  "submitter_donor_id": "string",
-  "program_id_id": "string",
+  "program_id": "string",
+  "uuid": "string",
   "gender": "Man",
-  "sex_at_birth": "Male",
+  "submitter_donor_id": "string",
+  "sex_at_birth": "string",
   "is_deceased": true,
   "lost_to_followup_after_clinical_event_identifier": "string",
-  "lost_to_followup_reason": "Completed study",
+  "lost_to_followup_reason": "string",
   "date_alive_after_lost_to_followup": "string",
-  "cause_of_death": "Died of cancer",
+  "cause_of_death": "string",
   "date_of_birth": "string",
   "date_of_death": "string",
   "primary_site": [
-    "Accessory sinuses"
-  ],
-  "program_id": "string",
-  "uuid": "string"
+    null
+  ]
 }
 
 ```
@@ -1985,8 +1971,25 @@ DonorIngestSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|submitter_donor_id|string|true|none|none|
-|program_id_id|string|true|none|none|
+|program_id|string|true|none|none|
+|uuid|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |gender|any|false|none|none|
 
 anyOf
@@ -2005,13 +2008,14 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|submitter_donor_id|string|true|none|none|
 |sex_at_birth|any|false|none|none|
 
 anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[SexAtBirthEnum](#schemasexatbirthenum)|false|none|none|
+|» *anonymous*|string|false|none|none|
 
 or
 
@@ -2065,7 +2069,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[LostToFollowupReasonEnum](#schemalosttofollowupreasonenum)|false|none|none|
+|» *anonymous*|string|false|none|none|
 
 or
 
@@ -2101,7 +2105,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[CauseOfDeathEnum](#schemacauseofdeathenum)|false|none|none|
+|» *anonymous*|string|false|none|none|
 
 or
 
@@ -2155,26 +2159,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[[PrimarySiteEnum](#schemaprimarysiteenum)]|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|true|none|none|
-|uuid|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
+|» *anonymous*|[any]|false|none|none|
 
 or
 
@@ -2209,161 +2194,6 @@ GenderEnum
 |GenderEnum|Man|
 |GenderEnum|Woman|
 |GenderEnum|Non-binary|
-
-<h2 id="tocS_LostToFollowupReasonEnum">LostToFollowupReasonEnum</h2>
-
-<a id="schemalosttofollowupreasonenum"></a>
-<a id="schema_LostToFollowupReasonEnum"></a>
-<a id="tocSlosttofollowupreasonenum"></a>
-<a id="tocslosttofollowupreasonenum"></a>
-
-```json
-"Completed study"
-
-```
-
-LostToFollowupReasonEnum
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|LostToFollowupReasonEnum|string|false|none|none|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|LostToFollowupReasonEnum|Completed study|
-|LostToFollowupReasonEnum|Discharged to palliative care|
-|LostToFollowupReasonEnum|Lost contact|
-|LostToFollowupReasonEnum|Not applicable|
-|LostToFollowupReasonEnum|Unknown|
-|LostToFollowupReasonEnum|Withdrew from study|
-
-<h2 id="tocS_PrimarySiteEnum">PrimarySiteEnum</h2>
-
-<a id="schemaprimarysiteenum"></a>
-<a id="schema_PrimarySiteEnum"></a>
-<a id="tocSprimarysiteenum"></a>
-<a id="tocsprimarysiteenum"></a>
-
-```json
-"Accessory sinuses"
-
-```
-
-PrimarySiteEnum
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|PrimarySiteEnum|string|false|none|none|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|PrimarySiteEnum|Accessory sinuses|
-|PrimarySiteEnum|Adrenal gland|
-|PrimarySiteEnum|Anus and anal canal|
-|PrimarySiteEnum|Base of tongue|
-|PrimarySiteEnum|Bladder|
-|PrimarySiteEnum|Bones, joints and articular cartilage of limbs|
-|PrimarySiteEnum|Bones, joints and articular cartilage of other and unspecified sites|
-|PrimarySiteEnum|Brain|
-|PrimarySiteEnum|Breast|
-|PrimarySiteEnum|Bronchus and lung|
-|PrimarySiteEnum|Cervix uteri|
-|PrimarySiteEnum|Colon|
-|PrimarySiteEnum|Connective, subcutaneous and other soft tissues|
-|PrimarySiteEnum|Corpus uteri|
-|PrimarySiteEnum|Esophagus|
-|PrimarySiteEnum|Eye and adnexa|
-|PrimarySiteEnum|Floor of mouth|
-|PrimarySiteEnum|Gallbladder|
-|PrimarySiteEnum|Gum|
-|PrimarySiteEnum|Heart, mediastinum, and pleura|
-|PrimarySiteEnum|Hematopoietic and reticuloendothelial systems|
-|PrimarySiteEnum|Hypopharynx|
-|PrimarySiteEnum|Kidney|
-|PrimarySiteEnum|Larynx|
-|PrimarySiteEnum|Lip|
-|PrimarySiteEnum|Liver and intrahepatic bile ducts|
-|PrimarySiteEnum|Lymph nodes|
-|PrimarySiteEnum|Meninges|
-|PrimarySiteEnum|Nasal cavity and middle ear|
-|PrimarySiteEnum|Nasopharynx|
-|PrimarySiteEnum|Oropharynx|
-|PrimarySiteEnum|Other and ill-defined digestive organs|
-|PrimarySiteEnum|Other and ill-defined sites|
-|PrimarySiteEnum|Other and ill-defined sites in lip, oral cavity and pharynx|
-|PrimarySiteEnum|Other and ill-defined sites within respiratory system and intrathoracic organs|
-|PrimarySiteEnum|Other and unspecified female genital organs|
-|PrimarySiteEnum|Other and unspecified major salivary glands|
-|PrimarySiteEnum|Other and unspecified male genital organs|
-|PrimarySiteEnum|Other and unspecified parts of biliary tract|
-|PrimarySiteEnum|Other and unspecified parts of mouth|
-|PrimarySiteEnum|Other and unspecified parts of tongue|
-|PrimarySiteEnum|Other and unspecified urinary organs|
-|PrimarySiteEnum|Other endocrine glands and related structures|
-|PrimarySiteEnum|Ovary|
-|PrimarySiteEnum|Palate|
-|PrimarySiteEnum|Pancreas|
-|PrimarySiteEnum|Parotid gland|
-|PrimarySiteEnum|Penis|
-|PrimarySiteEnum|Peripheral nerves and autonomic nervous system|
-|PrimarySiteEnum|Placenta|
-|PrimarySiteEnum|Prostate gland|
-|PrimarySiteEnum|Pyriform sinus|
-|PrimarySiteEnum|Rectosigmoid junction|
-|PrimarySiteEnum|Rectum|
-|PrimarySiteEnum|Renal pelvis|
-|PrimarySiteEnum|Retroperitoneum and peritoneum|
-|PrimarySiteEnum|Skin|
-|PrimarySiteEnum|Small intestine|
-|PrimarySiteEnum|Spinal cord, cranial nerves, and other parts of central nervous system|
-|PrimarySiteEnum|Stomach|
-|PrimarySiteEnum|Testis|
-|PrimarySiteEnum|Thymus|
-|PrimarySiteEnum|Thyroid gland|
-|PrimarySiteEnum|Tonsil|
-|PrimarySiteEnum|Trachea|
-|PrimarySiteEnum|Ureter|
-|PrimarySiteEnum|Uterus, NOS|
-|PrimarySiteEnum|Vagina|
-|PrimarySiteEnum|Vulva|
-|PrimarySiteEnum|Unknown primary site|
-
-<h2 id="tocS_SexAtBirthEnum">SexAtBirthEnum</h2>
-
-<a id="schemasexatbirthenum"></a>
-<a id="schema_SexAtBirthEnum"></a>
-<a id="tocSsexatbirthenum"></a>
-<a id="tocssexatbirthenum"></a>
-
-```json
-"Male"
-
-```
-
-SexAtBirthEnum
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|SexAtBirthEnum|string|false|none|none|
-
-#### Enumerated Values
-
-|Property|Value|
-|---|---|
-|SexAtBirthEnum|Male|
-|SexAtBirthEnum|Female|
-|SexAtBirthEnum|Other|
-|SexAtBirthEnum|Unknown|
 
 <h2 id="tocS_BiomarkerIngestSchema">BiomarkerIngestSchema</h2>
 
@@ -5362,6 +5192,34 @@ BasisOfDiagnosisEnum
 |BasisOfDiagnosisEnum|Specific tumour markers|
 |BasisOfDiagnosisEnum|Unknown|
 
+<h2 id="tocS_CauseOfDeathEnum">CauseOfDeathEnum</h2>
+
+<a id="schemacauseofdeathenum"></a>
+<a id="schema_CauseOfDeathEnum"></a>
+<a id="tocScauseofdeathenum"></a>
+<a id="tocscauseofdeathenum"></a>
+
+```json
+"Died of cancer"
+
+```
+
+CauseOfDeathEnum
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|CauseOfDeathEnum|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|CauseOfDeathEnum|Died of cancer|
+|CauseOfDeathEnum|Died of other reasons|
+|CauseOfDeathEnum|Unknown|
+
 <h2 id="tocS_DonorWithClinicalDataSchema">DonorWithClinicalDataSchema</h2>
 
 <a id="schemadonorwithclinicaldataschema"></a>
@@ -5371,23 +5229,35 @@ BasisOfDiagnosisEnum
 
 ```json
 {
+  "submitter_donor_id": "string",
+  "program_id": "string",
+  "gender": "Man",
+  "sex_at_birth": "Male",
+  "is_deceased": true,
+  "lost_to_followup_after_clinical_event_identifier": "string",
+  "lost_to_followup_reason": "Completed study",
+  "date_alive_after_lost_to_followup": "string",
+  "cause_of_death": "Died of cancer",
+  "date_of_birth": "string",
+  "date_of_death": "string",
+  "primary_site": [
+    "Accessory sinuses"
+  ],
   "primary_diagnoses": [
     {
       "submitter_primary_diagnosis_id": "string",
       "date_of_diagnosis": "string",
+      "cancer_type_code": "string",
       "basis_of_diagnosis": "Clinical investigation",
+      "laterality": "Bilateral",
       "lymph_nodes_examined_status": "Cannot be determined",
       "lymph_nodes_examined_method": "Imaging",
+      "number_lymph_nodes_positive": 0,
       "clinical_tumour_staging_system": "AJCC 8th edition",
       "clinical_t_category": "T0",
       "clinical_n_category": "N0",
       "clinical_m_category": "M0",
       "clinical_stage_group": "Stage 0",
-      "laterality": "Bilateral",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "cancer_type_code": "string",
-      "number_lymph_nodes_positive": 0,
       "specimens": [
         {
           "sample_registrations": [
@@ -5607,20 +5477,6 @@ BasisOfDiagnosisEnum
       "comorbidity_treatment_status": "string",
       "comorbidity_treatment": "string"
     }
-  ],
-  "submitter_donor_id": "string",
-  "program_id": "string",
-  "gender": "string",
-  "sex_at_birth": "string",
-  "is_deceased": true,
-  "lost_to_followup_after_clinical_event_identifier": "string",
-  "lost_to_followup_reason": "string",
-  "date_alive_after_lost_to_followup": "string",
-  "cause_of_death": "string",
-  "date_of_birth": "string",
-  "date_of_death": "string",
-  "primary_site": [
-    null
   ]
 }
 
@@ -5632,11 +5488,6 @@ DonorWithClinicalDataSchema
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|false|none|none|
-|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|false|none|none|
-|biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|false|none|none|
-|exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|false|none|none|
-|comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|false|none|none|
 |submitter_donor_id|string|true|none|none|
 |program_id|string|true|none|none|
 |gender|any|false|none|none|
@@ -5645,7 +5496,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
+|» *anonymous*|[GenderEnum](#schemagenderenum)|false|none|none|
 
 or
 
@@ -5663,7 +5514,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
+|» *anonymous*|[SexAtBirthEnum](#schemasexatbirthenum)|false|none|none|
 
 or
 
@@ -5717,7 +5568,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
+|» *anonymous*|[LostToFollowupReasonEnum](#schemalosttofollowupreasonenum)|false|none|none|
 
 or
 
@@ -5753,7 +5604,7 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
+|» *anonymous*|[CauseOfDeathEnum](#schemacauseofdeathenum)|false|none|none|
 
 or
 
@@ -5807,13 +5658,54 @@ anyOf
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|» *anonymous*|[any]|false|none|none|
+|» *anonymous*|[[PrimarySiteEnum](#schemaprimarysiteenum)]|false|none|none|
 
 or
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|primary_diagnoses|[[NestedPrimaryDiagnosisSchema](#schemanestedprimarydiagnosisschema)]|false|none|none|
+|followups|[[NestedFollowUpSchema](#schemanestedfollowupschema)]|false|none|none|
+|biomarkers|[[NestedBiomarkerSchema](#schemanestedbiomarkerschema)]|false|none|none|
+|exposures|[[NestedExposureSchema](#schemanestedexposureschema)]|false|none|none|
+|comorbidities|[[NestedComorbiditySchema](#schemanestedcomorbidityschema)]|false|none|none|
+
+<h2 id="tocS_LostToFollowupReasonEnum">LostToFollowupReasonEnum</h2>
+
+<a id="schemalosttofollowupreasonenum"></a>
+<a id="schema_LostToFollowupReasonEnum"></a>
+<a id="tocSlosttofollowupreasonenum"></a>
+<a id="tocslosttofollowupreasonenum"></a>
+
+```json
+"Completed study"
+
+```
+
+LostToFollowupReasonEnum
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|LostToFollowupReasonEnum|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|LostToFollowupReasonEnum|Completed study|
+|LostToFollowupReasonEnum|Discharged to palliative care|
+|LostToFollowupReasonEnum|Lost contact|
+|LostToFollowupReasonEnum|Not applicable|
+|LostToFollowupReasonEnum|Unknown|
+|LostToFollowupReasonEnum|Withdrew from study|
 
 <h2 id="tocS_LymphNodeMethodEnum">LymphNodeMethodEnum</h2>
 
@@ -7156,19 +7048,17 @@ or
 {
   "submitter_primary_diagnosis_id": "string",
   "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
   "basis_of_diagnosis": "Clinical investigation",
+  "laterality": "Bilateral",
   "lymph_nodes_examined_status": "Cannot be determined",
   "lymph_nodes_examined_method": "Imaging",
+  "number_lymph_nodes_positive": 0,
   "clinical_tumour_staging_system": "AJCC 8th edition",
   "clinical_t_category": "T0",
   "clinical_n_category": "N0",
   "clinical_m_category": "M0",
   "clinical_stage_group": "Stage 0",
-  "laterality": "Bilateral",
-  "program_id": "string",
-  "submitter_donor_id": "string",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 0,
   "specimens": [
     {
       "sample_registrations": [
@@ -7354,6 +7244,24 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|cancer_type_code|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |basis_of_diagnosis|any|false|none|none|
 
 anyOf
@@ -7361,6 +7269,24 @@ anyOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|laterality|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PrimaryDiagnosisLateralityEnum](#schemaprimarydiagnosislateralityenum)|false|none|none|
 
 or
 
@@ -7397,6 +7323,24 @@ anyOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[LymphNodeMethodEnum](#schemalymphnodemethodenum)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|number_lymph_nodes_positive|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|integer|false|none|none|
 
 or
 
@@ -7487,79 +7431,6 @@ anyOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[StageGroupEnum](#schemastagegroupenum)|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|laterality|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PrimaryDiagnosisLateralityEnum](#schemaprimarydiagnosislateralityenum)|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|true|none|none|
-|submitter_donor_id|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|cancer_type_code|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|number_lymph_nodes_positive|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|integer|false|none|none|
 
 or
 
@@ -8823,6 +8694,130 @@ PrimaryDiagnosisLateralityEnum
 |PrimaryDiagnosisLateralityEnum|Right|
 |PrimaryDiagnosisLateralityEnum|Unilateral, side not specified|
 |PrimaryDiagnosisLateralityEnum|Unknown|
+
+<h2 id="tocS_PrimarySiteEnum">PrimarySiteEnum</h2>
+
+<a id="schemaprimarysiteenum"></a>
+<a id="schema_PrimarySiteEnum"></a>
+<a id="tocSprimarysiteenum"></a>
+<a id="tocsprimarysiteenum"></a>
+
+```json
+"Accessory sinuses"
+
+```
+
+PrimarySiteEnum
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|PrimarySiteEnum|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|PrimarySiteEnum|Accessory sinuses|
+|PrimarySiteEnum|Adrenal gland|
+|PrimarySiteEnum|Anus and anal canal|
+|PrimarySiteEnum|Base of tongue|
+|PrimarySiteEnum|Bladder|
+|PrimarySiteEnum|Bones, joints and articular cartilage of limbs|
+|PrimarySiteEnum|Bones, joints and articular cartilage of other and unspecified sites|
+|PrimarySiteEnum|Brain|
+|PrimarySiteEnum|Breast|
+|PrimarySiteEnum|Bronchus and lung|
+|PrimarySiteEnum|Cervix uteri|
+|PrimarySiteEnum|Colon|
+|PrimarySiteEnum|Connective, subcutaneous and other soft tissues|
+|PrimarySiteEnum|Corpus uteri|
+|PrimarySiteEnum|Esophagus|
+|PrimarySiteEnum|Eye and adnexa|
+|PrimarySiteEnum|Floor of mouth|
+|PrimarySiteEnum|Gallbladder|
+|PrimarySiteEnum|Gum|
+|PrimarySiteEnum|Heart, mediastinum, and pleura|
+|PrimarySiteEnum|Hematopoietic and reticuloendothelial systems|
+|PrimarySiteEnum|Hypopharynx|
+|PrimarySiteEnum|Kidney|
+|PrimarySiteEnum|Larynx|
+|PrimarySiteEnum|Lip|
+|PrimarySiteEnum|Liver and intrahepatic bile ducts|
+|PrimarySiteEnum|Lymph nodes|
+|PrimarySiteEnum|Meninges|
+|PrimarySiteEnum|Nasal cavity and middle ear|
+|PrimarySiteEnum|Nasopharynx|
+|PrimarySiteEnum|Oropharynx|
+|PrimarySiteEnum|Other and ill-defined digestive organs|
+|PrimarySiteEnum|Other and ill-defined sites|
+|PrimarySiteEnum|Other and ill-defined sites in lip, oral cavity and pharynx|
+|PrimarySiteEnum|Other and ill-defined sites within respiratory system and intrathoracic organs|
+|PrimarySiteEnum|Other and unspecified female genital organs|
+|PrimarySiteEnum|Other and unspecified major salivary glands|
+|PrimarySiteEnum|Other and unspecified male genital organs|
+|PrimarySiteEnum|Other and unspecified parts of biliary tract|
+|PrimarySiteEnum|Other and unspecified parts of mouth|
+|PrimarySiteEnum|Other and unspecified parts of tongue|
+|PrimarySiteEnum|Other and unspecified urinary organs|
+|PrimarySiteEnum|Other endocrine glands and related structures|
+|PrimarySiteEnum|Ovary|
+|PrimarySiteEnum|Palate|
+|PrimarySiteEnum|Pancreas|
+|PrimarySiteEnum|Parotid gland|
+|PrimarySiteEnum|Penis|
+|PrimarySiteEnum|Peripheral nerves and autonomic nervous system|
+|PrimarySiteEnum|Placenta|
+|PrimarySiteEnum|Prostate gland|
+|PrimarySiteEnum|Pyriform sinus|
+|PrimarySiteEnum|Rectosigmoid junction|
+|PrimarySiteEnum|Rectum|
+|PrimarySiteEnum|Renal pelvis|
+|PrimarySiteEnum|Retroperitoneum and peritoneum|
+|PrimarySiteEnum|Skin|
+|PrimarySiteEnum|Small intestine|
+|PrimarySiteEnum|Spinal cord, cranial nerves, and other parts of central nervous system|
+|PrimarySiteEnum|Stomach|
+|PrimarySiteEnum|Testis|
+|PrimarySiteEnum|Thymus|
+|PrimarySiteEnum|Thyroid gland|
+|PrimarySiteEnum|Tonsil|
+|PrimarySiteEnum|Trachea|
+|PrimarySiteEnum|Ureter|
+|PrimarySiteEnum|Uterus, NOS|
+|PrimarySiteEnum|Vagina|
+|PrimarySiteEnum|Vulva|
+|PrimarySiteEnum|Unknown primary site|
+
+<h2 id="tocS_SexAtBirthEnum">SexAtBirthEnum</h2>
+
+<a id="schemasexatbirthenum"></a>
+<a id="schema_SexAtBirthEnum"></a>
+<a id="tocSsexatbirthenum"></a>
+<a id="tocssexatbirthenum"></a>
+
+```json
+"Male"
+
+```
+
+SexAtBirthEnum
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|SexAtBirthEnum|string|false|none|none|
+
+#### Enumerated Values
+
+|Property|Value|
+|---|---|
+|SexAtBirthEnum|Male|
+|SexAtBirthEnum|Female|
+|SexAtBirthEnum|Other|
+|SexAtBirthEnum|Unknown|
 
 <h2 id="tocS_StageGroupEnum">StageGroupEnum</h2>
 
@@ -10092,19 +10087,19 @@ or
     {
       "submitter_primary_diagnosis_id": "string",
       "date_of_diagnosis": "string",
+      "cancer_type_code": "string",
       "basis_of_diagnosis": "Clinical investigation",
+      "laterality": "Bilateral",
       "lymph_nodes_examined_status": "Cannot be determined",
       "lymph_nodes_examined_method": "Imaging",
+      "number_lymph_nodes_positive": 0,
       "clinical_tumour_staging_system": "AJCC 8th edition",
       "clinical_t_category": "T0",
       "clinical_n_category": "N0",
       "clinical_m_category": "M0",
       "clinical_stage_group": "Stage 0",
-      "laterality": "Bilateral",
       "program_id": "string",
-      "submitter_donor_id": "string",
-      "cancer_type_code": "string",
-      "number_lymph_nodes_positive": 0
+      "submitter_donor_id": "string"
     }
   ],
   "count": 0,
@@ -10182,19 +10177,19 @@ or
 {
   "submitter_primary_diagnosis_id": "string",
   "date_of_diagnosis": "string",
+  "cancer_type_code": "string",
   "basis_of_diagnosis": "Clinical investigation",
+  "laterality": "Bilateral",
   "lymph_nodes_examined_status": "Cannot be determined",
   "lymph_nodes_examined_method": "Imaging",
+  "number_lymph_nodes_positive": 0,
   "clinical_tumour_staging_system": "AJCC 8th edition",
   "clinical_t_category": "T0",
   "clinical_n_category": "N0",
   "clinical_m_category": "M0",
   "clinical_stage_group": "Stage 0",
-  "laterality": "Bilateral",
   "program_id": "string",
-  "submitter_donor_id": "string",
-  "cancer_type_code": "string",
-  "number_lymph_nodes_positive": 0
+  "submitter_donor_id": "string"
 }
 
 ```
@@ -10224,6 +10219,24 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|cancer_type_code|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |basis_of_diagnosis|any|false|none|none|
 
 anyOf
@@ -10231,6 +10244,24 @@ anyOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[BasisOfDiagnosisEnum](#schemabasisofdiagnosisenum)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|laterality|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[PrimaryDiagnosisLateralityEnum](#schemaprimarydiagnosislateralityenum)|false|none|none|
 
 or
 
@@ -10267,6 +10298,24 @@ anyOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|[LymphNodeMethodEnum](#schemalymphnodemethodenum)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|number_lymph_nodes_positive|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|integer|false|none|none|
 
 or
 
@@ -10368,74 +10417,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|laterality|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[PrimaryDiagnosisLateralityEnum](#schemaprimarydiagnosislateralityenum)|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
 |program_id|string|true|none|none|
-|submitter_donor_id|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|cancer_type_code|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|string|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|number_lymph_nodes_positive|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|integer|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
+|submitter_donor_id|string|true|none|none|
 
 <h2 id="tocS_BiomarkerFilterSchema">BiomarkerFilterSchema</h2>
 
@@ -16049,6 +16032,7 @@ ConfirmedDiagnosisTumourEnum
   "items": [
     {
       "submitter_specimen_id": "string",
+      "submitter_primary_diagnosis_id": "string",
       "pathological_tumour_staging_system": "AJCC 8th edition",
       "pathological_t_category": "T0",
       "pathological_n_category": "N0",
@@ -16056,19 +16040,18 @@ ConfirmedDiagnosisTumourEnum
       "pathological_stage_group": "Stage 0",
       "specimen_collection_date": "string",
       "specimen_storage": "Cut slide",
+      "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
       "tumour_histological_type": "string",
       "specimen_anatomic_location": "string",
+      "specimen_laterality": "Left",
       "reference_pathology_confirmed_diagnosis": "Yes",
       "reference_pathology_confirmed_tumour_presence": "Yes",
       "tumour_grading_system": "FNCLCC grading system",
       "tumour_grade": "Low grade",
       "percent_tumour_cells_range": "0-19%",
       "percent_tumour_cells_measurement_method": "Genomics",
-      "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
-      "specimen_laterality": "Left",
       "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
+      "submitter_donor_id": "string"
     }
   ],
   "count": 0,
@@ -16202,6 +16185,7 @@ SpecimenLateralityEnum
 ```json
 {
   "submitter_specimen_id": "string",
+  "submitter_primary_diagnosis_id": "string",
   "pathological_tumour_staging_system": "AJCC 8th edition",
   "pathological_t_category": "T0",
   "pathological_n_category": "N0",
@@ -16209,19 +16193,18 @@ SpecimenLateralityEnum
   "pathological_stage_group": "Stage 0",
   "specimen_collection_date": "string",
   "specimen_storage": "Cut slide",
+  "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
   "tumour_histological_type": "string",
   "specimen_anatomic_location": "string",
+  "specimen_laterality": "Left",
   "reference_pathology_confirmed_diagnosis": "Yes",
   "reference_pathology_confirmed_tumour_presence": "Yes",
   "tumour_grading_system": "FNCLCC grading system",
   "tumour_grade": "Low grade",
   "percent_tumour_cells_range": "0-19%",
   "percent_tumour_cells_measurement_method": "Genomics",
-  "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
-  "specimen_laterality": "Left",
   "program_id": "string",
-  "submitter_donor_id": "string",
-  "submitter_primary_diagnosis_id": "string"
+  "submitter_donor_id": "string"
 }
 
 ```
@@ -16233,6 +16216,7 @@ SpecimenModelSchema
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |submitter_specimen_id|string|true|none|none|
+|submitter_primary_diagnosis_id|string|true|none|none|
 |pathological_tumour_staging_system|any|false|none|none|
 
 anyOf
@@ -16359,6 +16343,24 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
+|specimen_processing|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenProcessingEnum](#schemaspecimenprocessingenum)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |tumour_histological_type|any|false|none|none|
 
 anyOf
@@ -16384,6 +16386,24 @@ anyOf
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|specimen_laterality|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[SpecimenLateralityEnum](#schemaspecimenlateralityenum)|false|none|none|
 
 or
 
@@ -16503,45 +16523,8 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|specimen_processing|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[SpecimenProcessingEnum](#schemaspecimenprocessingenum)|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|specimen_laterality|any|false|none|none|
-
-anyOf
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|[SpecimenLateralityEnum](#schemaspecimenlateralityenum)|false|none|none|
-
-or
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|» *anonymous*|null|false|none|none|
-
-continued
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
 |program_id|string|true|none|none|
 |submitter_donor_id|string|true|none|none|
-|submitter_primary_diagnosis_id|string|true|none|none|
 
 <h2 id="tocS_SpecimenProcessingEnum">SpecimenProcessingEnum</h2>
 
