@@ -148,7 +148,8 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
         "self", on_delete=models.CASCADE, blank=True, null=True, related_name="derived_biosamples",
         help_text=rec_help(d.BIOSAMPLE, "derived_from_id"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "description"))
-    sampled_tissue = JSONField(validators=[ontology_validator], help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
+    sampled_tissue = JSONField(blank=True, null=True, validators=[ontology_validator],
+                               help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
     sample_type = JSONField(blank=True, null=True, validators=[ontology_validator],
                             help_text=rec_help(d.BIOSAMPLE, "sample_type"))
 
