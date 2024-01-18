@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from ninja import Field, ModelSchema, Schema
+from ninja import Field
 from ninja.orm import create_schema
 
 from chord_metadata_service.mohpackets.models import (
@@ -23,7 +23,6 @@ from chord_metadata_service.mohpackets.models import (
 from chord_metadata_service.mohpackets.permissible_values import (
     COMORBIDITY_REGEX_PATTERNS,
     DATE_REGEX_PATTERNS,
-    GENDER,
     ID_REGEX_PATTERNS,
     MORPHOLOGY_REGEX_PATTERNS,
     TOPOGRAPHY_REGEX_PATTERNS,
@@ -96,7 +95,7 @@ Author: Son Chau
 
 ########################################
 #                                      #
-#           MODEL SCHEMA               #
+#           BASE SCHEMA                #
 #                                      #
 ########################################
 
