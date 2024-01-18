@@ -38,7 +38,6 @@ from chord_metadata_service.mohpackets.schemas.ingestion import (
     SurgeryIngestSchema,
     TreatmentIngestSchema,
 )
-from chord_metadata_service.mohpackets.schemas.model import ProgramModelSchema
 
 """
 Module with create APIs for clinical data.
