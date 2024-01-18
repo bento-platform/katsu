@@ -73,6 +73,12 @@ def filter_datasets(qs, name, value):
         return qs
 
 
+def filter_time_element(qs, name, value):
+    # TODO: better filters
+    lookup = "__".join([name, "icontains"])
+    return qs.filter(**{lookup: value})
+
+
 # FILTERS
 
 
@@ -123,7 +129,7 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.PhenotypicFeature
-        fields = ["id", "negated", "biosample", "phenopacket"]
+        fields = ["id", "excluded", "biosample", "phenopacket"]
 
     def filter_evidence(self, qs, name, value):
         """
@@ -136,84 +142,8 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
 class ProcedureFilter(django_filters.rest_framework.FilterSet):
     code = django_filters.CharFilter(method=filter_ontology, field_name="code", label="Code")
     body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site", label="Body site")
-    biosample = django_filters.ModelMultipleChoiceFilter(
-        queryset=m.Biosample.objects.all(), widget=CSVWidget, field_name="biosample",
-        method=filter_related_model_ids, label="Biosample"
-    )
+    performed = django_filters.CharFilter(method=filter_time_element, field_name="performed", label="Performed")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="biosample__phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="biosample__phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Procedure
-        fields = ["id"]
-
-
-class HtsFileFilter(django_filters.rest_framework.FilterSet):
-    description = django_filters.CharFilter(lookup_expr="icontains")
-    hts_format = django_filters.CharFilter(lookup_expr="iexact")
-    genome_assembly = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.HtsFile
-        fields = ["uri"]
-
-
-class GeneFilter(django_filters.rest_framework.FilterSet):
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Gene
-        fields = ["id", "symbol"]
-
-
-class VariantFilter(django_filters.rest_framework.FilterSet):
-    allele_type = django_filters.CharFilter(lookup_expr="iexact")
-    zygosity = django_filters.CharFilter(method=filter_ontology, field_name="zygosity", label="Zygosity")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Variant
-        fields = ["id"]
 
 
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
@@ -274,10 +204,12 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
         field_name="phenopacket__dataset__title",
         label="Authorized datasets"
     )
+    procedure = django_filters.CharFilter(
+        method=filter_time_element, field_name="procedure", label="Procedure")
 
     class Meta:
         model = m.Biosample
-        fields = ["id", "individual", "procedure", "is_control_sample"]
+        fields = ["id", "individual", "is_control_sample"]
 
 
 class PhenopacketFilter(django_filters.rest_framework.FilterSet):
@@ -302,7 +234,7 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = m.Phenopacket
-        fields = ["id", "subject", "biosamples", "genes", "variants", "hts_files"]
+        fields = ["id", "subject"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
         """
@@ -311,18 +243,44 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
         qs = qs.filter(
             Q(phenotypic_features__pftype__id__icontains=value) |
             Q(phenotypic_features__pftype__label__icontains=value),
-            phenotypic_features__negated=False
+            phenotypic_features__excluded=False
         ).distinct()
         return qs
 
 
 class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
     status = django_filters.CharFilter(lookup_expr="iexact")
+    gene_filter = django_filters.CharFilter(method="filter_gene", field_name="gene_descriptor",
+                                            label="Filter by  GeneDescriptor IDs and symbols")
+    variant_filter = django_filters.CharFilter(method="filter_variant", field_name="variant_interpretation",
+                                               label="Filter by VariantInterpretation ID and ontologies")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
+
+    def filter_gene(self, qs, name, value):
+        # GeneDescriptor filters
+        value_id_filter = Q(gene_descriptor__value_id__icontains=value)
+        symbol_filter = Q(gene_descriptor__symbol__icontains=value)
+        alt_id_filter = Q(gene_descriptor__alternate_ids__icontains=value)
+        alt_symbols_filter = Q(gene_descriptor__alternate_symbols__icontains=value)
+
+        qs = qs.filter(
+            value_id_filter | symbol_filter | alt_id_filter | alt_symbols_filter
+        ).distinct()
+        return qs
+
+    def filter_variant(self, qs, name, value):
+        id_filter = Q(variant_interpretation__variation_descriptor__id__icontains=value)
+        label_filter = Q(variant_interpretation__variation_descriptor__label__icontains=value)
+        pathology_class_filter = Q(variant_interpretation__acmg_pathogenicity_classification__icontains=value)
+        therapeutic_actionability_filter = Q(variant_interpretation__therapeutic_actionability__icontains=value)
+        qs = qs.filter(
+            id_filter | label_filter | pathology_class_filter | therapeutic_actionability_filter
+        ).distinct()
+        return qs
 
     class Meta:
         model = m.GenomicInterpretation
-        fields = ["id", "gene", "variant"]
+        fields = ["id", "gene_descriptor", "variant_interpretation"]
 
 
 class DiagnosisFilter(django_filters.rest_framework.FilterSet):
@@ -347,7 +305,7 @@ class DiagnosisFilter(django_filters.rest_framework.FilterSet):
 
 
 class InterpretationFilter(django_filters.rest_framework.FilterSet):
-    resolution_status = django_filters.CharFilter(lookup_expr="iexact")
+    progress_status = django_filters.CharFilter(lookup_expr="iexact")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
@@ -363,3 +321,8 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = m.Interpretation
         fields = ["id", "phenopacket"]
+
+    def filter_diagnosis(self, qs, name, value):
+        lookup = "__".join([name, "icontains"])
+        qs = qs.filter(**{lookup: value}).distinct()
+        return qs

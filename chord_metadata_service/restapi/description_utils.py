@@ -18,13 +18,16 @@ def describe_schema(schema, descriptions):
     if schema_help is not None:
         new_schema["help"] = schema_help
 
-    if all((schema["type"] == "object", "properties" in schema, isinstance(descriptions, dict),
+    if all(("type" in schema and schema["type"] == "object", "properties" in schema, isinstance(descriptions, dict),
             "properties" in descriptions)):
         new_schema["properties"] = {p: describe_schema(schema["properties"].get(p, None),
                                                        descriptions["properties"].get(p, None))
                                     for p in schema["properties"]}
 
-    elif all((schema["type"] == "array", "items" in schema, isinstance(descriptions, dict), "items" in descriptions)):
+    elif all(("type" in schema and schema["type"] == "array",
+              "items" in schema,
+              isinstance(descriptions, dict),
+              "items" in descriptions)):
         new_schema["items"] = describe_schema(schema["items"], descriptions["items"])
 
     return new_schema

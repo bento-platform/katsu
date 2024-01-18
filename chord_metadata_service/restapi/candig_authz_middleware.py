@@ -60,10 +60,9 @@ class CandigAuthzMiddleware:
     def is_authorized_get(self, request):
         authorized_paths = [
             "^/api/phenopackets/?.*", "^/api/diagnoses/?.*", "^/api/diseases/?.*", "^/api/datasets/?.*",
-            "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/htsfiles/?.*", "^/api/individuals/?.*",
+            "^/api/genes/?.*", "^/api/genomicinterpretations/?.*", "^/api/individuals/?.*",
             "^/api/interpretations/?.*", "^/api/metadata/?.*", "^/api/phenopackets/?.*", "^/api/phenotypicfeatures/?.*",
             "^/api/procedures/?.*", "^/api/variants/?.*", "^/api/biosamples/?.*", "^/api/labsvital/?.*",
-            "^/api/mcodepackets/?.*", "^/api/medicationstatements/?.*",  "^/api/geneticspecimens/?.*",
             "^/api/cancergeneticvariants/?.*", "^/api/genomicregionsstudied/?.*", "^/api/genomicsreports/?.*",
             "^/api/cancerconditions/?.*", "^/api/tnmstaging/?.*", "^/api/cancerrelatedprocedures/?.*"
         ]
@@ -98,14 +97,14 @@ class CandigAuthzMiddleware:
                 headers={"X-Opa": f"{settings.CANDIG_OPA_SECRET}"},
                 json={
                     "input": {
-                            "token": token,
-                            "body": {
-                                "path": path,
-                                "method": method
-                            }
+                        "token": token,
+                        "body": {
+                            "path": path,
+                            "method": method
                         }
                     }
-                )
+                }
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException:
             error_response = {
@@ -131,10 +130,10 @@ class CandigAuthzMiddleware:
                 headers={"Authorization": f"Bearer {settings.CANDIG_OPA_SECRET}"},
                 json={
                     "input": {
-                            "token": token
-                        }
+                        "token": token
                     }
-                )
+                }
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException:
             return False

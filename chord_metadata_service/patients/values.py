@@ -5,6 +5,7 @@ from typing import Tuple
 __all__ = [
     "Sex",
     "KaryotypicSex",
+    "PatientStatus",
 ]
 
 
@@ -57,4 +58,15 @@ class KaryotypicSex(ValuesCollection):
         XXXX,
         XYY,
         OTHER_KARYOTYPE,
+    )
+
+
+class PatientStatus(ValuesCollection):
+    UNKNOWN_STATUS = "UNKNOWN_STATUS"
+    ALIVE = "ALIVE"
+    DECEASED = "DECEASED"
+    values = (
+        UNKNOWN_STATUS,
+        ALIVE,
+        DECEASED
     )

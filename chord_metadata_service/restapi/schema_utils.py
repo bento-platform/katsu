@@ -1,7 +1,10 @@
+from enum import Enum
 from bento_lib.search import queries as q
+from typing import Dict, List, Optional
+from django.db import models
+from pathlib import Path
 from chord_metadata_service.logger import logger
 from copy import deepcopy
-from typing import List, Optional, Dict
 
 from .description_utils import describe_schema
 from .types import ExtensionSchemaDict
@@ -14,9 +17,61 @@ __all__ = [
     "tag_schema_with_nested_ids",
     "tag_ids_and_describe",
     "customize_schema",
-    "schema_list",
+    "validation_schema_list",
+    "array_of",
     "patch_project_schemas",
 ]
+
+DRAFT_07 = "http://json-schema.org/draft-07/schema#"
+CURIE_PATTERN = r"^[a-z0-9]+:[A-Za-z0-9.\-:]+$"
+
+SEARCH_DATABASE_JSONB = {
+    "database": {
+        "type": "jsonb"
+    }
+}
+
+
+class SCHEMA_TYPES(Enum):
+    STRING = "string"
+    INTEGER = "integer"
+    NUMBER = "number"
+    BOOLEAN = "boolean"
+    OBJECT = "object"
+    NULL = "null"
+
+
+class SCHEMA_STRING_FORMATS(Enum):
+    """
+    Json-schema supported string formats as enums
+    See: https://json-schema.org/understanding-json-schema/reference/string.html#format
+    """
+    DATE_TIME = "date-time"
+    TIME = "time"
+    DATE = "date"
+    DURATION = "duration"
+    EMAIL = "email"
+    IDN_EMAIL = "idn-email"
+    HOSTNAME = "hostname"
+    IDN_HOSTNAME = "idn-hostname"
+    IPV4 = "ipv4"
+    IPV6 = "ipv6"
+    UUID = "uuid"
+    URI = "uri"
+    URI_REFERENCE = "uri-reference"
+    IRI = "iri"
+    IRI_REFERENCE = "iri-reference"
+
+
+def get_schema_app_id(app_name: str):
+    return f"/chord_metadata_service/{app_name}"
+
+
+def sub_schema_uri(base_uri: str, name: str):
+    return f"{base_uri}/{name}"
+
+
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 
 def merge_schema_dictionaries(dict1: dict, dict2: dict):
@@ -55,6 +110,42 @@ def search_optional_str(order: int, queryable: str = "all", multiple: bool = Fal
         q.SEARCH_OP_IEW,
         q.SEARCH_OP_ILIKE,
     ], order, queryable, multiple)
+
+
+def search_db_pk(model: models.Model):
+    """
+    Helper for search schema primary key definitions
+    """
+    return {
+        "search": {
+            **search_optional_eq(0),
+            "database": {
+                "field": model._meta.pk.column
+            }
+        }
+    }
+
+
+def search_db_fk(type: str, foreign_model: models.Model, field_name: str):
+    return {
+        "search": {
+            "database": {
+                "relationship": {
+                    "type": type,
+                    "foreign_key": foreign_model._meta.get_field(field_name).column
+                }
+            }
+        }
+    }
+
+
+def search_table_ref(model: models.Model):
+    return {
+        "database": {
+            "primary_key": model._meta.pk.column,
+            "relation": model._meta.db_table
+        }
+    }
 
 
 def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict]):
@@ -102,7 +193,7 @@ def tag_schema_with_nested_ids(schema: dict):
         return {
             **schema,
             "properties": {
-                k: tag_schema_with_nested_ids({**v, "$id": f"{schema_id}:{k}"} if "$id" not in v else v)
+                k: tag_schema_with_nested_ids({**v, "$id": f"{schema_id}/{k}"} if "$id" not in v else v)
                 for k, v in schema["properties"].items()
             },
         } if "properties" in schema else schema
@@ -112,7 +203,7 @@ def tag_schema_with_nested_ids(schema: dict):
             **schema,
             "items": tag_schema_with_nested_ids({
                 **schema["items"],
-                "$id": f"{schema_id}:item",
+                "$id": f"{schema_id}/item",
             } if "$id" not in schema["items"] else schema["items"]),
         } if "items" in schema else schema
 
@@ -126,9 +217,9 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required=None) -> dict:
+                     additional_properties: bool = False, required: List[str] = None) -> dict:
     return {
-        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$schema": DRAFT_07,
         "$id": schema_id,
         "title": title,
         "description": description,
@@ -142,16 +233,103 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
     }
 
 
-def schema_list(schema):
+def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description: str = None,
+                       additional_properties: bool = False, required: List[str] = None) -> dict:
+    return {
+        "$schema": DRAFT_07,
+        "$id": schema_id,
+        "title": title,
+        "description": description,
+        "type": "object",
+        "properties": properties,
+        "required": required or [],
+        "additionalProperties": additional_properties
+    }
+
+
+def describe_schema_opt(schema: dict, description: str):
+    """ Optionally adds a description entry to a schema dict """
+    if description:
+        return {
+            **schema,
+            "description": description
+        }
+    else:
+        return schema
+
+
+def validation_schema_list(schema):
     """ Schema to validate JSON array values. """
 
     return {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "$id": "chord_metadata_service:schema_list",
+        "$schema": DRAFT_07,
+        "$id": sub_schema_uri(base_uri, "schema_list"),
         "title": "Schema list",
         "type": "array",
         "items": schema
     }
+
+
+def array_of(item, description=""):
+    """
+    Simple array schema with items schema specified by argument.
+    Use to simplify/shorthen json-schema writing.
+    """
+    schema = {
+        "type": "array",
+        "items": item
+    }
+    return describe_schema_opt(schema, description)
+
+
+def enum_of(values: List[str], description=""):
+    schema = {
+        "type": "string",
+        "enum": values
+    }
+    return describe_schema_opt(schema, description)
+
+
+def base_type(type: SCHEMA_TYPES, description=""):
+    """
+    Creates a basic type schema
+    """
+    return describe_schema_opt({"type": type.value}, description)
+
+
+def string_with_pattern(pattern: str, description=""):
+    """
+    Creates a regex formated string schema
+    """
+    schema = {
+        "type": "string",
+        "pattern": pattern
+    }
+    return describe_schema_opt(schema, description)
+
+
+def string_with_format(format: SCHEMA_STRING_FORMATS, description=""):
+    schema = {
+        "type": "string",
+        "format": format.value
+    }
+    return describe_schema_opt(schema, description)
+
+
+def named_one_of(prop_name: str, prop_schema: dict):
+    """
+    Returns a schema valid as a oneOf object item for a specific property name
+    """
+    return {
+        "type": "object",
+        "properties": {
+            prop_name: prop_schema
+        },
+        "required": [prop_name]
+    }
+
+
+DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
 
 
 def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, ExtensionSchemaDict]) -> dict:

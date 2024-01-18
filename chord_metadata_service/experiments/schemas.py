@@ -1,9 +1,13 @@
+from pathlib import Path
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
 from chord_metadata_service.ontologies import read_xsd_simple_type_values, SRA_EXPERIMENT_FILE_NAME
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
+
+
+base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 # Experiment library strategy options are read from the EBI xsd file
 LIBRARY_STRATEGIES = read_xsd_simple_type_values(
@@ -18,9 +22,10 @@ LIBRARY_SELECTION = read_xsd_simple_type_values(
     "typeLibrarySelection",
 )
 
+
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:experiments:experiment_result",
+    "$id": sub_schema_uri(base_uri, "experiment_result"),
     "title": "Experiment result schema",
     "description": "Schema for describing information about analysis of sequencing data in a file format.",
     "type": "object",
@@ -36,12 +41,12 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         },
         "genome_assembly_id": {
             "type": "string",
-            "enum": ["GRCh37", "GRCh38", "GRCm38", "GRCm39"]
         },
         "file_format": {
             "type": "string",
             "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "MAF", "GVCF", "BigWig", "BigBed", "FASTA",
-                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "UNKNOWN", "OTHER"]
+                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "PDF", "CSV", "TSV", "JPEG", "PNG", "GIF",
+                     "MARKDOWN", "MP3", "M4A", "MP4", "DOCX", "XLS", "XLSX", "UNKNOWN", "OTHER"]
         },
         "data_output_type": {
             "type": "string",
@@ -63,7 +68,7 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
 
 INSTRUMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:experiments:instrument",
+    "$id": sub_schema_uri(base_uri, "instrument"),
     "title": "Instrument schema",
     "description": "Schema for describing an instrument used for a sequencing experiment.",
     "type": "object",
@@ -87,7 +92,7 @@ INSTRUMENT_SCHEMA = tag_ids_and_describe({
 
 EXPERIMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "katsu:experiments:experiment",
+    "$id": sub_schema_uri(base_uri, "experiment"),
     "title": "Experiment schema",
     "description": "Schema for describing an experiment.",
     "type": "object",
@@ -105,7 +110,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES",
                      "WGS", "Genotyping", "Proteomic profiling",
                      "Neutralizing antibody titers", "Metabolite profiling",
-                     "Antibody measurement", "Other"]
+                     "Antibody measurement", "Viral WGS", "Other"]
         },
         "experiment_ontology": ONTOLOGY_CLASS_LIST,
         "molecule": {

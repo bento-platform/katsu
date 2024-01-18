@@ -5,6 +5,9 @@ __pycache__/
 # sqlite
 /*.sqlite3
 
+#PostgreSQL
+postgres/
+
 # migrations
 patients/migrations/*
 

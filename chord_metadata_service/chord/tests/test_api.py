@@ -62,7 +62,17 @@ class CreateDatasetTest(APITestCase):
         self.project = r.json()
 
         self.valid_payloads = [
-            valid_dataset_1(self.project["identifier"])
+            valid_dataset_1(self.project["identifier"]),
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 2",
+                "dats_file": {},  # Valid dats_file JSON object
+            },
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 3",
+                "dats_file": "{}",  # Valid dats_file JSON string
+            }
         ]
 
         self.dats_valid_payload = dats_dataset(self.project["identifier"], VALID_DATS_CREATORS)
@@ -78,7 +88,12 @@ class CreateDatasetTest(APITestCase):
                 "title": "Dataset 1",
                 "description": "Test Dataset",
                 "project": None
-            }
+            },
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 4",
+                "dats_file": "INVALID_JSON_STRING",
+            },
         ]
 
     def test_create_dataset(self):
@@ -95,7 +110,7 @@ class CreateDatasetTest(APITestCase):
             self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     def test_dats(self):
-        payload = {**self.dats_valid_payload, 'dats_file': json.dumps({})}
+        payload = {**self.dats_valid_payload, 'dats_file': {}}
         r = self.client.post('/api/datasets', data=json.dumps(payload),
                              content_type="application/json")
         r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
@@ -109,7 +124,36 @@ class CreateDatasetTest(APITestCase):
         url = f'/api/datasets/{dataset_id}/dats'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.data, json.loads(payload['dats_file']))
+        self.assertDictEqual(response.data, payload['dats_file'])
+
+    def test_resources(self):
+        resource = {
+            "id": "NCBITaxon:2023-09-14",
+            "name": "NCBI Taxonomy OBO Edition",
+            "version": "2023-09-14",
+            "namespace_prefix": "NCBITaxon",
+            "url": "http://purl.obolibrary.org/obo/ncbitaxon/2023-09-14/ncbitaxon.owl",
+            "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_",
+        }
+
+        r = self.client.post("/api/resources", data=json.dumps(resource), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        r = self.client.post(
+            "/api/datasets",
+            data=json.dumps({
+                **valid_dataset_1(self.project["identifier"]),
+                "additional_resources": [resource["id"]],
+            }),
+            content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        dataset_id = Dataset.objects.first().identifier
+        r = self.client.get(f"/api/datasets/{dataset_id}/resources")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(r.data), 1)
+        self.assertEqual(r.data[0]["id"], resource["id"])
+
 
 # TODO: Update Dataset
 # TODO: Delete Dataset

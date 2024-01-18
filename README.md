@@ -11,23 +11,30 @@ A Phenopackets-based clinical and phenotypic metadata service for the Bento plat
 
 ## Table of Contents
 
-  * [License](#license)
-  * [Funding](#funding)
-  * [Architecture](#architecture)
-  * [REST API Highlights](#rest-api-highlights)
-  * [Install](#install)
-  * [Authentication](#authentication)
-     * [Note on Permissions](#note-on-permissions)
-     * [Authorization inside CanDIG](#authorization-inside-candig)
-  * [Developing](#developing)
-     * [Branching](#branching)
-     * [Tests](#tests)
-     * [Terminal Commands](#terminal-commands)
-        * [Project/Dataset/Table/Ingestion Commands](#projectdatasettableingestion-commands)
-        * [Patient Commands](#patient-commands)
-        * [Phenopacket Commands](#phenopacket-commands)
-     * [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
-  * [Configuring Public overview and public search fields](#configuring-public-overview-and-public-search-fields)
+- [Katsu Metadata Service](#katsu-metadata-service)
+  - [Table of Contents](#table-of-contents)
+  - [License](#license)
+  - [Funding](#funding)
+  - [Architecture](#architecture)
+  - [REST API highlights](#rest-api-highlights)
+  - [Install](#install)
+    - [Install via Docker](#install-via-docker)
+  - [Environment Variables](#environment-variables)
+  - [Standalone PostGres db and AdMiner](#standalone-postgres-db-and-adminer)
+  - [Authentication](#authentication)
+    - [Note on Permissions](#note-on-permissions)
+    - [Authorization inside CanDIG](#authorization-inside-candig)
+  - [Developing](#developing)
+    - [Branching](#branching)
+    - [Tests](#tests)
+    - [Terminal Commands](#terminal-commands)
+      - [Project/Dataset/Table/Ingestion Commands](#projectdatasettableingestion-commands)
+      - [Patient Commands](#patient-commands)
+      - [Phenopacket Commands](#phenopacket-commands)
+    - [Accessing the Django Shell from inside a Bento Container](#accessing-the-django-shell-from-inside-a-bento-container)
+      - [When running Katsu with `bentoV2`:](#when-running-katsu-with-bentov2)
+      - [When running Katsu with `chord_singularity` (DEPRECATED)](#when-running-katsu-with-chord_singularity-deprecated)
+  - [Configuring public overview and public search fields](#configuring-public-overview-and-public-search-fields)
 
 ## License
 
@@ -46,25 +53,22 @@ CANARIE funded initial development of the Katsu Metadata service under the CHORD
 Katsu Metadata Service is a service to store epigenomic metadata.
 
 1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
-    * Data model: aggregated profile from GA4GH Phenopackets Individual, FHIR Patient and mCODE Patient.
+    * Data model: aggregated profile from GA4GH Phenopackets Individual, and FHIR Patient.
 
 2. Phenopackets service handles phenotypic and clinical data
     * Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)
 
-3. mCode service handles patient's oncology related data.
-    * Data model: [mCODE data elements](https://mcodeinitiative.org/)
-
-4. Experiments service handles experiment related data.
+3. Experiments service handles experiment related data.
     * Data model: derived from 
       [IHEC Metadata Experiment](https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments)
 
-5. Resources service handles metadata about ontologies used for data annotation.
+4. Resources service handles metadata about ontologies used for data annotation.
     * Data model: derived from Phenopackets Resource profile
 
-6. CHORD service  handles metadata about dataset, has relation to phenopackets (one dataset can have many phenopackets)
+5. CHORD service  handles metadata about dataset, has relation to phenopackets (one dataset can have many phenopackets)
     * Data model: [DATS](https://github.com/datatagsuite)  + [GA4GH DUO](https://github.com/EBISPOT/DUO)
 
-7. Rest api service handles all generic functionality shared among other services
+6. Rest api service handles all generic functionality shared among other services
 
 
 ## Schemas
@@ -110,10 +114,9 @@ git submodule update --init
 
 The service uses PostgreSQL database for data storage.
 
-* Create and activate virtual environment
-* Install Poetry (for dependency management) in the virtual environment: `pip install poetry`
-* Install dependencies with `poetry install`
-* To configure the application (such as the DB credentials) we are using python-dotenv:
+* Install Poetry (for dependency management): `pip install poetry`
+* Install dependencies with `poetry install`, which manages its own virtual environment
+* To configure the application (such as the DB credentials) we are using `python-dotenv`:
     - Take a look at the .env-sample file at the root of the project
     - You can export these in your virtualenv or simply `cp .env-sample .env`
     - `python-dotenv` can handle either (a local .env will override environment variables though)
@@ -122,9 +125,9 @@ The service uses PostgreSQL database for data storage.
 * Run:
 
 ```
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
+poetry run python manage.py makemigrations
+poetry run python manage.py migrate
+poetry run python manage.py runserver
 ```
 
 * Development server runs at `localhost:8000`
@@ -132,8 +135,10 @@ python manage.py runserver
 
 ### Install via Docker
 
-Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or
-deploy Katsu as part of the Bento platform, you should use Bento's Docker image instead.
+Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or deploy Katsu as 
+part of the Bento platform, you should use Bento's Docker 
+[image](https://github.com/bento-platform/katsu/pkgs/container/katsu) instead.
+
 
 
 ## Environment Variables
@@ -179,6 +184,29 @@ CANDIG_OPA_SECRET=
 CANDIG_OPA_SITE_ADMIN_KEY=
 INSIDE_CANDIG=
 ```
+
+## Standalone Postgres db and Adminer
+
+For local development, you can quickly deploy a local database server (Postgres) and management tool (Adminer) with 
+`docker compose`. Make sure your Postgres env variables are set in `.env` before running:
+
+```
+# Start docker compose containers
+docker compose -f docker-compose.dev.yaml up -d
+
+# Stop and remove docker-compose containers
+docker compose -f docker-compose.dev.yaml down
+```
+
+You can now use the katsu-db container (`localhost:5432`) as your database for standalone katsu development and 
+explore the database tables with adminer (`localhost:8080`).
+Login to adminer by specifying the following on the login page:
+
+- **System:** `PostgreSQL`
+- **Server:** `katsu-db` (host and port are resolved by Docker with the container name)
+- **Username:** `POSTGRES_USER`
+- **Password:** `POSTGRES_PASSWORD`
+- **Database:** `POSTGRES_DATABASE`
 
 ## Authentication
 

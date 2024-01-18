@@ -2,12 +2,17 @@ from . import models, schemas
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.search_schemas import RESOURCE_SEARCH_SCHEMA
 from chord_metadata_service.restapi.schema_utils import (
+    SEARCH_DATABASE_JSONB,
+    array_of,
     merge_schema_dictionaries,
+    search_db_fk,
+    search_db_pk,
     search_optional_eq,
     search_optional_str,
+    search_table_ref,
     tag_schema_with_search_properties,
 )
-from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
+from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA, TIME_ELEMENT_SEARCH_SCHEMA
 
 __all__ = [
     "EXTERNAL_REFERENCE_SEARCH_SCHEMA",
@@ -38,11 +43,7 @@ EXTERNAL_REFERENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
             "search": search_optional_str(1, multiple=True)  # TODO: Searchable? may leak
         }
     },
-    "search": {
-        "database": {
-            "type": "jsonb"  # TODO: parameterize?
-        }
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, {
@@ -89,7 +90,6 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
 
 UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPDATE_SCHEMA, {
     "properties": {
-        # TODO: timestamp
         "updated_by": {
             "search": search_optional_str(0, multiple=True),
         },
@@ -97,11 +97,7 @@ UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPD
             "search": search_optional_str(1, multiple=True),
         }
     },
-    "search": {
-        "database": {
-            "type": "jsonb"
-        }
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 # noinspection PyProtectedMember
@@ -153,11 +149,7 @@ EVIDENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_E
         "evidence_code": ONTOLOGY_SEARCH_SCHEMA,
         "reference": EXTERNAL_REFERENCE_SEARCH_SCHEMA,
     },
-    "search": {
-        "database": {
-            "type": "jsonb"
-        }
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA, {
@@ -174,14 +166,15 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
                 }
             }
         }),
-        "negated": {
+        "excluded": {
             "search": search_optional_eq(1),
         },
         "severity": ONTOLOGY_SEARCH_SCHEMA,
-        "modifier": {  # TODO: Plural?
-            "items": ONTOLOGY_SEARCH_SCHEMA
-        },
-        "onset": ONTOLOGY_SEARCH_SCHEMA,
+        "modifiers": array_of(ONTOLOGY_SEARCH_SCHEMA),
+        # TODO: Add in new search
+        # "onset": TIME_ELEMENT_SEARCH_SCHEMA,
+        # TODO: Add in new search
+        # "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
         "evidence": EVIDENCE_SEARCH_SCHEMA,
     },
     "search": {
@@ -192,38 +185,15 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
     }
 })
 
-# TODO: Fix
-GENE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENE_SCHEMA, {
+
+PROCEDURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_PROCEDURE_SCHEMA, {
     "properties": {
-        "id": {
-            "search": search_optional_str(0),
-        },
-        "alternate_ids": {
-            "items": {
-                "search": search_optional_str(1),
-            }
-        },
-        "symbol": {
-            "search": search_optional_str(2),
-        }
+        "code": ONTOLOGY_SEARCH_SCHEMA,
+        "body_site": ONTOLOGY_SEARCH_SCHEMA,
+        # TODO: Add in new search
+        # "performed": TIME_ELEMENT_SEARCH_SCHEMA,
     },
-    "search": {
-        "database": {
-            "relation": models.Gene._meta.db_table,
-            "primary_key": models.Gene._meta.pk.column
-        }
-    }
-})
-
-# TODO: Search? Probably not
-HTS_FILE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_HTS_FILE_SCHEMA, {})
-
-# TODO: search??
-VARIANT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_VARIANT_SCHEMA, {
-    "properties": {
-        "allele": {"search": {}},  # TODO
-        "zygosity": ONTOLOGY_SEARCH_SCHEMA,
-    }
+    "search": SEARCH_DATABASE_JSONB
 })
 
 BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_BIOSAMPLE_SCHEMA, {
@@ -265,6 +235,7 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
         "taxonomy": ONTOLOGY_SEARCH_SCHEMA,
         # TODO: Front end will need to deal with this:
         # TODO: individual_age_at_collection
+        "time_of_collection": TIME_ELEMENT_SEARCH_SCHEMA,
         "histological_diagnosis": ONTOLOGY_SEARCH_SCHEMA,
         "tumor_progression": ONTOLOGY_SEARCH_SCHEMA,
         "tumor_grade": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Is this a list?
@@ -272,28 +243,7 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
             "items": ONTOLOGY_SEARCH_SCHEMA,
             "search": {"database": {"type": "array"}}
         },
-        "procedure": {
-            "properties": {
-                "code": ONTOLOGY_SEARCH_SCHEMA,
-                "body_site": ONTOLOGY_SEARCH_SCHEMA
-            },
-            "search": {
-                "database": {
-                    "primary_key": models.Procedure._meta.pk.column,
-                    "relation": models.Procedure._meta.db_table,
-                    "relationship": {
-                        "type": "MANY_TO_ONE",
-                        "foreign_key": models.Biosample._meta.get_field("procedure").column
-                    }
-                }
-            }
-        },
-        "hts_files": {
-            "items": HTS_FILE_SEARCH_SCHEMA  # TODO
-        },
-        "variants": {
-            "items": VARIANT_SEARCH_SCHEMA,  # TODO: search?
-        },
+        "procedure": PROCEDURE_SEARCH_SCHEMA,
         "is_control_sample": {
             "search": search_optional_eq(1),  # TODO: Boolean search
         },
@@ -315,11 +265,11 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
         "onset": DISEASE_ONSET_SEARCH_SCHEMA,
         "disease_stage": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "array"}}
+            "search": SEARCH_DATABASE_JSONB
         },
-        "tnm_finding": {
+        "clinical_tnm_finding": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"database": {"type": "array"}}
+            "search": SEARCH_DATABASE_JSONB
         },
     },
     "search": {
@@ -330,6 +280,81 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
     }
 })
 
+GENOMIC_INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENOMIC_INTERPRETATION, {
+    "properties": {
+        "id": search_table_ref(models.GenomicInterpretation),
+        "subject": merge_schema_dictionaries(
+            INDIVIDUAL_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.GenomicInterpretation, "subject")
+        ),
+        "biosample": merge_schema_dictionaries(
+            BIOSAMPLE_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.GenomicInterpretation, "biosample")
+        ),
+        "interpretation_status": {
+            "search": search_optional_str(0)
+        },
+        "call": {}
+    },
+    "search": search_table_ref(models.GenomicInterpretation)
+})
+
+DIAGNOSIS_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DIAGNOSIS_SCHEMA, {
+    "properties": {
+        "id": search_db_pk(models.Diagnosis),
+        "disease": ONTOLOGY_SEARCH_SCHEMA,
+        "genomic_interpretations": merge_schema_dictionaries(
+            GENOMIC_INTERPRETATION_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.Diagnosis, "genomic_interpretations")
+        ),
+    },
+    "search": search_table_ref(models.Diagnosis)
+})
+
+MEASUREMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_MEASUREMENT_SCHEMA, {
+    "properties": {
+        "description": {
+            "search": search_optional_str(0, multiple=True)
+        },
+        "assay": ONTOLOGY_SEARCH_SCHEMA,
+        "procedure": PROCEDURE_SEARCH_SCHEMA,
+        # TODO: Add in new search
+        # "time_observed": TIME_ELEMENT_SEARCH_SCHEMA,
+    },
+    "search": SEARCH_DATABASE_JSONB
+})
+
+MEDICAL_ACTION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_MEDICAL_ACTION_SCHEMA, {
+    "properties": {
+        # TODO: new search with one_of supported medical actions
+        # "action": MEDICAL_ACTION_ITEM_SEARCH_SCHEMA,
+        "treatment_target": ONTOLOGY_SEARCH_SCHEMA,
+        "treatment_intent": ONTOLOGY_SEARCH_SCHEMA,
+        "response_to_treatment": ONTOLOGY_SEARCH_SCHEMA,
+        "adverse_events": {
+            "items": ONTOLOGY_SEARCH_SCHEMA,
+            "search": SEARCH_DATABASE_JSONB
+        },
+        "treatment_termination_reason": ONTOLOGY_SEARCH_SCHEMA,
+    },
+    "search": SEARCH_DATABASE_JSONB
+})
+
+INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_INTERPRETATION_SCHEMA, {
+    "properties": {
+        "progress_status": {
+            "search": search_optional_eq(0),
+        },
+        "summary": {
+            "search": search_optional_str(1)
+        },
+        "diagnosis": merge_schema_dictionaries(
+            DIAGNOSIS_SEARCH_SCHEMA,
+            search_db_fk("MANY_TO_ONE", models.Interpretation, "diagnosis")
+        ),
+    },
+    "search": search_table_ref(models.Interpretation)
+})
 # noinspection PyProtectedMember
 PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_SCHEMA, {
     "properties": {
@@ -388,27 +413,35 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                 }
             }
         },
-        "genes": {  # TODO: Too sensitive for search?
+        "interpretations": {
             "items": merge_schema_dictionaries(
-                GENE_SEARCH_SCHEMA,
+                INTERPRETATION_SEARCH_SCHEMA,
                 {"search": {"database": {
                     "relationship": {
                         "type": "MANY_TO_ONE",
-                        "foreign_key": "gene_id"
-                    }}}}),
+                        "foreign_key": "interpretation_id"
+                    }
+                }}}),
             "search": {
                 "database": {
-                    "relation": models.Phenopacket._meta.get_field("genes").remote_field.through._meta.db_table,
+                    "relation": (
+                        models.Phenopacket._meta.get_field("interpretations").remote_field.through._meta.db_table
+                    ),
                     "relationship": {
                         "type": "ONE_TO_MANY",
-                        "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
-                        "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
+                        "parent_foreign_key": "phenopacket_id",
+                        "parent_primary_key": models.Phenopacket._meta.pk.column
                     }
                 }
             }
         },
-        "variants": {
-            "items": VARIANT_SEARCH_SCHEMA
+        "measurements": {
+            "items": MEASUREMENT_SEARCH_SCHEMA,
+            "search": SEARCH_DATABASE_JSONB
+        },
+        "medical_actions": {
+            "items": MEDICAL_ACTION_SEARCH_SCHEMA,
+            "search": SEARCH_DATABASE_JSONB
         },
         "diseases": {  # TODO: Too sensitive for search?
             "items": merge_schema_dictionaries(
@@ -425,13 +458,11 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
                         "type": "ONE_TO_MANY",
                         "parent_foreign_key": "phenopacket_id",  # TODO: No hard-code
                         "parent_primary_key": models.Phenopacket._meta.pk.column  # TODO: Redundant?
-                    }
+                    },
+                    "type": "jsonb"
                 }
             }
         },  # TODO
-        "hts_files": {
-            "items": HTS_FILE_SEARCH_SCHEMA  # TODO
-        },
         "meta_data": META_DATA_SEARCH_SCHEMA
     },
     "search": {

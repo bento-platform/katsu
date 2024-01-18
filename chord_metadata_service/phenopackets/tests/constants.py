@@ -25,39 +25,26 @@ VALID_META_DATA_1 = {
     "submitted_by": "David Lougheed"
 }
 
-VALID_META_DATA_2 = {
-    "created_by": "Ksenia Zaytseva",
-    "submitted_by": "Ksenia Zaytseva",
-    "external_references": [
-        {
-            "id": "PMID:30808312",
-            "description": "Bao M, et al. COL6A1 mutation leading to Bethlem myopathy with recurrent hematuria: a case "
-                           "report. BMC Neurol. 2019;19(1):32."
-        },
-        {
-            "id": "PMID:3080844",
-            "description": "Test"
-        }
-    ],
-    "updates": [
-        {
-            "timestamp": "2018-06-10T10:59:06Z",
-            "updated_by": "Julius J.",
-            "comment": "added phenotypic features to individual patient:1"
-        }
-    ],
-    "phenopacket_schema_version": "0.1"
-}
+VALID_META_DATA_2 = {"created_by": "Victor Rocheleau",
+                     "submitted_by": "Victor Rocheleau",
+                     "external_references": [{"id": "DOI:10.1016/j.jaccas.2020.04.001",
+                                              "reference": "PMID:32292915",
+                                              "description": "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS "
+                                                             "in a Patient on Durable LVAD Support"}],
+                     "updates": [{"timestamp": "2018-06-10T10:59:06Z",
+                                  "updated_by": "Julius J.",
+                                  "comment": "added phenotypic features to individual patient:1"}],
+                     "phenopacket_schema_version": "2.0"}
 
 VALID_INDIVIDUAL_1 = {
     "id": "patient:1",
     "date_of_birth": "1967-01-01",
     "sex": "MALE",
-    "age": {
-        "age": "P45Y"
+    "time_at_last_encounter": {
+        "age": {
+            "iso8601duration": "P45Y"
+        }
     },
-    "age_numeric": 45.00,
-    "age_unit": "years",
     "extra_properties": {
         "education": "Bachelor's Degree"
     }
@@ -67,50 +54,29 @@ VALID_INDIVIDUAL_2 = {
     "id": "patient:2",
     "date_of_birth": "1978-01-01",
     "sex": "FEMALE",
-    "age": {
-        "start": {
-            "age": "P30Y"
-        },
-        "end": {
-            "age": "P35Y"
+    "time_at_last_encounter": {
+        "age_range": {
+            "start": {
+                "age": {
+                    "iso8601duration": "P30Y"
+                }
+            },
+            "end": {
+                "age": {
+                    "iso8601duration": "P35Y"
+                }
+            }
         }
     }
 }
 
-VALID_HTS_FILE = {
-    "uri": "https://data.example/genomes/germline_wgs.vcf.gz",
-    "description": "Matched normal germline sample",
-    "hts_format": "VCF",
-    "genome_assembly": "GRCh38",
-    "individual_to_sample_identifiers": {
-        "patient:1": "NA12345"
-    },
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-VALID_GENE_1 = {
-    "id": "HGNC:347",
+VALID_GENE_DESCRIPTOR_1 = {
+    "value_id": "HGNC:347",
+    "symbol": "ETF1",
     "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
-    "symbol": "ETF1",
     "extra_properties": {
         "comment": "test data"
     }
-}
-
-INVALID_GENE_2 = {
-    "id": "HGNC:347",
-    "alternate_ids": "ensembl:ENSRNOG00000019450",
-    "symbol": "ETF1",
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-DUPLICATE_GENE_2 = {
-    "id": "HGNC:347",
-    "symbol": "DYI"
 }
 
 VALID_VARIANT_1 = {
@@ -149,13 +115,84 @@ VALID_VARIANT_2 = {
     }
 }
 
+VALID_VARIANT_3 = {
+    "location": {
+        "interval": {
+            "end": {
+                "type": "Number",
+                "value": 44908822
+            },
+            "start": {
+                "type": "Number",
+                "value": 44908821
+            },
+            "type": "SequenceInterval"
+        },
+        "sequence_id": "ga4gh:SQ.IIB53T8CNeJJdUqzn9V_JnRtQadwWCbl",
+        "type": "SequenceLocation"
+    },
+    "state": {
+        "sequence": "T",
+        "type": "SequenceState"
+    },
+    "type": "Allele"
+}
+
+VALID_ALLELE = {
+    "location": {
+        "interval": {
+            "end": {
+                "type": "Number",
+                "value": 44908822
+            },
+            "start": {
+                "type": "Number",
+                "value": 44908821
+            },
+            "type": "SequenceInterval"
+        },
+        "sequence_id": "ga4gh:SQ.IIB53T8CNeJJdUqzn9V_JnRtQadwWCbl",
+        "type": "SequenceLocation"
+    },
+    "state": {
+        "sequence": "T",
+        "type": "SequenceState"
+    },
+    "type": "Allele"
+}
+
+VALID_VARIANT_DESCRIPTOR = {
+    "id": "clinvar:13294",
+    "expressions": [{
+        "syntax": "hgvs",
+        "value": "NM_001848.2:c.877G\u003eA"
+    }],
+    "allelic_state": {
+        "id": "GENO:0000135",
+        "label": "heterozygous"
+    }
+}
+
+VALID_DISEASE_ONTOLOGY = {
+    "id": "OMIM:164400",
+    "label": "Spinocerebellar ataxia 1"
+}
+
 VALID_DISEASE_1 = {
     "term": {
         "id": "OMIM:164400",
         "label": "Spinocerebellar ataxia 1"
     },
+    "excluded": "False",
     "onset": {
-        "age": "P25Y3M2D"
+        "age": {
+            "iso8601duration": "P25Y3M2D"
+        }
+    },
+    "resolution": {
+        "age": {
+            "iso8601duration": "P28Y3M2D"
+        }
     },
     "disease_stage": [
         {
@@ -163,7 +200,7 @@ VALID_DISEASE_1 = {
             "label": "Cancer TNM Finding by Site"
         }
     ],
-    "tnm_finding": [
+    "clinical_tnm_finding": [
         {
             "id": "NCIT:C28091",
             "label": "Gleason Score 7"
@@ -192,6 +229,163 @@ INVALID_DISEASE_2 = {
     }
 }
 
+VALID_MEASUREMENT_1 = {
+    "assay": {
+        "id": "NCIT:C113237",
+        "label": "Absolute Blood Lymphocyte Count"
+    },
+    "value": {
+        "quantity": {
+            "unit": {
+                "id": "NCIT:C67245",
+                "label": "Thousand Cells"
+            },
+            "value": 1.4,
+            "referenceRange": {
+                "unit": {
+                    "id": "NCIT:C67245",
+                    "label": "Thousand Cells"
+                },
+                "low": 1.0,
+                "high": 4.5
+            }
+        }
+    },
+    "timeObserved": {
+        "interval": {
+            "start": "2019-09-01T00:00:00Z",
+            "end": "2020-03-01T00:00:00Z"
+        }
+    }
+}
+
+VALID_MEASUREMENT_2 = {
+    "assay": {
+        "id": "LOINC:26474-7",
+        "label": "Lymphocytes [#/volume] in Blood"
+    },
+    "value": {
+        "quantity": {
+            "unit": {
+                "id": "NCIT:C67245",
+                "label": "Thousand Cells"
+            },
+            "value": 0.7,
+            "referenceRange": {
+                "unit": {
+                    "id": "NCIT:C67245",
+                    "label": "Thousand Cells"
+                },
+                "low": 1.0,
+                "high": 4.5
+            }
+        }
+    },
+    "timeObserved": {
+        "timestamp": "2020-03-20T00:00:00Z"
+    }
+}
+
+VALID_MEDICAL_ACTIONS = [
+    {
+        "procedure": {
+            "code": {
+                "id": "NCIT:C80473",
+                "label": "Left Ventricular Assist Device"
+            },
+            "performed": {
+                "timestamp": "2016-01-01T00:00:00Z"
+            }
+        }
+    },
+    {
+        "treatment": {
+            "agent": {
+                "id": "NCIT:C722",
+                "label": "Oxygen"
+            },
+            "routeOfAdministration": {
+                "id": "NCIT:C38284",
+                "label": "Nasal Route of Administration"
+            },
+            "doseIntervals": [
+                {
+                    "quantity": {
+                        "unit": {
+                            "id": "NCIT:C67388",
+                            "label": "Liter per Minute"
+                        },
+                        "value": 2.0
+                    },
+                    "scheduleFrequency": {
+                        "id": "NCIT:C125004",
+                        "label": "Once Daily"
+                    },
+                    "interval": {
+                        "start": "2020-03-20T00:00:00Z",
+                        "end": "2020-03-22T00:00:00Z"
+                    }
+                },
+                {
+                    "quantity": {
+                        "unit": {
+                            "id": "NCIT:C67388",
+                            "label": "Liter per Minute"
+                        },
+                        "value": 50.0
+                    },
+                    "scheduleFrequency": {
+                        "id": "NCIT:C125004",
+                        "label": "Once Daily"
+                    },
+                    "interval": {
+                        "start": "2020-03-22T00:00:00Z",
+                        "end": "2020-03-23T00:00:00Z"
+                    }
+                }
+            ]
+        }
+    }
+],
+
+VALID_GENOMIC_INTERPRETATION = {
+    "subjectOrBiosampleId": "proband A",
+    "interpretationStatus": "CAUSATIVE",
+    "variantInterpretation": {
+        "acmgPathogenicityClassification": "PATHOGENIC",
+        "therapeuticActionability": "ACTIONABLE",
+        "variationDescriptor": {
+            "id": "variant_descriptor-id",
+            "variation": {
+                "copyNumber": {
+                    "derivedSequenceExpression": {
+                        "location": {
+                            "sequenceId": "refseq:NC_000013.14",
+                            "sequenceInterval": {
+                                "startNumber": {
+                                    "value": "25981249"
+                                },
+                                "endNumber": {
+                                    "value": "61706822"
+                                }
+                            }
+                        },
+                        "reverseComplement": False
+                    },
+                    "number": {
+                        "value": "1"
+                    }
+                }
+            },
+            "extensions": [{
+                "name": "mosaicism",
+                "value": "40.0%"
+            }],
+            "moleculeContext": "unspecified_molecule_context"
+        }
+    }
+}
+
 
 def valid_phenopacket(subject, meta_data):
     return dict(
@@ -201,25 +395,22 @@ def valid_phenopacket(subject, meta_data):
     )
 
 
-def valid_biosample_1(individual, procedure):
+def valid_biosample_1(individual, procedure=VALID_PROCEDURE_1):
     return dict(
         id='biosample_id:1',
-        individual=individual,
+        individual_id=individual,
+        description='This is a test biosample.',
         sampled_tissue={
             "id": "UBERON_0001256",
             "label": "wall of urinary bladder"
         },
-        description='This is a test biosample.',
         taxonomy={
             "id": "NCBITaxon:9606",
             "label": "Homo sapiens"
         },
-        individual_age_at_collection={
-            "start": {
-                "age": "P45Y"
-            },
-            "end": {
-                "age": "P49Y"
+        time_of_collection={
+            "age": {
+                "iso8601duration": "P45Y"
             }
         },
         histological_diagnosis={
@@ -245,11 +436,10 @@ def valid_biosample_1(individual, procedure):
             }
         ],
         procedure=procedure,
-        is_control_sample=True
     )
 
 
-def valid_biosample_2(individual, procedure):
+def valid_biosample_2(individual, procedure=VALID_PROCEDURE_2):
     return dict(
         id='biosample_id:2',
         individual=individual,
@@ -262,12 +452,9 @@ def valid_biosample_2(individual, procedure):
             "id": "NCBITaxon:9606",
             "label": "Homo sapiens"
         },
-        individual_age_at_collection={
-            "start": {
-                "age": "P45Y"
-            },
-            "end": {
-                "age": "P49Y"
+        time_of_collection={
+            "age": {
+                "iso8601duration": "P45Y"
             }
         },
         histological_diagnosis={
@@ -304,12 +491,12 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
             "id": "HP:0000520",
             "label": "Proptosis"
         },
-        negated=True,
+        excluded=True,
         severity={
             "id": "HP: 0012825",
             "label": "Mild"
         },
-        modifier=[
+        modifiers=[
             {
                 "id": "HP: 0012825 ",
                 "label": "Mild"
@@ -320,8 +507,10 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
             }
         ],
         onset={
-            "id": "HP:0003577",
-            "label": "Congenital onset"
+            "ontology_class": {
+                "id": "HP:0003577",
+                "label": "Congenital onset"
+            }
         },
         evidence={
             "evidence_code": {
@@ -345,12 +534,12 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
 def invalid_phenotypic_feature():
     return dict(
         description='This is a test phenotypic feature',
-        negated=True,
+        excluded=True,
         severity={
             "id": "HP: 0012825",
             "label": "Mild"
         },
-        modifier=[
+        modifiers=[
             {
                 "label": "Mild"
             },
@@ -378,19 +567,45 @@ def invalid_phenotypic_feature():
     )
 
 
-def valid_genomic_interpretation(gene=None, variant=None):
+def valid_variant_interpretation(variant_descriptor, acmg_class="NOT_PROVIDED",
+                                 therapeutic_actionability="UNKNOWN_ACTIONABILITY"):
     return dict(
-        status='CANDIDATE',
-        gene=gene,
-        variant=variant,
+        acmg_pathogenicity_classification=acmg_class,
+        therapeutic_actionability=therapeutic_actionability,
+        variation_descriptor=variant_descriptor
+    )
+
+
+def valid_variant_descriptor(gene_descriptor):
+    return dict(
+        **VALID_VARIANT_DESCRIPTOR,
+        gene_context=gene_descriptor
+    )
+
+
+def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=None):
+    base = dict(
+        interpretation_status='CANDIDATE',
         extra_properties={
             "comment": "test data"
         }
     )
+    if gene_descriptor:
+        base = dict(
+            **base,
+            gene_descriptor=gene_descriptor
+        )
+    if variant_interpretation:
+        base = dict(
+            **base,
+            variant_interpretation=variant_interpretation
+        )
+    return base
 
 
-def valid_diagnosis(disease):
+def valid_diagnosis(disease, id="interpretation:1"):
     return dict(
+        id=id,
         disease=disease,
         extra_properties={
             "comment": "test data"
@@ -398,12 +613,12 @@ def valid_diagnosis(disease):
     )
 
 
-def valid_interpretation(phenopacket, meta_data):
+def valid_interpretation(diagnosis):
     return dict(
         id='interpretation:1',
-        resolution_status='IN_PROGRESS',
-        phenopacket=phenopacket,
-        meta_data=meta_data,
+        progress_status='IN_PROGRESS',
+        diagnosis=diagnosis,
+        summary="Test interpretation",
         extra_properties={
             "comment": "test data"
         }

@@ -5,10 +5,9 @@ from uuid import uuid4
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, Procedure
+from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket
 from chord_metadata_service.phenopackets.tests.constants import (
     valid_biosample_1,
-    VALID_PROCEDURE_1,
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType
@@ -94,8 +93,7 @@ class ProjectJsonSchemaTest(ProjectTestCase):
     def test_existing_data_validation(self):
         # Add a Phenopacket with an Individual and a Biosample to the project
         individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
-        procedure = Procedure.objects.create(**VALID_PROCEDURE_1)
-        biosample = Biosample.objects.create(**valid_biosample_1(individual, procedure))
+        biosample = Biosample.objects.create(**valid_biosample_1(individual))
         meta_data = MetaData.objects.create(
             created_by="test",
             submitted_by="test"

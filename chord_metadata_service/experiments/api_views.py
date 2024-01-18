@@ -1,11 +1,9 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, mixins
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
@@ -90,14 +88,16 @@ class ExperimentBatchViewSet(BatchViewSet):
     def get_queryset(self):
         experiment_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": experiment_ids} if experiment_ids else {}
-        queryset = Experiment.objects.filter(**filter_by_id)\
-            .select_related(*EXPERIMENT_SELECT_REL)\
-            .prefetch_related(*EXPERIMENT_PREFETCH)\
+
+        return (
+            Experiment.objects
+            .filter(**filter_by_id)
+            .select_related(*EXPERIMENT_SELECT_REL)
+            .prefetch_related(*EXPERIMENT_PREFETCH)
             .order_by("id")
+        )
 
-        return queryset
-
-    def create(self, request, *args, **kwargs):
+    def create(self, request, *_args, **_kwargs):
         ids_list = request.data.get('id', [])
         request.data["id"] = ids_list
         queryset = self.get_queryset()
@@ -123,7 +123,6 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     filterset_class = ExperimentResultFilter
 
     # Cache page for the requested url for 2 hours
-    @method_decorator(cache_page(60 * 60 * 2))
     def dispatch(self, *args, **kwargs):
         return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
 

@@ -2,14 +2,12 @@ import logging
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from chord_metadata_service.phenopackets.models import (
-    HtsFile,
     Disease,
     Biosample,
     PhenotypicFeature,
     Phenopacket
 )
 from chord_metadata_service.phenopackets.indices import (
-    build_htsfile_index,
     build_disease_index,
     build_biosample_index,
     build_phenotypicfeature_index,
@@ -32,12 +30,6 @@ class Command(BaseCommand):
         # TODO: currently only place we create the index, will have to review
         if es:
             es.indices.create(index=settings.FHIR_INDEX_NAME, ignore=400)
-
-            htsfiles = HtsFile.objects.all()
-
-            for htsfile in htsfiles:
-                created_or_updated = build_htsfile_index(htsfile)
-                logger.info(f"{created_or_updated} index for htsfile ID {htsfile.uri} indexed id {htsfile.index_id}")
 
             diseases = Disease.objects.all()
 

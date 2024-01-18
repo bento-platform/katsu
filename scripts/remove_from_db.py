@@ -18,7 +18,6 @@ def main():
     script = (
         "from chord_metadata_service.chord.models import *;"
         "from chord_metadata_service.experiments.models import *;"
-        "from chord_metadata_service.mcode.models import *;"
         "from chord_metadata_service.patients.models import *;"
         "from chord_metadata_service.phenopackets.models import *;"
         "from chord_metadata_service.resources.models import *;"

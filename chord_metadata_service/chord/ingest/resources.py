@@ -9,8 +9,7 @@ def ingest_resource(resource: dict) -> rm.Resource:
     assigned_resource_id = ru.make_resource_id(namespace_prefix, version)
 
     rs_obj, _ = rm.Resource.objects.get_or_create(
-        # If this doesn't match assigned_resource_id, it'll throw anyway
-        id=resource.get("id", assigned_resource_id),
+        id=assigned_resource_id,
         name=resource["name"],
         namespace_prefix=namespace_prefix,
         url=resource["url"],

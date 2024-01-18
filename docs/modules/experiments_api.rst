@@ -56,7 +56,6 @@ The following **filters** can be applied:
 - ``filename`` (single, case-insensitive, partial match): :code:`/api/experimentresults?filename=1001_rnaseq.bw`
 
 - ``genome_assembly_id`` (single, case-insensitive, exact match): :code:`/api/experimentresults?genome_assembly_id=GRCh37`
-  options: GRCh37, GRCh38, GRCm38, GRCm39
 
 - ``file_format`` (single, case-insensitive, exact match): :code:`/api/experimentresults?file_format=VCF`
 

@@ -11,11 +11,10 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
-from django.http import HttpRequest
-from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -29,18 +28,16 @@ from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, 
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 
-from chord_metadata_service.mcode.models import MCodePacket
-from chord_metadata_service.mcode.serializers import MCodePacketSerializer
 
 from chord_metadata_service.metadata.elastic import es
 
 from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket, Biosample, Variant
+from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 
-from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_MCODEPACKET, DATA_TYPE_PHENOPACKET, DATA_TYPES
+from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset
 
 from collections import defaultdict
@@ -55,24 +52,6 @@ def experiment_dataset_summary(dataset):
 
     return {
         "count": experiments.count(),
-        "data_type_specific": {},  # TODO
-    }
-
-
-def mcodepacket_dataset_summary(dataset):
-    mcodepackets = MCodePacket.objects.filter(dataset=dataset)  # TODO
-
-    return {
-        "count": mcodepackets.count(),
-        "data_type_specific": {},  # TODO
-    }
-
-
-def variant_dataset_summary(dataset):
-    variants = Variant.objects.filter(dataset=dataset)
-
-    return {
-        "count": variants.count(),
         "data_type_specific": {},  # TODO
     }
 
@@ -158,20 +137,6 @@ def experiment_query_results(query, params, options=None):
         .prefetch_related(*EXPERIMENT_PREFETCH)
 
 
-def mcodepacket_query_results(query, params, options=None):
-    # TODO: possibly a quite inefficient way of doing things...
-    # TODO: select_related / prefetch_related for instant performance boost!
-    queryset = MCodePacket.objects.filter(
-        id__in=data_type_results(query, params, "id")
-    )
-
-    output_format = options.get("output") if options else None
-    if output_format == OUTPUT_FORMAT_VALUES_LIST:
-        return get_values_list(queryset, options)
-
-    return queryset
-
-
 def get_biosamples_with_experiment_details(subject_ids):
     """
     The function returns a queryset where each entry represents a biosample obtained from a subject, along with
@@ -244,13 +209,11 @@ def phenopacket_query_results(query, params, options=None):
 
 QUERY_RESULTS_FN: Dict[str, Callable] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
-    DATA_TYPE_MCODEPACKET: mcodepacket_query_results,
     DATA_TYPE_PHENOPACKET: phenopacket_query_results,
 }
 
 QUERY_RESULT_SERIALIZERS = {
     DATA_TYPE_EXPERIMENT: ExperimentSerializer,
-    DATA_TYPE_MCODEPACKET: MCodePacketSerializer,
     DATA_TYPE_PHENOPACKET: PhenopacketSerializer,
 }
 
@@ -260,7 +223,7 @@ def search(request, internal_data=False):
     Generic function that takes a request object containing the following parameters:
     - query: a Bento specific string representation of a query. e.g.
         ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
-    - data_type: one of "experiment", "mcode", "phenopacket"
+    - data_type: one of "experiment", "phenopacket"
     If internal_data is False, this function returns the tables id where matches
     are found.
     If internal_data is True, this function returns matches grouped by their
@@ -334,8 +297,6 @@ def search(request, internal_data=False):
     }, start))
 
 
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_search(request):
@@ -349,8 +310,6 @@ def chord_search(request):
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
 @permission_classes([AllowAny])
 def chord_private_search(request):
@@ -361,7 +320,7 @@ def chord_private_search(request):
     - query: a Bento specific object representing a query e.g.:
         ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
         Note: for GET method, it must be encoded as a JSON string.
-    - data_type: one of "phenopackets"/"experiments"/"mcodepackets"
+    - data_type: one of "phenopackets"/"experiments"
     - optional parameters:
         see chord_private_table_search
 
@@ -382,15 +341,12 @@ def chord_private_search(request):
     return search(request, internal_data=True)
 
 
-def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
+def phenopacket_filter_results(subject_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
     query = Phenopacket.objects.get_queryset()
 
     if subject_ids:
         query = query.filter(subject__id__in=subject_ids)
-
-    if htsfile_ids:
-        query = query.filter(htsfiles__id__in=htsfile_ids)
 
     if disease_ids:
         query = query.filter(diseases__id__in=disease_ids)
@@ -433,19 +389,17 @@ def fhir_search(request, internal_data=False):
                          if hit['_source']['resourceType'] == resource_type)
 
     subject_ids = hits_for('Patient')
-    htsfile_ids = hits_for('DocumentReference')
     disease_ids = hits_for('Condition')
     biosample_ids = hits_for('Specimen')
     phenotypicfeature_ids = hits_for('Observation')
     phenopacket_ids = hits_for('Composition')
 
-    if all((not subject_ids, not htsfile_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
+    if all((not subject_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
             not phenopacket_ids)):
         return Response(build_search_response([], start))
 
     phenopackets = phenopacket_filter_results(
         subject_ids,
-        htsfile_ids,
         disease_ids,
         biosample_ids,
         phenotypicfeature_ids,
@@ -489,7 +443,7 @@ def get_chord_search_parameters(request, data_type=None):
         - request: DRF Request object. See `chord_private_table_search` for a
         detail of the possible values. Note that the "output" parameter is not
         implemented for this search.
-        - data_type: optional argument. Can be "experiment"/"phenopacket"/"mcodepacket"
+        - data_type: optional argument. Can be "experiment"/"phenopacket"
             This value is provided for the chord searches that are restricted to
             a specific table (values inferred from the table properties)
     - returns:
@@ -590,7 +544,7 @@ def chord_dataset_representation(dataset: Dataset):
     }
 
 
-def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
+def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     start = datetime.now()
     search_params, err = get_chord_search_parameters(request=request)
     if err:
@@ -605,22 +559,21 @@ def dataset_search(request: HttpRequest, dataset_id: str, internal=False):
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def public_dataset_search(request: HttpRequest, dataset_id: str):
+def public_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id)
 
 
 @api_view(["GET", "POST"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def private_dataset_search(request: HttpRequest, dataset_id: str):
+def private_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id, internal=True)
 
 
 @api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_summary(request: HttpRequest, dataset_id: str):
+def dataset_summary(request: DrfRequest, dataset_id: str):
     dataset = Dataset.objects.get(identifier=dataset_id)
     return Response({
         DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),
         DATA_TYPE_EXPERIMENT: experiment_dataset_summary(dataset=dataset),
-        DATA_TYPE_MCODEPACKET: mcodepacket_dataset_summary(dataset=dataset),
     })

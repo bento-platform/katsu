@@ -1,10 +1,6 @@
-import json
-import logging
-
-from collections import Counter
-
+from adrf.decorators import api_view as api_view_async
+from drf_spectacular.utils import extend_schema, inline_serializer
 from django.conf import settings
-from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -12,42 +8,34 @@ from rest_framework.decorators import api_view, permission_classes
 from chord_metadata_service.restapi.utils import (
     get_age_numeric_binned,
     get_field_options,
-    parse_individual_age,
     stats_for_field,
     queryset_stats_for_field,
     get_categorical_stats,
     get_date_stats,
     get_range_stats
 )
+from chord_metadata_service.chord import data_types as dt, models as chord_models
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
-from chord_metadata_service.metadata.service_info import SERVICE_INFO
-from chord_metadata_service.chord import models as chord_models
-from chord_metadata_service.phenopackets import models as pheno_models
-from chord_metadata_service.mcode import models as mcode_models
-from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.experiments import models as experiments_models
-from chord_metadata_service.mcode.api_views import MCODEPACKET_PREFETCH, MCODEPACKET_SELECT
+from chord_metadata_service.metadata.service_info import get_service_info
+from chord_metadata_service.phenopackets import models as pheno_models
+from chord_metadata_service.patients import models as patients_models
 from chord_metadata_service.restapi.models import SchemaType
-from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 
-from chord_metadata_service.chord import data_types as dt
-
-logger = logging.getLogger("restapi_api_views")
-logger.setLevel(logging.INFO)
 
 OVERVIEW_AGE_BIN_SIZE = 10
 
 
-@api_view()
+@api_view_async()
 @permission_classes([AllowAny])
-def service_info(_request):
+async def service_info(_request):
     """
     get:
     Return service info
     """
 
-    return Response(SERVICE_INFO)
+    return Response(await get_service_info())
 
 
 @extend_schema(
@@ -108,7 +96,6 @@ def overview(_request):
                 },
                 "taxonomy": stats_for_field(patients_models.Individual, "taxonomy__label"),
                 "age": individuals_age,
-                "ethnicity": stats_for_field(patients_models.Individual, "ethnicity"),
             },
             "phenotypic_features": {
                 # count is a number of unique phenotypic feature types (not all pfs in the database)
@@ -204,100 +191,6 @@ def search_overview(request):
         },
     }
     return Response(r)
-
-
-@extend_schema(
-    description="Overview of all mCode data in the database",
-    responses={
-        200: inline_serializer(
-            name='mcode_overview_response',
-            fields={
-                'mcodepackets': serializers.IntegerField(),
-                'data_type_specific': serializers.JSONField(),
-            }
-        )
-    }
-)
-# Cache page for the requested url for 2 hours
-@cache_page(60 * 60 * 2)
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
-def mcode_overview(_request):
-    """
-    get:
-    Overview of all mCode data in the database
-    """
-    mcodepackets = mcode_models.MCodePacket.objects.all()\
-        .prefetch_related(*MCODEPACKET_PREFETCH)\
-        .select_related(*MCODEPACKET_SELECT)
-
-    # cancer condition code
-    cancer_condition_counter = Counter()
-    # cancer related procedure type - radiation vs. surgical
-    cancer_related_procedure_type_counter = Counter()
-    # cancer related procedure code
-    cancer_related_procedure_counter = Counter()
-    # cancer disease status
-    cancer_disease_status_counter = Counter()
-
-    individuals_set = set()
-    individuals_sex = Counter()
-    individuals_k_sex = Counter()
-    individuals_taxonomy = Counter()
-    individuals_age = Counter()
-    individuals_ethnicity = Counter()
-
-    for mcodepacket in mcodepackets:
-        # subject/individual
-        individual = mcodepacket.subject
-        individuals_set.add(individual.id)
-        individuals_sex.update((individual.sex,))
-        individuals_k_sex.update((individual.karyotypic_sex,))
-        if individual.ethnicity != "":
-            individuals_ethnicity.update((individual.ethnicity,))
-        if individual.age is not None:
-            individuals_age.update((parse_individual_age(individual.age),))
-        if individual.taxonomy is not None:
-            individuals_taxonomy.update((individual.taxonomy["label"],))
-        if mcodepacket.cancer_condition is not None:
-            cancer_condition_counter.update((mcodepacket.cancer_condition.condition_type,))
-        for cancer_related_procedure in mcodepacket.cancer_related_procedures.all():
-            cancer_related_procedure_type_counter.update((cancer_related_procedure.procedure_type,))
-            cancer_related_procedure_counter.update((cancer_related_procedure.code["label"],))
-        if mcodepacket.cancer_disease_status is not None:
-            cancer_disease_status_counter.update((mcodepacket.cancer_disease_status["label"],))
-
-    return Response({
-        "mcodepackets": mcodepackets.count(),
-        "data_type_specific": {
-            "cancer_conditions": {
-                "count": len(cancer_condition_counter.keys()),
-                "term": dict(cancer_condition_counter)
-            },
-            "cancer_related_procedure_types": {
-                "count": len(cancer_related_procedure_type_counter.keys()),
-                "term": dict(cancer_related_procedure_type_counter)
-            },
-            "cancer_related_procedures": {
-                "count": len(cancer_related_procedure_counter.keys()),
-                "term": dict(cancer_related_procedure_counter)
-            },
-            "cancer_disease_status": {
-                "count": len(cancer_disease_status_counter.keys()),
-                "term": dict(cancer_disease_status_counter)
-            },
-            "individuals": {
-                "count": len(individuals_set),
-                "sex": {k: individuals_sex[k] for k in (s[0] for s in pheno_models.Individual.SEX)},
-                "karyotypic_sex": {
-                    k: individuals_k_sex[k] for k in (s[0] for s in pheno_models.Individual.KARYOTYPIC_SEX)
-                },
-                "taxonomy": dict(individuals_taxonomy),
-                "age": dict(individuals_age),
-                "ethnicity": dict(individuals_ethnicity)
-            },
-        }
-    })
 
 
 @extend_schema(
@@ -434,13 +327,6 @@ def public_dataset(_request):
         "extra_properties", "identifier"
     )
 
-    # convert dats_file json content to dict
-    datasets = [
-        {
-            **d,
-            "dats_file": json.loads(d["dats_file"]) if d["dats_file"] else None
-        } for d in datasets]
-
     return Response({
         "datasets": datasets
     })
@@ -448,8 +334,5 @@ def public_dataset(_request):
 
 DT_QUERYSETS = {
     dt.DATA_TYPE_EXPERIMENT: experiments_models.Experiment.objects.all(),
-    dt.DATA_TYPE_EXPERIMENT_RESULT: experiments_models.ExperimentResult.objects.all(),
-    dt.DATA_TYPE_MCODEPACKET: mcode_models.MCodePacket.objects.all(),
     dt.DATA_TYPE_PHENOPACKET: pheno_models.Phenopacket.objects.all(),
-    # dt.DATA_TYPE_READSET: None,
 }

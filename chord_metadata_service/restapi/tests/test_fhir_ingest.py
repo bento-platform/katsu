@@ -8,7 +8,7 @@ from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_FHIR_JSON
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import PhenotypicFeature, Biosample, Disease, Procedure, Phenopacket
+from chord_metadata_service.phenopackets.models import PhenotypicFeature, Biosample, Disease, Phenopacket
 from chord_metadata_service.restapi.fhir_ingest import ingest_patients, ingest_observations
 from .constants import INVALID_FHIR_BUNDLE_1, INVALID_SUBJECT_NOT_PRESENT
 
@@ -50,6 +50,5 @@ class TestFhirIngest(APITestCase):
         self.assertTrue(len(Individual.objects.all()) >= 1)
         self.assertTrue(len(PhenotypicFeature.objects.all()) >= 1)
         self.assertTrue(len(Biosample.objects.all()) >= 1)
-        self.assertTrue(len(Procedure.objects.all()) >= 1)
         self.assertTrue(len(Disease.objects.all()) >= 1)
         self.assertTrue(len(Phenopacket.objects.all()) >= 1)

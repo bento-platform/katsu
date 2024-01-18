@@ -3,7 +3,7 @@ asgiref==3.6.0
 Babel==2.12.1
 certifi==2023.7.22
 charset-normalizer==3.1.0
-Django==4.1.10
+Django==4.2.7
 docutils==0.16
 idna==3.4
 imagesize==1.4.1
@@ -24,4 +24,4 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 sqlparse==0.4.4
 toml==0.10.2
-urllib3==1.26.15
+urllib3==1.26.18

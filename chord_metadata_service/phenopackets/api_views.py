@@ -1,12 +1,9 @@
-from django.conf import settings
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
-from django_filters.rest_framework import DjangoFilterBackend
 
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
@@ -22,11 +19,6 @@ from rest_framework import serializers, status
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
-
-    # Cache response to the requested URL, default to 2 hours.
-    @method_decorator(cache_page(settings.CACHE_TIME))
-    def dispatch(self, *args, **kwargs):
-        return super(PhenopacketsModelViewSet, self).dispatch(*args, **kwargs)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
@@ -46,65 +38,6 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenotypicFeatureFilter
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
-
-
-class ProcedureViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing procedures
-
-    post:
-    Create a new procedure
-
-    """
-    serializer_class = s.ProcedureSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.ProcedureFilter
-    queryset = m.Procedure.objects.all().order_by("id")
-
-
-class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing HTS files
-
-    post:
-    Create a new HTS file
-
-    """
-    serializer_class = s.HtsFileSerializer
-    filter_backends = [DjangoFilterBackend]
-    queryset = m.HtsFile.objects.all().order_by("uri")
-
-
-class GeneViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing genes
-
-    post:
-    Create a new gene
-
-    """
-    serializer_class = s.GeneSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.GeneFilter
-    queryset = m.Gene.objects.all().order_by("id")
-
-
-class VariantViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing variants
-
-    post:
-    Create a new variant
-
-    """
-    serializer_class = s.VariantSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.VariantFilter
-    queryset = m.Variant.objects.all().order_by("id")
 
 
 class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
@@ -143,15 +76,8 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 
 
 BIOSAMPLE_PREFETCH = (
-    "hts_files",
     "phenotypic_features",
-    "procedure",
-    "variants",
     "experiment_set",
-)
-
-BIOSAMPLE_SELECT_REL = (
-    "procedure",
 )
 
 
@@ -163,10 +89,6 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = m.Biosample.objects.all() \
-        .prefetch_related(*BIOSAMPLE_PREFETCH) \
-        .select_related(*BIOSAMPLE_SELECT_REL) \
-        .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
@@ -197,7 +119,6 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
             queryset = queryset.filter(id__in=ids_list)
 
         queryset = queryset.prefetch_related(*BIOSAMPLE_PREFETCH) \
-            .select_related(*BIOSAMPLE_SELECT_REL) \
             .order_by("id")
 
         return queryset
@@ -216,13 +137,10 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
 
 PHENOPACKET_PREFETCH = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-    "diseases",
-    "genes",
-    "hts_files",
     *(f"meta_data__{p}" for p in META_DATA_PREFETCH),
     "phenotypic_features",
     "subject",
-    "variants",
+    "interpretations",
 )
 
 PHENOPACKET_SELECT_REL = (
