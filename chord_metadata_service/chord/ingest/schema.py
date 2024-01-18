@@ -1,4 +1,3 @@
-from ctypes import Array
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
 
@@ -32,4 +31,3 @@ def schema_validation(obj, schema, registry=None):
         for i, error in enumerate(errors, 1):
             logger.error(f"{i} Validation error in {'.'.join(str(v) for v in error.path)}: {error.message}")
         return errors
-            

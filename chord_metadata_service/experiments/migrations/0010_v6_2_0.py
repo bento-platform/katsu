@@ -24,7 +24,7 @@ def set_experiment_library(apps, _schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('experiments', '0007_v4_0_0'),
+        ('experiments', '0009_v6_0_0'),
     ]
 
     operations = [
