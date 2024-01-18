@@ -4875,20 +4875,22 @@
                         ],
                         "title": "Uuid"
                     },
-                    "gender": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/GenderEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
                     "submitter_donor_id": {
                         "maxLength": 64,
                         "title": "Submitter Donor Id",
                         "type": "string"
+                    },
+                    "gender": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Gender"
                     },
                     "sex_at_birth": {
                         "anyOf": [
@@ -5004,15 +5006,6 @@
                 ],
                 "title": "DonorIngestSchema",
                 "type": "object"
-            },
-            "GenderEnum": {
-                "enum": [
-                    "Man",
-                    "Woman",
-                    "Non-binary"
-                ],
-                "title": "GenderEnum",
-                "type": "string"
             },
             "BiomarkerIngestSchema": {
                 "properties": {
@@ -7242,6 +7235,15 @@
                     "Unknown"
                 ],
                 "title": "ErPrHpvStatusEnum",
+                "type": "string"
+            },
+            "GenderEnum": {
+                "enum": [
+                    "Man",
+                    "Woman",
+                    "Non-binary"
+                ],
+                "title": "GenderEnum",
                 "type": "string"
             },
             "Her2StatusEnum": {
