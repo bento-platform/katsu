@@ -3,7 +3,7 @@
     "info": {
         "title": "MoH Service API",
         "version": "3.0.0",
-        "description": "This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/d6516a38754bb8841817b1fc2fce1fa53a46b436/chord_metadata_service/mohpackets/docs/schema.json"
+        "description": "This is the RESTful API for the MoH Service."
     },
     "paths": {
         "/v2/service-info": {
@@ -7006,6 +7006,40 @@
                 "title": "CauseOfDeathEnum",
                 "type": "string"
             },
+            "CellsMeasureMethodEnum": {
+                "enum": [
+                    "Genomics",
+                    "Image analysis",
+                    "Pathology estimate by percent nuclei",
+                    "Unknown"
+                ],
+                "title": "CellsMeasureMethodEnum",
+                "type": "string"
+            },
+            "ConfirmedDiagnosisTumourEnum": {
+                "enum": [
+                    "Yes",
+                    "No",
+                    "Not done",
+                    "Unknown"
+                ],
+                "title": "ConfirmedDiagnosisTumourEnum",
+                "type": "string"
+            },
+            "DiseaseStatusFollowupEnum": {
+                "enum": [
+                    "Complete remission",
+                    "Distant progression",
+                    "Loco-regional progression",
+                    "No evidence of disease",
+                    "Partial remission",
+                    "Progression not otherwise specified",
+                    "Relapse or recurrence",
+                    "Stable"
+                ],
+                "title": "DiseaseStatusFollowupEnum",
+                "type": "string"
+            },
             "DonorWithClinicalDataSchema": {
                 "properties": {
                     "submitter_donor_id": {
@@ -7177,6 +7211,82 @@
                 "title": "DonorWithClinicalDataSchema",
                 "type": "object"
             },
+            "DosageUnitsEnum": {
+                "enum": [
+                    "mg/m2",
+                    "IU/m2",
+                    "IU/kg",
+                    "ug/m2",
+                    "g/m2",
+                    "mg/kg",
+                    "cells/kg"
+                ],
+                "title": "DosageUnitsEnum",
+                "type": "string"
+            },
+            "DrugReferenceDbEnum": {
+                "enum": [
+                    "RxNorm",
+                    "PubChem",
+                    "NCI Thesaurus"
+                ],
+                "title": "DrugReferenceDbEnum",
+                "type": "string"
+            },
+            "ErPrHpvStatusEnum": {
+                "enum": [
+                    "Cannot be determined",
+                    "Negative",
+                    "Not applicable",
+                    "Positive",
+                    "Unknown"
+                ],
+                "title": "ErPrHpvStatusEnum",
+                "type": "string"
+            },
+            "Her2StatusEnum": {
+                "enum": [
+                    "Cannot be determined",
+                    "Equivocal",
+                    "Positive",
+                    "Negative",
+                    "Not applicable",
+                    "Unknown"
+                ],
+                "title": "Her2StatusEnum",
+                "type": "string"
+            },
+            "HpvStrainEnum": {
+                "enum": [
+                    "HPV16",
+                    "HPV18",
+                    "HPV31",
+                    "HPV33",
+                    "HPV35",
+                    "HPV39",
+                    "HPV45",
+                    "HPV51",
+                    "HPV52",
+                    "HPV56",
+                    "HPV58",
+                    "HPV59",
+                    "HPV66",
+                    "HPV68",
+                    "HPV73"
+                ],
+                "title": "HpvStrainEnum",
+                "type": "string"
+            },
+            "ImmunotherapyTypeEnum": {
+                "enum": [
+                    "Cell-based",
+                    "Immune checkpoint inhibitors",
+                    "Monoclonal antibodies other than immune checkpoint inhibitors",
+                    "Other immunomodulatory substances"
+                ],
+                "title": "ImmunotherapyTypeEnum",
+                "type": "string"
+            },
             "LostToFollowupReasonEnum": {
                 "enum": [
                     "Completed study",
@@ -7209,6 +7319,19 @@
                 "title": "LymphNodeStatusEnum",
                 "type": "string"
             },
+            "LymphovascularInvasionEnum": {
+                "enum": [
+                    "Absent",
+                    "Both lymphatic and small vessel and venous (large vessel) invasion",
+                    "Lymphatic and small vessel invasion only",
+                    "Not applicable",
+                    "Present",
+                    "Venous (large vessel) invasion only",
+                    "Unknown"
+                ],
+                "title": "LymphovascularInvasionEnum",
+                "type": "string"
+            },
             "MCategoryEnum": {
                 "enum": [
                     "M0",
@@ -7230,6 +7353,31 @@
                     "MX"
                 ],
                 "title": "MCategoryEnum",
+                "type": "string"
+            },
+            "MalignancyLateralityEnum": {
+                "enum": [
+                    "Bilateral",
+                    "Left",
+                    "Midline",
+                    "Not applicable",
+                    "Right",
+                    "Unilateral, Side not specified",
+                    "Unknown"
+                ],
+                "title": "MalignancyLateralityEnum",
+                "type": "string"
+            },
+            "MarginTypesEnum": {
+                "enum": [
+                    "Circumferential resection margin",
+                    "Common bile duct margin",
+                    "Distal margin",
+                    "Not applicable",
+                    "Proximal margin",
+                    "Unknown"
+                ],
+                "title": "MarginTypesEnum",
                 "type": "string"
             },
             "NCategoryEnum": {
@@ -7362,14 +7510,12 @@
                     "er_status": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Er Status"
+                        ]
                     },
                     "er_percent_positive": {
                         "anyOf": [
@@ -7385,14 +7531,12 @@
                     "pr_status": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Pr Status"
+                        ]
                     },
                     "pr_percent_positive": {
                         "anyOf": [
@@ -7408,55 +7552,49 @@
                     "her2_ihc_status": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/Her2StatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Her2 Ihc Status"
+                        ]
                     },
                     "her2_ish_status": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/Her2StatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Her2 Ish Status"
+                        ]
                     },
                     "hpv_ihc_status": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Hpv Ihc Status"
+                        ]
                     },
                     "hpv_pcr_status": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Hpv Pcr Status"
+                        ]
                     },
                     "hpv_strain": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "$ref": "#/components/schemas/HpvStrainEnum"
+                                },
                                 "type": "array"
                             },
                             {
@@ -7474,14 +7612,12 @@
                     "drug_reference_database": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DrugReferenceDbEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Drug Reference Database"
+                        ]
                     },
                     "drug_name": {
                         "anyOf": [
@@ -7510,14 +7646,12 @@
                     "chemotherapy_drug_dose_units": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DosageUnitsEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Chemotherapy Drug Dose Units"
+                        ]
                     },
                     "prescribed_cumulative_drug_dose": {
                         "anyOf": [
@@ -7550,26 +7684,22 @@
                     "prior_malignancy": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/uBooleanEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Prior Malignancy"
+                        ]
                     },
                     "laterality_of_prior_malignancy": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/MalignancyLateralityEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Laterality Of Prior Malignancy"
+                        ]
                     },
                     "age_at_comorbidity_diagnosis": {
                         "anyOf": [
@@ -7586,6 +7716,7 @@
                         "anyOf": [
                             {
                                 "maxLength": 64,
+                                "pattern": "^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$",
                                 "type": "string"
                             },
                             {
@@ -7597,14 +7728,12 @@
                     "comorbidity_treatment_status": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/uBooleanEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Comorbidity Treatment Status"
+                        ]
                     },
                     "comorbidity_treatment": {
                         "anyOf": [
@@ -7627,19 +7756,19 @@
                     "tobacco_smoking_status": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SmokingStatusEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Tobacco Smoking Status"
+                        ]
                     },
                     "tobacco_type": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "$ref": "#/components/schemas/TobaccoTypeEnum"
+                                },
                                 "type": "array"
                             },
                             {
@@ -7667,6 +7796,7 @@
                 "properties": {
                     "submitter_follow_up_id": {
                         "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
                         "title": "Submitter Follow Up Id",
                         "type": "string"
                     },
@@ -7674,6 +7804,7 @@
                         "anyOf": [
                             {
                                 "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
                                 "type": "string"
                             },
                             {
@@ -7685,31 +7816,28 @@
                     "disease_status_at_followup": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DiseaseStatusFollowupEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Disease Status At Followup"
+                        ]
                     },
                     "relapse_type": {
                         "anyOf": [
                             {
-                                "maxLength": 128,
-                                "type": "string"
+                                "$ref": "#/components/schemas/RelapseTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Relapse Type"
+                        ]
                     },
                     "date_of_relapse": {
                         "anyOf": [
                             {
                                 "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
                                 "type": "string"
                             },
                             {
@@ -7721,7 +7849,9 @@
                     "method_of_progression_status": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "$ref": "#/components/schemas/ProgressionStatusMethodEnum"
+                                },
                                 "type": "array"
                             },
                             {
@@ -7733,7 +7863,9 @@
                     "anatomic_site_progression_or_recurrence": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "type": "string"
+                                },
                                 "type": "array"
                             },
                             {
@@ -7745,62 +7877,52 @@
                     "recurrence_tumour_staging_system": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourStagingSystemEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Recurrence Tumour Staging System"
+                        ]
                     },
                     "recurrence_t_category": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TCategoryEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Recurrence T Category"
+                        ]
                     },
                     "recurrence_n_category": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/NCategoryEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Recurrence N Category"
+                        ]
                     },
                     "recurrence_m_category": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/MCategoryEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Recurrence M Category"
+                        ]
                     },
                     "recurrence_stage_group": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/StageGroupEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Recurrence Stage Group"
+                        ]
                     }
                 },
                 "required": [
@@ -7814,14 +7936,12 @@
                     "drug_reference_database": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DrugReferenceDbEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Drug Reference Database"
+                        ]
                     },
                     "drug_name": {
                         "anyOf": [
@@ -7850,14 +7970,12 @@
                     "hormone_drug_dose_units": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DosageUnitsEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Hormone Drug Dose Units"
+                        ]
                     },
                     "prescribed_cumulative_drug_dose": {
                         "anyOf": [
@@ -7890,26 +8008,22 @@
                     "drug_reference_database": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DrugReferenceDbEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Drug Reference Database"
+                        ]
                     },
                     "immunotherapy_type": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ImmunotherapyTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Immunotherapy Type"
+                        ]
                     },
                     "drug_name": {
                         "anyOf": [
@@ -7938,14 +8052,12 @@
                     "immunotherapy_drug_dose_units": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/DosageUnitsEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Immunotherapy Drug Dose Units"
+                        ]
                     },
                     "prescribed_cumulative_drug_dose": {
                         "anyOf": [
@@ -8140,26 +8252,22 @@
                     "radiation_therapy_modality": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/RadiationTherapyModalityEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Radiation Therapy Modality"
+                        ]
                     },
                     "radiation_therapy_type": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TherapyTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Radiation Therapy Type"
+                        ]
                     },
                     "radiation_therapy_fractions": {
                         "anyOf": [
@@ -8186,14 +8294,12 @@
                     "anatomical_site_irradiated": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/RadiationAnatomicalSiteEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Anatomical Site Irradiated"
+                        ]
                     },
                     "radiation_boost": {
                         "anyOf": [
@@ -8226,56 +8332,49 @@
                 "properties": {
                     "submitter_sample_id": {
                         "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
                         "title": "Submitter Sample Id",
                         "type": "string"
                     },
                     "specimen_tissue_source": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SpecimenTissueSourceEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Specimen Tissue Source"
+                        ]
                     },
                     "tumour_normal_designation": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourDesginationEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Tumour Normal Designation"
+                        ]
                     },
                     "specimen_type": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SpecimenTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Specimen Type"
+                        ]
                     },
                     "sample_type": {
                         "anyOf": [
                             {
-                                "maxLength": 128,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SampleTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Sample Type"
+                        ]
                     }
                 },
                 "required": [
@@ -8286,82 +8385,67 @@
             },
             "NestedSpecimenSchema": {
                 "properties": {
-                    "sample_registrations": {
-                        "items": {
-                            "$ref": "#/components/schemas/NestedSampleRegistrationSchema"
-                        },
-                        "title": "Sample Registrations",
-                        "type": "array"
-                    },
                     "submitter_specimen_id": {
                         "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
                         "title": "Submitter Specimen Id",
                         "type": "string"
                     },
                     "pathological_tumour_staging_system": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourStagingSystemEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Pathological Tumour Staging System"
+                        ]
                     },
                     "pathological_t_category": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TCategoryEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Pathological T Category"
+                        ]
                     },
                     "pathological_n_category": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/NCategoryEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Pathological N Category"
+                        ]
                     },
                     "pathological_m_category": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/MCategoryEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Pathological M Category"
+                        ]
                     },
                     "pathological_stage_group": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/StageGroupEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Pathological Stage Group"
+                        ]
                     },
                     "specimen_collection_date": {
                         "anyOf": [
                             {
                                 "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
                                 "type": "string"
                             },
                             {
@@ -8373,31 +8457,28 @@
                     "specimen_storage": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/StorageEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Specimen Storage"
+                        ]
                     },
                     "specimen_processing": {
                         "anyOf": [
                             {
-                                "maxLength": 128,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SpecimenProcessingEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Specimen Processing"
+                        ]
                     },
                     "tumour_histological_type": {
                         "anyOf": [
                             {
                                 "maxLength": 128,
+                                "pattern": "^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$",
                                 "type": "string"
                             },
                             {
@@ -8410,6 +8491,7 @@
                         "anyOf": [
                             {
                                 "maxLength": 32,
+                                "pattern": "^[C][0-9]{2}(.[0-9]{1})?$",
                                 "type": "string"
                             },
                             {
@@ -8421,86 +8503,79 @@
                     "specimen_laterality": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SpecimenLateralityEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Specimen Laterality"
+                        ]
                     },
                     "reference_pathology_confirmed_diagnosis": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ConfirmedDiagnosisTumourEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Reference Pathology Confirmed Diagnosis"
+                        ]
                     },
                     "reference_pathology_confirmed_tumour_presence": {
                         "anyOf": [
                             {
-                                "maxLength": 32,
-                                "type": "string"
+                                "$ref": "#/components/schemas/ConfirmedDiagnosisTumourEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Reference Pathology Confirmed Tumour Presence"
+                        ]
                     },
                     "tumour_grading_system": {
                         "anyOf": [
                             {
-                                "maxLength": 128,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourGradingSystemEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Tumour Grading System"
+                        ]
                     },
                     "tumour_grade": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourGradeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Tumour Grade"
+                        ]
                     },
                     "percent_tumour_cells_range": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/PercentCellsRangeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Percent Tumour Cells Range"
+                        ]
                     },
                     "percent_tumour_cells_measurement_method": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/CellsMeasureMethodEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Percent Tumour Cells Measurement Method"
+                        ]
+                    },
+                    "sample_registrations": {
+                        "items": {
+                            "$ref": "#/components/schemas/NestedSampleRegistrationSchema"
+                        },
+                        "title": "Sample Registrations",
+                        "type": "array"
                     }
                 },
                 "required": [
@@ -8526,19 +8601,18 @@
                     "surgery_type": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SurgeryTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Surgery Type"
+                        ]
                     },
                     "surgery_site": {
                         "anyOf": [
                             {
                                 "maxLength": 255,
+                                "pattern": "^[C][0-9]{2}(.[0-9]{1})?$",
                                 "type": "string"
                             },
                             {
@@ -8550,14 +8624,12 @@
                     "surgery_location": {
                         "anyOf": [
                             {
-                                "maxLength": 128,
-                                "type": "string"
+                                "$ref": "#/components/schemas/SurgeryLocationEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Surgery Location"
+                        ]
                     },
                     "tumour_length": {
                         "anyOf": [
@@ -8595,31 +8667,29 @@
                     "tumour_focality": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourFocalityEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Tumour Focality"
+                        ]
                     },
                     "residual_tumour_classification": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
-                                "type": "string"
+                                "$ref": "#/components/schemas/TumourClassificationEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Residual Tumour Classification"
+                        ]
                     },
                     "margin_types_involved": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "$ref": "#/components/schemas/MarginTypesEnum"
+                                },
                                 "type": "array"
                             },
                             {
@@ -8631,7 +8701,9 @@
                     "margin_types_not_involved": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "$ref": "#/components/schemas/MarginTypesEnum"
+                                },
                                 "type": "array"
                             },
                             {
@@ -8643,7 +8715,9 @@
                     "margin_types_not_assessed": {
                         "anyOf": [
                             {
-                                "items": {},
+                                "items": {
+                                    "$ref": "#/components/schemas/MarginTypesEnum"
+                                },
                                 "type": "array"
                             },
                             {
@@ -8655,26 +8729,22 @@
                     "lymphovascular_invasion": {
                         "anyOf": [
                             {
-                                "maxLength": 255,
-                                "type": "string"
+                                "$ref": "#/components/schemas/LymphovascularInvasionEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Lymphovascular Invasion"
+                        ]
                     },
                     "perineural_invasion": {
                         "anyOf": [
                             {
-                                "maxLength": 128,
-                                "type": "string"
+                                "$ref": "#/components/schemas/PerineuralInvasionEnum"
                             },
                             {
                                 "type": "null"
                             }
-                        ],
-                        "title": "Perineural Invasion"
+                        ]
                     }
                 },
                 "title": "NestedSurgerySchema",
@@ -8682,6 +8752,145 @@
             },
             "NestedTreatmentSchema": {
                 "properties": {
+                    "submitter_treatment_id": {
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
+                        "title": "Submitter Treatment Id",
+                        "type": "string"
+                    },
+                    "treatment_type": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "$ref": "#/components/schemas/TreatmentTypeEnum"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment Type"
+                    },
+                    "is_primary_treatment": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/uBooleanEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "line_of_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Line Of Treatment"
+                    },
+                    "treatment_start_date": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment Start Date"
+                    },
+                    "treatment_end_date": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment End Date"
+                    },
+                    "treatment_setting": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TreatmentSettingEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "treatment_intent": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TreatmentIntentEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "days_per_cycle": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Days Per Cycle"
+                    },
+                    "number_of_cycles": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Number Of Cycles"
+                    },
+                    "response_to_treatment_criteria_method": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TreatmentResponseMethodEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "response_to_treatment": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TreatmentResponseEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "status_of_treatment": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/TreatmentStatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "chemotherapies": {
                         "items": {
                             "$ref": "#/components/schemas/NestedChemotherapySchema"
@@ -8723,152 +8932,6 @@
                         },
                         "title": "Followups",
                         "type": "array"
-                    },
-                    "submitter_treatment_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Treatment Id",
-                        "type": "string"
-                    },
-                    "treatment_type": {
-                        "anyOf": [
-                            {
-                                "items": {},
-                                "type": "array"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Treatment Type"
-                    },
-                    "is_primary_treatment": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Is Primary Treatment"
-                    },
-                    "line_of_treatment": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Line Of Treatment"
-                    },
-                    "treatment_start_date": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Treatment Start Date"
-                    },
-                    "treatment_end_date": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Treatment End Date"
-                    },
-                    "treatment_setting": {
-                        "anyOf": [
-                            {
-                                "maxLength": 128,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Treatment Setting"
-                    },
-                    "treatment_intent": {
-                        "anyOf": [
-                            {
-                                "maxLength": 128,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Treatment Intent"
-                    },
-                    "days_per_cycle": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Days Per Cycle"
-                    },
-                    "number_of_cycles": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Number Of Cycles"
-                    },
-                    "response_to_treatment_criteria_method": {
-                        "anyOf": [
-                            {
-                                "maxLength": 255,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Response To Treatment Criteria Method"
-                    },
-                    "response_to_treatment": {
-                        "anyOf": [
-                            {
-                                "maxLength": 255,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Response To Treatment"
-                    },
-                    "status_of_treatment": {
-                        "anyOf": [
-                            {
-                                "maxLength": 255,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Status Of Treatment"
                     }
                 },
                 "required": [
@@ -8876,6 +8939,26 @@
                 ],
                 "title": "NestedTreatmentSchema",
                 "type": "object"
+            },
+            "PercentCellsRangeEnum": {
+                "enum": [
+                    "0-19%",
+                    "20-50%",
+                    "51-100%"
+                ],
+                "title": "PercentCellsRangeEnum",
+                "type": "string"
+            },
+            "PerineuralInvasionEnum": {
+                "enum": [
+                    "Absent",
+                    "Cannot be assessed",
+                    "Not applicable",
+                    "Present",
+                    "Unknown"
+                ],
+                "title": "PerineuralInvasionEnum",
+                "type": "string"
             },
             "PrimaryDiagnosisLateralityEnum": {
                 "enum": [
@@ -8966,6 +9049,323 @@
                 "title": "PrimarySiteEnum",
                 "type": "string"
             },
+            "ProgressionStatusMethodEnum": {
+                "enum": [
+                    "Imaging (procedure)",
+                    "Histopathology test (procedure)",
+                    "Assessment of symptom control (procedure)",
+                    "Physical examination procedure (procedure)",
+                    "Tumor marker measurement (procedure)",
+                    "Laboratory data interpretation (procedure)"
+                ],
+                "title": "ProgressionStatusMethodEnum",
+                "type": "string"
+            },
+            "RadiationAnatomicalSiteEnum": {
+                "enum": [
+                    "Left Abdomen",
+                    "Whole Abdomen",
+                    "Right Abdomen",
+                    "Lower Abdomen",
+                    "Left Lower Abdomen",
+                    "Right Lower Abdomen",
+                    "Upper Abdomen",
+                    "Left Upper Abdomen",
+                    "Right Upper Abdomen",
+                    "Left Adrenal",
+                    "Right Adrenal",
+                    "Bilateral Ankle",
+                    "Left Ankle",
+                    "Right Ankle",
+                    "Bilateral Antrum (Bull's Eye)",
+                    "Left Antrum",
+                    "Right Antrum",
+                    "Anus",
+                    "Lower Left Arm",
+                    "Lower Right Arm",
+                    "Bilateral Arms",
+                    "Left Arm",
+                    "Right Arm",
+                    "Upper Left Arm",
+                    "Upper Right Arm",
+                    "Left Axilla",
+                    "Right Axilla",
+                    "Skin or Soft Tissue of Back",
+                    "Bile Duct",
+                    "Bladder",
+                    "Lower Body",
+                    "Middle Body",
+                    "Upper Body",
+                    "Whole Body",
+                    "Boost - Area Previously Treated",
+                    "Brain",
+                    "Left Breast Boost",
+                    "Right Breast Boost",
+                    "Bilateral Breast",
+                    "Left Breast",
+                    "Right Breast",
+                    "Bilateral Breasts with Nodes",
+                    "Left Breast with Nodes",
+                    "Right Breast with Nodes",
+                    "Bilateral Buttocks",
+                    "Left Buttock",
+                    "Right Buttock",
+                    "Inner Canthus",
+                    "Outer Canthus",
+                    "Cervix",
+                    "Bilateral Chest Lung & Area Involve",
+                    "Left Chest",
+                    "Right Chest",
+                    "Chin",
+                    "Left Cheek",
+                    "Right Cheek",
+                    "Bilateral Chest Wall (W/o Breast)",
+                    "Left Chest Wall",
+                    "Right Chest Wall",
+                    "Bilateral Clavicle",
+                    "Left Clavicle",
+                    "Right Clavicle",
+                    "Coccyx",
+                    "Colon",
+                    "Whole C.N.S. (Medulla Techinque)",
+                    "Csf Spine (Medull Tech 2 Diff Machi",
+                    "Left Chestwall Boost",
+                    "Right Chestwall Boost",
+                    "Bilateral Chestwall with Nodes",
+                    "Left Chestwall with Nodes",
+                    "Right Chestwall with Nodes",
+                    "Left Ear",
+                    "Right Ear",
+                    "Epigastrium",
+                    "Lower Esophagus",
+                    "Middle Esophagus",
+                    "Upper Esophagus",
+                    "Entire Esophagus",
+                    "Ethmoid Sinus",
+                    "Bilateral Eyes",
+                    "Left Eye",
+                    "Right Eye",
+                    "Bilateral Face",
+                    "Left Face",
+                    "Right Face",
+                    "Left Fallopian Tubes",
+                    "Right Fallopian Tubes",
+                    "Bilateral Femur",
+                    "Left Femur",
+                    "Right Femur",
+                    "Left Fibula",
+                    "Right Fibula",
+                    "Finger (Including Thumbs)",
+                    "Floor of Mouth (Boosts)",
+                    "Bilateral Feet",
+                    "Left Foot",
+                    "Right Foot",
+                    "Forehead",
+                    "Posterior Fossa",
+                    "Gall Bladder",
+                    "Gingiva",
+                    "Bilateral Hand",
+                    "Left Hand",
+                    "Right Hand",
+                    "Head",
+                    "Bilateral Heel",
+                    "Left Heel",
+                    "Right Heel",
+                    "Left Hemimantle",
+                    "Right Hemimantle",
+                    "Heart",
+                    "Bilateral Hip",
+                    "Left Hip",
+                    "Right Hip",
+                    "Left Humerus",
+                    "Right Humerus",
+                    "Hypopharynx",
+                    "Bilateral Internal Mammary Chain",
+                    "Bilateral Inguinal Nodes",
+                    "Left Inguinal Nodes",
+                    "Right Inguinal Nodes",
+                    "Inverted 'Y' (Dog-Leg,Hockey-Stick)",
+                    "Left Kidney",
+                    "Right Kidney",
+                    "Bilateral Knee",
+                    "Left Knee",
+                    "Right Knee",
+                    "Bilateral Lacrimal Gland",
+                    "Left Lacrimal Gland",
+                    "Right Lacrimal Gland",
+                    "Larygopharynx",
+                    "Larynx",
+                    "Bilateral Leg",
+                    "Left Leg",
+                    "Right Leg",
+                    "Lower Bilateral Leg",
+                    "Lower Left Leg",
+                    "Lower Right Leg",
+                    "Upper Bilateral Leg",
+                    "Upper Left Leg",
+                    "Upper Right Leg",
+                    "Both Eyelid(s)",
+                    "Left Eyelid",
+                    "Right Eyelid",
+                    "Both Lip(s)",
+                    "Lower Lip",
+                    "Upper Lip",
+                    "Liver",
+                    "Bilateral Lung",
+                    "Left Lung",
+                    "Right Lung",
+                    "Bilateral Mandible",
+                    "Left Mandible",
+                    "Right Mandible",
+                    "Mantle",
+                    "Bilateral Maxilla",
+                    "Left Maxilla",
+                    "Right Maxilla",
+                    "Mediastinum",
+                    "Multiple Skin",
+                    "Nasal Fossa",
+                    "Nasopharynx",
+                    "Bilateral Neck Includes Nodes",
+                    "Left Neck Includes Nodes",
+                    "Right Neck Includes Nodes",
+                    "Neck - Skin",
+                    "Nose",
+                    "Oral Cavity / Buccal Mucosa",
+                    "Bilateral Orbit",
+                    "Left Orbit",
+                    "Right Orbit",
+                    "Oropharynx",
+                    "Bilateral Ovary",
+                    "Left Ovary",
+                    "Right Ovary",
+                    "Hard Palate",
+                    "Soft Palate",
+                    "Palate Unspecified",
+                    "Pancreas",
+                    "Para-Aortic Nodes",
+                    "Left Parotid",
+                    "Right Parotid",
+                    "Bilateral Pelvis",
+                    "Left Pelvis",
+                    "Right Pelvis",
+                    "Penis",
+                    "Perineum",
+                    "Pituitary",
+                    "Left Pleura (As in Mesothelioma)",
+                    "Right Pleura",
+                    "Prostate",
+                    "Pubis",
+                    "Pyriform Fossa (Sinuses)",
+                    "Left Radius",
+                    "Right Radius",
+                    "Rectum (Includes Sigmoid)",
+                    "Left Ribs",
+                    "Right Ribs",
+                    "Sacrum",
+                    "Left Salivary Gland",
+                    "Right Salivary Gland",
+                    "Bilateral Scapula",
+                    "Left Scapula",
+                    "Right Scapula",
+                    "Bilateral Supraclavicular Nodes",
+                    "Left Supraclavicular Nodes",
+                    "Right Supraclavicular Nodes",
+                    "Bilateral Scalp",
+                    "Left Scalp",
+                    "Right Scalp",
+                    "Scrotum",
+                    "Bilateral Shoulder",
+                    "Left Shoulder",
+                    "Right Shoulder",
+                    "Whole Body - Skin",
+                    "Skull",
+                    "Cervical & Thoracic Spine",
+                    "Sphenoid Sinus",
+                    "Cervical Spine",
+                    "Lumbar Spine",
+                    "Thoracic Spine",
+                    "Whole Spine",
+                    "Spleen",
+                    "Lumbo-Sacral Spine",
+                    "Thoracic & Lumbar Spine",
+                    "Sternum",
+                    "Stomach",
+                    "Submandibular Glands",
+                    "Left Temple",
+                    "Right Temple",
+                    "Bilateral Testis",
+                    "Left Testis",
+                    "Right Testis",
+                    "Thyroid",
+                    "Left Tibia",
+                    "Right Tibia",
+                    "Left Toes",
+                    "Right Toes",
+                    "Tongue",
+                    "Tonsil",
+                    "Trachea",
+                    "Left Ulna",
+                    "Right Ulna",
+                    "Left Ureter",
+                    "Right Ureter",
+                    "Urethra",
+                    "Uterus",
+                    "Uvula",
+                    "Vagina",
+                    "Vulva",
+                    "Abdomen",
+                    "Body",
+                    "Chest",
+                    "Lower Limb",
+                    "Neck",
+                    "Other",
+                    "Pelvis",
+                    "Skin",
+                    "Spine",
+                    "Upper Limb"
+                ],
+                "title": "RadiationAnatomicalSiteEnum",
+                "type": "string"
+            },
+            "RadiationTherapyModalityEnum": {
+                "enum": [
+                    "Megavoltage radiation therapy using photons (procedure)",
+                    "Radiopharmaceutical",
+                    "Teleradiotherapy using electrons (procedure)",
+                    "Teleradiotherapy protons (procedure)",
+                    "Teleradiotherapy neutrons (procedure)",
+                    "Brachytherapy (procedure)",
+                    "Other"
+                ],
+                "title": "RadiationTherapyModalityEnum",
+                "type": "string"
+            },
+            "RelapseTypeEnum": {
+                "enum": [
+                    "Distant recurrence/metastasis",
+                    "Local recurrence",
+                    "Local recurrence and distant metastasis",
+                    "Progression (liquid tumours)",
+                    "Biochemical progression"
+                ],
+                "title": "RelapseTypeEnum",
+                "type": "string"
+            },
+            "SampleTypeEnum": {
+                "enum": [
+                    "Amplified DNA",
+                    "ctDNA",
+                    "Other DNA enrichments",
+                    "Other RNA fractions",
+                    "polyA+ RNA",
+                    "Protein",
+                    "rRNA-depleted RNA",
+                    "Total DNA",
+                    "Total RNA"
+                ],
+                "title": "SampleTypeEnum",
+                "type": "string"
+            },
             "SexAtBirthEnum": {
                 "enum": [
                     "Male",
@@ -8974,6 +9374,109 @@
                     "Unknown"
                 ],
                 "title": "SexAtBirthEnum",
+                "type": "string"
+            },
+            "SmokingStatusEnum": {
+                "enum": [
+                    "Current reformed smoker for <= 15 years",
+                    "Current reformed smoker for > 15 years",
+                    "Current reformed smoker, duration not specified",
+                    "Current smoker",
+                    "Lifelong non-smoker (<100 cigarettes smoked in lifetime)",
+                    "Not applicable",
+                    "Smoking history not documented"
+                ],
+                "title": "SmokingStatusEnum",
+                "type": "string"
+            },
+            "SpecimenLateralityEnum": {
+                "enum": [
+                    "Left",
+                    "Not applicable",
+                    "Right",
+                    "Unknown"
+                ],
+                "title": "SpecimenLateralityEnum",
+                "type": "string"
+            },
+            "SpecimenProcessingEnum": {
+                "enum": [
+                    "Cryopreservation in liquid nitrogen (dead tissue)",
+                    "Cryopreservation in dry ice (dead tissue)",
+                    "Cryopreservation of live cells in liquid nitrogen",
+                    "Cryopreservation - other",
+                    "Formalin fixed & paraffin embedded",
+                    "Formalin fixed - buffered",
+                    "Formalin fixed - unbuffered",
+                    "Fresh",
+                    "Other",
+                    "Unknown"
+                ],
+                "title": "SpecimenProcessingEnum",
+                "type": "string"
+            },
+            "SpecimenTissueSourceEnum": {
+                "enum": [
+                    "Abdominal fluid",
+                    "Amniotic fluid",
+                    "Arterial blood",
+                    "Bile",
+                    "Blood derived - bone marrow",
+                    "Blood derived - peripheral blood",
+                    "Bone marrow fluid",
+                    "Bone marrow derived mononuclear cells",
+                    "Buccal cell",
+                    "Buffy coat",
+                    "Cerebrospinal fluid",
+                    "Cervical mucus",
+                    "Convalescent plasma",
+                    "Cord blood",
+                    "Duodenal fluid",
+                    "Female genital fluid",
+                    "Fetal blood",
+                    "Hydrocele fluid",
+                    "Male genital fluid",
+                    "Pancreatic fluid",
+                    "Pericardial effusion",
+                    "Pleural fluid",
+                    "Renal cyst fluid",
+                    "Saliva",
+                    "Seminal fluid",
+                    "Serum",
+                    "Solid tissue",
+                    "Sputum",
+                    "Synovial fluid",
+                    "Urine",
+                    "Venous blood",
+                    "Vitreous fluid",
+                    "Whole blood",
+                    "Wound"
+                ],
+                "title": "SpecimenTissueSourceEnum",
+                "type": "string"
+            },
+            "SpecimenTypeEnum": {
+                "enum": [
+                    "Cell line - derived from normal",
+                    "Cell line - derived from primary tumour",
+                    "Cell line - derived from metastatic tumour",
+                    "Cell line - derived from xenograft tumour",
+                    "Metastatic tumour - additional metastatic",
+                    "Metastatic tumour - metastasis local to lymph node",
+                    "Metastatic tumour - metastasis to distant location",
+                    "Metastatic tumour",
+                    "Normal - tissue adjacent to primary tumour",
+                    "Normal",
+                    "Primary tumour - additional new primary",
+                    "Primary tumour - adjacent to normal",
+                    "Primary tumour",
+                    "Recurrent tumour",
+                    "Tumour - unknown if derived from primary or metastatic tumour",
+                    "Xenograft - derived from primary tumour",
+                    "Xenograft - derived from metastatic tumour",
+                    "Xenograft - derived from tumour cell line"
+                ],
+                "title": "SpecimenTypeEnum",
                 "type": "string"
             },
             "StageGroupEnum": {
@@ -9077,6 +9580,93 @@
                 "title": "StageGroupEnum",
                 "type": "string"
             },
+            "StorageEnum": {
+                "enum": [
+                    "Cut slide",
+                    "Frozen in -70 freezer",
+                    "Frozen in liquid nitrogen",
+                    "Frozen in vapour phase",
+                    "Not Applicable",
+                    "Other",
+                    "Paraffin block",
+                    "RNA later frozen",
+                    "Unknown"
+                ],
+                "title": "StorageEnum",
+                "type": "string"
+            },
+            "SurgeryLocationEnum": {
+                "enum": [
+                    "Local recurrence",
+                    "Metastatic",
+                    "Primary"
+                ],
+                "title": "SurgeryLocationEnum",
+                "type": "string"
+            },
+            "SurgeryTypeEnum": {
+                "enum": [
+                    "Ablation",
+                    "Axillary Clearance",
+                    "Axillary lymph nodes sampling",
+                    "Bilateral complete salpingo-oophorectomy",
+                    "Biopsy",
+                    "Bypass Gastrojejunostomy",
+                    "Cholecystectomy",
+                    "Cholecystojejunostomy",
+                    "Completion Gastrectomy",
+                    "Debridement of pancreatic and peripancreatic necrosis",
+                    "Distal subtotal pancreatectomy",
+                    "Drainage of abscess",
+                    "Duodenal preserving pancreatic head resection",
+                    "Endoscopic biopsy",
+                    "Endoscopic brushings of gastrointestinal tract",
+                    "Enucleation",
+                    "Esophageal bypass surgery/jejunostomy only",
+                    "Exploratory laparotomy",
+                    "Fine needle aspiration biopsy",
+                    "Gastric Antrectomy",
+                    "Glossectomy",
+                    "Hepatojejunostomy",
+                    "Hysterectomy",
+                    "Incision of thorax",
+                    "Ivor Lewis subtotal esophagectomy",
+                    "Laparotomy",
+                    "Left thoracoabdominal incision",
+                    "Lobectomy",
+                    "Mammoplasty",
+                    "Mastectomy",
+                    "McKeown esophagectomy",
+                    "Merendino procedure",
+                    "Minimally invasive esophagectomy",
+                    "Omentectomy",
+                    "Ovariectomy",
+                    "Pancreaticoduodenectomy (Whipple procedure)",
+                    "Pancreaticojejunostomy, side-to-side anastomosis",
+                    "Partial pancreatectomy",
+                    "Pneumonectomy",
+                    "Prostatectomy",
+                    "Proximal subtotal gastrectomy",
+                    "Pylorus-sparing Whipple operation",
+                    "Radical pancreaticoduodenectomy",
+                    "Radical prostatectomy",
+                    "Reexcision",
+                    "Segmentectomy",
+                    "Sentinal Lymph Node Biopsy",
+                    "Spleen preserving distal pancreatectomy",
+                    "Splenectomy",
+                    "Total gastrectomy",
+                    "Total gastrectomy with extended lymphadenectomy",
+                    "Total pancreatectomy",
+                    "Transhiatal esophagectomy",
+                    "Triple bypass of pancreas",
+                    "Tumor Debulking",
+                    "Wedge/localised gastric resection",
+                    "Wide Local Excision"
+                ],
+                "title": "SurgeryTypeEnum",
+                "type": "string"
+            },
             "TCategoryEnum": {
                 "enum": [
                     "T0",
@@ -9135,6 +9725,213 @@
                 "title": "TCategoryEnum",
                 "type": "string"
             },
+            "TherapyTypeEnum": {
+                "enum": [
+                    "External",
+                    "Internal"
+                ],
+                "title": "TherapyTypeEnum",
+                "type": "string"
+            },
+            "TobaccoTypeEnum": {
+                "enum": [
+                    "Chewing Tobacco",
+                    "Cigar",
+                    "Cigarettes",
+                    "Electronic cigarettes",
+                    "Not applicable",
+                    "Pipe",
+                    "Roll-ups",
+                    "Snuff",
+                    "Unknown",
+                    "Waterpipe"
+                ],
+                "title": "TobaccoTypeEnum",
+                "type": "string"
+            },
+            "TreatmentIntentEnum": {
+                "enum": [
+                    "Curative",
+                    "Palliative",
+                    "Supportive",
+                    "Diagnostic",
+                    "Preventive",
+                    "Guidance",
+                    "Screening",
+                    "Forensic"
+                ],
+                "title": "TreatmentIntentEnum",
+                "type": "string"
+            },
+            "TreatmentResponseEnum": {
+                "enum": [
+                    "Complete response",
+                    "Partial response",
+                    "Progressive disease",
+                    "Stable disease",
+                    "Immune complete response (iCR)",
+                    "Immune partial response (iPR)",
+                    "Immune uncomfirmed progressive disease (iUPD)",
+                    "Immune confirmed progressive disease (iCPD)",
+                    "Immune stable disease (iSD)",
+                    "Complete remission",
+                    "Partial remission",
+                    "Minor response",
+                    "Complete remission without measurable residual disease (CR MRD-)",
+                    "Complete remission with incomplete hematologic recovery (CRi)",
+                    "Morphologic leukemia-free state",
+                    "Primary refractory disease",
+                    "Hematologic relapse (after CR MRD-, CR, CRi)",
+                    "Molecular relapse (after CR MRD-)",
+                    "Physician assessed complete response",
+                    "Physician assessed partial response",
+                    "Physician assessed stable disease",
+                    "No evidence of disease (NED)",
+                    "Major response"
+                ],
+                "title": "TreatmentResponseEnum",
+                "type": "string"
+            },
+            "TreatmentResponseMethodEnum": {
+                "enum": [
+                    "RECIST 1.1",
+                    "iRECIST",
+                    "Cheson CLL 2012 Oncology Response Criteria",
+                    "Response Assessment in Neuro-Oncology (RANO)",
+                    "AML Response Criteria",
+                    "Physician Assessed Response Criteria",
+                    "Blazer score"
+                ],
+                "title": "TreatmentResponseMethodEnum",
+                "type": "string"
+            },
+            "TreatmentSettingEnum": {
+                "enum": [
+                    "Adjuvant",
+                    "Advanced/Metastatic",
+                    "Neoadjuvant",
+                    "Conditioning",
+                    "Induction",
+                    "Locally advanced",
+                    "Maintenance",
+                    "Mobilization",
+                    "Preventative",
+                    "Radiosensitization",
+                    "Salvage"
+                ],
+                "title": "TreatmentSettingEnum",
+                "type": "string"
+            },
+            "TreatmentStatusEnum": {
+                "enum": [
+                    "Treatment completed as prescribed",
+                    "Treatment incomplete due to technical or organizational problems",
+                    "Treatment incomplete because patient died",
+                    "Patient choice (stopped or interrupted treatment)",
+                    "Physician decision (stopped or interrupted treatment)",
+                    "Treatment stopped due to lack of efficacy (disease progression)",
+                    "Treatment stopped due to acute toxicity",
+                    "Other",
+                    "Not applicable",
+                    "Unknown"
+                ],
+                "title": "TreatmentStatusEnum",
+                "type": "string"
+            },
+            "TreatmentTypeEnum": {
+                "enum": [
+                    "Bone marrow transplant",
+                    "Chemotherapy",
+                    "Hormonal therapy",
+                    "Immunotherapy",
+                    "No treatment",
+                    "Other targeting molecular therapy",
+                    "Photodynamic therapy",
+                    "Radiation therapy",
+                    "Stem cell transplant",
+                    "Surgery"
+                ],
+                "title": "TreatmentTypeEnum",
+                "type": "string"
+            },
+            "TumourClassificationEnum": {
+                "enum": [
+                    "Not applicable",
+                    "RX",
+                    "R0",
+                    "R1",
+                    "R2",
+                    "Unknown"
+                ],
+                "title": "TumourClassificationEnum",
+                "type": "string"
+            },
+            "TumourDesginationEnum": {
+                "enum": [
+                    "Normal",
+                    "Tumour"
+                ],
+                "title": "TumourDesginationEnum",
+                "type": "string"
+            },
+            "TumourFocalityEnum": {
+                "enum": [
+                    "Cannot be assessed",
+                    "Multifocal",
+                    "Not applicable",
+                    "Unifocal",
+                    "Unknown"
+                ],
+                "title": "TumourFocalityEnum",
+                "type": "string"
+            },
+            "TumourGradeEnum": {
+                "enum": [
+                    "Low grade",
+                    "High grade",
+                    "GX",
+                    "G1",
+                    "G2",
+                    "G3",
+                    "G4",
+                    "Low",
+                    "High",
+                    "Grade 1",
+                    "Grade 2",
+                    "Grade 3",
+                    "Grade 4",
+                    "Grade I",
+                    "Grade II",
+                    "Grade III",
+                    "Grade IV",
+                    "Grade Group 1",
+                    "Grade Group 2",
+                    "Grade Group 3",
+                    "Grade Group 4",
+                    "Grade Group 5"
+                ],
+                "title": "TumourGradeEnum",
+                "type": "string"
+            },
+            "TumourGradingSystemEnum": {
+                "enum": [
+                    "FNCLCC grading system",
+                    "Four-tier grading system",
+                    "Gleason grade group system",
+                    "Grading system for GISTs",
+                    "Grading system for GNETs",
+                    "IASLC grading system",
+                    "ISUP grading system",
+                    "Nottingham grading system",
+                    "Nuclear grading system for DCIS",
+                    "Scarff-Bloom-Richardson grading system",
+                    "Three-tier grading system",
+                    "Two-tier grading system",
+                    "WHO grading system for CNS tumours"
+                ],
+                "title": "TumourGradingSystemEnum",
+                "type": "string"
+            },
             "TumourStagingSystemEnum": {
                 "enum": [
                     "AJCC 8th edition",
@@ -9153,6 +9950,15 @@
                     "St Jude staging system"
                 ],
                 "title": "TumourStagingSystemEnum",
+                "type": "string"
+            },
+            "uBooleanEnum": {
+                "enum": [
+                    "Yes",
+                    "No",
+                    "Unknown"
+                ],
+                "title": "uBooleanEnum",
                 "type": "string"
             },
             "Input": {
@@ -10188,89 +10994,6 @@
             },
             "BiomarkerModelSchema": {
                 "properties": {
-                    "er_status": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "pr_status": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "her2_ihc_status": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/Her2StatusEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "her2_ish_status": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/Her2StatusEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "hpv_ihc_status": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "hpv_pcr_status": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "hpv_strain": {
-                        "anyOf": [
-                            {
-                                "items": {
-                                    "$ref": "#/components/schemas/HpvStrainEnum"
-                                },
-                                "type": "array"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Hpv Strain"
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
                     "submitter_specimen_id": {
                         "anyOf": [
                             {
@@ -10364,6 +11087,16 @@
                         ],
                         "title": "Cea"
                     },
+                    "er_status": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "er_percent_positive": {
                         "anyOf": [
                             {
@@ -10375,6 +11108,16 @@
                         ],
                         "title": "Er Percent Positive"
                     },
+                    "pr_status": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "pr_percent_positive": {
                         "anyOf": [
                             {
@@ -10385,6 +11128,68 @@
                             }
                         ],
                         "title": "Pr Percent Positive"
+                    },
+                    "her2_ihc_status": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Her2StatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "her2_ish_status": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Her2StatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "hpv_ihc_status": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "hpv_pcr_status": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ErPrHpvStatusEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "hpv_strain": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "$ref": "#/components/schemas/HpvStrainEnum"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Hpv Strain"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -10393,50 +11198,6 @@
                 ],
                 "title": "BiomarkerModelSchema",
                 "type": "object"
-            },
-            "ErPrHpvStatusEnum": {
-                "enum": [
-                    "Cannot be determined",
-                    "Negative",
-                    "Not applicable",
-                    "Positive",
-                    "Unknown"
-                ],
-                "title": "ErPrHpvStatusEnum",
-                "type": "string"
-            },
-            "Her2StatusEnum": {
-                "enum": [
-                    "Cannot be determined",
-                    "Equivocal",
-                    "Positive",
-                    "Negative",
-                    "Not applicable",
-                    "Unknown"
-                ],
-                "title": "Her2StatusEnum",
-                "type": "string"
-            },
-            "HpvStrainEnum": {
-                "enum": [
-                    "HPV16",
-                    "HPV18",
-                    "HPV31",
-                    "HPV33",
-                    "HPV35",
-                    "HPV39",
-                    "HPV45",
-                    "HPV51",
-                    "HPV52",
-                    "HPV56",
-                    "HPV58",
-                    "HPV59",
-                    "HPV66",
-                    "HPV68",
-                    "HPV73"
-                ],
-                "title": "HpvStrainEnum",
-                "type": "string"
             },
             "PagedBiomarkerModelSchema": {
                 "properties": {
@@ -10597,16 +11358,6 @@
             },
             "ChemotherapyModelSchema": {
                 "properties": {
-                    "chemotherapy_drug_dose_units": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/DosageUnitsEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
                     "drug_reference_database": {
                         "anyOf": [
                             {
@@ -10616,20 +11367,6 @@
                                 "type": "null"
                             }
                         ]
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "submitter_treatment_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Treatment Id",
-                        "type": "string"
                     },
                     "drug_name": {
                         "anyOf": [
@@ -10655,6 +11392,16 @@
                         ],
                         "title": "Drug Reference Identifier"
                     },
+                    "chemotherapy_drug_dose_units": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/DosageUnitsEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "prescribed_cumulative_drug_dose": {
                         "anyOf": [
                             {
@@ -10676,6 +11423,18 @@
                             }
                         ],
                         "title": "Actual Cumulative Drug Dose"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
+                    "submitter_treatment_id": {
+                        "title": "Submitter Treatment Id",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -10685,28 +11444,6 @@
                 ],
                 "title": "ChemotherapyModelSchema",
                 "type": "object"
-            },
-            "DosageUnitsEnum": {
-                "enum": [
-                    "mg/m2",
-                    "IU/m2",
-                    "IU/kg",
-                    "ug/m2",
-                    "g/m2",
-                    "mg/kg",
-                    "cells/kg"
-                ],
-                "title": "DosageUnitsEnum",
-                "type": "string"
-            },
-            "DrugReferenceDbEnum": {
-                "enum": [
-                    "RxNorm",
-                    "PubChem",
-                    "NCI Thesaurus"
-                ],
-                "title": "DrugReferenceDbEnum",
-                "type": "string"
             },
             "PagedChemotherapyModelSchema": {
                 "properties": {
@@ -10876,6 +11613,17 @@
                             }
                         ]
                     },
+                    "age_at_comorbidity_diagnosis": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Age At Comorbidity Diagnosis"
+                    },
                     "comorbidity_type_code": {
                         "anyOf": [
                             {
@@ -10916,20 +11664,8 @@
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "maxLength": 64,
                         "title": "Submitter Donor Id",
                         "type": "string"
-                    },
-                    "age_at_comorbidity_diagnosis": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Age At Comorbidity Diagnosis"
                     }
                 },
                 "required": [
@@ -10938,19 +11674,6 @@
                 ],
                 "title": "ComorbidityModelSchema",
                 "type": "object"
-            },
-            "MalignancyLateralityEnum": {
-                "enum": [
-                    "Bilateral",
-                    "Left",
-                    "Midline",
-                    "Not applicable",
-                    "Right",
-                    "Unilateral, Side not specified",
-                    "Unknown"
-                ],
-                "title": "MalignancyLateralityEnum",
-                "type": "string"
             },
             "PagedComorbidityModelSchema": {
                 "properties": {
@@ -11003,15 +11726,6 @@
                 ],
                 "title": "PagedComorbidityModelSchema",
                 "type": "object"
-            },
-            "uBooleanEnum": {
-                "enum": [
-                    "Yes",
-                    "No",
-                    "Unknown"
-                ],
-                "title": "uBooleanEnum",
-                "type": "string"
             },
             "ExposureFilterSchema": {
                 "properties": {
@@ -11097,15 +11811,6 @@
                         ],
                         "title": "Tobacco Type"
                     },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
                     "pack_years_smoked": {
                         "anyOf": [
                             {
@@ -11116,6 +11821,14 @@
                             }
                         ],
                         "title": "Pack Years Smoked"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -11176,35 +11889,6 @@
                 ],
                 "title": "PagedExposureModelSchema",
                 "type": "object"
-            },
-            "SmokingStatusEnum": {
-                "enum": [
-                    "Current reformed smoker for <= 15 years",
-                    "Current reformed smoker for > 15 years",
-                    "Current reformed smoker, duration not specified",
-                    "Current smoker",
-                    "Lifelong non-smoker (<100 cigarettes smoked in lifetime)",
-                    "Not applicable",
-                    "Smoking history not documented"
-                ],
-                "title": "SmokingStatusEnum",
-                "type": "string"
-            },
-            "TobaccoTypeEnum": {
-                "enum": [
-                    "Chewing Tobacco",
-                    "Cigar",
-                    "Cigarettes",
-                    "Electronic cigarettes",
-                    "Not applicable",
-                    "Pipe",
-                    "Roll-ups",
-                    "Snuff",
-                    "Unknown",
-                    "Waterpipe"
-                ],
-                "title": "TobaccoTypeEnum",
-                "type": "string"
             },
             "FollowUpFilterSchema": {
                 "properties": {
@@ -11382,20 +12066,6 @@
                 "title": "FollowUpFilterSchema",
                 "type": "object"
             },
-            "DiseaseStatusFollowupEnum": {
-                "enum": [
-                    "Complete remission",
-                    "Distant progression",
-                    "Loco-regional progression",
-                    "No evidence of disease",
-                    "Partial remission",
-                    "Progression not otherwise specified",
-                    "Relapse or recurrence",
-                    "Stable"
-                ],
-                "title": "DiseaseStatusFollowupEnum",
-                "type": "string"
-            },
             "FollowUpModelSchema": {
                 "properties": {
                     "submitter_follow_up_id": {
@@ -11403,6 +12073,19 @@
                         "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
                         "title": "Submitter Follow Up Id",
                         "type": "string"
+                    },
+                    "date_of_followup": {
+                        "anyOf": [
+                            {
+                                "maxLength": 32,
+                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Date Of Followup"
                     },
                     "disease_status_at_followup": {
                         "anyOf": [
@@ -11423,19 +12106,6 @@
                                 "type": "null"
                             }
                         ]
-                    },
-                    "date_of_followup": {
-                        "anyOf": [
-                            {
-                                "maxLength": 32,
-                                "pattern": "^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Date Of Followup"
                     },
                     "date_of_relapse": {
                         "anyOf": [
@@ -11528,43 +12198,17 @@
                             }
                         ]
                     },
-                    "treatment_uuid": {
-                        "anyOf": [
-                            {
-                                "format": "uuid",
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Treatment Uuid"
-                    },
-                    "primary_diagnosis_uuid": {
-                        "anyOf": [
-                            {
-                                "format": "uuid",
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Primary Diagnosis Uuid"
-                    },
                     "program_id": {
                         "title": "Program Id",
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "maxLength": 64,
                         "title": "Submitter Donor Id",
                         "type": "string"
                     },
                     "submitter_primary_diagnosis_id": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
                                 "type": "string"
                             },
                             {
@@ -11576,7 +12220,6 @@
                     "submitter_treatment_id": {
                         "anyOf": [
                             {
-                                "maxLength": 64,
                                 "type": "string"
                             },
                             {
@@ -11645,29 +12288,6 @@
                 ],
                 "title": "PagedFollowUpModelSchema",
                 "type": "object"
-            },
-            "ProgressionStatusMethodEnum": {
-                "enum": [
-                    "Imaging (procedure)",
-                    "Histopathology test (procedure)",
-                    "Assessment of symptom control (procedure)",
-                    "Physical examination procedure (procedure)",
-                    "Tumor marker measurement (procedure)",
-                    "Laboratory data interpretation (procedure)"
-                ],
-                "title": "ProgressionStatusMethodEnum",
-                "type": "string"
-            },
-            "RelapseTypeEnum": {
-                "enum": [
-                    "Distant recurrence/metastasis",
-                    "Local recurrence",
-                    "Local recurrence and distant metastasis",
-                    "Progression (liquid tumours)",
-                    "Biochemical progression"
-                ],
-                "title": "RelapseTypeEnum",
-                "type": "string"
             },
             "HormoneTherapyFilterSchema": {
                 "properties": {
@@ -11776,16 +12396,6 @@
             },
             "HormoneTherapyModelSchema": {
                 "properties": {
-                    "hormone_drug_dose_units": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/DosageUnitsEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
                     "drug_reference_database": {
                         "anyOf": [
                             {
@@ -11795,20 +12405,6 @@
                                 "type": "null"
                             }
                         ]
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "submitter_treatment_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Treatment Id",
-                        "type": "string"
                     },
                     "drug_name": {
                         "anyOf": [
@@ -11834,6 +12430,16 @@
                         ],
                         "title": "Drug Reference Identifier"
                     },
+                    "hormone_drug_dose_units": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/DosageUnitsEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "prescribed_cumulative_drug_dose": {
                         "anyOf": [
                             {
@@ -11855,6 +12461,18 @@
                             }
                         ],
                         "title": "Actual Cumulative Drug Dose"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
+                    "submitter_treatment_id": {
+                        "title": "Submitter Treatment Id",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -12035,16 +12653,6 @@
             },
             "ImmunotherapyModelSchema": {
                 "properties": {
-                    "immunotherapy_type": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/ImmunotherapyTypeEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
                     "drug_reference_database": {
                         "anyOf": [
                             {
@@ -12055,29 +12663,15 @@
                             }
                         ]
                     },
-                    "immunotherapy_drug_dose_units": {
+                    "immunotherapy_type": {
                         "anyOf": [
                             {
-                                "$ref": "#/components/schemas/DosageUnitsEnum"
+                                "$ref": "#/components/schemas/ImmunotherapyTypeEnum"
                             },
                             {
                                 "type": "null"
                             }
                         ]
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "submitter_treatment_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Treatment Id",
-                        "type": "string"
                     },
                     "drug_name": {
                         "anyOf": [
@@ -12103,6 +12697,16 @@
                         ],
                         "title": "Drug Reference Identifier"
                     },
+                    "immunotherapy_drug_dose_units": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/DosageUnitsEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "prescribed_cumulative_drug_dose": {
                         "anyOf": [
                             {
@@ -12124,6 +12728,18 @@
                             }
                         ],
                         "title": "Actual Cumulative Drug Dose"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
+                    "submitter_treatment_id": {
+                        "title": "Submitter Treatment Id",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -12133,16 +12749,6 @@
                 ],
                 "title": "ImmunotherapyModelSchema",
                 "type": "object"
-            },
-            "ImmunotherapyTypeEnum": {
-                "enum": [
-                    "Cell-based",
-                    "Immune checkpoint inhibitors",
-                    "Monoclonal antibodies other than immune checkpoint inhibitors",
-                    "Other immunomodulatory substances"
-                ],
-                "title": "ImmunotherapyTypeEnum",
-                "type": "string"
             },
             "PagedImmunotherapyModelSchema": {
                 "properties": {
@@ -12364,272 +12970,6 @@
                 "title": "PagedRadiationModelSchema",
                 "type": "object"
             },
-            "RadiationAnatomicalSiteEnum": {
-                "enum": [
-                    "Left Abdomen",
-                    "Whole Abdomen",
-                    "Right Abdomen",
-                    "Lower Abdomen",
-                    "Left Lower Abdomen",
-                    "Right Lower Abdomen",
-                    "Upper Abdomen",
-                    "Left Upper Abdomen",
-                    "Right Upper Abdomen",
-                    "Left Adrenal",
-                    "Right Adrenal",
-                    "Bilateral Ankle",
-                    "Left Ankle",
-                    "Right Ankle",
-                    "Bilateral Antrum (Bull's Eye)",
-                    "Left Antrum",
-                    "Right Antrum",
-                    "Anus",
-                    "Lower Left Arm",
-                    "Lower Right Arm",
-                    "Bilateral Arms",
-                    "Left Arm",
-                    "Right Arm",
-                    "Upper Left Arm",
-                    "Upper Right Arm",
-                    "Left Axilla",
-                    "Right Axilla",
-                    "Skin or Soft Tissue of Back",
-                    "Bile Duct",
-                    "Bladder",
-                    "Lower Body",
-                    "Middle Body",
-                    "Upper Body",
-                    "Whole Body",
-                    "Boost - Area Previously Treated",
-                    "Brain",
-                    "Left Breast Boost",
-                    "Right Breast Boost",
-                    "Bilateral Breast",
-                    "Left Breast",
-                    "Right Breast",
-                    "Bilateral Breasts with Nodes",
-                    "Left Breast with Nodes",
-                    "Right Breast with Nodes",
-                    "Bilateral Buttocks",
-                    "Left Buttock",
-                    "Right Buttock",
-                    "Inner Canthus",
-                    "Outer Canthus",
-                    "Cervix",
-                    "Bilateral Chest Lung & Area Involve",
-                    "Left Chest",
-                    "Right Chest",
-                    "Chin",
-                    "Left Cheek",
-                    "Right Cheek",
-                    "Bilateral Chest Wall (W/o Breast)",
-                    "Left Chest Wall",
-                    "Right Chest Wall",
-                    "Bilateral Clavicle",
-                    "Left Clavicle",
-                    "Right Clavicle",
-                    "Coccyx",
-                    "Colon",
-                    "Whole C.N.S. (Medulla Techinque)",
-                    "Csf Spine (Medull Tech 2 Diff Machi",
-                    "Left Chestwall Boost",
-                    "Right Chestwall Boost",
-                    "Bilateral Chestwall with Nodes",
-                    "Left Chestwall with Nodes",
-                    "Right Chestwall with Nodes",
-                    "Left Ear",
-                    "Right Ear",
-                    "Epigastrium",
-                    "Lower Esophagus",
-                    "Middle Esophagus",
-                    "Upper Esophagus",
-                    "Entire Esophagus",
-                    "Ethmoid Sinus",
-                    "Bilateral Eyes",
-                    "Left Eye",
-                    "Right Eye",
-                    "Bilateral Face",
-                    "Left Face",
-                    "Right Face",
-                    "Left Fallopian Tubes",
-                    "Right Fallopian Tubes",
-                    "Bilateral Femur",
-                    "Left Femur",
-                    "Right Femur",
-                    "Left Fibula",
-                    "Right Fibula",
-                    "Finger (Including Thumbs)",
-                    "Floor of Mouth (Boosts)",
-                    "Bilateral Feet",
-                    "Left Foot",
-                    "Right Foot",
-                    "Forehead",
-                    "Posterior Fossa",
-                    "Gall Bladder",
-                    "Gingiva",
-                    "Bilateral Hand",
-                    "Left Hand",
-                    "Right Hand",
-                    "Head",
-                    "Bilateral Heel",
-                    "Left Heel",
-                    "Right Heel",
-                    "Left Hemimantle",
-                    "Right Hemimantle",
-                    "Heart",
-                    "Bilateral Hip",
-                    "Left Hip",
-                    "Right Hip",
-                    "Left Humerus",
-                    "Right Humerus",
-                    "Hypopharynx",
-                    "Bilateral Internal Mammary Chain",
-                    "Bilateral Inguinal Nodes",
-                    "Left Inguinal Nodes",
-                    "Right Inguinal Nodes",
-                    "Inverted 'Y' (Dog-Leg,Hockey-Stick)",
-                    "Left Kidney",
-                    "Right Kidney",
-                    "Bilateral Knee",
-                    "Left Knee",
-                    "Right Knee",
-                    "Bilateral Lacrimal Gland",
-                    "Left Lacrimal Gland",
-                    "Right Lacrimal Gland",
-                    "Larygopharynx",
-                    "Larynx",
-                    "Bilateral Leg",
-                    "Left Leg",
-                    "Right Leg",
-                    "Lower Bilateral Leg",
-                    "Lower Left Leg",
-                    "Lower Right Leg",
-                    "Upper Bilateral Leg",
-                    "Upper Left Leg",
-                    "Upper Right Leg",
-                    "Both Eyelid(s)",
-                    "Left Eyelid",
-                    "Right Eyelid",
-                    "Both Lip(s)",
-                    "Lower Lip",
-                    "Upper Lip",
-                    "Liver",
-                    "Bilateral Lung",
-                    "Left Lung",
-                    "Right Lung",
-                    "Bilateral Mandible",
-                    "Left Mandible",
-                    "Right Mandible",
-                    "Mantle",
-                    "Bilateral Maxilla",
-                    "Left Maxilla",
-                    "Right Maxilla",
-                    "Mediastinum",
-                    "Multiple Skin",
-                    "Nasal Fossa",
-                    "Nasopharynx",
-                    "Bilateral Neck Includes Nodes",
-                    "Left Neck Includes Nodes",
-                    "Right Neck Includes Nodes",
-                    "Neck - Skin",
-                    "Nose",
-                    "Oral Cavity / Buccal Mucosa",
-                    "Bilateral Orbit",
-                    "Left Orbit",
-                    "Right Orbit",
-                    "Oropharynx",
-                    "Bilateral Ovary",
-                    "Left Ovary",
-                    "Right Ovary",
-                    "Hard Palate",
-                    "Soft Palate",
-                    "Palate Unspecified",
-                    "Pancreas",
-                    "Para-Aortic Nodes",
-                    "Left Parotid",
-                    "Right Parotid",
-                    "Bilateral Pelvis",
-                    "Left Pelvis",
-                    "Right Pelvis",
-                    "Penis",
-                    "Perineum",
-                    "Pituitary",
-                    "Left Pleura (As in Mesothelioma)",
-                    "Right Pleura",
-                    "Prostate",
-                    "Pubis",
-                    "Pyriform Fossa (Sinuses)",
-                    "Left Radius",
-                    "Right Radius",
-                    "Rectum (Includes Sigmoid)",
-                    "Left Ribs",
-                    "Right Ribs",
-                    "Sacrum",
-                    "Left Salivary Gland",
-                    "Right Salivary Gland",
-                    "Bilateral Scapula",
-                    "Left Scapula",
-                    "Right Scapula",
-                    "Bilateral Supraclavicular Nodes",
-                    "Left Supraclavicular Nodes",
-                    "Right Supraclavicular Nodes",
-                    "Bilateral Scalp",
-                    "Left Scalp",
-                    "Right Scalp",
-                    "Scrotum",
-                    "Bilateral Shoulder",
-                    "Left Shoulder",
-                    "Right Shoulder",
-                    "Whole Body - Skin",
-                    "Skull",
-                    "Cervical & Thoracic Spine",
-                    "Sphenoid Sinus",
-                    "Cervical Spine",
-                    "Lumbar Spine",
-                    "Thoracic Spine",
-                    "Whole Spine",
-                    "Spleen",
-                    "Lumbo-Sacral Spine",
-                    "Thoracic & Lumbar Spine",
-                    "Sternum",
-                    "Stomach",
-                    "Submandibular Glands",
-                    "Left Temple",
-                    "Right Temple",
-                    "Bilateral Testis",
-                    "Left Testis",
-                    "Right Testis",
-                    "Thyroid",
-                    "Left Tibia",
-                    "Right Tibia",
-                    "Left Toes",
-                    "Right Toes",
-                    "Tongue",
-                    "Tonsil",
-                    "Trachea",
-                    "Left Ulna",
-                    "Right Ulna",
-                    "Left Ureter",
-                    "Right Ureter",
-                    "Urethra",
-                    "Uterus",
-                    "Uvula",
-                    "Vagina",
-                    "Vulva",
-                    "Abdomen",
-                    "Body",
-                    "Chest",
-                    "Lower Limb",
-                    "Neck",
-                    "Other",
-                    "Pelvis",
-                    "Skin",
-                    "Spine",
-                    "Upper Limb"
-                ],
-                "title": "RadiationAnatomicalSiteEnum",
-                "type": "string"
-            },
             "RadiationModelSchema": {
                 "properties": {
                     "radiation_therapy_modality": {
@@ -12651,30 +12991,6 @@
                                 "type": "null"
                             }
                         ]
-                    },
-                    "anatomical_site_irradiated": {
-                        "anyOf": [
-                            {
-                                "$ref": "#/components/schemas/RadiationAnatomicalSiteEnum"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ]
-                    },
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "submitter_donor_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Donor Id",
-                        "type": "string"
-                    },
-                    "submitter_treatment_id": {
-                        "maxLength": 64,
-                        "title": "Submitter Treatment Id",
-                        "type": "string"
                     },
                     "radiation_therapy_fractions": {
                         "anyOf": [
@@ -12698,6 +13014,16 @@
                         ],
                         "title": "Radiation Therapy Dosage"
                     },
+                    "anatomical_site_irradiated": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/RadiationAnatomicalSiteEnum"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
                     "radiation_boost": {
                         "anyOf": [
                             {
@@ -12720,6 +13046,18 @@
                             }
                         ],
                         "title": "Reference Radiation Treatment Id"
+                    },
+                    "program_id": {
+                        "title": "Program Id",
+                        "type": "string"
+                    },
+                    "submitter_donor_id": {
+                        "title": "Submitter Donor Id",
+                        "type": "string"
+                    },
+                    "submitter_treatment_id": {
+                        "title": "Submitter Treatment Id",
+                        "type": "string"
                     }
                 },
                 "required": [
@@ -12729,27 +13067,6 @@
                 ],
                 "title": "RadiationModelSchema",
                 "type": "object"
-            },
-            "RadiationTherapyModalityEnum": {
-                "enum": [
-                    "Megavoltage radiation therapy using photons (procedure)",
-                    "Radiopharmaceutical",
-                    "Teleradiotherapy using electrons (procedure)",
-                    "Teleradiotherapy protons (procedure)",
-                    "Teleradiotherapy neutrons (procedure)",
-                    "Brachytherapy (procedure)",
-                    "Other"
-                ],
-                "title": "RadiationTherapyModalityEnum",
-                "type": "string"
-            },
-            "TherapyTypeEnum": {
-                "enum": [
-                    "External",
-                    "Internal"
-                ],
-                "title": "TherapyTypeEnum",
-                "type": "string"
             },
             "SampleRegistrationFilterSchema": {
                 "properties": {
@@ -12950,12 +13267,10 @@
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "maxLength": 64,
                         "title": "Submitter Donor Id",
                         "type": "string"
                     },
                     "submitter_specimen_id": {
-                        "maxLength": 64,
                         "title": "Submitter Specimen Id",
                         "type": "string"
                     }
@@ -12968,93 +13283,6 @@
                 ],
                 "title": "SampleRegistrationModelSchema",
                 "type": "object"
-            },
-            "SampleTypeEnum": {
-                "enum": [
-                    "Amplified DNA",
-                    "ctDNA",
-                    "Other DNA enrichments",
-                    "Other RNA fractions",
-                    "polyA+ RNA",
-                    "Protein",
-                    "rRNA-depleted RNA",
-                    "Total DNA",
-                    "Total RNA"
-                ],
-                "title": "SampleTypeEnum",
-                "type": "string"
-            },
-            "SpecimenTissueSourceEnum": {
-                "enum": [
-                    "Abdominal fluid",
-                    "Amniotic fluid",
-                    "Arterial blood",
-                    "Bile",
-                    "Blood derived - bone marrow",
-                    "Blood derived - peripheral blood",
-                    "Bone marrow fluid",
-                    "Bone marrow derived mononuclear cells",
-                    "Buccal cell",
-                    "Buffy coat",
-                    "Cerebrospinal fluid",
-                    "Cervical mucus",
-                    "Convalescent plasma",
-                    "Cord blood",
-                    "Duodenal fluid",
-                    "Female genital fluid",
-                    "Fetal blood",
-                    "Hydrocele fluid",
-                    "Male genital fluid",
-                    "Pancreatic fluid",
-                    "Pericardial effusion",
-                    "Pleural fluid",
-                    "Renal cyst fluid",
-                    "Saliva",
-                    "Seminal fluid",
-                    "Serum",
-                    "Solid tissue",
-                    "Sputum",
-                    "Synovial fluid",
-                    "Urine",
-                    "Venous blood",
-                    "Vitreous fluid",
-                    "Whole blood",
-                    "Wound"
-                ],
-                "title": "SpecimenTissueSourceEnum",
-                "type": "string"
-            },
-            "SpecimenTypeEnum": {
-                "enum": [
-                    "Cell line - derived from normal",
-                    "Cell line - derived from primary tumour",
-                    "Cell line - derived from metastatic tumour",
-                    "Cell line - derived from xenograft tumour",
-                    "Metastatic tumour - additional metastatic",
-                    "Metastatic tumour - metastasis local to lymph node",
-                    "Metastatic tumour - metastasis to distant location",
-                    "Metastatic tumour",
-                    "Normal - tissue adjacent to primary tumour",
-                    "Normal",
-                    "Primary tumour - additional new primary",
-                    "Primary tumour - adjacent to normal",
-                    "Primary tumour",
-                    "Recurrent tumour",
-                    "Tumour - unknown if derived from primary or metastatic tumour",
-                    "Xenograft - derived from primary tumour",
-                    "Xenograft - derived from metastatic tumour",
-                    "Xenograft - derived from tumour cell line"
-                ],
-                "title": "SpecimenTypeEnum",
-                "type": "string"
-            },
-            "TumourDesginationEnum": {
-                "enum": [
-                    "Normal",
-                    "Tumour"
-                ],
-                "title": "TumourDesginationEnum",
-                "type": "string"
             },
             "SpecimenFilterSchema": {
                 "properties": {
@@ -13293,26 +13521,6 @@
                 "title": "SpecimenFilterSchema",
                 "type": "object"
             },
-            "CellsMeasureMethodEnum": {
-                "enum": [
-                    "Genomics",
-                    "Image analysis",
-                    "Pathology estimate by percent nuclei",
-                    "Unknown"
-                ],
-                "title": "CellsMeasureMethodEnum",
-                "type": "string"
-            },
-            "ConfirmedDiagnosisTumourEnum": {
-                "enum": [
-                    "Yes",
-                    "No",
-                    "Not done",
-                    "Unknown"
-                ],
-                "title": "ConfirmedDiagnosisTumourEnum",
-                "type": "string"
-            },
             "PagedSpecimenModelSchema": {
                 "properties": {
                     "items": {
@@ -13365,35 +13573,12 @@
                 "title": "PagedSpecimenModelSchema",
                 "type": "object"
             },
-            "PercentCellsRangeEnum": {
-                "enum": [
-                    "0-19%",
-                    "20-50%",
-                    "51-100%"
-                ],
-                "title": "PercentCellsRangeEnum",
-                "type": "string"
-            },
-            "SpecimenLateralityEnum": {
-                "enum": [
-                    "Left",
-                    "Not applicable",
-                    "Right",
-                    "Unknown"
-                ],
-                "title": "SpecimenLateralityEnum",
-                "type": "string"
-            },
             "SpecimenModelSchema": {
                 "properties": {
                     "submitter_specimen_id": {
                         "maxLength": 64,
                         "pattern": "^[A-Za-z0-9\\-\\._]{1,64}",
                         "title": "Submitter Specimen Id",
-                        "type": "string"
-                    },
-                    "submitter_primary_diagnosis_id": {
-                        "title": "Submitter Primary Diagnosis Id",
                         "type": "string"
                     },
                     "pathological_tumour_staging_system": {
@@ -13582,94 +13767,20 @@
                     "submitter_donor_id": {
                         "title": "Submitter Donor Id",
                         "type": "string"
+                    },
+                    "submitter_primary_diagnosis_id": {
+                        "title": "Submitter Primary Diagnosis Id",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "submitter_specimen_id",
-                    "submitter_primary_diagnosis_id",
                     "program_id",
-                    "submitter_donor_id"
+                    "submitter_donor_id",
+                    "submitter_primary_diagnosis_id"
                 ],
                 "title": "SpecimenModelSchema",
                 "type": "object"
-            },
-            "SpecimenProcessingEnum": {
-                "enum": [
-                    "Cryopreservation in liquid nitrogen (dead tissue)",
-                    "Cryopreservation in dry ice (dead tissue)",
-                    "Cryopreservation of live cells in liquid nitrogen",
-                    "Cryopreservation - other",
-                    "Formalin fixed & paraffin embedded",
-                    "Formalin fixed - buffered",
-                    "Formalin fixed - unbuffered",
-                    "Fresh",
-                    "Other",
-                    "Unknown"
-                ],
-                "title": "SpecimenProcessingEnum",
-                "type": "string"
-            },
-            "StorageEnum": {
-                "enum": [
-                    "Cut slide",
-                    "Frozen in -70 freezer",
-                    "Frozen in liquid nitrogen",
-                    "Frozen in vapour phase",
-                    "Not Applicable",
-                    "Other",
-                    "Paraffin block",
-                    "RNA later frozen",
-                    "Unknown"
-                ],
-                "title": "StorageEnum",
-                "type": "string"
-            },
-            "TumourGradeEnum": {
-                "enum": [
-                    "Low grade",
-                    "High grade",
-                    "GX",
-                    "G1",
-                    "G2",
-                    "G3",
-                    "G4",
-                    "Low",
-                    "High",
-                    "Grade 1",
-                    "Grade 2",
-                    "Grade 3",
-                    "Grade 4",
-                    "Grade I",
-                    "Grade II",
-                    "Grade III",
-                    "Grade IV",
-                    "Grade Group 1",
-                    "Grade Group 2",
-                    "Grade Group 3",
-                    "Grade Group 4",
-                    "Grade Group 5"
-                ],
-                "title": "TumourGradeEnum",
-                "type": "string"
-            },
-            "TumourGradingSystemEnum": {
-                "enum": [
-                    "FNCLCC grading system",
-                    "Four-tier grading system",
-                    "Gleason grade group system",
-                    "Grading system for GISTs",
-                    "Grading system for GNETs",
-                    "IASLC grading system",
-                    "ISUP grading system",
-                    "Nottingham grading system",
-                    "Nuclear grading system for DCIS",
-                    "Scarff-Bloom-Richardson grading system",
-                    "Three-tier grading system",
-                    "Two-tier grading system",
-                    "WHO grading system for CNS tumours"
-                ],
-                "title": "TumourGradingSystemEnum",
-                "type": "string"
             },
             "SurgeryFilterSchema": {
                 "properties": {
@@ -13855,31 +13966,6 @@
                 "title": "SurgeryFilterSchema",
                 "type": "object"
             },
-            "LymphovascularInvasionEnum": {
-                "enum": [
-                    "Absent",
-                    "Both lymphatic and small vessel and venous (large vessel) invasion",
-                    "Lymphatic and small vessel invasion only",
-                    "Not applicable",
-                    "Present",
-                    "Venous (large vessel) invasion only",
-                    "Unknown"
-                ],
-                "title": "LymphovascularInvasionEnum",
-                "type": "string"
-            },
-            "MarginTypesEnum": {
-                "enum": [
-                    "Circumferential resection margin",
-                    "Common bile duct margin",
-                    "Distal margin",
-                    "Not applicable",
-                    "Proximal margin",
-                    "Unknown"
-                ],
-                "title": "MarginTypesEnum",
-                "type": "string"
-            },
             "PagedSurgeryModelSchema": {
                 "properties": {
                     "items": {
@@ -13932,28 +14018,20 @@
                 "title": "PagedSurgeryModelSchema",
                 "type": "object"
             },
-            "PerineuralInvasionEnum": {
-                "enum": [
-                    "Absent",
-                    "Cannot be assessed",
-                    "Not applicable",
-                    "Present",
-                    "Unknown"
-                ],
-                "title": "PerineuralInvasionEnum",
-                "type": "string"
-            },
-            "SurgeryLocationEnum": {
-                "enum": [
-                    "Local recurrence",
-                    "Metastatic",
-                    "Primary"
-                ],
-                "title": "SurgeryLocationEnum",
-                "type": "string"
-            },
             "SurgeryModelSchema": {
                 "properties": {
+                    "submitter_specimen_id": {
+                        "anyOf": [
+                            {
+                                "maxLength": 64,
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Submitter Specimen Id"
+                    },
                     "surgery_type": {
                         "anyOf": [
                             {
@@ -13986,6 +14064,39 @@
                                 "type": "null"
                             }
                         ]
+                    },
+                    "tumour_length": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Length"
+                    },
+                    "tumour_width": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Tumour Width"
+                    },
+                    "greatest_dimension_tumour": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Greatest Dimension Tumour"
                     },
                     "tumour_focality": {
                         "anyOf": [
@@ -14074,59 +14185,12 @@
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "maxLength": 64,
                         "title": "Submitter Donor Id",
                         "type": "string"
                     },
                     "submitter_treatment_id": {
-                        "maxLength": 64,
                         "title": "Submitter Treatment Id",
                         "type": "string"
-                    },
-                    "submitter_specimen_id": {
-                        "anyOf": [
-                            {
-                                "maxLength": 64,
-                                "type": "string"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Submitter Specimen Id"
-                    },
-                    "tumour_length": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tumour Length"
-                    },
-                    "tumour_width": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Tumour Width"
-                    },
-                    "greatest_dimension_tumour": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Greatest Dimension Tumour"
                     }
                 },
                 "required": [
@@ -14136,92 +14200,6 @@
                 ],
                 "title": "SurgeryModelSchema",
                 "type": "object"
-            },
-            "SurgeryTypeEnum": {
-                "enum": [
-                    "Ablation",
-                    "Axillary Clearance",
-                    "Axillary lymph nodes sampling",
-                    "Bilateral complete salpingo-oophorectomy",
-                    "Biopsy",
-                    "Bypass Gastrojejunostomy",
-                    "Cholecystectomy",
-                    "Cholecystojejunostomy",
-                    "Completion Gastrectomy",
-                    "Debridement of pancreatic and peripancreatic necrosis",
-                    "Distal subtotal pancreatectomy",
-                    "Drainage of abscess",
-                    "Duodenal preserving pancreatic head resection",
-                    "Endoscopic biopsy",
-                    "Endoscopic brushings of gastrointestinal tract",
-                    "Enucleation",
-                    "Esophageal bypass surgery/jejunostomy only",
-                    "Exploratory laparotomy",
-                    "Fine needle aspiration biopsy",
-                    "Gastric Antrectomy",
-                    "Glossectomy",
-                    "Hepatojejunostomy",
-                    "Hysterectomy",
-                    "Incision of thorax",
-                    "Ivor Lewis subtotal esophagectomy",
-                    "Laparotomy",
-                    "Left thoracoabdominal incision",
-                    "Lobectomy",
-                    "Mammoplasty",
-                    "Mastectomy",
-                    "McKeown esophagectomy",
-                    "Merendino procedure",
-                    "Minimally invasive esophagectomy",
-                    "Omentectomy",
-                    "Ovariectomy",
-                    "Pancreaticoduodenectomy (Whipple procedure)",
-                    "Pancreaticojejunostomy, side-to-side anastomosis",
-                    "Partial pancreatectomy",
-                    "Pneumonectomy",
-                    "Prostatectomy",
-                    "Proximal subtotal gastrectomy",
-                    "Pylorus-sparing Whipple operation",
-                    "Radical pancreaticoduodenectomy",
-                    "Radical prostatectomy",
-                    "Reexcision",
-                    "Segmentectomy",
-                    "Sentinal Lymph Node Biopsy",
-                    "Spleen preserving distal pancreatectomy",
-                    "Splenectomy",
-                    "Total gastrectomy",
-                    "Total gastrectomy with extended lymphadenectomy",
-                    "Total pancreatectomy",
-                    "Transhiatal esophagectomy",
-                    "Triple bypass of pancreas",
-                    "Tumor Debulking",
-                    "Wedge/localised gastric resection",
-                    "Wide Local Excision"
-                ],
-                "title": "SurgeryTypeEnum",
-                "type": "string"
-            },
-            "TumourClassificationEnum": {
-                "enum": [
-                    "Not applicable",
-                    "RX",
-                    "R0",
-                    "R1",
-                    "R2",
-                    "Unknown"
-                ],
-                "title": "TumourClassificationEnum",
-                "type": "string"
-            },
-            "TumourFocalityEnum": {
-                "enum": [
-                    "Cannot be assessed",
-                    "Multifocal",
-                    "Not applicable",
-                    "Unifocal",
-                    "Unknown"
-                ],
-                "title": "TumourFocalityEnum",
-                "type": "string"
             },
             "TreatmentFilterSchema": {
                 "properties": {
@@ -14454,20 +14432,6 @@
                 "title": "PagedTreatmentModelSchema",
                 "type": "object"
             },
-            "TreatmentIntentEnum": {
-                "enum": [
-                    "Curative",
-                    "Palliative",
-                    "Supportive",
-                    "Diagnostic",
-                    "Preventive",
-                    "Guidance",
-                    "Screening",
-                    "Forensic"
-                ],
-                "title": "TreatmentIntentEnum",
-                "type": "string"
-            },
             "TreatmentModelSchema": {
                 "properties": {
                     "submitter_treatment_id": {
@@ -14499,6 +14463,17 @@
                                 "type": "null"
                             }
                         ]
+                    },
+                    "line_of_treatment": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Line Of Treatment"
                     },
                     "treatment_start_date": {
                         "anyOf": [
@@ -14546,6 +14521,28 @@
                             }
                         ]
                     },
+                    "days_per_cycle": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Days Per Cycle"
+                    },
+                    "number_of_cycles": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Number Of Cycles"
+                    },
                     "response_to_treatment_criteria_method": {
                         "anyOf": [
                             {
@@ -14581,47 +14578,12 @@
                         "type": "string"
                     },
                     "submitter_donor_id": {
-                        "maxLength": 64,
                         "title": "Submitter Donor Id",
                         "type": "string"
                     },
                     "submitter_primary_diagnosis_id": {
-                        "maxLength": 64,
                         "title": "Submitter Primary Diagnosis Id",
                         "type": "string"
-                    },
-                    "line_of_treatment": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Line Of Treatment"
-                    },
-                    "days_per_cycle": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Days Per Cycle"
-                    },
-                    "number_of_cycles": {
-                        "anyOf": [
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "null"
-                            }
-                        ],
-                        "title": "Number Of Cycles"
                     }
                 },
                 "required": [
@@ -14632,97 +14594,6 @@
                 ],
                 "title": "TreatmentModelSchema",
                 "type": "object"
-            },
-            "TreatmentResponseEnum": {
-                "enum": [
-                    "Complete response",
-                    "Partial response",
-                    "Progressive disease",
-                    "Stable disease",
-                    "Immune complete response (iCR)",
-                    "Immune partial response (iPR)",
-                    "Immune uncomfirmed progressive disease (iUPD)",
-                    "Immune confirmed progressive disease (iCPD)",
-                    "Immune stable disease (iSD)",
-                    "Complete remission",
-                    "Partial remission",
-                    "Minor response",
-                    "Complete remission without measurable residual disease (CR MRD-)",
-                    "Complete remission with incomplete hematologic recovery (CRi)",
-                    "Morphologic leukemia-free state",
-                    "Primary refractory disease",
-                    "Hematologic relapse (after CR MRD-, CR, CRi)",
-                    "Molecular relapse (after CR MRD-)",
-                    "Physician assessed complete response",
-                    "Physician assessed partial response",
-                    "Physician assessed stable disease",
-                    "No evidence of disease (NED)",
-                    "Major response"
-                ],
-                "title": "TreatmentResponseEnum",
-                "type": "string"
-            },
-            "TreatmentResponseMethodEnum": {
-                "enum": [
-                    "RECIST 1.1",
-                    "iRECIST",
-                    "Cheson CLL 2012 Oncology Response Criteria",
-                    "Response Assessment in Neuro-Oncology (RANO)",
-                    "AML Response Criteria",
-                    "Physician Assessed Response Criteria",
-                    "Blazer score"
-                ],
-                "title": "TreatmentResponseMethodEnum",
-                "type": "string"
-            },
-            "TreatmentSettingEnum": {
-                "enum": [
-                    "Adjuvant",
-                    "Advanced/Metastatic",
-                    "Neoadjuvant",
-                    "Conditioning",
-                    "Induction",
-                    "Locally advanced",
-                    "Maintenance",
-                    "Mobilization",
-                    "Preventative",
-                    "Radiosensitization",
-                    "Salvage"
-                ],
-                "title": "TreatmentSettingEnum",
-                "type": "string"
-            },
-            "TreatmentStatusEnum": {
-                "enum": [
-                    "Treatment completed as prescribed",
-                    "Treatment incomplete due to technical or organizational problems",
-                    "Treatment incomplete because patient died",
-                    "Patient choice (stopped or interrupted treatment)",
-                    "Physician decision (stopped or interrupted treatment)",
-                    "Treatment stopped due to lack of efficacy (disease progression)",
-                    "Treatment stopped due to acute toxicity",
-                    "Other",
-                    "Not applicable",
-                    "Unknown"
-                ],
-                "title": "TreatmentStatusEnum",
-                "type": "string"
-            },
-            "TreatmentTypeEnum": {
-                "enum": [
-                    "Bone marrow transplant",
-                    "Chemotherapy",
-                    "Hormonal therapy",
-                    "Immunotherapy",
-                    "No treatment",
-                    "Other targeting molecular therapy",
-                    "Photodynamic therapy",
-                    "Radiation therapy",
-                    "Stem cell transplant",
-                    "Surgery"
-                ],
-                "title": "TreatmentTypeEnum",
-                "type": "string"
             },
             "ProgramDiscoverySchema": {
                 "properties": {
