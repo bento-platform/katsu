@@ -23,6 +23,21 @@ ALLOWED_HOSTS = [
     os.environ.get("HOST_CONTAINER_NAME"),
 ]
 
+# Debug toolbar settings
+# ----------------------
+INSTALLED_APPS.append("debug_toolbar")
+MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+INTERNAL_IPS = type("c", (), {"__contains__": lambda *a: True})()
+DEBUG_TOOLBAR_CONFIG = {
+    'RENDER_PANELS': False,
+    'RESULTS_CACHE_SIZE': 100,
+}
+
+# Whitenoise
+# ----------
+MIDDLEWARE.append("whitenoise.middleware.WhiteNoiseMiddleware")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 # CANDIG SETTINGS
 # ---------------
 KATSU_AUTHORIZATION = os.getenv("KATSU_AUTHORIZATION")

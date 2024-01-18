@@ -2,19 +2,11 @@
 __pycache__/
 *.pyc
 
-# sqlite
-/*.sqlite3
-
-# migrations
-patients/migrations/*
-
-# passwords
-passwords.txt
-
 # virtualenv
 env/
 .env
 .venv/
+.tox/
 
 # IDE related (intelliJ, vim files)
 .idea/
@@ -26,22 +18,9 @@ env/
 .coverage
 htmlcov/
 
-# docs build
-
-docs/_build
-
-# project custom config file
-config.json
-
 # MacOS
 .DS_Store
 katsu.code-workspace
-
-# Backup files
-chord_metadata_service/mohpackets/data/backup_db/*
-chord_metadata_service/mohpackets/data/small_dataset/fixtures/*
-chord_metadata_service/mohpackets/data/medium_dataset/fixtures/*
-chord_metadata_service/mohpackets/data/large_dataset/fixtures/*
 
 # Staticfiles
 config/staticfiles/*

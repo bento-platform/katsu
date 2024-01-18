@@ -1,7 +1,7 @@
 -r base.txt # inherit from base.txt
-coverage==7.3.2 # measures code coverage
-flake8==6.1.0 # style guide enforcement
-tox==4.11.3 # test command line tool 
+coverage==7.4.0 # measures code coverage
+flake8==7.0.0 # style guide enforcement
+tox==4.11.4 # test command line tool 
 django-debug-toolbar==4.2.0 # display debug information
 factory-boy==3.3.0 # setup test cases
 tqdm==4.66.1 # progress bar for data loader script

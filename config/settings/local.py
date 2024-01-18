@@ -10,15 +10,16 @@
 # - testing token is user1 and user2                        #
 #############################################################
 
-
+import socket
 from .base import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0"]
 
+# Debug toolbar settings
+# ----------------------
 INSTALLED_APPS.append("debug_toolbar")
-
 MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 # ==============================================================================
