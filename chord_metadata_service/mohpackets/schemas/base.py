@@ -170,9 +170,10 @@ BaseSpecimenSchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "primary_diagnosis_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_primary_diagnosis_id",
+        "primary_diagnosis_uuid",
     ],
     custom_fields=[
         ("submitter_specimen_id", str, Field(pattern=ID_REGEX_PATTERNS, max_length=64)),
@@ -223,7 +224,14 @@ BaseSpecimenSchema = create_schema(
 BaseSampleRegistrationSchema = create_schema(
     SampleRegistration,
     name="BaseSampleRegistrationSchema",
-    exclude=["uuid", "donor_uuid", "specimen_uuid", "submitter_donor_id", "program_id"],
+    exclude=[
+        "uuid",
+        "donor_uuid",
+        "submitter_donor_id",
+        "program_id",
+        "submitter_specimen_id",
+        "specimen_uuid",
+    ],
     custom_fields=[
         ("submitter_sample_id", str, Field(pattern=ID_REGEX_PATTERNS, max_length=64)),
         ("specimen_tissue_source", Optional[SpecimenTissueSourceEnum], None),
@@ -239,9 +247,10 @@ BaseTreatmentSchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "primary_diagnosis_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_primary_diagnosis_id",
+        "primary_diagnosis_uuid",
     ],
     custom_fields=[
         (
@@ -279,9 +288,10 @@ BaseChemotherapySchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "treatment_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_treatment_id",
+        "treatment_uuid",
     ],
     custom_fields=[
         ("chemotherapy_drug_dose_units", Optional[DosageUnitsEnum], None),
@@ -295,9 +305,10 @@ BaseHormoneTherapySchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "treatment_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_treatment_id",
+        "treatment_uuid",
     ],
     custom_fields=[
         ("hormone_drug_dose_units", Optional[DosageUnitsEnum], None),
@@ -311,9 +322,10 @@ BaseRadiationSchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "treatment_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_treatment_id",
+        "treatment_uuid",
     ],
     custom_fields=[
         ("radiation_therapy_modality", Optional[RadiationTherapyModalityEnum], None),
@@ -328,9 +340,10 @@ BaseImmunotherapySchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "treatment_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_treatment_id",
+        "treatment_uuid",
     ],
     custom_fields=[
         ("immunotherapy_type", Optional[ImmunotherapyTypeEnum], None),
@@ -345,9 +358,10 @@ BaseSurgerySchema = create_schema(
     exclude=[
         "uuid",
         "donor_uuid",
-        "treatment_uuid",
         "submitter_donor_id",
         "program_id",
+        "submitter_treatment_id",
+        "treatment_uuid",
     ],
     custom_fields=[
         ("surgery_type", Optional[SurgeryTypeEnum], None),
@@ -370,7 +384,16 @@ BaseSurgerySchema = create_schema(
 BaseFollowUpSchema = create_schema(
     FollowUp,
     name="BaseFollowUpSchema",
-    exclude=["uuid", "donor_uuid", "submitter_donor_id", "program_id"],
+    exclude=[
+        "uuid",
+        "donor_uuid",
+        "submitter_donor_id",
+        "program_id",
+        "submitter_treatment_id",
+        "submitter_primary_diagnosis_id",
+        "primary_diagnosis_uuid",
+        "treatment_uuid",
+    ],
     custom_fields=[
         (
             "submitter_follow_up_id",
