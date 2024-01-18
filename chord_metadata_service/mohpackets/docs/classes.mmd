@@ -3,114 +3,151 @@ classDiagram
     pre_save(model_instance, add)
   }
   class Biomarker {
-    ca125 : PositiveSmallIntegerField
-    cea : PositiveSmallIntegerField
-    er_percent_positive : FloatField
-    er_status : CharField
-    her2_ihc_status : CharField
-    her2_ish_status : CharField
-    hpv_ihc_status : CharField
-    hpv_pcr_status : CharField
-    hpv_strain : ArrayField
-    id : UUIDField
-    pr_percent_positive : FloatField
-    pr_status : CharField
-    program_id : ForeignKey
-    psa_level : PositiveSmallIntegerField
-    submitter_donor_id : ForeignKey
-    submitter_follow_up_id : CharField
-    submitter_primary_diagnosis_id : CharField
-    submitter_specimen_id : CharField
-    submitter_treatment_id : CharField
-    test_date : CharField
+    ca125
+    cea
+    donor_uuid
+    er_percent_positive
+    er_status
+    her2_ihc_status
+    her2_ish_status
+    hpv_ihc_status
+    hpv_pcr_status
+    hpv_strain
+    pr_percent_positive
+    pr_status
+    program_id
+    psa_level
+    submitter_donor_id
+    submitter_follow_up_id
+    submitter_primary_diagnosis_id
+    submitter_specimen_id
+    submitter_treatment_id
+    test_date
+    uuid
   }
   class Chemotherapy {
-    actual_cumulative_drug_dose : PositiveSmallIntegerField
-    chemotherapy_drug_dose_units : CharField
-    drug_name : CharField
-    drug_reference_database : CharField
-    drug_reference_identifier : CharField
-    id : UUIDField
-    prescribed_cumulative_drug_dose : PositiveSmallIntegerField
-    program_id : ForeignKey
-    submitter_donor_id : ForeignKey
-    submitter_treatment_id : ForeignKey
+    actual_cumulative_drug_dose
+    chemotherapy_drug_dose_units
+    donor_uuid
+    drug_name
+    drug_reference_database
+    drug_reference_identifier
+    prescribed_cumulative_drug_dose
+    program_id
+    submitter_donor_id
+    submitter_treatment_id
+    treatment_uuid
+    uuid
   }
   class Comorbidity {
-    age_at_comorbidity_diagnosis : PositiveSmallIntegerField
-    comorbidity_treatment : CharField
-    comorbidity_treatment_status : CharField
-    comorbidity_type_code : CharField
-    id : UUIDField
-    laterality_of_prior_malignancy : CharField
-    prior_malignancy : CharField
-    program_id : ForeignKey
-    submitter_donor_id : ForeignKey
+    age_at_comorbidity_diagnosis
+    comorbidity_treatment
+    comorbidity_treatment_status
+    comorbidity_type_code
+    donor_uuid
+    laterality_of_prior_malignancy
+    prior_malignancy
+    program_id
+    submitter_donor_id
+    uuid
   }
   class Donor {
-    cause_of_death : CharField
-    date_alive_after_lost_to_followup : CharField
-    date_of_birth : CharField
-    date_of_death : CharField
-    gender : CharField
-    is_deceased : BooleanField
-    lost_to_followup_after_clinical_event_identifier : CharField
-    lost_to_followup_reason : CharField
-    primary_site : ArrayField
-    program_id : ForeignKey
-    sex_at_birth : CharField
-    submitter_donor_id : CharField
+    cause_of_death
+    date_alive_after_lost_to_followup
+    date_of_birth
+    date_of_death
+    gender
+    is_deceased
+    lost_to_followup_after_clinical_event_identifier
+    lost_to_followup_reason
+    primary_site
+    program_id
+    sex_at_birth
+    submitter_donor_id
+    uuid
   }
   class Exposure {
-    id : UUIDField
-    pack_years_smoked : FloatField
-    program_id : ForeignKey
-    submitter_donor_id : ForeignKey
-    tobacco_smoking_status : CharField
-    tobacco_type : ArrayField
+    donor_uuid
+    pack_years_smoked
+    program_id
+    submitter_donor_id
+    tobacco_smoking_status
+    tobacco_type
+    uuid
   }
   class FollowUp {
-    anatomic_site_progression_or_recurrence : ArrayField
-    date_of_followup : CharField
-    date_of_relapse : CharField
-    disease_status_at_followup : CharField
-    method_of_progression_status : ArrayField
-    program_id : ForeignKey
-    recurrence_m_category : CharField
-    recurrence_n_category : CharField
-    recurrence_stage_group : CharField
-    recurrence_t_category : CharField
-    recurrence_tumour_staging_system : CharField
-    relapse_type : CharField
-    submitter_donor_id : ForeignKey
-    submitter_follow_up_id : CharField
-    submitter_primary_diagnosis_id : ForeignKey
-    submitter_treatment_id : ForeignKey
+    anatomic_site_progression_or_recurrence
+    date_of_followup
+    date_of_relapse
+    disease_status_at_followup
+    donor_uuid
+    method_of_progression_status
+    primary_diagnosis_uuid
+    program_id
+    recurrence_m_category
+    recurrence_n_category
+    recurrence_stage_group
+    recurrence_t_category
+    recurrence_tumour_staging_system
+    relapse_type
+    submitter_donor_id
+    submitter_follow_up_id
+    submitter_primary_diagnosis_id
+    submitter_treatment_id
+    treatment_uuid
+    uuid
   }
   class HormoneTherapy {
-    actual_cumulative_drug_dose : PositiveSmallIntegerField
-    drug_name : CharField
-    drug_reference_database : CharField
-    drug_reference_identifier : CharField
-    hormone_drug_dose_units : CharField
-    id : UUIDField
-    prescribed_cumulative_drug_dose : PositiveSmallIntegerField
-    program_id : ForeignKey
-    submitter_donor_id : ForeignKey
-    submitter_treatment_id : ForeignKey
+    actual_cumulative_drug_dose
+    donor_uuid
+    drug_name
+    drug_reference_database
+    drug_reference_identifier
+    hormone_drug_dose_units
+    prescribed_cumulative_drug_dose
+    program_id
+    submitter_donor_id
+    submitter_treatment_id
+    treatment_uuid
+    uuid
   }
   class Immunotherapy {
-    actual_cumulative_drug_dose : PositiveSmallIntegerField
-    drug_name : CharField
-    drug_reference_database : CharField
-    drug_reference_identifier : CharField
-    id : UUIDField
-    immunotherapy_drug_dose_units : CharField
-    immunotherapy_type : CharField
-    prescribed_cumulative_drug_dose : PositiveSmallIntegerField
-    program_id : ForeignKey
-    submitter_donor_id : ForeignKey
-    submitter_treatment_id : ForeignKey
+    actual_cumulative_drug_dose
+    donor_uuid
+    drug_name
+    drug_reference_database
+    drug_reference_identifier
+    immunotherapy_drug_dose_units
+    immunotherapy_type
+    prescribed_cumulative_drug_dose
+    program_id
+    submitter_donor_id
+    submitter_treatment_id
+    treatment_uuid
+    uuid
+  }
+  class Meta {
+    ordering : list
+  }
+  class Meta {
+    ordering : list
+    unique_together : list
+  }
+  class Meta {
+    ordering : list
+    unique_together : list
+  }
+  class Meta {
+    ordering : list
+    unique_together : list
+  }
+  class Meta {
+    ordering : list
+    unique_together : list
+  }
+  class Meta {
+    ordering : list
+    unique_together : list
   }
   class Meta {
     ordering : list
@@ -129,21 +166,7 @@ classDiagram
   }
   class Meta {
     ordering : list
-  }
-  class Meta {
-    ordering : list
-  }
-  class Meta {
-    ordering : list
-  }
-  class Meta {
-    ordering : list
-  }
-  class Meta {
-    ordering : list
-  }
-  class Meta {
-    ordering : list
+    unique_together : list
   }
   class Meta {
     ordering : list
@@ -155,110 +178,125 @@ classDiagram
     ordering : list
   }
   class PrimaryDiagnosis {
-    basis_of_diagnosis : CharField
-    cancer_type_code : CharField
-    clinical_m_category : CharField
-    clinical_n_category : CharField
-    clinical_stage_group : CharField
-    clinical_t_category : CharField
-    clinical_tumour_staging_system : CharField
-    date_of_diagnosis : CharField
-    laterality : CharField
-    lymph_nodes_examined_method : CharField
-    lymph_nodes_examined_status : CharField
-    number_lymph_nodes_positive : PositiveSmallIntegerField
-    program_id : ForeignKey
-    submitter_donor_id : ForeignKey
-    submitter_primary_diagnosis_id : CharField
+    basis_of_diagnosis
+    cancer_type_code
+    clinical_m_category
+    clinical_n_category
+    clinical_stage_group
+    clinical_t_category
+    clinical_tumour_staging_system
+    date_of_diagnosis
+    donor_uuid
+    laterality
+    lymph_nodes_examined_method
+    lymph_nodes_examined_status
+    number_lymph_nodes_positive
+    program_id
+    submitter_donor_id
+    submitter_primary_diagnosis_id
+    uuid
   }
   class Program {
-    created : DateTimeField
-    metadata : JSONField
-    program_id : CharField
+    created
+    metadata
+    program_id
     updated
   }
   class Radiation {
-    anatomical_site_irradiated : CharField
-    id : UUIDField
-    program_id : ForeignKey
-    radiation_boost : BooleanField
-    radiation_therapy_dosage : PositiveSmallIntegerField
-    radiation_therapy_fractions : PositiveSmallIntegerField
-    radiation_therapy_modality : CharField
-    radiation_therapy_type : CharField
-    reference_radiation_treatment_id : CharField
-    submitter_donor_id : ForeignKey
-    submitter_treatment_id : ForeignKey
+    anatomical_site_irradiated
+    donor_uuid
+    program_id
+    radiation_boost
+    radiation_therapy_dosage
+    radiation_therapy_fractions
+    radiation_therapy_modality
+    radiation_therapy_type
+    reference_radiation_treatment_id
+    submitter_donor_id
+    submitter_treatment_id
+    treatment_uuid
+    uuid
   }
   class SampleRegistration {
-    program_id : ForeignKey
-    sample_type : CharField
-    specimen_tissue_source : CharField
-    specimen_type : CharField
-    submitter_donor_id : ForeignKey
-    submitter_sample_id : CharField
-    submitter_specimen_id : ForeignKey
-    tumour_normal_designation : CharField
+    donor_uuid
+    program_id
+    sample_type
+    specimen_tissue_source
+    specimen_type
+    specimen_uuid
+    submitter_donor_id
+    submitter_sample_id
+    submitter_specimen_id
+    tumour_normal_designation
+    uuid
   }
   class Specimen {
-    pathological_m_category : CharField
-    pathological_n_category : CharField
-    pathological_stage_group : CharField
-    pathological_t_category : CharField
-    pathological_tumour_staging_system : CharField
-    percent_tumour_cells_measurement_method : CharField
-    percent_tumour_cells_range : CharField
-    program_id : ForeignKey
-    reference_pathology_confirmed_diagnosis : CharField
-    reference_pathology_confirmed_tumour_presence : CharField
-    specimen_anatomic_location : CharField
-    specimen_collection_date : CharField
-    specimen_laterality : CharField
-    specimen_processing : CharField
-    specimen_storage : CharField
-    submitter_donor_id : ForeignKey
-    submitter_primary_diagnosis_id : ForeignKey
-    submitter_specimen_id : CharField
-    tumour_grade : CharField
-    tumour_grading_system : CharField
-    tumour_histological_type : CharField
+    donor_uuid
+    pathological_m_category
+    pathological_n_category
+    pathological_stage_group
+    pathological_t_category
+    pathological_tumour_staging_system
+    percent_tumour_cells_measurement_method
+    percent_tumour_cells_range
+    primary_diagnosis_uuid
+    program_id
+    reference_pathology_confirmed_diagnosis
+    reference_pathology_confirmed_tumour_presence
+    specimen_anatomic_location
+    specimen_collection_date
+    specimen_laterality
+    specimen_processing
+    specimen_storage
+    submitter_donor_id
+    submitter_primary_diagnosis_id
+    submitter_specimen_id
+    tumour_grade
+    tumour_grading_system
+    tumour_histological_type
+    uuid
   }
   class Surgery {
-    greatest_dimension_tumour : PositiveSmallIntegerField
-    id : UUIDField
-    lymphovascular_invasion : CharField
-    margin_types_involved : ArrayField
-    margin_types_not_assessed : ArrayField
-    margin_types_not_involved : ArrayField
-    perineural_invasion : CharField
-    program_id : ForeignKey
-    residual_tumour_classification : CharField
-    submitter_donor_id : ForeignKey
-    submitter_specimen_id : CharField
-    submitter_treatment_id : ForeignKey
-    surgery_location : CharField
-    surgery_site : CharField
-    surgery_type : CharField
-    tumour_focality : CharField
-    tumour_length : PositiveSmallIntegerField
-    tumour_width : PositiveSmallIntegerField
+    donor_uuid
+    greatest_dimension_tumour
+    lymphovascular_invasion
+    margin_types_involved
+    margin_types_not_assessed
+    margin_types_not_involved
+    perineural_invasion
+    program_id
+    residual_tumour_classification
+    submitter_donor_id
+    submitter_specimen_id
+    submitter_treatment_id
+    surgery_location
+    surgery_site
+    surgery_type
+    treatment_uuid
+    tumour_focality
+    tumour_length
+    tumour_width
+    uuid
   }
   class Treatment {
-    days_per_cycle : PositiveSmallIntegerField
-    is_primary_treatment : CharField
-    line_of_treatment : IntegerField
-    number_of_cycles : PositiveSmallIntegerField
-    program_id : ForeignKey
-    response_to_treatment : CharField
-    response_to_treatment_criteria_method : CharField
-    status_of_treatment : CharField
-    submitter_donor_id : ForeignKey
-    submitter_primary_diagnosis_id : ForeignKey
-    submitter_treatment_id : CharField
-    treatment_end_date : CharField
-    treatment_intent : CharField
-    treatment_setting : CharField
-    treatment_start_date : CharField
-    treatment_type : ArrayField
+    days_per_cycle
+    donor_uuid
+    is_primary_treatment
+    line_of_treatment
+    number_of_cycles
+    primary_diagnosis_uuid
+    program_id
+    response_to_treatment
+    response_to_treatment_criteria_method
+    status_of_treatment
+    submitter_donor_id
+    submitter_primary_diagnosis_id
+    submitter_treatment_id
+    treatment_end_date
+    treatment_intent
+    treatment_setting
+    treatment_start_date
+    treatment_type
+    uuid
   }
   AutoDateTimeField --* Program : updated
