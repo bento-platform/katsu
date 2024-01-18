@@ -187,7 +187,7 @@ EXPERIMENT_WORKFLOW_SCHEMA = {
 Dictionary of schema changes for warnings.
 """
 EXPERIMENT_SCHEMA_CHANGES = {
-    "4.1.0": {
+    "6.2.0": {
         "properties": {
             "library_strategy": [
                     ("WES", "WXS"),

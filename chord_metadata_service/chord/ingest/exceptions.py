@@ -84,7 +84,7 @@ def parse_schema_warnings(data: dict, schema: dict) -> Optional[List[dict]]:
     if not data or not schema:
         return None
 
-    data_type = schema.get("$id", "").split(":")[-1]
+    data_type = schema.get("$id", "").split("/")[-1]
     applicable_changes = DATA_TYPE_SCHEMA_CHANGES.get(data_type, None)
 
     if not applicable_changes or __version__ not in applicable_changes:

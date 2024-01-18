@@ -2,9 +2,9 @@ from typing import List, Tuple
 from django.db import migrations
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA_CHANGES
 
-V4_1_0_PROPERTIES = EXPERIMENT_SCHEMA_CHANGES["4.1.0"]["properties"]
-LIB_STRATEGY_CONVERSIONS = V4_1_0_PROPERTIES["library_strategy"]
-LIB_SELECTION_CONVERIONS = V4_1_0_PROPERTIES["library_selection"]
+V6_2_0_PROPERTIES = EXPERIMENT_SCHEMA_CHANGES["6.2.0"]["properties"]
+LIB_STRATEGY_CONVERSIONS = V6_2_0_PROPERTIES["library_strategy"]
+LIB_SELECTION_CONVERIONS = V6_2_0_PROPERTIES["library_selection"]
 
 
 def set_experiment_library(apps, _schema_editor):
