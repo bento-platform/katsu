@@ -18,7 +18,6 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
-from chord_metadata_service.mohpackets.permissible_values import GenderEnum
 
 """
 Module with schema used for ingesting
@@ -45,12 +44,10 @@ class ProgramIngestSchema(ModelSchema):
 class DonorIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
     uuid: Optional[str] = None
-    gender: Optional[GenderEnum] = None
 
     class Config:
         model = Donor
         model_exclude = ["uuid", "program_id"]
-        use_enum_values = True
 
 
 class PrimaryDiagnosisIngestSchema(ModelSchema):
