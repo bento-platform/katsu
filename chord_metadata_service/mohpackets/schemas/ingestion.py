@@ -1,7 +1,6 @@
 from typing import Optional
 
 from ninja import Field, ModelSchema
-
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
     Chemotherapy,
@@ -12,6 +11,7 @@ from chord_metadata_service.mohpackets.models import (
     HormoneTherapy,
     Immunotherapy,
     PrimaryDiagnosis,
+    Program,
     Radiation,
     SampleRegistration,
     Specimen,
@@ -33,6 +33,14 @@ Author: Son Chau
 #           INGEST SCHEMA              #
 #                                      #
 ########################################
+
+
+class ProgramIngestSchema(ModelSchema):
+    class Meta:
+        model = Program
+        fields = "__all__"
+
+
 class DonorIngestSchema(ModelSchema):
     program_id_id: str = Field(..., alias="program_id")
     uuid: Optional[str] = None
