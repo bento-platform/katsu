@@ -5,8 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.chord.tests.example_ingest import EXAMPLE_INGEST_EXPERIMENT, \
-    EXAMPLE_INGEST_EXPERIMENT_BAD_RESOURCE, EXAMPLE_INGEST_INVALID_EXPERIMENT, \
-    EXAMPLE_INGEST_INVALID_PHENOPACKET, EXAMPLE_INGEST_PHENOPACKET
+    EXAMPLE_INGEST_INVALID_EXPERIMENT, EXAMPLE_INGEST_INVALID_PHENOPACKET, EXAMPLE_INGEST_PHENOPACKET
 from .constants import VALID_PROJECT_1, valid_dataset_1
 from ..workflows.metadata import workflow_set, WORKFLOW_PHENOPACKETS_JSON
 
@@ -75,7 +74,7 @@ class IngestTest(APITestCase):
         c = r.json()
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(c["success"], False)
-        self.assertEqual(len(c["errors"]), 1)
+        self.assertEqual(len(c["errors"]), 2)  # 2 required properties missing: 'id' and 'meta_data'
 
         # Bad ingestion body JSON
         r = self.client.post(
@@ -97,7 +96,7 @@ class IngestTest(APITestCase):
         c = r.json()
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(c["success"], False)
-        self.assertEqual(len(c["errors"]), 2)
+        self.assertEqual(len(c["errors"]), 1)  # missing required phenopacket ID
 
         # Success
         r = self.client.post(
@@ -183,16 +182,16 @@ class IngestTest(APITestCase):
         self.assertEqual(len(c["errors"]), 1)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # Invalid resource
+        # Missing biosample
         r = self.client.post(
             reverse("ingest-into-dataset", args=(self.dataset["identifier"], "experiments_json")),
             content_type="application/json",
-            data=json.dumps(EXAMPLE_INGEST_EXPERIMENT_BAD_RESOURCE),
+            data=json.dumps(EXAMPLE_INGEST_EXPERIMENT),
         )
         c = r.json()
         self.assertEqual(c["success"], False)
         self.assertEqual(len(c["errors"]), 1)
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def test_experiment_ingest_success(self):
         # Create the required phenopacket with a biosample first
