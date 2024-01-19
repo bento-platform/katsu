@@ -71,6 +71,21 @@ Katsu Metadata Service is a service to store epigenomic metadata.
 6. Rest api service handles all generic functionality shared among other services
 
 
+## Schemas
+### Clinical Data
+
+Katsu implements the [Phenopacket V1.0.0](https://phenopacket-schema.readthedocs.io/en/1.0.0/) schema for clinical data.
+
+The schema definition for the phenopacket object is located in [chord_metadata_service/phenopackets/schemas.py](https://github.com/bento-platform/katsu/blob/4ab3c55d6052994ef69b188fb872261c47de24e0/chord_metadata_service/phenopackets/schemas.py#L336).
+
+### Experiments
+
+Katsu's experiments schemas are based on the IHEC [schema](https://github.com/IHEC/ihec-ecosystems/blob/master/docs/metadata/2.0/Ihec_metadata_specification.md#experiments), which is based on EBI/SRA schemas.
+
+The value options for `library_strategy` and `library_selection` are read from [chord_metadata_service/ontologies/xsd/SRA.experiment.xsd.xml](./chord_metadata_service/ontologies/xsd/SRA.experiment.xsd.xml), downloaded from the EBI's [SRA v1.5 database](http://ftp.ebi.ac.uk/pub/databases/ena/doc/xsd/sra_1_5/).
+
+The `SRA.experiment.xsd.xml` file is licensed under Apache License V2.0, the full copyright text is included in the file's header.
+
 ## REST API highlights
 
 * Swagger schema docs can be found 

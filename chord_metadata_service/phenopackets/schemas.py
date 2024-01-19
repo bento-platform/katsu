@@ -658,7 +658,7 @@ PHENOPACKET_SCHEMA = describe_schema({
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)
 
-VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT_07)
+VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions)
 VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 
 resolver = VRS_REF_REGISTRY.resolver()

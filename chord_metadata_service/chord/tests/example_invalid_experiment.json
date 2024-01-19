@@ -11,9 +11,9 @@
           "label": "ChIP-seq"
         }
       ],
-      "library_strategy": "ChIP-Seq",
+      "library_strategy": "WES",
       "library_source": "Genomic",
-      "library_selection": "Random",
+      "library_selection": "random",
       "library_layout": "Single",
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",

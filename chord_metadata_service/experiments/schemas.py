@@ -2,10 +2,26 @@ from pathlib import Path
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
+from chord_metadata_service.ontologies import read_xsd_simple_type_values, SRA_EXPERIMENT_FILE_NAME
 
 __all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
 
+
 base_uri = get_schema_app_id(Path(__file__).parent.name)
+
+# Experiment library strategy options are read from the EBI xsd file
+LIBRARY_STRATEGIES = read_xsd_simple_type_values(
+    SRA_EXPERIMENT_FILE_NAME,
+    "typeLibraryStrategy",
+)
+
+
+# Experiment library selection options are read from the EBI xsd file
+LIBRARY_SELECTION = read_xsd_simple_type_values(
+    SRA_EXPERIMENT_FILE_NAME,
+    "typeLibrarySelection",
+)
+
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -105,7 +121,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "molecule_ontology": ONTOLOGY_CLASS_LIST,
         "library_strategy": {
             "type": "string",
-            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "WGS", "RAD-Seq", "AMPLICON", "Other"]
+            "enum": LIBRARY_STRATEGIES
         },
         "library_source": {
             "type": "string",
@@ -114,7 +130,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         },
         "library_selection": {
             "type": "string",
-            "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture", "Other"]
+            "enum": LIBRARY_SELECTION
         },
         "library_layout": {
             "type": "string",
@@ -144,3 +160,45 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
     },
     "required": ["id", "experiment_type"]
 }, EXPERIMENT)
+
+
+EXPERIMENT_WORKFLOW_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "katsu:experiments:experiment_workflow_schema",
+    "title": "Experiment workflow schema",
+    "description": "Schema that describes the shape \
+        of an experiment workflow ingestion",
+    "type": "object",
+    "properties": {
+        "experiments": {
+            "type": "array",
+            "items": {"type": "object"},
+            "minItems": 1,
+        },
+        "resources": {
+            "type": "array",
+            "items": {"type": "object"},
+        }
+    },
+    "required": ["experiments"]
+}
+
+"""
+Dictionary of schema changes for warnings.
+"""
+EXPERIMENT_SCHEMA_CHANGES = {
+    "6.2.0": {
+        "properties": {
+            "library_strategy": [
+                    ("WES", "WXS"),
+                    ("Other", "OTHER"),
+            ],
+            "library_selection": [
+                    ("Random", "RANDOM"),
+                    ("Random PCR", "RANDOM PCR"),
+                    ("Exome capture", "Hybrid Selection"),
+                    ("Other", "other"),
+            ]
+        }
+    }
+}

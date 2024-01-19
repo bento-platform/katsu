@@ -4,7 +4,8 @@ import uuid
 
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.experiments import models as em
-from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, \
+    EXPERIMENT_RESULT_SCHEMA, EXPERIMENT_WORKFLOW_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
 
 from typing import Optional
@@ -56,12 +57,24 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
 
 def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
     # Validate experiment data against experiments schema.
-    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
-    if not validation:
-        # TODO: Report more precise errors
+    if val_errors := schema_validation(experiment_data, EXPERIMENT_SCHEMA):
         raise IngestError(
-            f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
-            f"(check Katsu logs for more information)")
+            data=experiment_data,
+            schema=EXPERIMENT_SCHEMA,
+            schema_validation_errors=val_errors,
+            message=f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
+                    f"(check Katsu logs for more information)"
+        )
+
+
+def validate_experiment_workflow(json_data: dict) -> None:
+    if val_errors := schema_validation(json_data, EXPERIMENT_WORKFLOW_SCHEMA):
+        raise IngestError(
+            data=json_data,
+            schema=EXPERIMENT_WORKFLOW_SCHEMA,
+            schema_validation_errors=val_errors,
+            message="Failed schema validation for experiments ingestion workflow payload.",
+        )
 
 
 def ingest_experiment(
@@ -139,6 +152,9 @@ def ingest_experiment(
 
 
 def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experiment]:
+    # First, validate the workflow's json_data
+    validate_experiment_workflow(json_data)
+
     dataset = Dataset.objects.get(identifier=dataset_id)
 
     for rs in json_data.get("resources", []):
@@ -146,7 +162,7 @@ def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experimen
 
     exps = json_data.get("experiments", [])
 
-    # First, validate all experiments with the schema before creating anything in the database.
+    # Second, validate all experiments with the schema before creating anything in the database.
     for idx, exp in enumerate(exps):
         validate_experiment(exp, idx)
 
@@ -164,12 +180,16 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
     # First, validate all experiment results with the schema before creating anything in the database.
 
     for idx, exp_result in enumerate(json_data):
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
-        if not validation:
+        val_errors = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
+        if val_errors:
             # TODO: Report more precise errors
             raise IngestError(
-                f"Failed schema validation for experiment result {idx} "
-                f"(check Katsu logs for more information)")
+                data=exp_result,
+                schema=EXPERIMENT_RESULT_SCHEMA,
+                schema_validation_errors=val_errors,
+                message=f"Failed schema validation for experiment result {idx} "
+                        f"(check Katsu logs for more information)"
+            )
 
     # If everything passes, perform the actual ingestion next.
 
