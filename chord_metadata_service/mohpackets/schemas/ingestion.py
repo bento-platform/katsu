@@ -18,6 +18,7 @@ from chord_metadata_service.mohpackets.models import (
     Surgery,
     Treatment,
 )
+from chord_metadata_service.mohpackets.schemas.base import BaseDonorSchema, BasePrimaryDiagnosisSchema, BaseProgramSchema
 
 """
 Module with schema used for ingesting
@@ -35,32 +36,25 @@ Author: Son Chau
 ########################################
 
 
-class ProgramIngestSchema(ModelSchema):
-    class Meta:
-        model = Program
-        fields = "__all__"
+class ProgramIngestSchema(BaseProgramSchema):
+    pass
 
 
-class DonorIngestSchema(ModelSchema):
+class DonorIngestSchema(BaseDonorSchema):
     program_id_id: str = Field(..., alias="program_id")
     uuid: Optional[str] = None
 
-    class Config:
-        model = Donor
-        model_exclude = ["uuid", "program_id"]
+    class Config(BaseDonorSchema.Config):
+        use_enum_values = True
 
 
-class PrimaryDiagnosisIngestSchema(ModelSchema):
+class PrimaryDiagnosisIngestSchema(BasePrimaryDiagnosisSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = PrimaryDiagnosis
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-        ]
+    class Config(BasePrimaryDiagnosisSchema.Config):
+        use_enum_values = True
 
 
 class BiomarkerIngestSchema(ModelSchema):
