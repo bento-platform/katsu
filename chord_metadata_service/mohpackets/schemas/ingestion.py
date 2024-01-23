@@ -86,6 +86,7 @@ class BiomarkerIngestSchema(BaseBiomarkerSchema):
 class ChemotherapyIngestSchema(BaseChemotherapySchema):
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
+    submitter_treatment_id: str
     uuid: Optional[str] = None
 
     class Config(BaseChemotherapySchema.Config):
@@ -113,6 +114,8 @@ class ExposureIngestSchema(BaseExposureSchema):
 class FollowUpIngestSchema(BaseFollowUpSchema):
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
+    submitter_primary_diagnosis_id: Optional[str] = None
+    submitter_treatment_id: Optional[str] = None
     uuid: Optional[str] = None
 
     class Config(BaseFollowUpSchema.Config):
