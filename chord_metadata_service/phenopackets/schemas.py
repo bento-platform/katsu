@@ -10,7 +10,8 @@ from chord_metadata_service.restapi.schemas import (
     AGE_RANGE,
     EXTRA_PROPERTIES_SCHEMA,
     ONTOLOGY_CLASS,
-    TIME_INTERVAL, TIME_ELEMENT_SCHEMA,
+    TIME_INTERVAL,
+    TIME_ELEMENT_SCHEMA,
 )
 from chord_metadata_service.restapi.schema_utils import (
     DATE_TIME,
@@ -21,7 +22,8 @@ from chord_metadata_service.restapi.schema_utils import (
     enum_of,
     named_one_of,
     sub_schema_uri,
-    describe_schema, get_schema_app_id
+    describe_schema,
+    get_schema_app_id
 )
 
 from . import descriptions
@@ -52,7 +54,8 @@ __all__ = [
     "EXPRESSION_SCHEMA",
     "EXTENSION_SCHEMA",
     "VCF_RECORD_SCHEMA",
-    "VRS_VARIATION_SCHEMA"
+    "VRS_REF_REGISTRY",
+    "VRS_VARIATION_SCHEMA",
 ]
 
 base_uri = get_schema_app_id(Path(__file__).parent.name)

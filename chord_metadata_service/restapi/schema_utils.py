@@ -10,6 +10,11 @@ from .description_utils import describe_schema
 from .types import ExtensionSchemaDict
 
 __all__ = [
+    "DRAFT_07",
+    "DATE_TIME",
+    "SEARCH_DATABASE_JSONB",
+    "SCHEMA_TYPES",
+    "SCHEMA_STRING_FORMATS",
     "merge_schema_dictionaries",
     "search_optional_eq",
     "search_optional_str",
@@ -17,13 +22,18 @@ __all__ = [
     "tag_schema_with_nested_ids",
     "tag_ids_and_describe",
     "customize_schema",
+    "describe_schema",
     "validation_schema_list",
+    "get_schema_app_id",
+    "base_type",
     "array_of",
+    "enum_of",
+    "named_one_of",
+    "sub_schema_uri",
     "patch_project_schemas",
 ]
 
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
-CURIE_PATTERN = r"^[a-z0-9]+:[A-Za-z0-9.\-:]+$"
 
 SEARCH_DATABASE_JSONB = {
     "database": {
@@ -126,12 +136,12 @@ def search_db_pk(model: models.Model):
     }
 
 
-def search_db_fk(type: str, foreign_model: models.Model, field_name: str):
+def search_db_fk(type_: str, foreign_model: models.Model, field_name: str):
     return {
         "search": {
             "database": {
                 "relationship": {
-                    "type": type,
+                    "type": type_,
                     "foreign_key": foreign_model._meta.get_field(field_name).column
                 }
             }
@@ -290,11 +300,11 @@ def enum_of(values: List[str], description=""):
     return describe_schema_opt(schema, description)
 
 
-def base_type(type: SCHEMA_TYPES, description=""):
+def base_type(type_: SCHEMA_TYPES, description=""):
     """
     Creates a basic type schema
     """
-    return describe_schema_opt({"type": type.value}, description)
+    return describe_schema_opt({"type": type_.value}, description)
 
 
 def string_with_pattern(pattern: str, description=""):
@@ -308,10 +318,10 @@ def string_with_pattern(pattern: str, description=""):
     return describe_schema_opt(schema, description)
 
 
-def string_with_format(format: SCHEMA_STRING_FORMATS, description=""):
+def string_with_format(format_: SCHEMA_STRING_FORMATS, description=""):
     schema = {
         "type": "string",
-        "format": format.value
+        "format": format_.value
     }
     return describe_schema_opt(schema, description)
 
