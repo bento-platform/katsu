@@ -510,7 +510,7 @@ class Comorbidity(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.program_id}: {self.donor_uuid}"
+        return f"{self.program_id}: {self.submitter_donor_id}"
 
 
 class Exposure(models.Model):
@@ -532,4 +532,4 @@ class Exposure(models.Model):
         ordering = ["uuid"]
 
     def __str__(self):
-        return f"{self.program_id}: {self.donor_uuid}"
+        return f"{self.program_id}: {self.submitter_donor_id}"

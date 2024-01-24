@@ -1,23 +1,6 @@
 from typing import Optional
 
-from ninja import Field, ModelSchema
-from chord_metadata_service.mohpackets.models import (
-    Biomarker,
-    Chemotherapy,
-    Comorbidity,
-    Donor,
-    Exposure,
-    FollowUp,
-    HormoneTherapy,
-    Immunotherapy,
-    PrimaryDiagnosis,
-    Program,
-    Radiation,
-    SampleRegistration,
-    Specimen,
-    Surgery,
-    Treatment,
-)
+from ninja import Field
 from chord_metadata_service.mohpackets.schemas.base import (
     BaseBiomarkerSchema,
     BaseChemotherapySchema,
