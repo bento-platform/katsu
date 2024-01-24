@@ -67,6 +67,31 @@ class SampleRegistrationTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_sample_registration_create_validator(self):
+        """
+        Test invalid data and receive 422 unprocess response.
+
+        Testing Strategy:
+        - Build SampleRegistration data based on the existing primary_diagnosis_uuid and wrong data for validator
+        - An authorized user (user_2) with admin permission.
+        - User cannot perform a POST request for sample registration creation.
+        """
+        sample_registration = SampleRegistrationFactory.build(specimen_uuid=self.specimens[0])
+        sample_registration_dict = model_to_dict(sample_registration)
+        sample_registration_dict["sample_type"] = "invalid"
+        response = self.client.post(
+            self.sample_registration_url,
+            data=sample_registration_dict,
+            content_type="application/json",
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(
+            response.status_code,
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
+            f"Response content: {response.content}",
+        )
 
 # GET API
 # -------
