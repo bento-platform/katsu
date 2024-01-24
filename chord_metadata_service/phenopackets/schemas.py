@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT7
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
 from chord_metadata_service.restapi.schemas import (
@@ -658,7 +659,7 @@ PHENOPACKET_SCHEMA = describe_schema({
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)
 
-VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT_07)
+VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT7)
 VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 
 resolver = VRS_REF_REGISTRY.resolver()
