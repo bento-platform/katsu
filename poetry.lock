@@ -217,30 +217,31 @@ tests-no-zope = ["attrs[tests-mypy]", "cloudpickle", "hypothesis", "pympler", "p
 
 [[package]]
 name = "bento-lib"
-version = "10.1.1"
+version = "11.3.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
 python-versions = ">=3.10.0"
 files = [
-    {file = "bento_lib-10.1.1-py3-none-any.whl", hash = "sha256:6fef7bd444aea9550c9f2882f220e2c5f1a15014fcbd244b928e74cfd50b98ee"},
-    {file = "bento_lib-10.1.1.tar.gz", hash = "sha256:de0b721d81cc871f6123360885b24de871ba96a88a2a891a506cae6e39e9151a"},
+    {file = "bento_lib-11.3.0-py3-none-any.whl", hash = "sha256:24009c2c348320c37d5a10f97b94289a48dafa9adaf3947a1f1b96fb24142836"},
+    {file = "bento_lib-11.3.0.tar.gz", hash = "sha256:aad652324c57f707cf00a50beb6399e3e5c5f3d15ab0476215b7c992e76039f3"},
 ]
 
 [package.dependencies]
-aiohttp = ">=3.8.4,<4"
-Django = {version = ">=4.2.1,<5", optional = true, markers = "extra == \"django\""}
+aiohttp = ">=3.9.1,<4"
+Django = {version = ">=4.2.7,<5", optional = true, markers = "extra == \"django\""}
 djangorestframework = {version = ">=3.14.0,<3.15", optional = true, markers = "extra == \"django\""}
-jsonschema = ">=4.17.3,<5"
-psycopg2-binary = ">=2.9.5,<3.0"
-pydantic = ">=2.3.0,<3"
-redis = ">=4.5.4,<5.0"
-requests = ">=2.28.1,<3"
+jsonschema = ">=4.20.0,<5"
+psycopg2-binary = ">=2.9.9,<3.0"
+pydantic = ">=2.5.2,<3"
+pydantic-settings = ">=2.1.0,<3"
+redis = ">=5.0.1,<6"
+requests = ">=2.31.0,<3"
 Werkzeug = ">=2.2.3,<4"
 
 [package.extras]
 asyncpg = ["asyncpg (>=0.29.0,<0.30.0)"]
-django = ["Django (>=4.2.1,<5)", "djangorestframework (>=3.14.0,<3.15)"]
-fastapi = ["fastapi (>=0.100,<0.105)"]
+django = ["Django (>=4.2.7,<5)", "djangorestframework (>=3.14.0,<3.15)"]
+fastapi = ["fastapi (>=0.104,<0.110)"]
 flask = ["Flask (>=2.2.5,<4)"]
 
 [[package]]
@@ -967,13 +968,13 @@ files = [
 
 [[package]]
 name = "jsonschema"
-version = "4.19.2"
+version = "4.20.0"
 description = "An implementation of JSON Schema validation for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "jsonschema-4.19.2-py3-none-any.whl", hash = "sha256:eee9e502c788e89cb166d4d37f43084e3b64ab405c795c03d343a4dbc2c810fc"},
-    {file = "jsonschema-4.19.2.tar.gz", hash = "sha256:c9ff4d7447eed9592c23a12ccee508baf0dd0d59650615e847feb6cdca74f392"},
+    {file = "jsonschema-4.20.0-py3-none-any.whl", hash = "sha256:ed6231f0429ecf966f5bc8dfef245998220549cbbcf140f913b7464c52c3b6b3"},
+    {file = "jsonschema-4.20.0.tar.gz", hash = "sha256:4f614fd46d8d61258610998997743ec5492a648b33cf478c1ddc23ed4598a5fa"},
 ]
 
 [package.dependencies]
@@ -1452,6 +1453,21 @@ files = [
 typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 
 [[package]]
+name = "pydantic-settings"
+version = "2.1.0"
+description = "Settings management using Pydantic"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pydantic_settings-2.1.0-py3-none-any.whl", hash = "sha256:7621c0cb5d90d1140d2f0ef557bdf03573aac7035948109adf2574770b77605a"},
+    {file = "pydantic_settings-2.1.0.tar.gz", hash = "sha256:26b1492e0a24755626ac5e6d715e9077ab7ad4fb5f19a8b7ed7011d52f36141c"},
+]
+
+[package.dependencies]
+pydantic = ">=2.3.0"
+python-dotenv = ">=0.21.0"
+
+[[package]]
 name = "pyflakes"
 version = "3.2.0"
 description = "passive checker of Python programs"
@@ -1647,13 +1663,13 @@ networkx = ["networkx (>=2.0.0,<3.0.0)"]
 
 [[package]]
 name = "redis"
-version = "4.6.0"
+version = "5.0.1"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "redis-4.6.0-py3-none-any.whl", hash = "sha256:e2b03db868160ee4591de3cb90d40ebb50a90dd302138775937f6a42b7ed183c"},
-    {file = "redis-4.6.0.tar.gz", hash = "sha256:585dc516b9eb042a619ef0a39c3d7d55fe81bdb4df09a52c9cdde0d07bf1aa7d"},
+    {file = "redis-5.0.1-py3-none-any.whl", hash = "sha256:ed4802971884ae19d640775ba3b03aa2e7bd5e8fb8dfaed2decce4d0fc48391f"},
+    {file = "redis-5.0.1.tar.gz", hash = "sha256:0dab495cd5753069d3bc650a0dde8a8f9edde16fc5691b689a566eda58100d0f"},
 ]
 
 [package.dependencies]
@@ -2143,4 +2159,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "92797443dfc40a536108b3b95c72df5951b747d46bd1818a6055b972ccc61658"
+content-hash = "9f51bd79e6d2a6c1fffe8a9650eb3ba7a155d86ef18d89ca8375e35361f50c7f"

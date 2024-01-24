@@ -1,6 +1,8 @@
 from django.conf import settings
 
-from bento_lib.service_info import SERVICE_ORGANIZATION_C3G, GA4GHServiceInfo, build_service_info
+from bento_lib.service_info.constants import SERVICE_ORGANIZATION_C3G
+from bento_lib.service_info.types import GA4GHServiceInfo
+from bento_lib.service_info.helpers import build_service_info
 
 from .. import __version__
 from ..logger import logger
