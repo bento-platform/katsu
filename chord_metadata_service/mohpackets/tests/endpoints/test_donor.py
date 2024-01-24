@@ -60,6 +60,32 @@ class IngestTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_donor_ingest_validator(self):
+        """
+        Test invalid data and receive 422 unprocess response.
+
+        Testing Strategy:
+        - Build Donor data based on the existing program_id and wrong data not match with validator
+        - An authorized user (user_2) with admin permission.
+        - User cannot perform a POST request for donor creation.
+        """
+        donor = DonorFactory.build(program_id=self.programs[1])
+        donor_dict = model_to_dict(donor)
+        donor_dict["cause_of_death"] = "invalid"
+        response = self.client.post(
+            self.donor_url,
+            data=donor_dict,
+            content_type="application/json",
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(
+            response.status_code,
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
+            f"Response content: {response.content}",
+        )
+
 
 # GET API
 # -------
