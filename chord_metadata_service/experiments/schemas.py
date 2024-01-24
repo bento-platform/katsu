@@ -23,6 +23,12 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         "filename": {
             "type": "string"
         },
+        "url": {
+            "type": "string",
+            "format": "uri",
+            # only supported schemes allowed, in alphabetical order:
+            "pattern": r"^(data|doi|drs|file|ftp|https?|s3)://",
+        },
         "genome_assembly_id": {
             "type": "string",
         },
