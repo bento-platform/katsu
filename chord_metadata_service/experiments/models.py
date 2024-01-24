@@ -85,6 +85,7 @@ class ExperimentResult(models.Model, IndexableMixin):
                             help_text=rec_help(d.EXPERIMENT_RESULT, "description"))
     filename = CharField(max_length=500, blank=True, null=True,
                          help_text=rec_help(d.EXPERIMENT_RESULT, "filename"))
+    url = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.EXPERIMENT_RESULT, "url"))
     genome_assembly_id = CharField(max_length=50, blank=True, null=True,
                                    help_text=rec_help(d.EXPERIMENT_RESULT, "genome_assembly_id"))
     file_format = CharField(max_length=50, blank=True, null=True,

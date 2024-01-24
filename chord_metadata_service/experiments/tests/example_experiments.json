@@ -28,6 +28,7 @@
           "identifier": "sample1_01",
           "description": "test",
           "filename": "sample1_01.vcf.gz",
+          "url": "http://example.org/sample1_01.vcf.gz",
           "file_format": "VCF",
           "data_output_type": "Derived data",
           "usage": "Visualized",

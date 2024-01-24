@@ -20,17 +20,20 @@ EXPERIMENT_RESULT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPE
         "filename": {
             "search": search_optional_str(2)
         },
-        "file_format": {
-            "search": search_optional_eq(3)
+        "url": {
+            "search": search_optional_str(3)
         },
-        "data_output_type": {
+        "file_format": {
             "search": search_optional_eq(4)
         },
+        "data_output_type": {
+            "search": search_optional_eq(5)
+        },
         "usage": {
-            "search": search_optional_str(5)
+            "search": search_optional_str(6)
         },
         "genome_assembly_id": {
-            "search": search_optional_eq(6)
+            "search": search_optional_eq(7)
         },
     },
     "search": {
