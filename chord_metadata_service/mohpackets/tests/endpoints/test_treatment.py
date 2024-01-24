@@ -64,6 +64,31 @@ class TreatmentsIngestTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_treatment_create_validator(self):
+        """
+        Test invalid data and receive 422 unprocess response.
+
+        Testing Strategy:
+        - Build Treatment data based on the existing primary_diagnosis_uuid and wrong data for validator
+        - An authorized user (user_2) with admin permission.
+        - User cannot perform a POST request for treatment creation.
+        """
+        treatment = TreatmentFactory.build(primary_diagnosis_uuid=self.primary_diagnoses[0])
+        treatment_dict = model_to_dict(treatment)
+        treatment_dict["treatment_type"] = "invalid"
+        response = self.client.post(
+            self.treatment_url,
+            data=treatment_dict,
+            content_type="application/json",
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(
+            response.status_code,
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
+            f"Response content: {response.content}",
+        )
 
 # GET API
 # -------
