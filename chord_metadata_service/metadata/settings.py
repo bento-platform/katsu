@@ -16,7 +16,7 @@ import logging
 import json
 from os.path import exists
 
-from bento_lib.service_info import GA4GHServiceType
+from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 

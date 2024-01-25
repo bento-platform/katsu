@@ -18,7 +18,7 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework import status
 
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Callable
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
 from chord_metadata_service.logger import logger
@@ -207,7 +207,7 @@ def phenopacket_query_results(query, params, options=None):
             .prefetch_related(*PHENOPACKET_PREFETCH)
 
 
-QUERY_RESULTS_FN: Dict[str, Callable] = {
+QUERY_RESULTS_FN: dict[str, Callable] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
     DATA_TYPE_PHENOPACKET: phenopacket_query_results,
 }
@@ -503,7 +503,7 @@ def get_chord_search_parameters(request, data_type=None):
 def chord_dataset_search(
         search_params,
         dataset_id, start,
-        internal=False) -> Tuple[Union[None, bool, list], Optional[str]]:
+        internal=False) -> tuple[bool | list | None, str | None]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
     to a given table.

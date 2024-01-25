@@ -17,14 +17,14 @@ from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import map_if_list, query_and_check_nulls
 from .logger import logger
-from typing import Any, Dict, Iterable, Optional, Union, Callable, TypeVar
+from typing import Any, Callable, Iterable, TypeVar
 from django.db.models import Model
 
 # Generic TypeVar for django db models
 T = TypeVar('T', bound=Model)
 
 
-def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> Optional[T]:
+def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> T | None:
     """
     Helper function to get or create DB objects if a key is in a dict
     """
@@ -34,7 +34,7 @@ def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> O
     return obj
 
 
-def _clean_extra_properties(extra_properties: dict) -> Dict:
+def _clean_extra_properties(extra_properties: dict[str, Any]) -> dict[str, Any]:
     """
     Removes computed properties from an extra_properties dictionary.
     Computed extra_properties start with "__" and should never be ingested.
@@ -82,7 +82,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
 
 def validate_phenopacket(phenopacket_data: dict[str, Any],
                          schema: dict = PHENOPACKET_SCHEMA,
-                         idx: Optional[int] = None) -> None:
+                         idx: int | None = None) -> None:
     # Validate phenopacket data against phenopackets schema.
     # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
     validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY)
@@ -106,8 +106,8 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
     # --------------------------------------------------------------------------------------------------------------
 
-    age_numeric_value: Optional[Decimal] = None
-    age_unit_value: Optional[str] = None
+    age_numeric_value: Decimal | None = None
+    age_unit_value: str | None = None
     if "time_at_last_encounter" in subject:
         age_numeric_value, age_unit_value = time_element_to_years(subject["time_at_last_encounter"])
 
@@ -318,7 +318,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
                        dataset_id: str,
                        json_schema: dict = PHENOPACKET_SCHEMA,
                        validate: bool = True,
-                       idx: Optional[int] = None) -> pm.Phenopacket:
+                       idx: int | None = None) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
 
     if validate:
@@ -372,7 +372,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     # If there's a subject attached to the phenopacket, create it
     # - or, if it already exists, *update* the extra properties if needed.
     #   This is one of the few cases of 'updating' something that exists in Katsu.
-    subject_obj: Optional[pm.Individual] = None
+    subject_obj: pm.Individual | None = None
     if subject:  # we have a dictionary of subject data in the phenopacket
         subject_obj = update_or_create_subject(subject)
 
@@ -423,7 +423,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     return phenopacket
 
 
-def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
+def ingest_phenopacket_workflow(json_data, dataset_id) -> list[pm.Phenopacket] | pm.Phenopacket:
     project_id = Project.objects.get(datasets=dataset_id)
     project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
         "json_schema",
@@ -432,7 +432,7 @@ def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopac
     )
 
     # Map with key:schema_type and value:json_schema
-    extension_schemas: Dict[str, ExtensionSchemaDict] = {
+    extension_schemas: dict[str, ExtensionSchemaDict] = {
         proj_schema["schema_type"].lower(): proj_schema
         for proj_schema in project_schemas
     }

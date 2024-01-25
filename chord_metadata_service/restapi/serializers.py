@@ -1,11 +1,10 @@
 from collections import OrderedDict
 from rest_framework import serializers
-from typing import Tuple
 
 
 class GenericSerializer(serializers.ModelSerializer):
     """ Subclass of ModelSerializer """
-    always_include: Tuple[str, ...] = ()
+    always_include: tuple[str, ...] = ()
 
     def __init__(self, *args, **kwargs):
         exclude_when_nested = kwargs.pop('exclude_when_nested', None)

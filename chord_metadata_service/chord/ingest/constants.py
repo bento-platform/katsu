@@ -5,7 +5,8 @@ from chord_metadata_service.chord.ingest.experiments import ingest_experiments_w
 from chord_metadata_service.chord.ingest.phenopackets import ingest_phenopacket_workflow, validate_phenopacket
 
 __all__ = [
-    "DATA_TYPE_TO_VALIDATOR_FN"
+    "DATA_TYPE_TO_VALIDATOR_FN",
+    "DATA_TYPE_TO_INGESTION_FN",
 ]
 
 
