@@ -15,6 +15,7 @@ __all__ = [
     "AGE",
     "AGE_RANGE",
     "AGE_OR_AGE_RANGE",
+    "TIME_INTERVAL",
     "EXTRA_PROPERTIES_SCHEMA",
     "FHIR_BUNDLE_SCHEMA",
     "GESTATIONAL_AGE",
