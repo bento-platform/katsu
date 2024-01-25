@@ -76,7 +76,9 @@ class SampleRegistrationTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User cannot perform a POST request for sample registration creation.
         """
-        sample_registration = SampleRegistrationFactory.build(specimen_uuid=self.specimens[0])
+        sample_registration = SampleRegistrationFactory.build(
+            specimen_uuid=self.specimens[0]
+        )
         sample_registration_dict = model_to_dict(sample_registration)
         sample_registration_dict["sample_type"] = "invalid"
         response = self.client.post(
@@ -92,6 +94,7 @@ class SampleRegistrationTestCase(BaseTestCase):
             f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
+
 
 # GET API
 # -------

@@ -73,7 +73,9 @@ class TreatmentsIngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User cannot perform a POST request for treatment creation.
         """
-        treatment = TreatmentFactory.build(primary_diagnosis_uuid=self.primary_diagnoses[0])
+        treatment = TreatmentFactory.build(
+            primary_diagnosis_uuid=self.primary_diagnoses[0]
+        )
         treatment_dict = model_to_dict(treatment)
         treatment_dict["treatment_type"] = "invalid"
         response = self.client.post(
@@ -89,6 +91,7 @@ class TreatmentsIngestTestCase(BaseTestCase):
             f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
+
 
 # GET API
 # -------

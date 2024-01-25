@@ -73,7 +73,9 @@ class IngestTestCase(BaseTestCase):
         - An authorized user (user_2) with admin permission.
         - User cannot perform a POST request for specimen creation.
         """
-        specimen = SpecimenFactory.build(primary_diagnosis_uuid=self.primary_diagnoses[0])
+        specimen = SpecimenFactory.build(
+            primary_diagnosis_uuid=self.primary_diagnoses[0]
+        )
         specimen_dict = model_to_dict(specimen)
         specimen_dict["tumour_grade"] = "invalid"
         response = self.client.post(
@@ -89,6 +91,7 @@ class IngestTestCase(BaseTestCase):
             f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
+
 
 # GET API
 # -------

@@ -86,6 +86,7 @@ class IngestTestCase(BaseTestCase):
             f"Response content: {response.content}",
         )
 
+
 # GET API
 # -------
 class GETTestCase(BaseTestCase):

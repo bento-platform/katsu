@@ -62,7 +62,6 @@ class IngestTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
-
     def test_primary_diagnosis_ingest_validator(self):
         """
         Test invalid data and receive 422 unprocess response.
@@ -88,6 +87,7 @@ class IngestTestCase(BaseTestCase):
             f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
             f"Response content: {response.content}",
         )
+
 
 # GET API
 # -------
