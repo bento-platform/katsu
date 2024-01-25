@@ -62,6 +62,32 @@ class IngestTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_chemotherapy_ingest_validator(self):
+        """
+        Test invalid data and receive 422 unprocess response.
+
+        Testing Strategy:
+        - Build Chemotherapy data based on the existing treatment_uuid and wrong data for validator
+        - An authorized user (user_2) with admin permission.
+        - User cannot perform a POST request for chemotherapy record creation.
+        """
+        chemotherapy = ChemotherapyFactory.build(treatment_uuid=self.treatments[0])
+        chemotherapy_dict = model_to_dict(chemotherapy)
+        chemotherapy_dict["drug_reference_database"] = "invalid"
+        response = self.client.post(
+            self.chemotherapy_url,
+            data=chemotherapy_dict,
+            content_type="application/json",
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(
+            response.status_code,
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
+            f"Response content: {response.content}",
+        )
+
 
 # GET API
 # -------

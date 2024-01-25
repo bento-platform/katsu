@@ -64,7 +64,7 @@ class TreatmentsIngestTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
-    def test_treatment_create_validator(self):
+    def test_treatment_ingest_validator(self):
         """
         Test invalid data and receive 422 unprocess response.
 

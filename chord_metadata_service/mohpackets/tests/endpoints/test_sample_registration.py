@@ -67,12 +67,12 @@ class SampleRegistrationTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
-    def test_sample_registration_create_validator(self):
+    def test_sample_registration_ingest_validator(self):
         """
         Test invalid data and receive 422 unprocess response.
 
         Testing Strategy:
-        - Build SampleRegistration data based on the existing primary_diagnosis_uuid and wrong data for validator
+        - Build SampleRegistration data based on the existing specimen_uuid and wrong data for validator
         - An authorized user (user_2) with admin permission.
         - User cannot perform a POST request for sample registration creation.
         """
