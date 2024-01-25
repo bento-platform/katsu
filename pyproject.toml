@@ -55,7 +55,6 @@ uritemplate = "^4.1.1"
 pyhumps = "^3.8.0"
 adrf = "^0.1.1"
 referencing = "^0.32.1"
-humps = "^0.2.2"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.0"
