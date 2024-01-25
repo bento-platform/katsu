@@ -1,5 +1,4 @@
 from django.test import SimpleTestCase, TestCase
-from typing import Dict
 
 from ..schema_utils import merge_schema_dictionaries, tag_schema_with_nested_ids, patch_project_schemas
 from ..types import ExtensionSchemaDict
@@ -63,7 +62,7 @@ class TestPatchSchema(SimpleTestCase):
     def test_ignored(self):
         # patch_project_schemas simply returns the base_schema if it has no "type" property
         base_schema = {"$schema": "https://json-schema.org/draft/2020-12/schema"}
-        ext_schemas: Dict[str, ExtensionSchemaDict] = {
+        ext_schemas: dict[str, ExtensionSchemaDict] = {
             "phenopacket": {
                 "json_schema": {
                     "type": "object"

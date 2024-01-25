@@ -1,6 +1,5 @@
 from enum import Enum
 from bento_lib.search import queries as q
-from typing import Dict, List, Optional
 from django.db import models
 from pathlib import Path
 from chord_metadata_service.logger import logger
@@ -13,11 +12,14 @@ __all__ = [
     "DRAFT_07",
     "DATE_TIME",
     "SEARCH_DATABASE_JSONB",
-    "SCHEMA_TYPES",
-    "SCHEMA_STRING_FORMATS",
+    "SchemaTypes",
+    "SchemaStringFormats",
     "merge_schema_dictionaries",
     "search_optional_eq",
     "search_optional_str",
+    "search_db_fk",
+    "search_db_pk",
+    "search_table_ref",
     "tag_schema_with_search_properties",
     "tag_schema_with_nested_ids",
     "tag_ids_and_describe",
@@ -42,7 +44,7 @@ SEARCH_DATABASE_JSONB = {
 }
 
 
-class SCHEMA_TYPES(Enum):
+class SchemaTypes(Enum):
     STRING = "string"
     INTEGER = "integer"
     NUMBER = "number"
@@ -51,7 +53,7 @@ class SCHEMA_TYPES(Enum):
     NULL = "null"
 
 
-class SCHEMA_STRING_FORMATS(Enum):
+class SchemaStringFormats(Enum):
     """
     Json-schema supported string formats as enums
     See: https://json-schema.org/understanding-json-schema/reference/string.html#format
@@ -96,7 +98,7 @@ def merge_schema_dictionaries(dict1: dict, dict2: dict):
     return res_dict
 
 
-def _searchable_field(operations: List[str], order: int, queryable: str = "all", multiple: bool = False):
+def _searchable_field(operations: list[str], order: int, queryable: str = "all", multiple: bool = False):
     return {
         "operations": operations,
         "queryable": queryable,
@@ -158,7 +160,7 @@ def search_table_ref(model: models.Model):
     }
 
 
-def tag_schema_with_search_properties(schema, search_descriptions: Optional[dict]):
+def tag_schema_with_search_properties(schema, search_descriptions: dict | None):
     if not isinstance(schema, dict) or not search_descriptions:
         return schema
 
@@ -227,7 +229,7 @@ def tag_ids_and_describe(schema: dict, descriptions: dict):
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
                      schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required: List[str] = None) -> dict:
+                     additional_properties: bool = False, required: list[str] = None) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,
@@ -244,7 +246,7 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
 
 
 def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description: str = None,
-                       additional_properties: bool = False, required: List[str] = None) -> dict:
+                       additional_properties: bool = False, required: list[str] = None) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,
@@ -292,7 +294,7 @@ def array_of(item, description=""):
     return describe_schema_opt(schema, description)
 
 
-def enum_of(values: List[str], description=""):
+def enum_of(values: list[str], description=""):
     schema = {
         "type": "string",
         "enum": values
@@ -300,7 +302,7 @@ def enum_of(values: List[str], description=""):
     return describe_schema_opt(schema, description)
 
 
-def base_type(type_: SCHEMA_TYPES, description=""):
+def base_type(type_: SchemaTypes, description=""):
     """
     Creates a basic type schema
     """
@@ -318,7 +320,7 @@ def string_with_pattern(pattern: str, description=""):
     return describe_schema_opt(schema, description)
 
 
-def string_with_format(format_: SCHEMA_STRING_FORMATS, description=""):
+def string_with_format(format_: SchemaStringFormats, description=""):
     schema = {
         "type": "string",
         "format": format_.value
@@ -339,10 +341,10 @@ def named_one_of(prop_name: str, prop_schema: dict):
     }
 
 
-DATE_TIME = string_with_format(SCHEMA_STRING_FORMATS.DATE_TIME)
+DATE_TIME = string_with_format(SchemaStringFormats.DATE_TIME)
 
 
-def patch_project_schemas(base_schema: dict, extension_schemas: Dict[str, ExtensionSchemaDict]) -> dict:
+def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, ExtensionSchemaDict]) -> dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 

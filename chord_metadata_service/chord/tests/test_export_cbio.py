@@ -1,5 +1,5 @@
 import io
-from typing import Dict, TextIO
+from typing import TextIO
 from os import walk, path
 
 from django.db.models import F
@@ -57,7 +57,7 @@ class ExportCBioTest(TestCase):
         self.exp_res = ExperimentResult.objects.all()
 
     @staticmethod
-    def stream_to_dict(output: TextIO) -> Dict[str, str]:
+    def stream_to_dict(output: TextIO) -> dict[str, str]:
         """
         Utility function. Parses cBioPortal metadata text files (lines of
         key/value pairs separated by `: `) in a dictionary structure.

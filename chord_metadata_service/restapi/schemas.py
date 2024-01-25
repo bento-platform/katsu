@@ -1,7 +1,7 @@
 from pathlib import Path
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
-from .schema_utils import DATE_TIME, DRAFT_07, SCHEMA_TYPES, base_type, tag_ids_and_describe, \
+from .schema_utils import DATE_TIME, DRAFT_07, SchemaTypes, base_type, tag_ids_and_describe, \
     tag_schema_with_nested_ids, named_one_of, get_schema_app_id, sub_schema_uri
 
 # Individual schemas for validation of JSONField values
@@ -33,8 +33,8 @@ ONTOLOGY_CLASS = tag_ids_and_describe({
     "title": "Ontology class schema",
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
-        "label": base_type(SCHEMA_TYPES.STRING)
+        "id": base_type(SchemaTypes.STRING),
+        "label": base_type(SchemaTypes.STRING)
     },
     "additionalProperties": False,
     "required": ["id", "label"]
@@ -162,8 +162,8 @@ GESTATIONAL_AGE = tag_ids_and_describe({
     "title": "Gestational age schema",
     "type": "object",
     "properties": {
-        "weeks": base_type(SCHEMA_TYPES.INTEGER),
-        "days": base_type(SCHEMA_TYPES.INTEGER),
+        "weeks": base_type(SchemaTypes.INTEGER),
+        "days": base_type(SchemaTypes.INTEGER),
     },
     "required": ["weeks"]
 }, descriptions.GESTATIONAL_AGE)
