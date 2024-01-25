@@ -889,17 +889,6 @@ files = [
 ]
 
 [[package]]
-name = "humps"
-version = "0.2.2"
-description = "camelCase converter"
-optional = false
-python-versions = "*"
-files = [
-    {file = "humps-0.2.2-py2.py3-none-any.whl", hash = "sha256:401de60fd73673b697086ba7c865966751c57b11cce57a37c9eabb3e75938417"},
-    {file = "humps-0.2.2.tar.gz", hash = "sha256:777f7a17f6b20aa9cc078d63b56ebd66532c6b2c88b370f1d596d5205410f67c"},
-]
-
-[[package]]
 name = "idna"
 version = "3.6"
 description = "Internationalized Domain Names in Applications (IDNA)"
@@ -2170,4 +2159,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "3d070f4495029e5923ed06954333961c6311ab0bcb45029bb072ced70b847b5a"
+content-hash = "c5c1267c29502cd7363a66a7a74cadbafab3f045da7e05914035c4e513f60d88"
