@@ -1,23 +1,24 @@
 from typing import Optional
 
-from ninja import Field, ModelSchema
-from chord_metadata_service.mohpackets.models import (
-    Biomarker,
-    Chemotherapy,
-    Comorbidity,
-    Donor,
-    Exposure,
-    FollowUp,
-    HormoneTherapy,
-    Immunotherapy,
-    PrimaryDiagnosis,
-    Program,
-    Radiation,
-    SampleRegistration,
-    Specimen,
-    Surgery,
-    Treatment,
+from ninja import Field
+from chord_metadata_service.mohpackets.schemas.base import (
+    BaseBiomarkerSchema,
+    BaseChemotherapySchema,
+    BaseComorbiditySchema,
+    BaseDonorSchema,
+    BaseExposureSchema,
+    BaseFollowUpSchema,
+    BaseHormoneTherapySchema,
+    BaseImmunotherapySchema,
+    BasePrimaryDiagnosisSchema,
+    BaseProgramSchema,
+    BaseRadiationSchema,
+    BaseSampleRegistrationSchema,
+    BaseSpecimenSchema,
+    BaseSurgerySchema,
+    BaseTreatmentSchema,
 )
+
 
 """
 Module with schema used for ingesting
@@ -35,193 +36,140 @@ Author: Son Chau
 ########################################
 
 
-class ProgramIngestSchema(ModelSchema):
-    class Meta:
-        model = Program
-        fields = "__all__"
+class ProgramIngestSchema(BaseProgramSchema):
+    pass
 
 
-class DonorIngestSchema(ModelSchema):
+class DonorIngestSchema(BaseDonorSchema):
     program_id_id: str = Field(..., alias="program_id")
     uuid: Optional[str] = None
 
-    class Config:
-        model = Donor
-        model_exclude = ["uuid", "program_id"]
+    class Config(BaseDonorSchema.Config):
+        use_enum_values = True
 
 
-class PrimaryDiagnosisIngestSchema(ModelSchema):
+class PrimaryDiagnosisIngestSchema(BasePrimaryDiagnosisSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = PrimaryDiagnosis
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-        ]
+    class Config(BasePrimaryDiagnosisSchema.Config):
+        use_enum_values = True
 
 
-class BiomarkerIngestSchema(ModelSchema):
+class BiomarkerIngestSchema(BaseBiomarkerSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Biomarker
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-        ]
+    class Config(BaseBiomarkerSchema.Config):
+        use_enum_values = True
 
 
-class ChemotherapyIngestSchema(ModelSchema):
+class ChemotherapyIngestSchema(BaseChemotherapySchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Chemotherapy
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "treatment_uuid",
-        ]
+    class Config(BaseChemotherapySchema.Config):
+        use_enum_values = True
 
 
-class ComorbidityIngestSchema(ModelSchema):
+class ComorbidityIngestSchema(BaseComorbiditySchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Comorbidity
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-        ]
+    class Config(BaseComorbiditySchema.Config):
+        use_enum_values = True
 
 
-class ExposureIngestSchema(ModelSchema):
+class ExposureIngestSchema(BaseExposureSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Exposure
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-        ]
+    class Config(BaseExposureSchema.Config):
+        use_enum_values = True
 
 
-class FollowUpIngestSchema(ModelSchema):
+class FollowUpIngestSchema(BaseFollowUpSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_primary_diagnosis_id: Optional[str] = None
+    submitter_treatment_id: Optional[str] = None
     uuid: Optional[str] = None
 
-    class Config:
-        model = FollowUp
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-        ]
+    class Config(BaseFollowUpSchema.Config):
+        use_enum_values = True
 
 
-class HormoneTherapyIngestSchema(ModelSchema):
+class HormoneTherapyIngestSchema(BaseHormoneTherapySchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = HormoneTherapy
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "treatment_uuid",
-        ]
+    class Config(BaseHormoneTherapySchema.Config):
+        use_enum_values = True
 
 
-class ImmunotherapyIngestSchema(ModelSchema):
+class ImmunotherapyIngestSchema(BaseImmunotherapySchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Immunotherapy
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "treatment_uuid",
-        ]
+    class Config(BaseImmunotherapySchema.Config):
+        use_enum_values = True
 
 
-class RadiationIngestSchema(ModelSchema):
+class RadiationIngestSchema(BaseRadiationSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Radiation
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "treatment_uuid",
-        ]
+    class Config(BaseRadiationSchema.Config):
+        use_enum_values = True
 
 
-class SampleRegistrationIngestSchema(ModelSchema):
+class SampleRegistrationIngestSchema(BaseSampleRegistrationSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_specimen_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = SampleRegistration
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "specimen_uuid",
-        ]
+    class Config(BaseSampleRegistrationSchema.Config):
+        use_enum_values = True
 
 
-class SpecimenIngestSchema(ModelSchema):
+class SpecimenIngestSchema(BaseSpecimenSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_primary_diagnosis_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Specimen
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "primary_diagnosis_uuid",
-        ]
+    class Config(BaseSpecimenSchema.Config):
+        use_enum_values = True
 
 
-class SurgeryIngestSchema(ModelSchema):
+class SurgeryIngestSchema(BaseSurgerySchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Surgery
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "treatment_uuid",
-        ]
+    class Config(BaseSurgerySchema.Config):
+        use_enum_values = True
 
 
-class TreatmentIngestSchema(ModelSchema):
+class TreatmentIngestSchema(BaseTreatmentSchema):
     program_id_id: str = Field(..., alias="program_id")
+    submitter_donor_id: str
+    submitter_primary_diagnosis_id: str
     uuid: Optional[str] = None
 
-    class Config:
-        model = Treatment
-        model_exclude = [
-            "uuid",
-            "program_id",
-            "donor_uuid",
-            "primary_diagnosis_uuid",
-        ]
+    class Config(BaseTreatmentSchema.Config):
+        use_enum_values = True

@@ -60,6 +60,32 @@ class IngestTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_follow_up_ingest_validator(self):
+        """
+        Test invalid data and receive 422 unprocessable entity response for follow-up creation.
+
+        Testing Strategy:
+        - Build FollowUp data based on the existing treatment_uuid and wrong data for validator.
+        - An authorized user (user_2) with admin permission.
+        - User cannot perform a POST request for follow-up creation.
+        """
+        follow_up = FollowUpFactory.build(treatment_uuid=self.treatments[0])
+        follow_up_dict = model_to_dict(follow_up)
+        follow_up_dict["relapse_type"] = "invalid"
+        response = self.client.post(
+            self.follow_up_url,
+            data=follow_up_dict,
+            content_type="application/json",
+            format="json",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(
+            response.status_code,
+            HTTPStatus.UNPROCESSABLE_ENTITY,
+            f"Expected status code {HTTPStatus.UNPROCESSABLE_ENTITY}, but got {response.status_code}. "
+            f"Response content: {response.content}",
+        )
+
 
 # GET API
 # -------

@@ -109,8 +109,8 @@ BaseProgramSchema = create_schema(
 
 BaseDonorSchema = create_schema(
     Donor,
-    name="BaseDonorSchema",  # name display in schema
-    exclude=["uuid"],  # need exclude here, cannot do in config
+    name="BaseDonorSchema",
+    exclude=["uuid", "program_id"],
     custom_fields=[
         ("cause_of_death", Optional[CauseOfDeathEnum], None),
         ("submitter_donor_id", str, Field(pattern=ID_REGEX_PATTERNS, max_length=64)),

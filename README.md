@@ -106,13 +106,13 @@ tox
 Run all tests for mohpackets:
 
 ```bash
-python manage.py test chord_metadata_service.mohpackets
+python manage.py test chord_metadata_service/mohpackets/tests/
 ```
 
 Run each test:
 
 ```bash
-python manage.py test chord_metadata_service.mohpackets.tests.<test_name>
+python manage.py test chord_metadata_service.mohpackets.tests.endpoints.<test_name>
 ```
 
 Test and create `coverage` HTML report:
