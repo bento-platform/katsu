@@ -6,7 +6,7 @@ import datetime
 from collections import defaultdict, Counter
 from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
-from typing import Any, Optional, Type, TypedDict, Mapping, Generator
+from typing import Any, Type, TypedDict, Mapping, Generator
 
 from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
 from django.db.models.functions import Cast
@@ -114,9 +114,9 @@ def _round_decimal_two_places(d: float) -> Decimal:
     return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
 
-def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
-    time_value: Optional[Decimal] = None
-    time_unit: Optional[str] = None
+def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Decimal | None, str | None]:
+    time_value: Decimal | None = None
+    time_unit: str | None = None
     if "age" in time_element:
         return iso_duration_to_years(time_element["age"], unit=unit)
     elif "age_range" in time_element:
@@ -127,7 +127,7 @@ def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Opti
     return time_value, time_unit
 
 
-def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> tuple[Optional[Decimal], Optional[str]]:
+def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> tuple[Decimal | None, str | None]:
     """
     This function takes ISO8601 Duration string in the format e.g 'P20Y6M4D' and converts it to years.
     """
@@ -186,8 +186,8 @@ def custom_binning_generator(field_props: dict) -> Generator[tuple[int, int, str
     """
 
     c = field_props["config"]
-    minimum: Optional[int] = int(c["minimum"]) if "minimum" in c else None
-    maximum: Optional[int] = int(c["maximum"]) if "maximum" in c else None
+    minimum: int | None = int(c["minimum"]) if "minimum" in c else None
+    maximum: int | None = int(c["maximum"]) if "maximum" in c else None
     bins: list[int] = [int(value) for value in c["bins"]]
 
     # check prerequisites
@@ -288,7 +288,7 @@ def get_model_and_field(field_id: str) -> tuple[any, str]:
 
     model_name, *field_path = field_id.split("/")
 
-    model: Optional[Type[Model]] = MODEL_NAMES_TO_MODEL.get(model_name)
+    model: Type[Model] | None = MODEL_NAMES_TO_MODEL.get(model_name)
     if model is None:
         msg = f"Accessing field on model {model_name} not implemented"
         raise NotImplementedError(msg)
@@ -400,7 +400,7 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     stats = stats_for_field(model, field_name, add_missing=True)
 
     # Enforce values order from config and apply policies
-    labels: Optional[list[str]] = field_props["config"].get("enum")
+    labels: list[str] | None = field_props["config"].get("enum")
     derived_labels: bool = labels is None
 
     # Special case: for some fields, values are based on what's present in the
@@ -469,8 +469,8 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
     )
 
     stats = defaultdict(int)
-    start: Optional[str] = None
-    end: Optional[str] = None
+    start: str | None = None
+    end: str | None = None
     # Key the counts on yyyy-mm combination (aggregate same month counts)
     for item in query_set:
         key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
@@ -505,7 +505,7 @@ def get_date_stats(field_props: dict) -> list[BinWithValue]:
     return bins
 
 
-def get_month_date_range(field_props: dict) -> tuple[Optional[str], Optional[str]]:
+def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
@@ -560,7 +560,7 @@ def get_range_stats(field_props: dict) -> list[BinWithValue]:
         .annotate(total=Count("label"))
     )
 
-    threshold = get_threshold()  # Maximum number of entries needed to round a count down to 0 (censored discovery)
+    threshold = get_threshold()  # Maximum number of entries needed to round a count-down to 0 (censored discovery)
     stats: dict[str, int] = dict()
     for item in query_set:
         key = item["label"]

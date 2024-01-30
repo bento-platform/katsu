@@ -1,6 +1,6 @@
 import logging
 import csv
-from typing import Callable, Dict, Optional, TextIO
+from typing import Callable, TextIO
 import re
 
 from django.db.models import F
@@ -130,7 +130,7 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO) -> None:
     Study meta data file generation
     """
 
-    lines: Dict[str, str] = {
+    lines: dict[str, str] = {
         "type_of_cancer": "mixed",  # TODO: find if this information is available. !IMPORTANT! uses Oncotree codes
         "cancer_study_identifier": str(dataset.identifier),
         "name": dataset.title,
@@ -156,7 +156,7 @@ def clinical_meta_export(study_id: str, datatype: str, file_handle: TextIO):
     Clinical Metadata files generation (samples or patients)
     """
 
-    lines: Dict[str, str] = {
+    lines: dict[str, str] = {
         "cancer_study_identifier": study_id,
         "genetic_alteration_type": "CLINICAL",
     }
@@ -338,7 +338,7 @@ class CbioportalClinicalHeaderGenerator:
 
     fields_mapping = {}
 
-    def __init__(self, mappings: Optional[dict] = None):
+    def __init__(self, mappings: dict | None = None):
         self.fields_mapping = mappings or {}
 
     def make_header(self, fields: list):
