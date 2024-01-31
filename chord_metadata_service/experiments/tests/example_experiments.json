@@ -29,6 +29,9 @@
           "description": "test",
           "filename": "sample1_01.vcf.gz",
           "url": "http://example.org/sample1_01.vcf.gz",
+          "indices": [
+            {"url": "http://example.org/sample1_01.vcf.gz.tbi", "format": "TABIX"}
+          ],
           "file_format": "VCF",
           "data_output_type": "Derived data",
           "usage": "Visualized",

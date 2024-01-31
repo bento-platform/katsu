@@ -3,9 +3,59 @@ from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
 
-__all__ = ["EXPERIMENT_SCHEMA", "EXPERIMENT_RESULT_SCHEMA", "INSTRUMENT_SCHEMA"]
+__all__ = [
+    "DATA_FILE_OR_RECORD_URL_SCHEMA",
+    "EXPERIMENT_RESULT_FILE_INDEX_SCHEMA",
+    "EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA",
+    "EXPERIMENT_SCHEMA",
+    "EXPERIMENT_RESULT_SCHEMA",
+    "INSTRUMENT_SCHEMA",
+]
 
 base_uri = get_schema_app_id(Path(__file__).parent.name)
+
+DATA_FILE_OR_RECORD_URL_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": sub_schema_uri(base_uri, "data_file_or_record_url"),
+    "title": "Data file or record URL",
+    "description": "A URL of a particular scheme, pointing to a data file OR a DRS record which itself points to a "
+                   "data file.",
+    "type": "string",
+    "format": "uri",
+    # only supported schemes allowed, in alphabetical order:
+    "pattern": r"^(data|doi|drs|file|ftp|https?|s3)://",
+}
+
+EXPERIMENT_RESULT_FILE_INDEX_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": sub_schema_uri(base_uri, "experiment_result_file_index"),
+    "title": "Experiment result file index schema",
+    "description": "Schema for describing an object representing an index of an experiment result file.",
+    "type": "object",
+    "properties": {
+        "url": DATA_FILE_OR_RECORD_URL_SCHEMA,
+        "format": {
+            "type": "string",
+            "enum": [
+                "BAI",  # BAM index files ( http://samtools.github.io/hts-specs/SAMv1.pdf "BAI" )
+                "BGZF",  # BGZip index files (often .gzi)
+                "CRAI",  # CRAM index files ( https://samtools.github.io/hts-specs/CRAMv3.pdf "CRAM index" )
+                "CSI",  # See http://samtools.github.io/hts-specs/CSIv1.pdf
+                "TABIX",  # See https://samtools.github.io/hts-specs/tabix.pdf
+                "TRIBBLE",
+            ],
+        }
+    },
+    "required": ["url", "format"],
+}
+EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": sub_schema_uri(base_uri, "experiment_result_file_index_list"),
+    "title": "Experiment result file index list schema",
+    "description": "Schema for describing a list of object representing an indices of an experiment result file.",
+    "type": "array",
+    "items": EXPERIMENT_RESULT_FILE_INDEX_SCHEMA,
+}
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -23,20 +73,16 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         "filename": {
             "type": "string"
         },
-        "url": {
-            "type": "string",
-            "format": "uri",
-            # only supported schemes allowed, in alphabetical order:
-            "pattern": r"^(data|doi|drs|file|ftp|https?|s3)://",
-        },
+        "url": DATA_FILE_OR_RECORD_URL_SCHEMA,
+        "indices": EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA,
         "genome_assembly_id": {
             "type": "string",
         },
         "file_format": {
             "type": "string",
-            "enum": ["SAM", "BAM", "CRAM", "BAI", "CRAI", "VCF", "BCF", "MAF", "GVCF", "BigWig", "BigBed", "FASTA",
-                     "FASTQ", "TAB", "SRA", "SRF", "SFF", "GFF", "TABIX", "PDF", "CSV", "TSV", "JPEG", "PNG", "GIF",
-                     "MARKDOWN", "MP3", "M4A", "MP4", "DOCX", "XLS", "XLSX", "UNKNOWN", "OTHER"]
+            "enum": ["SAM", "BAM", "CRAM", "VCF", "BCF", "MAF", "GVCF", "BigWig", "BigBed", "FASTA", "FASTQ", "TAB",
+                     "SRA", "SRF", "SFF", "GFF", "PDF", "CSV", "TSV", "JPEG", "PNG", "GIF", "MARKDOWN", "MP3", "M4A",
+                     "MP4", "DOCX", "XLS", "XLSX", "UNKNOWN", "OTHER"]
         },
         "data_output_type": {
             "type": "string",

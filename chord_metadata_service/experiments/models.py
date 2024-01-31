@@ -5,7 +5,9 @@ from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
 from chord_metadata_service.phenopackets.models import Biosample
-import chord_metadata_service.experiments.descriptions as d
+
+from . import descriptions as d
+from .validators import file_index_list_validator
 
 __all__ = ["Experiment", "ExperimentResult", "Instrument"]
 
@@ -85,7 +87,14 @@ class ExperimentResult(models.Model, IndexableMixin):
                             help_text=rec_help(d.EXPERIMENT_RESULT, "description"))
     filename = CharField(max_length=500, blank=True, null=True,
                          help_text=rec_help(d.EXPERIMENT_RESULT, "filename"))
+    # URLs:
+    #  - one file for the experiment result file proper
     url = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.EXPERIMENT_RESULT, "url"))
+    #  - an array of index file objects (e.g., FAI, Tabix, Tribble, BGZF), formatted like
+    #    { "url": "...", "format": "FAI" | "TABIX" | "TRIBBLE " | ... }
+    indices = JSONField(blank=True, default=list, validators=[file_index_list_validator],
+                        help_text=rec_help(d.EXPERIMENT_RESULT, "indices"))
+
     genome_assembly_id = CharField(max_length=50, blank=True, null=True,
                                    help_text=rec_help(d.EXPERIMENT_RESULT, "genome_assembly_id"))
     file_format = CharField(max_length=50, blank=True, null=True,
