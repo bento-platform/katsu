@@ -32,7 +32,7 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     identifier = django_filters.CharFilter(lookup_expr='exact')
     description = django_filters.CharFilter(lookup_expr='icontains')
     filename = django_filters.CharFilter(lookup_expr='icontains')
-    url = django_filters.CharFilter(lookup_expr='contains')
+    url = django_filters.CharFilter(lookup_expr='icontains')
     indices = django_filters.CharFilter(method="filter_indices", label="Indices")
     genome_assembly_id = django_filters.CharFilter(lookup_expr='iexact')
     file_format = django_filters.CharFilter(lookup_expr='iexact')
