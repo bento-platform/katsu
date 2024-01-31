@@ -629,17 +629,16 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-autocomplete-light"
-version = "3.9.7"
+version = "3.11.0rc1"
 description = "Fresh autocompletes for Django"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django-autocomplete-light-3.9.7.tar.gz", hash = "sha256:a34f192ac438c4df056dbfd399550799ddc631c4661960134ded924648770373"},
+    {file = "django-autocomplete-light-3.11.0rc1.tar.gz", hash = "sha256:3db5cda740067680c91dc87207ed30d0789650c5861ae09e35bd6367a3587901"},
 ]
 
 [package.dependencies]
 django = ">=3.2"
-six = "*"
 
 [package.extras]
 genericm2m = ["django-generic-m2m"]
@@ -2160,4 +2159,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "af731d064149db370bcba1098dcdb4e4fb1eed4f0836e0f2067b205d1cf3b15b"
+content-hash = "c5c1267c29502cd7363a66a7a74cadbafab3f045da7e05914035c4e513f60d88"

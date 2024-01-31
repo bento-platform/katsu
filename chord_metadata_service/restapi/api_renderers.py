@@ -2,7 +2,8 @@ import json
 import csv
 from uuid import UUID
 from rdflib import Graph
-from rdflib.plugin import register, Serializer
+from rdflib.plugin import register
+from rdflib.serializer import Serializer
 from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer

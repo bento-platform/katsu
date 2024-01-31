@@ -1,4 +1,3 @@
-from typing import Optional
 from django.apps import apps
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -196,7 +195,7 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     def schema_type(self) -> SchemaType:
         return SchemaType.BIOSAMPLE
 
-    def get_project_id(self) -> Optional[str]:
+    def get_project_id(self) -> str | None:
         model = apps.get_model("phenopackets.Phenopacket")
         if len(phenopackets := model.objects.filter(biosamples__id=self.id)) < 1:
             return None
@@ -424,7 +423,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
 
-    def get_project_id(self) -> Optional[str]:
+    def get_project_id(self) -> str | None:
         model = apps.get_model("chord.Project")
         try:
             project = model.objects.get(datasets=self.dataset)

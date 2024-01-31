@@ -1,6 +1,6 @@
+from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from .models import Experiment, ExperimentResult, Instrument
-from chord_metadata_service.patients.models import Individual
 
 
 __all__ = ["ExperimentSerializer", "ExperimentResultSerializer", "InstrumentSerializer"]

@@ -1,5 +1,5 @@
 from django.db.models import Model
-from typing import Set, Type, Union
+from typing import Type
 
 from ..logger import logger
 from ..utils import build_id_set
@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-async def remove_items(model: Type[Model], to_remove: Set[Union[int, str, None]], name_plural: str) -> int:
+async def remove_items(model: Type[Model], to_remove: set[int | str | None], name_plural: str) -> int:
     n_to_remove = len(to_remove)
 
     if n_to_remove:
@@ -22,7 +22,7 @@ async def remove_items(model: Type[Model], to_remove: Set[Union[int, str, None]]
     return n_to_remove
 
 
-async def remove_not_referenced(model: Type[Model], references: Set[Union[int, str, None]], name_plural: str) -> int:
+async def remove_not_referenced(model: Type[Model], references: set[int | str | None], name_plural: str) -> int:
     objs_referenced = references.copy()
 
     # Remove null from set
