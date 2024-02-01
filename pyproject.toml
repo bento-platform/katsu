@@ -34,7 +34,7 @@ classifiers = [
 python = "^3.10.0"
 bento-lib = {extras = ["django"], version = "^11.3.0"}
 Django = "^4.2.9"
-django-autocomplete-light = "^3.9.4"
+django-autocomplete-light = "^3.11.0rc1"
 django-cors-headers = "^4.3.1"
 django-filter = "^23.5"
 djangorestframework = "^3.14.0"

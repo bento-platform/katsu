@@ -7,8 +7,6 @@ from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
 
-from typing import Optional
-
 from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
@@ -42,6 +40,8 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
         identifier=er.get("identifier"),
         description=er.get("description"),
         filename=er.get("filename"),
+        url=er.get("url"),
+        indices=er.get("indices") or [],
         genome_assembly_id=er.get("genome_assembly_id"),
         file_format=er.get("file_format"),
         data_output_type=er.get("data_output_type"),
@@ -54,7 +54,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
     return er_obj
 
 
-def validate_experiment(experiment_data, idx: Optional[int] = None) -> None:
+def validate_experiment(experiment_data, idx: int | None = None) -> None:
     # Validate experiment data against experiments schema.
     validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
     if not validation:
@@ -68,7 +68,7 @@ def ingest_experiment(
     experiment_data: dict,
     dataset_id: str,
     validate: bool = True,
-    idx: Optional[int] = None,
+    idx: int | None = None,
 ) -> em.Experiment:
     """Ingests a single experiment."""
 
@@ -95,7 +95,7 @@ def ingest_experiment(
     instrument = experiment_data.get("instrument", {})
     extra_properties = experiment_data.get("extra_properties", {})
 
-    biosample: Optional[pm.Biosample] = None
+    biosample: pm.Biosample | None = None
 
     # get existing biosample id
     if biosample_id is not None:
@@ -204,5 +204,5 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
 # The table_id is required to fit the bento_ingest.schema.json in bento_lib,
 # but it is unused. It can be set to any valid table_id or to one of the override
 # values defined in view_ingest.py
-def ingest_maf_derived_from_vcf_workflow(json_data, dataset_id: str) -> list[em.ExperimentResult]:
+def ingest_maf_derived_from_vcf_workflow(json_data, _dataset_id: str) -> list[em.ExperimentResult]:
     return ingest_derived_experiment_results(json_data)
