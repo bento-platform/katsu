@@ -107,7 +107,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         logger.info(f"Cleanup: removed {n_removed} objects in total")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def _parse_dats(self, request) -> str | None :
+    def _parse_dats(self, request) -> str | None:
         dats_file = request.data.get('dats_file')
         if isinstance(dats_file, str):
             try:
@@ -128,7 +128,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         if error_msg := self._parse_dats(request):
             return Response(error_msg, status.HTTP_400_BAD_REQUEST)
         return super().create(request, *args, **kwargs)
-    
+
     def update(self, request, *args, **kwargs):
         if error_msg := self._parse_dats(request):
             return Response(error_msg, status.HTTP_400_BAD_REQUEST)
