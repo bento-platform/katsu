@@ -54,6 +54,16 @@ EXPERIMENT_RESULT = {
         "description": "Description of an experiment result.",
         "filename": "The name of the file containing the result.",
         "url": "A URL pointing to the file containing the result.",
+        "indices": {
+            "description": "An array of indices for the file containing the result.",
+            "items": {
+                "description": "An object describing an index for the file containing the result.",
+                "properties": {
+                    "url": "A URL pointing to the index for the file containg the result.",
+                    "format": "The index format of the file stored at the index URL.",
+                },
+            },
+        },
         "genome_assembly_id": "Reference genome assembly ID.",
         "file_format": "(Controlled Vocabulary) File format.",
         "data_output_type": "The type of data output: Raw or Derived data."

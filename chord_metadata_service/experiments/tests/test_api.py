@@ -92,6 +92,20 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(response_data["count"], 2)
         self.assertEqual(len(response_data["results"]), 2)
 
+    def test_filter_experiment_results_url(self):
+        response = self.client.get('/api/experimentresults?url=example.org')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 1)
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_filter_experiment_results_indices(self):
+        response = self.client.get('/api/experimentresults?indices=tabix')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 1)
+        self.assertEqual(len(response_data["results"]), 1)
+
     def test_filter_experiment_results_by_dataset_1(self):
         response = self.client.get('/api/experimentresults?datasets=dataset_1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
