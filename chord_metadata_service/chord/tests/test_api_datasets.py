@@ -1,3 +1,4 @@
+import json
 import uuid
 import re
 from django.urls import reverse
@@ -9,6 +10,7 @@ from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from chord_metadata_service.chord.data_types import DATA_TYPES, DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments.models import Experiment
+from chord_metadata_service.chord.tests import constants
 
 
 class DatasetsTest(APITestCase, PhenoTestCase):
@@ -95,3 +97,26 @@ class DatasetsTest(APITestCase, PhenoTestCase):
                 self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
                 with self.assertRaises(self.entities_by_data_type[dt]['class'].DoesNotExist):
                     self.entities_by_data_type[dt]['entity'].refresh_from_db()
+
+    def test_dataset_update(self):
+        # Updates a dataset by changing its dats file
+        url = f"/api/datasets/{self.dataset.identifier}"
+        payload = {
+            "data_use": constants.VALID_DATA_USE_1,
+            "dats_file": constants.dats_dataset(str(self.project.identifier), ["Creator A", "Creator B"]),
+            "description": "Updated description",
+            "project": str(self.project.identifier),
+            "title": "Updated title"
+        }
+        r = self.client.put(
+            url,
+            data=json.dumps(payload),
+            content_type='application/json'
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        # Check the updated dats file
+        r = self.client.get(url + "/dats")
+        data = r.json()
+
+        self.assertEqual(data["project"], payload["dats_file"]["project"])
