@@ -719,21 +719,18 @@ components:
         date_alive_after_lost_to_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Alive After Lost To Followup
         date_of_birth:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Birth
         date_of_death:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Death
@@ -794,21 +791,18 @@ components:
         date_alive_after_lost_to_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Alive After Lost To Followup
         date_of_birth:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Birth
         date_of_death:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Death
@@ -874,21 +868,18 @@ components:
         date_alive_after_lost_to_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Alive After Lost To Followup
         date_of_birth:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Birth
         date_of_death:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Death
@@ -1168,14 +1159,12 @@ components:
         date_of_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Followup
         date_of_relapse:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Relapse
@@ -1258,14 +1247,12 @@ components:
         date_of_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Followup
         date_of_relapse:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Relapse
@@ -1995,14 +1982,12 @@ components:
         date_of_followup:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Followup
         date_of_relapse:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Relapse
@@ -2157,7 +2142,6 @@ components:
         date_of_diagnosis:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Diagnosis
@@ -2319,7 +2303,6 @@ components:
         specimen_collection_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Specimen Collection Date
@@ -2351,7 +2334,7 @@ components:
         tumour_histological_type:
           anyOf:
           - maxLength: 128
-            pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
+            pattern: ^\d{4}[/]\d{1}$
             type: string
           - type: 'null'
           title: Tumour Histological Type
@@ -2507,7 +2490,6 @@ components:
         treatment_end_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Treatment End Date
@@ -2522,7 +2504,6 @@ components:
         treatment_start_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Treatment Start Date
@@ -3102,7 +3083,6 @@ components:
         date_of_diagnosis:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Diagnosis
@@ -3191,7 +3171,6 @@ components:
         date_of_diagnosis:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Date Of Diagnosis
@@ -4143,7 +4122,6 @@ components:
         specimen_collection_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Specimen Collection Date
@@ -4181,7 +4159,7 @@ components:
         tumour_histological_type:
           anyOf:
           - maxLength: 128
-            pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
+            pattern: ^\d{4}[/]\d{1}$
             type: string
           - type: 'null'
           title: Tumour Histological Type
@@ -4256,7 +4234,6 @@ components:
         specimen_collection_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Specimen Collection Date
@@ -4294,7 +4271,7 @@ components:
         tumour_histological_type:
           anyOf:
           - maxLength: 128
-            pattern: ^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$
+            pattern: ^\d{4}[/]\d{1}$
             type: string
           - type: 'null'
           title: Tumour Histological Type
@@ -5047,7 +5024,6 @@ components:
         treatment_end_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Treatment End Date
@@ -5062,7 +5038,6 @@ components:
         treatment_start_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Treatment Start Date
@@ -5147,7 +5122,6 @@ components:
         treatment_end_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Treatment End Date
@@ -5162,7 +5136,6 @@ components:
         treatment_start_date:
           anyOf:
           - maxLength: 32
-            pattern: ^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?
             type: string
           - type: 'null'
           title: Treatment Start Date
@@ -5359,7 +5332,7 @@ components:
       scheme: bearer
       type: http
 info:
-  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/d3f2142f9c4e974034a6b8a3bf1d109b90da8300/chord_metadata_service/mohpackets/docs/schema.json
+  description: This is the RESTful API for the MoH Service. Based on https://raw.githubusercontent.com/CanDIG/katsu/008713a5491d6f1598de55994f2d0b233ed173c4/chord_metadata_service/mohpackets/docs/schema.json
   title: MoH Service API
   version: 3.0.0
 openapi: 3.1.0
