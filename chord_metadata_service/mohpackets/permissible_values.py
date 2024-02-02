@@ -1086,47 +1086,21 @@ TOBACCO_TYPE = [
 TUMOUR_DESIGNATION = ["Normal", "Tumour"]
 THERAPY_TYPE = ["External", "Internal"]
 
-REGEX_PATTERNS = {
-    # ID format
-    # Examples: 90234, BLD_donor_89, AML-90
-    "ID": r"^[A-Za-z0-9\-\._]{1,64}",
-    # Date format
-    # A date, or partial date (e.g. just year or year + month) as used in
-    # human communication. The format is YYYY, YYYY-MM, or YYYY-MM-DD,
-    # e.g. 2018, 1973-06, or 1905-08-23. There SHALL be no time zone.
-    "DATE": r"^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?",
-    # ICD-O-3 morphology codes
-    # Examples: 8260/3, 9691/36
-    "MORPHOLOGY": r"^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$",
-    # ICD-O-3 topography codes
-    # Examples: C50.1, C18
-    "TOPOGRAPHY": r"^[C][0-9]{2}(.[0-9]{1})?$",
-    # WHO ICD-10 codes
-    # Examples: E10, C50.1, I11, M06
-    "COMORBIDITY": r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$",
-}
-
 # ID format
 # Examples: 90234, BLD_donor_89, AML-90
-ID_REGEX_PATTERNS = r"^[A-Za-z0-9\-\._]{1,64}"
-
-# Date format
-# A date, or partial date (e.g. just year or year + month) as used in
-# human communication. The format is YYYY, YYYY-MM, or YYYY-MM-DD,
-# e.g. 2018, 1973-06, or 1905-08-23. There SHALL be no time zone.
-DATE_REGEX_PATTERNS = r"^([0-9]([0-9]([0-9][1-9]|[1-9]0)|[1-9]00)|[1-9]000)(-(0[1-9]|1[0-2])(-(0[1-9]|[1-2][0-9]|3[0-1]))?)?"  # noqa: E501
+ID_REGEX = r"^[A-Za-z0-9\-\._]{1,64}"
 
 # ICD-O-3 morphology codes
 # Examples: 8260/3, 9691/36
-MORPHOLOGY_REGEX_PATTERNS = r"^[8,9]{1}[0-9]{3}/[0,1,2,3,6,9]{1}[1-9]{0,1}$"
+MORPHOLOGY_REGEX = r"^\d{4}[/]\d{1}$"
 
 # ICD-O-3 topography codes
 # Examples: C50.1, C18
-TOPOGRAPHY_REGEX_PATTERNS = r"^[C][0-9]{2}(.[0-9]{1})?$"
+TOPOGRAPHY_REGEX = r"^[C][0-9]{2}(.[0-9]{1})?$"
 
 # WHO ICD-10 codes
 # Examples: E10, C50.1, I11, M06
-COMORBIDITY_REGEX_PATTERNS = r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$"
+COMORBIDITY_REGEX = r"^[A-Z][0-9]{2}(.[0-9]{1,3}[A-Z]{0,1})?$"
 
 CauseOfDeathEnum = list_to_enum("CauseOfDeathEnum", CAUSE_OF_DEATH)
 PrimarySiteEnum = list_to_enum("PrimarySiteEnum", PRIMARY_SITE)
