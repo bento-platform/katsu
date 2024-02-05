@@ -20,7 +20,7 @@ MODEL_NAME_MAPPING = {
 }
 
 
-def set_foreign_keys(path):
+def set_foreign_keys(path, program_id):
     """
     Set foreign keys for synthetic data.
     """
@@ -53,7 +53,7 @@ def set_foreign_keys(path):
             data_without_relationships = json.load(f)
 
         print(f"Processing {filename}...")
-        data_with_keys = replace_values(data_without_relationships, relationship)
+        data_with_keys = replace_values(data_without_relationships, relationship, program_id)
 
         with open(output_path, "w") as f:
             json.dump(data_with_keys, f, indent=4)
@@ -61,7 +61,7 @@ def set_foreign_keys(path):
     print("--------------------\n")
 
 
-def replace_values(input_data, transformation_rules):
+def replace_values(input_data, transformation_rules, program_id):
     """
     Replace values in input data using transformation rules.
 
@@ -105,7 +105,7 @@ def replace_values(input_data, transformation_rules):
     }
     """
     field_value_map = {
-        "program_id": "SYNTHETIC-",
+        "program_id": program_id,
         "submitter_donor_id": "DONOR_",
         "submitter_primary_diagnosis_id": "PRIMARY_DIAGNOSIS_",
         "submitter_specimen_id": "SPECIMEN_",
@@ -163,8 +163,8 @@ def main():
         print("Invalid option. Please try again.")
         return
 
-    set_foreign_keys(path)
-
+    program_id = str(input("Enter the dataset name (default: SYNTHETIC-): ")) or "SYNTHETIC-"
+    set_foreign_keys(path, program_id)
 
 if __name__ == "__main__":
     main()
