@@ -1,5 +1,6 @@
 from pathlib import Path
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
 
@@ -134,7 +135,8 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         "id": {
-            "type": "string"
+            "type": "string",
+            "pattern": MODEL_ID_PATTERN,
         },
         "study_type": {
             "type": "string",

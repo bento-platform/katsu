@@ -31,6 +31,7 @@ from chord_metadata_service.restapi.api_renderers import (
     ARGORenderer,
     IndividualBentoSearchRenderer,
 )
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.utils import (
     get_field_options,
@@ -66,6 +67,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
         *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
         *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
     ).order_by("id")
+    lookup_value_regex = MODEL_ID_PATTERN
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:

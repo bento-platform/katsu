@@ -397,7 +397,7 @@ def valid_phenopacket(subject, meta_data):
 
 def valid_biosample_1(individual, procedure=VALID_PROCEDURE_1):
     return dict(
-        id='biosample_id:1',
+        id='katsu.biosample_id:1',
         individual_id=individual,
         description='This is a test biosample.',
         sampled_tissue={

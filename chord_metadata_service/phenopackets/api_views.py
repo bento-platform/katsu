@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
                                                           IndividualBentoSearchRenderer)
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
@@ -93,6 +94,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
     queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
+    lookup_value_regex = MODEL_ID_PATTERN
 
 
 class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
@@ -162,6 +164,7 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
     queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
+    lookup_value_regex = MODEL_ID_PATTERN
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):

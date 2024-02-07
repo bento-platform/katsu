@@ -5,6 +5,7 @@ from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT7
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import (
     AGE,
     AGE_RANGE,
@@ -19,6 +20,7 @@ from chord_metadata_service.restapi.schema_utils import (
     SchemaTypes,
     array_of,
     base_type,
+    string_with_pattern,
     enum_of,
     named_one_of,
     sub_schema_uri,
@@ -72,7 +74,7 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "title": "External reference schema",
     "type": "object",
     "properties": {
-        "id": base_type(SchemaTypes.STRING),
+        "id": string_with_pattern(MODEL_ID_PATTERN),
         "reference": base_type(SchemaTypes.STRING),
         "description": base_type(SchemaTypes.STRING)
     }
@@ -277,9 +279,9 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
     "$id": sub_schema_uri(base_uri, "biosample"),
     "type": "object",
     "properties": {
-        "id": base_type(SchemaTypes.STRING),
-        "individual_id": base_type(SchemaTypes.STRING),
-        "derived_from_id": base_type(SchemaTypes.STRING),
+        "id": string_with_pattern(MODEL_ID_PATTERN),
+        "individual_id": string_with_pattern(MODEL_ID_PATTERN),
+        "derived_from_id": string_with_pattern(MODEL_ID_PATTERN),
         "description": base_type(SchemaTypes.STRING),
         "sampled_tissue": ONTOLOGY_CLASS,
         "sample_type": ONTOLOGY_CLASS,
@@ -647,7 +649,7 @@ PHENOPACKET_SCHEMA = describe_schema({
     "description": "Schema for metadata service datasets",
     "type": "object",
     "properties": {
-        "id": base_type(SchemaTypes.STRING),
+        "id": string_with_pattern(MODEL_ID_PATTERN),
         "subject": INDIVIDUAL_SCHEMA,
         "phenotypic_features": array_of(PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA),
         "measurements": array_of(PHENOPACKET_MEASUREMENT_SCHEMA),

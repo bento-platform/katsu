@@ -1,5 +1,16 @@
-from chord_metadata_service.restapi.schema_utils import DATE_TIME, DRAFT_07, SchemaTypes, array_of, base_type, \
-    enum_of, tag_ids_and_describe, get_schema_app_id, sub_schema_uri
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
+from chord_metadata_service.restapi.schema_utils import (
+    DATE_TIME,
+    DRAFT_07,
+    SchemaTypes,
+    array_of,
+    base_type,
+    string_with_pattern,
+    enum_of,
+    tag_ids_and_describe,
+    get_schema_app_id,
+    sub_schema_uri,
+)
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA, TIME_ELEMENT_SCHEMA
 from pathlib import Path
 from .descriptions import INDIVIDUAL, VITAL_STATUS
@@ -28,7 +39,10 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
     "type": "object",
     "properties": {
         # Phenopacket V2 Individual fields
-        "id": base_type(SchemaTypes.STRING, description="Unique researcher-specified identifier for the individual."),
+        "id": string_with_pattern(
+            MODEL_ID_PATTERN,
+            description="Unique researcher-specified identifier for the individual.",
+        ),
         "alternate_ids": array_of(base_type(SchemaTypes.STRING)),
         "date_of_birth": DATE_TIME,
         "time_at_last_encounter": TIME_ELEMENT_SCHEMA,
