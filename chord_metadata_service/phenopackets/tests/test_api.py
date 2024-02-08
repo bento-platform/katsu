@@ -66,7 +66,7 @@ class CreateBiosampleTest(APITestCase):
         response = get_post_response('biosamples-list', self.valid_payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Biosample.objects.count(), 1)
-        self.assertEqual(m.Biosample.objects.get().id, 'biosample_id:1')
+        self.assertEqual(m.Biosample.objects.get().id, 'katsu.biosample_id:1')
 
     def test_create_invalid_biosample(self):
         """ POST a new biosample with invalid data. """
