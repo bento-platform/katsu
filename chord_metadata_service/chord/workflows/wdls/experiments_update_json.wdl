@@ -1,87 +1,72 @@
 version 1.0
 
-workflow document {
+workflow experiments_update_json {
     input {
-        Array[File] document_files
-        File experimentJson
+        String directory
+        File json_document
         String drs_url
         String project_dataset
         String access_token
         Boolean validate_ssl
     }
 
-    scatter(file in document_files) {
-        call post_to_drs {
-            input:
-                file_path = file,
-                drs_url = drs_url,
-                project_dataset = project_dataset,
-                token = access_token,
-                validate_ssl = validate_ssl
-        }
-    }
-
-    call update_json {
+    call update_json_paths {
         input:
-            drs_uris = post_to_drs.response_message,
-            experimentJson = experimentJson
+            json_document = json_document,
+            directory = directory
     }
 
     output {
-        Array[String] drs_responses = post_to_drs.response_message
-        File updatedExperimentJson = update_json.updatedJson
+        File updated_json = update_json_paths.updated_json
     }
 }
 
-task post_to_drs {
-    input {
-        File file_path
-        String drs_url
-        String project_dataset
-        String token
-        Boolean validate_ssl
-    }
 
+task update_json_paths {
+    input {
+        File json_document
+        String directory
+    }
     command <<<
-        project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
-        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
-        curl ~{true="" false="-k" validate_ssl} \
-            -X POST \
-            -F "file=@~{file_path}" \
-            -F "project_id=$project_id" \
-            -F "dataset_id=$dataset_id" \
-            -H "Authorization: Bearer ~{token}" \
-            --fail-with-body \
-            "~{drs_url}/ingest"
+        python3 -c "
+import json
+import os
+
+print('Starting script...')  # Debugging line
+directory = '~{directory}'
+print(f'Searching in directory: {directory}')  # Debugging line
+
+# Load the input JSON
+with open('~{json_document}', 'r') as json_file:
+    data = json.load(json_file)
+
+found_files = 0  # Debugging variable
+
+names_list = []
+
+for file_entry in data.get('files', []):
+    file_name = file_entry['name']
+    for root, dirs, files in os.walk(directory):
+        print(f'Checking {root}...')  # Debugging line
+        if file_name in files:
+            file_path = os.path.join(root, file_name)
+            names_list.append(file_path)
+            file_entry['file_path'] = file_path
+            print(f'Found {file_name} at {file_path}')  # Debugging line
+            found_files += 1
+            break
+
+print(names_list)  # Debugging line
+
+if found_files == 0:
+    print('No files were updated.')  # Debugging line
+
+# Write the updated JSON to a new file
+with open('updated_json.json', 'w') as updated_json_file:
+    json.dump(data, updated_json_file, indent=4)
+"
     >>>
     output {
-        String response_message = read_string(stdout())
-    }
-}
-
-task update_json {
-    input {
-        Array[String] drs_uris
-        File experimentJson
-    }
-
-    command <<<
-        python3 <<CODE
-        import json
-
-        with open("~{experimentJson}") as f:
-            data = json.load(f)
-
-        # Assuming the JSON structure and updating it with DRS URIs
-        for i, uri in enumerate(~{drs_uris}):
-            # Modify below line to fit the JSON structure
-            data["results"][i]["url"] = uri
-
-        with open("updated_experiment.json", "w") as f:
-            json.dump(data, f, indent=4)
-        CODE
-    >>>
-    output {
-        File updatedJson = "updated_experiment.json"
+        File updated_json = "updated_json.json"
     }
 }
