@@ -28,6 +28,7 @@ __all__ = [
     "validation_schema_list",
     "get_schema_app_id",
     "base_type",
+    "string_with_pattern",
     "array_of",
     "enum_of",
     "named_one_of",

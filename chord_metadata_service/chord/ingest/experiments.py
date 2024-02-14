@@ -41,7 +41,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
         description=er.get("description"),
         filename=er.get("filename"),
         url=er.get("url"),
-        indices=er.get("indices") or [],
+        indices=er.get("indices", []),
         genome_assembly_id=er.get("genome_assembly_id"),
         file_format=er.get("file_format"),
         data_output_type=er.get("data_output_type"),

@@ -124,7 +124,7 @@ class FHIRPhenotypicFeatureTest(APITestCase):
                          'description')
         self.assertIsNotNone(get_resp_obj['observations'][0]['specimen'])
         self.assertIsInstance(get_resp_obj['observations'][0]['specimen'], dict)
-        self.assertEqual(get_resp_obj['observations'][0]['specimen']['reference'], 'biosample_id:1')
+        self.assertEqual(get_resp_obj['observations'][0]['specimen']['reference'], 'katsu.biosample_id:1')
 
 
 class FHIRBiosampleTest(APITestCase):

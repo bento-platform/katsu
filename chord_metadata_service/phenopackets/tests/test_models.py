@@ -45,7 +45,7 @@ class BiosampleTest(ProjectTestCase):
             tumor_progression__label='Primary Malignant Neoplasm',
             sampled_tissue__label__icontains='urinary bladder'
         )
-        self.assertEqual(biosample_one.id, 'biosample_id:1')
+        self.assertEqual(biosample_one.id, 'katsu.biosample_id:1')
         self.assertEqual(biosample_one.schema_type, SchemaType.BIOSAMPLE)
         self.assertEqual(biosample_one.get_project_id(), self.project.identifier)
 
