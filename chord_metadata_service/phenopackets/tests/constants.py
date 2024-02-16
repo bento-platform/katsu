@@ -70,42 +70,6 @@ VALID_INDIVIDUAL_2 = {
     }
 }
 
-VALID_HTS_FILE = {
-    "uri": "https://data.example/genomes/germline_wgs.vcf.gz",
-    "description": "Matched normal germline sample",
-    "hts_format": "VCF",
-    "genome_assembly": "GRCh38",
-    "individual_to_sample_identifiers": {
-        "patient:1": "NA12345"
-    },
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-VALID_GENE_1 = {
-    "id": "HGNC:347",
-    "alternate_ids": ["ensembl:ENSRNOG00000019450", "ncbigene:307503"],
-    "symbol": "ETF1",
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-INVALID_GENE_2 = {
-    "id": "HGNC:347",
-    "alternate_ids": "ensembl:ENSRNOG00000019450",
-    "symbol": "ETF1",
-    "extra_properties": {
-        "comment": "test data"
-    }
-}
-
-DUPLICATE_GENE_2 = {
-    "id": "HGNC:347",
-    "symbol": "DYI"
-}
-
 VALID_GENE_DESCRIPTOR_1 = {
     "value_id": "HGNC:347",
     "symbol": "ETF1",
@@ -207,12 +171,6 @@ VALID_VARIANT_DESCRIPTOR = {
         "id": "GENO:0000135",
         "label": "heterozygous"
     }
-}
-
-VALID_VARIANT_INTERPRETATION = {
-    "acmg_pathogenicity_classification": "PATHOGENIC",
-    "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
-    "variant_descriptor": VALID_VARIANT_DESCRIPTOR
 }
 
 VALID_DISEASE_ONTOLOGY = {
@@ -439,7 +397,7 @@ def valid_phenopacket(subject, meta_data):
 
 def valid_biosample_1(individual, procedure=VALID_PROCEDURE_1):
     return dict(
-        id='biosample_id:1',
+        id='katsu.biosample_id:1',
         individual_id=individual,
         description='This is a test biosample.',
         sampled_tissue={
@@ -645,9 +603,10 @@ def valid_genomic_interpretation(gene_descriptor=None, variant_interpretation=No
     return base
 
 
-def valid_diagnosis(disease):
+def valid_diagnosis(disease, id="interpretation:1"):
     return dict(
-        disease_ontology=disease,
+        id=id,
+        disease=disease,
         extra_properties={
             "comment": "test data"
         }

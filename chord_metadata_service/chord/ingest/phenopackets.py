@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import uuid
 from humps import decamelize
 
 from dateutil.parser import isoparse
@@ -12,19 +11,21 @@ from chord_metadata_service.phenopackets.utils import time_element_to_years
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
+from chord_metadata_service.restapi.utils import COMPUTED_PROPERTY_PREFIX
 
 from .exceptions import IngestError
 from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import map_if_list, query_and_check_nulls
-from typing import Any, Dict, Iterable, Optional, Union, Callable, TypeVar
+from .logger import logger
+from typing import Any, Callable, Iterable, TypeVar
 from django.db.models import Model
 
 # Generic TypeVar for django db models
 T = TypeVar('T', bound=Model)
 
 
-def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> Optional[T]:
+def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> T | None:
     """
     Helper function to get or create DB objects if a key is in a dict
     """
@@ -32,6 +33,16 @@ def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> O
     if key in data:
         obj = create_func(data[key])
     return obj
+
+
+def _clean_extra_properties(extra_properties: dict[str, Any]) -> dict[str, Any]:
+    """
+    Removes computed properties from an extra_properties dictionary.
+    Computed extra_properties start with "__" and should never be ingested.
+    """
+    if extra_properties:
+        return {k: v for k, v in extra_properties.items() if not k.startswith(COMPUTED_PROPERTY_PREFIX)}
+    return extra_properties
 
 
 def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
@@ -64,7 +75,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         severity=pf.get("severity"),
         onset=pf.get("onset"),
         evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
-        extra_properties=pf.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(pf.get("extra_properties", {})),
     )
     pf_obj.save()
     return pf_obj
@@ -72,7 +83,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
 
 def validate_phenopacket(phenopacket_data: dict[str, Any],
                          schema: dict = PHENOPACKET_SCHEMA,
-                         idx: Optional[int] = None) -> None:
+                         idx: int | None = None) -> None:
     # Validate phenopacket data against phenopackets schema.
     # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
     validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY)
@@ -84,7 +95,7 @@ def validate_phenopacket(phenopacket_data: dict[str, Any],
 
 
 def update_or_create_subject(subject: dict) -> pm.Individual:
-    extra_properties: dict[str, Any] = subject.get("extra_properties", {})
+    extra_properties: dict[str, Any] = _clean_extra_properties(subject.get("extra_properties", {}))
 
     # Pre-process subject data:    ---------------------------------------------------------------------------------
 
@@ -96,8 +107,8 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
     # --------------------------------------------------------------------------------------------------------------
 
-    age_numeric_value: Optional[Decimal] = None
-    age_unit_value: Optional[str] = None
+    age_numeric_value: Decimal | None = None
+    age_unit_value: str | None = None
     if "time_at_last_encounter" in subject:
         age_numeric_value, age_unit_value = time_element_to_years(subject["time_at_last_encounter"])
 
@@ -140,15 +151,23 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         id=bs["id"],
         description=bs.get("description", ""),
         procedure=bs.get("procedure", {}),
-        derived_from_id=bs.get("derived_from_id", ""),
         sample_type=bs.get("sample_type", {}),
         measurements=bs.get("measurements", []),
         pathological_stage=bs.get("pathological_stage", {}),
         is_control_sample=bs.get("is_control_sample", False),
         diagnostic_markers=bs.get("diagnostic_markers", []),
-        extra_properties=bs.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(bs.get("extra_properties", {})),
         **bs_query
     )
+
+    if derived_from_id := bs.get("derived_from_id"):
+        try:
+            parent_biosample = pm.Biosample.objects.get(id=derived_from_id)
+            parent_biosample.derived_biosamples.add(bs_obj)
+            parent_biosample.save()
+        except pm.Biosample.DoesNotExist:
+            logger.warning(
+                f"Biosample {bs['id']} refers to a non-existing 'derived_from_id' Biosample {derived_from_id}.")
 
     if bs_created:
         bs_pfs = [get_or_create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
@@ -203,26 +222,43 @@ def get_or_create_variant_interp(variant_interp_data: dict) -> pm.VariantInterpr
 
 
 def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpretation:
-    gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
-    variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
-
     # Check if a Biosample or Individual with subject_or_biosample_id exists
     subject_or_biosample_id = gen_interp["subject_or_biosample_id"]
     is_biosample = pm.Biosample.objects.filter(id=subject_or_biosample_id).exists()
     is_subject = pm.Individual.objects.filter(id=subject_or_biosample_id).exists()
 
-    # Store the type the ID refers to in extra_properties
-    element_type = "biosample" if is_biosample and not is_subject else "subject"
-    extra_properties = gen_interp.get("extra_properties", {})
-    extra_properties["related_type"] = element_type
+    if is_biosample and is_subject:
+        # Cannot be both
+        raise IngestError(
+            f"Ambiguous GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
+            "points to a Biosample AND a Subject. Must point to a Biosample or a Subject, not both.")
+    elif is_biosample:
+        # Get related Biosample
+        related_obj = pm.Biosample.objects.get(id=subject_or_biosample_id)
+    elif is_subject:
+        # Get related Individual
+        related_obj = pm.Individual.objects.get(id=subject_or_biosample_id)
+    else:
+        # Cannot be neither
+        raise IngestError(
+            f"GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
+            "has no matching Biosample or Individual.")
+
+    gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
+    variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
-        subject_or_biosample_id=subject_or_biosample_id,
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
-        extra_properties=extra_properties,
+        extra_properties=_clean_extra_properties(gen_interp.get("extra_properties", {})),
     )
+
+    if related_obj:
+        # Set the link with Biosample/Individual
+        related_obj.genomic_interpretations.add(gen_obj)
+        related_obj.save()
+
     return gen_obj
 
 
@@ -231,38 +267,49 @@ def get_or_create_disease(disease) -> pm.Disease:
         term=disease["term"],
         disease_stage=disease.get("disease_stage", []),
         clinical_tnm_finding=disease.get("clinical_tnm_finding", []),
-        extra_properties=disease.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(disease.get("extra_properties", {})),
         **query_and_check_nulls(disease, "onset")
     )
     return d_obj
 
 
-def get_or_create_diagnosis(diagnosis: dict) -> pm.Diagnosis:
-    # Create GenomicInterpretation
-    genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
-    genomic_interpretations = [
-        get_or_create_genomic_interpretation(gen_interp)
-        for gen_interp
-        in genomic_interpretations_data
-    ]
-    # disease = pm.Disease.objects.get_or_create(diagnosis["disease"])
-    diag_obj, _ = pm.Diagnosis.objects.get_or_create(
-        disease_ontology=diagnosis.get("disease", {}),
-        extra_properties=diagnosis.get("extra_properties", {})
+def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis | None:
+    diagnosis = interpretation.get("diagnosis")
+
+    if not diagnosis:
+        # No diagnosis to create
+        return
+
+    # One-to-one relation between Interpretation and Diagnosis.
+    # If an Interpretation has a Diagnosis, the created Diagnosis row uses the interpretation's ID as its PK
+    # This ensures unique diagnoses if more than one share the same disease/extra_properties
+    id = interpretation.get("id")
+    diag_obj, created = pm.Diagnosis.objects.get_or_create(
+        id=id,
+        disease=diagnosis.get("disease", {}),
+        extra_properties=_clean_extra_properties(diagnosis.get("extra_properties", {})),
     )
-    # diag_obj.disease.set(disease)
-    diag_obj.genomic_interpretations.set(genomic_interpretations)
+
+    if created:
+        # Create GenomicInterpretation
+        genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
+        genomic_interpretations = [
+            get_or_create_genomic_interpretation(gen_interp)
+            for gen_interp
+            in genomic_interpretations_data
+        ]
+        diag_obj.genomic_interpretations.set(genomic_interpretations)
     return diag_obj
 
 
 def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
-    diagnosis = get_or_create_diagnosis(interpretation["diagnosis"])
+    diagnosis = get_or_create_interpretation_diagnosis(interpretation)
     interp_obj, _ = pm.Interpretation.objects.get_or_create(
         id=interpretation["id"],
         diagnosis=diagnosis,
         progress_status=interpretation["progress_status"],
-        summary=interpretation.get("summary", {}),
-        extra_properties=interpretation.get("extra_properties", {})
+        summary=interpretation.get("summary", ""),
+        extra_properties=_clean_extra_properties(interpretation.get("extra_properties", {}))
     )
 
     return interp_obj
@@ -272,7 +319,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
                        dataset_id: str,
                        json_schema: dict = PHENOPACKET_SCHEMA,
                        validate: bool = True,
-                       idx: Optional[int] = None) -> pm.Phenopacket:
+                       idx: int | None = None) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
 
     if validate:
@@ -284,13 +331,22 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #  id: ...
     #  subject: {...}
     #  phenotypic_features: [...]
+    #  measurements: [...]
     #  biosamples: [...]
-    #  genes: [...]
+    #  interpretations: [...]
     #  diseases: [...]
-    #  hts_files: [...]
+    #  medical_actions: [...]
     #  meta_data: {..., resources: [...]}
 
-    new_phenopacket_id = phenopacket_data.get("id", str(uuid.uuid4()))
+    if phenopacket_data.get("files", []):
+        logger.warning("Found files in phenopacket.files are not ingested by Katsu.")
+
+    # Abort the ingestion if the phenopacket's ID exists in the DB
+    phenopacket_id = phenopacket_data.get("id")
+    if pm.Phenopacket.objects.filter(id=phenopacket_id).exists():
+        error_msg = f"Cannot ingest Phenopacket with ID {phenopacket_id}, ID already exists in the database."
+        logger.error(error_msg)
+        raise IngestError(error_msg)
 
     subject = phenopacket_data.get("subject")
 
@@ -317,7 +373,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     # If there's a subject attached to the phenopacket, create it
     # - or, if it already exists, *update* the extra properties if needed.
     #   This is one of the few cases of 'updating' something that exists in Katsu.
-    subject_obj: Optional[pm.Individual] = None
+    subject_obj: pm.Individual | None = None
     if subject:  # we have a dictionary of subject data in the phenopacket
         subject_obj = update_or_create_subject(subject)
 
@@ -337,9 +393,9 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     meta_data_obj = pm.MetaData(
         created_by=meta_data["created_by"],
         submitted_by=meta_data.get("submitted_by"),
-        phenopacket_schema_version="2.0.0",
+        phenopacket_schema_version=meta_data.get("phenopacket_schema_version"),
         external_references=meta_data.get("external_references", []),
-        extra_properties=meta_data.get("extra_properties", {}),
+        extra_properties=_clean_extra_properties(meta_data.get("extra_properties", {})),
     )
     meta_data_obj.save()
 
@@ -347,8 +403,8 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     meta_data_obj.resources.set(resources_db)
 
     # Create the phenopacket object...
-    new_phenopacket = pm.Phenopacket(
-        id=new_phenopacket_id,
+    phenopacket = pm.Phenopacket(
+        id=phenopacket_id,
         subject=subject_obj,
         measurements=measurements,
         medical_actions=medical_actions,
@@ -356,19 +412,19 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
         dataset=Dataset.objects.get(identifier=dataset_id),
     )
 
-    # ... save it to the database...
-    new_phenopacket.save()
+    #  ... save it to the database...
+    phenopacket.save()
 
     # ... and attach all the other objects to it.
-    new_phenopacket.phenotypic_features.set(phenotypic_features_db)
-    new_phenopacket.interpretations.set(interpretations_db)
-    new_phenopacket.biosamples.set(biosamples_db)
-    new_phenopacket.diseases.set(diseases_db)
+    phenopacket.phenotypic_features.set(phenotypic_features_db)
+    phenopacket.interpretations.set(interpretations_db)
+    phenopacket.biosamples.set(biosamples_db)
+    phenopacket.diseases.set(diseases_db)
 
-    return new_phenopacket
+    return phenopacket
 
 
-def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopacket], pm.Phenopacket]:
+def ingest_phenopacket_workflow(json_data, dataset_id) -> list[pm.Phenopacket] | pm.Phenopacket:
     project_id = Project.objects.get(datasets=dataset_id)
     project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
         "json_schema",
@@ -377,7 +433,7 @@ def ingest_phenopacket_workflow(json_data, dataset_id) -> Union[list[pm.Phenopac
     )
 
     # Map with key:schema_type and value:json_schema
-    extension_schemas: Dict[str, ExtensionSchemaDict] = {
+    extension_schemas: dict[str, ExtensionSchemaDict] = {
         proj_schema["schema_type"].lower(): proj_schema
         for proj_schema in project_schemas
     }

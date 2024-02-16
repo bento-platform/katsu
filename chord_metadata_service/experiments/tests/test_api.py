@@ -44,6 +44,12 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(response_data["count"], 2)
         self.assertEqual(len(response_data["results"]), 2)
 
+    def test_get_experiment_one(self):
+        response = self.client.get('/api/experiments/katsu.experiment:1')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data['id'], 'katsu.experiment:1')
+
     def test_get_experiment_schema(self):
         response = self.client.get('/api/experiment_schema')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -92,6 +98,20 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(response_data["count"], 2)
         self.assertEqual(len(response_data["results"]), 2)
 
+    def test_filter_experiment_results_url(self):
+        response = self.client.get('/api/experimentresults?url=example.org')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 1)
+        self.assertEqual(len(response_data["results"]), 1)
+
+    def test_filter_experiment_results_indices(self):
+        response = self.client.get('/api/experimentresults?indices=tabix')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], 1)
+        self.assertEqual(len(response_data["results"]), 1)
+
     def test_filter_experiment_results_by_dataset_1(self):
         response = self.client.get('/api/experimentresults?datasets=dataset_1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -134,11 +154,11 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(len(response.json()), 2)
 
     def test_post_experiment_batch_with_ids(self):
-        response = self.client.post('/api/batch/experiments', {'id': ['experiment:1']}, format='json')
+        response = self.client.post('/api/batch/experiments', {'id': ['katsu.experiment:1']}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data), 1)
-        self.assertEqual(response_data[0]['id'], 'experiment:1')
+        self.assertEqual(response_data[0]['id'], 'katsu.experiment:1')
 
 
 class TestExperimentCSVRenderer(TestCase):

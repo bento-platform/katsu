@@ -1,7 +1,7 @@
 {
   "experiments": [
     {
-      "id": "experiment:1",
+      "id": "katsu.experiment:1",
       "biosample": "sample1",
       "study_type": "Epigenomics",
       "experiment_type": "WES",
@@ -28,6 +28,10 @@
           "identifier": "sample1_01",
           "description": "test",
           "filename": "sample1_01.vcf.gz",
+          "url": "http://example.org/sample1_01.vcf.gz",
+          "indices": [
+            {"url": "http://example.org/sample1_01.vcf.gz.tbi", "format": "TABIX"}
+          ],
           "file_format": "VCF",
           "data_output_type": "Derived data",
           "usage": "Visualized",
@@ -65,7 +69,7 @@
       }
     },
     {
-      "id": "experiment:2",
+      "id": "katsu.experiment:2",
       "biosample": "sample8",
       "study_type": "Epigenomics",
       "experiment_type": "WES",

@@ -73,22 +73,6 @@ def filter_datasets(qs, name, value):
         return qs
 
 
-def filter_json_array(qs, name, value):
-    """
-    Filters on the id and label of an ontology contained in a JSONField with a JSON array object.
-    :param qs: QuerySet to filter
-    :param name: lookup pointing to JSONField field
-    :param value: The value to filter on
-    :return: The filtered QuerySet
-    """
-    if value:
-        lookup = "__".join([name, "contains"])
-        qs = qs.filter(
-            **{lookup: value}
-        ).distinct()
-    return qs
-
-
 def filter_time_element(qs, name, value):
     # TODO: better filters
     lookup = "__".join([name, "icontains"])
@@ -160,45 +144,6 @@ class ProcedureFilter(django_filters.rest_framework.FilterSet):
     body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site", label="Body site")
     performed = django_filters.CharFilter(method=filter_time_element, field_name="performed", label="Performed")
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-
-
-class HtsFileFilter(django_filters.rest_framework.FilterSet):
-    description = django_filters.CharFilter(lookup_expr="icontains")
-    hts_format = django_filters.CharFilter(lookup_expr="iexact")
-    genome_assembly = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.HtsFile
-        fields = ["uri"]
-
-
-class GeneFilter(django_filters.rest_framework.FilterSet):
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
-
-    class Meta:
-        model = m.Gene
-        fields = ["id", "symbol"]
 
 
 class DiseaseFilter(django_filters.rest_framework.FilterSet):
@@ -378,7 +323,6 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
         fields = ["id", "phenopacket"]
 
     def filter_diagnosis(self, qs, name, value):
-        # TODO: implement and test diagnosis filters
-        qs = qs.filter(
-        ).distinct()
+        lookup = "__".join([name, "icontains"])
+        qs = qs.filter(**{lookup: value}).distinct()
         return qs

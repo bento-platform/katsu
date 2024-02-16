@@ -7,7 +7,8 @@
     "karyotypic_sex": "UNKNOWN_KARYOTYPE",
     "extra_properties": {
       "cool_guy": true,
-      "smoker": false
+      "smoker": false,
+      "__computed": "This extra_property was computed and should not be ingested."
     }
   },
   "phenotypic_features": [
@@ -155,6 +156,322 @@
       ]
     }
   ],
+  "measurements": [
+    {
+      "assay": {
+        "id": "LOINC:26474-7",
+        "label": "Lymphocytes [#/volume] in Blood"
+      },
+      "value": {
+        "quantity": {
+          "unit": {
+            "id": "NCIT:C67245",
+            "label": "Thousand Cells"
+          },
+          "value": 1.4
+        }
+      },
+      "time_observed": {
+        "interval": {
+          "start": "2019-09-01T00:00:00Z",
+          "end": "2020-03-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "assay": {
+        "id": "LOINC:26474-7",
+        "label": "Lymphocytes [#/volume] in Blood"
+      },
+      "value": {
+        "quantity": {
+          "unit": {
+            "id": "NCIT:C67245",
+            "label": "Thousand Cells"
+          },
+          "value": 0.7
+        }
+      },
+      "time_observed": {
+        "timestamp": "2020-03-20T00:00:00Z"
+      }
+    },
+    {
+      "assay": {
+        "id": "dummy:id",
+        "label": "Thumb on forhead"
+      },
+      "value": {
+        "ontology_class": {
+          "id": "NCIT:C25626",
+          "label": "Present"
+        }
+      },
+      "description": "Subject has an extra thumb"
+    },
+    {
+      "assay": {
+        "id": "CMO:0000003",
+        "label": "blood pressure measurement"
+      },
+      "complex_value": {
+        "typed_quantities": [
+          {
+            "type": {
+              "id": "NCIT:C25298",
+              "label": "Systolic Blood Pressure"
+            },
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C49670",
+                "label": "Millimeter of Mercury"
+              },
+              "value": 120.0
+            }
+          },
+          {
+            "type": {
+              "id": "NCIT:C25299",
+              "label": "Diastolic Blood Pressure"
+            },
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C49670",
+                "label": "Millimeter of Mercury"
+              },
+              "value": 75.0
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "medical_actions": [
+    {
+      "procedure": {
+        "code": {
+          "id": "NCIT:C80473",
+          "label": "Left Ventricular Assist Device"
+        },
+        "performed": {
+          "timestamp": "2016-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "treatment": {
+        "agent": {
+          "id": "NCIT:C722",
+          "label": "Oxygen"
+        },
+        "route_of_administration": {
+          "id": "NCIT:C38284",
+          "label": "Nasal Route of Administration"
+        },
+        "dose_intervals": [
+          {
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C67388",
+                "label": "Liter per Minute"
+              },
+              "value": 2.0
+            },
+            "schedule_frequency": {
+              "id": "PATO:0000689",
+              "label": "continuous"
+            },
+            "interval": {
+              "start": "2021-02-01T18:58:43Z",
+              "end": "2021-02-02T08:22:42Z"
+            }
+          },
+          {
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C67388",
+                "label": "Liter per Minute"
+              },
+              "value": 50.0
+            },
+            "schedule_frequency": {
+              "id": "PATO:0000689",
+              "label": "continuous"
+            },
+            "interval": {
+              "start": "2021-02-02T08:22:42Z",
+              "end": "2021-02-02T12:22:42Z"
+            }
+          }
+        ],
+        "drug_type": "UNKNOWN_DRUG_TYPE"
+      }
+    },
+    {
+      "treatment": {
+        "agent": {
+          "id": "CHEBI:41879",
+          "label": "dexamethasone"
+        },
+        "dose_intervals": [
+          {
+            "quantity": {
+              "unit": {
+                "id": "UCUM:mg",
+                "label": "milligram"
+              },
+              "value": 6.0
+            },
+            "schedule_frequency": {
+              "id": "NCIT:C125004",
+              "label": "Once Daily"
+            },
+            "interval": {
+              "start": "2020-03-20T00:00:00Z",
+              "end": "2020-03-30T00:00:00Z"
+            }
+          }
+        ],
+        "drug_type": "UNKNOWN_DRUG_TYPE"
+      }
+    },
+    {
+      "procedure": {
+        "code": {
+          "id": "NCIT:C116648",
+          "label": "Tracheal Intubation"
+        },
+        "performed": {
+          "timestamp": "2020-03-22T00:00:00Z"
+        }
+      }
+    },
+    {
+      "treatment": {
+        "agent": {
+          "id": "NCIT:C722",
+          "label": "Oxygen"
+        },
+        "route_of_administration": {
+          "id": "NCIT:C50254",
+          "label": "Positive end Expiratory Pressure Valve Device"
+        },
+        "dose_intervals": [
+          {
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C91060",
+                "label": "Centimeters of Water"
+              },
+              "value": 14.0
+            },
+            "schedule_frequency": {
+              "id": "PATO:0000689",
+              "label": "continuous"
+            },
+            "interval": {
+              "start": "2020-03-22T00:00:00Z",
+              "end": "2020-03-28T00:00:00Z"
+            }
+          }
+        ],
+        "drug_type": "UNKNOWN_DRUG_TYPE"
+      }
+    },
+    {
+      "treatment": {
+        "agent": {
+          "id": "NCIT:C84217",
+          "label": "Tocilizumab"
+        },
+        "dose_intervals": [
+          {
+            "quantity": {
+              "unit": {
+                "id": "NCIT:C124458",
+                "label": "Milligram per Kilogram per Dose"
+              },
+              "value": 4.0
+            },
+            "schedule_frequency": {
+              "id": "NCIT:C64529",
+              "label": "Every Four Weeks"
+            },
+            "interval": {
+              "start": "2020-03-24T00:00:00Z",
+              "end": "2020-03-28T00:00:00Z"
+            }
+          }
+        ],
+        "drug_type": "UNKNOWN_DRUG_TYPE"
+      }
+    },
+    {
+      "radiation_therapy": {
+        "modality": {
+          "id": "NCIT:C84217",
+          "label": "Tocilizumab"
+        },
+        "body_site": {
+          "id": "NCIT:C84217",
+          "label": "Tocilizumab"
+        },
+        "dosage": 5,
+        "fractions": 4
+      }
+    },
+    {
+      "therapeutic_regimen": {
+        "external_reference": {
+          "id": "NCT04576091",
+          "reference": "https://clinicaltrials.gov/ct2/show/NCT04576091",
+          "description": "Testing the Addition of an Anti-cancer Drug, BAY189534"
+        },
+        "start_time": {
+          "timestamp": "2016-01-01T00:00:00Z"
+        },
+        "end_time": {
+          "timestamp": "2020-03-17T00:00:00Z"
+        },
+        "status": "COMPLETED"
+      }
+    }
+  ],
+  "interpretations": [
+    {
+      "id": "interpretation.id.1",
+      "progress_status": "SOLVED",
+      "diagnosis": {
+        "disease": {
+          "id": "OMIM:158810",
+          "label": "Bethlem myopathy 1"
+        },
+        "genomic_interpretations": [
+          {
+            "subject_or_biosample_id": "patient1",
+            "interpretation_status": "CONTRIBUTORY",
+            "variant_interpretation": {
+              "acmg_pathogenicity_classification": "PATHOGENIC",
+              "therapeutic_actionability": "UNKNOWN_ACTIONABILITY",
+              "variation_descriptor": {
+                "id": "clinvar:13294",
+                "expressions": [
+                  {
+                    "syntax": "hgvs",
+                    "value": "NM_001848.2:c.877G\u003eA"
+                  }
+                ],
+                "allelic_state": {
+                  "id": "GENO:0000135",
+                  "label": "heterozygous"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
   "meta_data": {
     "created": "2019-04-03T15:31:40.765Z",
     "created_by": "Peter R",
@@ -185,7 +502,7 @@
         "iri_prefix": "http://purl.obolibrary.org/obo/NCIT_"
       }
     ],
-    "phenopacket_schema_version": "2.0.0",
+    "phenopacket_schema_version": "2.0",
     "external_references": [
       {
         "id": "PMID:29221636",

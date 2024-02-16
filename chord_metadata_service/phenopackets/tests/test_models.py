@@ -5,6 +5,7 @@ from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
+    InterpretationFilter,
     filter_ontology,
     filter_extra_properties_datatype,
     PhenotypicFeatureFilter,
@@ -44,7 +45,7 @@ class BiosampleTest(ProjectTestCase):
             tumor_progression__label='Primary Malignant Neoplasm',
             sampled_tissue__label__icontains='urinary bladder'
         )
-        self.assertEqual(biosample_one.id, 'biosample_id:1')
+        self.assertEqual(biosample_one.id, 'katsu.biosample_id:1')
         self.assertEqual(biosample_one.schema_type, SchemaType.BIOSAMPLE)
         self.assertEqual(biosample_one.get_project_id(), self.project.identifier)
 
@@ -111,50 +112,6 @@ class PhenotypicFeatureTest(TestCase):
                                     data={"individual": "patient:2,patient:1"})
         result = f.qs
         self.assertEqual(len(result), 1)
-
-
-class HtsFileTest(TestCase):
-    """ Test module for HtsFile model. """
-
-    def setUp(self):
-        self.hts_file = m.HtsFile.objects.create(**c.VALID_HTS_FILE)
-
-    def test_hts_file(self):
-        hts_file = m.HtsFile.objects.get(genome_assembly='GRCh38')
-        self.assertEqual(hts_file.uri, 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-    def test_hts_file_str(self):
-        self.assertEqual(str(self.hts_file), 'https://data.example/genomes/germline_wgs.vcf.gz')
-
-
-# class GeneTest(TestCase):
-#     """ Test module for Gene model. """
-#
-#     def setUp(self):
-#         self.gene_1 = m.Gene.objects.create(**c.VALID_GENE_1)
-#
-#     def test_gene(self):
-#         gene_1 = m.Gene.objects.get(id='HGNC:347')
-#         self.assertEqual(gene_1.symbol, 'ETF1')
-#         with self.assertRaises(IntegrityError):
-#             m.Gene.objects.create(**c.DUPLICATE_GENE_2)
-#
-#     def test_gene_str(self):
-#         self.assertEqual(str(self.gene_1), "HGNC:347")
-
-
-# class VariantTest(TestCase):
-#     """ Test module for Variant model. """
-#
-#     def setUp(self):
-#         self.variant = m.Variant.objects.create(**c.VALID_VARIANT_1)
-#
-#     def test_variant(self):
-#         variant_query = m.Variant.objects.filter(zygosity__id='NCBITaxon:9606')
-#         self.assertEqual(variant_query.count(), 1)
-#
-#     def test_variant_str(self):
-#         self.assertEqual(str(self.variant), str(self.variant.id))
 
 
 class GenomicInterpretationTest(TestCase):
@@ -234,12 +191,12 @@ class DiagnosisTest(TestCase):
         ])
 
     def test_diagnosis(self):
-        self._test_disease_filter(Q(disease_ontology__id__icontains="omim"), 1)
-        self._test_disease_filter(Q(disease_ontology__id__icontains="Omim:1644"), 1)
-        self._test_disease_filter(Q(disease_ontology__id__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__id__icontains="omim"), 1)
+        self._test_disease_filter(Q(disease__id__icontains="Omim:1644"), 1)
+        self._test_disease_filter(Q(disease__id__icontains="should_not_match"), 0)
 
-        self._test_disease_filter(Q(disease_ontology__label__icontains="Spinocerebellar ataxia 1"), 1)
-        self._test_disease_filter(Q(disease_ontology__label__icontains="should_not_match"), 0)
+        self._test_disease_filter(Q(disease__label__icontains="Spinocerebellar ataxia 1"), 1)
+        self._test_disease_filter(Q(disease__label__icontains="should_not_match"), 0)
 
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
@@ -271,11 +228,20 @@ class InterpretationTest(TestCase):
             progress_status='IN_PROGRESS'
         )
         self.assertEqual(interpretation_qs.count(), 1)
-        # TODO: test diagnosis filters
-        # interpretation_qs = m.Interpretation.objects.filter()
+
+        self._test_interpretation_filter(self.disease_ontology['id'], 1)
+        self._test_interpretation_filter("MONDO:0005015", 0)
 
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
+
+    def _test_interpretation_filter(self, value, count: int):
+        qs = InterpretationFilter().filter_diagnosis(
+            m.Interpretation.objects.all(),
+            "diagnosis__disease__id",
+            value,
+        )
+        self.assertEqual(qs.count(), count)
 
 
 class MetaDataTest(TestCase):

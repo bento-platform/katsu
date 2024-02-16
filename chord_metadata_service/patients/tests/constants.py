@@ -1,4 +1,3 @@
-from typing import Tuple, Optional
 import uuid
 import random
 from datetime import date, timedelta
@@ -90,8 +89,8 @@ INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,P45Y - P
 INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,P50Y,,--IGNORE--,--IGNORE--"
 
 
-def generate_valid_individual(age=None, age_range=None, gen_random_age: Optional[Tuple[int, int]] = None,
-                              date_of_consent_range: Tuple[int, int] = (2020, 2023)):
+def generate_valid_individual(age=None, age_range=None, gen_random_age: tuple[int, int] | None = None,
+                              date_of_consent_range: tuple[int, int] = (2020, 2023)):
     if age and age_range:
         raise ValueError("Cannot use 'age' and 'age_range' simultaneously for Individual.time_at_last_encounter.")
 

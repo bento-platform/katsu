@@ -1,8 +1,9 @@
 from __future__ import annotations
 from typing import Any, TypedDict
 
-
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+
+COMPUTED_PROPERTY_PREFIX = "__"
 
 
 class BinWithValue(TypedDict):
@@ -36,3 +37,10 @@ def transform_keys(obj: Any) -> Any:
         }
 
     return obj
+
+
+def computed_property(name: str):
+    """
+    Takes a name and returns it prefixed with "__"
+    """
+    return COMPUTED_PROPERTY_PREFIX + name

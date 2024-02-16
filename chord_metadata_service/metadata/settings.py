@@ -16,7 +16,7 @@ import logging
 import json
 from os.path import exists
 
-from bento_lib.types import GA4GHServiceType
+from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
@@ -55,6 +55,8 @@ BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip(
 BENTO_AUTHZ_SERVICE_URL: str = (
     os.environ.get("BENTO_AUTHZ_SERVICE_URL", "").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
 )
+
+BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 

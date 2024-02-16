@@ -1,9 +1,9 @@
 from rest_framework import serializers
+
+from chord_metadata_service.restapi.utils import computed_property
 from .models import (
     MetaData,
     PhenotypicFeature,
-    HtsFile,
-    Gene,
     Disease,
     Biosample,
     Phenopacket,
@@ -23,13 +23,11 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 __all__ = [
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
-    "HtsFileSerializer",
-    "GeneSerializer",
     "DiseaseSerializer",
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
     "PhenopacketSerializer",
-    "VariantDescriptorSerializer",
+    "VariationDescriptorSerializer",
     "VariantInterpretationSerializer",
     "GenomicInterpretationSerializer",
     "GeneDescriptorSerializer",
@@ -72,29 +70,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
         # meta info for converting to FHIR
         fhir_datatype_plural = 'observations'
         class_converter = fhir_utils.fhir_observation
-
-
-class HtsFileSerializer(GenericSerializer):
-
-    class Meta:
-        model = HtsFile
-        fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'document_references'
-        class_converter = fhir_utils.fhir_document_reference
-
-
-class GeneSerializer(GenericSerializer):
-    alternate_ids = serializers.ListField(
-        child=serializers.CharField(allow_blank=True),
-        allow_empty=True, required=False)
-
-    class Meta:
-        model = Gene
-        fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'observations'
-        class_converter = fhir_utils.fhir_obs_component_region_studied
 
 
 class DiseaseSerializer(GenericSerializer):
@@ -148,7 +123,7 @@ class GeneDescriptorSerializer(GenericSerializer):
         fields = '__all__'
 
 
-class VariantDescriptorSerializer(GenericSerializer):
+class VariationDescriptorSerializer(GenericSerializer):
     gene_context = GeneDescriptorSerializer(many=False, required=False)
 
     class Meta:
@@ -164,7 +139,7 @@ class VariantInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["variation_descriptor"] = VariantDescriptorSerializer(
+        response["variation_descriptor"] = VariationDescriptorSerializer(
             instance.variation_descriptor, many=False, required=True).data
         return response
 
@@ -173,7 +148,7 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
     class Meta:
         model = GenomicInterpretation
-        fields = '__all__'
+        exclude = ["subject", "biosample"]
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -186,6 +161,19 @@ class GenomicInterpretationSerializer(GenericSerializer):
             response["variant_interpretation"] = VariantInterpretationSerializer(
                 instance.variant_interpretation, many=False, required=False).data
 
+        # The 'subject_or_biosample_id' value is obtained from the referenced subject/biosample
+        # The '__related_type' property is added to extra_properties as a computed value ("__" prefix)
+        # This allows us to disambiguate on the client side for links
+        extra_properties = response.get("extra_properties", {})
+        computed_related_type = computed_property("related_type")
+        if instance.subject:
+            response["subject_or_biosample_id"] = instance.subject.id
+            extra_properties[computed_related_type] = "subject"
+        elif instance.biosample:
+            response["subject_or_biosample_id"] = instance.biosample.id
+            extra_properties[computed_related_type] = "biosample"
+
+        response["extra_properties"] = extra_properties
         return response
 
 
@@ -208,6 +196,8 @@ class InterpretationSerializer(GenericSerializer):
         response = super().to_representation(instance)
         response["diagnosis"] = DiagnosisSerializer(instance.diagnosis, many=False, required=False).data
         return response
+
+
 #############################################################
 #                                                           #
 #              Phenopacket Data  Serializers                 #

@@ -6,12 +6,30 @@ from chord_metadata_service.experiments.models import Experiment, ExperimentResu
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import cleanup as pc
-from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, PhenotypicFeature
+from chord_metadata_service.phenopackets.models import (
+    Biosample,
+    Diagnosis,
+    GeneDescriptor,
+    GenomicInterpretation,
+    Interpretation,
+    MetaData,
+    Phenopacket,
+    PhenotypicFeature,
+    VariantInterpretation,
+    VariationDescriptor,
+)
 from chord_metadata_service.phenopackets.tests.constants import (
+    VALID_DISEASE_ONTOLOGY,
+    VALID_GENE_DESCRIPTOR_1,
     VALID_PROCEDURE_1,
+    VALID_VARIANT_DESCRIPTOR,
+    VALID_META_DATA_1,
     valid_biosample_1,
     valid_biosample_2,
-    VALID_META_DATA_1,
+    valid_diagnosis,
+    valid_genomic_interpretation,
+    valid_interpretation,
+    valid_variant_interpretation,
 )
 from chord_metadata_service.resources.cleanup import clean_resources
 from chord_metadata_service.resources.models import Resource
@@ -64,6 +82,25 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
+        # GenomicInterpretation (Gene & Variant)
+        self.gene_descriptor = GeneDescriptor.objects.create(**VALID_GENE_DESCRIPTOR_1)
+        self.variant_descriptor = VariationDescriptor.objects.create(**VALID_VARIANT_DESCRIPTOR)
+        self.variant_interpretation = VariantInterpretation.objects.create(
+            **valid_variant_interpretation(self.variant_descriptor)
+        )
+        self.genomic_interpretation = GenomicInterpretation.objects.create(
+            **valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
+        )
+
+        # Phenopacket.interpretations
+        self.disease_ontology = VALID_DISEASE_ONTOLOGY
+        self.diagnosis = Diagnosis.objects.create(**valid_diagnosis(self.disease_ontology))
+        self.diagnosis.genomic_interpretations.set([self.genomic_interpretation])
+
+        self.interpretation = Interpretation.objects.create(**valid_interpretation(self.diagnosis))
+        self.phenopacket.interpretations.set([self.interpretation])
+
+        # Phenopacket.phenotypic_features
         self.phenotypic_feature = PhenotypicFeature.objects.create(
             **valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
@@ -72,8 +109,8 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
             **valid_phenotypic_feature(phenopacket=None)
         )
 
-    async def _check_dataset_delete(self, delete_url: str):
-        # Check individual exists pre-table-delete
+    async def test_dataset_delete_api(self):
+        # Check individual exists pre-dataset-delete
         await Individual.objects.aget(id="patient:1")
 
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
@@ -81,10 +118,13 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # since the individual is referenced by the phenopacket and the biosample is in use.
         self.assertEqual(await pc.clean_biosamples(), 0)
         self.assertEqual(await pc.clean_phenotypic_features(), 1)
+        self.assertEqual(await pc.clean_interpretations(), 0)
+        self.assertEqual(await pc.clean_diagnoses(), 0)
+        self.assertEqual(await pc.clean_genomic_interpretations(), 0)
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
-        r = await self.async_client.delete(delete_url)
+        r = await self.async_client.delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == 204
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
@@ -95,11 +135,23 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
 
         self.assertEqual(await pc.clean_biosamples(), 0)
         self.assertEqual(await pc.clean_phenotypic_features(), 0)
+        self.assertEqual(await pc.clean_interpretations(), 0)
+        self.assertEqual(await pc.clean_diagnoses(), 0)
+        self.assertEqual(await pc.clean_genomic_interpretations(), 0)
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             await Individual.objects.aget(id="patient:1")
+
+        with self.assertRaises(Interpretation.DoesNotExist):
+            await self.interpretation.arefresh_from_db()
+
+        with self.assertRaises(Diagnosis.DoesNotExist):
+            await self.diagnosis.arefresh_from_db()
+
+        with self.assertRaises(GenomicInterpretation.DoesNotExist):
+            await self.genomic_interpretation.arefresh_from_db()
 
         # Check we can run all cleaning again with no change...
         self.assertEqual(await run_all_cleanup(), 0)
@@ -117,16 +169,26 @@ class CleanUpIndividualsAndPhenopacketsTestCase(APITestCase):
         # Delete dataset to remove the parent phenopacket
         await self.dataset.adelete()
 
+        # Phenopacket artifacts
         # 1 metadata object +
         # 2 biosamples +
         # 0 linked phenotypic feature (removed via cascade with v2.17.0 database changes) +
         # 1 unlinked phenotypic feature (pretend left-over from pre v2.17.0 or created manually) +
-        # 1 individual +
+        # 1 interpretation +
+        # 1 diagnosis
+        # 1 genomic interpretation
+
+        # Experiment artifacts
         # 0 experiment results +
         # 0 instruments +
-        # 1 resource
-        # = 6 objects total
-        self.assertEqual(await run_all_cleanup(), 6)
+
+        # Patients
+        # 1 individual +
+
+        # Resources
+        # 1 resource +
+        # = 9 objects total
+        self.assertEqual(await run_all_cleanup(), 9)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):

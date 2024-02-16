@@ -12,16 +12,6 @@ class PhenotypicFeatureAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(m.HtsFile)
-class HtsFileAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(m.Gene)
-class GeneAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(m.Disease)
 class DiseaseAdmin(admin.ModelAdmin):
     pass

@@ -60,3 +60,18 @@ async def clean_phenotypic_features() -> int:
         field="id",
     )
     return await remove_items(pm.PhenotypicFeature, pf_to_remove, "phenotypic features")
+
+
+async def clean_interpretations() -> int:
+    interpretations_referenced = await build_id_set_from_model(pm.Phenopacket, "interpretations__id")
+    return await remove_not_referenced(pm.Interpretation, interpretations_referenced, "interpretations")
+
+
+async def clean_diagnoses() -> int:
+    diagnoses_referenced = await build_id_set_from_model(pm.Interpretation, "diagnosis__id")
+    return await remove_not_referenced(pm.Diagnosis, diagnoses_referenced, "diagnosis")
+
+
+async def clean_genomic_interpretations() -> int:
+    gi_referenced = await build_id_set_from_model(pm.Diagnosis, "genomic_interpretations__id")
+    return await remove_not_referenced(pm.GenomicInterpretation, gi_referenced, "genomic interpretations")

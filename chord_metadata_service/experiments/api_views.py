@@ -1,7 +1,5 @@
 from asgiref.sync import async_to_sync
 from bento_lib.auth.permissions import P_QUERY_DATA
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
@@ -18,6 +16,7 @@ from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     ExperimentCSVRenderer,
 )
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 
@@ -58,6 +57,7 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExperimentFilter
+    lookup_value_regex = MODEL_ID_PATTERN
 
     @async_to_sync
     async def get_queryset(self):
@@ -161,7 +161,6 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
         return ExperimentResult.objects.filter(**filter_by_dataset).order_by("id")
 
     # Cache page for the requested url for 2 hours
-    @method_decorator(cache_page(60 * 60 * 2))
     def dispatch(self, *args, **kwargs):
         return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
 

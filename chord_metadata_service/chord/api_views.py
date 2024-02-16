@@ -149,7 +149,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return not_found(request)  # side effect: sets authz done flag
 
         authz.mark_authz_done(request)
-        return Response(json.loads(dataset.dats_file))
+        return Response(dataset.dats_file)
 
     @action(detail=True, methods=["get"])
     def resources(self, request, *_args, **_kwargs):
@@ -175,7 +175,45 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         return super().list(request, *args, **kwargs)
 
     @async_to_sync
-    async def create(self, request: Request, *args, **kwargs):
+    async def destroy(self, request: Request, *args, **kwargs):
+        try:
+            ds = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        if not (await authz.async_evaluate_one(request, build_resource(project=ds.project_id), P_DELETE_DATASET)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        await ds.adelete()
+
+        logger.info(f"Running cleanup after deleting dataset {ds.identifier} via DRF API")
+        n_removed = await run_all_cleanup()
+        logger.info(f"Cleanup: removed {n_removed} objects in total")
+
+        authz.mark_authz_done(request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @staticmethod
+    def _parse_dats(request) -> str | None:
+        dats_file = request.data.get('dats_file')
+        if isinstance(dats_file, str):
+            try:
+                dats_file = json.loads(dats_file)
+            except json.JSONDecodeError:
+                error_msg = ("Submitted dataset.dats_file data is not a valid JSON string. "
+                             "Make sure the string value is JSON compatible, or submit dats_file as a JSON object.")
+                logger.error(error_msg)
+                return error_msg
+            # Set dats_file request value to JSON
+            request.data['dats_file'] = dats_file
+
+    @async_to_sync
+    async def create(self, request, *args, **kwargs):
+        """
+        Creates a Dataset.
+        If the request's dats_file is a string, it will be parsed to JSON.
+        """
+
         project_id = request.data.get("project")
 
         if project_id is None:
@@ -185,6 +223,10 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return forbidden(request)  # side effect: sets authz done flag
 
         authz.mark_authz_done(request)
+
+        if error_msg := self._parse_dats(request):
+            return Response(error_msg, status.HTTP_400_BAD_REQUEST)
+
         return super().create(request, *args, **kwargs)  # TODO: handle invalid
 
     @async_to_sync
@@ -204,26 +246,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         # TODO
 
         authz.mark_authz_done(request)
+
+        if error_msg := self._parse_dats(request):
+            return Response(error_msg, status.HTTP_400_BAD_REQUEST)
+
         return super().update(request, *args, **kwargs)  # TODO: handle invalid
-
-    @async_to_sync
-    async def destroy(self, request: Request, *args, **kwargs):
-        try:
-            ds = await self.get_obj_async()
-        except Http404:
-            return not_found(request)  # side effect: sets authz done flag
-
-        if not (await authz.async_evaluate_one(request, build_resource(project=ds.project_id), P_DELETE_DATASET)):
-            return forbidden(request)  # side effect: sets authz done flag
-
-        await ds.adelete()
-
-        logger.info(f"Running cleanup after deleting dataset {ds.identifier} via DRF API")
-        n_removed = await run_all_cleanup()
-        logger.info(f"Cleanup: removed {n_removed} objects in total")
-
-        authz.mark_authz_done(request)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):

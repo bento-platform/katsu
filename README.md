@@ -120,7 +120,9 @@ poetry run python manage.py runserver
 
 ### Install via Docker
 
-Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or deploy Katsu as part of the Bento platform, you should use Bento's Docker [image](https://github.com/bento-platform/katsu/pkgs/container/katsu) instead.
+Optionally, you may also install standalone Katsu with the Dockerfile provided. If you develop or deploy Katsu as 
+part of the Bento platform, you should use Bento's Docker 
+[image](https://github.com/bento-platform/katsu/pkgs/container/katsu) instead.
 
 
 
@@ -168,25 +170,28 @@ CANDIG_OPA_SITE_ADMIN_KEY=
 INSIDE_CANDIG=
 ```
 
-## Standalone PostGres db and AdMiner
+## Standalone Postgres db and Adminer
 
-For local development, you can quickly deploy a local database server (postgres) and management tool (adminer) with `docker-compose`. Make sure your postgres env variables are set in `.env` before running:
+For local development, you can quickly deploy a local database server (Postgres) and management tool (Adminer) with 
+`docker compose`. Make sure your Postgres env variables are set in `.env` before running:
 
 ```
-# Start docker-compose containers
-docker-compose -f docker-compose.dev.yaml up -d
+# Start docker compose containers
+docker compose -f docker-compose.dev.yaml up -d
 
 # Stop and remove docker-compose containers
-docker-compose -f docker-compose.dev.yaml down
+docker compose -f docker-compose.dev.yaml down
 ```
 
-You can now use the katsu-db container (`localhost:5432`) as your database for standalone katsu development and explore the database tables with adminer (`localhost:8080`). Login to adminer by specifying the following on the login page:
+You can now use the katsu-db container (`localhost:5432`) as your database for standalone katsu development and 
+explore the database tables with adminer (`localhost:8080`).
+Login to adminer by specifying the following on the login page:
 
-- **System**: `PostgreSQL`
-- **Server** `katsu-db` (host and port are resolved by Docker with the container name)
-- **Username**: `POSTGRES_USER`
-- **Password**: `POSTGRES_PASSWORD`
-- **Database**: `POSTGRES_DATABASE`
+- **System:** `PostgreSQL`
+- **Server:** `katsu-db` (host and port are resolved by Docker with the container name)
+- **Username:** `POSTGRES_USER`
+- **Password:** `POSTGRES_PASSWORD`
+- **Database:** `POSTGRES_DATABASE`
 
 ## Authentication
 

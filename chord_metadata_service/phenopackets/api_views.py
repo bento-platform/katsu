@@ -1,7 +1,4 @@
 from asgiref.sync import async_to_sync
-from django.conf import settings
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status, viewsets
@@ -16,6 +13,7 @@ from chord_metadata_service.discovery.helpers import datasets_allowed_for_reques
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
                                                           IndividualBentoSearchRenderer)
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
@@ -26,11 +24,6 @@ from . import models as m, serializers as s, filters as f
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
-
-    # Cache response to the requested URL, default to 2 hours.
-    @method_decorator(cache_page(settings.CACHE_TIME))
-    def dispatch(self, *args, **kwargs):
-        return super(PhenopacketsModelViewSet, self).dispatch(*args, **kwargs)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
@@ -50,35 +43,6 @@ class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenotypicFeatureFilter
     queryset = m.PhenotypicFeature.objects.all().order_by("id")
-
-
-class HtsFileViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing HTS files
-
-    post:
-    Create a new HTS file
-
-    """
-    serializer_class = s.HtsFileSerializer
-    filter_backends = [DjangoFilterBackend]
-    queryset = m.HtsFile.objects.all().order_by("uri")
-
-
-class GeneViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing genes
-
-    post:
-    Create a new gene
-
-    """
-    serializer_class = s.GeneSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.GeneFilter
-    queryset = m.Gene.objects.all().order_by("id")
 
 
 class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
@@ -117,7 +81,6 @@ class MetaDataViewSet(PhenopacketsModelViewSet):
 
 
 BIOSAMPLE_PREFETCH = (
-    "hts_files",
     "phenotypic_features",
     "experiment_set",
 )
@@ -131,12 +94,11 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
-    queryset = m.Biosample.objects.all() \
-        .prefetch_related(*BIOSAMPLE_PREFETCH) \
-        .order_by("id")
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
+    queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
+    lookup_value_regex = MODEL_ID_PATTERN
 
 
 class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
@@ -205,6 +167,7 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
+    lookup_value_regex = MODEL_ID_PATTERN
 
     @async_to_sync
     async def get_queryset(self):

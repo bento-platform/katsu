@@ -47,7 +47,8 @@
           "version": "2015-09-01",
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
-      ]
+      ],
+      "phenopacket_schema_version": "2.0"
     },
     "biosamples": [
         {
@@ -215,7 +216,8 @@
           "version": "2015-09-01",
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
-      ]
+      ],
+      "phenopacket_schema_version": "2.0"
     },
     "biosamples": [
         {
@@ -357,7 +359,8 @@
           "version": "2015-09-01",
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
-      ]
+      ],
+      "phenopacket_schema_version": "2.0"
     },
     "biosamples": [
         {

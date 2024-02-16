@@ -1,5 +1,4 @@
 from abc import ABC
-from typing import Tuple
 
 
 __all__ = [
@@ -10,7 +9,7 @@ __all__ = [
 
 
 class ValuesCollection(ABC):
-    values: Tuple[str, ...] = ()
+    values: tuple[str, ...] = ()
 
     @classmethod
     def as_django_values(cls):

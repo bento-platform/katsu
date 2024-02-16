@@ -17,7 +17,7 @@ from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.cleanup import run_all_cleanup
-from chord_metadata_service.experiments.models import Experiment, ExperimentResult
+from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
@@ -26,20 +26,13 @@ from . import data_types as dt
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
     dt.DATA_TYPE_PHENOPACKET: lambda dataset_id: Phenopacket.objects.filter(dataset_id=dataset_id),
-    dt.DATA_TYPE_EXPERIMENT_RESULT: lambda dataset_id: ExperimentResult.objects.filter(
-        experiment__dataset_id=dataset_id),
 }
 
 
-async def get_count_for_data_type(data_type: str, project: str | None = None, dataset: str | None = None) -> int | None:
+async def _filtered_query(data_type: str, project: str | None = None, dataset: str | None = None) -> QuerySet:
     """
-    Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
-    provided, the count will be for the whole node.
+    Returns a filtered query based on the data type, project, and dataset.
     """
-
-    if data_type == dt.DATA_TYPE_READSET:
-        # No counts for readset, it's a fake data type inside Katsu...
-        return None
 
     q: QuerySet | None = None
 
@@ -56,23 +49,33 @@ async def get_count_for_data_type(data_type: str, project: str | None = None, da
             except ValidationError:
                 raise ValueError("Project ID must be a UUID")
 
-    elif data_type == dt.DATA_TYPE_EXPERIMENT_RESULT:
-        q = ExperimentResult.objects.all()
-        if dataset:
-            try:
-                q = q.filter(experiment__dataset_id=dataset)
-            except ValidationError:
-                raise ValueError("Dataset ID must be a UUID")
-        elif project:
-            try:
-                q = q.filter(experiment__dataset__project_id=project)
-            except ValidationError:
-                raise ValueError("Project ID must be a UUID")
-
     if q is None:
-        raise ValueError(f"Unsupported data type for count function: {data_type}")
+        raise ValueError(f"Unsupported data type: {data_type}")
 
-    return await q.acount()
+    return q
+
+
+async def get_count_for_data_type(data_type: str, project: str | None = None, dataset: str | None = None) -> int | None:
+    """
+    Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
+    provided, the count will be for the whole node.
+    """
+    q = await _filtered_query(data_type, project, dataset)
+    return None if q is None else await q.acount()
+
+
+async def get_last_ingested_for_data_type(data_type: str, project: str | None = None,
+                                          dataset: str | None = None) -> dict | None:
+
+    q = await _filtered_query(data_type, project, dataset)
+    if q is None:
+        return None
+    latest_obj = await q.order_by('-created').afirst()
+
+    if not latest_obj:
+        return None
+
+    return latest_obj.created
 
 
 async def make_data_type_response_object(

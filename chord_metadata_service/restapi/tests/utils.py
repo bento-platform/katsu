@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 
 # Helper functions for tests
 
-def get_response(viewname, obj):
+def get_post_response(viewname, obj):
     """ Generic POST function. """
     client = APIClient()
     return client.post(

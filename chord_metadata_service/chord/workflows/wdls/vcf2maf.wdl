@@ -4,9 +4,8 @@ workflow vcf2maf {
     input {
         String drs_url
         String katsu_url
-        String one_time_token_metadata_ingest
-        String temp_token_drs
-        String auth_host
+        String access_token
+        String validate_ssl
         String project_dataset
         String vep_cache_dir
         String run_dir
@@ -18,7 +17,8 @@ workflow vcf2maf {
     call katsu_dataset_export_vcf {
         input:  project_dataset = project_dataset,
                 drs_url  = drs_url,
-                katsu_url = katsu_url
+                katsu_url = katsu_url,
+                validate_ssl = validate_ssl
     }
 
     call vcf_2_maf {
@@ -27,8 +27,8 @@ workflow vcf2maf {
             vep_species = vep_species,
             vep_cache_dir = vep_cache_dir,
             drs_url = drs_url,
-            temp_token_drs = temp_token_drs,
-            auth_host = auth_host,
+            access_token = access_token,
+            validate_ssl = validate_ssl,
             run_dir = run_dir
     }
 
@@ -37,8 +37,8 @@ workflow vcf2maf {
                 experiment_results_json = katsu_dataset_export_vcf.experiment_results_json,
                 maf_list = vcf_2_maf.maf_list,
                 katsu_url  = katsu_url,
-                one_time_token_metadata_ingest = one_time_token_metadata_ingest,
-                auth_host = auth_host,
+                access_token = access_token,
+                validate_ssl = validate_ssl,
                 run_dir = run_dir
     }
 
@@ -52,6 +52,7 @@ task katsu_dataset_export_vcf {
         String project_dataset
         String drs_url
         String katsu_url
+        Boolean validate_ssl
     }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
@@ -76,7 +77,7 @@ task katsu_dataset_export_vcf {
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
         metadata_url = f"~{katsu_url}/api/experimentresults?datasets={dataset_id}&file_format=vcf&page_size=10000"
-        response = requests.get(metadata_url, verify=False)
+        response = requests.get(metadata_url, verify=~{true="True" false="False" validate_ssl})
         r = response.json()
 
         if r["count"] == 0:
@@ -101,7 +102,7 @@ task katsu_dataset_export_vcf {
                 # Query DRS with the filename to get the absolute file path in
                 # DRS for processing.
                 drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
-                response = requests.get(drs_url, verify=False)
+                response = requests.get(drs_url, verify=~{true="True" false="False" validate_ssl})
                 if not response.ok:
                     continue
                 drs_resp = response.json()
@@ -140,8 +141,8 @@ task vcf_2_maf {
         String vep_species
         String vep_cache_dir
         String drs_url
-        String temp_token_drs
-        String auth_host
+        String access_token
+        Boolean validate_ssl
         String run_dir
     }
 
@@ -214,9 +215,9 @@ task vcf_2_maf {
         try:
             response = requests.post(
                 drs_url,
-                headers={"Authorization": "Bearer ~{token}"} if "~{token}" else {},
+                headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
                 json=params,
-                verify=False
+                verify=~{true="True" false="False" validate_ssl},
             )
             response.raise_for_status()
 
@@ -253,7 +254,8 @@ task katsu_update_experiment_results_with_maf {
     input {
         String project_dataset
         String katsu_url
-        String auth_host
+        String access_token
+        Boolean validate_ssl
         String run_dir
         File experiment_results_json
         File maf_list
@@ -311,8 +313,8 @@ task katsu_update_experiment_results_with_maf {
         # internally, direct access to the file is guaranteed.
 
         headers = (
-            {"Authorization": "Bearer ~{TODO}"}
-            if "~{TODO}"
+            {"Authorization": "Bearer ~{access_token}"}
+            if "~{access_token}"
             else {}
         )
 
@@ -324,7 +326,12 @@ task katsu_update_experiment_results_with_maf {
                 "derived_from_data_type": "experiment_result"
             }
         }
-        response = requests.post(metadata_url, headers=headers, json=data, verify=False)
+        response = requests.post(
+            metadata_url,
+            headers=headers,
+            json=data,
+            verify=~{true="True" false="False" validate_ssl},
+        )
         response.raise_for_status()
 
         CODE

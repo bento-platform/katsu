@@ -373,10 +373,13 @@ class SearchTest(APITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 phenopacket that contains 2 matching biosamples
-            self.assertIn("biosample_id:1", [b["id"]
-                                             for phenopacket in c["results"]
-                                             for b in phenopacket["biosamples"]
-                                             ])
+            self.assertIn(
+                "katsu.biosample_id:1",
+                [
+                    b["id"]
+                    for phenopacket in c["results"]
+                    for b in phenopacket["biosamples"]
+                ])
 
     def test_private_dataset_search_values_list(self):
         # Valid query to search for biosample id in list

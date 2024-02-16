@@ -119,6 +119,9 @@ class IngestTest(TestCase):
         self.assertEqual(p.subject.sex, EXAMPLE_INGEST_PHENOPACKET["subject"]["sex"])
         self.assertEqual(p.subject.karyotypic_sex, EXAMPLE_INGEST_PHENOPACKET["subject"]["karyotypic_sex"])
 
+        self.assertIn("__computed", EXAMPLE_INGEST_PHENOPACKET["subject"]["extra_properties"])
+        self.assertNotIn("__computed", p.subject.extra_properties)
+
         pfs = list(p.phenotypic_features.all().order_by("pftype__id"))
 
         self.assertEqual(len(pfs), 2)

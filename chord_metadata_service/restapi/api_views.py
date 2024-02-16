@@ -16,24 +16,25 @@ from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as experiments_models, summaries as exp_summaries
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
-from chord_metadata_service.metadata.service_info import SERVICE_INFO
+from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.patients import models as patients_models, summaries as patient_summaries
 from chord_metadata_service.phenopackets import models as pheno_models, summaries as pheno_summaries
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.models import SchemaType
+
 
 OVERVIEW_AGE_BIN_SIZE = 10
 
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-def service_info(_request: Request):
+async def service_info(_request: Request):
     """
     get:
     Return service info
     """
 
-    return Response(SERVICE_INFO)
+    return Response(await get_service_info())
 
 
 @extend_schema(

@@ -14,17 +14,15 @@ from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
-from django.views.decorators.cache import cache_page
 from psycopg2 import sql
 from rest_framework.decorators import api_view
-from rest_framework.request import Request
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework import status
 
 from typing import Callable
 
 from chord_metadata_service.authz.middleware import authz_middleware
-
 from chord_metadata_service.logger import logger
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
@@ -50,7 +48,7 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(request: Request, dataset):
+async def experiment_dataset_summary(request: DrfRequest, dataset):
     return await dt_experiment_summary(
         Experiment.objects.filter(dataset=dataset),
         dt_permissions=await get_data_type_discovery_permissions(
@@ -62,7 +60,7 @@ async def experiment_dataset_summary(request: Request, dataset):
     )
 
 
-async def phenopacket_dataset_summary(request: Request, dataset: Dataset):
+async def phenopacket_dataset_summary(request: DrfRequest, dataset: Dataset):
     return await dt_phenopacket_summary(
         Phenopacket.objects.filter(dataset=dataset),
         dt_permissions=await get_data_type_discovery_permissions(
@@ -291,8 +289,6 @@ def search(request, internal_data=False):
     }, start))
 
 
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
 def chord_search(request):
     """
@@ -305,8 +301,6 @@ def chord_search(request):
 
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
-# Cache page for the requested url
-@cache_page(60 * 60 * 2)
 @api_view(["GET", "POST"])
 def chord_private_search(request):
     """
@@ -337,15 +331,12 @@ def chord_private_search(request):
     return search(request, internal_data=True)
 
 
-def phenopacket_filter_results(subject_ids, htsfile_ids, disease_ids, biosample_ids,
+def phenopacket_filter_results(subject_ids, disease_ids, biosample_ids,
                                phenotypicfeature_ids, phenopacket_ids):
     query = Phenopacket.objects.get_queryset()
 
     if subject_ids:
         query = query.filter(subject__id__in=subject_ids)
-
-    if htsfile_ids:
-        query = query.filter(htsfiles__id__in=htsfile_ids)
 
     if disease_ids:
         query = query.filter(diseases__id__in=disease_ids)
@@ -388,19 +379,17 @@ def fhir_search(request, internal_data=False):
                          if hit['_source']['resourceType'] == resource_type)
 
     subject_ids = hits_for('Patient')
-    htsfile_ids = hits_for('DocumentReference')
     disease_ids = hits_for('Condition')
     biosample_ids = hits_for('Specimen')
     phenotypicfeature_ids = hits_for('Observation')
     phenopacket_ids = hits_for('Composition')
 
-    if all((not subject_ids, not htsfile_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
+    if all((not subject_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
             not phenopacket_ids)):
         return Response(build_search_response([], start))
 
     phenopackets = phenopacket_filter_results(
         subject_ids,
-        htsfile_ids,
         disease_ids,
         biosample_ids,
         phenotypicfeature_ids,
@@ -545,7 +534,7 @@ def chord_dataset_representation(dataset: Dataset) -> dict:
     }
 
 
-def dataset_search(request: Request, dataset_id: str, internal=False):
+def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     # TODO: permissions on request
 
     start = datetime.now()
@@ -564,12 +553,12 @@ def dataset_search(request: Request, dataset_id: str, internal=False):
 
 
 @api_view(["GET", "POST"])
-def public_dataset_search(request: Request, dataset_id: str):
+def public_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request, dataset_id)
 
 
 @api_view(["GET", "POST"])
-def private_dataset_search(request: Request, dataset_id: str):
+def private_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request, dataset_id, internal=True)
 
 
@@ -580,8 +569,9 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 
 
 @async_api_view(["GET"])
-async def dataset_summary(request: Request, dataset_id: str):
+async def dataset_summary(request: DrfRequest, dataset_id: str):
     # TODO: PERMISSIONS
+
     dataset = Dataset.objects.get(identifier=dataset_id)
 
     summaries = await asyncio.gather(

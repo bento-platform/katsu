@@ -2,13 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from ..data_types import (
-    DATA_TYPE_EXPERIMENT,
-    DATA_TYPE_EXPERIMENT_RESULT,
-    DATA_TYPE_PHENOPACKET,
-    DATA_TYPE_READSET,
-    DATA_TYPES
-)
+from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from ..views_data_types import get_count_for_data_type
 
 POST_GET = ("POST", "GET")
@@ -25,8 +19,6 @@ class DataTypeTest(APITestCase):
         ids = [dt["id"] for dt in c]
         self.assertIn(DATA_TYPE_EXPERIMENT, ids)
         self.assertIn(DATA_TYPE_PHENOPACKET, ids)
-        self.assertIn(DATA_TYPE_READSET, ids)
-        self.assertIn(DATA_TYPE_EXPERIMENT_RESULT, ids)
 
     def test_data_type_list_non_uuid_project(self):
         # Non-UUID project
@@ -49,6 +41,7 @@ class DataTypeTest(APITestCase):
             **DATA_TYPES[DATA_TYPE_PHENOPACKET],
             "queryable": True,
             "count": 0,
+            "last_ingested": None,
         })
 
     def test_data_type_detail_non_uuid_project(self):
@@ -56,22 +49,10 @@ class DataTypeTest(APITestCase):
         r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"project": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-        r = self.client.get(
-            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_EXPERIMENT_RESULT}), {"project": "a"})
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_data_type_detail_non_uuid_dataset(self):
         # Non-UUID dataset
         r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"dataset": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-        r = self.client.get(reverse(
-            "data-type-detail", kwargs={"data_type": DATA_TYPE_EXPERIMENT_RESULT}), {"dataset": "a"})
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_data_type_detail_bad_data_type_for_count(self):
-        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_READSET}))
-        self.assertIsNone(r.json()["count"])
 
     async def test_data_type_count_bad_data_type(self):
         with self.assertRaises(ValueError):

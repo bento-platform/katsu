@@ -2,27 +2,30 @@
 import json
 from pathlib import Path
 from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT7
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import (
     AGE,
     AGE_RANGE,
     EXTRA_PROPERTIES_SCHEMA,
     ONTOLOGY_CLASS,
-    TIME_INTERVAL, TIME_ELEMENT_SCHEMA,
+    TIME_INTERVAL,
+    TIME_ELEMENT_SCHEMA,
 )
 from chord_metadata_service.restapi.schema_utils import (
     DATE_TIME,
     DRAFT_07,
-    SCHEMA_STRING_FORMATS,
-    SCHEMA_TYPES,
+    SchemaTypes,
     array_of,
     base_type,
+    string_with_pattern,
     enum_of,
     named_one_of,
     sub_schema_uri,
-    string_with_format,
-    describe_schema, get_schema_app_id
+    describe_schema,
+    get_schema_app_id
 )
 
 from . import descriptions
@@ -35,7 +38,6 @@ __all__ = [
     "PHENOPACKET_EVIDENCE_SCHEMA",
     "PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA",
     "PHENOPACKET_GENE_SCHEMA",
-    "PHENOPACKET_HTS_FILE_SCHEMA",
     "PHENOPACKET_BIOSAMPLE_SCHEMA",
     "PHENOPACKET_DISEASE_ONSET_SCHEMA",
     "PHENOPACKET_DISEASE_SCHEMA",
@@ -54,9 +56,9 @@ __all__ = [
     "EXPRESSION_SCHEMA",
     "EXTENSION_SCHEMA",
     "VCF_RECORD_SCHEMA",
-    "VRS_VARIATION_SCHEMA",
     "VRS_REF_RESOURCE",
     "VRS_REF_REGISTRY",
+    "VRS_VARIATION_SCHEMA",
 ]
 
 base_uri = get_schema_app_id(Path(__file__).parent.name)
@@ -73,9 +75,9 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "title": "External reference schema",
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
-        "reference": base_type(SCHEMA_TYPES.STRING),
-        "description": base_type(SCHEMA_TYPES.STRING)
+        "id": string_with_pattern(MODEL_ID_PATTERN),
+        "reference": base_type(SchemaTypes.STRING),
+        "description": base_type(SchemaTypes.STRING)
     }
 }, descriptions.EXTERNAL_REFERENCE)
 
@@ -86,8 +88,8 @@ PHENOPACKET_UPDATE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "timestamp": DATE_TIME,
-        "updated_by": base_type(SCHEMA_TYPES.STRING),
-        "comment": base_type(SCHEMA_TYPES.STRING)
+        "updated_by": base_type(SchemaTypes.STRING),
+        "comment": base_type(SchemaTypes.STRING)
     },
     "additionalProperties": False,
     "required": ["timestamp", "comment"],
@@ -101,11 +103,11 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "created": DATE_TIME,
-        "created_by": base_type(SCHEMA_TYPES.STRING),
-        "submitted_by": base_type(SCHEMA_TYPES.STRING),
+        "created_by": base_type(SchemaTypes.STRING),
+        "submitted_by": base_type(SchemaTypes.STRING),
         "resources": array_of(RESOURCE_SCHEMA),
         "updates": array_of(PHENOPACKET_UPDATE_SCHEMA),
-        "phenopacket_schema_version": base_type(SCHEMA_TYPES.STRING),
+        "phenopacket_schema_version": enum_of(["2.0"]),
         "external_references": array_of(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
@@ -130,9 +132,9 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
     "$id": sub_schema_uri(base_uri, "phenotypic_feature"),
     "type": "object",
     "properties": {
-        "description": base_type(SCHEMA_TYPES.STRING),
+        "description": base_type(SchemaTypes.STRING),
         "type": ONTOLOGY_CLASS,
-        "excluded": base_type(SCHEMA_TYPES.BOOLEAN),
+        "excluded": base_type(SchemaTypes.BOOLEAN),
         "severity": ONTOLOGY_CLASS,
         "modifiers": array_of(ONTOLOGY_CLASS),
         "onset": TIME_ELEMENT_SCHEMA,
@@ -148,28 +150,13 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
     "$id": sub_schema_uri(base_uri, "gene"),
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
-        "alternate_ids": array_of(base_type(SCHEMA_TYPES.STRING)),
-        "symbol": base_type(SCHEMA_TYPES.STRING),
+        "id": base_type(SchemaTypes.STRING),
+        "alternate_ids": array_of(base_type(SchemaTypes.STRING)),
+        "symbol": base_type(SchemaTypes.STRING),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "symbol"]
 }, descriptions.GENE)
-
-PHENOPACKET_HTS_FILE_SCHEMA = describe_schema({
-    "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "hts_file"),
-    "type": "object",
-    "properties": {
-        "uri": string_with_format(SCHEMA_STRING_FORMATS.URI),
-        "description": base_type(SCHEMA_TYPES.STRING),
-        "hts_format": enum_of(["SAM", "BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTQ", "UNKNOWN"]),
-        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
-        "individual_to_sample_identifiers": base_type(SCHEMA_TYPES.OBJECT),
-        "extra_properties": EXTRA_PROPERTIES_SCHEMA
-    }
-}, descriptions.HTS_FILE)
-
 
 PHENOPACKET_PROCEDURE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
@@ -191,8 +178,8 @@ REFERENCE_RANGE_SCHEMA = {
     "type": "object",
     "properties": {
         "unit": ONTOLOGY_CLASS,
-        "low": base_type(SCHEMA_TYPES.NUMBER),
-        "high": base_type(SCHEMA_TYPES.NUMBER)
+        "low": base_type(SchemaTypes.NUMBER),
+        "high": base_type(SchemaTypes.NUMBER)
     },
     "required": ["unit", "low", "high"]
 }
@@ -204,7 +191,7 @@ PHENOPACKET_QUANTITY_SCHEMA = {
     "type": "object",
     "properties": {
         "unit": ONTOLOGY_CLASS,
-        "value": base_type(SCHEMA_TYPES.NUMBER),
+        "value": base_type(SchemaTypes.NUMBER),
         "reference_range": REFERENCE_RANGE_SCHEMA
     },
     "required": ["unit", "value"]
@@ -261,7 +248,7 @@ PHENOPACKET_MEASUREMENT_SCHEMA = {
     "title": "Measurement schema",
     "type": "object",
     "properties": {
-        "description": base_type(SCHEMA_TYPES.STRING),
+        "description": base_type(SchemaTypes.STRING),
         "assay": ONTOLOGY_CLASS,
         "time_observed": TIME_ELEMENT_SCHEMA,
         "procedure": PHENOPACKET_PROCEDURE_SCHEMA
@@ -281,9 +268,9 @@ FILE_SCHEMA = describe_schema({
     + "contains to external files which can be used to inform analyses.",
     "type": "object",
     "properties": {
-        "uri": base_type(SCHEMA_TYPES.STRING),
-        "undividual_to_file_identifiers": base_type(SCHEMA_TYPES.OBJECT),
-        "file_attributes": base_type(SCHEMA_TYPES.OBJECT)
+        "uri": base_type(SchemaTypes.STRING),
+        "undividual_to_file_identifiers": base_type(SchemaTypes.OBJECT),
+        "file_attributes": base_type(SchemaTypes.OBJECT)
     }
 }, {})
 
@@ -293,10 +280,10 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
     "$id": sub_schema_uri(base_uri, "biosample"),
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
-        "individual_id": base_type(SCHEMA_TYPES.STRING),
-        "derived_from_id": base_type(SCHEMA_TYPES.STRING),
-        "description": base_type(SCHEMA_TYPES.STRING),
+        "id": string_with_pattern(MODEL_ID_PATTERN),
+        "individual_id": string_with_pattern(MODEL_ID_PATTERN),
+        "derived_from_id": string_with_pattern(MODEL_ID_PATTERN),
+        "description": base_type(SchemaTypes.STRING),
         "sampled_tissue": ONTOLOGY_CLASS,
         "sample_type": ONTOLOGY_CLASS,
         "phenotypic_features": array_of(PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA),
@@ -342,7 +329,7 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
     "type": "object",
     "properties": {
         "term": ONTOLOGY_CLASS,
-        "excluded": base_type(SCHEMA_TYPES.BOOLEAN),
+        "excluded": base_type(SchemaTypes.BOOLEAN),
         "onset": TIME_ELEMENT_SCHEMA,
         "resolution": TIME_ELEMENT_SCHEMA,
         "disease_stage": array_of(ONTOLOGY_CLASS),
@@ -398,8 +385,8 @@ PHENOPACKET_RADIATION_THERAPY = describe_schema({
     "properties": {
         "modality": ONTOLOGY_CLASS,
         "body_site": ONTOLOGY_CLASS,
-        "dosage": base_type(SCHEMA_TYPES.INTEGER),
-        "fractions": base_type(SCHEMA_TYPES.INTEGER)
+        "dosage": base_type(SchemaTypes.INTEGER),
+        "fractions": base_type(SchemaTypes.INTEGER)
     },
     "required": ["modality", "body_site", "dosage", "fractions"]
 }, {})
@@ -466,12 +453,12 @@ GENE_DESCRIPTOR = describe_schema({
     "description": "Schema used to describe genes",
     "type": "object",
     "properties": {
-        "value_id": base_type(SCHEMA_TYPES.STRING),
-        "symbol": base_type(SCHEMA_TYPES.STRING),
-        "description": base_type(SCHEMA_TYPES.STRING),
-        "alternate_ids": array_of(base_type(SCHEMA_TYPES.STRING)),
-        "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),
-        "alternate_symbols": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "value_id": base_type(SchemaTypes.STRING),
+        "symbol": base_type(SchemaTypes.STRING),
+        "description": base_type(SchemaTypes.STRING),
+        "alternate_ids": array_of(base_type(SchemaTypes.STRING)),
+        "xrefs": array_of(base_type(SchemaTypes.STRING)),
+        "alternate_symbols": array_of(base_type(SchemaTypes.STRING)),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["value_id", "symbol"]
@@ -485,9 +472,9 @@ EXPRESSION_SCHEMA = describe_schema({
     "description": "Enables description of an object based on a nomenclature",
     "type": "object",
     "properties": {
-        "syntax": base_type(SCHEMA_TYPES.STRING),
-        "value": base_type(SCHEMA_TYPES.STRING),
-        "version": base_type(SCHEMA_TYPES.STRING)
+        "syntax": base_type(SchemaTypes.STRING),
+        "value": base_type(SchemaTypes.STRING),
+        "version": base_type(SchemaTypes.STRING)
     },
     "required": ["syntax", "value"]
 }, descriptions=descriptions.EXPRESSION)
@@ -501,8 +488,8 @@ EXTENSION_SCHEMA = describe_schema({
                    "content provider",
     "type": "object",
     "properties": {
-        "name": base_type(SCHEMA_TYPES.STRING),
-        "value": base_type(SCHEMA_TYPES.STRING)
+        "name": base_type(SchemaTypes.STRING),
+        "value": base_type(SchemaTypes.STRING)
     },
     "required": ["name", "value"]
 }, {})
@@ -514,15 +501,15 @@ VCF_RECORD_SCHEMA = describe_schema({
     "description": "This element is used to describe variants using the Variant Call Format.",
     "type": "object",
     "properties": {
-        "genome_assembly": base_type(SCHEMA_TYPES.STRING),
-        "chrom": base_type(SCHEMA_TYPES.STRING),
-        "pos": base_type(SCHEMA_TYPES.INTEGER),
-        "id": base_type(SCHEMA_TYPES.STRING),
-        "ref": base_type(SCHEMA_TYPES.STRING),
-        "alt": base_type(SCHEMA_TYPES.STRING),
-        "qual": base_type(SCHEMA_TYPES.STRING),
-        "filter": base_type(SCHEMA_TYPES.STRING),
-        "info": base_type(SCHEMA_TYPES.STRING)
+        "genome_assembly": base_type(SchemaTypes.STRING),
+        "chrom": base_type(SchemaTypes.STRING),
+        "pos": base_type(SchemaTypes.INTEGER),
+        "id": base_type(SchemaTypes.STRING),
+        "ref": base_type(SchemaTypes.STRING),
+        "alt": base_type(SchemaTypes.STRING),
+        "qual": base_type(SchemaTypes.STRING),
+        "filter": base_type(SchemaTypes.STRING),
+        "info": base_type(SchemaTypes.STRING)
     },
     "required": ["genome_assembly", "chrom", "pos", "ref", "alt"]
 }, descriptions=descriptions.VCF_RECORD)
@@ -566,19 +553,19 @@ VARIANT_DESCRIPTOR = describe_schema({
     "description": "Schema used to describe variants",
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
+        "id": base_type(SchemaTypes.STRING),
         "variation": VARIATION_ONE_OF_SCHEMA,
-        "label": base_type(SCHEMA_TYPES.STRING),
-        "description": base_type(SCHEMA_TYPES.STRING),
+        "label": base_type(SchemaTypes.STRING),
+        "description": base_type(SchemaTypes.STRING),
         "gene_context": GENE_DESCRIPTOR,
         "expressions": array_of(EXPRESSION_SCHEMA),
         "vcf_record": VCF_RECORD_SCHEMA,
-        "xrefs": array_of(base_type(SCHEMA_TYPES.STRING)),
-        "alternate_labels": array_of(base_type(SCHEMA_TYPES.STRING)),
+        "xrefs": array_of(base_type(SchemaTypes.STRING)),
+        "alternate_labels": array_of(base_type(SchemaTypes.STRING)),
         "extensions": array_of(EXTENSION_SCHEMA),
-        "molecule_context": base_type(SCHEMA_TYPES.STRING),
+        "molecule_context": base_type(SchemaTypes.STRING),
         "structural_type": ONTOLOGY_CLASS,
-        "vrs_ref_allele_seq": base_type(SCHEMA_TYPES.STRING),
+        "vrs_ref_allele_seq": base_type(SchemaTypes.STRING),
         "allelic_state": ONTOLOGY_CLASS
     },
     "required": ["id"]
@@ -609,7 +596,7 @@ PHENOPACKET_GENOMIC_INTERPRETATION = describe_schema({
     "description": "Describes the interpretation for an individual variant or gene",
     "type": "object",
     "properties": {
-        "subject_or_biosample_id": base_type(SCHEMA_TYPES.STRING),
+        "subject_or_biosample_id": base_type(SchemaTypes.STRING),
         "interpretation_status": enum_of(["UNKNOWN_STATUS", "REJECTED", "CANDIDATE", "CONTRIBUTORY", "CAUSATIVE"]),
     },
     "oneOf": [
@@ -641,7 +628,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
                    "from a diagnostic laboratory.",
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
+        "id": base_type(SchemaTypes.STRING),
         "progress_status": enum_of([
             "UNKNOWN_PROGRESS",
             "IN_PROGRESS",
@@ -650,7 +637,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
             "UNSOLVED"
         ]),
         "diagnosis": PHENOPACKET_DIAGNOSIS_SCHEMA,
-        "summary": base_type(SCHEMA_TYPES.STRING),
+        "summary": base_type(SchemaTypes.STRING),
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id", "progress_status"]
@@ -663,7 +650,7 @@ PHENOPACKET_SCHEMA = describe_schema({
     "description": "Schema for metadata service datasets",
     "type": "object",
     "properties": {
-        "id": base_type(SCHEMA_TYPES.STRING),
+        "id": string_with_pattern(MODEL_ID_PATTERN),
         "subject": INDIVIDUAL_SCHEMA,
         "phenotypic_features": array_of(PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA),
         "measurements": array_of(PHENOPACKET_MEASUREMENT_SCHEMA),
@@ -678,7 +665,7 @@ PHENOPACKET_SCHEMA = describe_schema({
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)
 
-VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT_07)
+VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT7)
 VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 
 resolver = VRS_REF_REGISTRY.resolver()

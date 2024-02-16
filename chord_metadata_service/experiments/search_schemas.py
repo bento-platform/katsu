@@ -20,17 +20,34 @@ EXPERIMENT_RESULT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPE
         "filename": {
             "search": search_optional_str(2)
         },
+        "url": {
+            "search": search_optional_str(3)
+        },
+        "indices": {
+            "items": {
+                "properties": {
+                    "url": {
+                        "search": search_optional_str(0),
+                    },
+                    "format": {
+                        "search": search_optional_eq(1),
+                    },
+                },
+                "search": {"database": {"type": "jsonb"}},
+            },
+            "search": {"order": 4, "database": {"type": "jsonb"}}
+        },
         "file_format": {
-            "search": search_optional_eq(3)
+            "search": search_optional_eq(5)
         },
         "data_output_type": {
-            "search": search_optional_eq(4)
+            "search": search_optional_eq(6)
         },
         "usage": {
-            "search": search_optional_str(5)
+            "search": search_optional_str(7)
         },
         "genome_assembly_id": {
-            "search": search_optional_eq(6)
+            "search": search_optional_eq(8)
         },
     },
     "search": {

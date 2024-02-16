@@ -1,4 +1,3 @@
-from typing import Optional
 from django.apps import apps
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
@@ -108,88 +107,6 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-# class Procedure(BaseTimeStamp, IndexableMixin):
-#     """
-#     Class to represent a clinical procedure performed on an individual
-#     (subject) in order to extract a biosample
-
-#     FHIR: Procedure
-#     """
-
-#     code = JSONField(validators=[ontology_validator], help_text=rec_help(d.PROCEDURE, "code"))
-#     body_site = JSONField(blank=True, null=True, validators=[ontology_validator],
-#                           help_text=rec_help(d.PROCEDURE, "body_site"))
-#     performed = JSONField(blank=True, null=True, validators=[
-#         JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
-#     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PROCEDURE, "extra_properties"))
-
-#     def __str__(self):
-#         return str(self.id)
-
-
-class File(BaseTimeStamp, IndexableMixin):
-    uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.FILE, "uri"))
-    individual_to_file_identifiers = JSONField(blank=True, null=True,
-                                               help_text=rec_help(d.FILE, "individual_to_file_identifiers"))
-    file_attributes = JSONField(blank=True, null=True, help_text=rec_help(d.FILE, "file_attributes"))
-
-    def __str__(self):
-        return str(self.uri)
-
-
-class HtsFile(BaseTimeStamp, IndexableMixin):
-    """
-    Class to link HTC files with data
-
-    FHIR: DocumentReference
-    """
-
-    HTS_FORMAT = (
-        ('UNKNOWN', 'UNKNOWN'),
-        ('SAM', 'SAM'),
-        ('BAM', 'BAM'),
-        ('CRAM', 'CRAM'),
-        ('VCF', 'VCF'),
-        ('BCF', 'BCF'),
-        ('GVCF', 'GVCF'),
-    )
-    uri = models.URLField(primary_key=True, max_length=200, help_text=rec_help(d.HTS_FILE, "uri"))
-    description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.HTS_FILE, "description"))
-    hts_format = models.CharField(max_length=200, choices=HTS_FORMAT, help_text=rec_help(d.HTS_FILE, "hts_format"))
-    genome_assembly = models.CharField(max_length=200, help_text=rec_help(d.HTS_FILE, "genome_assembly"))
-    # e.g.
-    # "individualToSampleIdentifiers": {
-    #   "patient23456": "NA12345"
-    # TODO how to perform this validation, ensure the patient id is the correct one?
-    individual_to_sample_identifiers = JSONField(
-        blank=True, null=True, help_text=rec_help(d.HTS_FILE, "individual_to_sample_identifiers"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.HTS_FILE, "extra_properties"))
-
-    def __str__(self):
-        return str(self.uri)
-
-
-class Gene(BaseTimeStamp):
-    """
-    Class to represent an identifier for a gene
-
-    FHIR: ?
-    Draft extension for Gene is in development
-    where Gene defined via class CodeableConcept
-    """
-
-    # Gene id is unique
-    id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE, "id"))
-    # CURIE style? Yes!
-    alternate_ids = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
-                               help_text=rec_help(d.GENE, "alternate_ids"))
-    symbol = models.CharField(max_length=200, help_text=rec_help(d.GENE, "symbol"))
-    extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.GENE, "extra_properties"))
-
-    def __str__(self):
-        return str(self.id)
-
-
 class Disease(BaseTimeStamp, IndexableMixin):
     """
     Class to represent a diagnosis and inference or hypothesis about the cause
@@ -226,9 +143,12 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     individual = models.ForeignKey(
         Individual, on_delete=models.CASCADE, blank=True, null=True, related_name="biosamples",
         help_text=rec_help(d.BIOSAMPLE, "individual_id"))
-    derived_from_id = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "derived_from_id"))
+    derived_from_id = models.ForeignKey(
+        "self", on_delete=models.CASCADE, blank=True, null=True, related_name="derived_biosamples",
+        help_text=rec_help(d.BIOSAMPLE, "derived_from_id"))
     description = models.CharField(max_length=200, blank=True, help_text=rec_help(d.BIOSAMPLE, "description"))
-    sampled_tissue = JSONField(validators=[ontology_validator], help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
+    sampled_tissue = JSONField(blank=True, null=True, validators=[ontology_validator],
+                               help_text=rec_help(d.BIOSAMPLE, "sampled_tissue"))
     sample_type = JSONField(blank=True, null=True, validators=[ontology_validator],
                             help_text=rec_help(d.BIOSAMPLE, "sample_type"))
 
@@ -255,10 +175,7 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                                    help_text=rec_help(d.BIOSAMPLE, "pathological_stage"))
     diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
-    # CHECK! if Procedure instance is deleted Biosample instance is deleted too
     procedure = models.JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "procedure"))
-    hts_files = models.ManyToManyField(
-        HtsFile, blank=True, related_name='biosample_hts_files', help_text=rec_help(d.BIOSAMPLE, "hts_files"))
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
 
@@ -267,17 +184,18 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
 
     @property
     def get_sample_tissue_data(self):
-        return {'reference': {
-            'reference': self.sampled_tissue.get('id'),
-            'display': self.sampled_tissue.get('label')
-        }
+        return {
+            'reference': {
+                'reference': self.sampled_tissue.get('id'),
+                'display': self.sampled_tissue.get('label'),
+            },
         }
 
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.BIOSAMPLE
 
-    def get_project_id(self) -> Optional[str]:
+    def get_project_id(self) -> str | None:
         model = apps.get_model("phenopackets.Phenopacket")
         if len(phenopackets := model.objects.filter(biosamples__id=self.id)) < 1:
             return None
@@ -398,8 +316,15 @@ class GenomicInterpretation(BaseTimeStamp):
         (CONTRIBUTORY, 'Contributory'),
         (CAUSATIVE, 'Causative')
     )
-    subject_or_biosample_id = models.CharField(
-        max_length=200, blank=True, help_text="Id of the patient or biosample of the subject being interpreted")
+    # 'subject_or_biosample_id' is returned by the serializer
+
+    # Corresponds to 'subject_or_biosample_id' if it matches an Individual
+    subject = models.ForeignKey(
+        Individual, on_delete=models.CASCADE, null=True, blank=True, related_name="genomic_interpretations")
+    # Corresponds to 'subject_or_biosample_id' if it matches a Biosample
+    biosample = models.ForeignKey(
+        Biosample, on_delete=models.CASCADE, null=True, blank=True, related_name="genomic_interpretations")
+
     interpretation_status = models.CharField(max_length=200, choices=GENOMIC_INTERPRETATION_STATUS,
                                              default="UNKNOWN_STATUS",
                                              help_text='How the call of this GenomicInterpretation was interpreted.')
@@ -418,6 +343,8 @@ class GenomicInterpretation(BaseTimeStamp):
     def clean(self):
         if not (self.gene_descriptor or self.variant_interpretation):
             raise ValidationError('Either Gene or Variant must be specified')
+        if not (self.subject or self.biosample):
+            raise ValidationError('The subject_or_biosample_id must point to a Biosample or a Subject.')
 
     def __str__(self):
         return str(self.id)
@@ -429,9 +356,9 @@ class Diagnosis(BaseTimeStamp):
 
     FHIR: Condition
     """
-    disease_ontology = models.JSONField(null=True, blank=True, validators=[ontology_validator])
-
-    # required?
+    id = models.CharField(primary_key=True, max_length=200,
+                          help_text="Unique ID, uses the parent Interpretation's id when ingesting.")
+    disease = models.JSONField(null=True, blank=True, validators=[ontology_validator])
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
         help_text='The genomic elements assessed as being responsible for the disease.')
@@ -464,8 +391,8 @@ class Interpretation(BaseTimeStamp):
     id = models.CharField(primary_key=True, max_length=200, help_text='An arbitrary identifier for the interpretation.')
     progress_status = models.CharField(choices=PROGRESS_STATUS, max_length=200, blank=True,
                                        help_text='The current status of work on the case.')
-    diagnosis = models.ForeignKey(Diagnosis, blank=True, null=True, on_delete=models.CASCADE,
-                                  help_text='One or more diagnoses, if made.')
+    diagnosis = models.OneToOneField(Diagnosis, blank=True, null=True, on_delete=models.CASCADE,
+                                     help_text='The diagnosis, if made.')
     summary = models.CharField(max_length=200, blank=True, help_text='Free text summary of the interpretation.')
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
@@ -496,7 +423,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
 
-    def get_project_id(self) -> Optional[str]:
+    def get_project_id(self) -> str | None:
         model = apps.get_model("chord.Project")
         try:
             project = model.objects.get(datasets=self.dataset)
@@ -526,8 +453,6 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
 
     medical_actions = models.JSONField(
         blank=True, null=True, validators=[JsonSchemaValidator(PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
-
-    # TODO: warn users that files will not be ingested in phenopackets
 
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
