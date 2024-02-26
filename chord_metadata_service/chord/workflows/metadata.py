@@ -5,7 +5,7 @@ from bento_lib.workflows.workflow_set import WorkflowSet
 __all__ = [
     "WORKFLOW_PHENOPACKETS_JSON",
     "WORKFLOW_EXPERIMENTS_JSON",
-    "WORKFLOW_EXPERIMENTS_UPDATE_JSON",
+    "WORKFLOW_EXPERIMENTS_EXTENDED_JSON",
     "WORKFLOW_FHIR_JSON",
     "WORKFLOW_READSET",
     "WORKFLOW_DOCUMENT",
@@ -20,7 +20,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_T
 
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
-WORKFLOW_EXPERIMENTS_UPDATE_JSON = "experiments_update_json"
+WORKFLOW_EXPERIMENTS_EXTENDED_JSON = "experiments_extended_json"
 
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_READSET = "readset"
@@ -84,17 +84,18 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
     ],
 ))
 
-workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_UPDATE_JSON, wm.WorkflowDefinition(
+workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_EXTENDED_JSON, wm.WorkflowDefinition(
     type="ingestion",
     name="Bento Experiments JSON-extended",
-    description="This workflow ingests experiment-related files into the DRS and updates the experiment metadata JSON file with DRS URIs.",
+    description="This workflow ingests experiments and related files into DRS.",
     data_type=DATA_TYPE_EXPERIMENT,
     tags=[DATA_TYPE_EXPERIMENT, "experiment_result"],
-    file="experiments_update_json.wdl",
+    file="experiments_extended_json.wdl",
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
         DRS_URL_INPUT,
+        KATSU_URL_INPUT,
         VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
@@ -102,28 +103,6 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_UPDATE_JSON, wm.WorkflowDefinitio
         json_file_input("json_document"),
     ],
 ))
-
-""" DIRECTORY_PATH_INPUT,
-        json_file_input("json_document"),
-
-    workflow_set.add_workflow(WORKFLOW_DRS_INGESTION_JSON, wm.WorkflowDefinition(
-    type="ingestion",
-    name="DRS Data Ingestion and JSON Update",
-    description="This workflow ingests experiment-related files into the DRS and updates the experiment metadata JSON file with DRS URIs. It's compatible with Bento Experiments schema and handles secure data transfer and ingestion.",
-    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT, "DRS", "Data Ingestion", "Metadata Update"],
-    file="drs_data_ingestion_update_json.wdl",
-    inputs=[
-        # injected
-        ACCESS_TOKEN_INPUT,
-        DRS_URL_INPUT,  # Assuming DRS URL is needed
-        VALIDATE_SSL_INPUT,
-        # user
-        PROJECT_DATASET_INPUT,
-        DIRECTORY_PATH_INPUT,  # Path to directory containing experiment files
-        json_file_input("experiment_metadata_json"),  # JSON file with experiment metadata
-    ],
-)) """
 
 workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
     type="ingestion",
