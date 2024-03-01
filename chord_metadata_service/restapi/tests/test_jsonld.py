@@ -11,7 +11,7 @@ import json
 
 class JSONLDDatasetTest(APITestCase):
     def setUp(self) -> None:
-        project = get_post_response('project-list', VALID_PROJECT_1)
+        project = get_post_response('projects-list', VALID_PROJECT_1)
         self.project = project.json()
         self.creators = VALID_DATS_CREATORS
         self.dataset = dats_dataset(self.project['identifier'], self.creators)
