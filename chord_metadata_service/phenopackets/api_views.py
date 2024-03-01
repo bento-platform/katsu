@@ -1,10 +1,15 @@
+from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers, status, viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.discovery.helpers import datasets_allowed_for_request_and_data_type
 from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
                                                           BiosamplesCSVRenderer, ARGORenderer,
                                                           IndividualBentoSearchRenderer)
@@ -12,9 +17,8 @@ from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+
 from . import models as m, serializers as s, filters as f
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
@@ -158,13 +162,26 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
 
     post:
     Create a new phenopacket
-
     """
+
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
-    queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
     lookup_value_regex = MODEL_ID_PATTERN
+
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            m.Phenopacket.objects
+            .filter(
+                dataset_id__in=await datasets_allowed_for_request_and_data_type(self.request, DATA_TYPE_PHENOPACKET))
+            .prefetch_related(*PHENOPACKET_PREFETCH)
+            .order_by("id")
+        )
+
+    def list(self, request, *args, **kwargs):
+        authz_middleware.mark_authz_done(request)  # get_queryset has done the permissions logic already
+        return super().list(request, *args, **kwargs)
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
@@ -224,7 +241,7 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     }
 )
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_chord_phenopacket_schema(_request):
     """
     get:

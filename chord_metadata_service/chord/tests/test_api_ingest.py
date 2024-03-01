@@ -47,7 +47,7 @@ class WorkflowTest(APITestCase):
 
 class IngestTest(APITestCase):
     def setUp(self) -> None:
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        r = self.client.post(reverse("projects-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
         r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),

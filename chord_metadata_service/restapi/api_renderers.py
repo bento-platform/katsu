@@ -8,8 +8,8 @@ from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
+from ..phenopackets.utils import parse_onset
 from .jsonld_utils import dataset_to_jsonld
-from .utils import parse_onset
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 

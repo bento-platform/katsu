@@ -42,13 +42,13 @@ class CreateProjectTest(APITestCase):
 
     def test_create_project(self):
         for i, p in enumerate(self.valid_payloads, 1):
-            r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
+            r = self.client.post(reverse("projects-list"), data=json.dumps(p), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Project.objects.count(), i)
             self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
 
         for p in self.invalid_payloads:
-            r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
+            r = self.client.post(reverse("projects-list"), data=json.dumps(p), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertEqual(Project.objects.count(), len(self.valid_payloads))
 
@@ -58,7 +58,7 @@ class CreateProjectTest(APITestCase):
 
 class CreateDatasetTest(APITestCase):
     def setUp(self) -> None:
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        r = self.client.post(reverse("projects-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
         self.valid_payloads = [
@@ -163,7 +163,7 @@ class CreateProjectJsonSchema(APITestCase):
 
     def setUp(self) -> None:
         # Create project
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        r = self.client.post(reverse("projects-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
 
         # Valid payload and project_id

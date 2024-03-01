@@ -45,15 +45,20 @@ logging.info(f"DEBUG: {DEBUG}")
 LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
 
 
-# CHORD-specific settings
+# Bento-specific settings
+
+# SECURITY WARNING: Don't run with AUTHZ_ENABLED turned off in production,
+# unless an alternative permissions system is in place.
+#  - This needs to be here to avoid a circular import with settings.py
+BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
+
+BENTO_AUTHZ_SERVICE_URL: str = (
+    os.environ.get("BENTO_AUTHZ_SERVICE_URL", "").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
+)
 
 BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
-
-# SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
-# unless an alternative permissions system is in place.
-CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
 
 CHORD_SERVICE_ARTIFACT = "metadata"
 # NOTE: LEAVE CHORD UNLESS YOU WANT A BUNCH OF BROKEN TABLES... vvv
@@ -66,9 +71,6 @@ CHORD_SERVICE_TYPE: GA4GHServiceType = {
 }
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 BENTO_SERVICE_KIND = "metadata"
-
-# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
-AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 # When Katsu is hosted on a subpath (e.g. http://myportal.com/api/katsu), this
 # parameter is used by Django to compute correct URLs in templates (for example
@@ -122,7 +124,7 @@ if exists("/run/secrets/opa-root-token"):
 
 # Application definition
 
-INSTALLED_APPS = [
+INSTALLED_APPS = (['daphne'] if os.environ.get("KATSU_CONTAINER_LOCAL") else []) + [
     'dal',
     'dal_select2',
 
@@ -155,7 +157,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
+    'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -187,6 +189,7 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'chord_metadata_service.metadata.asgi.application'
 WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 LOGGING = {
@@ -266,16 +269,16 @@ FHIR_INDEX_NAME = 'fhir_metadata'
 ELASTICSEARCH = False
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
+    # Allow any by default for DRF auth (BentoDeferToHandler is just a wrapper for doing nothing, basically)
+    #  - the Bento authorization middleware will take care of denying.
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.BentoDeferToHandler'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'JSON_UNDERSCOREIZE': {
@@ -302,8 +305,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ['bento_lib.auth.django_remote_user.BentoRemoteUserBackend'] + (
-    ['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
+AUTHENTICATION_BACKENDS = (['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
 
 # Models
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
@@ -333,11 +335,33 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 # Settings related to the Public APIs
 
 # Read project specific config.json that contains custom search fields
+#  - This should not be used directly by endpoints etc. Instead, it should be accessed via the getter in restapi.utils
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_PUBLIC = json.load(config_file)
 else:
     CONFIG_PUBLIC = {}
+
+# The below DISCOVERY_* settings should be accessed via the get_discovery_rules_and_field_set_permissions getter in
+# API views, to correctly incorporate permissions.
+
+# Maximum query parameters - can be sourced from environment variable; fallback to CONFIG_PUBLIC
+# and if that is not set, then use 0 (no query parameters allowed)
+# NOTE: This value only applies to tokens with the project-level counts permission.
+#  - If this permission is not present, the effective value is 0.
+#  - If the query:data permission is present, the effective value is maxsize.
+DISCOVERY_MAX_QUERY_PARAMETERS = int(os.environ.get(
+    "DISCOVERY_MAX_QUERY_PARAMETERS",
+    CONFIG_PUBLIC.get("rules", {}).get("max_query_parameters", 0)))
+
+# Return count threshold for censored discovery - can be sourced from environment variable; fallback to CONFIG_PUBLIC
+# and if that is not set, then use sys.maxsize (effectively, everything becomes 0)
+# NOTE: This value only applies to tokens with the project-level counts permission.
+#  - If this permission is not present, the effective value is maxsize.
+#  - If the query:data permission is present, the effective value is 0.
+DISCOVERY_COUNT_THRESHOLD = int(os.environ.get(
+    "DISCOVERY_COUNT_THRESHOLD",
+    CONFIG_PUBLIC.get("rules", {}).get("count_threshold", sys.maxsize)))
 
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}

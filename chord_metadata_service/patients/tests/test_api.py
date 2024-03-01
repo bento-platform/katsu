@@ -10,9 +10,9 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
-from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
-from chord_metadata_service.restapi.utils import iso_duration_to_years
+from chord_metadata_service.phenopackets.tests import constants as ph_c
+from chord_metadata_service.phenopackets.utils import iso_duration_to_years
 
 from . import constants as c
 
