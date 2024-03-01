@@ -93,11 +93,11 @@ async def make_data_type_response_object(
 
 async def can_see_counts(request: HttpRequest, resource: dict) -> bool:
     return any(
-        await authz_middleware.async_evaluate(
+        (await authz_middleware.async_evaluate(
             request,
             (resource,),
             (get_counts_permission(resource.get("dataset") is not None), P_QUERY_DATA),
-        )[0]  # tuple of [bool for counts permission, bool for query:data]
+        ))[0]  # tuple of [bool for counts permission, bool for query:data]
     )
 
 
