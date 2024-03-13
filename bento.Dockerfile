@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.02.14
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.03.01
 
 SHELL ["/bin/bash", "-c"]
 
@@ -7,7 +7,7 @@ SHELL ["/bin/bash", "-c"]
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir "uvicorn[standard]==0.27.1"
+    pip install --no-cache-dir "uvicorn[standard]==0.28.0"
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app

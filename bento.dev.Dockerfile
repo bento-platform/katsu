@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.02.14
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.03.01
 
 LABEL org.opencontainers.image.description="Local development image for Katsu."
 LABEL devcontainer.metadata='[{ \
@@ -17,8 +17,7 @@ SHELL ["/bin/bash", "-c"]
 # Install Poetry for dependency management
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir "uvicorn[standard]==0.27.1"
+    rm -rf /var/lib/apt/lists/*
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
