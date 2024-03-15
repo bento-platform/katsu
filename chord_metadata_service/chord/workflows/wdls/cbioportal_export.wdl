@@ -3,7 +3,6 @@ version 1.0
 workflow cbioportal {
     input {
         String project_dataset
-        String run_dir
         String katsu_url
         String drs_url
         String access_token
@@ -16,7 +15,6 @@ workflow cbioportal {
 
     call katsu_dataset_export {
         input: dataset_id = dataset_id_from_project_dataset.dataset_id,
-               run_dir = run_dir,
                katsu_url = katsu_url,
                token = access_token,
                validate_ssl = validate_ssl
@@ -25,15 +23,13 @@ workflow cbioportal {
     call get_maf {
         input: drs_url = drs_url,
                dataset_id = dataset_id_from_project_dataset.dataset_id,
-               run_dir = run_dir,
                token = access_token,
-               validate_ssl = validate_ssl
+               validate_ssl = validate_ssl,
+               export_data = katsu_dataset_export.export_data
     }
 
     output {
-        Array[File] cbio = katsu_dataset_export.data_txt
-        File stdout = katsu_dataset_export.txt_output
-        File stderr = katsu_dataset_export.err_output
+        File export_data = get_maf.export_data_with_maf
     }
 }
 
@@ -45,7 +41,7 @@ task dataset_id_from_project_dataset {
         python3 -c 'print("~{project_dataset}".split(":")[1], end="")'
     >>>
     output {
-        String dataset_id = stdout()
+        String dataset_id = read_string(stdout())
     }
 }
 
@@ -53,7 +49,6 @@ task katsu_dataset_export {
     input {
         String dataset_id
         String katsu_url
-        String run_dir
         String token
         Boolean validate_ssl
     }
@@ -62,23 +57,17 @@ task katsu_dataset_export {
     # command block (tested with womtool-v78). Using triple angle braces made
     # interpolation more straightforward.
     command <<<
-        # Export results at export_path and returns http code 200 in case of success
-        RESPONSE=$(curl -X POST ~{true="" false="-k" validate_ssl} -s -w "%{http_code}" \
+        # Export results; Katsu returns a .tar.gz file
+        curl -X POST ~{true="" false="-k" validate_ssl} -s --fail-with-body \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer ~{token}" \
-            -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "~{dataset_id}", "output_path": "~{run_dir}"}' \
-            "~{katsu_url}/private/export")
-
-        if [ "${RESPONSE}" != "204" ]
-        then
-            echo "Error: Metadata service replied with HTTP code ${RESPONSE}" 1>&2  # to stderr
-            exit 1
-        fi
-        echo ${RESPONSE}
+            -d '{"format": "cbioportal", "object_type": "dataset", "object_id": "~{dataset_id}"}' \
+            -o export.tar.gz \
+            "~{katsu_url}/private/export"
     >>>
 
     output {
-        Array[File] data_txt = glob("${run_dir}/export/${dataset_id}/*.txt")
+        File export_data = "export.tar.gz"
         File txt_output = stdout()
         File err_output = stderr()
     }
@@ -87,21 +76,24 @@ task katsu_dataset_export {
 task get_maf {
     input {
         String drs_url
-        String run_dir
         String dataset_id
         String token
         Boolean validate_ssl
+        File export_data
     }
 
     command <<<
+        # Extract exported data
+        tar -xzvf ~{export_data}
+
+        # Write data_mutations_extended
         python <<CODE
         import json
         import requests
         import sys
 
-        work_dir = "~{run_dir}/export/~{dataset_id}"
-        MAF_LIST = f"{work_dir}/maf_list.txt"
-        MUTATION_DATA_FILE= f"{work_dir}/data_mutations_extended.txt"
+        MAF_LIST = "export/maf_list.txt"
+        MUTATION_DATA_FILE= "export/data_mutations_extended.txt"
 
         with open(MAF_LIST) as file_handle, \
             open(MUTATION_DATA_FILE, 'w') as mutation_file_handle:
@@ -142,11 +134,14 @@ task get_maf {
 
                     no_file_processed_yet = False
 
+
         CODE
+
+        # Compress the final exported data, with MAFs
+        tar -czf export_with_maf.tar.gz export
     >>>
 
     output {
-        File txt_output_maf = stdout()
-        File err_output_maf = stderr()
+        File export_data_with_maf = "export_with_maf.tar.gz"
     }
 }

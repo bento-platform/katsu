@@ -48,7 +48,7 @@ def export(request: Request):
     if not BENTO_EXPORT_SCHEMA_VALIDATOR.is_valid(request.data):
         msg_list = [err.message for err in BENTO_EXPORT_SCHEMA_VALIDATOR.iter_errors(request.data)]
         return Response(errors.bad_request_error(
-            "Invalid ingest request body: " + "\n".join(msg_list)),
+            "Invalid export request body: " + "\n".join(msg_list)),
             status=400  # TODO: Validation errors
         )
 
