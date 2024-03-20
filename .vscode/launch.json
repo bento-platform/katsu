@@ -3,7 +3,7 @@
     "configurations": [
         {
             "name": "Python: Django Test",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "args": [
@@ -15,7 +15,7 @@
         },
         {
             "name": "Python: Run Django",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/manage.py",
             "console": "integratedTerminal",
@@ -28,10 +28,12 @@
         },
         {
             "name": "Python: Attach Debugger (Bento)",
-            "type": "python",
+            "type": "debugpy",
             "request": "attach",
-            "port": 5678,
-            "host": "0.0.0.0"
+            "connect": {
+                "host": "0.0.0.0",
+                "port": 5678
+            }
         }
     ]
 }
