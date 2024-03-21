@@ -32,6 +32,7 @@ class DatasetSerializer(GenericSerializer):
         "description",
         "contact_info",
         "linked_field_sets",
+        "dats_file",
         "project",
     )
 
