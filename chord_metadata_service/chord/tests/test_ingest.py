@@ -133,7 +133,9 @@ class IngestTest(TestCase):
 
         diseases = list(p.diseases.all().order_by("term__id"))
         self.assertEqual(len(diseases), 1)
-        # TODO: More
+        for field in ["term", "excluded", "onset", "resolution", "disease_stage", 
+                      "clinical_tnm_finding", "primary_site", "laterality"]:
+            self.assertEqual(getattr(diseases[0], field), EXAMPLE_INGEST_PHENOPACKET["diseases"][0][field])
 
         # TODO: Test Metadata
 

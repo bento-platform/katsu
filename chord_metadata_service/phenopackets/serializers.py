@@ -73,6 +73,9 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 
 
 class DiseaseSerializer(GenericSerializer):
+    always_include = (
+        "excluded",
+    )
 
     class Meta:
         model = Disease

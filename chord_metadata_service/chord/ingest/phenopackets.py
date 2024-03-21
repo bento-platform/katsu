@@ -264,8 +264,12 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
 def get_or_create_disease(disease) -> pm.Disease:
     d_obj, _ = pm.Disease.objects.get_or_create(
         term=disease["term"],
+        excluded=disease.get("excluded"),
+        resolution=disease.get("resolution"),
         disease_stage=disease.get("disease_stage", []),
         clinical_tnm_finding=disease.get("clinical_tnm_finding", []),
+        primary_site=disease.get("primary_site"),
+        laterality=disease.get("laterality"),
         extra_properties=_clean_extra_properties(disease.get("extra_properties", {})),
         **query_and_check_nulls(disease, "onset")
     )
