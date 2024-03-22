@@ -154,7 +154,7 @@ def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experimen
     return [ingest_experiment(exp, dataset_id, validate=False) for exp in exps]
 
 
-def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.ExperimentResult]:
+def ingest_derived_experiment_results(json_data: list[dict], dataset_id: str) -> list[em.ExperimentResult]:
     """ Reads a JSON file containing a list of experiment results and adds them
         to the database.
         The linkage to experiments is inferred from the `derived_from` category
@@ -176,7 +176,7 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
     exp_res_list: list[em.ExperimentResult] = []
     # Create a map of experiment results identifier to experiment id.
     # Prefetch results due to the many-to-many relationship
-    exp = em.Experiment.objects.all().prefetch_related("experiment_results")
+    exp = em.Experiment.objects.filter(dataset_id=dataset_id).prefetch_related("experiment_results")
     exp_result2exp = dict()
     for row in exp.values("id", "experiment_results__identifier"):
         exp_result2exp[row["experiment_results__identifier"]] = row["id"]
@@ -201,8 +201,8 @@ def ingest_derived_experiment_results(json_data: list[dict]) -> list[em.Experime
     return exp_res_list
 
 
-# The table_id is required to fit the bento_ingest.schema.json in bento_lib,
-# but it is unused. It can be set to any valid table_id or to one of the override
+# The dataset_id is required to fit the bento_ingest.schema.json in bento_lib,
+# but it is unused. It can be set to any valid dataset_id or to one of the override
 # values defined in view_ingest.py
-def ingest_maf_derived_from_vcf_workflow(json_data, _dataset_id: str) -> list[em.ExperimentResult]:
-    return ingest_derived_experiment_results(json_data)
+def ingest_maf_derived_from_vcf_workflow(json_data, dataset_id: str) -> list[em.ExperimentResult]:
+    return ingest_derived_experiment_results(json_data, dataset_id)

@@ -235,9 +235,6 @@ task vcf_2_maf {
 
         '
         done
-
-        echo "end loop" >> /tmp/dump.tsv
-
     >>>
 
     output {
@@ -303,14 +300,7 @@ task katsu_update_experiment_results_with_maf {
                     }
                 })
 
-        EXPERIMENT_RESULTS_JSON = path.join("~{run_dir}", "experiment_results_maf.json")
-        with open(EXPERIMENT_RESULTS_JSON, "w") as file_handle:
-            json.dump(maf_exp_res_list, file_handle)
-
         # Ingest metadata about MAF files into Katsu
-        # The following passes an absolute path to the current working directory.
-        # As Katsu has the /wes/tmp/ volume mounted with the same path
-        # internally, direct access to the file is guaranteed.
 
         headers = (
             {"Authorization": "Bearer ~{access_token}"}
@@ -318,18 +308,12 @@ task katsu_update_experiment_results_with_maf {
             else {}
         )
 
-        metadata_url = f"~{katsu_url}/private/ingest"
-        data = {
-            "dataset_id": "FROM_DERIVED_DATA",
-            "workflow_id": "maf_derived_from_vcf_json",
-            "workflow_params": {
-                "derived_from_data_type": "experiment_result"
-            }
-        }
+         _, dataset_id = "~{project_dataset}".split(":")
+        metadata_url = f"~{katsu_url}/ingest/{dataset_id}/maf_derived_from_vcf_json"
         response = requests.post(
             metadata_url,
             headers=headers,
-            json=data,
+            json=maf_exp_res_list,
             verify=~{true="True" false="False" validate_ssl},
         )
         response.raise_for_status()
