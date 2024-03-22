@@ -292,13 +292,13 @@ task katsu_update_experiment_results_with_maf {
                     "description": "MAF file",
                     "filename": row["maf"],
                     "file_format": "MAF",
+                    "url": row['uri'],  # DRS record URL
                     "data_output_type": "Derived data",
                     "usage": "Downloaded",
                     "creation_date": date.today().isoformat(),
                     "created_by": "Bento",
                     "genome_assembly_id": vcf_props.get("genome_assembly_id", "GRCh37"),  # TODO: make fallback a parameter
                     "extra_properties": {
-                        "uri": row['uri'],
                         "derived_from": vcf_props["identifier"]
                     }
                 })
