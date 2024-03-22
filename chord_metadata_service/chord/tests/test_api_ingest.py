@@ -69,13 +69,13 @@ class IngestTest(APITestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-        # Bad ingestion body JSON
+        # Bad ingestion body JSON - JSON parse error 400
         r = self.client.post(
             reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
             content_type="application/json",
-            data="\{\}\}",  # noqa: W605
+            data="{}}",  # noqa: W605
         )
-        self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Invalid phenopacket JSON validation
         invalid_phenopacket = load_local_json("example_invalid_phenopacket.json")
