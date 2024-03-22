@@ -206,7 +206,7 @@ class ExportCBioTest(TestCase):
         maf_count = exp_res.count()
         self.assertTrue(maf_count > 0)
         with io.StringIO() as output:
-            exp.maf_list(exp_res, output)
+            exp.write_maf_list(exp_res, output)
             output.seek(0)
             i = 0
             for line in output:
