@@ -113,7 +113,7 @@ def study_export(get_path: Callable[[str], str], dataset_id: str):
             .annotate(biosample_id=F("experiment__biosample"))
         )
 
-        maf_list(exp_res, file_maf_list)
+        write_maf_list(exp_res, file_maf_list)
         case_list_export(cbio_study_id, exp_res, file_case_list)
 
     with open(get_path(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
@@ -261,12 +261,11 @@ def sample_export(results, file_handle: TextIO):
     dict_writer.writerows(samples)
 
 
-def maf_list(results, file_handle: TextIO):
+def write_maf_list(results: list[ExperimentResult], file_handle: TextIO):
     """
     List of maf files associated with this dataset.
     """
-    maf_uri = [experiment.extra_properties["uri"] + "\n" for experiment in results]
-    file_handle.writelines(maf_uri)
+    file_handle.writelines(experiment.url + "\n" for experiment in results)
 
 
 def mutation_meta_export(study_id: str, file_handle: TextIO):
