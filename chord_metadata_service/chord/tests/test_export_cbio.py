@@ -19,9 +19,9 @@ from chord_metadata_service.chord.export.utils import ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.ingest.experiments import ingest_derived_experiment_results
 from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
-    WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
 )
 from chord_metadata_service.patients.models import Individual
@@ -51,9 +51,7 @@ class ExportCBioTest(TestCase):
             EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
         )
         # append derived MAF files to experiment results
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
-            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier
-        )
+        ingest_derived_experiment_results(EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier)
         self.exp_res = ExperimentResult.objects.all()
 
     @staticmethod
