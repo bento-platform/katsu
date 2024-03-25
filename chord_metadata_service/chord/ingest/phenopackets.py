@@ -70,10 +70,11 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         description=pf.get("description", ""),
         pftype=pf["type"],
         excluded=pf.get("excluded", False),
-        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
         severity=pf.get("severity"),
+        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
         onset=pf.get("onset"),
-        evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
+        resolution=pf.get("resolution"),
+        evidence=pf.get("evidence", []),  # TODO: Separate class for evidence?
         extra_properties=_clean_extra_properties(pf.get("extra_properties", {})),
     )
     pf_obj.save()
