@@ -80,12 +80,7 @@ INDIVIDUAL_SEARCH_SCHEMA = tag_schema_with_search_properties(INDIVIDUAL_SCHEMA, 
         },
         "taxonomy": ONTOLOGY_SEARCH_SCHEMA,
     },
-    "search": {
-        "database": {
-            "relation": models.Individual._meta.db_table,
-            "primary_key": models.Individual._meta.pk.column,
-        }
-    },
+    "search": search_table_ref(models.Individual),
 })
 
 UPDATE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_UPDATE_SCHEMA, {
@@ -136,12 +131,7 @@ META_DATA_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
             "items": EXTERNAL_REFERENCE_SEARCH_SCHEMA
         }
     },
-    "search": {
-        "database": {
-            "relation": models.MetaData._meta.db_table,
-            "primary_key": models.MetaData._meta.pk.column
-        }
-    }
+    "search": search_table_ref(models.MetaData),
 })
 
 EVIDENCE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_EVIDENCE_SCHEMA, {
@@ -177,12 +167,7 @@ PHENOTYPIC_FEATURE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHE
         # "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
         "evidence": EVIDENCE_SEARCH_SCHEMA,
     },
-    "search": {
-        "database": {
-            "relation": models.PhenotypicFeature._meta.db_table,
-            "primary_key": models.PhenotypicFeature._meta.pk.column
-        }
-    }
+    "search": search_table_ref(models.PhenotypicFeature),
 })
 
 
@@ -248,21 +233,17 @@ BIOSAMPLE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_
             "search": search_optional_eq(1),  # TODO: Boolean search
         },
     },
-    "search": {
-        "database": {
-            "primary_key": models.Biosample._meta.pk.column,
-            "relation": models.Biosample._meta.db_table,
-        }
-    }
+    "search": search_table_ref(models.Biosample),
 })
-
-# TODO
-DISEASE_ONSET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DISEASE_ONSET_SCHEMA, {})
 
 DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DISEASE_SCHEMA, {
     "properties": {
         "term": ONTOLOGY_SEARCH_SCHEMA,
-        "onset": DISEASE_ONSET_SEARCH_SCHEMA,
+        "excluded": {
+            "search": search_optional_eq(0),
+        },
+        "onset": TIME_ELEMENT_SEARCH_SCHEMA,
+        "resolution": TIME_ELEMENT_SEARCH_SCHEMA,
         "disease_stage": {
             "items": ONTOLOGY_SEARCH_SCHEMA,
             "search": SEARCH_DATABASE_JSONB
@@ -271,13 +252,9 @@ DISEASE_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_DI
             "items": ONTOLOGY_SEARCH_SCHEMA,
             "search": SEARCH_DATABASE_JSONB
         },
+        "primary_site": ONTOLOGY_SEARCH_SCHEMA,
     },
-    "search": {
-        "database": {
-            "primary_key": models.Disease._meta.pk.column,
-            "relation": models.Disease._meta.db_table,
-        }
-    }
+    "search": search_table_ref(models.Disease),
 })
 
 GENOMIC_INTERPRETATION_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKET_GENOMIC_INTERPRETATION, {
@@ -465,10 +442,5 @@ PHENOPACKET_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.PHENOPACKE
         },  # TODO
         "meta_data": META_DATA_SEARCH_SCHEMA
     },
-    "search": {
-        "database": {
-            "relation": models.Phenopacket._meta.db_table,
-            "primary_key": models.Phenopacket._meta.pk.column
-        }
-    }
+    "search": search_table_ref(models.Phenopacket),
 })
