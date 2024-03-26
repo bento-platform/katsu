@@ -70,10 +70,11 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         description=pf.get("description", ""),
         pftype=pf["type"],
         excluded=pf.get("excluded", False),
-        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
         severity=pf.get("severity"),
+        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
         onset=pf.get("onset"),
-        evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
+        resolution=pf.get("resolution"),
+        evidence=pf.get("evidence", []),  # TODO: Separate class for evidence?
         extra_properties=_clean_extra_properties(pf.get("extra_properties", {})),
     )
     pf_obj.save()
@@ -264,8 +265,12 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
 def get_or_create_disease(disease) -> pm.Disease:
     d_obj, _ = pm.Disease.objects.get_or_create(
         term=disease["term"],
+        excluded=disease.get("excluded", False),
+        resolution=disease.get("resolution"),
         disease_stage=disease.get("disease_stage", []),
         clinical_tnm_finding=disease.get("clinical_tnm_finding", []),
+        primary_site=disease.get("primary_site"),
+        laterality=disease.get("laterality"),
         extra_properties=_clean_extra_properties(disease.get("extra_properties", {})),
         **query_and_check_nulls(disease, "onset")
     )

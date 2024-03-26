@@ -144,6 +144,16 @@
         "label": "Infiltrating Urothelial Carcinoma"
       },
       "excluded": false,
+      "resolution": {
+        "age": {
+            "iso8601duration": "P30Y"
+        }
+      },
+      "onset": {
+          "age": {
+              "iso8601duration": "P27Y"
+          }
+      },
       "disease_stage": [
         {
           "id": "NCIT:C48766",
@@ -153,7 +163,21 @@
           "id": "NCIT:C48750",
           "label": "pN2 Stage Finding"
         }
-      ]
+      ],
+      "clinical_tnm_finding": [
+        {
+          "id": "NCIT:C48766",
+          "label": "pT2b Stage Finding"
+        }
+      ],
+      "primary_site": {
+        "id": "NCIT:C43234",
+        "label": "Not Reported"
+      },
+      "laterality": {
+        "id": "LATERAL:left",
+        "label": "left"
+      }
     }
   ],
   "measurements": [
