@@ -1,7 +1,9 @@
+import asyncio
 import itertools
 import json
 import logging
 
+from adrf.decorators import api_view as async_api_view
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
 
@@ -27,7 +29,7 @@ from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
-
+from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
 from chord_metadata_service.metadata.elastic import es
 
@@ -36,6 +38,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
+from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset
@@ -47,42 +50,12 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-def experiment_dataset_summary(dataset):
-    experiments = Experiment.objects.filter(dataset=dataset)
-
-    return {
-        "count": experiments.count(),
-        "data_type_specific": {},  # TODO
-    }
+async def experiment_dataset_summary(_request: DrfRequest, dataset):
+    return await dt_experiment_summary(Experiment.objects.filter(dataset=dataset), low_counts_censored=False)
 
 
-def phenopacket_dataset_summary(dataset):
-    phenopacket_qs = Phenopacket.objects.filter(dataset=dataset)  # TODO
-
-    # Sex related fields stats are precomputed here and post processed later
-    # to include missing values inferred from the schema
-    individuals_sex = queryset_stats_for_field(phenopacket_qs, "subject__sex")
-    individuals_k_sex = queryset_stats_for_field(phenopacket_qs, "subject__karyotypic_sex")
-
-    return {
-        "count": phenopacket_qs.count(),
-        "data_type_specific": {
-            "biosamples": {
-                "count": phenopacket_qs.values("biosamples__id").count(),
-                "is_control_sample": queryset_stats_for_field(phenopacket_qs, "biosamples__is_control_sample"),
-                "taxonomy": queryset_stats_for_field(phenopacket_qs, "biosamples__taxonomy__label"),
-            },
-            "diseases": queryset_stats_for_field(phenopacket_qs, "diseases__term__label"),
-            "individuals": {
-                "count": phenopacket_qs.values("subject__id").count(),
-                "sex": {k: individuals_sex.get(k, 0) for k in (s[0] for s in Individual.SEX)},
-                "karyotypic_sex": {k: individuals_k_sex.get(k, 0) for k in (s[0] for s in Individual.KARYOTYPIC_SEX)},
-                "taxonomy": queryset_stats_for_field(phenopacket_qs, "subject__taxonomy__label"),
-                "age": get_field_bins(phenopacket_qs, "subject__age_numeric", 10),
-            },
-            "phenotypic_features": queryset_stats_for_field(phenopacket_qs, "phenotypic_features__pftype__label"),
-        }
-    }
+async def phenopacket_dataset_summary(_request: DrfRequest, dataset: Dataset):
+    return await dt_phenopacket_summary(Phenopacket.objects.filter(dataset=dataset), low_counts_censored=False)
 
 
 # TODO: CHORD-standardized logging
@@ -90,7 +63,7 @@ def debug_log(message):  # pragma: no cover
     logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}")
 
 
-def get_field_lookup(field):
+def get_field_lookup(field: list[str]) -> str:
     """
     Given a field identifier as a schema-like path e.g. ['biosamples', '[item]', 'id'],
     returns a Django ORM field lookup string e.g. 'biosamples__id'
@@ -116,7 +89,7 @@ def get_values_list(queryset, options):
     return queryset.values_list(field_lookup, flat=True)
 
 
-def data_type_results(query, params, key="id"):
+def data_type_results(query: sql.SQL, params, key="id"):
     with connection.cursor() as cursor:
         debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
         cursor.execute(query.as_string(cursor.connection), params)
@@ -569,11 +542,22 @@ def private_dataset_search(request: DrfRequest, dataset_id: str):
     return dataset_search(request=request, dataset_id=dataset_id, internal=True)
 
 
-@api_view(["GET"])
+DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
+    DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary,
+    DATA_TYPE_EXPERIMENT: experiment_dataset_summary,
+}
+
+
+@async_api_view(["GET"])
 @permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def dataset_summary(request: DrfRequest, dataset_id: str):
+async def dataset_summary(request: DrfRequest, dataset_id: str):
+    # TODO: PERMISSIONS
+
     dataset = Dataset.objects.get(identifier=dataset_id)
-    return Response({
-        DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary(dataset=dataset),
-        DATA_TYPE_EXPERIMENT: experiment_dataset_summary(dataset=dataset),
-    })
+
+    summaries = await asyncio.gather(
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset),
+             DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
+    )
+
+    return Response({dt: s} for dt, s in zip(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(), summaries))
