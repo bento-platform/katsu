@@ -24,7 +24,6 @@ from typing import Callable
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.utils import get_field_bins, queryset_stats_for_field
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -32,8 +31,6 @@ from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
 from chord_metadata_service.metadata.elastic import es
-
-from chord_metadata_service.patients.models import Individual
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
@@ -553,7 +550,7 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 async def dataset_summary(request: DrfRequest, dataset_id: str):
     # TODO: PERMISSIONS
 
-    dataset = Dataset.objects.get(identifier=dataset_id)
+    dataset = await Dataset.objects.aget(identifier=dataset_id)
 
     summaries = await asyncio.gather(
         *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset),
