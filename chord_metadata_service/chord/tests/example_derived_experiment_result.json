@@ -4,14 +4,14 @@
         "description": "test add to experiment results",
         "filename": "sample1_01.vcf.gz.maf",
         "file_format": "MAF",
+        "url": "drs://wherever.org/aaaa-bbbb-12345678",
         "data_output_type": "Derived data",
         "usage": "Downloaded",
         "creation_date": "01-09-2021",
         "created_by": "Admin",
         "genome_assembly_id": "GRCh37",
         "extra_properties": {
-            "derived_from": "sample1_01",
-            "uri": "drs://wherever.org/aaaa-bbbb-12345678"
+            "derived_from": "sample1_01"
         }
     },
     {
@@ -19,14 +19,14 @@
         "description": "test add to experiment results",
         "filename": "sample1_02.vcf.gz.maf",
         "file_format": "MAF",
+        "url": "drs://wherever.org/aaaa-bbbb-123456789",
         "data_output_type": "Derived data",
         "usage": "Downloaded",
         "creation_date": "01-09-2021",
         "created_by": "Admin",
         "genome_assembly_id": "GRCh37",
         "extra_properties": {
-            "derived_from": "sample1_02",
-            "uri": "drs://wherever.org/aaaa-bbbb-123456789"
+            "derived_from": "sample1_02"
         }
     }
 ]

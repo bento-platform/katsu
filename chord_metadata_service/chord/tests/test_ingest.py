@@ -1,6 +1,5 @@
-from django.test import TestCase
-from chord_metadata_service.chord.ingest.views import DATASET_ID_OVERRIDES
 from dateutil.parser import isoparse
+from django.test import TestCase
 
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
@@ -242,7 +241,7 @@ class IngestTest(TestCase):
         )
         # ingest list of experiment results
         experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
-            EXAMPLE_INGEST_EXPERIMENT_RESULT, DATASET_ID_OVERRIDES
+            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier
         )
         self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
         # check that it has been linked to the same experiment as the file it
