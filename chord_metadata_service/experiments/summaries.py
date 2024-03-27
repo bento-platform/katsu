@@ -53,8 +53,7 @@ async def experiment_summary(experiments: QuerySet, low_counts_censored: bool) -
 
 
 async def experiment_result_summary(experiments: QuerySet, low_counts_censored: bool) -> dict:
-    experiment_results = models.ExperimentResult.objects.filter(
-        experiment__id__in=experiments.values_list("id", flat=True))
+    experiment_results = models.ExperimentResult.objects.filter(experiment__in=experiments)
 
     (
         count,
@@ -77,7 +76,7 @@ async def experiment_result_summary(experiments: QuerySet, low_counts_censored: 
 
 
 async def instrument_summary(experiments: QuerySet, low_counts_censored: bool) -> dict:
-    instruments = models.Instrument.objects.filter(experiment__id__in=experiments.values_list("id", flat=True))
+    instruments = models.Instrument.objects.filter(experiment__in=experiments).distinct()
 
     count, platform, model = await asyncio.gather(
         instruments.acount(),

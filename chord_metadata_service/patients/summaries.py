@@ -16,7 +16,7 @@ OVERVIEW_AGE_BIN_SIZE = 10  # TODO: configurable
 async def individual_summary(phenopackets: QuerySet | None, low_counts_censored: bool):
     individuals = (
         models.Individual.objects.all()
-        if phenopackets is None else models.Individual.objects.filter(phenopackets__in=phenopackets)
+        if phenopackets is None else models.Individual.objects.filter(phenopackets__in=phenopackets).distinct()
     )
 
     individual_count, individual_sex, individual_k_sex, individual_age, individual_taxonomy = await asyncio.gather(
