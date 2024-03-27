@@ -71,7 +71,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         pftype=pf["type"],
         excluded=pf.get("excluded", False),
         severity=pf.get("severity"),
-        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
+        modifiers=pf.get("modifiers", []),
         onset=pf.get("onset"),
         resolution=pf.get("resolution"),
         evidence=pf.get("evidence", []),  # TODO: Separate class for evidence?
