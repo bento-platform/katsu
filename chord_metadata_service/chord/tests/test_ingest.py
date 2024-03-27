@@ -1,8 +1,6 @@
-from django.test import TestCase
 from chord_metadata_service.chord.ingest.views import DATASET_ID_OVERRIDES
 from dateutil.parser import isoparse
 
-from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.ingest.exceptions import IngestError
 from chord_metadata_service.chord.ingest.experiments import (
@@ -15,6 +13,7 @@ from chord_metadata_service.chord.ingest.phenopackets import (
     validate_phenopacket,
     ingest_phenopacket,
 )
+from chord_metadata_service.chord.tests.helpers import ModelFieldsTestMixin, ProjectTestCase
 from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
@@ -27,7 +26,6 @@ from chord_metadata_service.experiments.models import Experiment, ExperimentResu
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 
 
-from .constants import VALID_DATA_USE_1
 from .example_ingest import (
     EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS,
     EXAMPLE_INGEST_PHENOPACKET,
@@ -39,12 +37,10 @@ from .example_ingest import (
     EXAMPLE_INGEST_INVALID_EXPERIMENT,
 )
 
+IGNORE_COMMON_FIELDS = ["created", "updated", "created_by", "submitted_by"]
 
-class IngestTest(TestCase):
-    def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=p)
+
+class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
     def test_create_pf(self):
         p1 = get_or_create_phenotypic_feature({
@@ -111,48 +107,93 @@ class IngestTest(TestCase):
     #     self.assertEqual(p3.pk, p1.pk)
 
     def test_ingesting_phenopackets_json(self):
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET,
+            self.dataset.identifier
+        )
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
-        self.assertEqual(p.subject.id, EXAMPLE_INGEST_PHENOPACKET["subject"]["id"])
+        # Subject
         self.assertEqual(p.subject.date_of_birth, isoparse(EXAMPLE_INGEST_PHENOPACKET["subject"]["date_of_birth"]))
-        self.assertEqual(p.subject.sex, EXAMPLE_INGEST_PHENOPACKET["subject"]["sex"])
-        self.assertEqual(p.subject.karyotypic_sex, EXAMPLE_INGEST_PHENOPACKET["subject"]["karyotypic_sex"])
-
+        self.assert_model_fields_equal(
+            db_obj=p.subject,
+            ground_truth=EXAMPLE_INGEST_PHENOPACKET["subject"],
+            ignore_fields=IGNORE_COMMON_FIELDS + ["date_of_birth"]  # DOB needs parsing
+        )
         self.assertIn("__computed", EXAMPLE_INGEST_PHENOPACKET["subject"]["extra_properties"])
-        self.assertNotIn("__computed", p.subject.extra_properties)
+        self.assertNotIn("__computed", p.subject.extra_properties)  # Explicitly test computed extra_properties
 
-        pfs = list(p.phenotypic_features.all().order_by("pftype__id"))
+        # Phenotypic Features
+        pfs = list(p.phenotypic_features.all().order_by("created"))
+        self.assert_model_fields_list_equal(
+            db_list=pfs,
+            ground_truths=EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"],
+            ignore_fields=IGNORE_COMMON_FIELDS,
+            field_maps={
+                # JSON field mapping to model field
+                "type": "pftype",
+            },
+        )
 
-        self.assertEqual(len(pfs), 2)
-        self.assertEqual(pfs[0].description, EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["description"])
-        self.assertEqual(pfs[0].pftype["id"], EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["type"]["id"])
-        self.assertEqual(pfs[0].pftype["label"], EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["type"]["label"])
-        self.assertEqual(pfs[0].excluded, EXAMPLE_INGEST_PHENOPACKET["phenotypic_features"][0]["excluded"])
-        # TODO: Test more properties
-
+        # Diseases
         diseases = list(p.diseases.all().order_by("term__id"))
-        self.assertEqual(len(diseases), 1)
-        for field in ["term", "excluded", "onset", "resolution", "disease_stage",
-                      "clinical_tnm_finding", "primary_site", "laterality"]:
-            self.assertEqual(getattr(diseases[0], field), EXAMPLE_INGEST_PHENOPACKET["diseases"][0][field])
+        self.assert_model_fields_list_equal(
+            db_list=diseases,
+            ground_truths=EXAMPLE_INGEST_PHENOPACKET["diseases"],
+            ignore_fields=IGNORE_COMMON_FIELDS + ["id"],
+        )
 
-        # TODO: Test Metadata
+        # Metadata
+        self.assert_model_fields_equal(
+            db_obj=p.meta_data,
+            ground_truth=EXAMPLE_INGEST_PHENOPACKET["meta_data"],
+            ignore_fields=IGNORE_COMMON_FIELDS + ["id", "resources"]
+        )
 
+        # Metadata Resources
+        resources = list(p.meta_data.resources.all().order_by("created"))
+        self.assert_model_fields_list_equal(
+            db_list=resources,
+            ground_truths=EXAMPLE_INGEST_PHENOPACKET["meta_data"]["resources"],
+            ignore_fields=IGNORE_COMMON_FIELDS
+        )
+
+        # Biosamples
         biosamples = list(p.biosamples.all().order_by("id"))
-        self.assertEqual(len(biosamples), 5)
+        self.assert_model_fields_list_equal(
+            db_list=biosamples,
+            ground_truths=EXAMPLE_INGEST_PHENOPACKET["biosamples"],
+            ignore_fields=IGNORE_COMMON_FIELDS
+        )
 
         # Make sure biosamples are properly associated with phenopacket subject
         #  - Some test biosamples exclude individual_id; these should be properly associated too
         for bs in biosamples:
             self.assertEqual(bs.individual_id, p.subject.id)
 
-        # TODO: More
+        # TODO: add argument to pass fields list for JSONField models
+        # Measurements
+        # self.assert_model_fields_list_equal(
+        #     db_list=p.measurements,
+        #     ground_truths=EXAMPLE_INGEST_PHENOPACKET["measurements"],
+        #     ignore_fields=IGNORE_COMMON_FIELDS
+        # )
+        # Medical Actions
+        # self.assert_model_fields_list_equal(
+        #     db_list=p.medical_actions,
+        #     ground_truths=EXAMPLE_INGEST_PHENOPACKET["medical_actions"],
+        #     ignore_fields=IGNORE_COMMON_FIELDS
+        # )
 
     def test_reingesting_updating_phenopackets_json(self):
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
-        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET_UPDATE,
-                                                                      self.d.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET,
+            self.dataset.identifier
+        )
+        p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET_UPDATE,
+            self.dataset.identifier
+        )
 
         self.assertNotEqual(p.id, p2.id)
         self.assertEqual(p.subject.id, p2.subject.id)
@@ -191,12 +232,15 @@ class IngestTest(TestCase):
 
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
-        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET,
+            self.dataset.identifier
+        )
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier
         )
 
         # experiments
@@ -218,7 +262,7 @@ class IngestTest(TestCase):
         # try ingesting the file with an invalid biosample ID
         with self.assertRaises(Biosample.DoesNotExist):
             WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.d.identifier
+                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.dataset.identifier
             )
 
     def test_ingesting_invalid_experiment_json(self):
@@ -238,9 +282,9 @@ class IngestTest(TestCase):
 
     def test_ingesting_experiment_results_json(self):
         # ingest list of experiments
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier
         )
         # ingest list of experiment results
         experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
@@ -257,15 +301,11 @@ class IngestTest(TestCase):
         )
 
 
-class IngestISOAgeToNumberTest(TestCase):
-    def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=p)
+class IngestISOAgeToNumberTest(ProjectTestCase):
 
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.d.identifier
+            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier
         )
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001
