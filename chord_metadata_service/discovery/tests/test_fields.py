@@ -3,7 +3,7 @@ from django.test import override_settings
 from rest_framework.test import APITestCase
 from unittest import TestCase
 
-from chord_metadata_service.restapi.tests.constants import CONFIG_PUBLIC_TEST
+from .constants import CONFIG_PUBLIC_TEST
 from ..fields import (
     get_model_and_field,
     get_date_stats,
