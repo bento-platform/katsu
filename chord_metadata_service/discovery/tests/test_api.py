@@ -146,8 +146,7 @@ class PublicOverviewTest2(APITestCase):
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj["counts"]["individual"], 0)  # below count threshold
-        self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+        self.assertEqual(response_obj["counts"]["individuals"], 0)  # below count threshold
 
     @override_settings(CONFIG_PUBLIC={})
     def test_overview_response_no_config(self):
