@@ -89,7 +89,8 @@ class OverviewTest(APITestCase):
         # experiments
         experiment_res = response_obj['experiment']
         self.assertEqual(experiment_res['count'], 2)
-        self.assertEqual(experiment_res['data_type_specific']['experiments']['study_type']['Whole genome Sequencing'], 2)
+        self.assertEqual(
+            experiment_res['data_type_specific']['experiments']['study_type']['Whole genome Sequencing'], 2)
         self.assertEqual(
             experiment_res['data_type_specific']['experiments']['experiment_type']['DNA Methylation'], 2
         )
