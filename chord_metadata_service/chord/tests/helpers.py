@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.db.models import Model
 
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
@@ -29,7 +30,7 @@ class ModelFieldsTestMixin(TestCase):
     Helper TestCase mixin class providing functions to test data ingestion on all fields of a model.
     """
 
-    def assert_model_fields_list_equal(self, db_list: list, ground_truths: list[dict],
+    def assert_model_fields_list_equal(self, db_list: list[Model], ground_truths: list[dict],
                                        ignore_fields: list[str], field_maps={}):
         """
         List wrapper for assert_model_fields_equal.
@@ -44,7 +45,7 @@ class ModelFieldsTestMixin(TestCase):
                 field_maps=field_maps
             )
 
-    def assert_model_fields_equal(self, db_obj, ground_truth: dict,
+    def assert_model_fields_equal(self, db_obj: Model, ground_truth: dict,
                                   ignore_fields: list[str], field_maps={}):
         """
         Compares the fields of db_obj (exluding ignore_fields, if any) with the values of ground_truth.
