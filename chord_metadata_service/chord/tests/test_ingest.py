@@ -171,19 +171,19 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         for bs in biosamples:
             self.assertEqual(bs.individual_id, p.subject.id)
 
-        # TODO: add argument to pass fields list for JSONField models
         # Measurements
-        # self.assert_model_fields_list_equal(
-        #     db_list=p.measurements,
-        #     ground_truths=EXAMPLE_INGEST_PHENOPACKET["measurements"],
-        #     ignore_fields=IGNORE_COMMON_FIELDS
-        # )
+        self.assertEqual(p.measurements, EXAMPLE_INGEST_PHENOPACKET["measurements"])
+
         # Medical Actions
-        # self.assert_model_fields_list_equal(
-        #     db_list=p.medical_actions,
-        #     ground_truths=EXAMPLE_INGEST_PHENOPACKET["medical_actions"],
-        #     ignore_fields=IGNORE_COMMON_FIELDS
-        # )
+        self.assertEqual(p.medical_actions, EXAMPLE_INGEST_PHENOPACKET["medical_actions"])
+
+        # Interpretations
+        interpretations = list(p.interpretations.all().order_by("id"))
+        self.assert_model_fields_list_equal(
+            db_list=interpretations,
+            ground_truths=EXAMPLE_INGEST_PHENOPACKET["interpretations"],
+            ignore_fields=IGNORE_COMMON_FIELDS + ["diagnosis"],  # TODO: test diagnosis
+        )
 
     def test_reingesting_updating_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
