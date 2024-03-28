@@ -25,8 +25,15 @@ class ProjectTestCase(TestCase):
 
 
 class ModelFieldsTestMixin(TestCase):
+    """
+    Helper TestCase mixin class providing functions to test data ingestion on all fields of a model.
+    """
+
     def assert_model_fields_list_equal(self, db_list: list, ground_truths: list[dict],
                                        ignore_fields: list[str], field_maps={}):
+        """
+        List wrapper for assert_model_fields_equal.
+        """
         self.assertEqual(len(db_list), len(ground_truths))
         for idx, db_obj in enumerate(db_list):
             ground_truth = ground_truths[idx]
@@ -39,6 +46,9 @@ class ModelFieldsTestMixin(TestCase):
 
     def assert_model_fields_equal(self, db_obj, ground_truth: dict,
                                   ignore_fields: list[str], field_maps={}):
+        """
+        Compares the fields of db_obj (exluding ignore_fields, if any) with the values of ground_truth.
+        """
         MODEL_FIELDS = [f.name for f in db_obj._meta.get_fields() if f.name not in ignore_fields]
         for field in MODEL_FIELDS:
             gt_value = ground_truth.get(field)
