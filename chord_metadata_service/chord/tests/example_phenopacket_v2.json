@@ -31,6 +31,43 @@
         "id": "HP:0012828",
         "label": "Severe"
       }
+    },
+    {
+      "description": "Test pf 3",
+      "type": {
+        "id": "HP:0032122",
+        "label": "Very low visual acuity"
+      },
+      "excluded": true,
+      "modifiers": [
+        {
+          "id": "HP:0025286",
+          "label": "Aggravated by activity"
+        }
+      ],
+      "resolution": {
+        "age": {
+            "iso8601duration": "P30Y"
+        }
+      },
+      "onset": {
+          "age": {
+              "iso8601duration": "P27Y"
+          }
+      },
+      "evidence": [
+        {
+          "evidence_code": {
+            "id": "ECO:0006017",
+            "label": "author statement from published clinical study used in manual assertion"
+          },
+          "reference": {
+            "id": "PMID:30962759",
+            "reference": "https://pubmed.ncbi.nlm.nih.gov/30962759",
+            "description": "Recurrent Erythema Nodosum in a Child with a SHOC2 Gene Mutation"
+          }
+        }
+      ]
     }
   ],
   "biosamples": [
@@ -144,6 +181,16 @@
         "label": "Infiltrating Urothelial Carcinoma"
       },
       "excluded": false,
+      "resolution": {
+        "age": {
+            "iso8601duration": "P30Y"
+        }
+      },
+      "onset": {
+          "age": {
+              "iso8601duration": "P27Y"
+          }
+      },
       "disease_stage": [
         {
           "id": "NCIT:C48766",
@@ -153,7 +200,21 @@
           "id": "NCIT:C48750",
           "label": "pN2 Stage Finding"
         }
-      ]
+      ],
+      "clinical_tnm_finding": [
+        {
+          "id": "NCIT:C48766",
+          "label": "pT2b Stage Finding"
+        }
+      ],
+      "primary_site": {
+        "id": "NCIT:C43234",
+        "label": "Not Reported"
+      },
+      "laterality": {
+        "id": "LATERAL:left",
+        "label": "left"
+      }
     }
   ],
   "measurements": [

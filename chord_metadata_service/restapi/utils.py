@@ -700,3 +700,13 @@ def computed_property(name: str):
     Takes a name and returns it prefixed with "__"
     """
     return COMPUTED_PROPERTY_PREFIX + name
+
+
+def remove_computed_properties(data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Removes computed properties from an extra_properties dictionary.
+    Computed extra_properties start with "__" and should never be ingested.
+    """
+    if data:
+        return {k: v for k, v in data.items() if not k.startswith(COMPUTED_PROPERTY_PREFIX)}
+    return data
