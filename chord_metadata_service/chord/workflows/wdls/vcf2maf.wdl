@@ -43,6 +43,7 @@ workflow vcf2maf {
 
     output {
         Array[File] maf = vcf_2_maf.out
+        File maf_list = vcf_2_maf.maf_list
     }
 }
 
@@ -121,6 +122,8 @@ task katsu_dataset_export_vcf {
                 file_handle.write(f"{location}\t{assembly_id}\t{vcf}\n")
 
                 vcf_dict[vcf] = result
+
+        print(f"Found {len(vcf_dict)} VCF files to convert to MAF")
 
         # save the JSON
         with open("experiment_results.json", "w") as file_handle:
@@ -212,7 +215,9 @@ task vcf_2_maf {
         project_id, dataset_id = "~{project_dataset}".split(":")
 
         try:
-            with open(os.environ["maf"], "r") as fh:
+            maf_path = os.environ["maf"]
+            with open(maf_path, "r") as fh:
+                print(f"Ingesting {maf_path} into DRS")
                 response = requests.post(
                     "~{drs_url}/ingest",
                     headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
