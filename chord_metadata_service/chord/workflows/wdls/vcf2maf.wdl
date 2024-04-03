@@ -327,7 +327,6 @@ task katsu_update_experiment_results_with_maf {
     >>>
 
     output {
-        File experiment_results_maf_json = "experiment_results_maf.json"
         File txt_output = stdout()
         File err_output = stderr()
     }
