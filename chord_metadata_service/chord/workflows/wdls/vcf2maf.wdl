@@ -105,7 +105,7 @@ task katsu_dataset_export_vcf {
 
                 # Query DRS with the filename to get the absolute file path in
                 # DRS for processing.
-                drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
+                drs_url = f"~{drs_url}/search?name={vcf}&internal_path=1"
                 response = requests.get(drs_url, verify=~{true="True" false="False" validate_ssl})
                 if not response.ok:
                     continue
