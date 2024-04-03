@@ -5,7 +5,7 @@ workflow vcf2maf {
         String drs_url
         String katsu_url
         String access_token
-        String validate_ssl
+        Boolean validate_ssl
         String project_dataset
         String vep_cache_dir
         String run_dir
