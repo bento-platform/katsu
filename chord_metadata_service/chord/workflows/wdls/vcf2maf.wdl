@@ -58,8 +58,7 @@ task katsu_dataset_export_vcf {
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
     # interpolation more straightforward. According to specs, this should
-    # restrict to ~{} syntax instead of ${} for string interpolation, which is
-    # accepted by womtools but is not recognized by toil runner...
+    # restrict to ~{} syntax instead of ${} for string interpolation.
     command <<<
         python <<CODE
         import json
