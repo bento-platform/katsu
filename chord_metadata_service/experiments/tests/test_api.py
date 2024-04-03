@@ -30,19 +30,22 @@ class GetExperimentsAppApisTest(APITestCase):
         p = Project.objects.create(title="Test Project", description="Test")
         self.d1 = Dataset.objects.create(title="dataset_1", description="Some dataset 1", data_use=VALID_DATA_USE_1,
                                          project=p)
+        self.d1_id = self.d1.identifier
         self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset 2", data_use=VALID_DATA_USE_1,
                                          project=p)
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1.identifier)
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.d1.identifier)
+        self.d2_id = self.d2.identifier
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1_id)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.d1_id)
+
+    def assert_response_200_and_length(self, response, assert_len: int):
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data["count"], assert_len)
+        self.assertEqual(len(response_data["results"]), assert_len)
 
     def test_get_experiments(self):
         response = self.client.get('/api/experiments')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 2)
-        self.assertEqual(len(response_data["results"]), 2)
+        self.assert_response_200_and_length(response, 2)
 
     def test_get_experiment_one(self):
         response = self.client.get('/api/experiments/katsu.experiment:1')
@@ -58,95 +61,57 @@ class GetExperimentsAppApisTest(APITestCase):
 
     def test_filter_experiments(self):
         response = self.client.get('/api/experiments?study_type=epigenetics')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 0)
-        self.assertEqual(len(response_data["results"]), 0)
+        self.assert_response_200_and_length(response, 0)
 
     def test_filter_experiments_by_dataset_1(self):
-        response = self.client.get('/api/experiments?datasets=dataset_1')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 2)
-        self.assertEqual(len(response_data["results"]), 2)
+        response = self.client.get(f'/api/experiments?datasets={self.d1_id}')
+        self.assert_response_200_and_length(response, 2)
 
     def test_filter_experiments_by_dataset_2(self):
-        response = self.client.get('/api/experiments?datasets=dataset_2')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 0)
-        self.assertEqual(len(response_data["results"]), 0)
+        response = self.client.get(f'/api/experiments?datasets={self.d2_id}')
+        self.assert_response_200_and_length(response, 0)
 
     def test_filter_experiments_by_datasets_list(self):
-        response = self.client.get('/api/experiments?datasets=dataset_2,dataset_1')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 2)
-        self.assertEqual(len(response_data["results"]), 2)
+        response = self.client.get(f'/api/experiments?datasets={self.d2_id},{self.d1_id}')
+        self.assert_response_200_and_length(response, 2)
 
     def test_get_experiment_results(self):
         response = self.client.get('/api/experimentresults')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 4)
-        self.assertEqual(len(response_data["results"]), 4)
+        self.assert_response_200_and_length(response, 4)
 
     def test_filter_experiment_results(self):
         response = self.client.get('/api/experimentresults?file_format=vcf')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 2)
-        self.assertEqual(len(response_data["results"]), 2)
+        self.assert_response_200_and_length(response, 2)
 
     def test_filter_experiment_results_url(self):
         response = self.client.get('/api/experimentresults?url=example.org')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 1)
-        self.assertEqual(len(response_data["results"]), 1)
+        self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_indices(self):
         response = self.client.get('/api/experimentresults?indices=tabix')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 1)
-        self.assertEqual(len(response_data["results"]), 1)
+        self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_by_dataset_1(self):
-        response = self.client.get('/api/experimentresults?datasets=dataset_1')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 4)
-        self.assertEqual(len(response_data["results"]), 4)
+        response = self.client.get(f'/api/experimentresults?datasets={self.d1_id}')
+        self.assert_response_200_and_length(response, 4)
 
     def test_filter_experiment_results_by_dataset_2(self):
-        response = self.client.get('/api/experimentresults?datasets=dataset_2')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 0)
-        self.assertEqual(len(response_data["results"]), 0)
+        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id}')
+        self.assert_response_200_and_length(response, 0)
 
     def test_filter_experiment_results_by_datasets_list(self):
-        response = self.client.get('/api/experimentresults?datasets=dataset_2,dataset_1')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 4)
-        self.assertEqual(len(response_data["results"]), 4)
+        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}')
+        self.assert_response_200_and_length(response, 4)
 
     def test_combine_filters_experiment_results(self):
-        response = self.client.get('/api/experimentresults?datasets=dataset_2,dataset_1&file_format=cram')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 2)
-        self.assertEqual(len(response_data["results"]), 2)
+        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}&file_format=cram')
+        self.assert_response_200_and_length(response, 2)
 
     def test_combine_filters_experiment_results_2(self):
         # there are no experiments in dataset_2
-        response = self.client.get('/api/experimentresults?datasets=dataset_2&file_format=vcf')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(response_data["count"], 0)
-        self.assertEqual(len(response_data["results"]), 0)
+        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id}&file_format=vcf')
+        self.assert_response_200_and_length(response, 0)
 
     def test_post_experiment_batch_no_data(self):
         response = self.client.post('/api/batch/experiments', format='json')
