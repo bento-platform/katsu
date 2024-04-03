@@ -17,6 +17,7 @@ workflow vcf2maf {
         input:  project_dataset = project_dataset,
                 drs_url  = drs_url,
                 katsu_url = katsu_url,
+                access_token = access_token,
                 validate_ssl = validate_ssl
     }
 
@@ -50,6 +51,7 @@ task katsu_dataset_export_vcf {
         String project_dataset
         String drs_url
         String katsu_url
+        String access_token
         Boolean validate_ssl
     }
 
@@ -75,7 +77,11 @@ task katsu_dataset_export_vcf {
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
         metadata_url = f"~{katsu_url}/api/experimentresults?datasets={dataset_id}&file_format=vcf&page_size=10000"
-        response = requests.get(metadata_url, verify=~{true="True" false="False" validate_ssl})
+        response = requests.get(
+            metadata_url,
+            headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
+            verify=~{true="True" false="False" validate_ssl},
+        )
         r = response.json()
 
         if r["count"] == 0:
