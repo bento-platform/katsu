@@ -209,7 +209,9 @@ task vcf_2_maf {
             perl /opt/vcf2maf.pl \
                 --input-vcf ${filtered_vcf} \
                 --output-maf ${maf} \
+                --tmp-dir . \
                 --vep-data ~{vep_cache_dir} \
+                --species ${VEP_CACHE_PATH_SPECIES} \
                 --ref-fasta ${REF_FASTA_PATH}/${REF_FASTA_TOPLEVEL} \
                 --vep-path ${VEP_PATH} \
                 --tumor-id ${SAMPLE_ID}
@@ -217,7 +219,7 @@ task vcf_2_maf {
             # Store the maf file in DRS and register its uri
             python -c '
         import json
-        import logger
+        import logging
         import requests
         import os
         import sys
