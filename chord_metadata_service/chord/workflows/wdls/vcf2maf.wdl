@@ -42,7 +42,9 @@ workflow vcf2maf {
     }
 
     output {
-        Array[File] maf = vcf_2_maf.out
+        File vcf_export_stderr = katsu_dataset_export_vcf.err_output
+        File vcf_list = katsu_dataset_export_vcf.vcf_files
+        File vcf_2_maf_stderr = vcf_2_maf.err_output
         File maf_list = vcf_2_maf.maf_list
     }
 }
@@ -63,6 +65,7 @@ task katsu_dataset_export_vcf {
     command <<<
         python <<CODE
         import json
+        import logging
         import requests
         import sys
 
@@ -70,6 +73,7 @@ task katsu_dataset_export_vcf {
         # Note: it is not possible to get the corresponding experiments at
         # this step due to the many to many relationship between these objects.
 
+        logger = logging.getLogger("katsu_dataset_export_vcf")
         _, dataset_id = "~{project_dataset}".split(":")
 
         # Beware: results are paginated! 10,000 is supposedly big enough
@@ -97,6 +101,7 @@ task katsu_dataset_export_vcf {
                 # In case of duplicates, skip. This happens with the synthetic demo
                 # dataset.
                 if vcf in vcf_dict:
+                    logger.warning(f"Skipping duplicate entry for {vcf}")
                     continue
 
                 # TODO add a default global parameter for when genome_assembly_id
@@ -108,11 +113,12 @@ task katsu_dataset_export_vcf {
                 drs_url = f"~{drs_url}/search?name={vcf}&internal_path=1"
                 response = requests.get(drs_url, verify=~{true="True" false="False" validate_ssl})
                 if not response.ok:
+                    logger.error(f"Got non-OK response from DRS while searching for VCF {vcf}")
                     continue
                 drs_resp = response.json()
 
                 if len(drs_resp) == 0:
-                    print(f"VCF file {vcf} not found")
+                    logger.warning(f"VCF file {vcf} not found")
                     continue
 
                 filtered_methods = filter(
@@ -123,7 +129,7 @@ task katsu_dataset_export_vcf {
 
                 vcf_dict[vcf] = result
 
-        print(f"Found {len(vcf_dict)} VCF files to convert to MAF")
+        logger.info(f"Found {len(vcf_dict)} VCF files to convert to MAF")
 
         # save the JSON
         with open("experiment_results.json", "w") as file_handle:
@@ -208,16 +214,18 @@ task vcf_2_maf {
             # Store the maf file in DRS and register its uri
             python -c '
         import json
+        import logger
         import requests
         import os
         import sys
 
+        logger = logging.getLogger("vcf_2_maf")
         project_id, dataset_id = "~{project_dataset}".split(":")
 
         try:
             maf_path = os.environ["maf"]
             with open(maf_path, "r") as fh:
-                print(f"Ingesting {maf_path} into DRS")
+                logger.info(f"Ingesting {maf_path} into DRS")
                 response = requests.post(
                     "~{drs_url}/ingest",
                     headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
