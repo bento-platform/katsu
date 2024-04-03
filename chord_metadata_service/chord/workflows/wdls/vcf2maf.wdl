@@ -313,7 +313,7 @@ task katsu_update_experiment_results_with_maf {
             else {}
         )
 
-         _, dataset_id = "~{project_dataset}".split(":")
+        _, dataset_id = "~{project_dataset}".split(":")
         metadata_url = f"~{katsu_url}/ingest-derived-experiment-results/{dataset_id}"
         response = requests.post(
             metadata_url,
