@@ -4,9 +4,20 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
+from chord_metadata_service.chord.workflows.metadata import (
+    workflow_set,
+    WORKFLOW_PHENOPACKETS_JSON,
+    WORKFLOW_EXPERIMENTS_JSON,
+)
 from chord_metadata_service.restapi.tests.utils import load_local_json
+
 from .constants import VALID_PROJECT_1, valid_dataset_1
-from ..workflows.metadata import workflow_set, WORKFLOW_PHENOPACKETS_JSON
+from .example_ingest import (
+    EXAMPLE_INGEST_PHENOPACKET,
+    EXAMPLE_INGEST_EXPERIMENT,
+    EXAMPLE_INGEST_EXPERIMENT_RESULT,
+)
 
 
 def generate_phenopackets_ingest(dataset_id):
@@ -45,7 +56,7 @@ class WorkflowTest(APITestCase):
         # TODO: Check file contents
 
 
-class IngestTest(APITestCase):
+class APITestCaseWithDataset(APITestCase):
     def setUp(self) -> None:
         r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
         self.project = r.json()
@@ -53,25 +64,28 @@ class IngestTest(APITestCase):
         r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
                              content_type="application/json")
         self.dataset = r.json()
+        self.dataset_id = self.dataset["identifier"]
 
+
+class IngestTest(APITestCaseWithDataset):
     def test_phenopackets_ingest(self):
         # Invalid workflow ID
         r = self.client.post(
-            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json_invalid")),
+            reverse("ingest-into-dataset", args=(self.dataset_id, "phenopackets_json_invalid")),
             content_type="application/json",
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # No ingestion body
         r = self.client.post(
-            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
             content_type="application/json",
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Bad ingestion body JSON - JSON parse error 400
         r = self.client.post(
-            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
             content_type="application/json",
             data="{}}",  # noqa: W605
         )
@@ -80,7 +94,7 @@ class IngestTest(APITestCase):
         # Invalid phenopacket JSON validation
         invalid_phenopacket = load_local_json("example_invalid_phenopacket.json")
         r = self.client.post(
-            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
             content_type="application/json",
             data=json.dumps(invalid_phenopacket),
         )
@@ -89,8 +103,21 @@ class IngestTest(APITestCase):
         # Success
         valid_phenopacket = load_local_json("example_phenopacket_v2.json")
         r = self.client.post(
-            reverse("ingest-into-dataset", args=(self.dataset["identifier"], "phenopackets_json")),
+            reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
             content_type="application/json",
             data=json.dumps(valid_phenopacket),
         )
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class IngestDerivedExperimentResultsTest(APITestCaseWithDataset):
+    def test_ingest_derived_experiment_results(self):
+        # ingest list of experiments
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset_id)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_EXPERIMENT, self.dataset_id)
+        # ingest list of experiment results
+        self.client.post(
+            reverse("ingest-derived-experiment-results", args=(self.dataset_id,)),
+            content_type="application/json",
+            data=json.dumps(EXAMPLE_INGEST_EXPERIMENT_RESULT),
+        )
