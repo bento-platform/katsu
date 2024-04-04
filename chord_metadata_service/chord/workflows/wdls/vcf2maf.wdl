@@ -191,15 +191,13 @@ task vcf_2_maf {
             VEP_ENSEMBL_VERSION=$(vep --help | grep "ensembl-vep" | grep -o "[0-9]*" | head -1)
 
             # Find the location of the reference assembly FASTA file for VEP
+            #  - REF_FASTA_PATH is the directory in which we search for the FASTA file.
             VEP_CACHE_PATH_SPECIES=$(echo ~{vep_species} | tr '[:upper:]' '[:lower:]')
             REF_FASTA_PATH=~{vep_cache_dir}/${VEP_CACHE_PATH_SPECIES}/${VEP_ENSEMBL_VERSION}_${assembly_id}
 
-            # The name of the FASTA file used as a reference can not be infered
-            # consistently from primitives: GRCh37 assembly has not been updated since
-            # ensembl version 75. We rely on the file actually present in the
-            # cache directory
-            # (pattern is like: "Homo_sapiens.GRCh37.75.dna.toplevel.fa.gz")
-            REF_FASTA_TOPLEVEL=$(ls ${REF_FASTA_PATH} | grep "toplevel" | head -1)
+            # The name of the FASTA file used as a reference can not be inferred consistently from primitives.
+            # We rely on the file actually present in the cache directory:
+            REF_FASTA_TOPLEVEL=$(ls ${REF_FASTA_PATH} | grep ".fa" | head -1)
 
             # Get the sample ID from the VCF file header.
             # Here it is assumed that the first sample in the file is the tumour and the second is the normal.
