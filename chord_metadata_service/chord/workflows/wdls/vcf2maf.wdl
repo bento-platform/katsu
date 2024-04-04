@@ -202,9 +202,19 @@ task vcf_2_maf {
             REF_FASTA_TOPLEVEL=$(ls ${REF_FASTA_PATH} | grep "toplevel" | head -1)
 
             # Get the sample ID from the VCF file header.
-            # Here it is assumed that only one sample is present in the file.
-            # TODO: check output and syntax if multiple samples are present.
-            SAMPLE_ID=$(bcftools query -l ${g_vcf})
+            # Here it is assumed that the first sample in the file is the tumour and the second is the normal.
+            # TODO: more generalized, depending on experiment configuration. Right now, this only really works for
+            # RENATA.
+
+            n_samples=$(bcftools query -l ${g_vcf} | wc -l)
+            if [[ $n_samples != 2 ]]; then
+                echo "WARNING: Must have two samples in the VCF for vcf2maf to work. Skipping ${g_vcf}." 1>&2
+                continue
+            fi
+
+            # xargs echo -n strips the newline.
+            TUMOR_ID=$(bcftools query -l ${g_vcf} | head -1 | xargs echo -n)
+            NORMAL_ID=$(bcftools query -l ${g_vcf} | tail -1 | xargs echo -n)
 
             perl /opt/vcf2maf.pl \
                 --input-vcf ${filtered_vcf} \
@@ -214,7 +224,8 @@ task vcf_2_maf {
                 --species ${VEP_CACHE_PATH_SPECIES} \
                 --ref-fasta ${REF_FASTA_PATH}/${REF_FASTA_TOPLEVEL} \
                 --vep-path ${VEP_PATH} \
-                --tumor-id ${SAMPLE_ID}
+                --tumor-id ${TUMOR_ID} \
+                --normal-id ${NORMAL_ID}
 
             # Store the maf file in DRS and register its uri
             python -c '
