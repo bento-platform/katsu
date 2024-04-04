@@ -17,7 +17,7 @@ __all__ = [
     "validate_experiment",
     "ingest_experiment",
     "ingest_experiments_workflow",
-    "ingest_maf_derived_from_vcf_workflow",
+    "ingest_derived_experiment_results",
 ]
 
 from .exceptions import IngestError
@@ -199,10 +199,3 @@ def ingest_derived_experiment_results(json_data: list[dict], dataset_id: str) ->
         exp_res_list.append(new_experiment_results)
 
     return exp_res_list
-
-
-# The dataset_id is required to fit the bento_ingest.schema.json in bento_lib,
-# but it is unused. It can be set to any valid dataset_id or to one of the override
-# values defined in view_ingest.py
-def ingest_maf_derived_from_vcf_workflow(json_data, dataset_id: str) -> list[em.ExperimentResult]:
-    return ingest_derived_experiment_results(json_data, dataset_id)

@@ -44,8 +44,11 @@ jobs:
     - name: Test
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
-        poetry run coverage run ./manage.py test
+        poetry run coverage run --branch ./manage.py test
+        poetry run coverage xml
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v4
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        verbose: true

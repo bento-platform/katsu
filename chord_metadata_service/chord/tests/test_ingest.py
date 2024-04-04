@@ -5,6 +5,7 @@ from chord_metadata_service.chord.ingest.exceptions import IngestError
 from chord_metadata_service.chord.ingest.experiments import (
     validate_experiment,
     ingest_experiment,
+    ingest_derived_experiment_results,
 )
 from chord_metadata_service.chord.ingest.schema import schema_validation
 from chord_metadata_service.chord.ingest.phenopackets import (
@@ -15,7 +16,6 @@ from chord_metadata_service.chord.ingest.phenopackets import (
 from chord_metadata_service.chord.tests.helpers import ModelFieldsTestMixin, ProjectTestCase
 from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
-    WORKFLOW_MAF_DERIVED_FROM_VCF_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
 )
 from chord_metadata_service.phenopackets.models import Biosample, PhenotypicFeature, Phenopacket
@@ -286,7 +286,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
             EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier
         )
         # ingest list of experiment results
-        experiment_results = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_MAF_DERIVED_FROM_VCF_JSON](
+        experiment_results = ingest_derived_experiment_results(
             EXAMPLE_INGEST_EXPERIMENT_RESULT, self.dataset.identifier
         )
         self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
