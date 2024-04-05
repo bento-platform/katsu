@@ -217,7 +217,9 @@ task vcf_2_maf {
             perl /opt/vcf2maf.pl \
                 --input-vcf ${filtered_vcf} \
                 --output-maf ${maf} \
+                --buffer-size 200 \
                 --tmp-dir . \
+                --verbose \
                 --vep-data ~{vep_cache_dir} \
                 --species ${VEP_CACHE_PATH_SPECIES} \
                 --ref-fasta ${REF_FASTA_PATH}/${REF_FASTA_TOPLEVEL} \
