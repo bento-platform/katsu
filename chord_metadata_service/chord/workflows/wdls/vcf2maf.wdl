@@ -214,10 +214,11 @@ task vcf_2_maf {
             TUMOR_ID=$(bcftools query -l ${g_vcf} | head -1 | xargs echo -n)
             NORMAL_ID=$(bcftools query -l ${g_vcf} | tail -1 | xargs echo -n)
 
+            # --buffer-size default is 5000. We reduce it by a lot to reduce memory usage and avoid crashes.
             perl /opt/vcf2maf.pl \
                 --input-vcf ${filtered_vcf} \
                 --output-maf ${maf} \
-                --buffer-size 200 \
+                --buffer-size 500 \
                 --tmp-dir . \
                 --verbose \
                 --vep-data ~{vep_cache_dir} \
