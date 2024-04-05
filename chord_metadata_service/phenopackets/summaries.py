@@ -4,6 +4,8 @@ from django.db.models import QuerySet
 
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.stats import stats_for_field, queryset_stats_for_field
+from chord_metadata_service.patients.summaries import individual_summary
+
 from . import models
 
 __all__ = [
@@ -12,8 +14,6 @@ __all__ = [
     "phenotypic_feature_summary",
     "dt_phenopacket_summary",
 ]
-
-from chord_metadata_service.patients.summaries import individual_summary
 
 
 async def biosample_summary(phenopackets: QuerySet, low_counts_censored: bool):
