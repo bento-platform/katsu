@@ -221,6 +221,7 @@ task vcf_2_maf {
                 --vep-data ~{vep_cache_dir} \
                 --species ${VEP_CACHE_PATH_SPECIES} \
                 --ref-fasta ${REF_FASTA_PATH}/${REF_FASTA_TOPLEVEL} \
+                --ncbi-build ${assembly_id} \
                 --vep-path ${VEP_PATH} \
                 --tumor-id ${TUMOR_ID} \
                 --normal-id ${NORMAL_ID}
