@@ -26,6 +26,7 @@ MODEL_NAMES_TO_MODEL: dict[str, Type[Model]] = {
 }
 
 COMPUTED_PROPERTY_PREFIX = "__"
+MAPPING_SEPARATOR = "/"
 
 
 class BinWithValue(TypedDict):
@@ -286,7 +287,7 @@ def get_model_and_field(field_id: str) -> tuple[any, str]:
     field for this object.
     """
 
-    model_name, *field_path = field_id.split("/")
+    model_name, *field_path = field_id.split(MAPPING_SEPARATOR)
 
     model: Type[Model] | None = MODEL_NAMES_TO_MODEL.get(model_name)
     if model is None:
@@ -297,16 +298,16 @@ def get_model_and_field(field_id: str) -> tuple[any, str]:
     return model, field_name
 
 
-def stats_for_field(model, field: str, add_missing=False) -> Mapping[str, int]:
+def stats_for_field(model, field: str, add_missing=False, group_by=None) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
     queryset = model.objects.all()
-    return queryset_stats_for_field(queryset, field, add_missing)
+    return queryset_stats_for_field(queryset, field, add_missing, group_by)
 
 
-def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping[str, int]:
+def queryset_stats_for_field(queryset, field: str, add_missing=False, group_by=None) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a queryset.
     """
@@ -315,6 +316,12 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
 
+    if group_by:
+        # If 'field' maps to a JSONField containing an array (e.g. biosamples__diagnostic_markers)
+        # django can't use field lookups with QuerySet.values() inside array elements,
+        # we remove the 'group_by' portion of the mapping, and group later.
+        field = field.split(f"__{group_by}")[0]
+
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
 
@@ -322,8 +329,17 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False) -> Mapping
 
     for item in annotated_queryset:
         key = item[field]
-        if key is None:
+        if key is None or (isinstance(key, list) and not key):
             num_missing = item["total"]
+            continue
+
+        # group the values in the array using the 'group_by' option
+        if isinstance(key, list) and key and group_by:
+            for subkey in key:
+                group = get_nested_dict_value(subkey, group_by)
+                stats.update({
+                    group: stats.get(group, 0) + item["total"]
+                })
             continue
 
         key = str(key) if not isinstance(key, str) else key.strip()
@@ -397,7 +413,7 @@ def get_categorical_stats(field_props: dict) -> list[BinWithValue]:
     Fetches statistics for a given categorical field and apply privacy policies
     """
     model, field_name = get_model_and_field(field_props["mapping"])
-    stats = stats_for_field(model, field_name, add_missing=True)
+    stats = stats_for_field(model, field_name, add_missing=True, group_by=field_props.get("group_by"))
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -611,11 +627,23 @@ def get_distinct_field_values(field_props: dict) -> list[Any]:
     model, field = get_model_and_field(field_props["mapping"])
     threshold = get_threshold()
 
+    if group_by := field_props.get("group_by"):
+        field = field.split(f"__{group_by}")[0]
+
     values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
+    if group_by:
+        grouped_values_with_counts = set()
+        for val, count in values_with_counts:
+            if isinstance(val, list) and val and count > threshold:
+                for nested_val in val:
+                    nested_val = get_nested_dict_value(nested_val, group_by)
+                    grouped_values_with_counts.add(nested_val)
+        return grouped_values_with_counts
+
     return [val for val, count in values_with_counts if count > threshold]
 
 
-def filter_queryset_field_value(qs, field_props, value: str):
+def filter_queryset_field_value(qs, field_props: dict, value: str):
     """
     Further filter a queryset using the field defined by field_props and the
     given value.
@@ -631,8 +659,14 @@ def filter_queryset_field_value(qs, field_props, value: str):
         else field_props["mapping"]
     )
 
+    if group_by := field_props.get("group_by"):
+        field = field.split(f"__{group_by}")[0]
+
     if field_props["datatype"] == "string":
-        condition = {f"{field}__iexact": value}
+        if group_by:
+            condition = {f"{field}__contains": [{group_by: value}]}
+        else:
+            condition = {f"{field}__iexact": value}
     elif field_props["datatype"] == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
@@ -710,3 +744,17 @@ def remove_computed_properties(data: dict[str, Any]) -> dict[str, Any]:
     if data:
         return {k: v for k, v in data.items() if not k.startswith(COMPUTED_PROPERTY_PREFIX)}
     return data
+
+
+def get_nested_dict_value(data: dict, path: str, default=None):
+    """
+    Returns the dict's value for a given path.
+    Paths are expressed as keys separated by '/'.
+    """
+    if MAPPING_SEPARATOR in path:
+        keys = path.split(MAPPING_SEPARATOR)
+        value = data
+        for key in keys:
+            value = value.get(key, default)
+        return value
+    return data.get(path, default)
