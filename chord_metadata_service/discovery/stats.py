@@ -98,7 +98,7 @@ async def queryset_stats_for_field(
 
         # Censor low cell counts if necessary - we don't want to betray that the value even exists in the database if
         # we have a low count for it.
-        if item["total"] <= low_counts_censored:
+        if thresholded_count(item["total"], low_counts_censored) == 0:
             continue
 
         stats[key] = item["total"]
