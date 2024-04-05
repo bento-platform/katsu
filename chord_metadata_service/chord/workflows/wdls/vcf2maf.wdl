@@ -5,10 +5,9 @@ workflow vcf2maf {
         String drs_url
         String katsu_url
         String access_token
-        String validate_ssl
+        Boolean validate_ssl
         String project_dataset
         String vep_cache_dir
-        String run_dir
 
         # Defaults (see: https://github.com/openwdl/wdl/blob/main/versions/1.0/SPEC.md#declared-inputs-defaults-and-overrides)
         String vep_species = "Homo_sapiens"     # ensembl syntax
@@ -18,18 +17,19 @@ workflow vcf2maf {
         input:  project_dataset = project_dataset,
                 drs_url  = drs_url,
                 katsu_url = katsu_url,
+                access_token = access_token,
                 validate_ssl = validate_ssl
     }
 
     call vcf_2_maf {
         input:
+            project_dataset = project_dataset,
             vcf_files = katsu_dataset_export_vcf.vcf_files,
             vep_species = vep_species,
             vep_cache_dir = vep_cache_dir,
             drs_url = drs_url,
             access_token = access_token,
             validate_ssl = validate_ssl,
-            run_dir = run_dir
     }
 
     call katsu_update_experiment_results_with_maf {
@@ -39,7 +39,6 @@ workflow vcf2maf {
                 katsu_url  = katsu_url,
                 access_token = access_token,
                 validate_ssl = validate_ssl,
-                run_dir = run_dir
     }
 
     output {
@@ -52,6 +51,7 @@ task katsu_dataset_export_vcf {
         String project_dataset
         String drs_url
         String katsu_url
+        String access_token
         Boolean validate_ssl
     }
 
@@ -77,7 +77,11 @@ task katsu_dataset_export_vcf {
         # TODO: handle pagination, i.e. if the `next` property is set, loop
         # over the pages of results
         metadata_url = f"~{katsu_url}/api/experimentresults?datasets={dataset_id}&file_format=vcf&page_size=10000"
-        response = requests.get(metadata_url, verify=~{true="True" false="False" validate_ssl})
+        response = requests.get(
+            metadata_url,
+            headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
+            verify=~{true="True" false="False" validate_ssl},
+        )
         r = response.json()
 
         if r["count"] == 0:
@@ -97,7 +101,7 @@ task katsu_dataset_export_vcf {
 
                 # TODO add a default global parameter for when genome_assembly_id
                 # is not defined on experiment results records.
-                assembly_id = result.get("genome_assembly_id", "GRCh37")
+                assembly_id = result.get("genome_assembly_id", "GRCh38")
 
                 # Query DRS with the filename to get the absolute file path in
                 # DRS for processing.
@@ -137,13 +141,13 @@ task katsu_dataset_export_vcf {
 
 task vcf_2_maf {
     input {
+        String project_dataset
         File vcf_files
         String vep_species
         String vep_cache_dir
         String drs_url
         String access_token
         Boolean validate_ssl
-        String run_dir
     }
 
     # Enclosing command with curly braces {} causes issues with parsing in this
@@ -162,7 +166,7 @@ task vcf_2_maf {
             # prepare file names
             export vcf_file_name=$(basename ${orig_vcf_filename})
             filtered_vcf=$(echo ${vcf_file_name} | sed 's/\(.*\.\)vcf\.gz/\1filtered\.vcf/')
-            export maf=~{run_dir}/${vcf_file_name}.maf
+            export maf=${vcf_file_name}.maf
 
             # filter out variants that are homozyguous and identical to assemby ref.
             bcftools view -i 'GT[*]="alt"' ${g_vcf} > ${filtered_vcf}
@@ -206,20 +210,23 @@ task vcf_2_maf {
         import os
         import sys
 
-        params = {
-            "path": os.environ["maf"],
-            "deduplicate": True
-        }
+        project_id, dataset_id = "~{project_dataset}".split(":")
 
-        drs_url = "~{drs_url}/ingest"
         try:
-            response = requests.post(
-                drs_url,
-                headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
-                json=params,
-                verify=~{true="True" false="False" validate_ssl},
-            )
-            response.raise_for_status()
+            with open(os.environ["maf"], "r") as fh:
+                response = requests.post(
+                    "~{drs_url}/ingest",
+                    headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
+                    files={"file": fh},
+                    data={
+                        "deduplicate": True,
+                        "project_id": project_id,
+                        "dataset_id": dataset_id,
+                        "data_type": "experiment",
+                    },
+                    verify=~{true="True" false="False" validate_ssl},
+                )
+                response.raise_for_status()
 
         except requests.exceptions.RequestException as e:
             msg = e.response.json() if hasattr(e, "response") else ""
@@ -230,7 +237,7 @@ task vcf_2_maf {
 
         with open("maf.list.tsv", "a") as maf_list_fh:
             maf_list_fh.write(
-                os.environ["vcf_file_name"] + "\t" + os.path.basename(params["path"]) + "\t" + uri + "\n"
+                os.environ["vcf_file_name"] + "\t" + os.path.basename(os.environ["maf"]) + "\t" + uri + "\n"
             )
 
         '
@@ -253,7 +260,6 @@ task katsu_update_experiment_results_with_maf {
         String katsu_url
         String access_token
         Boolean validate_ssl
-        String run_dir
         File experiment_results_json
         File maf_list
     }
@@ -294,7 +300,7 @@ task katsu_update_experiment_results_with_maf {
                     "usage": "Downloaded",
                     "creation_date": date.today().isoformat(),
                     "created_by": "Bento",
-                    "genome_assembly_id": vcf_props.get("genome_assembly_id", "GRCh37"),  # TODO: make fallback a parameter
+                    "genome_assembly_id": vcf_props.get("genome_assembly_id", "GRCh38"),  # TODO: make fallback a parameter
                     "extra_properties": {
                         "derived_from": vcf_props["identifier"]
                     }
@@ -309,7 +315,7 @@ task katsu_update_experiment_results_with_maf {
         )
 
          _, dataset_id = "~{project_dataset}".split(":")
-        metadata_url = f"~{katsu_url}/ingest/{dataset_id}/maf_derived_from_vcf_json"
+        metadata_url = f"~{katsu_url}/ingest-derived-experiment-results/{dataset_id}"
         response = requests.post(
             metadata_url,
             headers=headers,

@@ -8,7 +8,6 @@ __all__ = [
     "WORKFLOW_FHIR_JSON",
     "WORKFLOW_READSET",
     "WORKFLOW_DOCUMENT",
-    "WORKFLOW_MAF_DERIVED_FROM_VCF_JSON",
     "WORKFLOW_VCF2MAF",
     "WORKFLOW_CBIOPORTAL",
 
@@ -22,7 +21,6 @@ WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_READSET = "readset"
 WORKFLOW_DOCUMENT = "document"
-WORKFLOW_MAF_DERIVED_FROM_VCF_JSON = "maf_derived_from_vcf_json"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
@@ -121,23 +119,6 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
             required=True,
             pattern=r"^.*\.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|mp3|m4a|mp4)$",
         ),
-    ],
-))
-
-workflow_set.add_workflow(WORKFLOW_MAF_DERIVED_FROM_VCF_JSON, wm.WorkflowDefinition(
-    type="ingestion",
-    name="MAF files derived from VCF files as a JSON",
-    description="This ingestion workflow will add to the current experiment results MAF files that were generated from "
-                "VCF files found in the Dataset.",
-    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT, WORKFLOW_TAG_CBIOPORTAL],
-    file="maf_derived_from_vcf_json.wdl",
-    inputs=[
-        # injected
-        ACCESS_TOKEN_INPUT,
-        # user
-        PROJECT_DATASET_INPUT,
-        json_file_input("json_document"),
     ],
 ))
 

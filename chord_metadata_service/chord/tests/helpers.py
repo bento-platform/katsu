@@ -1,7 +1,9 @@
 from django.test import TestCase
+from django.db.models import Model
 
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.restapi.utils import remove_computed_properties
 
 
 class ProjectTestCase(TestCase):
@@ -21,3 +23,41 @@ class ProjectTestCase(TestCase):
         )
 
         return super().setUpTestData()
+
+
+class ModelFieldsTestMixin(TestCase):
+    """
+    Helper TestCase mixin class providing functions to test data ingestion on all fields of a model.
+    """
+
+    def assert_model_fields_list_equal(self, db_list: list[Model], ground_truths: list[dict],
+                                       ignore_fields: list[str], field_maps={}):
+        """
+        List wrapper for assert_model_fields_equal.
+        """
+        self.assertEqual(len(db_list), len(ground_truths))
+        for idx, db_obj in enumerate(db_list):
+            ground_truth = ground_truths[idx]
+            self.assert_model_fields_equal(
+                db_obj=db_obj,
+                ground_truth=ground_truth,
+                ignore_fields=ignore_fields,
+                field_maps=field_maps
+            )
+
+    def assert_model_fields_equal(self, db_obj: Model, ground_truth: dict,
+                                  ignore_fields: list[str], field_maps={}):
+        """
+        Compares the fields of db_obj (exluding ignore_fields, if any) with the values of ground_truth.
+        """
+        MODEL_FIELDS = [f.name for f in db_obj._meta.get_fields() if f.name not in ignore_fields]
+        for field in MODEL_FIELDS:
+            gt_value = ground_truth.get(field)
+            if gt_value and field == "extra_properties":
+                # remove non-ingested computed properties from gt to compare
+                gt_value = remove_computed_properties(gt_value)
+            # Apply field mapping, if any
+            model_field = field_maps.get(field, field)
+            if gt_value:
+                # we expect the db_obj to contain this ground truth value
+                self.assertEqual(getattr(db_obj, model_field), gt_value)

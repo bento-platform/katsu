@@ -13,6 +13,8 @@ urlpatterns = [
 
     path('private/export', views_export.export, name="export"),
 
+    path('ingest-derived-experiment-results/<str:dataset_id>', views_ingest.ingest_derived_experiment_results,
+         name="ingest-derived-experiment-results"),
     path('ingest/<str:dataset_id>/<str:workflow_id>', views_ingest.ingest_into_dataset, name="ingest-into-dataset"),
 
     path('data-types', views_data_types.data_type_list, name="data-type-list"),
