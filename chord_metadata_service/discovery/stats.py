@@ -8,6 +8,7 @@ from .types import BinWithValue
 
 async def experiment_type_stats(queryset: QuerySet, low_counts_censored: bool) -> tuple[int, list[BinWithValue]]:
     """
+    Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for experiment type
     note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
     """
@@ -21,6 +22,7 @@ async def experiment_type_stats(queryset: QuerySet, low_counts_censored: bool) -
 
 async def biosample_tissue_stats(queryset: QuerySet, low_counts_censored: bool) -> tuple[int, list[BinWithValue]]:
     """
+    Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for biosample sampled_tissue
     """
     return await bento_public_format_count_and_stats_list(
