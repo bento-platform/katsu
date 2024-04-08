@@ -316,11 +316,11 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False, group_by=N
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
 
-    if group_by:
-        # If 'field' maps to a JSONField containing an array (e.g. biosamples__diagnostic_markers)
-        # django can't use field lookups with QuerySet.values() inside array elements,
-        # we remove the 'group_by' portion of the mapping, and group later.
-        field = field.split(f"__{group_by}")[0]
+    # if group_by:
+    #     # If 'field' maps to a JSONField containing an array (e.g. biosamples__diagnostic_markers)
+    #     # django can't use field lookups with QuerySet.values() inside array elements,
+    #     # we remove the 'group_by' portion of the mapping, and group later.
+    #     field = field.split(f"__{group_by}")[0]
 
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
@@ -562,13 +562,24 @@ def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
 def get_range_stats(field_props: dict) -> list[BinWithValue]:
     model, field = get_model_and_field(field_props["mapping"])
 
-    # Generate a list of When conditions that return a label for the given bin.
-    # This is equivalent to an SQL CASE statement.
-    whens = [When(
-        **{f"{field}__gte": floor} if floor is not None else {},
-        **{f"{field}__lt": ceil} if ceil is not None else {},
-        then=Value(label)
-    ) for floor, ceil, label in labelled_range_generator(field_props)]
+    group_by = field_props.get("group_by")
+    group_by_value = field_props.get("group_by_value")
+    value_mapping = field_props.get("value_mapping")
+    
+    if group_by and group_by_value and value_mapping:
+        # JSONField
+        group_condition = get_nested_json_condition(group_by, group_by_value)
+        whens = [When(
+            **{f"{field}__contains": group_condition}
+        )]
+    else:
+        # Generate a list of When conditions that return a label for the given bin.
+        # This is equivalent to an SQL CASE statement.
+        whens = [When(
+            **{f"{field}__gte": floor} if floor is not None else {},
+            **{f"{field}__lt": ceil} if ceil is not None else {},
+            then=Value(label)
+        ) for floor, ceil, label in labelled_range_generator(field_props)]
 
     query_set = (
         model.objects
@@ -627,8 +638,11 @@ def get_distinct_field_values(field_props: dict) -> list[Any]:
     model, field = get_model_and_field(field_props["mapping"])
     threshold = get_threshold()
 
-    if group_by := field_props.get("group_by"):
-        field = field.split(f"__{group_by}")[0]
+    group_by = field_props.get("group_by")
+    group_by_value = field_props.get("group_by_value")
+    value_mapping = field_props.get("value_mapping")
+    # if group_by := field_props.get("group_by"):
+    #     field = field.split(f"__{group_by}")[0]
 
     values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
     if group_by:
@@ -658,13 +672,17 @@ def filter_queryset_field_value(qs, field_props: dict, value: str):
         field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
         else field_props["mapping"]
     )
-
-    if group_by := field_props.get("group_by"):
-        field = field.split(f"__{group_by}")[0]
+    
+    group_by = field_props.get("group_by")
+    group_by_value = field_props.get("group_by_value")
+    value_mapping = field_props.get("value_mapping")
+    # if group_by := field_props.get("group_by"):
+    #     field = field.split(f"__{group_by}")[0]
 
     if field_props["datatype"] == "string":
         if group_by:
-            condition = {f"{field}__contains": [{group_by: value}]}
+            nested_condition = get_nested_json_condition(group_by, value)
+            condition = {f"{field}__contains": [nested_condition]}
         else:
             condition = {f"{field}__iexact": value}
     elif field_props["datatype"] == "number":
@@ -758,3 +776,20 @@ def get_nested_dict_value(data: dict, path: str, default=None):
             value = value.get(key, default)
         return value
     return data.get(path, default)
+
+def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
+    """
+    Takes a '/' delimited path and creates an array filter condition for JSONFields.
+    e.g. with:
+    path="assay/label" and value="something"
+    returns {
+        "assay": {
+            "label": "something"
+        }
+    }
+    """
+    elements = path.split(MAPPING_SEPARATOR)
+    condition = value
+    for field in reversed(elements):
+        condition = {field: condition}
+    return condition
