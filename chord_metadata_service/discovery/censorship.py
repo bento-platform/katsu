@@ -4,7 +4,6 @@ from django.conf import settings
 
 __all__ = [
     "RULES_NO_PERMISSIONS",
-    "RULES_FULL_PERMISSIONS",
     "get_threshold",
     "thresholded_count",
     "get_max_query_parameters",
@@ -14,11 +13,6 @@ __all__ = [
 RULES_NO_PERMISSIONS = {
     "max_query_parameters": 0,  # default to no query parameters allowed
     "count_threshold": sys.maxsize,  # default to MAXINT count threshold (i.e., no counts can be seen)
-}
-
-RULES_FULL_PERMISSIONS = {
-    "max_query_parameters": sys.maxsize,
-    "count_threshold": 0,
 }
 
 
