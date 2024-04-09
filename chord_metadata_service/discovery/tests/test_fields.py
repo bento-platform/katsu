@@ -32,16 +32,23 @@ class TestModelField(TransactionTestCase):
 
 class TestGetFieldOptions(TransactionTestCase):
 
+    field_some_prop = {
+        "datatype": "string",
+        "mapping": "individual/extra_properties/some_prop",
+        "title": "Some Prop",
+        "description": "Some property",
+        "config": {
+            "enum": ["a", "b"],
+        },
+    }
+
     async def test_get_string_options(self):
-        self.assertListEqual(await get_field_options({
-            "datatype": "string",
-            "mapping": "individual/extra_properties/some_prop",
-            "title": "Some Prop",
-            "description": "Some property",
-            "config": {
-                "enum": ["a", "b"],
-            },
-        }, low_counts_censored=False), ["a", "b"])
+        self.assertListEqual(await get_field_options(self.field_some_prop, low_counts_censored=False), ["a", "b"])
+
+    async def test_get_field_options_not_impl(self):
+        with self.assertRaises(NotImplementedError):
+            # noinspection PyTypeChecker
+            await get_field_options({**self.field_some_prop, "datatype": "made_up"}, low_counts_censored=False)
 
 
 class TestDateStatsExcept(APITestCase):
