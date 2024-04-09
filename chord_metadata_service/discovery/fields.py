@@ -13,7 +13,7 @@ from .censorship import get_threshold, thresholded_count
 from .fields_utils import monthly_generator
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from .stats import stats_for_field
-from .types import BinWithValue
+from .types import BinWithValue, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
@@ -58,7 +58,7 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
     return stats
 
 
-async def get_field_options(field_props: dict, low_counts_censored: bool) -> list[Any]:
+async def get_field_options(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
@@ -86,7 +86,7 @@ async def get_field_options(field_props: dict, low_counts_censored: bool) -> lis
     return options
 
 
-async def get_distinct_field_values(field_props: dict, low_counts_censored: bool) -> list[Any]:
+async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[Any]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
@@ -150,7 +150,7 @@ async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int, l
     }
 
 
-async def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
+async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
@@ -188,7 +188,7 @@ async def get_month_date_range(field_props: dict) -> tuple[str | None, str | Non
     return start, end
 
 
-async def get_range_stats(field_props: dict, low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
     model, field = get_model_and_field(field_props["mapping"])
 
     # Generate a list of When conditions that return a label for the given bin.
@@ -225,7 +225,7 @@ async def get_range_stats(field_props: dict, low_counts_censored: bool = True) -
     return bins
 
 
-async def get_categorical_stats(field_props: dict, low_counts_censored: bool) -> list[BinWithValue]:
+async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -273,7 +273,7 @@ async def get_categorical_stats(field_props: dict, low_counts_censored: bool) ->
     return bins
 
 
-async def get_date_stats(field_props: dict, low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.

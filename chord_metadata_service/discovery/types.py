@@ -1,6 +1,9 @@
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 __all__ = [
+    "OverviewSectionChart",
+    "OverviewSection",
+    "DiscoveryFieldProps",
     "DiscoveryRules",
     "CompleteDiscoveryConfig",
     "DiscoveryConfig",
@@ -29,7 +32,7 @@ class DiscoveryFieldProps(TypedDict):
     title: str
     description: str
     datatype: Literal["number", "string", "date"]
-    config: dict[str, str | int]
+    config: dict[str, Any]
 
 
 class DiscoveryRules(TypedDict):
