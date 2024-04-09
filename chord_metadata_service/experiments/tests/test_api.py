@@ -85,7 +85,6 @@ class GetExperimentsAppApisTest(APITestCase):
 
     def test_filter_experiment_results_url(self):
         response = self.client.get('/api/experimentresults?url=example.org')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_indices(self):
