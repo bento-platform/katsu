@@ -387,9 +387,9 @@ VALID_GENOMIC_INTERPRETATION = {
 }
 
 
-def valid_phenopacket(subject, meta_data):
+def valid_phenopacket(subject, meta_data, id='phenopacket:1'):
     return dict(
-        id='phenopacket:1',
+        id=id,
         subject=subject,
         meta_data=meta_data
     )
@@ -621,5 +621,23 @@ def valid_interpretation(diagnosis):
         summary="Test interpretation",
         extra_properties={
             "comment": "test data"
+        }
+    )
+
+
+def valid_measurement_tumor_length(value: float | int):
+    return dict(
+        assay={
+            "id": "NCIT:C200479",
+            "label": "Tumour length"
+        },
+        value={
+            "quantity": {
+                "unit": {
+                    "id": "NCIT:C28251",
+                    "label": "mm"
+                },
+                "value": value
+            }
         }
     )

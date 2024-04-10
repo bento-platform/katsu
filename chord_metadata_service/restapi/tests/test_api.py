@@ -141,7 +141,8 @@ class PublicSearchFieldsTest(APITestCase):
         self.individual_1 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
-            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1)
+            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
+            measurements=[ph_c.VALID_MEASUREMENT_1, ph_c.VALID_MEASUREMENT_2]
         )
         self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
         self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1))
@@ -193,6 +194,19 @@ class PublicOverviewTest(APITestCase):
         individuals = {
             f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
         }
+
+        # phenopackets (count 8)
+        for i in range(1, len(VALID_INDIVIDUALS), 1):
+            ph_m.Phenopacket.objects.create(
+                **ph_c.valid_phenopacket(
+                    id=f"phenopacket_{i}",
+                    subject=individuals.get(f"individual_{i}"),
+                    meta_data=ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+                ),
+                # Only add a measurement for first 6 phenopackets
+                measurements=[ph_c.valid_measurement_tumor_length(3)] if i <= 6 else None,
+            )
+
         # biosamples
         self.biosample_1 = ph_m.Biosample.objects.create(
             **ph_c.valid_biosample_1(individuals["individual_1"])
@@ -218,6 +232,10 @@ class PublicOverviewTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj["counts"]["individuals"], db_count)
+        self.assertEqual(response_obj["fields"]["measurement_types"]["data"][0]["label"], "Tumour length")
+        self.assertEqual(response_obj["fields"]["measurement_types"]["data"][0]["value"], 6)
+        self.assertEqual(response_obj["fields"]["measurement_tumor_length"]["data"][0]["label"], "[0, 5)")
+        self.assertEqual(response_obj["fields"]["measurement_tumor_length"]["data"][0]["value"], 6)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_overview_bins(self):

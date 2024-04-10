@@ -375,6 +375,8 @@ CONFIG_PUBLIC_TEST = {
             "charts": [
                 {"field": "age", "chart_type": "bar"},
                 {"field": "sex", "chart_type": "pie"},
+                {"field": "measurement_types", "chart_type": "pie"},
+                {"field": "measurement_tumor_length", "chart_type": "bar"},
             ]
         },
         {
@@ -508,6 +510,33 @@ CONFIG_PUBLIC_TEST = {
             "datatype": "string",
             "config": {
                 "enum": None
+            }
+        },
+        "measurement_types": {
+            "mapping": "individual/phenopackets/measurements",
+            "group_by": "assay/label",
+            "title": "Measurement types",
+            "description": "types of measurements performed",
+            "datatype": "string",
+            "config": {
+                "enum": None
+            }
+        },
+        "measurement_tumor_length": {
+            "mapping": "individual/phenopackets/measurements",
+            "group_by": "assay/id",
+            "group_by_value": "NCIT:C200479",
+            "value_mapping": "value/quantity/value",
+            "title": "Tumor lengths",
+            "description": "measured tumor lengths in millimeters",
+            "datatype": "number",
+            "config": {
+                "minimum": 0,
+                "maximum": 10,
+                "bin_size": 5,
+                "taper_left": 0,
+                "taper_right": 10,
+                "units": "mm"
             }
         }
     },
