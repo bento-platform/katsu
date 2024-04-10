@@ -8,7 +8,7 @@ from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
 from typing import Any, Type, TypedDict, Mapping, Generator
 
-from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value
+from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, Q, BooleanField
 from django.db.models.functions import Cast
 from django.conf import settings
 
@@ -316,12 +316,6 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False, group_by=N
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
 
-    # if group_by:
-    #     # If 'field' maps to a JSONField containing an array (e.g. biosamples__diagnostic_markers)
-    #     # django can't use field lookups with QuerySet.values() inside array elements,
-    #     # we remove the 'group_by' portion of the mapping, and group later.
-    #     field = field.split(f"__{group_by}")[0]
-
     annotated_queryset = queryset.values(field).annotate(total=Count("*"))
     num_missing = 0
 
@@ -559,22 +553,31 @@ def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
     return start, end
 
 
-def get_range_stats(field_props: dict) -> list[BinWithValue]:
-    model, field = get_model_and_field(field_props["mapping"])
+class JSONBPathFilter(Func):
+    function = "jsonb_path_exists"
+    output_field = BooleanField()
 
+
+def get_range_stats(field_props: dict) -> list[BinWithValue]:
+    field_mapping = field_props["mapping"]
+
+    # JSONField specific
     group_by = field_props.get("group_by")
     group_by_value = field_props.get("group_by_value")
     value_mapping = field_props.get("value_mapping")
-    
+
+    model, field = get_model_and_field(field_mapping)
+
+    # Generate a list of When conditions that return a label for the given bin.
+    # This is equivalent to an SQL CASE statement.
     if group_by and group_by_value and value_mapping:
-        # JSONField
-        group_condition = get_nested_json_condition(group_by, group_by_value)
+        # JSONField array specific
+        # Range stats on a JSONField array require jsonb_path_exists conditions
         whens = [When(
-            **{f"{field}__contains": group_condition}
-        )]
+            get_json_range_condition(field_props, floor, ceil),
+            then=Value(label)
+        ) for floor, ceil, label in labelled_range_generator(field_props)]
     else:
-        # Generate a list of When conditions that return a label for the given bin.
-        # This is equivalent to an SQL CASE statement.
         whens = [When(
             **{f"{field}__gte": floor} if floor is not None else {},
             **{f"{field}__lt": ceil} if ceil is not None else {},
@@ -639,13 +642,10 @@ def get_distinct_field_values(field_props: dict) -> list[Any]:
     threshold = get_threshold()
 
     group_by = field_props.get("group_by")
-    group_by_value = field_props.get("group_by_value")
-    value_mapping = field_props.get("value_mapping")
-    # if group_by := field_props.get("group_by"):
-    #     field = field.split(f"__{group_by}")[0]
 
     values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
     if group_by:
+        # JSONField array specific
         grouped_values_with_counts = set()
         for val, count in values_with_counts:
             if isinstance(val, list) and val and count > threshold:
@@ -672,15 +672,12 @@ def filter_queryset_field_value(qs, field_props: dict, value: str):
         field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
         else field_props["mapping"]
     )
-    
+
     group_by = field_props.get("group_by")
-    group_by_value = field_props.get("group_by_value")
-    value_mapping = field_props.get("value_mapping")
-    # if group_by := field_props.get("group_by"):
-    #     field = field.split(f"__{group_by}")[0]
 
     if field_props["datatype"] == "string":
         if group_by:
+            # JSONField array string check must use 'contains' lookup
             nested_condition = get_nested_json_condition(group_by, value)
             condition = {f"{field}__contains": [nested_condition]}
         else:
@@ -690,10 +687,15 @@ def filter_queryset_field_value(qs, field_props: dict, value: str):
 
         if value.startswith("["):
             [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
-            condition = {
-                f"{field}__gte": start,
-                f"{field}__lt": end
-            }
+            if json_range_condition := get_json_range_condition(field_props, start, end):
+                # JSONField array range stats must use 'jsonb_path_exists' conditions
+                logger.debug(f"Filtering {model}.{field} with {json_range_condition}")
+                return qs.filter(json_range_condition)
+            else:
+                condition = {
+                    f"{field}__gte": start,
+                    f"{field}__lt": end
+                }
         else:
             [sym, val] = value.split(" ")
             if sym == "≥":
@@ -777,6 +779,7 @@ def get_nested_dict_value(data: dict, path: str, default=None):
         return value
     return data.get(path, default)
 
+
 def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
     """
     Takes a '/' delimited path and creates an array filter condition for JSONFields.
@@ -793,3 +796,25 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
     for field in reversed(elements):
         condition = {field: condition}
     return condition
+
+
+def get_json_range_condition(field_props: dict, min: int, max: int):
+    _, field = get_model_and_field(field_props["mapping"])
+    group_by = field_props.get("group_by")
+    group_by_value = field_props.get("group_by_value")
+    value_mapping = field_props.get("value_mapping")
+    if group_by and group_by_value and value_mapping:
+        group_by_content = get_nested_json_condition(group_by, group_by_value)
+        json_field_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
+        return (
+            Q(**{f"{field}__contains": [group_by_content]}) &
+            Q(JSONBPathFilter(
+                F(field),
+                Value(f"$[*].{json_field_path} ? (@ >= {min})")
+            ) if min is not None else {}) &
+            Q(JSONBPathFilter(
+                F(field),
+                Value(f"$[*].{json_field_path} ? (@ < {max})")
+            ) if max is not None else {})
+        )
+    return {}
