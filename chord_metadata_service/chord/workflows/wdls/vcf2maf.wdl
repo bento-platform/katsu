@@ -42,7 +42,10 @@ workflow vcf2maf {
     }
 
     output {
-        Array[File] maf = vcf_2_maf.out
+        File vcf_export_stderr = katsu_dataset_export_vcf.err_output
+        File vcf_list = katsu_dataset_export_vcf.vcf_files
+        File vcf_2_maf_stderr = vcf_2_maf.err_output
+        File maf_list = vcf_2_maf.maf_list
     }
 }
 
@@ -58,11 +61,11 @@ task katsu_dataset_export_vcf {
     # Enclosing command with curly braces {} causes issues with parsing in this
     # command block (tested with womtool-v78). Using triple angle braces made
     # interpolation more straightforward. According to specs, this should
-    # restrict to ~{} syntax instead of ${} for string interpolation, which is
-    # accepted by womtools but is not recognized by toil runner...
+    # restrict to ~{} syntax instead of ${} for string interpolation.
     command <<<
         python <<CODE
         import json
+        import logging
         import requests
         import sys
 
@@ -70,11 +73,12 @@ task katsu_dataset_export_vcf {
         # Note: it is not possible to get the corresponding experiments at
         # this step due to the many to many relationship between these objects.
 
+        logger = logging.getLogger("katsu_dataset_export_vcf")
         _, dataset_id = "~{project_dataset}".split(":")
 
         # Beware: results are paginated! 10,000 is supposedly big enough
         # (actually the upper limit)
-        # TODO: handle pagination, i.e. if the `next` property is set, loop
+        # TODO: handle pagination, i.e. if the 'next' property is set, loop
         # over the pages of results
         metadata_url = f"~{katsu_url}/api/experimentresults?datasets={dataset_id}&file_format=vcf&page_size=10000"
         response = requests.get(
@@ -97,6 +101,7 @@ task katsu_dataset_export_vcf {
                 # In case of duplicates, skip. This happens with the synthetic demo
                 # dataset.
                 if vcf in vcf_dict:
+                    logger.warning(f"Skipping duplicate entry for {vcf}")
                     continue
 
                 # TODO add a default global parameter for when genome_assembly_id
@@ -105,14 +110,18 @@ task katsu_dataset_export_vcf {
 
                 # Query DRS with the filename to get the absolute file path in
                 # DRS for processing.
-                drs_url = f"${drs_url}/search?name={vcf}&internal_path=1"
-                response = requests.get(drs_url, verify=~{true="True" false="False" validate_ssl})
+                response = requests.get(
+                    f"~{drs_url}/search?name={vcf}&internal_path=1",
+                    headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
+                    verify=~{true="True" false="False" validate_ssl}
+                )
                 if not response.ok:
+                    logger.error(f"Got non-OK response from DRS while searching for VCF {vcf}")
                     continue
                 drs_resp = response.json()
 
                 if len(drs_resp) == 0:
-                    print(f"VCF file {vcf} not found")
+                    logger.warning(f"VCF file {vcf} not found")
                     continue
 
                 filtered_methods = filter(
@@ -122,6 +131,8 @@ task katsu_dataset_export_vcf {
                 file_handle.write(f"{location}\t{assembly_id}\t{vcf}\n")
 
                 vcf_dict[vcf] = result
+
+        logger.info(f"Found {len(vcf_dict)} VCF files to convert to MAF")
 
         # save the JSON
         with open("experiment_results.json", "w") as file_handle:
@@ -180,40 +191,59 @@ task vcf_2_maf {
             VEP_ENSEMBL_VERSION=$(vep --help | grep "ensembl-vep" | grep -o "[0-9]*" | head -1)
 
             # Find the location of the reference assembly FASTA file for VEP
+            #  - REF_FASTA_PATH is the directory in which we search for the FASTA file.
             VEP_CACHE_PATH_SPECIES=$(echo ~{vep_species} | tr '[:upper:]' '[:lower:]')
             REF_FASTA_PATH=~{vep_cache_dir}/${VEP_CACHE_PATH_SPECIES}/${VEP_ENSEMBL_VERSION}_${assembly_id}
 
-            # The name of the FASTA file used as a reference can not be infered
-            # consistently from primitives: GRCh37 assembly has not been updated since
-            # ensembl version 75. We rely on the file actually present in the
-            # cache directory
-            # (pattern is like: "Homo_sapiens.GRCh37.75.dna.toplevel.fa.gz")
-            REF_FASTA_TOPLEVEL=$(ls ${REF_FASTA_PATH} | grep "toplevel" | head -1)
+            # The name of the FASTA file used as a reference can not be inferred consistently from primitives.
+            # We rely on the file actually present in the cache directory:
+            REF_FASTA_TOPLEVEL=$(ls ${REF_FASTA_PATH} | grep ".fa" | head -1)
 
             # Get the sample ID from the VCF file header.
-            # Here it is assumed that only one sample is present in the file.
-            # TODO: check output and syntax if multiple samples are present.
-            SAMPLE_ID=$(bcftools query -l ${g_vcf})
+            # Here it is assumed that the first sample in the file is the tumour and the second is the normal.
+            # TODO: more generalized, depending on experiment configuration. Right now, this only really works for
+            # RENATA.
 
+            n_samples=$(bcftools query -l ${g_vcf} | wc -l)
+            if [[ $n_samples != 2 ]]; then
+                echo "WARNING: Must have two samples in the VCF for vcf2maf to work. Skipping ${g_vcf}." 1>&2
+                continue
+            fi
+
+            # xargs echo -n strips the newline.
+            TUMOR_ID=$(bcftools query -l ${g_vcf} | head -1 | xargs echo -n)
+            NORMAL_ID=$(bcftools query -l ${g_vcf} | tail -1 | xargs echo -n)
+
+            # --buffer-size default is 5000. We reduce it by a lot to reduce memory usage and avoid crashes.
             perl /opt/vcf2maf.pl \
                 --input-vcf ${filtered_vcf} \
                 --output-maf ${maf} \
+                --buffer-size 500 \
+                --tmp-dir . \
+                --verbose \
                 --vep-data ~{vep_cache_dir} \
+                --species ${VEP_CACHE_PATH_SPECIES} \
                 --ref-fasta ${REF_FASTA_PATH}/${REF_FASTA_TOPLEVEL} \
+                --ncbi-build ${assembly_id} \
                 --vep-path ${VEP_PATH} \
-                --tumor-id ${SAMPLE_ID}
+                --tumor-id ${TUMOR_ID} \
+                --normal-id ${NORMAL_ID}
 
             # Store the maf file in DRS and register its uri
             python -c '
         import json
+        import logging
         import requests
         import os
         import sys
 
+        logger = logging.getLogger("vcf_2_maf")
         project_id, dataset_id = "~{project_dataset}".split(":")
 
         try:
-            with open(os.environ["maf"], "r") as fh:
+            maf_path = os.environ["maf"]
+            with open(maf_path, "r") as fh:
+                logger.info(f"Ingesting {maf_path} into DRS")
                 response = requests.post(
                     "~{drs_url}/ingest",
                     headers={"Authorization": "Bearer ~{access_token}"} if "~{access_token}" else {},
@@ -314,7 +344,7 @@ task katsu_update_experiment_results_with_maf {
             else {}
         )
 
-         _, dataset_id = "~{project_dataset}".split(":")
+        _, dataset_id = "~{project_dataset}".split(":")
         metadata_url = f"~{katsu_url}/ingest-derived-experiment-results/{dataset_id}"
         response = requests.post(
             metadata_url,
@@ -328,7 +358,6 @@ task katsu_update_experiment_results_with_maf {
     >>>
 
     output {
-        File experiment_results_maf_json = "experiment_results_maf.json"
         File txt_output = stdout()
         File err_output = stderr()
     }
