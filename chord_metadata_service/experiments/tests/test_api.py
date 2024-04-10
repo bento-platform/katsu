@@ -184,7 +184,7 @@ class TestExperimentCSVRenderer(TestCase):
         csv_content = response.content.decode()
         csv_file = io.StringIO(csv_content)
         reader = csv.DictReader(csv_file)
-        row = next(reader)
+        next(reader)  # skip header
         for row in reader:
             for key in row:
                 self.assertEqual(row[key], '')
