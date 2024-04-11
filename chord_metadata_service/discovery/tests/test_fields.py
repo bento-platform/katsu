@@ -2,12 +2,16 @@ from django.db.models.base import ModelBase
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.patients import models as pa_m
+from chord_metadata_service.phenopackets.tests import constants as ph_c
+
 from .constants import CONFIG_PUBLIC_TEST
 from ..fields import (
     get_model_and_field,
     get_field_options,
+    get_categorical_stats,
     get_date_stats,
-    get_month_date_range
+    get_month_date_range,
 )
 
 
@@ -49,6 +53,35 @@ class TestGetFieldOptions(TransactionTestCase):
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
             await get_field_options({**self.field_some_prop, "datatype": "made_up"}, low_counts_censored=False)
+
+
+class TestGetCategoricalStats(TransactionTestCase):
+
+    f_sex = {
+        "mapping": "individual/sex",
+        "datatype": "string",
+        "title": "Sex",
+        "description": "Sex",
+        "config": {
+            "enum": None,
+        },
+    }
+
+    def setUp(self):
+        self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+
+    async def test_categorical_stats_lcf(self):
+        import sys
+        res = await get_categorical_stats(self.f_sex, low_counts_censored=False)
+        print("AAAAA", file=sys.stderr)
+        self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    async def test_categorical_stats_lct(self):
+        import sys
+        res = await get_categorical_stats(self.f_sex, low_counts_censored=True)
+        print("BBBBB", file=sys.stderr)
+        self.assertListEqual(res, [{"label": "missing", "value": 0}])
 
 
 class TestDateStatsExcept(APITestCase):
