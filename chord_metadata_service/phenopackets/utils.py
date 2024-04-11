@@ -26,6 +26,14 @@ def parse_onset(onset):
         return None
 
 
+DAYS_IN_A_MONTH = 30.5  # 30.5 average days in a month (including leap year)
+DAYS_IN_A_YEAR = 365.25  # 365.25 average days in a year (including leap year)
+
+
+def _days_to_years(days: float) -> float:
+    return days / DAYS_IN_A_YEAR   # 365.25 average days in a year (including leap year)
+
+
 def _round_decimal_two_places(d: float) -> Decimal:
     return Decimal(d).quantize(Decimal("0.01"), rounding=ROUND_HALF_EVEN)
 
@@ -40,19 +48,14 @@ def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> 
 
     # if duration string includes Y and M then the instance is of both types of Duration and datetime.timedelta
     if isinstance(duration, isodate.Duration):
-        # 30.5 average days in a month (including leap year)
-        days = (float(duration.months) * 30.5) + duration.days
-        # 24 hours 60 minutes 60 seconds
-        days_to_seconds = days * 24 * 60 * 60
-        # 365.25 average days in a year (including leap year)
-        years = (days_to_seconds / 60 / 60 / 24 / 365.25) + float(duration.years)
+        days = (float(duration.months) * DAYS_IN_A_MONTH) + duration.days
+        years = _days_to_years(days) + float(duration.years)
         return _round_decimal_two_places(years), unit
 
     # if duration string contains only days then the instance is of type datetime.timedelta
     if not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
         if duration.days is not None:
-            days_to_seconds = duration.days * 24 * 60 * 60
-            years = days_to_seconds / 60 / 60 / 24 / 365.25
+            years = _days_to_years(duration.days)
             return _round_decimal_two_places(years), unit
 
     return None, None
