@@ -1,7 +1,7 @@
 import asyncio
 import re
 
-from asgiref.sync import async_to_sync
+from adrf.views import APIView
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
 from datetime import datetime
@@ -17,7 +17,6 @@ from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.views import APIView
 
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
@@ -185,6 +184,7 @@ async def public_discovery_filter_queryset(request: DrfRequest, queryset: QueryS
     return queryset
 
 
+# noinspection PyMethodMayBeStatic
 @extend_schema(
     description="Individual list available in public endpoint",
     responses={
@@ -201,7 +201,6 @@ class PublicListIndividuals(APIView):
     View to return only count of all individuals after filtering.
     """
 
-    @async_to_sync
     async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
             return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
@@ -240,13 +239,13 @@ class PublicListIndividuals(APIView):
         })
 
 
+# noinspection PyMethodMayBeStatic
 class BeaconListIndividuals(APIView):
     """
     View to return lists of individuals filtered using search terms from katsu's config.json.
     Uncensored equivalent of PublicListIndividuals.
     """
 
-    @async_to_sync
     async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
             return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=404)
@@ -259,8 +258,8 @@ class BeaconListIndividuals(APIView):
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            individual_biosample_tissue_stats(filtered_qs, low_counts_censored=True),
-            individual_experiment_type_stats(filtered_qs, low_counts_censored=True),
+            individual_biosample_tissue_stats(filtered_qs, low_counts_censored=False),
+            individual_experiment_type_stats(filtered_qs, low_counts_censored=False),
         )
 
         return Response({
