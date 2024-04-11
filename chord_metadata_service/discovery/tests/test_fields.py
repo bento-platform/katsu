@@ -71,16 +71,12 @@ class TestGetCategoricalStats(TransactionTestCase):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
 
     async def test_categorical_stats_lcf(self):
-        import sys
         res = await get_categorical_stats(self.f_sex, low_counts_censored=False)
-        print("AAAAA", file=sys.stderr)
         self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     async def test_categorical_stats_lct(self):
-        import sys
         res = await get_categorical_stats(self.f_sex, low_counts_censored=True)
-        print("BBBBB", file=sys.stderr)
         self.assertListEqual(res, [{"label": "missing", "value": 0}])
 
 
