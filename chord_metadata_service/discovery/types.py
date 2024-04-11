@@ -5,8 +5,6 @@ __all__ = [
     "OverviewSection",
     "DiscoveryFieldProps",
     "DiscoveryRules",
-    "CompleteDiscoveryConfig",
-    "DiscoveryConfig",
     "BinWithValue",
 ]
 
@@ -38,16 +36,6 @@ class DiscoveryFieldProps(TypedDict):
 class DiscoveryRules(TypedDict):
     max_query_parameters: int
     count_threshold: int
-
-
-class CompleteDiscoveryConfig(TypedDict):
-    overview: list[OverviewSection]
-    search: list[SearchSection]
-    fields: dict[str, DiscoveryFieldProps]
-    rules: DiscoveryRules
-
-
-DiscoveryConfig = CompleteDiscoveryConfig | None
 
 
 class BinWithValue(TypedDict):

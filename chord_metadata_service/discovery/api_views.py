@@ -70,6 +70,10 @@ async def public_search_fields(_request: DrfRequest):
     })
 
 
+async def _counts_for_model_name(mn: str) -> tuple[str, int]:
+    return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
+
+
 @extend_schema(
     description="Overview of all public data in the database",
     responses={
@@ -99,8 +103,6 @@ async def public_overview(_request: DrfRequest):
     # TODO: public overviews SHOULD be project-scoped at least.
 
     # Predefined counts
-    async def _counts_for_model_name(mn: str) -> tuple[str, int]:
-        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
     counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
 
     # Get the rules config - because we used get_config_public_and_field_set_permissions with no arguments, it'll choose
