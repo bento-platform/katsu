@@ -5,8 +5,18 @@ from typing import Mapping, Type
 from .censorship import thresholded_count
 from .types import BinWithValue
 
+__all__ = [
+    "individual_experiment_type_stats",
+    "individual_biosample_tissue_stats",
+    "bento_public_format_count_and_stats_list",
+    "stats_for_field",
+    "queryset_stats_for_field",
+]
 
-async def experiment_type_stats(queryset: QuerySet, low_counts_censored: bool) -> tuple[int, list[BinWithValue]]:
+
+async def individual_experiment_type_stats(
+    queryset: QuerySet, low_counts_censored: bool
+) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for experiment type
@@ -20,7 +30,9 @@ async def experiment_type_stats(queryset: QuerySet, low_counts_censored: bool) -
     )
 
 
-async def biosample_tissue_stats(queryset: QuerySet, low_counts_censored: bool) -> tuple[int, list[BinWithValue]]:
+async def individual_biosample_tissue_stats(
+    queryset: QuerySet, low_counts_censored: bool
+) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for biosample sampled_tissue

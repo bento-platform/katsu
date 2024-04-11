@@ -21,7 +21,7 @@ from rest_framework.views import APIView
 
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
-from chord_metadata_service.discovery.stats import biosample_tissue_stats, experiment_type_stats
+from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -223,8 +223,8 @@ class PublicListIndividuals(APIView):
             return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            biosample_tissue_stats(filtered_qs, low_counts_censored=True),
-            experiment_type_stats(filtered_qs, low_counts_censored=True),
+            individual_biosample_tissue_stats(filtered_qs, low_counts_censored=True),
+            individual_experiment_type_stats(filtered_qs, low_counts_censored=True),
         )
 
         return Response({
@@ -259,8 +259,8 @@ class BeaconListIndividuals(APIView):
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            biosample_tissue_stats(filtered_qs, low_counts_censored=True),
-            experiment_type_stats(filtered_qs, low_counts_censored=True),
+            individual_biosample_tissue_stats(filtered_qs, low_counts_censored=True),
+            individual_experiment_type_stats(filtered_qs, low_counts_censored=True),
         )
 
         return Response({
