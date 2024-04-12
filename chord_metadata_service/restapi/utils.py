@@ -822,20 +822,20 @@ def get_json_range_condition(field_props: dict, min: int, max: int):
     group_by_value = field_props.get("group_by_value")
     value_mapping = field_props.get("value_mapping")
     if group_by and group_by_value and value_mapping:
-        json_group_path = ".".join(group_by.split(MAPPING_SEPARATOR))
-        json_field_value_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
+        json_group_by_path = ".".join(group_by.split(MAPPING_SEPARATOR))
+        json_value_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
         return (
             Q(JSONBPathFilter(
                 # Points to the JSONField
                 F(field),
                 # JSON path expression with GTE and group_by_value condition
-                Value(f'$[*] ? (@.{json_field_value_path} >= {min} && @.{json_group_path} == "{group_by_value}")')
+                Value(f'$[*] ? (@.{json_value_path} >= {min} && @.{json_group_by_path} == "{group_by_value}")')
             ) if min is not None else {}) &
             Q(JSONBPathFilter(
                 # Points to the JSONField
                 F(field),
                 # JSON path expression with LT and group_by_value condition
-                Value(f'$[*] ? (@.{json_field_value_path} < {max} && @.{json_group_path} == "{group_by_value}")')
+                Value(f'$[*] ? (@.{json_value_path} < {max} && @.{json_group_by_path} == "{group_by_value}")')
             ) if max is not None else {})
         )
     return {}
