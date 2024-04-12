@@ -18,6 +18,7 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
@@ -203,7 +204,7 @@ class PublicListIndividuals(APIView):
 
     async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE)
 
         base_qs = Individual.objects.all()
         try:
@@ -219,7 +220,7 @@ class PublicListIndividuals(APIView):
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
                 f"sub-threshold count: {qct} <= {get_threshold(True)}")
-            return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
+            return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, low_counts_censored=True),
@@ -248,7 +249,7 @@ class BeaconListIndividuals(APIView):
 
     async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=404)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=404)
 
         base_qs = Individual.objects.all()
         try:

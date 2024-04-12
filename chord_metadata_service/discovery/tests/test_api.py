@@ -10,6 +10,7 @@ from rest_framework.test import APITestCase
 
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
+from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -63,7 +64,7 @@ class PublicSearchFieldsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_FIELDS_CONFIGURED)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_FIELDS_CONFIGURED)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS)
     def test_public_search_fields_missing_extra_properties(self):
@@ -129,7 +130,7 @@ class PublicOverviewTest(APITestCase):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class PublicOverviewTest2(APITestCase):
@@ -154,7 +155,7 @@ class PublicOverviewTest2(APITestCase):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
@@ -242,4 +243,4 @@ class PublicDatasetsMetadataTest(APITestCase):
         response = self.client.get(reverse("public-dataset"))
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)

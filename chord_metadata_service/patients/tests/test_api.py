@@ -3,11 +3,11 @@ import json
 import csv
 import io
 import random
-from django.conf import settings
 from django.urls import reverse
 from django.test import override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
+from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
@@ -290,7 +290,7 @@ class PublicListIndividualsTest(APITestCase):
 
     @staticmethod
     def response_threshold_check(response):
-        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
+        return response['count'] if 'count' in response else dres.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
         individuals = [c.generate_valid_individual() for _ in range(self.random_range)]  # random range
@@ -305,10 +305,10 @@ class PublicListIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertIn(
             self.response_threshold_check(response_obj),
-            [Individual.objects.all().count(), settings.INSUFFICIENT_DATA_AVAILABLE]
+            [Individual.objects.all().count(), dres.INSUFFICIENT_DATA_AVAILABLE]
         )
         if Individual.objects.all().count() <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(Individual.objects.all().count(), response_obj['count'])
             self.assertEqual(response_obj['biosamples']['count'], 0)
@@ -323,7 +323,7 @@ class PublicListIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class PublicFilteringIndividualsTest(APITestCase):
@@ -335,7 +335,7 @@ class PublicFilteringIndividualsTest(APITestCase):
 
     @staticmethod
     def response_threshold_check(response):
-        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
+        return response['count'] if 'count' in response else dres.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
         individuals = [
@@ -357,10 +357,10 @@ class PublicFilteringIndividualsTest(APITestCase):
         nb_female = Individual.objects.filter(sex__iexact='female').count()
         self.assertIn(
             self.response_threshold_check(response_obj),
-            [nb_female, settings.INSUFFICIENT_DATA_AVAILABLE]
+            [nb_female, dres.INSUFFICIENT_DATA_AVAILABLE]
         )
         if nb_female <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(nb_female, response_obj['count'])
 
@@ -373,9 +373,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         db_count = Individual.objects.filter(sex__iexact='female')\
             .filter(extra_properties__contains={"smoking": "Smoker"}).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -388,7 +388,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_1(self):
@@ -399,9 +399,9 @@ class PublicFilteringIndividualsTest(APITestCase):
         db_count = Individual.objects.filter(
             extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased"}
         ).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -414,7 +414,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_extra_properties_2(self):
@@ -447,9 +447,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lt": 300
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj["count"])
 
@@ -465,9 +465,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__gte": 200,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -483,9 +483,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__lt": 50,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -513,9 +513,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lt": 200
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -533,9 +533,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__covidstatus__iexact": "positive",
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -554,9 +554,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__baseline_creatinine__lt": 150,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -573,9 +573,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__date_of_consent__startswith": "2021-03"
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -594,9 +594,9 @@ class PublicFilteringIndividualsTest(APITestCase):
             "extra_properties__lab_test_result_value__lt": 200,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -640,7 +640,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
 
     @staticmethod
     def response_threshold_check(response):
-        return response['count'] if 'count' in response else settings.INSUFFICIENT_DATA_AVAILABLE
+        return response['count'] if 'count' in response else dres.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
         individuals = [
@@ -665,9 +665,9 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, settings.INSUFFICIENT_DATA_AVAILABLE])
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, settings.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(db_count, response_obj['count'])
 
@@ -695,7 +695,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, settings.NO_PUBLIC_DATA_AVAILABLE)
+        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
 class BeaconSearchTest(APITestCase):

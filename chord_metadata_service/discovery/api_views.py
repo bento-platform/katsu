@@ -9,6 +9,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
+from . import responses as dres
 from .types import BinWithValue
 from ..chord import models as cm
 from ..logger import logger
@@ -43,7 +44,7 @@ async def public_search_fields(_request: DrfRequest):
     config_public = settings.CONFIG_PUBLIC
 
     if not config_public:
-        return Response(settings.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
+        return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
 
     field_conf = config_public["fields"]
 
@@ -98,7 +99,7 @@ async def public_overview(_request: DrfRequest):
     config_public = settings.CONFIG_PUBLIC
 
     if not config_public:
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+        return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     # TODO: public overviews SHOULD be project-scoped at least.
 
@@ -173,7 +174,7 @@ async def public_dataset(_request: DrfRequest):
     # In the future, we could introduce a view:dataset permission or something.
 
     if not settings.CONFIG_PUBLIC:
-        return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+        return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     # Datasets provenance metadata
     datasets = cm.Dataset.objects.values(
