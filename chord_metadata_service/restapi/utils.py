@@ -8,7 +8,7 @@ from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
 from typing import Any, Type, TypedDict, Mapping, Generator
 
-from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, Q, BooleanField
+from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, Q, BooleanField, JSONField
 from django.db.models.functions import Cast
 from django.conf import settings
 
@@ -316,7 +316,14 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False, group_by=N
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
 
-    annotated_queryset = queryset.values(field).annotate(total=Count("*"))
+    if group_by is not None:
+        jsonb_group_path = ".".join(group_by.split("/"))
+        queryset_values = queryset.values(
+            **{field: JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_path}"))},
+        )
+    else:
+        queryset_values = queryset.values(field)
+    annotated_queryset = queryset_values.annotate(total=Count("*"))
     num_missing = 0
 
     stats: dict[str, int] = {}
@@ -556,6 +563,10 @@ def get_month_date_range(field_props: dict) -> tuple[str | None, str | None]:
 class JSONBPathFilter(Func):
     function = "jsonb_path_exists"
     output_field = BooleanField()
+
+class JSONBPathQuery(Func):
+    function = "jsonb_path_query"
+    output_field = JSONField()
 
 
 def get_range_stats(field_props: dict) -> list[BinWithValue]:
@@ -804,17 +815,16 @@ def get_json_range_condition(field_props: dict, min: int, max: int):
     group_by_value = field_props.get("group_by_value")
     value_mapping = field_props.get("value_mapping")
     if group_by and group_by_value and value_mapping:
-        group_by_content = get_nested_json_condition(group_by, group_by_value)
-        json_field_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
+        json_group_path = ".".join(group_by.split(MAPPING_SEPARATOR))
+        json_field_value_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
         return (
-            Q(**{f"{field}__contains": [group_by_content]}) &
             Q(JSONBPathFilter(
                 F(field),
-                Value(f"$[*].{json_field_path} ? (@ >= {min})")
+                Value(f'$[*] ? (@.{json_field_value_path} >= {min} && @.{json_group_path} == "{group_by_value}")')
             ) if min is not None else {}) &
             Q(JSONBPathFilter(
                 F(field),
-                Value(f"$[*].{json_field_path} ? (@ < {max})")
+                Value(f'$[*] ? (@.{json_field_value_path} < {max} && @.{json_group_path} == "{group_by_value}")')
             ) if max is not None else {})
         )
     return {}
