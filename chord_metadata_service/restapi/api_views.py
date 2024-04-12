@@ -1,6 +1,7 @@
 import asyncio
 
 from adrf.decorators import api_view
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import permission_classes
@@ -10,11 +11,10 @@ from rest_framework.response import Response
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
-from chord_metadata_service.experiments import models as experiments_models, summaries as exp_summaries
+from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
-from chord_metadata_service.patients import summaries as patient_summaries
-from chord_metadata_service.phenopackets import models as pheno_models, summaries as pheno_summaries
+from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.models import SchemaType
 
@@ -31,6 +31,18 @@ async def service_info(_request: DrfRequest):
     """
 
     return Response(await get_service_info())
+
+
+async def build_overview_response(phenopackets: QuerySet, experiments: QuerySet):
+    phenopackets_summary, experiments_summary = await asyncio.gather(
+        dt_phenopacket_summary(phenopackets, low_counts_censored=False),
+        dt_experiment_summary(experiments, low_counts_censored=False),
+    )
+
+    return Response({
+        DATA_TYPE_PHENOPACKET: phenopackets_summary,
+        DATA_TYPE_EXPERIMENT: experiments_summary,
+    })
 
 
 @extend_schema(
@@ -58,15 +70,7 @@ async def overview(_request: DrfRequest):
     phenopackets = pheno_models.Phenopacket.objects.all()
     experiments = experiments_models.Experiment.objects.all()
 
-    phenopackets_summary, experiments_summary = await asyncio.gather(
-        dt_phenopacket_summary(phenopackets, low_counts_censored=False),
-        dt_experiment_summary(experiments, low_counts_censored=False),
-    )
-
-    return Response({
-        DATA_TYPE_PHENOPACKET: phenopackets_summary,
-        DATA_TYPE_EXPERIMENT: experiments_summary,
-    })
+    return await build_overview_response(phenopackets, experiments)
 
 
 @api_view(["GET"])
@@ -100,21 +104,4 @@ async def search_overview(request: DrfRequest):
     #  - in general, this endpoint is less than ideal and should be derived from search results themselves vs. this
     #    hack-y mess of passing IDs around.
 
-    # We have the "query:data" permission on all datasets we get back here for all data types.
-    # No low-count thresholding is needed.
-
-    biosample_summary, disease_summary, individual_summary, pf_summary, experiment_summary = await asyncio.gather(
-        pheno_summaries.biosample_summary(phenopackets, low_counts_censored=False),
-        pheno_summaries.disease_summary(phenopackets, low_counts_censored=False),
-        patient_summaries.individual_summary(phenopackets, low_counts_censored=False),
-        pheno_summaries.phenotypic_feature_summary(phenopackets, low_counts_censored=False),
-        exp_summaries.experiment_summary(experiments, low_counts_censored=False),
-    )
-
-    return Response({
-        "biosamples": biosample_summary,
-        "diseases": disease_summary,
-        "individuals": individual_summary,
-        "phenotypic_features": pf_summary,
-        "experiments": experiment_summary,
-    })
+    return await build_overview_response(phenopackets, experiments)
