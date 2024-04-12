@@ -1,15 +1,5 @@
 from unittest import TestCase
-
-from django.db.models.base import ModelBase
-from django.test import override_settings
-from rest_framework.test import APITestCase
-
-from ..utils import (
-    labelled_range_generator,
-    get_model_and_field,
-    get_date_stats,
-    get_month_date_range)
-from .constants import CONFIG_PUBLIC_TEST
+from ..fields_utils import labelled_range_generator
 
 
 class TestLabelledRangeGenerator(TestCase):
@@ -134,49 +124,3 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         }
         rg = labelled_range_generator(c)
         self.assertRaises(ValueError, list, rg)
-
-
-class TestModelField(TestCase):
-
-    def test_get_model_field_basic(self):
-        model, field = get_model_and_field("individual/age_numeric")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "age_numeric")
-
-        model, field = get_model_and_field("experiment/experiment_type")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "experiment_type")
-
-    def test_get_model_nested_field(self):
-        model, field = get_model_and_field("individual/extra_properties/lab_test_result")
-        self.assertEqual(field, "extra_properties__lab_test_result")
-
-    def test_get_wrong_model(self):
-        self.assertRaises(NotImplementedError, get_model_and_field, "junk/age_numeric")
-
-
-class TestDateStatsExcept(APITestCase):
-
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_wrong_bin_config(self):
-        fp = {
-            "mapping": "individual/extra_properties/date_of_consent",
-            "datatype": "date",
-            "config": {
-                "bin_by": "year"
-            }
-        }
-        self.assertRaises(NotImplementedError, get_date_stats, fp)
-        self.assertRaises(NotImplementedError, get_month_date_range, fp)
-
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_wrong_field_config(self):
-        fp = {
-            "mapping": "individual/date_of_consent",
-            "datatype": "date",
-            "config": {
-                "bin_by": "month"
-            }
-        }
-        self.assertRaises(NotImplementedError, get_date_stats, fp)
-        self.assertRaises(NotImplementedError, get_month_date_range, fp)

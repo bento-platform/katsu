@@ -3,7 +3,7 @@
 import chord_metadata_service.restapi.validators
 import django.contrib.postgres.fields.jsonb
 from django.db import migrations, models
-from chord_metadata_service.restapi.utils import iso_duration_to_years
+from chord_metadata_service.phenopackets.utils import iso_duration_to_years
 
 
 def populate_age_numeric_and_age_unit(apps, schema_editor):
