@@ -8,7 +8,9 @@ from calendar import month_abbr
 from decimal import Decimal, ROUND_HALF_EVEN
 from typing import Any, Type, TypedDict, Mapping, Generator
 
-from django.db.models import Count, F, Func, IntegerField, CharField, Case, Model, When, Value, Q, BooleanField, JSONField
+from django.db.models import (
+    Count, F, Func, IntegerField, CharField, Case, Model, When, Value, Q, BooleanField, JSONField
+)
 from django.db.models.functions import Cast
 from django.conf import settings
 
@@ -564,6 +566,7 @@ class JSONBPathFilter(Func):
     function = "jsonb_path_exists"
     output_field = BooleanField()
 
+
 class JSONBPathQuery(Func):
     function = "jsonb_path_query"
     output_field = JSONField()
@@ -810,6 +813,18 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
 
 
 def get_json_range_condition(field_props: dict, min: int, max: int):
+    """
+    Takes field props for a 'number' data type contained in a JSONField array,
+    and returns a query expression for the provided 'min' and 'max' values.
+
+    Note: since Django doesn't support index-agnostic lookups for JSONField array elements,
+    we rely on the 'jsonb_path_exists' PostgreSQL function to perform element-wise filtering
+    on array elements that satisfy the range and 'group_by_value' field prop condition.
+
+    e.g. To get measurements where assay.id == "NCIT:C16358" AND value.quantity.value < 20 (BMIs bellow 20),
+    the JSON path with conditions would be:
+        '$[*] ? (@.value.quantity.value < 20 && @.assay.id == "NCIT:C16358")'
+    """
     _, field = get_model_and_field(field_props["mapping"])
     group_by = field_props.get("group_by")
     group_by_value = field_props.get("group_by_value")
@@ -819,11 +834,15 @@ def get_json_range_condition(field_props: dict, min: int, max: int):
         json_field_value_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
         return (
             Q(JSONBPathFilter(
+                # Points to the JSONField
                 F(field),
+                # JSON path expression with GTE and group_by_value condition
                 Value(f'$[*] ? (@.{json_field_value_path} >= {min} && @.{json_group_path} == "{group_by_value}")')
             ) if min is not None else {}) &
             Q(JSONBPathFilter(
+                # Points to the JSONField
                 F(field),
+                # JSON path expression with LT and group_by_value condition
                 Value(f'$[*] ? (@.{json_field_value_path} < {max} && @.{json_group_path} == "{group_by_value}")')
             ) if max is not None else {})
         )
