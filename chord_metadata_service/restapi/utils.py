@@ -319,9 +319,10 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False, group_by=N
     # Count("*") aggregates results including nulls
 
     if group_by is not None:
-        jsonb_group_path = ".".join(group_by.split("/"))
+        # JSONField array, fetch items at the group_by path
+        jsonb_group_by_path = ".".join(group_by.split(MAPPING_SEPARATOR))
         queryset_values = queryset.values(
-            **{field: JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_path}"))},
+            **{field: JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_by_path}"))},
         )
     else:
         queryset_values = queryset.values(field)
@@ -332,17 +333,8 @@ def queryset_stats_for_field(queryset, field: str, add_missing=False, group_by=N
 
     for item in annotated_queryset:
         key = item[field]
-        if key is None or (isinstance(key, list) and not key):
+        if key is None:
             num_missing = item["total"]
-            continue
-
-        # group the values in the array using the 'group_by' option
-        if isinstance(key, list) and key and group_by:
-            for subkey in key:
-                group = get_nested_dict_value(subkey, group_by)
-                stats.update({
-                    group: stats.get(group, 0) + item["total"]
-                })
             continue
 
         key = str(key) if not isinstance(key, str) else key.strip()
