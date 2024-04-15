@@ -145,6 +145,7 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         measurements=bs.get("measurements", []),
         pathological_stage=bs.get("pathological_stage", {}),
         is_control_sample=bs.get("is_control_sample", False),
+        pathological_tnm_finding=bs.get("pathological_tnm_finding", []),
         diagnostic_markers=bs.get("diagnostic_markers", []),
         extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
         **bs_query
