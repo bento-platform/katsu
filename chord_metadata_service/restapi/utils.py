@@ -781,7 +781,11 @@ def get_nested_dict_value(data: dict, path: str, default=None):
         keys = path.split(MAPPING_SEPARATOR)
         value = data
         for key in keys:
-            value = value.get(key, default)
+            if value:
+                value = value.get(key, default)
+            else:
+                # data doesn't contain path
+                return
         return value
     return data.get(path, default)
 
