@@ -14,7 +14,7 @@ from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
 from .fields_utils import monthly_generator
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
-from .stats import stats_for_field
+from .stats import JSONBPathQuery, stats_for_field
 from .types import BinWithValue, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -104,21 +104,20 @@ async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts
     model, field = get_model_and_field(field_props["mapping"])
     threshold = get_threshold(low_counts_censored)
 
-    values_with_counts = model.objects.values_list(field).annotate(count=Count(field))
+    field_expression = field
     if group_by := field_props.get("group_by"):
-        # JSONField array specific
-        grouped_values_with_counts = set()
-        async for val, count in values_with_counts:
-            if isinstance(val, list) and val and count > threshold:
-                for nested_val in val:
-                    nested_val = get_nested_dict_value(nested_val, group_by)
-                    grouped_values_with_counts.add(nested_val)
-        return grouped_values_with_counts
-    return [
+        # JSONField containing an array
+        # use jsonb_path_query field expression
+        jsonb_group_by_path = ".".join(group_by.split("/"))
+        field_expression = JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_by_path}"))
+    values_with_counts = model.objects.values_list(field_expression).annotate(count=Count(field))
+
+    distinct_values = [
         val
         async for val, count in (values_with_counts)
         if count > threshold
     ]
+    return distinct_values
 
 
 async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> list[int]:
