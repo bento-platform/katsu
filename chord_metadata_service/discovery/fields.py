@@ -112,12 +112,11 @@ async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts
         field_expression = JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_by_path}"))
     values_with_counts = model.objects.values_list(field_expression).annotate(count=Count(field))
 
-    distinct_values = [
+    return [
         val
         async for val, count in (values_with_counts)
         if count > threshold
     ]
-    return distinct_values
 
 
 async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> list[int]:
