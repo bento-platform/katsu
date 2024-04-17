@@ -6,8 +6,8 @@ from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 
 from .constants import CONFIG_PUBLIC_TEST
+from ..fields_utils import get_model_and_field
 from ..fields import (
-    get_model_and_field,
     get_field_options,
     get_categorical_stats,
     get_date_stats,

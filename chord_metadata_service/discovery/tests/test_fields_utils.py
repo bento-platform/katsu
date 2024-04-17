@@ -1,5 +1,12 @@
-from unittest import TestCase
-from ..fields_utils import labelled_range_generator
+from django.test import TestCase
+from django.db.models import Q
+
+from chord_metadata_service.discovery.tests.constants import CONFIG_PUBLIC_TEST
+from ..fields_utils import (
+    get_json_range_condition,
+    labelled_range_generator,
+    get_nested_json_condition
+)
 
 
 class TestLabelledRangeGenerator(TestCase):
@@ -124,3 +131,38 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         }
         rg = labelled_range_generator(c)
         self.assertRaises(ValueError, list, rg)
+
+
+class TestJsonFieldUtils(TestCase):
+
+    def test_get_nested_json_condition(self):
+        path = "assay/label"
+        value = "The assay label"
+
+        nested_condition = get_nested_json_condition(path, value)
+        self.assertEqual(nested_condition, {
+            "assay": {
+                "label": value
+            }
+        })
+
+    def test_get_json_range_condition(self):
+        field_props = CONFIG_PUBLIC_TEST["fields"]["measurement_tumor_length"]
+
+        # GTE 0 an LT 20
+        json_range_condition_0_20 = get_json_range_condition(field_props, min=0, max=20)
+        self.assertTrue(len(json_range_condition_0_20), 2)  # expect 2 conditions (GTE and LT)
+
+        # GTE 0
+        json_range_condition_gte_0 = get_json_range_condition(field_props, min=0)
+        self.assertTrue(len(json_range_condition_gte_0), 1)
+
+        # LT 20
+        json_range_condition_lt_20 = get_json_range_condition(field_props, max=20)
+        self.assertTrue(len(json_range_condition_lt_20), 1)
+
+        # Combined Q object
+        combined = Q()
+        combined.add(json_range_condition_gte_0, Q.AND)
+        combined.add(json_range_condition_lt_20, Q.AND)
+        self.assertEqual(json_range_condition_0_20, combined)

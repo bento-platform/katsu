@@ -2,55 +2,19 @@ import datetime
 
 from calendar import month_abbr
 from collections import Counter, defaultdict
-from django.db.models import (
-    Case, CharField, Count, F, Func, IntegerField, Model, QuerySet, When, Value, BooleanField, Q
-)
+from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value
 from django.db.models.functions import Cast
-from typing import Any, Mapping, Type
+from typing import Any, Mapping
 
 from ..logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
 from .fields_utils import monthly_generator
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from .stats import JSONBPathQuery, stats_for_field
 from .types import BinWithValue, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
-
-COMPUTED_PROPERTY_PREFIX = "__"
-MAPPING_SEPARATOR = "/"
-
-
-class JSONBPathFilter(Func):
-    function = "jsonb_path_exists"
-    output_field = BooleanField()
-
-
-def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str, ...]]:
-    model_name, *field_path = field_id.split("/")
-    return model_name, tuple(field_path)
-
-
-def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
-    """
-    Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
-    where the first crumb represents the object in the DB model, and the next ones
-    are the field with their possible joins through tables relations.
-    Returns a tuple of the model object and the Django string representation of the
-    field for this object.
-    """
-
-    model_name, field_path = get_public_model_name_and_field_path(field_id)
-
-    model: Type[Model] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
-    if model is None:
-        msg = f"Accessing field on model {model_name} not implemented"
-        raise NotImplementedError(msg)
-
-    field_name = "__".join(field_path)
-    return model, field_name
 
 
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
@@ -101,14 +65,14 @@ async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
 
-    model, field = get_model_and_field(field_props["mapping"])
+    model, field = f_utils.get_model_and_field(field_props["mapping"])
     threshold = get_threshold(low_counts_censored)
 
     field_expression = field
     if group_by := field_props.get("group_by"):
         # JSONField containing an array
         # use jsonb_path_query field expression
-        jsonb_group_by_path = ".".join(group_by.split("/"))
+        jsonb_group_by_path = f_utils.mapping_to_json_path(group_by)
         field_expression = JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_by_path}"))
     values_with_counts = model.objects.values_list(field_expression).annotate(count=Count(field))
 
@@ -177,7 +141,7 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
     if (bin_by := field_props["config"]["bin_by"]) != "month":
         raise NotImplementedError(f"Binning dates by `{bin_by}` method not implemented")
 
-    model, field_name = get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
         raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
@@ -203,7 +167,7 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
 
 
 async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
-    model, field = get_model_and_field(field_props["mapping"])
+    model, field = f_utils.get_model_and_field(field_props["mapping"])
 
     # JSONField specific
     group_by = field_props.get("group_by")
@@ -216,7 +180,7 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
         # JSONField array specific
         # Range stats on a JSONField array require jsonb_path_exists conditions
         whens = [When(
-            get_json_range_condition(field_props, floor, ceil),
+            f_utils.get_json_range_condition(field_props, floor, ceil),
             then=Value(label)
         ) for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     else:
@@ -257,7 +221,7 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_cen
     Fetches statistics for a given categorical field and apply privacy policies
     """
 
-    model, field_name = get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
@@ -306,7 +270,7 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
         msg = f"Binning dates by `{bin_by}` method not implemented"
         raise NotImplementedError(msg)
 
-    model, field_name = get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
@@ -366,7 +330,7 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     the `mapping` value is based on the same model as the queryset.
     """
 
-    model, field = get_model_and_field(
+    model, field = f_utils.get_model_and_field(
         field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
         else field_props["mapping"]
     )
@@ -376,7 +340,7 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     if field_props["datatype"] == "string":
         if group_by:
             # JSONField array string check must use 'contains' lookup
-            nested_condition = get_nested_json_condition(group_by, value)
+            nested_condition = f_utils.get_nested_json_condition(group_by, value)
             condition = {f"{field}__contains": [nested_condition]}
         else:
             condition = {f"{field}__iexact": value}
@@ -385,7 +349,7 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
 
         if value.startswith("["):
             [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
-            if json_range_condition := get_json_range_condition(field_props, start, end):
+            if json_range_condition := f_utils.get_json_range_condition(field_props, start, end):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 logger.debug(f"Filtering {model}.{field} with {json_range_condition}")
                 return qs.filter(json_range_condition)
@@ -413,76 +377,3 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     logger.debug(f"Filtering {model}.{field} with {condition}")
 
     return qs.filter(**condition)
-
-
-def get_nested_dict_value(data: dict, path: str, default=None):
-    """
-    Returns the dict's value for a given path.
-    Paths are expressed as keys separated by '/'.
-    """
-    if MAPPING_SEPARATOR in path:
-        keys = path.split(MAPPING_SEPARATOR)
-        value = data
-        for key in keys:
-            if value:
-                value = value.get(key, default)
-            else:
-                # data doesn't contain path
-                return
-        return value
-    return data.get(path, default)
-
-
-def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
-    """
-    Takes a '/' delimited path and creates an array filter condition for JSONFields.
-    e.g. with:
-    path="assay/label" and value="something"
-    returns {
-        "assay": {
-            "label": "something"
-        }
-    }
-    """
-    elements = path.split(MAPPING_SEPARATOR)
-    condition = value
-    for field in reversed(elements):
-        condition = {field: condition}
-    return condition
-
-
-def get_json_range_condition(field_props: dict, min: int, max: int):
-    """
-    Takes field props for a 'number' data type contained in a JSONField array,
-    and returns a query expression for the provided 'min' and 'max' values.
-
-    Note: since Django doesn't support index-agnostic lookups for JSONField array elements,
-    we rely on the 'jsonb_path_exists' PostgreSQL function to perform element-wise filtering
-    on array elements that satisfy the range and 'group_by_value' field prop condition.
-
-    e.g. To get measurements where assay.id == "NCIT:C16358" AND value.quantity.value < 20 (BMIs bellow 20),
-    the JSON path with conditions would be:
-        '$[*] ? (@.value.quantity.value < 20 && @.assay.id == "NCIT:C16358")'
-    """
-    _, field = get_model_and_field(field_props["mapping"])
-    group_by = field_props.get("group_by")
-    group_by_value = field_props.get("group_by_value")
-    value_mapping = field_props.get("value_mapping")
-    if group_by and group_by_value and value_mapping:
-        json_group_by_path = ".".join(group_by.split(MAPPING_SEPARATOR))
-        json_value_path = ".".join(value_mapping.split(MAPPING_SEPARATOR))
-        return (
-            Q(JSONBPathFilter(
-                # Points to the JSONField
-                F(field),
-                # JSON path expression with GTE and group_by_value condition
-                Value(f'$[*] ? (@.{json_value_path} >= {min} && @.{json_group_by_path} == "{group_by_value}")')
-            ) if min is not None else {}) &
-            Q(JSONBPathFilter(
-                # Points to the JSONField
-                F(field),
-                # JSON path expression with LT and group_by_value condition
-                Value(f'$[*] ? (@.{json_value_path} < {max} && @.{json_group_by_path} == "{group_by_value}")')
-            ) if max is not None else {})
-        )
-    return {}
