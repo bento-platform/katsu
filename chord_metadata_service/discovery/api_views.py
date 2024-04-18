@@ -16,6 +16,7 @@ from ..logger import logger
 
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .schemas import DISCOVERY_SCHEMA
 
 
 @extend_schema(
@@ -190,3 +191,9 @@ async def public_dataset(_request: DrfRequest):
     return Response({
         "datasets": datasets
     })
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+async def discovery_schema(_request: DrfRequest):
+    return Response(DISCOVERY_SCHEMA)

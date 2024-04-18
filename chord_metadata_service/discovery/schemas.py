@@ -6,7 +6,7 @@ from chord_metadata_service.restapi.schema_utils import (
 base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 DISCOVERY_FIELD_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery_named_fields"),
+    "$id": sub_schema_uri(base_uri, "discovery_field"),
     "description": "Field configuration",
     "type": "object",
     "properties": {

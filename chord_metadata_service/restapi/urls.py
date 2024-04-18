@@ -2,7 +2,12 @@ from django.urls import path, include
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
-from chord_metadata_service.discovery.api_views import public_search_fields, public_overview, public_dataset
+from chord_metadata_service.discovery.api_views import (
+    public_search_fields,
+    public_overview,
+    public_dataset,
+    discovery_schema
+)
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
@@ -60,7 +65,7 @@ urlpatterns = [
          name="chord-phenopacket-schema"),
     path('experiment_schema', experiment_views.get_experiment_schema,
          name="experiment-schema"),
-
+    path('discovery_schema', discovery_schema, name="discovery-schema"),
     # extra properties schema types
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 
