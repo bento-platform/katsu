@@ -1,4 +1,3 @@
-from django.db.models.base import ModelBase
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 
@@ -6,32 +5,12 @@ from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 
 from .constants import CONFIG_PUBLIC_TEST
-from ..fields_utils import get_model_and_field
 from ..fields import (
     get_field_options,
     get_categorical_stats,
     get_date_stats,
     get_month_date_range,
 )
-
-
-class TestModelField(TransactionTestCase):
-
-    def test_get_model_field_basic(self):
-        model, field = get_model_and_field("individual/age_numeric")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "age_numeric")
-
-        model, field = get_model_and_field("experiment/experiment_type")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "experiment_type")
-
-    def test_get_model_nested_field(self):
-        model, field = get_model_and_field("individual/extra_properties/lab_test_result")
-        self.assertEqual(field, "extra_properties__lab_test_result")
-
-    def test_get_wrong_model(self):
-        self.assertRaises(NotImplementedError, get_model_and_field, "junk/age_numeric")
 
 
 class TestGetFieldOptions(TransactionTestCase):

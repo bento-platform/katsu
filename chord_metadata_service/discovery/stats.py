@@ -1,10 +1,10 @@
-from django.db.models import Count, F, Model, QuerySet, Value, Func, JSONField
+from django.db.models import Count, F, Model, QuerySet
 
 from typing import Mapping, Type
 
 from .censorship import thresholded_count
 from .types import BinWithValue
-from .fields_utils import mapping_to_json_path
+from .fields_utils import get_jsonb_path_query
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -13,11 +13,6 @@ __all__ = [
     "stats_for_field",
     "queryset_stats_for_field",
 ]
-
-
-class JSONBPathQuery(Func):
-    function = "jsonb_path_query"
-    output_field = JSONField()
 
 
 async def individual_experiment_type_stats(
@@ -102,9 +97,8 @@ async def queryset_stats_for_field(
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
     if group_by is not None:
-        jsonb_group_by_path = mapping_to_json_path(group_by)
         queryset_values = queryset.values(
-            **{field: JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_by_path}"))},
+            **{field: get_jsonb_path_query(field, group_by)},
         )
     else:
         queryset_values = queryset.values(field)

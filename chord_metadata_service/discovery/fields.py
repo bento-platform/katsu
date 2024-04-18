@@ -11,7 +11,7 @@ from ..logger import logger
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
 from .fields_utils import monthly_generator
-from .stats import JSONBPathQuery, stats_for_field
+from .stats import stats_for_field
 from .types import BinWithValue, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -68,13 +68,12 @@ async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts
     model, field = f_utils.get_model_and_field(field_props["mapping"])
     threshold = get_threshold(low_counts_censored)
 
-    field_expression = field
+    field_query = field
     if group_by := field_props.get("group_by"):
         # JSONField containing an array
         # use jsonb_path_query field expression
-        jsonb_group_by_path = f_utils.mapping_to_json_path(group_by)
-        field_expression = JSONBPathQuery(F(field), Value(f"$[*].{jsonb_group_by_path}"))
-    values_with_counts = model.objects.values_list(field_expression).annotate(count=Count(field))
+        field_query = f_utils.get_jsonb_path_query(field, group_by)
+    values_with_counts = model.objects.values_list(field_query).annotate(count=Count(field))
 
     return [
         val

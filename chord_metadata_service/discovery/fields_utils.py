@@ -1,5 +1,5 @@
 from typing import Any, Iterator, Type
-from django.db.models import Q, Func, BooleanField, F, Value, Model
+from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
 from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 
@@ -13,6 +13,17 @@ JSON_PATH_ACCESSOR = "."
 class JSONBPathFilter(Func):
     function = "jsonb_path_exists"
     output_field = BooleanField()
+
+
+class JSONBPathQuery(Func):
+    function = "jsonb_path_query"
+    output_field = JSONField()
+
+
+def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=True):
+    field_operator = "$[*]" if is_array else "$"
+    query_path = mapping_to_json_path(json_path) if is_mapping else json_path
+    return JSONBPathQuery(F(field), Value(f"{field_operator}.{query_path}"))
 
 
 def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str, ...]]:
