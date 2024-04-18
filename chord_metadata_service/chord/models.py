@@ -6,6 +6,7 @@ from django.utils import timezone
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
+from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from ..restapi.models import SchemaType
 
 
@@ -34,6 +35,8 @@ class Project(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
+                                 validators=[JsonSchemaValidator()])
 
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
