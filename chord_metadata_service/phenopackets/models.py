@@ -116,7 +116,7 @@ class Disease(BaseTimeStamp, IndexableMixin):
     """
 
     term = JSONField(validators=[ontology_validator], help_text=rec_help(d.DISEASE, "term"))
-    excluded = models.BooleanField(blank=True, null=True)
+    excluded = models.BooleanField(default=False)
     onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
     resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema=TIME_ELEMENT_SCHEMA)])
     disease_stage = JSONField(blank=True, null=True, validators=[ontology_list_validator],

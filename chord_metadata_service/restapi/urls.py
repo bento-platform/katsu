@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
+from chord_metadata_service.discovery.api_views import public_search_fields, public_overview, public_dataset
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
@@ -11,14 +12,7 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
     BiosampleSampledTissueAutocomplete
 )
 from chord_metadata_service.resources import api_views as resources_views
-from .api_views import (
-     overview,
-     public_search_fields,
-     public_overview,
-     public_dataset,
-     search_overview,
-     extra_properties_schema_types,
-)
+from chord_metadata_service.restapi.api_views import overview, search_overview, extra_properties_schema_types
 from chord_metadata_service.restapi.routers import BatchListRouter
 
 __all__ = ["router", "batch_router", "urlpatterns"]

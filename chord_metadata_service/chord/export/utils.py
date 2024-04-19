@@ -86,7 +86,7 @@ class ExportFileContext:
         # if filename contains a subdirectory, ensure it is created
         dirpath = os.path.dirname(path)
         if not os.path.exists(dirpath):
-            os.makedirs(dirpath, 0o777)
+            os.makedirs(dirpath)
 
         return path
 
@@ -102,13 +102,6 @@ class ExportFileContext:
         tar_path = os.path.join(self.base_path, EXPORT_DIR, self.project_id + '.tar.gz')
         with tarfile.open(tar_path, 'w:gz') as tar:
             output_dir = self.get_path()
-            tar.add(output_dir, filter=reset_tar_info)
+            # tar.gz will contain one `export/` output directory:
+            tar.add(output_dir, arcname="export")
         return tar_path
-
-
-def reset_tar_info(info: tarfile.TarInfo) -> tarfile.TarInfo:
-    info.gid = 0
-    info.uid = 0
-    info.uname = 'root'
-    info.gname = 'root'
-    return info

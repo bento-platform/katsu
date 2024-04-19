@@ -1,25 +1,27 @@
+import asyncio
 import re
 
-from datetime import datetime
-
-from rest_framework import viewsets, filters, mixins, serializers
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.settings import api_settings
-from rest_framework.views import APIView
-from django.conf import settings
-from django_filters.rest_framework import DjangoFilterBackend
-from django.core.exceptions import ValidationError
-from django.db.models import Count, F, Q
-from django.db.models.functions import Coalesce
-from django.contrib.postgres.aggregates import ArrayAgg
-from drf_spectacular.utils import extend_schema, inline_serializer
+from adrf.views import APIView
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
+from datetime import datetime
+from django.conf import settings
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.core.exceptions import ValidationError
+from django.db.models import Count, F, Q, QuerySet
+from django.db.models.functions import Coalesce
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import viewsets, filters, mixins, serializers
+from rest_framework.decorators import action
+from rest_framework.request import Request as DrfRequest
+from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
-from .serializers import IndividualSerializer
-from .models import Individual
-from .filters import IndividualFilter
+from chord_metadata_service.discovery import responses as dres
+from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
+from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
+from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -33,13 +35,11 @@ from chord_metadata_service.restapi.api_renderers import (
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
-from chord_metadata_service.restapi.utils import (
-    get_field_options,
-    filter_queryset_field_value,
-    biosample_tissue_stats,
-    experiment_type_stats
-)
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+
+from .serializers import IndividualSerializer
+from .models import Individual
+from .filters import IndividualFilter
 
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -146,6 +146,46 @@ class IndividualBatchViewSet(BatchViewSet):
         return queryset
 
 
+async def public_discovery_filter_queryset(request: DrfRequest, queryset: QuerySet, low_counts_censored: bool):
+    # Check query parameters validity
+    qp = request.query_params
+    if len(qp) > get_max_query_parameters(low_counts_censored=low_counts_censored):
+        raise ValidationError(f"Wrong number of fields: {len(qp)}")
+
+    search_conf = settings.CONFIG_PUBLIC["search"]
+    field_conf = settings.CONFIG_PUBLIC["fields"]
+    queryable_fields = {
+        f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
+    }
+
+    for field, value in qp.items():
+        if field not in queryable_fields:
+            raise ValidationError(f"Unsupported field used in query: {field}")
+
+        field_props = queryable_fields[field]
+        options = await get_field_options(field_props, low_counts_censored=low_counts_censored)
+        if (
+            value not in options
+            and not (
+                # case-insensitive search on categories
+                field_props["datatype"] == "string"
+                and value.lower() in [o.lower() for o in options]
+            )
+            and not (
+                # no restriction when enum is not set for categories
+                field_props["datatype"] == "string"
+                and field_props["config"]["enum"] is None
+            )
+        ):
+            raise ValidationError(f"Invalid value used in query: {value}")
+
+        # recursion
+        queryset = filter_queryset_field_value(queryset, field_props, value)
+
+    return queryset
+
+
+# noinspection PyMethodMayBeStatic
 @extend_schema(
     description="Individual list available in public endpoint",
     responses={
@@ -162,129 +202,66 @@ class PublicListIndividuals(APIView):
     View to return only count of all individuals after filtering.
     """
 
-    def filter_queryset(self, queryset):
-        # Check query parameters validity
-        qp = self.request.query_params
-        if len(qp) > settings.CONFIG_PUBLIC["rules"]["max_query_parameters"]:
-            raise ValidationError(f"Wrong number of fields: {len(qp)}")
-
-        search_conf = settings.CONFIG_PUBLIC["search"]
-        field_conf = settings.CONFIG_PUBLIC["fields"]
-        queryable_fields = {
-            f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
-        }
-
-        for field, value in qp.items():
-            if field not in queryable_fields:
-                raise ValidationError(f"Unsupported field used in query: {field}")
-
-            field_props = queryable_fields[field]
-            options = get_field_options(field_props)
-            if value not in options \
-                    and not (
-                        # case-insensitive search on categories
-                        field_props["datatype"] == "string"
-                        and value.lower() in [o.lower() for o in options]
-                    ) \
-                    and not (
-                        # no restriction when enum is not set for categories
-                        field_props["datatype"] == "string"
-                        and field_props["config"]["enum"] is None
-                    ):
-                raise ValidationError(f"Invalid value used in query: {value}")
-
-            # recursion
-            queryset = filter_queryset_field_value(queryset, field_props, value)
-
-        return queryset
-
-    def get(self, request, *args, **kwargs):
+    async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE)
 
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = self.filter_queryset(base_qs)
+            filtered_qs = await public_discovery_filter_queryset(request, base_qs, low_counts_censored=True)
         except ValidationError as e:
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ))
 
-        qct = filtered_qs.count()
+        qct = thresholded_count(await filtered_qs.acount(), low_counts_censored=True)
 
-        if qct <= (threshold := settings.CONFIG_PUBLIC["rules"]["count_threshold"]):
+        if qct == 0:
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
-                f"sub-threshold count: {qct} <= {threshold}")
-            return Response(settings.INSUFFICIENT_DATA_AVAILABLE)
+                f"sub-threshold count: {qct} <= {get_threshold(True)}")
+            return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
-        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
-        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+        (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
+            individual_biosample_tissue_stats(filtered_qs, low_counts_censored=True),
+            individual_experiment_type_stats(filtered_qs, low_counts_censored=True),
+        )
 
         return Response({
             "count": qct,
             "biosamples": {
                 "count": tissues_count,
-                "sampled_tissue": sampled_tissues
+                "sampled_tissue": sampled_tissues,
             },
             "experiments": {
                 "count": experiments_count,
-                "experiment_type": experiment_types
+                "experiment_type": experiment_types,
             }
         })
 
 
+# noinspection PyMethodMayBeStatic
 class BeaconListIndividuals(APIView):
     """
     View to return lists of individuals filtered using search terms from katsu's config.json.
     Uncensored equivalent of PublicListIndividuals.
     """
-    def filter_queryset(self, queryset):
-        # Check query parameters validity
-        qp = self.request.query_params
-        search_conf = settings.CONFIG_PUBLIC["search"]
-        field_conf = settings.CONFIG_PUBLIC["fields"]
-        queryable_fields = {
-            f: field_conf[f] for section in search_conf for f in section["fields"]
-        }
 
-        for field, value in qp.items():
-            if field not in queryable_fields:
-                raise ValidationError(f"Unsupported field used in query: {field}")
-
-            field_props = queryable_fields[field]
-            options = get_field_options(field_props)
-            if value not in options \
-                    and not (
-                        # case-insensitive search on categories
-                        field_props["datatype"] == "string"
-                        and value.lower() in [o.lower() for o in options]
-                    ) \
-                    and not (
-                        # no restriction when enum is not set for categories
-                        field_props["datatype"] == "string"
-                        and field_props["config"]["enum"] is None
-                    ):
-                raise ValidationError(f"Invalid value used in query: {value}")
-
-            # recursion
-            queryset = filter_queryset_field_value(queryset, field_props, value)
-
-        return queryset
-
-    def get(self, request, *args, **kwargs):
+    async def get(self, request, *_args, **_kwargs):
         if not settings.CONFIG_PUBLIC:
-            return Response(settings.NO_PUBLIC_DATA_AVAILABLE, status=404)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=404)
 
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = self.filter_queryset(base_qs)
+            filtered_qs = await public_discovery_filter_queryset(request, base_qs, low_counts_censored=False)
         except ValidationError as e:
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
 
-        tissues_count, sampled_tissues = biosample_tissue_stats(filtered_qs)
-        experiments_count, experiment_types = experiment_type_stats(filtered_qs)
+        (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
+            individual_biosample_tissue_stats(filtered_qs, low_counts_censored=False),
+            individual_experiment_type_stats(filtered_qs, low_counts_censored=False),
+        )
 
         return Response({
             "matches": filtered_qs.values_list("id", flat=True),

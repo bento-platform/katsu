@@ -7,10 +7,11 @@ from decimal import Decimal
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
+from chord_metadata_service.phenopackets.utils import time_element_to_years
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
-from chord_metadata_service.restapi.utils import COMPUTED_PROPERTY_PREFIX, time_element_to_years
+from chord_metadata_service.restapi.utils import remove_computed_properties
 
 from .exceptions import IngestError
 from .resources import ingest_resource
@@ -32,16 +33,6 @@ def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> T
     if key in data:
         obj = create_func(data[key])
     return obj
-
-
-def _clean_extra_properties(extra_properties: dict[str, Any]) -> dict[str, Any]:
-    """
-    Removes computed properties from an extra_properties dictionary.
-    Computed extra_properties start with "__" and should never be ingested.
-    """
-    if extra_properties:
-        return {k: v for k, v in extra_properties.items() if not k.startswith(COMPUTED_PROPERTY_PREFIX)}
-    return extra_properties
 
 
 def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
@@ -70,11 +61,12 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
         description=pf.get("description", ""),
         pftype=pf["type"],
         excluded=pf.get("excluded", False),
-        modifiers=pf.get("modifiers", []),  # TODO: Validate ontology term in schema...
         severity=pf.get("severity"),
+        modifiers=pf.get("modifiers", []),
         onset=pf.get("onset"),
-        evidence=pf.get("evidence"),  # TODO: Separate class for evidence?
-        extra_properties=_clean_extra_properties(pf.get("extra_properties", {})),
+        resolution=pf.get("resolution"),
+        evidence=pf.get("evidence", []),  # TODO: Separate class for evidence?
+        extra_properties=remove_computed_properties(pf.get("extra_properties", {})),
     )
     pf_obj.save()
     return pf_obj
@@ -94,7 +86,7 @@ def validate_phenopacket(phenopacket_data: dict[str, Any],
 
 
 def update_or_create_subject(subject: dict) -> pm.Individual:
-    extra_properties: dict[str, Any] = _clean_extra_properties(subject.get("extra_properties", {}))
+    extra_properties: dict[str, Any] = remove_computed_properties(subject.get("extra_properties", {}))
 
     # Pre-process subject data:    ---------------------------------------------------------------------------------
 
@@ -155,7 +147,7 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         pathological_stage=bs.get("pathological_stage", {}),
         is_control_sample=bs.get("is_control_sample", False),
         diagnostic_markers=bs.get("diagnostic_markers", []),
-        extra_properties=_clean_extra_properties(bs.get("extra_properties", {})),
+        extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
         **bs_query
     )
 
@@ -250,7 +242,7 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
-        extra_properties=_clean_extra_properties(gen_interp.get("extra_properties", {})),
+        extra_properties=remove_computed_properties(gen_interp.get("extra_properties", {})),
     )
 
     if related_obj:
@@ -264,9 +256,13 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
 def get_or_create_disease(disease) -> pm.Disease:
     d_obj, _ = pm.Disease.objects.get_or_create(
         term=disease["term"],
+        excluded=disease.get("excluded", False),
+        resolution=disease.get("resolution"),
         disease_stage=disease.get("disease_stage", []),
         clinical_tnm_finding=disease.get("clinical_tnm_finding", []),
-        extra_properties=_clean_extra_properties(disease.get("extra_properties", {})),
+        primary_site=disease.get("primary_site"),
+        laterality=disease.get("laterality"),
+        extra_properties=remove_computed_properties(disease.get("extra_properties", {})),
         **query_and_check_nulls(disease, "onset")
     )
     return d_obj
@@ -286,7 +282,7 @@ def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis
     diag_obj, created = pm.Diagnosis.objects.get_or_create(
         id=id,
         disease=diagnosis.get("disease", {}),
-        extra_properties=_clean_extra_properties(diagnosis.get("extra_properties", {})),
+        extra_properties=remove_computed_properties(diagnosis.get("extra_properties", {})),
     )
 
     if created:
@@ -308,7 +304,7 @@ def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
         diagnosis=diagnosis,
         progress_status=interpretation["progress_status"],
         summary=interpretation.get("summary", ""),
-        extra_properties=_clean_extra_properties(interpretation.get("extra_properties", {}))
+        extra_properties=remove_computed_properties(interpretation.get("extra_properties", {}))
     )
 
     return interp_obj
@@ -394,7 +390,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version=meta_data.get("phenopacket_schema_version"),
         external_references=meta_data.get("external_references", []),
-        extra_properties=_clean_extra_properties(meta_data.get("extra_properties", {})),
+        extra_properties=remove_computed_properties(meta_data.get("extra_properties", {})),
     )
     meta_data_obj.save()
 
