@@ -2,7 +2,7 @@ import datetime
 
 from calendar import month_abbr
 from collections import Counter, defaultdict
-from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value
+from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
 from django.db.models.functions import Cast
 from typing import Any, Mapping
 
@@ -77,7 +77,7 @@ async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts
 
     return [
         val
-        async for val, count in (values_with_counts)
+        async for val, count in values_with_counts
         if count > threshold
     ]
 
@@ -340,9 +340,9 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
         if group_by:
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(group_by, value)
-            condition = {f"{field}__contains": [nested_condition]}
+            condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
-            condition = {f"{field}__iexact": value}
+            condition = Q(**{f"{field}__iexact": value})
     elif field_props["datatype"] == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
@@ -350,29 +350,34 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
             [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
             if json_range_condition := f_utils.get_json_range_condition(field_props, start, end):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
-                logger.debug(f"Filtering {model}.{field} with {json_range_condition}")
-                return qs.filter(json_range_condition)
+                condition = json_range_condition
             else:
-                condition = {
+                condition = Q(**{
                     f"{field}__gte": start,
                     f"{field}__lt": end
-                }
+                })
         else:
             [sym, val] = value.split(" ")
             if sym == "≥":
-                condition = {f"{field}__gte": int(val)}
+                if json_range_condition := f_utils.get_json_range_condition(field_props, min=int(val)):
+                    condition = json_range_condition
+                else:
+                    condition = Q(**{f"{field}__gte": int(val)})
             elif sym == "<":
-                condition = {f"{field}__lt": int(val)}
+                if json_range_condition := f_utils.get_json_range_condition(field_props, max=int(val)):
+                    condition = json_range_condition
+                else:
+                    condition = Q(**{f"{field}__lt": int(val)})
             else:
                 raise NotImplementedError()
     elif field_props["datatype"] == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
-        condition = {f"{field}__startswith": val}
+        condition = Q(**{f"{field}__startswith": val})
     else:
         raise NotImplementedError()
 
     logger.debug(f"Filtering {model}.{field} with {condition}")
 
-    return qs.filter(**condition)
+    return qs.filter(condition)

@@ -3,8 +3,6 @@ from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
 from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 
-# from chord_metadata_service.discovery.fields import get_model_and_field
-
 COMPUTED_PROPERTY_PREFIX = "__"
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
@@ -232,12 +230,12 @@ def get_json_range_condition(field_props: dict, min: int = None, max: int = None
     the JSON path with conditions would be:
         '$[*] ? (@.value.quantity.value < 20 && @.assay.id == "NCIT:C16358")'
     """
-    _, field = get_model_and_field(field_props["mapping"])
     group_by = field_props.get("group_by")
     group_by_value = field_props.get("group_by_value")
     value_mapping = field_props.get("value_mapping")
     range_condition = Q()
     if group_by and group_by_value and value_mapping:
+        _, field = get_model_and_field(field_props["mapping"])
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
         if min is not None:
