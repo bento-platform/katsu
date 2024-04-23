@@ -12,6 +12,9 @@ DISCOVERY_FIELD_SCHEMA = {
     "properties": {
         "mapping": base_type(SchemaTypes.STRING),
         "mapping_for_search_filter": base_type(SchemaTypes.STRING),
+        "group_by": base_type(SchemaTypes.STRING),
+        "group_by_value": base_type(SchemaTypes.STRING),
+        "value_mapping": base_type(SchemaTypes.STRING),
         "title": base_type(SchemaTypes.STRING),
         "description": base_type(SchemaTypes.STRING),
         "datatype": enum_of(["number", "string"]),
@@ -19,7 +22,13 @@ DISCOVERY_FIELD_SCHEMA = {
             "type": "object",
             "properties": {
                 # datatype == string
-                "enum": array_of(base_type(SchemaTypes.STRING)),
+                "enum": {
+                    "oneOf": [
+                        # either an array of strings, or null
+                        array_of(base_type(SchemaTypes.STRING)),
+                        base_type(SchemaTypes.NULL)
+                    ]
+                },
                 # datatype == number
                 "bins": array_of(base_type(SchemaTypes.NUMBER)),
                 "bin_size": base_type(SchemaTypes.NUMBER),
@@ -28,10 +37,6 @@ DISCOVERY_FIELD_SCHEMA = {
                 "units": base_type(SchemaTypes.STRING),
                 "minimum": base_type(SchemaTypes.NUMBER),
                 "maximum": base_type(SchemaTypes.NUMBER),
-                # JSONField array specific
-                "group_by": base_type(SchemaTypes.STRING),
-                "group_by_value": base_type(SchemaTypes.STRING),
-                "value_mapping": base_type(SchemaTypes.STRING),
             }
         }
     },
@@ -99,3 +104,7 @@ DISCOVERY_SCHEMA = {
     },
     "additionalProperties": False
 }
+
+# import json
+# with open("discovery.json", "w") as schema_file:
+#     json.dump(DISCOVERY_SCHEMA, schema_file)

@@ -34,6 +34,7 @@ class DatasetSerializer(GenericSerializer):
         "linked_field_sets",
         "dats_file",
         "project",
+        "discovery",
     )
 
     # noinspection PyMethodMayBeStatic
@@ -146,6 +147,11 @@ class ProjectJsonSchemaSerializer(GenericSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     # Don't inherit GenericSerializer to not pop empty fields
+    always_include = (
+        "title",
+        "description",
+        "discovery",
+    )
 
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
