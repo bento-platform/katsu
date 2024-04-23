@@ -170,7 +170,9 @@ class TestJsonFieldArrayStats(TransactionTestCase):
 
     async def test_get_distinct_values(self):
         dm_values = await get_distinct_field_values(self.dm_fp, False)
-        self.assertListEqual(dm_values, ["Genetic Testing", "Hematology Test"])
+        self.assertEqual(len(dm_values), 2)
+        self.assertTrue("Genetic Testing" in dm_values)
+        self.assertTrue("Hematology Test" in dm_values)
 
         dm_values_censored = await get_distinct_field_values(self.dm_fp, True)
         self.assertListEqual(dm_values_censored, [])
