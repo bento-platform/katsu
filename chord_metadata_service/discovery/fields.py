@@ -168,7 +168,7 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
 async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
     model, field = f_utils.get_model_and_field(field_props["mapping"])
 
-    # JSONField specific
+    # JSONField array specific field props
     group_by = field_props.get("group_by")
     group_by_value = field_props.get("group_by_value")
     value_mapping = field_props.get("value_mapping")
@@ -176,9 +176,10 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
     if group_by and group_by_value and value_mapping:
-        # JSONField array specific
-        # Range stats on a JSONField array require jsonb_path_exists conditions
+        # group_by, group_by_value and value_mapping are required field props to get range stats on a JSONField array.
         whens = [When(
+            # Django's gte and lte lookups cannot span multiple JSON array indexes,
+            # so we use the jsonb_path_exists function instead.
             f_utils.get_json_range_condition(field_props, floor, ceil),
             then=Value(label)
         ) for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
