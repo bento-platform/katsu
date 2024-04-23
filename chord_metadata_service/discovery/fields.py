@@ -10,7 +10,6 @@ from ..logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
-from .fields_utils import monthly_generator
 from .stats import stats_for_field
 from .types import BinWithValue, DiscoveryFieldProps
 
@@ -304,7 +303,7 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
     # All the bins between start and end date must be represented
     bins: list[BinWithValue] = []
     if start:   # at least one month
-        for year, month in monthly_generator(start, end or start):
+        for year, month in f_utils.monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             bins.append({
