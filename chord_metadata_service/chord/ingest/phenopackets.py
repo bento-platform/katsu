@@ -8,6 +8,7 @@ from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Data
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
+from chord_metadata_service.patients.models import VitalStatus
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
@@ -93,7 +94,7 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     # - Be a bit flexible with the subject date_of_birth field for Signature; convert blank strings to None.
     subject["date_of_birth"] = subject.get("date_of_birth") or None
     subject_query = query_and_check_nulls(subject, "date_of_birth", transform=isoparse)
-    for k in ("alternate_ids", "time_at_last_encounter", "sex", "taxonomy"):
+    for k in ("alternate_ids", "time_at_last_encounter", "sex", "taxonomy", "gender"):
         subject_query.update(query_and_check_nulls(subject, k))
 
     # --------------------------------------------------------------------------------------------------------------
@@ -103,13 +104,19 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     if "time_at_last_encounter" in subject:
         age_numeric_value, age_unit_value = time_element_to_years(subject["time_at_last_encounter"])
 
+    vital_status: VitalStatus | None = None
+    if vital_status_data := subject.get("vital_status"):
+        vital_status, _ = VitalStatus.objects.get_or_create(**vital_status_data)
+
     # Check if subject already exists
     existing_extra_properties: dict[str, Any]
     try:
         existing_subject = pm.Individual.objects.get(id=subject["id"])
         existing_extra_properties = existing_subject.extra_properties
+        existing_vital_status = existing_subject.vital_status
     except pm.Individual.DoesNotExist:
         existing_extra_properties = extra_properties
+        existing_vital_status = vital_status
         pass
 
     # --------------------------------------------------------------------------------------------------------------
@@ -121,12 +128,14 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
         age_numeric=age_numeric_value,
         age_unit=age_unit_value if age_unit_value else "",
         extra_properties=existing_extra_properties,
+        vital_status=existing_vital_status,
         **subject_query
     )
 
     if not subject_obj_created:
-        # Add any new extra properties to subject if they already exist
+        # Add any new extra properties or vital status change to subject if they already exist
         subject_obj.extra_properties = extra_properties
+        subject_obj.vital_status = vital_status
         subject_obj.save()
 
     return subject_obj

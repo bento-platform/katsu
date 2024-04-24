@@ -12,6 +12,7 @@ class CensorshipGetThresholdTest(TestCase):
     def test_get_threshold_no_censorship(self):
         self.assertEqual(get_threshold(low_counts_censored=False), 0)
 
+    @override_settings(CONFIG_PUBLIC={})
     def test_get_threshold_no_config(self):  # no public config configured
         self.assertEqual(get_threshold(low_counts_censored=True), sys.maxsize)
 
@@ -28,6 +29,7 @@ class CensorshipThresholdedCountTest(TestCase):
     def test_thresholded_count_no_censorship(self):
         self.assertEqual(thresholded_count(1, low_counts_censored=False), 1)
 
+    @override_settings(CONFIG_PUBLIC={})
     def test_thresholded_count_no_config(self):  # no public config configured
         self.assertEqual(thresholded_count(100000, low_counts_censored=True), 0)
 
@@ -44,6 +46,7 @@ class CensorshipGetMaxQueryParametersTest(TestCase):
     def test_get_max_query_parameters_no_censorship(self):
         self.assertEqual(get_max_query_parameters(low_counts_censored=False), sys.maxsize)
 
+    @override_settings(CONFIG_PUBLIC={})
     def test_get_max_query_parameters_no_config(self):
         self.assertEqual(get_max_query_parameters(low_counts_censored=True), 0)
 
