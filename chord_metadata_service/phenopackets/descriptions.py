@@ -335,6 +335,10 @@ BIOSAMPLE = {
         "tumor_grade": ontology_class("representing the tumour grade. This should be a child term of NCIT:C28076 "
                                       "(Disease Grade Qualifier) or equivalent"),
         "pathological_stage": ontology_class("Pathological stage, if applicable."),
+        "pathological_tnm_finding": {
+            "description": "Pathological TNM findings, if applicable.",
+            "items": ontology_class("represents the TNM system for cancer staging")
+        },
         "diagnostic_markers": {
             "description": "A list of ontology terms representing clinically-relevant bio-markers.",
             "items": ontology_class("representing a clinically-relevant bio-marker. Most of the assays, such as "

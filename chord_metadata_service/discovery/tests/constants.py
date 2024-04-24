@@ -22,6 +22,13 @@ CONFIG_PUBLIC_TEST = {
             "charts": [
                 {"field": "lab_test_result_value", "chart_type": "bar"},
             ]
+        },
+        {
+            "section_title": "Fourth Section",
+            "charts": [
+                {"field": "diagnostic_markers", "chart_type": "pie"},
+                {"field": "measurement_tumor_length", "chart_type": "bar"}
+            ]
         }
     ],
     "search": [
@@ -141,7 +148,34 @@ CONFIG_PUBLIC_TEST = {
             "config": {
                 "enum": None
             }
-        }
+        },
+        "diagnostic_markers": {
+            "mapping": "individual/phenopackets/biosamples/diagnostic_markers",
+            "group_by": "label",
+            "title": "Diagnostic Markers",
+            "description": "Markers used for diagnosis",
+            "datatype": "string",
+            "config": {
+                "enum": None
+            }
+        },
+        "measurement_tumor_length": {
+            "mapping": "individual/phenopackets/measurements",
+            "group_by": "assay/id",
+            "group_by_value": "NCIT:C200479",
+            "value_mapping": "value/quantity/value",
+            "title": "Tumor lengths",
+            "description": "measured tumor lengths in millimeters",
+            "datatype": "number",
+            "config": {
+                "minimum": 0,
+                "maximum": 200,
+                "bin_size": 20,
+                "taper_left": 0,
+                "taper_right": 200,
+                "units": "mm"
+            }
+        },
     },
     "rules": {
         "count_threshold": 5,
