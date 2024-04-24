@@ -1,4 +1,51 @@
-from typing import Iterator
+from typing import Any, Iterator, Type
+from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
+
+from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+
+MAPPING_SEPARATOR = "/"
+JSON_PATH_ACCESSOR = "."
+
+
+class JSONBPathFilter(Func):
+    function = "jsonb_path_exists"
+    output_field = BooleanField()
+
+
+class JSONBPathQuery(Func):
+    function = "jsonb_path_query"
+    output_field = JSONField()
+
+
+def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=True):
+    field_operator = "$[*]" if is_array else "$"
+    query_path = mapping_to_json_path(json_path) if is_mapping else json_path
+    return JSONBPathQuery(F(field), Value(f"{field_operator}.{query_path}"))
+
+
+def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str, ...]]:
+    model_name, *field_path = field_id.split("/")
+    return model_name, tuple(field_path)
+
+
+def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
+    """
+    Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
+    where the first crumb represents the object in the DB model, and the next ones
+    are the field with their possible joins through tables relations.
+    Returns a tuple of the model object and the Django string representation of the
+    field for this object.
+    """
+
+    model_name, field_path = get_public_model_name_and_field_path(field_id)
+
+    model: Type[Model] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
+    if model is None:
+        msg = f"Accessing field on model {model_name} not implemented"
+        raise NotImplementedError(msg)
+
+    field_name = "__".join(field_path)
+    return model, field_name
 
 
 def parse_duration(duration: str | dict):
@@ -145,3 +192,65 @@ def monthly_generator(start: str, end: str) -> Iterator[tuple[int, int]]:
         year = start_year + (month_nb - 1) // 12
         month = month_nb % 12 or 12
         yield year, month
+
+
+def mapping_to_json_path(mapping: str) -> str:
+    return JSON_PATH_ACCESSOR.join(mapping.split(MAPPING_SEPARATOR))
+
+
+def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
+    """
+    Takes a '/' delimited path and creates an array filter condition for JSONFields.
+    e.g. with:
+    path="assay/label" and value="something"
+    returns {
+        "assay": {
+            "label": "something"
+        }
+    }
+    """
+    elements = path.split(MAPPING_SEPARATOR)
+    condition = value
+    for field in reversed(elements):
+        condition = {field: condition}
+    return condition
+
+
+def get_json_range_condition(field_props: dict, min: int = None, max: int = None) -> Q:
+    """
+    Takes field props for a 'number' data type contained in a JSONField array,
+    and returns a query expression for the provided 'min' and 'max' values.
+
+    Note: since Django doesn't support index-agnostic lookups for JSONField array elements,
+    we rely on the 'jsonb_path_exists' PostgreSQL function to perform element-wise filtering
+    on array elements that satisfy the range and 'group_by_value' field prop condition.
+
+    e.g. To get measurements where assay.id == "NCIT:C16358" AND value.quantity.value < 20 (BMIs bellow 20),
+    the JSON path with conditions would be:
+        '$[*] ? (@.value.quantity.value < 20 && @.assay.id == "NCIT:C16358")'
+    """
+    group_by = field_props.get("group_by")
+    group_by_value = field_props.get("group_by_value")
+    value_mapping = field_props.get("value_mapping")
+    range_condition = Q()
+    if group_by and group_by_value and value_mapping:
+        _, field = get_model_and_field(field_props["mapping"])
+        group_by_json_path = mapping_to_json_path(group_by)
+        value_json_path = mapping_to_json_path(value_mapping)
+        if min is not None:
+            min_condition = Q(JSONBPathFilter(
+                # Points to the JSONField
+                F(field),
+                # JSON path expression with GTE and group_by_value condition
+                Value(f'$[*] ? (@.{value_json_path} >= {min} && @.{group_by_json_path} == "{group_by_value}")')
+            ))
+            range_condition.add(min_condition, conn_type=Q.AND)
+        if max is not None:
+            max_condition = Q(JSONBPathFilter(
+                # Points to the JSONField
+                F(field),
+                # JSON path expression with LT and group_by_value condition
+                Value(f'$[*] ? (@.{value_json_path} < {max} && @.{group_by_json_path} == "{group_by_value}")')
+            ))
+            range_condition.add(max_condition, Q.AND)
+    return range_condition
