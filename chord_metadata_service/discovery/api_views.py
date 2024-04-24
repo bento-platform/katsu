@@ -19,6 +19,35 @@ from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from .schemas import DISCOVERY_SCHEMA
 
 
+async def get_project_discovery(project_id: str = None, project: cm.Project = None):
+    if not project and project_id:
+        project = await cm.Project.objects.aget(identifier=project_id)
+    if not project.discovery:
+        return settings.CONFIG_PUBLIC
+    return project.discovery
+
+
+async def get_dataset_discovery(dataset_id: str):
+    dataset = await cm.Dataset.objects.aget(identifier=dataset_id)
+    if not dataset.discovery:
+        project = await cm.Project.objects.aget(datasets=dataset_id)
+        return await get_project_discovery(project=project)
+    return dataset.discovery
+
+
+async def get_discovery(request: DrfRequest):
+    dataset_id = request.query_params.get("dataset")
+    project_id = request.query_params.get("project")
+    if dataset_id:
+        # get dataset's discovery config if dataset_id is passed
+        return await get_dataset_discovery(dataset_id)
+    if project_id and not dataset_id:
+        # get project's discovery config if project_id is passed and dataset_id is not
+        return await get_project_discovery(project_id)
+    # fallback to config.json when no dataset or project is in the request
+    return settings.CONFIG_PUBLIC
+
+
 @extend_schema(
     description="Public search fields with their configuration",
     responses={
@@ -34,15 +63,13 @@ from .schemas import DISCOVERY_SCHEMA
 )
 @api_view(["GET"])
 @permission_classes([AllowAny])
-async def public_search_fields(_request: DrfRequest):
+async def public_search_fields(request: DrfRequest):
     """
     get:
     Return public search fields with their configuration
     """
 
-    # TODO: should be project-scoped
-
-    config_public = settings.CONFIG_PUBLIC
+    config_public = await get_discovery(request)
 
     if not config_public:
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
@@ -91,18 +118,16 @@ async def _counts_for_model_name(mn: str) -> tuple[str, int]:
 )
 @api_view(["GET"])  # Don't use BentoAllowAny, we want to be more careful of cases here.
 @permission_classes([AllowAny])
-async def public_overview(_request: DrfRequest):
+async def public_overview(request: DrfRequest):
     """
     get:
     Overview of all public data in the database
     """
 
-    config_public = settings.CONFIG_PUBLIC
+    config_public = await get_discovery(request)
 
     if not config_public:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
-
-    # TODO: public overviews SHOULD be project-scoped at least.
 
     # Predefined counts
     counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
