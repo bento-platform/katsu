@@ -17,7 +17,7 @@ DISCOVERY_FIELD_SCHEMA = {
         "value_mapping": base_type(SchemaTypes.STRING),
         "title": base_type(SchemaTypes.STRING),
         "description": base_type(SchemaTypes.STRING),
-        "datatype": enum_of(["number", "string"]),
+        "datatype": enum_of(["number", "string", "date"]),
         "config": {
             "type": "object",
             "properties": {
