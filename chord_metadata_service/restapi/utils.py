@@ -3,7 +3,6 @@ from typing import Any
 
 
 COMPUTED_PROPERTY_PREFIX = "__"
-MAPPING_SEPARATOR = "/"
 
 
 def camel_case_field_names(string) -> str:
