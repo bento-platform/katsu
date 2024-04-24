@@ -3,7 +3,6 @@ from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
 from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 
-COMPUTED_PROPERTY_PREFIX = "__"
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
 
