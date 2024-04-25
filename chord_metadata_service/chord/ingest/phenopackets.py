@@ -106,7 +106,7 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
     vital_status: VitalStatus | None = None
     if vital_status_data := subject.get("vital_status"):
-        vital_status, _ = VitalStatus.objects.get_or_create(**vital_status_data)
+        vital_status, vital_status_created = VitalStatus.objects.get_or_create(**vital_status_data)
 
     # Check if subject already exists
     existing_extra_properties: dict[str, Any]
