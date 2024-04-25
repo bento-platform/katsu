@@ -67,6 +67,8 @@ class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                                       help_text='The karyotypic sex of the individual.')
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text='Ontology resource representing the species (e.g., NCBITaxon:9615).')
+    gender = JSONField(blank=True, null=True, validators=[ontology_validator],
+                       help_text='Self-identified gender')
 
     # FHIR specific
     active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')

@@ -117,10 +117,16 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_equal(
             db_obj=p.subject,
             ground_truth=EXAMPLE_INGEST_PHENOPACKET["subject"],
-            ignore_fields=IGNORE_COMMON_FIELDS + ["date_of_birth"]  # DOB needs parsing
+            ignore_fields=IGNORE_COMMON_FIELDS + ["date_of_birth", "vital_status"]  # DOB needs parsing
         )
         self.assertIn("__computed", EXAMPLE_INGEST_PHENOPACKET["subject"]["extra_properties"])
         self.assertNotIn("__computed", p.subject.extra_properties)  # Explicitly test computed extra_properties
+
+        self.assert_model_fields_equal(
+            db_obj=p.subject.vital_status,
+            ground_truth=EXAMPLE_INGEST_PHENOPACKET["subject"]["vital_status"],
+            ignore_fields=IGNORE_COMMON_FIELDS
+        )
 
         # Phenotypic Features
         pfs = list(p.phenotypic_features.all().order_by("created"))
@@ -208,6 +214,12 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
         for m1, m2 in zip(p.meta_data.resources.all().order_by("id"), p2.meta_data.resources.all().order_by("id")):
             self.assertEqual(m1.id, m2.id)
+
+        self.assert_model_fields_equal(
+            p2.subject.vital_status,
+            ground_truth=EXAMPLE_INGEST_PHENOPACKET_UPDATE["subject"]["vital_status"],
+            ignore_fields=IGNORE_COMMON_FIELDS
+        )
 
     def test_phenopackets_validation(self):
         # check invalid phenopacket, must fail validation & validate_phenopacket must raise
