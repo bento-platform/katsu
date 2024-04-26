@@ -1,37 +1,19 @@
-from django.db.models.base import ModelBase
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
+from chord_metadata_service.phenopackets import models as ph_m
 
 from .constants import CONFIG_PUBLIC_TEST
 from ..fields import (
-    get_model_and_field,
     get_field_options,
     get_categorical_stats,
+    get_distinct_field_values,
     get_date_stats,
     get_month_date_range,
+    filter_queryset_field_value,
 )
-
-
-class TestModelField(TransactionTestCase):
-
-    def test_get_model_field_basic(self):
-        model, field = get_model_and_field("individual/age_numeric")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "age_numeric")
-
-        model, field = get_model_and_field("experiment/experiment_type")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "experiment_type")
-
-    def test_get_model_nested_field(self):
-        model, field = get_model_and_field("individual/extra_properties/lab_test_result")
-        self.assertEqual(field, "extra_properties__lab_test_result")
-
-    def test_get_wrong_model(self):
-        self.assertRaises(NotImplementedError, get_model_and_field, "junk/age_numeric")
 
 
 class TestGetFieldOptions(TransactionTestCase):
@@ -117,3 +99,80 @@ class TestDateStatsExcept(APITestCase):
 
         with self.assertRaises(NotImplementedError):
             await get_month_date_range(fp)
+
+
+class TestJsonFieldArrayStats(TransactionTestCase):
+
+    tumor_lengths = range(1, 50, 5)
+    dm_fp = CONFIG_PUBLIC_TEST["fields"]["diagnostic_markers"]
+    mtl_fp = CONFIG_PUBLIC_TEST["fields"]["measurement_tumor_length"]
+
+    def setUp(self) -> None:
+        self.tumors = [ph_c.valid_measurement_tumor_length(length) for length in self.tumor_lengths]
+        self.individual = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual))
+        self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        self.phenopacket = ph_m.Phenopacket.objects.create(
+            id="phenopacket_id:1",
+            subject=self.individual,
+            measurements=self.tumors,
+            meta_data=self.meta_data,
+        )
+        self.phenopacket.biosamples.set([self.biosample])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    async def test_json_categorical_stats_lcf(self):
+        res = await get_categorical_stats(self.dm_fp, low_counts_censored=False)
+        ground_truth = [
+            {"label": "Genetic Testing", "value": 1},
+            {"label": "Hematology Test", "value": 1},
+            {"label": "missing", "value": 0},
+        ]
+        self.assertListEqual(res, ground_truth)
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    async def test_json_categorical_stats_lct(self):
+        res = await get_categorical_stats(self.dm_fp, low_counts_censored=True)
+        ground_truth = [
+            {"label": "missing", "value": 0},
+        ]
+        self.assertListEqual(res, ground_truth)
+
+    def test_filter_queryset_field_value_string(self):
+        base_qs = ph_m.Individual.objects.all()
+        qs = filter_queryset_field_value(base_qs, self.dm_fp, "Hematology Test")
+        self.assertEqual(qs.count(), 1)
+        qs = filter_queryset_field_value(base_qs, self.dm_fp, "Genetic Testing")
+        self.assertEqual(qs.count(), 1)
+        qs = filter_queryset_field_value(base_qs, self.dm_fp, "VALUE NOT IN DB")
+        self.assertEqual(qs.count(), 0)
+
+    def test_filter_queryset_field_value_number(self):
+        base_qs = ph_m.Individual.objects.all()
+
+        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "≥ 0")
+        self.assertEqual(qs.count(), 1)
+
+        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "≥ 60")
+        self.assertEqual(qs.count(), 0)
+
+        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "< 60")
+        self.assertEqual(qs.count(), 1)
+
+        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "< 0")
+        self.assertEqual(qs.count(), 0)
+
+        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "[30, 50)")
+        self.assertEqual(qs.count(), 1)
+
+        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "[100, 200)")
+        self.assertEqual(qs.count(), 0)
+
+    async def test_get_distinct_values(self):
+        dm_values = await get_distinct_field_values(self.dm_fp, False)
+        self.assertEqual(len(dm_values), 2)
+        self.assertTrue("Genetic Testing" in dm_values)
+        self.assertTrue("Hematology Test" in dm_values)
+
+        dm_values_censored = await get_distinct_field_values(self.dm_fp, True)
+        self.assertListEqual(dm_values_censored, [])

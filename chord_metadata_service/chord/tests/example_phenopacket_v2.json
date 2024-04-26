@@ -5,6 +5,13 @@
     "date_of_birth": "1964-03-15T00:00:00Z",
     "sex": "MALE",
     "karyotypic_sex": "UNKNOWN_KARYOTYPE",
+    "gender": {
+      "id": "SIG:ID",
+      "label": "a self-identified gender"
+    },
+    "vital_status": {
+      "status": "ALIVE"
+    },
     "extra_properties": {
       "cool_guy": true,
       "smoker": false,

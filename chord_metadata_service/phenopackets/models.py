@@ -173,6 +173,8 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                             help_text=rec_help(d.BIOSAMPLE, "tumor_grade"))
     pathological_stage = JSONField(blank=True, null=True, validators=[ontology_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "pathological_stage"))
+    pathological_tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
+                                         help_text=rec_help(d.BIOSAMPLE, "pathological_tnm_finding"))
     diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
     procedure = models.JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "procedure"))
