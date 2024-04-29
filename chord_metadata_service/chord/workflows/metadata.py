@@ -84,7 +84,7 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
 
 workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON_WITH_FILES, wm.WorkflowDefinition(
     type="ingestion",
-    name="Bento Experiments JSON-extended",
+    name="Bento Experiments JSON With Files",
     description="This workflow ingests experiments and related files into DRS.",
     data_type=DATA_TYPE_EXPERIMENT,
     tags=[DATA_TYPE_EXPERIMENT, "experiment_result"],
