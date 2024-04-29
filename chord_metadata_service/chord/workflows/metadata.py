@@ -5,7 +5,7 @@ from bento_lib.workflows.workflow_set import WorkflowSet
 __all__ = [
     "WORKFLOW_PHENOPACKETS_JSON",
     "WORKFLOW_EXPERIMENTS_JSON",
-    "WORKFLOW_EXPERIMENTS_EXTENDED_JSON",
+    "WORKFLOW_EXPERIMENTS_JSON_WITH_FILES",
     "WORKFLOW_FHIR_JSON",
     "WORKFLOW_READSET",
     "WORKFLOW_DOCUMENT",
@@ -19,7 +19,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_T
 
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
-WORKFLOW_EXPERIMENTS_EXTENDED_JSON = "experiments_extended_json"
+WORKFLOW_EXPERIMENTS_JSON_WITH_FILES = "experiments_json_with_files"
 
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_READSET = "readset"
@@ -82,13 +82,13 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
     ],
 ))
 
-workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_EXTENDED_JSON, wm.WorkflowDefinition(
+workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON_WITH_FILES, wm.WorkflowDefinition(
     type="ingestion",
     name="Bento Experiments JSON-extended",
     description="This workflow ingests experiments and related files into DRS.",
     data_type=DATA_TYPE_EXPERIMENT,
     tags=[DATA_TYPE_EXPERIMENT, "experiment_result"],
-    file="experiments_extended_json.wdl",
+    file="experiments_json_with_files.wdl",
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
