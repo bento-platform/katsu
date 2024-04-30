@@ -210,7 +210,7 @@ async def public_dataset(_request: DrfRequest):
         "dimensions", "primary_publications", "citations",
         "produced_by", "creators", "licenses",
         "acknowledges", "keywords", "version", "dats_file",
-        "extra_properties", "identifier"
+        "extra_properties", "identifier", "discovery"
     )
 
     return Response({
