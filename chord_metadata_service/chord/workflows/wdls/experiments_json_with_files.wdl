@@ -85,7 +85,7 @@ workflow experiments_json_with_files {
     output {
         File download_list = prepare_download_list.urls_json
         File path_list = prepare_download_list.path_list
-        Array[File]? downloaded_files = download_file.downloaded_file
+        Array[String]? downloaded_files = download_file.downloaded_file
         Array[String] consolidated_paths_for_drs = prepare_for_drs.consolidated_paths_for_drs
         Array[String] drs_responses = post_to_drs.response_message
         File results_post_drs = write_drs_responses_to_file.results_post_drs
@@ -199,7 +199,7 @@ task prepare_for_drs {
     input {
         File json_download_list
         File json_path_list
-        Array[File]? downloaded_files
+        Array[String]? downloaded_files
     }
 
     command <<<
