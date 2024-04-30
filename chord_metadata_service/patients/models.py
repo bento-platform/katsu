@@ -57,9 +57,10 @@ class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                                               validators=[JsonSchemaValidator(TIME_ELEMENT_SCHEMA)],
                                               help_text="TimeElement of the patient when last encountered.")
 
-    vital_status = models.OneToOneField(VitalStatus, blank=True, null=True, on_delete=models.CASCADE,
-                                        help_text="The vital status of the individual e.g. whether they are alive or"
-                                                  " the time and cause of death")
+    vital_status = models.ForeignKey(VitalStatus, blank=True, null=True, on_delete=models.CASCADE,
+                                     related_name="individuals",
+                                     help_text="The vital status of the individual e.g. whether they are alive or"
+                                               " the time and cause of death")
 
     sex = models.CharField(choices=SEX, max_length=200, blank=True, null=True,
                            help_text='Observed apparent sex of the individual.')
@@ -67,6 +68,8 @@ class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
                                       help_text='The karyotypic sex of the individual.')
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text='Ontology resource representing the species (e.g., NCBITaxon:9615).')
+    gender = JSONField(blank=True, null=True, validators=[ontology_validator],
+                       help_text='Self-identified gender')
 
     # FHIR specific
     active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')

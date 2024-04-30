@@ -4,6 +4,7 @@ from typing import Mapping, Type
 
 from .censorship import thresholded_count
 from .types import BinWithValue
+from .fields_utils import get_jsonb_path_query
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -75,17 +76,18 @@ async def stats_for_field(
     field: str,
     low_counts_censored: bool,
     add_missing: bool = False,
+    group_by=None,
 ) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
     return await queryset_stats_for_field(
-        model.objects.all(), field, low_counts_censored=low_counts_censored, add_missing=add_missing)
+        model.objects.all(), field, low_counts_censored=low_counts_censored, add_missing=add_missing, group_by=group_by)
 
 
 async def queryset_stats_for_field(
-    queryset: QuerySet, field: str, low_counts_censored: bool, add_missing: bool = False
+    queryset: QuerySet, field: str, low_counts_censored: bool, add_missing: bool = False, group_by: str = None
 ) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a queryset.
@@ -94,8 +96,13 @@ async def queryset_stats_for_field(
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
-
-    annotated_queryset = queryset.values(field).annotate(total=Count("*"))
+    if group_by is not None:
+        queryset_values = queryset.values(
+            **{field: get_jsonb_path_query(field, group_by)},
+        )
+    else:
+        queryset_values = queryset.values(field)
+    annotated_queryset = queryset_values.annotate(total=Count("*"))
     num_missing = 0
 
     stats: dict[str, int] = {}

@@ -5,6 +5,21 @@
     "date_of_birth": "1964-03-15T00:00:00Z",
     "sex": "MALE",
     "karyotypic_sex": "UNKNOWN_KARYOTYPE",
+    "gender": {
+      "id": "SIG:ID",
+      "label": "a self-identified gender"
+    },
+    "vital_status": {
+      "status": "DECEASED",
+      "time_of_death": {
+        "timestamp": "2024-03-15T00:00:00Z"
+      },
+      "cause_of_death": {
+        "id": "NCIT:C36263",
+        "label": "Metastatic Malignant Neoplasm"
+      },
+      "survival_time_in_days": 800
+    },
     "extra_properties": {
       "cool_guy": true,
       "smoker": false,

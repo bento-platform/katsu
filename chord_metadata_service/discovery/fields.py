@@ -2,45 +2,18 @@ import datetime
 
 from calendar import month_abbr
 from collections import Counter, defaultdict
-from django.db.models import Case, CharField, Count, F, Func, IntegerField, Model, QuerySet, When, Value
+from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
 from django.db.models.functions import Cast
-from typing import Any, Mapping, Type
+from typing import Any, Mapping
 
 from ..logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
-from .fields_utils import monthly_generator
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from .stats import stats_for_field
 from .types import BinWithValue, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
-
-
-def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str, ...]]:
-    model_name, *field_path = field_id.split("/")
-    return model_name, tuple(field_path)
-
-
-def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
-    """
-    Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
-    where the first crumb represents the object in the DB model, and the next ones
-    are the field with their possible joins through tables relations.
-    Returns a tuple of the model object and the Django string representation of the
-    field for this object.
-    """
-
-    model_name, field_path = get_public_model_name_and_field_path(field_id)
-
-    model: Type[Model] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
-    if model is None:
-        msg = f"Accessing field on model {model_name} not implemented"
-        raise NotImplementedError(msg)
-
-    field_name = "__".join(field_path)
-    return model, field_name
 
 
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
@@ -91,16 +64,19 @@ async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
 
-    model, field = get_model_and_field(field_props["mapping"])
+    model, field = f_utils.get_model_and_field(field_props["mapping"])
     threshold = get_threshold(low_counts_censored)
+
+    field_query = field
+    if group_by := field_props.get("group_by"):
+        # JSONField containing an array
+        # use jsonb_path_query field expression
+        field_query = f_utils.get_jsonb_path_query(field, group_by)
+    values_with_counts = model.objects.values_list(field_query).annotate(count=Count(field))
 
     return [
         val
-        async for val, count in (
-            model.objects
-            .values_list(field)
-            .annotate(count=Count(field))
-        )
+        async for val, count in values_with_counts
         if count > threshold
     ]
 
@@ -163,7 +139,7 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
     if (bin_by := field_props["config"]["bin_by"]) != "month":
         raise NotImplementedError(f"Binning dates by `{bin_by}` method not implemented")
 
-    model, field_name = get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
         raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
@@ -189,18 +165,32 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
 
 
 async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
-    model, field = get_model_and_field(field_props["mapping"])
+    model, field = f_utils.get_model_and_field(field_props["mapping"])
+
+    # JSONField array specific field props
+    group_by = field_props.get("group_by")
+    group_by_value = field_props.get("group_by_value")
+    value_mapping = field_props.get("value_mapping")
 
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
-    whens = [
-        When(
-            **{f"{field}__gte": floor} if floor is not None else {},
-            **{f"{field}__lt": ceil} if ceil is not None else {},
-            then=Value(label),
-        )
-        for floor, ceil, label in f_utils.labelled_range_generator(field_props)
-    ]
+    if group_by and group_by_value and value_mapping:
+        # group_by, group_by_value and value_mapping are required field props to get range stats on a JSONField array.
+        whens = [When(
+            # Django's gte and lte lookups cannot span multiple JSON array indexes,
+            # so we use the jsonb_path_exists function instead.
+            f_utils.get_json_range_condition(field_props, floor, ceil),
+            then=Value(label)
+        ) for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
+    else:
+        whens = [
+            When(
+                **{f"{field}__gte": floor} if floor is not None else {},
+                **{f"{field}__lt": ceil} if ceil is not None else {},
+                then=Value(label),
+            )
+            for floor, ceil, label in f_utils.labelled_range_generator(field_props)
+        ]
 
     query_set = (
         model.objects
@@ -230,14 +220,15 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_cen
     Fetches statistics for a given categorical field and apply privacy policies
     """
 
-    model, field_name = get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: Mapping[str, int] = await stats_for_field(model, field_name, low_counts_censored, add_missing=True)
+    stats: Mapping[str, int] = await stats_for_field(model, field_name, low_counts_censored,
+                                                     add_missing=True, group_by=field_props.get("group_by"))
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -278,7 +269,7 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
         msg = f"Binning dates by `{bin_by}` method not implemented"
         raise NotImplementedError(msg)
 
-    model, field_name = get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
@@ -312,7 +303,7 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
     # All the bins between start and end date must be represented
     bins: list[BinWithValue] = []
     if start:   # at least one month
-        for year, month in monthly_generator(start, end or start):
+        for year, month in f_utils.monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             bins.append({
@@ -338,38 +329,55 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     the `mapping` value is based on the same model as the queryset.
     """
 
-    model, field = get_model_and_field(
+    model, field = f_utils.get_model_and_field(
         field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
         else field_props["mapping"]
     )
 
+    group_by = field_props.get("group_by")
+
     if field_props["datatype"] == "string":
-        condition = {f"{field}__iexact": value}
+        if group_by:
+            # JSONField array string check must use 'contains' lookup
+            nested_condition = f_utils.get_nested_json_condition(group_by, value)
+            condition = Q(**{f"{field}__contains": [nested_condition]})
+        else:
+            condition = Q(**{f"{field}__iexact": value})
     elif field_props["datatype"] == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
         if value.startswith("["):
             [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
-            condition = {
-                f"{field}__gte": start,
-                f"{field}__lt": end
-            }
+            if json_range_condition := f_utils.get_json_range_condition(field_props, start, end):
+                # JSONField array range stats must use 'jsonb_path_exists' conditions
+                condition = json_range_condition
+            else:
+                condition = Q(**{
+                    f"{field}__gte": start,
+                    f"{field}__lt": end
+                })
         else:
             [sym, val] = value.split(" ")
             if sym == "≥":
-                condition = {f"{field}__gte": int(val)}
+                if json_range_condition := f_utils.get_json_range_condition(field_props, min=int(val)):
+                    condition = json_range_condition
+                else:
+                    condition = Q(**{f"{field}__gte": int(val)})
             elif sym == "<":
-                condition = {f"{field}__lt": int(val)}
+                if json_range_condition := f_utils.get_json_range_condition(field_props, max=int(val)):
+                    condition = json_range_condition
+                else:
+                    condition = Q(**{f"{field}__lt": int(val)})
             else:
                 raise NotImplementedError()
     elif field_props["datatype"] == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
-        condition = {f"{field}__startswith": val}
+        condition = Q(**{f"{field}__startswith": val})
     else:
         raise NotImplementedError()
 
     logger.debug(f"Filtering {model}.{field} with {condition}")
 
-    return qs.filter(**condition)
+    return qs.filter(condition)
