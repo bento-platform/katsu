@@ -15,7 +15,7 @@ from ..chord import models as cm
 from ..logger import logger
 
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS
 from .schemas import DISCOVERY_SCHEMA
 
 
@@ -125,12 +125,26 @@ async def public_overview(request: DrfRequest):
     """
 
     config_public = await get_discovery(request)
+    dataset_id = request.query_params.get("dataset")
+    project_id = request.query_params.get("project")
 
     if not config_public:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
+    async def _counts_for_scoped_model_name(mn: str) -> tuple[str, int]:
+        if project_id and not dataset_id:
+            scope = "project"
+            value = project_id
+        elif project_id and dataset_id:
+            scope = "dataset"
+            value = dataset_id
+        else:
+            # cannot scope
+            return await _counts_for_model_name(mn)
+        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.filter(**{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]: value}).acount()
+
     # Predefined counts
-    counts = dict(await asyncio.gather(*map(_counts_for_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
+    counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
 
     # Get the rules config - because we used get_config_public_and_field_set_permissions with no arguments, it'll choose
     #  these values based on if we have access to ALL public fields or not.
@@ -165,11 +179,11 @@ async def public_overview(request: DrfRequest):
     async def _get_field_response(field_id: str, field_props: dict) -> dict:
         stats: list[BinWithValue] | None
         if field_props["datatype"] == "string":
-            stats = await get_categorical_stats(field_props, low_counts_censored=True)
+            stats = await get_categorical_stats(field_props, project_id, dataset_id, low_counts_censored=True)
         elif field_props["datatype"] == "number":
-            stats = await get_range_stats(field_props, low_counts_censored=True)
+            stats = await get_range_stats(field_props, project_id, dataset_id, low_counts_censored=True)
         elif field_props["datatype"] == "date":
-            stats = await get_date_stats(field_props, low_counts_censored=True)
+            stats = await get_date_stats(field_props, project_id, dataset_id, low_counts_censored=True)
         else:
             raise NotImplementedError()
 

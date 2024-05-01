@@ -47,6 +47,12 @@ def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
     field_name = "__".join(field_path)
     return model, field_name
 
+def get_public_model_name(model: Type[Model]):
+    model_name = [key for key, m in PUBLIC_MODEL_NAMES_TO_MODEL.items() if m == model]
+    if len(model_name) != 1:
+        raise ValueError(f"Provided model {model} is not available for public.")
+    return model_name[0]
+
 
 def parse_duration(duration: str | dict):
     """ Returns years integer. """

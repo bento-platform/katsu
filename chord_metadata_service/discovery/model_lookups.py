@@ -19,3 +19,18 @@ PUBLIC_MODEL_NAMES_TO_DATA_TYPE = {
     "biosample": DATA_TYPE_PHENOPACKET,
     "experiment": DATA_TYPE_EXPERIMENT,
 }
+
+PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS = {
+    "individual": {
+        "project": "phenopackets__dataset__project__identifier",
+        "dataset": "phenopackets__dataset__identifier",
+    },
+    "biosample": {
+        "project": "phenopacket__dataset__project__identifier",
+        "dataset": "phenopacket__dataset__identifier",
+    },
+    "experiment": {
+        "project": "dataset__project__identifier",
+        "dataset": "dataset__identifier",
+    },
+}

@@ -2,9 +2,11 @@ from django.db.models import Count, F, Model, QuerySet
 
 from typing import Mapping, Type
 
+from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS
+
 from .censorship import thresholded_count
 from .types import BinWithValue
-from .fields_utils import get_jsonb_path_query
+from .fields_utils import get_jsonb_path_query, get_public_model_name
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -70,6 +72,17 @@ async def bento_public_format_count_and_stats_list(
 
     return thresholded_count(total, low_counts_censored), stats_list
 
+def get_scoped_queryset(model: Type[Model], project_id: str, dataset_id: str):
+    if project_id and not dataset_id:
+        scope = "project"
+        value = project_id
+    elif project_id and dataset_id:
+        scope = "dataset"
+        value = dataset_id
+    else:
+        return model.objects.all()
+    model_name = get_public_model_name(model)
+    return model.objects.filter(**{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[model_name][scope]: value})
 
 async def stats_for_field(
     model: Type[Model],
@@ -77,13 +90,16 @@ async def stats_for_field(
     low_counts_censored: bool,
     add_missing: bool = False,
     group_by=None,
+    project_id: str = None,
+    dataset_id: str = None,
 ) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
+    qs = get_scoped_queryset(model, project_id, dataset_id)
     return await queryset_stats_for_field(
-        model.objects.all(), field, low_counts_censored=low_counts_censored, add_missing=add_missing, group_by=group_by)
+        qs, field, low_counts_censored=low_counts_censored, add_missing=add_missing, group_by=group_by)
 
 
 async def queryset_stats_for_field(

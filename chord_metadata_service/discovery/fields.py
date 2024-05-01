@@ -10,7 +10,7 @@ from ..logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
-from .stats import stats_for_field
+from .stats import stats_for_field, get_scoped_queryset
 from .types import BinWithValue, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -164,7 +164,7 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
     return start, end
 
 
-async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_range_stats(field_props: DiscoveryFieldProps, project_id: str, dataset_id: str, low_counts_censored: bool = True) -> list[BinWithValue]:
     model, field = f_utils.get_model_and_field(field_props["mapping"])
 
     # JSONField array specific field props
@@ -193,7 +193,7 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
         ]
 
     query_set = (
-        model.objects
+        get_scoped_queryset(model, project_id, dataset_id)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
@@ -215,7 +215,7 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
     return bins
 
 
-async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[BinWithValue]:
+async def get_categorical_stats(field_props: DiscoveryFieldProps, project_id: str, dataset_id: str, low_counts_censored: bool) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -228,7 +228,8 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_cen
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
     stats: Mapping[str, int] = await stats_for_field(model, field_name, low_counts_censored,
-                                                     add_missing=True, group_by=field_props.get("group_by"))
+                                                     add_missing=True, group_by=field_props.get("group_by"),
+                                                     project_id=project_id, dataset_id=dataset_id)
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -255,7 +256,7 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_cen
     ]
 
 
-async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_date_stats(field_props: DiscoveryFieldProps, project_id: str, dataset_id: str, low_counts_censored: bool = True) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -277,7 +278,7 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
 
     # Note: lexical sort works on ISO dates
     query_set = (
-        model.objects
+        get_scoped_queryset(model, project_id, dataset_id)
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
