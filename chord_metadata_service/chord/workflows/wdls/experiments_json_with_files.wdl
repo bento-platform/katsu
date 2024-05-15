@@ -183,9 +183,9 @@ with open('results_post_drs.json', 'w') as output_file:
     }
 }
 
-task parse_txt {
+task parse_json {
     input {
-        File txt_responses
+        File json_responses
     }
 
     command <<<
@@ -194,28 +194,20 @@ import json
 
 def parse_drs_response(file_path):
     with open(file_path, 'r') as file:
-        data = file.read().strip().replace('\n', '').split('} {')
+        data = json.load(file)
 
     new_array = []
-    for line in data:
-        information = {'name': '', 'self_uri': ''}
-
-        line = line.strip('{} ').replace('\'', '\"')
-        parts = line.split(', ')
-        for part in parts:
-            key_value = part.split(':', 1)
-            if len(key_value) == 2:
-                key, value = key_value[0].strip(), key_value[1].strip().strip('\"')
-                if 'name' in key:
-                    information['name'] = value
-                elif 'self_uri' in key:
-                    information['self_uri'] = value
+    for item in data:
+        information = {
+            'name': item.get('name', ''),
+            'self_uri': item.get('self_uri', '')
+        }
         new_array.append(information)
 
     with open('processed_drs_responses.json', 'w') as outfile:
         json.dump(new_array, outfile, indent=4)
 
-parse_drs_response('~{txt_responses}')
+parse_drs_response('~{json_responses}')
 "
     >>>
     output {
