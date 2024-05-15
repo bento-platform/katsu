@@ -117,18 +117,19 @@ def generate_csv_response(data, filename, columns):
     return response
 
 
-def render_individual_age(individual):
-    if "time_at_last_encounter" not in individual:
+def render_age(data, time_key):
+    if time_key not in data:
         return None
-    time_at_last_encounter = individual["time_at_last_encounter"]
+    time_data = data[time_key]
 
-    if "age_range" in time_at_last_encounter:
-        age_range = time_at_last_encounter["age_range"]
+    if "age_range" in time_data:
+        age_range = time_data["age_range"]
         start = age_range["start"]["iso8601duration"]
         end = age_range["end"]["iso8601duration"]
         return f"{start} - {end}"
-    if "age" in time_at_last_encounter:
-        return time_at_last_encounter["age"]["iso8601duration"]
+
+    if "age" in time_data:
+        return time_data["age"]["iso8601duration"]
 
 
 class IndividualCSVRenderer(JSONRenderer):
