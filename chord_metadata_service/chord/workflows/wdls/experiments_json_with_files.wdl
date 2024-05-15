@@ -162,13 +162,24 @@ task write_drs_responses_to_file {
     }
 
     command <<<
-        for response in "~{sep=' ' drs_responses}"; do
-            echo "$response"
-        done > results_post_drs.txt
+    python3 -c "
+import json
+file_to_json = '~{write_json(drs_responses)}'
+with open(file_to_json, 'r') as file:
+    drs_responses = json.load(file)
+
+responses = []
+for response in drs_responses:
+    response_corrected = json.loads(response)
+    responses.append(response_corrected)
+
+with open('results_post_drs.json', 'w') as output_file:
+    json.dump(responses, output_file, indent=2)
+    "
     >>>
 
     output {
-        File results_post_drs = "results_post_drs.txt"
+        File results_post_drs = "results_post_drs.json"
     }
 }
 
