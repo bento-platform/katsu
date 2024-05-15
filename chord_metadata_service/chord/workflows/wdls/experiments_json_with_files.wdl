@@ -38,15 +38,15 @@ workflow experiments_json_with_files {
             drs_responses = post_to_drs.response_message
     }
 
-    call parse_txt {
+    call parse_json {
         input:
-            txt_responses = write_drs_responses_to_file.results_post_drs
+            json_responses = write_drs_responses_to_file.results_post_drs
     }
 
     call update_experiment_json {
         input:
             json_document = json_document,
-            processed_drs_responses = parse_txt.processed_drs_responses
+            processed_drs_responses = parse_json.processed_drs_responses
     }
 
     call ingest_task {
@@ -63,7 +63,7 @@ workflow experiments_json_with_files {
         Array[String] consolidated_paths_for_drs = prepare_for_drs.consolidated_paths_for_drs
         Array[String] drs_responses = post_to_drs.response_message
         File results_post_drs = write_drs_responses_to_file.results_post_drs
-        File processed_drs_responses = parse_txt.processed_drs_responses
+        File processed_drs_responses = parse_json.processed_drs_responses
         File final_updated_json = update_experiment_json.final_updated_json
     }
 }
