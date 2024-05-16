@@ -118,6 +118,7 @@ def generate_csv_response(data, filename, columns):
 
 
 def render_age(data, time_key):
+    # time_key is either "time_at_last_encounter" or "time_of_collection"
     if time_key not in data:
         return None
     time_data = data[time_key]
