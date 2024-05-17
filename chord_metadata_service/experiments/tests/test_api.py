@@ -188,3 +188,7 @@ class TestExperimentCSVRenderer(TestCase):
         for row in reader:
             for key in row:
                 self.assertEqual(row[key], '')
+
+    def test_render_none_data(self):
+        result = self.renderer.render(None)
+        self.assertIsNone(result)
