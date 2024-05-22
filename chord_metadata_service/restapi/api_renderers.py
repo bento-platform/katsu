@@ -147,7 +147,7 @@ class IndividualCSVRenderer(JSONRenderer):
                 'date_of_birth': individual.get('date_of_birth', None),
                 'taxonomy': None,
                 'karyotypic_sex': individual['karyotypic_sex'],
-                'age': render_age(individual),
+                'age': render_age(individual, 'time_at_last_encounter'),
                 'diseases': None,
                 'created': individual['created'],
                 'updated': individual['updated']
