@@ -13,6 +13,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets.utils import iso_duration_to_years
+from chord_metadata_service.restapi.api_renderers import render_age
 
 from . import constants as c
 
@@ -152,6 +153,16 @@ class IndividualCSVRendererTest(APITestCase):
         for column in ['id', 'sex', 'date of birth', 'taxonomy', 'karyotypic sex',
                        'age', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
+
+
+class IndividualMissingTimeKeyTest(APITestCase):
+    def test_render_age_missing_time_key(self):
+        individual = c.generate_valid_individual(gen_random_age=(1, 100))
+        del individual['time_at_last_encounter']
+        Individual.objects.create(**individual)
+
+        result = render_age(individual, "time_at_last_encounter")
+        self.assertIsNone(result, "Expected None for missing time_at_last_encounter")
 
 
 class IndividualWithPhenopacketSearchTest(APITestCase):
