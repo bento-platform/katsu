@@ -1,6 +1,7 @@
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
@@ -37,7 +38,7 @@ class TestGetFieldOptions(TransactionTestCase):
             await get_field_options({**self.field_some_prop, "datatype": "made_up"}, low_counts_censored=False)
 
 
-class TestGetCategoricalStats(TransactionTestCase):
+class TestGetCategoricalStats(ProjectTestCase):
 
     f_sex = {
         "mapping": "individual/sex",
@@ -51,14 +52,23 @@ class TestGetCategoricalStats(TransactionTestCase):
 
     def setUp(self):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        self.phenopacket = ph_m.Phenopacket.objects.create(
+            id="phenopacket_id:1",
+            subject=self.individual_1,
+            dataset=self.dataset,
+            meta_data=self.meta_data,
+        )
 
     async def test_categorical_stats_lcf(self):
-        res = await get_categorical_stats(self.f_sex, low_counts_censored=False)
+        res = await get_categorical_stats(self.f_sex, project_id=self.project.identifier,
+                                          dataset_id=self.dataset.identifier, low_counts_censored=False)
         self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     async def test_categorical_stats_lct(self):
-        res = await get_categorical_stats(self.f_sex, low_counts_censored=True)
+        res = await get_categorical_stats(self.f_sex, project_id=self.project.identifier,
+                                          dataset_id=self.dataset.identifier, low_counts_censored=True)
         self.assertListEqual(res, [{"label": "missing", "value": 0}])
 
 
@@ -101,7 +111,7 @@ class TestDateStatsExcept(APITestCase):
             await get_month_date_range(fp)
 
 
-class TestJsonFieldArrayStats(TransactionTestCase):
+class TestJsonFieldArrayStats(ProjectTestCase):
 
     tumor_lengths = range(1, 50, 5)
     dm_fp = CONFIG_PUBLIC_TEST["fields"]["diagnostic_markers"]
@@ -117,12 +127,14 @@ class TestJsonFieldArrayStats(TransactionTestCase):
             subject=self.individual,
             measurements=self.tumors,
             meta_data=self.meta_data,
+            dataset=self.dataset,
         )
         self.phenopacket.biosamples.set([self.biosample])
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     async def test_json_categorical_stats_lcf(self):
-        res = await get_categorical_stats(self.dm_fp, low_counts_censored=False)
+        res = await get_categorical_stats(self.dm_fp, project_id=self.project.identifier,
+                                          dataset_id=self.dataset.identifier, low_counts_censored=False)
         ground_truth = [
             {"label": "Genetic Testing", "value": 1},
             {"label": "Hematology Test", "value": 1},
@@ -132,7 +144,8 @@ class TestJsonFieldArrayStats(TransactionTestCase):
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     async def test_json_categorical_stats_lct(self):
-        res = await get_categorical_stats(self.dm_fp, low_counts_censored=True)
+        res = await get_categorical_stats(self.dm_fp, project_id=self.project.identifier,
+                                          dataset_id=self.dataset.identifier, low_counts_censored=True)
         ground_truth = [
             {"label": "missing", "value": 0},
         ]
