@@ -72,6 +72,7 @@ async def bento_public_format_count_and_stats_list(
 
     return thresholded_count(total, low_counts_censored), stats_list
 
+
 def get_scoped_queryset(model: Type[Model], project_id: str, dataset_id: str):
     if project_id and not dataset_id:
         scope = "project"
@@ -83,6 +84,7 @@ def get_scoped_queryset(model: Type[Model], project_id: str, dataset_id: str):
         return model.objects.all()
     model_name = get_public_model_name(model)
     return model.objects.filter(**{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[model_name][scope]: value})
+
 
 async def stats_for_field(
     model: Type[Model],

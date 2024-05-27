@@ -141,7 +141,9 @@ async def public_overview(request: DrfRequest):
         else:
             # cannot scope
             return await _counts_for_model_name(mn)
-        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.filter(**{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]: value}).acount()
+        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.filter(
+            **{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]: value}
+        ).acount()
 
     # Predefined counts
     counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
