@@ -1,6 +1,7 @@
 import json
 import csv
 from uuid import UUID
+from typing import Dict, Optional, Any
 from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
@@ -117,7 +118,7 @@ def generate_csv_response(data, filename, columns):
     return response
 
 
-def render_age(individual, time_key):
+def render_age(individual: Dict[str, Any], time_key: str) -> Optional[str]:
     if time_key not in individual:
         return None
     time_encounter = individual[time_key]
