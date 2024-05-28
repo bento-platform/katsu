@@ -660,7 +660,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
                     individual.save()
 
     def test_render_age_missing_time_key(self):
-        """Ensure render_age returns None when the time_key is missing."""
+        # age returns None when the time_key is missing
         test_individual = Individual.objects.create(**c.VALID_INDIVIDUAL)
         result = render_age(getattr(test_individual, 'time_at_last_encounter', {}), 'time_at_last_encounter')
         self.assertIsNone(result)
