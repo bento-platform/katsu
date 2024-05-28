@@ -13,6 +13,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets.utils import iso_duration_to_years
+from chord_metadata_service.restapi.api_renderers import render_age
 
 from . import constants as c
 
@@ -657,6 +658,12 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
                     individual.age_numeric = age_numeric
                     individual.age_unit = age_unit if age_unit else ""
                     individual.save()
+
+    def test_render_age_missing_time_key(self):
+        """Ensure render_age returns None when the time_key is missing."""
+        test_individual = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        result = render_age(getattr(test_individual, 'time_at_last_encounter', {}), 'time_at_last_encounter')
+        self.assertIsNone(result)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_age_range(self):
