@@ -141,7 +141,7 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO) -> None:
 
         "add_global_case_list": "true",  # otherwise causes an error at validation
         # tags_file: ?
-        "reference_genome_id": "hg38",  # TODO: should not be hard-coded...
+        "reference_genome": "hg38",  # TODO: should not be hard-coded...
     }
 
     # optional fields
