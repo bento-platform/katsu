@@ -121,15 +121,15 @@ def generate_csv_response(data, filename, columns):
 def render_age(individual: Dict[str, Any], time_key: str) -> Optional[str]:
     if time_key not in individual:
         return None
-    time_encounter = individual[time_key]
+    time_to_render = individual[time_key]
 
-    if "age_range" in time_encounter:
-        age_range = time_encounter["age_range"]
+    if "age_range" in time_to_render:
+        age_range = time_to_render["age_range"]
         start = age_range["start"]["iso8601duration"]
         end = age_range["end"]["iso8601duration"]
         return f"{start} - {end}"
-    if "age" in time_encounter:
-        return time_encounter["age"]["iso8601duration"]
+    if "age" in time_to_render:
+        return time_to_render["age"]["iso8601duration"]
 
 
 class IndividualCSVRenderer(JSONRenderer):
