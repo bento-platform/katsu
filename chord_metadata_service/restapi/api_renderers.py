@@ -189,7 +189,7 @@ class BiosamplesCSVRenderer(JSONRenderer):
                 'id': biosample['id'],
                 'description': biosample.get('description', 'NA'),
                 'sampled_tissue': biosample.get('sampled_tissue', {}).get('label', 'NA'),
-                'individual_age_at_collection': render_age(biosample, "time_of_collection"),
+                'time_of_collection': render_age(biosample, "time_of_collection"),
                 'histological_diagnosis': biosample.get('histological_diagnosis', {}).get('label', 'NA'),
                 'extra_properties': f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
                 'created': biosample['created'],
