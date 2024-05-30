@@ -115,5 +115,7 @@ async def dats_schema(request: DrfRequest):
     dats_file_path = os.path.join(DATS_PATH, 'dataset_schema.json')
     dats_schema = None
     with open(dats_file_path) as dats_file:
-        dats_schema = json.loads(dats_file.read())
+        dats_schema: dict = json.loads(dats_file.read())
+    if schema_id := dats_schema.pop("id"):
+        dats_schema["$id"] = schema_id
     return Response(dats_schema)
