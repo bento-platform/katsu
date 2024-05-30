@@ -17,7 +17,7 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
     BiosampleSampledTissueAutocomplete
 )
 from chord_metadata_service.resources import api_views as resources_views
-from chord_metadata_service.restapi.api_views import overview, search_overview, extra_properties_schema_types
+from chord_metadata_service.restapi.api_views import dats_schema, overview, search_overview, extra_properties_schema_types
 from chord_metadata_service.restapi.routers import BatchListRouter
 
 __all__ = ["router", "batch_router", "urlpatterns"]
@@ -66,6 +66,7 @@ urlpatterns = [
     path('experiment_schema', experiment_views.get_experiment_schema,
          name="experiment-schema"),
     path('discovery_schema', discovery_schema, name="discovery-schema"),
+    path('dats_schema', dats_schema, name="dats-schema"),
     # extra properties schema types
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 
