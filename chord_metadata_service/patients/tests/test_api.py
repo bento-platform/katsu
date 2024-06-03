@@ -648,9 +648,10 @@ class RenderAgeTest(TestCase):
                 "age": {
                     "iso8601duration": "P50Y"
                 }
-    },
+            }
         }
         result = render_age(subject_with_age, 'time_at_last_encounter')
+        self.assertEqual(result, "P50Y")
 
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):
