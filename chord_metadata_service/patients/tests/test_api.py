@@ -653,6 +653,14 @@ class RenderAgeTest(TestCase):
         result = render_age(subject_with_age, 'time_at_last_encounter')
         self.assertEqual(result, "P50Y")
 
+    def test_age_none(self):
+        subject_with_age = {
+            **c.VALID_INDIVIDUAL_3,
+            "time_at_last_encounter": {}
+        }
+        result = render_age(subject_with_age, 'time_at_last_encounter')
+        self.assertIsNone(result)
+
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """

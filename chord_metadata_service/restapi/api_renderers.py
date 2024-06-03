@@ -130,6 +130,7 @@ def render_age(individual: Dict[str, Any], time_key: str) -> Optional[str]:
         return f"{start} - {end}"
     if "age" in time_to_render:
         return time_to_render["age"]["iso8601duration"]
+    return None
 
 
 class IndividualCSVRenderer(JSONRenderer):
