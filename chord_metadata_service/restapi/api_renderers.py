@@ -118,10 +118,10 @@ def generate_csv_response(data, filename, columns):
     return response
 
 
-def render_age(individual: Dict[str, Any], time_key: str) -> Optional[str]:
-    if time_key not in individual:
+def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
+    if time_key not in item:
         return None
-    time_to_render = individual[time_key]
+    time_to_render = item[time_key]
 
     if "age_range" in time_to_render:
         age_range = time_to_render["age_range"]
