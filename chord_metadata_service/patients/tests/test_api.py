@@ -4,7 +4,7 @@ import csv
 import io
 import random
 from django.urls import reverse
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.discovery import responses as dres
@@ -633,6 +633,15 @@ class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTes
         self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 0)  # path to sex field
 
 
+class RenderAgeTest(TestCase):
+    def setUp(self):
+        self.individual_three = c.VALID_INDIVIDUAL_3
+
+    def test_render_age(self):
+        result = render_age(self.individual_three, 'time_at_last_encounter')
+        self.assertIsNone(result)
+
+
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """
 
@@ -658,12 +667,6 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
                     individual.age_numeric = age_numeric
                     individual.age_unit = age_unit if age_unit else ""
                     individual.save()
-
-    def test_render_age_missing_time_key(self):
-        # age returns None when the time_key is missing
-        test_individual = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        result = render_age(getattr(test_individual, 'time_at_last_encounter', {}), 'time_at_last_encounter')
-        self.assertIsNone(result)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
     def test_public_filtering_age_range(self):

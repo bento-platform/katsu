@@ -83,6 +83,15 @@ VALID_INDIVIDUAL_2 = {
     "sex": "MALE",
 }
 
+VALID_INDIVIDUAL_3 = {
+    "id": "patient:3",
+    "taxonomy": {
+        "id": "NCBITaxon:9606",
+        "label": "human"
+    },
+    "date_of_birth": "1967-01-01",
+    "sex": "MALE",
+}
 
 CSV_HEADER = "Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,Updated"
 INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,P45Y - P49Y,,--IGNORE--,--IGNORE--"
