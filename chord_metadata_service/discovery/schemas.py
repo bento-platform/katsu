@@ -1,12 +1,15 @@
+from django.conf import settings
 from pathlib import Path
 from chord_metadata_service.restapi.schema_utils import (
-    get_schema_app_id, sub_schema_uri, array_of, base_type, SchemaTypes, enum_of
+    sub_schema_uri, array_of, base_type, SchemaTypes, enum_of, get_schema_app_id
 )
 
-base_uri = get_schema_app_id(Path(__file__).parent.name)
+if settings.SCHEMAS_BASE_URL:
+    base_uri = settings.SCHEMAS_BASE_URL
+else:
+    base_uri = get_schema_app_id(Path(__file__).parent.name)
 
 DISCOVERY_FIELD_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery_field"),
     "description": "Field configuration",
     "type": "object",
     "properties": {
@@ -44,7 +47,6 @@ DISCOVERY_FIELD_SCHEMA = {
 }
 
 DISCOVERY_NAMED_FIELDS_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery_named_fields"),
     "description": "Intermediate schema, enforces field schema with flexible names.",
     "type": "object",
     "patternProperties": {
@@ -54,7 +56,6 @@ DISCOVERY_NAMED_FIELDS_SCHEMA = {
 }
 
 DISCOVERY_OVERVIEW_CHART_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery_overview_chart"),
     "description": "Associates a field name with a chart type for overview display",
     "type": "object",
     "properties": {
@@ -65,7 +66,6 @@ DISCOVERY_OVERVIEW_CHART_SCHEMA = {
 }
 
 DISCOVERY_OVERVIEW_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery_overview"),
     "description": "An overview section containing charts",
     "type": "object",
     "properties": {
@@ -76,7 +76,6 @@ DISCOVERY_OVERVIEW_SCHEMA = {
 }
 
 DISCOVERY_SEARCH_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery_search"),
     "description": "Groups search fields by section.",
     "type": "object",
     "properties": {
@@ -105,6 +104,5 @@ DISCOVERY_SCHEMA = {
     "additionalProperties": False
 }
 
-# import json
-# with open("discovery.json", "w") as schema_file:
-#     json.dump(DISCOVERY_SCHEMA, schema_file)
+
+# DATS

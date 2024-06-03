@@ -1,6 +1,4 @@
 import asyncio
-import json
-import os
 
 from adrf.decorators import api_view
 from django.db.models import QuerySet
@@ -18,7 +16,6 @@ from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
-from chord_metadata_service.restapi.dats_schemas import DATS_PATH
 from chord_metadata_service.restapi.models import SchemaType
 
 
@@ -108,14 +105,3 @@ async def search_overview(request: DrfRequest):
     #    hack-y mess of passing IDs around.
 
     return await build_overview_response(phenopackets, experiments)
-
-
-@api_view(["GET"])
-async def dats_schema(request: DrfRequest):
-    dats_file_path = os.path.join(DATS_PATH, 'dataset_schema.json')
-    dats_schema = None
-    with open(dats_file_path) as dats_file:
-        dats_schema: dict = json.loads(dats_file.read())
-    if schema_id := dats_schema.pop("id"):
-        dats_schema["$id"] = schema_id
-    return Response(dats_schema)

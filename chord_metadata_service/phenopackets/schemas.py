@@ -1,6 +1,7 @@
 # Individual schemas for validation of JSONField values
 import json
 from pathlib import Path
+from django.conf import settings
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT7
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
@@ -58,9 +59,14 @@ __all__ = [
     "VCF_RECORD_SCHEMA",
     "VRS_REF_REGISTRY",
     "VRS_VARIATION_SCHEMA",
+    "phenopacket_resolver",
 ]
 
-base_uri = get_schema_app_id(Path(__file__).parent.name)
+if settings.SCHEMAS_BASE_URL:
+    base_uri = settings.SCHEMAS_BASE_URL
+else:
+    base_uri = get_schema_app_id(Path(__file__).parent.name)
+phenopacket_base_uri = sub_schema_uri(base_uri=base_uri, name="phenopacket")
 
 with open("chord_metadata_service/vrs/schema/vrs.json", "r") as file:
     vrs_schema_definitions = json.load(file)
@@ -70,7 +76,7 @@ with open("chord_metadata_service/vrs/schema/vrs.json", "r") as file:
 
 PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "external_reference"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "external_reference"),
     "title": "External reference schema",
     "type": "object",
     "properties": {
@@ -82,7 +88,7 @@ PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = describe_schema({
 
 PHENOPACKET_UPDATE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "update"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "update"),
     "title": "Updates schema",
     "type": "object",
     "properties": {
@@ -98,7 +104,7 @@ PHENOPACKET_UPDATE_SCHEMA = describe_schema({
 # noinspection PyProtectedMember
 PHENOPACKET_META_DATA_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "meta_data"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "meta_data"),
     "type": "object",
     "properties": {
         "created": DATE_TIME,
@@ -114,7 +120,7 @@ PHENOPACKET_META_DATA_SCHEMA = describe_schema({
 
 PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "evidence"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "evidence"),
     "title": "Evidence schema",
     "type": "object",
     "properties": {
@@ -128,7 +134,7 @@ PHENOPACKET_EVIDENCE_SCHEMA = describe_schema({
 
 PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "phenotypic_feature"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "phenotypic_feature"),
     "type": "object",
     "properties": {
         "description": base_type(SchemaTypes.STRING),
@@ -146,7 +152,7 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema({
 # TODO: search
 PHENOPACKET_GENE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "gene"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "gene"),
     "type": "object",
     "properties": {
         "id": base_type(SchemaTypes.STRING),
@@ -159,7 +165,7 @@ PHENOPACKET_GENE_SCHEMA = describe_schema({
 
 PHENOPACKET_PROCEDURE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "procedure"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "procedure"),
     "title": "Procedure schema",
     "type": "object",
     "properties": {
@@ -172,7 +178,7 @@ PHENOPACKET_PROCEDURE_SCHEMA = describe_schema({
 
 REFERENCE_RANGE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "reference_range"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "reference_range"),
     "title": "Reference range schema",
     "type": "object",
     "properties": {
@@ -185,7 +191,7 @@ REFERENCE_RANGE_SCHEMA = {
 
 PHENOPACKET_QUANTITY_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "quantity"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "quantity"),
     "title": "Quantity schema",
     "type": "object",
     "properties": {
@@ -198,7 +204,7 @@ PHENOPACKET_QUANTITY_SCHEMA = {
 
 PHENOPACKET_TYPED_QUANTITY_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "typed_quantity"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "typed_quantity"),
     "title": "Quantity schema",
     "type": "object",
     "properties": {
@@ -210,7 +216,7 @@ PHENOPACKET_TYPED_QUANTITY_SCHEMA = {
 
 PHENOPACKET_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "value"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "value"),
     "title": "Value schema",
     "type": "object",
     "oneOf": [
@@ -221,7 +227,7 @@ PHENOPACKET_VALUE_SCHEMA = {
 
 PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "complex_value"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "complex_value"),
     "title": "Complex value schema",
     "type": "object",
     "properties": {
@@ -232,7 +238,7 @@ PHENOPACKET_COMPLEX_VALUE_SCHEMA = {
 
 PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "measurement_value"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "measurement_value"),
     "title": "Measurement value schema",
     "type": "object",
     "oneOf": [
@@ -243,7 +249,7 @@ PHENOPACKET_MEASUREMENT_VALUE_SCHEMA = {
 
 PHENOPACKET_MEASUREMENT_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "measurement"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "measurement"),
     "title": "Measurement schema",
     "type": "object",
     "properties": {
@@ -261,7 +267,7 @@ PHENOPACKET_MEASUREMENT_SCHEMA = {
 
 FILE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "file"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "file"),
     "title": "Phenopacket file schema",
     "description": "The File message allows a Phenopacket to link the structured phenotypic data it "
     + "contains to external files which can be used to inform analyses.",
@@ -276,7 +282,7 @@ FILE_SCHEMA = describe_schema({
 # noinspection PyProtectedMember
 PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "biosample"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "biosample"),
     "type": "object",
     "properties": {
         "id": string_with_pattern(MODEL_ID_PATTERN),
@@ -310,7 +316,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
 
 PHENOPACKET_DISEASE_ONSET_SCHEMA = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "disease_onset"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "disease_onset"),
     "title": "Onset age",
     "description": "Schema for the age of the onset of the disease.",
     "type": "object",
@@ -323,7 +329,7 @@ PHENOPACKET_DISEASE_ONSET_SCHEMA = {
 
 PHENOPACKET_DISEASE_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "disease"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "disease"),
     "title": "Disease schema",
     "type": "object",
     "properties": {
@@ -341,7 +347,7 @@ PHENOPACKET_DISEASE_SCHEMA = describe_schema({
 
 DOSE_INTERVAL = {
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "dose_interval"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "dose_interval"),
     "title": "Phenopacket dose interval for treatment",
     "description": "Represents the dose intervals of a treatment.",
     "type": "object",
@@ -355,7 +361,7 @@ DOSE_INTERVAL = {
 
 PHENOPACKET_TREATMENT = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "treatment"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "treatment"),
     "title": "Phenopacket treatment",
     "description": "Represents a treatment with an agent, such as a drug.",
     "type": "object",
@@ -376,7 +382,7 @@ PHENOPACKET_TREATMENT = describe_schema({
 
 PHENOPACKET_RADIATION_THERAPY = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "radiation_therapy"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "radiation_therapy"),
     "title": "Phenopacket radiation therapy",
     "description": "Radiation therapy (or radiotherapy) uses ionizing radiation, generally as part of cancer "
                    "treatment to control or kill malignant cells.",
@@ -392,7 +398,7 @@ PHENOPACKET_RADIATION_THERAPY = describe_schema({
 
 PHENOPACKET_THERAPEUTIC_REGIMEN = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "therapeutic_regimen"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "therapeutic_regimen"),
     "title": "Phenopacket therapeutic regimen",
     "description": "This element represents a therapeutic regimen which will involve a specified set of treatments "
                    "for a particular condition.",
@@ -411,7 +417,7 @@ PHENOPACKET_THERAPEUTIC_REGIMEN = describe_schema({
 
 ONE_OF_MEDICAL_ACTION = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "one_of_medical_actions"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "one_of_medical_actions"),
     "title": "Supported Phenopacket medical actions",
     "description": "One-of schema for supported medical action schemas",
     "type": "object",
@@ -425,7 +431,7 @@ ONE_OF_MEDICAL_ACTION = describe_schema({
 
 PHENOPACKET_MEDICAL_ACTION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "medical_action"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "medical_action"),
     "title": "Phenopacket medical action schema",
     "description": "Describes a medical action",
     "type": "object",
@@ -447,7 +453,7 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = describe_schema({
 
 GENE_DESCRIPTOR = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "gene_descriptor"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "gene_descriptor"),
     "title": "Gene descriptor schema",
     "description": "Schema used to describe genes",
     "type": "object",
@@ -466,7 +472,7 @@ GENE_DESCRIPTOR = describe_schema({
 
 EXPRESSION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "expression"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "expression"),
     "title": "Expression schema",
     "description": "Enables description of an object based on a nomenclature",
     "type": "object",
@@ -481,7 +487,7 @@ EXPRESSION_SCHEMA = describe_schema({
 
 EXTENSION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "extension"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "extension"),
     "title": "Extension schema",
     "description": "The Extension class provides a means to extend descriptions with other attributes unique to a "
                    "content provider",
@@ -495,7 +501,7 @@ EXTENSION_SCHEMA = describe_schema({
 
 VCF_RECORD_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "vcf_record"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "vcf_record"),
     "title": "VCF record schema",
     "description": "This element is used to describe variants using the Variant Call Format.",
     "type": "object",
@@ -516,38 +522,38 @@ VCF_RECORD_SCHEMA = describe_schema({
 
 VARIATION_ONE_OF_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "variation"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "variation"),
     "title": "VRS Variation object",
     "description": "Provides a computable representation of variation",
     "type": "object",
     "oneOf": [
         named_one_of("absolute_copy_numer", {
-            "$ref": sub_schema_uri(base_uri, "vrs#/definitions/AbsoluteCopyNumber")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "vrs#/definitions/AbsoluteCopyNumber")
         }),
         named_one_of("allele", {
-            "$ref": sub_schema_uri(base_uri, "vrs#/definitions/Allele")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "vrs#/definitions/Allele")
         }),
         named_one_of("genotype", {
-            "$ref": sub_schema_uri(base_uri, "#/definitions/Genotype")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "#/definitions/Genotype")
         }),
         named_one_of("haplotype", {
-            "$ref": sub_schema_uri(base_uri, "#/definitions/Haplotype")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "#/definitions/Haplotype")
         }),
         named_one_of("relative_copy_number", {
-            "$ref": sub_schema_uri(base_uri, "#/definitions/RelativeCopyNumber")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "#/definitions/RelativeCopyNumber")
         }),
         named_one_of("text", {
-            "$ref": sub_schema_uri(base_uri, "#/definitions/Text")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "#/definitions/Text")
         }),
         named_one_of("variation_set", {
-            "$ref": sub_schema_uri(base_uri, "#/definitions/VariationSet")
+            "$ref": sub_schema_uri(phenopacket_base_uri, "#/definitions/VariationSet")
         }),
     ]
 }, {})
 
 VARIANT_DESCRIPTOR = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "variant_descriptor"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "variant_descriptor"),
     "title": "Variant descriptor schema",
     "description": "Schema used to describe variants",
     "type": "object",
@@ -573,7 +579,7 @@ VARIANT_DESCRIPTOR = describe_schema({
 
 PHENOPACKET_VARIANT_INTERPRETATION = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "variant_interpretation"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "variant_interpretation"),
     "title": "Phenopacket variant interpretation schema",
     "description": "This element represents the interpretation of a variant according to the American College of "
                    "Medical Genetics (ACMG) guidelines.",
@@ -590,7 +596,7 @@ PHENOPACKET_VARIANT_INTERPRETATION = describe_schema({
 
 PHENOPACKET_GENOMIC_INTERPRETATION = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "genomic_interpretation"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "genomic_interpretation"),
     "title": "Phenopacket genomic interpretation schema",
     "description": "Describes the interpretation for an individual variant or gene",
     "type": "object",
@@ -608,7 +614,7 @@ PHENOPACKET_GENOMIC_INTERPRETATION = describe_schema({
 
 PHENOPACKET_DIAGNOSIS_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "diagnosis"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "diagnosis"),
     "title": "Phenopacket diagnosis schema",
     "description": "Refers to a disease and its genomic interpretations",
     "type": "object",
@@ -621,7 +627,7 @@ PHENOPACKET_DIAGNOSIS_SCHEMA = describe_schema({
 
 PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "interpretation"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "interpretation"),
     "title": "Phenopacket interpretation schema",
     "description": "This message intends to represent the interpretation of a genomic analysis, such as the report "
                    "from a diagnostic laboratory.",
@@ -644,7 +650,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
 
 PHENOPACKET_SCHEMA = describe_schema({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "phenopacket"),
+    "$id": phenopacket_base_uri,
     "title": "Phenopacket schema",
     "description": "Schema for metadata service datasets",
     "type": "object",
@@ -664,6 +670,12 @@ PHENOPACKET_SCHEMA = describe_schema({
     "required": ["id", "meta_data"],
 }, descriptions.PHENOPACKET)
 
+# Phenopacket schema URI referencing
+phenopacket_resource = Resource.from_contents(PHENOPACKET_SCHEMA)
+phenopacket_registry = Registry().with_resource(uri=phenopacket_base_uri, resource=phenopacket_resource)
+phenopacket_resolver = phenopacket_registry.resolver(base_uri=phenopacket_base_uri)
+
+# VRS referencing schema resolving
 VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, default_specification=DRAFT7)
 VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 

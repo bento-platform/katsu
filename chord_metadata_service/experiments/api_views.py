@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
-from .schemas import EXPERIMENT_SCHEMA
+from .schemas import EXPERIMENT_SCHEMA, experiment_resolver, experiment_base_uri
 from .filters import ExperimentFilter, ExperimentResultFilter
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
@@ -147,3 +147,14 @@ def get_experiment_schema(_request):
     Experiment schema
     """
     return Response(EXPERIMENT_SCHEMA)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_experiment_subschema(_request, subschema: str):
+    """
+    get:
+    Experiment sub-schema
+    """
+    schema = experiment_resolver.lookup(ref=f"{experiment_base_uri}/{subschema}").contents
+    return Response(schema)

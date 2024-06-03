@@ -1,3 +1,4 @@
+from django.conf import settings
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schema_utils import (
     DATE_TIME,
@@ -17,11 +18,15 @@ from .descriptions import INDIVIDUAL, VITAL_STATUS
 from .values import Sex, KaryotypicSex
 
 
-base_uri = get_schema_app_id(Path(__file__).parent.name)
+if settings.SCHEMAS_BASE_URL:
+    base_uri = settings.SCHEMAS_BASE_URL
+else:
+    base_uri = get_schema_app_id(Path(__file__).parent.name)
+phenopacket_base_uri = sub_schema_uri(base_uri=base_uri, name="phenopacket")
 
 VITAL_STATUS_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "vital_status"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "vital_status"),
     "type": "object",
     "properties": {
         "status": enum_of(["UNKNOWN_STATUS", "ALIVE", "DECEASED"]),
@@ -35,7 +40,7 @@ VITAL_STATUS_SCHEMA = tag_ids_and_describe({
 
 INDIVIDUAL_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "individual"),
+    "$id": sub_schema_uri(phenopacket_base_uri, "individual"),
     "type": "object",
     "properties": {
         # Phenopacket V2 Individual fields

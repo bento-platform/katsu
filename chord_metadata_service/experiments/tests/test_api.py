@@ -54,7 +54,7 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(response_data['id'], 'katsu.experiment:1')
 
     def test_get_experiment_schema(self):
-        response = self.client.get('/api/experiment_schema')
+        response = self.client.get('/api/schemas/experiment')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         Draft7Validator.check_schema(response_data)

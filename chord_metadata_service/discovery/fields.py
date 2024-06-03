@@ -164,8 +164,12 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
     return start, end
 
 
-async def get_range_stats(field_props: DiscoveryFieldProps, project_id: str, dataset_id: str,
-                          low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_range_stats(
+    field_props: DiscoveryFieldProps,
+    project_id: str | None = None,
+    dataset_id: str | None = None,
+    low_counts_censored: bool = True
+) -> list[BinWithValue]:
     model, field = f_utils.get_model_and_field(field_props["mapping"])
 
     # JSONField array specific field props
@@ -216,8 +220,12 @@ async def get_range_stats(field_props: DiscoveryFieldProps, project_id: str, dat
     return bins
 
 
-async def get_categorical_stats(field_props: DiscoveryFieldProps, project_id: str = "", dataset_id: str = "",
-                                low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_categorical_stats(
+    field_props: DiscoveryFieldProps,
+    project_id: str | None = None,
+    dataset_id: str | None = None,
+    low_counts_censored: bool = True
+) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -258,8 +266,12 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, project_id: st
     ]
 
 
-async def get_date_stats(field_props: DiscoveryFieldProps, project_id: str = "", dataset_id: str = "",
-                         low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_date_stats(
+    field_props: DiscoveryFieldProps,
+    project_id: str | None = None,
+    dataset_id: str | None = None,
+    low_counts_censored: bool = True,
+) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.

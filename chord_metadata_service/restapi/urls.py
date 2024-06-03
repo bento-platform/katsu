@@ -17,7 +17,7 @@ from chord_metadata_service.phenopackets.autocomplete_views import (
     BiosampleSampledTissueAutocomplete
 )
 from chord_metadata_service.resources import api_views as resources_views
-from chord_metadata_service.restapi.api_views import dats_schema, overview, search_overview, extra_properties_schema_types
+from chord_metadata_service.restapi.api_views import overview, search_overview, extra_properties_schema_types
 from chord_metadata_service.restapi.routers import BatchListRouter
 
 __all__ = ["router", "batch_router", "urlpatterns"]
@@ -61,12 +61,14 @@ urlpatterns = [
     path('', include(batch_router.urls)),
 
     # apps schemas
-    path('chord_phenopacket_schema', phenopacket_views.get_chord_phenopacket_schema,
+    path('schemas/phenopacket', phenopacket_views.get_chord_phenopacket_schema,
          name="chord-phenopacket-schema"),
-    path('experiment_schema', experiment_views.get_experiment_schema,
+    path('schemas/phenopacket/<str:subschema>', phenopacket_views.get_chord_phenopacket_subschema,
+         name="chord-phenopacket-subschema"),
+    path('schemas/experiment', experiment_views.get_experiment_schema,
          name="experiment-schema"),
-    path('discovery_schema', discovery_schema, name="discovery-schema"),
-    path('dats_schema', dats_schema, name="dats-schema"),
+    path('schemas/experiment/<str:subschema>', experiment_views.get_experiment_subschema, name="experiment-subschema"),
+    path('schemas/discovery', discovery_schema, name="discovery-schema"),
     # extra properties schema types
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 

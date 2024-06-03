@@ -50,6 +50,8 @@ LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").uppe
 BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
+if CHORD_URL:
+    SCHEMAS_BASE_URL = CHORD_URL + "/api/metadata/api/schemas"
 
 # SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
 # unless an alternative permissions system is in place.

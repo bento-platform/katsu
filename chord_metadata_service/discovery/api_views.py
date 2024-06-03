@@ -125,8 +125,8 @@ async def public_overview(request: DrfRequest):
     """
 
     config_public = await get_discovery(request)
-    dataset_id = request.query_params.get("dataset")
-    project_id = request.query_params.get("project")
+    dataset_id = request.query_params.get("dataset", None)
+    project_id = request.query_params.get("project", None)
 
     if not config_public:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
