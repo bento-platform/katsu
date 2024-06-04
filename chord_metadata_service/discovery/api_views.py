@@ -141,8 +141,10 @@ async def public_overview(request: DrfRequest):
         else:
             # cannot scope
             return await _counts_for_model_name(mn)
-        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.filter(
-            **{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]: value}
+        filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["filter"]
+        prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["prefetch_related"]
+        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(
+            **{filter_query: value}
         ).acount()
 
     # Predefined counts

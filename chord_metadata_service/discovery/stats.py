@@ -77,7 +77,7 @@ def get_scoped_queryset(
     model: Type[Model],
     project_id: str | None = None,
     dataset_id: str | None = None,
-):
+) -> QuerySet:
     if project_id and not dataset_id:
         scope = "project"
         value = project_id
@@ -87,7 +87,9 @@ def get_scoped_queryset(
     else:
         return model.objects.all()
     model_name = get_public_model_name(model)
-    return model.objects.filter(**{PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[model_name][scope]: value})
+    prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[model_name][scope]["prefetch_related"]
+    filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[model_name][scope]["filter"]
+    return model.objects.prefetch_related(*prefetch).filter(**{filter_query: value})
 
 
 async def stats_for_field(

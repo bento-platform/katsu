@@ -1,7 +1,7 @@
 from typing import Any, Iterator, Type
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
-from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelNames
 
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
@@ -48,7 +48,7 @@ def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
     return model, field_name
 
 
-def get_public_model_name(model: Type[Model]) -> str:
+def get_public_model_name(model: Type[Model]) -> PublicModelNames:
     model_name = [key for key, m in PUBLIC_MODEL_NAMES_TO_MODEL.items() if m == model]
     if len(model_name) != 1:
         raise ValueError(f"Provided model {model} is not available for public.")
