@@ -52,6 +52,8 @@ BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower()
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 if CHORD_URL:
     SCHEMAS_BASE_URL = CHORD_URL + "/api/metadata/api/schemas"
+else:
+    SCHEMAS_BASE_URL = None
 
 # SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
 # unless an alternative permissions system is in place.
