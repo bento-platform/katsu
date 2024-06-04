@@ -133,7 +133,7 @@ class BatchBiosamplesCSVTest(APITestCase):
         body = list(csv_reader)
         headers = body.pop(0)
         for column in ['id', 'description', 'sampled tissue',
-                       'individual age at collection',
+                       'time of collection',
                        'histological diagnosis', 'extra properties',
                        'created', 'updated', 'individual']:
             self.assertIn(column, [column_name.lower() for column_name in headers])

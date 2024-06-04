@@ -1,6 +1,7 @@
 import json
 import csv
 from uuid import UUID
+from typing import Dict, Optional, Any
 from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
@@ -117,18 +118,19 @@ def generate_csv_response(data, filename, columns):
     return response
 
 
-def render_individual_age(individual):
-    if "time_at_last_encounter" not in individual:
+def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
+    if time_key not in item:
         return None
-    time_at_last_encounter = individual["time_at_last_encounter"]
+    time_to_render = item[time_key]
 
-    if "age_range" in time_at_last_encounter:
-        age_range = time_at_last_encounter["age_range"]
+    if "age_range" in time_to_render:
+        age_range = time_to_render["age_range"]
         start = age_range["start"]["iso8601duration"]
         end = age_range["end"]["iso8601duration"]
         return f"{start} - {end}"
-    if "age" in time_at_last_encounter:
-        return time_at_last_encounter["age"]["iso8601duration"]
+    if "age" in time_to_render:
+        return time_to_render["age"]["iso8601duration"]
+    return None
 
 
 class IndividualCSVRenderer(JSONRenderer):
@@ -147,7 +149,7 @@ class IndividualCSVRenderer(JSONRenderer):
                 'date_of_birth': individual.get('date_of_birth', None),
                 'taxonomy': None,
                 'karyotypic_sex': individual['karyotypic_sex'],
-                'age': render_individual_age(individual),
+                'age': render_age(individual, 'time_at_last_encounter'),
                 'diseases': None,
                 'created': individual['created'],
                 'updated': individual['updated']
@@ -188,7 +190,7 @@ class BiosamplesCSVRenderer(JSONRenderer):
                 'id': biosample['id'],
                 'description': biosample.get('description', 'NA'),
                 'sampled_tissue': biosample.get('sampled_tissue', {}).get('label', 'NA'),
-                'individual_age_at_collection': biosample.get('individual_age_at_collection', {}).get('age', 'NA'),
+                'time_of_collection': render_age(biosample, "time_of_collection"),
                 'histological_diagnosis': biosample.get('histological_diagnosis', {}).get('label', 'NA'),
                 'extra_properties': f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
                 'created': biosample['created'],
