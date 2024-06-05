@@ -164,8 +164,9 @@ task write_drs_responses_to_file {
     command <<<
     python3 -c "
 import json
-file_to_json = '~{write_json(drs_responses)}'
-with open(file_to_json, 'r') as file:
+# this is a temporary file to store the responses (str) from DRS
+temporary_file_drs_responses = '~{write_json(drs_responses)}'
+with open(temporary_file_drs_responses, 'r') as file:
     drs_responses = json.load(file)
 
 responses = []
