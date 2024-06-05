@@ -19,7 +19,7 @@ from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PUBLIC_MODEL_NAMES_TO_SC
 from .schemas import DISCOVERY_SCHEMA
 
 
-async def get_project_discovery(project_id: str = None, project: cm.Project = None):
+async def _get_project_discovery(project_id: str = None, project: cm.Project = None):
     if not project and project_id:
         project = await cm.Project.objects.aget(identifier=project_id)
     if not project.discovery:
@@ -27,23 +27,23 @@ async def get_project_discovery(project_id: str = None, project: cm.Project = No
     return project.discovery
 
 
-async def get_dataset_discovery(dataset_id: str):
+async def _get_dataset_discovery(dataset_id: str):
     dataset = await cm.Dataset.objects.aget(identifier=dataset_id)
     if not dataset.discovery:
         project = await cm.Project.objects.aget(datasets=dataset_id)
-        return await get_project_discovery(project=project)
+        return await _get_project_discovery(project=project)
     return dataset.discovery
 
 
-async def get_discovery(request: DrfRequest):
+async def _get_discovery(request: DrfRequest):
     dataset_id = request.query_params.get("dataset")
     project_id = request.query_params.get("project")
     if dataset_id:
         # get dataset's discovery config if dataset_id is passed
-        return await get_dataset_discovery(dataset_id)
+        return await _get_dataset_discovery(dataset_id)
     if project_id and not dataset_id:
         # get project's discovery config if project_id is passed and dataset_id is not
-        return await get_project_discovery(project_id)
+        return await _get_project_discovery(project_id)
     # fallback to config.json when no dataset or project is in the request
     return settings.CONFIG_PUBLIC
 
@@ -69,7 +69,7 @@ async def public_search_fields(request: DrfRequest):
     Return public search fields with their configuration
     """
 
-    config_public = await get_discovery(request)
+    config_public = await _get_discovery(request)
 
     if not config_public:
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
@@ -124,7 +124,7 @@ async def public_overview(request: DrfRequest):
     Overview of all public data in the database
     """
 
-    config_public = await get_discovery(request)
+    config_public = await _get_discovery(request)
     dataset_id = request.query_params.get("dataset", None)
     project_id = request.query_params.get("project", None)
 

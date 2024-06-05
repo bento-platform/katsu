@@ -3,6 +3,7 @@ import os
 from copy import deepcopy
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.urls import reverse
 from django.test import override_settings
 from rest_framework import status
@@ -21,18 +22,51 @@ from chord_metadata_service.restapi.tests.constants import (
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT
 )
-from .constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS
+from .constants import (
+    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
+    DISCOVERY_CONFIG_TEST,
+    CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS,
+    DISCOVERY_CONFIG_EXTRA_PROPERTIES
+)
 
 
 class PublicSearchFieldsTest(APITestCase):
 
     def setUp(self) -> None:
+        # create 2 projects, only one with a dataset and data
+        self.project_a = ch_m.Project.objects.create(
+            title="Test project A",
+            description="test description",
+            # Should use node's discovery config
+            discovery={},
+        )
+        self.dataset_a = ch_m.Dataset.objects.create(
+            title="Dataset 1",
+            description="Test dataset",
+            contact_info="Test contact info",
+            types=["test type 1", "test type 2"],
+            privacy="Open",
+            keywords=["test keyword 1", "test keyword 2"],
+            data_use=ch_c.VALID_DATA_USE_1,
+            project=self.project_a,
+            dats_file={},
+            # Should use provided discovery config
+            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
+        )
+
+        self.project_b = ch_m.Project.objects.create(
+            title="Test project B",
+            description="test description",
+            # Should use provided discovery config
+            discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
+        )
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
         self.individual_1 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
-            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1)
+            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
+            dataset=self.dataset_a
         )
         self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
         self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1))
@@ -48,15 +82,44 @@ class PublicSearchFieldsTest(APITestCase):
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
-    def test_public_search_fields_configured(self):
-        response = self.client.get(reverse("public-search-fields"), content_type="application/json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def assert_response_section_fields(self, response: HttpResponse, config: dict):
         response_obj = response.json()
         self.assertSetEqual(
             set(field["id"] for section in response_obj["sections"] for field in section["fields"]),
-            set(field for section in settings.CONFIG_PUBLIC["search"] for field in section["fields"])
+            set(field for section in config["search"] for field in section["fields"])
         )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_search_fields_configured(self):
+        search_fields_url = reverse("public-search-fields")
+        # SCOPE: whole node
+        response = self.client.get(search_fields_url, content_type="application/json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assert_response_section_fields(response, settings.CONFIG_PUBLIC)
+
+        # SCOPE: project_a (same discovery as whole node)
+        response_p_a = self.client.get(
+            f"{search_fields_url}?project={str(self.project_a.identifier)}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
+        self.assert_response_section_fields(response_p_a, settings.CONFIG_PUBLIC)
+
+        # SCOPE: project_b (discovery search sex only)
+        response_p_b = self.client.get(
+            f"{search_fields_url}?project={str(self.project_b.identifier)}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
+        self.assert_response_section_fields(response_p_b, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
+
+        # SCOPE: dataset_a (discovery with dataset specific extra_properties)
+        response_d_a = self.client.get(
+            f"{search_fields_url}?dataset={str(self.dataset_a.identifier)}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
+        self.assert_response_section_fields(response_d_a, DISCOVERY_CONFIG_EXTRA_PROPERTIES)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
@@ -101,7 +164,7 @@ class PublicOverviewTest(APITestCase):
         experiment_2["id"] = "experiment:2"
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview(self):
         response = self.client.get('/api/public_overview')
         response_obj = response.json()
@@ -110,7 +173,7 @@ class PublicOverviewTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj["counts"]["individuals"], db_count)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_bins(self):
         # test that there is the correct number of data entries for number
         # histograms, vs. number of bins
@@ -140,7 +203,7 @@ class PublicOverviewTest2(APITestCase):
         for ind in VALID_INDIVIDUALS[:2]:
             ph_m.Individual.objects.create(**ind)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_response(self):
         # test overview response when individuals count < threshold
         response = self.client.get('/api/public_overview')
@@ -165,7 +228,7 @@ class PublicOverviewNotSupportedDataTypesListTest(APITestCase):
         for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST:
             ph_m.Individual.objects.create(**ind)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
         response = self.client.get('/api/public_overview')
@@ -190,7 +253,7 @@ class PublicOverviewNotSupportedDataTypesDictTest(APITestCase):
         for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT:
             ph_m.Individual.objects.create(**ind)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
         response = self.client.get('/api/public_overview')
@@ -223,7 +286,7 @@ class PublicDatasetsMetadataTest(APITestCase):
             dats_file=dats_content
         )
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_dataset(self):
         response = self.client.get(reverse("public-dataset"))
         response_obj = response.json()

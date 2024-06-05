@@ -2,7 +2,7 @@ from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
 from django.db.models.base import ModelBase
 
-from chord_metadata_service.discovery.tests.constants import CONFIG_PUBLIC_TEST
+from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
@@ -201,7 +201,7 @@ class TestJsonFieldUtils(TestCase):
         })
 
     def test_get_json_range_condition(self):
-        field_props = CONFIG_PUBLIC_TEST["fields"]["measurement_tumor_length"]
+        field_props = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
 
         # GTE 0 an LT 20
         json_range_condition_0_20 = get_json_range_condition(field_props, min=0, max=20)

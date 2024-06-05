@@ -6,7 +6,7 @@ from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
 
-from .constants import CONFIG_PUBLIC_TEST
+from .constants import DISCOVERY_CONFIG_TEST
 from ..fields import (
     get_field_options,
     get_categorical_stats,
@@ -65,7 +65,7 @@ class TestGetCategoricalStats(ProjectTestCase):
                                           dataset_id=self.dataset.identifier, low_counts_censored=False)
         self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
         res = await get_categorical_stats(self.f_sex, project_id=self.project.identifier,
                                           dataset_id=self.dataset.identifier, low_counts_censored=True)
@@ -74,7 +74,7 @@ class TestGetCategoricalStats(ProjectTestCase):
 
 class TestDateStatsExcept(APITestCase):
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_wrong_bin_config(self):
         fp = {
             "title": "Date of Consent",
@@ -92,7 +92,7 @@ class TestDateStatsExcept(APITestCase):
         with self.assertRaises(NotImplementedError):
             await get_month_date_range(fp)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_wrong_field_config(self):
         fp = {
             "title": "Date of Consent",
@@ -114,8 +114,8 @@ class TestDateStatsExcept(APITestCase):
 class TestJsonFieldArrayStats(ProjectTestCase):
 
     tumor_lengths = range(1, 50, 5)
-    dm_fp = CONFIG_PUBLIC_TEST["fields"]["diagnostic_markers"]
-    mtl_fp = CONFIG_PUBLIC_TEST["fields"]["measurement_tumor_length"]
+    dm_fp = DISCOVERY_CONFIG_TEST["fields"]["diagnostic_markers"]
+    mtl_fp = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
 
     def setUp(self) -> None:
         self.tumors = [ph_c.valid_measurement_tumor_length(length) for length in self.tumor_lengths]
@@ -131,7 +131,7 @@ class TestJsonFieldArrayStats(ProjectTestCase):
         )
         self.phenopacket.biosamples.set([self.biosample])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lcf(self):
         res = await get_categorical_stats(self.dm_fp, project_id=self.project.identifier,
                                           dataset_id=self.dataset.identifier, low_counts_censored=False)
@@ -142,7 +142,7 @@ class TestJsonFieldArrayStats(ProjectTestCase):
         ]
         self.assertListEqual(res, ground_truth)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
         res = await get_categorical_stats(self.dm_fp, project_id=self.project.identifier,
                                           dataset_id=self.dataset.identifier, low_counts_censored=True)
