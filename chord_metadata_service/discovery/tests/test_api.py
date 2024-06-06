@@ -1,9 +1,9 @@
 import json
 import os
 from copy import deepcopy
+import uuid
 
 from django.conf import settings
-from django.http import HttpResponse
 from django.urls import reverse
 from django.test import override_settings
 from rest_framework import status
@@ -37,7 +37,7 @@ class PublicSearchFieldsTest(APITestCase):
         self.project_a = ch_m.Project.objects.create(
             title="Test project A",
             description="test description",
-            # Should use node's discovery config
+            # Should fallback on the node's discovery config
             discovery={},
         )
         self.dataset_a = ch_m.Dataset.objects.create(
@@ -50,15 +50,28 @@ class PublicSearchFieldsTest(APITestCase):
             data_use=ch_c.VALID_DATA_USE_1,
             project=self.project_a,
             dats_file={},
-            # Should use provided discovery config
+            # Should use provided dataset discovery config
             discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
         )
 
         self.project_b = ch_m.Project.objects.create(
             title="Test project B",
             description="test description",
-            # Should use provided discovery config
+            # Should use provided project discovery config
             discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
+        )
+        self.dataset_b = ch_m.Dataset.objects.create(
+            title="Dataset 2",
+            description="Test dataset 2",
+            contact_info="Test contact info",
+            types=["test type 1", "test type 2"],
+            privacy="Open",
+            keywords=["test keyword 1", "test keyword 2"],
+            data_use=ch_c.VALID_DATA_USE_1,
+            project=self.project_b,
+            dats_file={},
+            # Should fallback on project's discovery config
+            discovery={},
         )
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
@@ -82,8 +95,7 @@ class PublicSearchFieldsTest(APITestCase):
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
 
-    def assert_response_section_fields(self, response: HttpResponse, config: dict):
-        response_obj = response.json()
+    def assert_response_section_fields(self, response_obj: dict, config: dict):
         self.assertSetEqual(
             set(field["id"] for section in response_obj["sections"] for field in section["fields"]),
             set(field for section in config["search"] for field in section["fields"])
@@ -95,7 +107,7 @@ class PublicSearchFieldsTest(APITestCase):
         # SCOPE: whole node
         response = self.client.get(search_fields_url, content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response, settings.CONFIG_PUBLIC)
+        self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC)
 
         # SCOPE: project_a (same discovery as whole node)
         response_p_a = self.client.get(
@@ -103,7 +115,7 @@ class PublicSearchFieldsTest(APITestCase):
             content_type="application/json",
         )
         self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response_p_a, settings.CONFIG_PUBLIC)
+        self.assert_response_section_fields(response_p_a.json(), settings.CONFIG_PUBLIC)
 
         # SCOPE: project_b (discovery search sex only)
         response_p_b = self.client.get(
@@ -111,7 +123,7 @@ class PublicSearchFieldsTest(APITestCase):
             content_type="application/json",
         )
         self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response_p_b, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
+        self.assert_response_section_fields(response_p_b.json(), CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
 
         # SCOPE: dataset_a (discovery with dataset specific extra_properties)
         response_d_a = self.client.get(
@@ -119,7 +131,46 @@ class PublicSearchFieldsTest(APITestCase):
             content_type="application/json",
         )
         self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response_d_a, DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+        self.assert_response_section_fields(response_d_a.json(), DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+
+        # SCOPE: non existing dataset
+        response_d_invalid = self.client.get(
+            f"{search_fields_url}?dataset={uuid.uuid4()}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_d_invalid.status_code, status.HTTP_404_NOT_FOUND)
+
+        # SCOPE: non existing project
+        response_p_invalid = self.client.get(
+            f"{search_fields_url}?project={uuid.uuid4()}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_p_invalid.status_code, status.HTTP_404_NOT_FOUND)
+
+        # SCOPE: dataset_b
+        response_d_b = self.client.get(
+            f"{search_fields_url}?dataset={self.dataset_b.identifier}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
+        # fallback on project's config, responses should be the same
+        self.assertEqual(response_d_b.json(), response_p_b.json())
+
+        # SCOPE: project_a + dataset_b (invalid)
+        response_pd_invalid = self.client.get(
+            f"{search_fields_url}?project={str(self.project_a.identifier)}&dataset={self.dataset_b.identifier}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_pd_invalid.status_code, status.HTTP_404_NOT_FOUND)
+
+        # SCOPE: project_a + dataset_a (valid)
+        response_pd_valid = self.client.get(
+            f"{search_fields_url}?project={str(self.project_a.identifier)}&dataset={self.dataset_a.identifier}",
+            content_type="application/json",
+        )
+        self.assertEqual(response_pd_valid.status_code, status.HTTP_200_OK)
+        # same as dataset_a
+        self.assertEqual(response_pd_valid.json(), response_d_a.json())
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
@@ -133,11 +184,7 @@ class PublicSearchFieldsTest(APITestCase):
     def test_public_search_fields_missing_extra_properties(self):
         response = self.client.get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        self.assertSetEqual(
-            set(field["id"] for section in response_obj["sections"] for field in section["fields"]),
-            set(field for section in settings.CONFIG_PUBLIC["search"] for field in section["fields"])
-        )
+        self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC)
 
 
 class PublicOverviewTest(APITestCase):
