@@ -5,7 +5,7 @@ import uuid
 
 from django.conf import settings
 from django.urls import reverse
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -30,49 +30,44 @@ from .constants import (
 )
 
 
-class PublicSearchFieldsTest(APITestCase):
+class ScopedDiscoveryTestCase(TestCase):
 
-    def setUp(self) -> None:
-        # create 2 projects, only one with a dataset and data
-        self.project_a = ch_m.Project.objects.create(
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.project_a = ch_m.Project.objects.create(
             title="Test project A",
             description="test description",
             # Should fallback on the node's discovery config
             discovery={},
         )
-        self.dataset_a = ch_m.Dataset.objects.create(
+        cls.dataset_a = ch_m.Dataset.objects.create(
             title="Dataset 1",
             description="Test dataset",
-            contact_info="Test contact info",
-            types=["test type 1", "test type 2"],
-            privacy="Open",
-            keywords=["test keyword 1", "test keyword 2"],
             data_use=ch_c.VALID_DATA_USE_1,
-            project=self.project_a,
-            dats_file={},
+            project=cls.project_a,
             # Should use provided dataset discovery config
             discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
         )
 
-        self.project_b = ch_m.Project.objects.create(
+        cls.project_b = ch_m.Project.objects.create(
             title="Test project B",
             description="test description",
             # Should use provided project discovery config
             discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
         )
-        self.dataset_b = ch_m.Dataset.objects.create(
+        cls.dataset_b = ch_m.Dataset.objects.create(
             title="Dataset 2",
             description="Test dataset 2",
-            contact_info="Test contact info",
-            types=["test type 1", "test type 2"],
-            privacy="Open",
-            keywords=["test keyword 1", "test keyword 2"],
             data_use=ch_c.VALID_DATA_USE_1,
-            project=self.project_b,
-            dats_file={},
+            project=cls.project_b,
             # Should fallback on project's discovery config
             discovery={},
         )
+
+
+class PublicSearchFieldsTest(APITestCase, ScopedDiscoveryTestCase):
+
+    def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
         self.individual_1 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
@@ -91,7 +86,9 @@ class PublicSearchFieldsTest(APITestCase):
 
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
-        self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
+        self.experiment = exp_m.Experiment.objects.create(
+            **exp_c.valid_experiment(self.biosample_1, self.instrument, dataset=self.dataset_a)
+        )
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
 
@@ -187,12 +184,23 @@ class PublicSearchFieldsTest(APITestCase):
         self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC)
 
 
-class PublicOverviewTest(APITestCase):
+class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
         # individuals (count 8)
         individuals = {
             f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
+        }
+        # all individuals are in phenopackets that belong to dataset_a
+        phenopackets = {
+            f"phenopacket_{ind_label}": ph_m.Phenopacket.objects.create(
+                **ph_c.valid_phenopacket(
+                    subject=ind,
+                    meta_data=ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1),
+                    id=f"phenopacket_{ind_label}"
+                ),
+                dataset=self.dataset_a
+            ) for ind_label, ind in individuals.items()
         }
         # biosamples
         self.biosample_1 = ph_m.Biosample.objects.create(
@@ -201,13 +209,17 @@ class PublicOverviewTest(APITestCase):
         self.biosample_2 = ph_m.Biosample.objects.create(
             **ph_c.valid_biosample_2(individuals["individual_2"])
         )
+        phenopackets["phenopacket_individual_1"].biosamples.set([self.biosample_1])
+        phenopackets["phenopacket_individual_2"].biosamples.set([self.biosample_2])
         # experiments
         self.instrument = exp_m.Instrument.objects.create(**exp_c.valid_instrument())
-        self.experiment = exp_m.Experiment.objects.create(**exp_c.valid_experiment(self.biosample_1, self.instrument))
+        self.experiment = exp_m.Experiment.objects.create(
+            **exp_c.valid_experiment(self.biosample_1, self.instrument, dataset=self.dataset_a)
+        )
         self.experiment_result = exp_m.ExperimentResult.objects.create(**exp_c.valid_experiment_result())
         self.experiment.experiment_results.set([self.experiment_result])
         # make a copy and create experiment 2
-        experiment_2 = deepcopy(exp_c.valid_experiment(self.biosample_2, self.instrument))
+        experiment_2 = deepcopy(exp_c.valid_experiment(self.biosample_2, self.instrument, dataset=self.dataset_a))
         experiment_2["id"] = "experiment:2"
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
