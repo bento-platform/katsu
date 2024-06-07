@@ -6,7 +6,11 @@ from chord_metadata_service.experiments import models as exp_models
 from chord_metadata_service.patients import models as patient_models
 from chord_metadata_service.phenopackets import models as pheno_models
 
-__all__ = ["PUBLIC_MODEL_NAMES_TO_MODEL", "PUBLIC_MODEL_NAMES_TO_DATA_TYPE"]
+__all__ = [
+    "PUBLIC_MODEL_NAMES_TO_MODEL",
+    "PUBLIC_MODEL_NAMES_TO_DATA_TYPE",
+    "PublicModelNames"
+]
 
 PublicModelNames = Literal["individual", "biosample", "experiment"]
 

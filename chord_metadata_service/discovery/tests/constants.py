@@ -13,7 +13,8 @@ DISCOVERY_CONFIG_TEST = {
             "section_title": "Second Section",
             "charts": [
                 {"field": "diagnostic_markers", "chart_type": "pie"},
-                {"field": "measurement_tumor_length", "chart_type": "bar"}
+                {"field": "measurement_tumor_length", "chart_type": "bar"},
+                {"field": "tissues", "chart_type": "pie"}
             ]
         }
     ],

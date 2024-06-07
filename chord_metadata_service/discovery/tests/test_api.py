@@ -34,33 +34,33 @@ class ScopedDiscoveryTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls) -> None:
+        # fallback on the node's discovery config
         cls.project_a = ch_m.Project.objects.create(
             title="Test project A",
             description="test description",
-            # Should fallback on the node's discovery config
             discovery={},
         )
+        # use provided dataset discovery config
         cls.dataset_a = ch_m.Dataset.objects.create(
             title="Dataset 1",
             description="Test dataset",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_a,
-            # Should use provided dataset discovery config
             discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
         )
 
+        # use provided project discovery config
         cls.project_b = ch_m.Project.objects.create(
             title="Test project B",
             description="test description",
-            # Should use provided project discovery config
             discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
         )
+        # Should fallback on project's discovery config
         cls.dataset_b = ch_m.Dataset.objects.create(
             title="Dataset 2",
             description="Test dataset 2",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_b,
-            # Should fallback on project's discovery config
             discovery={},
         )
 
@@ -223,14 +223,64 @@ class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
         experiment_2["id"] = "experiment:2"
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
+        self.data_type_counts: dict[str, int] = {
+            "individuals": ph_m.Individual.objects.all().count(),
+            "biosamples": ph_m.Biosample.objects.all().count(),
+            "experiments": exp_m.Experiment.objects.all().count()
+        }
+
+    def assert_counts_censored(self, overview_response: dict, discovery: dict):
+        count_threshold = discovery["rules"]["count_threshold"]
+        for data_type in self.data_type_counts.keys():
+            response_count = overview_response["counts"][data_type]
+            if response_count < count_threshold:
+                self.assertEqual(response_count, 0)
+            else:
+                self.assertEqual(response_count, self.data_type_counts[data_type])
+
+    def assert_scoped_fields(self, overview_response: dict, discovery: dict):
+        self.assertSetEqual(
+            set(field for field in overview_response["fields"].keys()),
+            set(chart["field"] for section in discovery["overview"] for chart in section["charts"])
+        )
+    
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview(self):
-        response = self.client.get('/api/public_overview')
-        response_obj = response.json()
-        db_count = ph_m.Individual.objects.all().count()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj["counts"]["individuals"], db_count)
+        node_discovery = settings.CONFIG_PUBLIC
+        public_overview_url = '/api/public_overview'
+        # SCOPE: whole node
+        response_whole = self.client.get(public_overview_url)
+        response_whole_obj = response_whole.json()
+        self.assertEqual(response_whole.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_whole_obj, dict)
+        self.assert_counts_censored(response_whole_obj, node_discovery)
+        self.assert_scoped_fields(response_whole_obj, node_discovery)
+
+        # SCOPE: project_a (whole node fallback)
+        response_p_a = self.client.get(f"{public_overview_url}?project={self.project_a.identifier}")
+        self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_p_a.json(), response_whole_obj)
+        self.assert_counts_censored(response_whole_obj, node_discovery)
+        self.assert_scoped_fields(response_whole_obj, node_discovery)
+
+        # SCOPE: dataset_a
+        response_d_a = self.client.get(f"{public_overview_url}?dataset={self.dataset_a.identifier}")
+        self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
+        self.assert_counts_censored(response_d_a.json(), self.dataset_a.discovery)
+        self.assert_scoped_fields(response_d_a.json(), self.dataset_a.discovery)
+
+        # SCOPE: project_b
+        response_p_b = self.client.get(f"{public_overview_url}?project={self.project_b.identifier}")
+        self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
+        self.assert_counts_censored(response_p_b.json(), self.project_b.discovery)
+        self.assert_scoped_fields(response_p_b.json(), self.project_b.discovery)
+
+        # SCOPE: dataset_b (project_b fallback)
+        response_d_b = self.client.get(f"{public_overview_url}?dataset={self.dataset_b.identifier}")
+        self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
+        self.assert_counts_censored(response_d_b.json(), self.project_b.discovery)
+        self.assert_scoped_fields(response_d_b.json(), self.project_b.discovery)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_bins(self):
