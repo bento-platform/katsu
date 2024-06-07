@@ -188,6 +188,8 @@ class PublicSearchFieldsTest(APITestCase, ScopedDiscoveryTestCase):
 class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
+        self.public_overview_url = '/api/public_overview'
+
         # individuals (count 8)
         individuals = {
             f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
@@ -249,9 +251,8 @@ class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview(self):
         node_discovery = settings.CONFIG_PUBLIC
-        public_overview_url = '/api/public_overview'
         # SCOPE: whole node
-        response_whole = self.client.get(public_overview_url)
+        response_whole = self.client.get(self.public_overview_url)
         response_whole_obj = response_whole.json()
         self.assertEqual(response_whole.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_whole_obj, dict)
@@ -259,29 +260,40 @@ class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
         self.assert_scoped_fields(response_whole_obj, node_discovery)
 
         # SCOPE: project_a (whole node fallback)
-        response_p_a = self.client.get(f"{public_overview_url}?project={self.project_a.identifier}")
+        response_p_a = self.client.get(f"{self.public_overview_url}?project={self.project_a.identifier}")
         self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
         self.assertEqual(response_p_a.json(), response_whole_obj)
         self.assert_counts_censored(response_whole_obj, node_discovery)
         self.assert_scoped_fields(response_whole_obj, node_discovery)
 
         # SCOPE: dataset_a
-        response_d_a = self.client.get(f"{public_overview_url}?dataset={self.dataset_a.identifier}")
+        response_d_a = self.client.get(f"{self.public_overview_url}?dataset={self.dataset_a.identifier}")
         self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
         self.assert_counts_censored(response_d_a.json(), self.dataset_a.discovery)
         self.assert_scoped_fields(response_d_a.json(), self.dataset_a.discovery)
 
         # SCOPE: project_b
-        response_p_b = self.client.get(f"{public_overview_url}?project={self.project_b.identifier}")
+        response_p_b = self.client.get(f"{self.public_overview_url}?project={self.project_b.identifier}")
         self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
         self.assert_counts_censored(response_p_b.json(), self.project_b.discovery)
         self.assert_scoped_fields(response_p_b.json(), self.project_b.discovery)
 
         # SCOPE: dataset_b (project_b fallback)
-        response_d_b = self.client.get(f"{public_overview_url}?dataset={self.dataset_b.identifier}")
+        response_d_b = self.client.get(f"{self.public_overview_url}?dataset={self.dataset_b.identifier}")
         self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
         self.assert_counts_censored(response_d_b.json(), self.project_b.discovery)
         self.assert_scoped_fields(response_d_b.json(), self.project_b.discovery)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_overview_project_dataset(self):
+        # SCOPE: project_a + dataset_a
+        response_valid = self.client.get(f"{self.public_overview_url}?project={self.project_a.identifier}&dataset={self.dataset_a.identifier}")
+        self.assertEqual(response_valid.status_code, status.HTTP_200_OK)
+        self.assert_scoped_fields(response_valid.json(), self.dataset_a.discovery)
+
+        # SCOPE: project_a + dataset_b (invalid)
+        response_invalid = self.client.get(f"{self.public_overview_url}?project={self.project_a.identifier}&dataset={self.dataset_b.identifier}")
+        self.assertEqual(response_invalid.status_code, status.HTTP_404_NOT_FOUND)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_bins(self):
