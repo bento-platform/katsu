@@ -154,14 +154,13 @@ async def public_overview(request: DrfRequest):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     async def _counts_for_scoped_model_name(mn: str) -> tuple[str, int]:
-        if project_id and not dataset_id:
-            scope = "project"
-            value = project_id
-        elif project_id and dataset_id:
+        if dataset_id:
             scope = "dataset"
             value = dataset_id
-        else:
-            # cannot scope
+        elif project_id and not dataset_id:
+            scope = "project"
+            value = project_id
+        elif not project_id and not dataset_id:
             return await _counts_for_model_name(mn)
         filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["filter"]
         prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["prefetch_related"]
