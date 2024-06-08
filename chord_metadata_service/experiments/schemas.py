@@ -1,11 +1,9 @@
-from pathlib import Path
-
 from django.conf import settings
 from referencing import Registry, Resource
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
     "DATA_FILE_OR_RECORD_URL_SCHEMA",
@@ -16,11 +14,7 @@ __all__ = [
     "INSTRUMENT_SCHEMA",
 ]
 
-if settings.SCHEMAS_BASE_URL:
-    base_uri = settings.SCHEMAS_BASE_URL
-else:
-    base_uri = get_schema_app_id(Path(__file__).parent.name)
-experiment_base_uri = sub_schema_uri(base_uri, "experiment")
+experiment_base_uri = f"{settings.SCHEMAS_BASE_URL}/experiment"
 
 DATA_FILE_OR_RECORD_URL_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",

@@ -1,6 +1,5 @@
 # Individual schemas for validation of JSONField values
 import json
-from pathlib import Path
 from django.conf import settings
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT7
@@ -26,7 +25,6 @@ from chord_metadata_service.restapi.schema_utils import (
     named_one_of,
     sub_schema_uri,
     describe_schema,
-    get_schema_app_id
 )
 
 from . import descriptions
@@ -62,15 +60,11 @@ __all__ = [
     "phenopacket_resolver",
 ]
 
-if settings.SCHEMAS_BASE_URL:
-    base_uri = settings.SCHEMAS_BASE_URL
-else:
-    base_uri = get_schema_app_id(Path(__file__).parent.name)
-phenopacket_base_uri = sub_schema_uri(base_uri=base_uri, name="phenopacket")
+phenopacket_base_uri = f"{settings.SCHEMAS_BASE_URL}/phenopacket"
 
 with open("chord_metadata_service/vrs/schema/vrs.json", "r") as file:
     vrs_schema_definitions = json.load(file)
-    vrs_schema_definitions["$id"] = sub_schema_uri(base_uri, "vrs")
+    vrs_schema_definitions["$id"] = sub_schema_uri(phenopacket_base_uri, "vrs")
     file.close()
 
 
@@ -680,4 +674,4 @@ VRS_REF_RESOURCE = Resource.from_contents(contents=vrs_schema_definitions, defau
 VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 
 resolver = VRS_REF_REGISTRY.resolver()
-VRS_VARIATION_SCHEMA = resolver.lookup(sub_schema_uri(base_uri, "vrs#/definitions/Variation")).contents
+VRS_VARIATION_SCHEMA = resolver.lookup(sub_schema_uri(phenopacket_base_uri, "vrs#/definitions/Variation")).contents

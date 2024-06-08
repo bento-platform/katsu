@@ -9,20 +9,14 @@ from chord_metadata_service.restapi.schema_utils import (
     string_with_pattern,
     enum_of,
     tag_ids_and_describe,
-    get_schema_app_id,
     sub_schema_uri,
 )
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA, TIME_ELEMENT_SCHEMA
-from pathlib import Path
 from .descriptions import INDIVIDUAL, VITAL_STATUS
 from .values import Sex, KaryotypicSex
 
 
-if settings.SCHEMAS_BASE_URL:
-    base_uri = settings.SCHEMAS_BASE_URL
-else:
-    base_uri = get_schema_app_id(Path(__file__).parent.name)
-phenopacket_base_uri = sub_schema_uri(base_uri=base_uri, name="phenopacket")
+phenopacket_base_uri = f"{settings.SCHEMAS_BASE_URL}/phenopacket"
 
 VITAL_STATUS_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,

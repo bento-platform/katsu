@@ -53,7 +53,7 @@ CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for runn
 if CHORD_URL:
     SCHEMAS_BASE_URL = CHORD_URL + "/api/metadata/api/schemas"
 else:
-    SCHEMAS_BASE_URL = None
+    SCHEMAS_BASE_URL = "/chord_metadata_service/schemas"
 
 # SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
 # unless an alternative permissions system is in place.
