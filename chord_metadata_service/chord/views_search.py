@@ -23,6 +23,9 @@ from rest_framework import status
 from typing import Callable
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
+from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
+from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.discovery.utils import get_discovery
 from chord_metadata_service.logger import logger
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
@@ -47,12 +50,20 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(_request: DrfRequest, dataset):
-    return await dt_experiment_summary(Experiment.objects.filter(dataset=dataset), low_counts_censored=False)
+async def experiment_dataset_summary(_request: DrfRequest, dataset: Dataset, discovery: DiscoveryConfig):
+    return await dt_experiment_summary(
+        Experiment.objects.filter(dataset=dataset),
+        discovery,
+        low_counts_censored=False
+    )
 
 
-async def phenopacket_dataset_summary(_request: DrfRequest, dataset: Dataset):
-    return await dt_phenopacket_summary(Phenopacket.objects.filter(dataset=dataset), low_counts_censored=False)
+async def phenopacket_dataset_summary(_request: DrfRequest, dataset: Dataset, discovery: DiscoveryConfig):
+    return await dt_phenopacket_summary(
+        Phenopacket.objects.filter(dataset=dataset),
+        discovery,
+        low_counts_censored=False
+    )
 
 
 # TODO: CHORD-standardized logging
@@ -550,10 +561,15 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 async def dataset_summary(request: DrfRequest, dataset_id: str):
     # TODO: PERMISSIONS
 
+    try:
+        discovery = await get_discovery(dataset_id=dataset_id)
+    except DiscoveryConfigException as e:
+        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+
     dataset = await Dataset.objects.aget(identifier=dataset_id)
 
     summaries = await asyncio.gather(
-        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset),
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset, discovery),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 

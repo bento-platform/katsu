@@ -3,6 +3,7 @@ from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.discovery.api_views import (
+    public_rules,
     public_search_fields,
     public_overview,
     public_dataset,
@@ -89,6 +90,7 @@ urlpatterns = [
     path('public_search_fields', public_search_fields, name='public-search-fields'),
     path('public_overview', public_overview, name='public-overview',),
     path('public_dataset', public_dataset, name='public-dataset'),
+    path('public_rules', public_rules, name='public-rules'),
 
     # uncensored endpoint for beacon search using fields from config.json
     path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),

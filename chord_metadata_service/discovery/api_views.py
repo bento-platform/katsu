@@ -2,7 +2,6 @@ import asyncio
 
 from adrf.decorators import api_view
 from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
@@ -10,7 +9,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
+from chord_metadata_service.discovery.censorship import RULES_NO_PERMISSIONS
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
+from chord_metadata_service.discovery.utils import get_request_discovery
 
 from . import responses as dres
 from .types import BinWithValue
@@ -20,48 +21,6 @@ from ..logger import logger
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS
 from .schemas import DISCOVERY_SCHEMA
-
-
-async def _get_project_discovery(project_id: str = None, project: cm.Project = None) -> dict:
-    if not project and project_id:
-        # retrieve project by ID if not provided
-        project = await cm.Project.objects.aget(identifier=project_id)
-    if not project.discovery:
-        # fallback on global discovery config if project has none
-        return settings.CONFIG_PUBLIC
-    return project.discovery
-
-
-async def _get_dataset_discovery(dataset_id: str) -> dict:
-    dataset = await cm.Dataset.objects.aget(identifier=dataset_id)
-    if not dataset.discovery:
-        project = await cm.Project.objects.aget(datasets=dataset_id)
-        return await _get_project_discovery(project=project)
-    return dataset.discovery
-
-
-async def _get_discovery(request: DrfRequest) -> dict:
-    dataset_id = request.query_params.get("dataset")
-    project_id = request.query_params.get("project")
-    if dataset_id and project_id:
-        # check if the dataset belongs to the project
-        is_scope_valid = await cm.Dataset.objects.filter(
-            identifier=dataset_id,
-            project__identifier=project_id,
-        ).aexists()
-        if not is_scope_valid:
-            raise DiscoveryConfigException(dataset_id, project_id)
-    try:
-        if dataset_id:
-            # get dataset's discovery config if dataset_id is passed
-            return await _get_dataset_discovery(dataset_id)
-        elif project_id:
-            # get project's discovery config if project_id is passed and dataset_id is not
-            return await _get_project_discovery(project_id=project_id)
-    except ObjectDoesNotExist:
-        raise DiscoveryConfigException(dataset_id, project_id)
-    # fallback to config.json when no dataset or project is in the request
-    return settings.CONFIG_PUBLIC
 
 
 @extend_schema(
@@ -86,25 +45,23 @@ async def public_search_fields(request: DrfRequest):
     """
 
     try:
-        config_public = await _get_discovery(request)
+        discovery = await get_request_discovery(request)
     except DiscoveryConfigException as e:
         return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
-    if not config_public:
+    if not discovery:
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
-
-    field_conf = config_public["fields"]
 
     # Note: the array is wrapped in a dictionary structure to help with JSON
     # processing by some services.
 
     async def _get_field_response(field) -> dict | None:
-        field_props = field_conf[field]
+        field_props = discovery.get("fields", {}).get(field, {})
 
         return {
             **field_props,
             "id": field,
-            "options": await get_field_options(field_props, low_counts_censored=True),
+            "options": await get_field_options(field, discovery=discovery, low_counts_censored=True),
         }
 
     async def _get_section_response(section) -> dict:
@@ -114,7 +71,7 @@ async def public_search_fields(request: DrfRequest):
         }
 
     return Response({
-        "sections": await asyncio.gather(*map(_get_section_response, config_public["search"])),
+        "sections": await asyncio.gather(*map(_get_section_response, discovery["search"])),
     })
 
 
@@ -144,13 +101,13 @@ async def public_overview(request: DrfRequest):
     """
 
     try:
-        config_public = await _get_discovery(request)
+        discovery = await get_request_discovery(request)
     except DiscoveryConfigException as e:
         return Response(e.message, status=status.HTTP_404_NOT_FOUND)
     dataset_id = request.query_params.get("dataset", None)
     project_id = request.query_params.get("project", None)
 
-    if not config_public:
+    if not discovery:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     async def _counts_for_scoped_model_name(mn: str) -> tuple[str, int]:
@@ -173,7 +130,7 @@ async def public_overview(request: DrfRequest):
 
     # Get the rules config - because we used get_config_public_and_field_set_permissions with no arguments, it'll choose
     #  these values based on if we have access to ALL public fields or not.
-    rules_config = config_public["rules"]
+    rules_config = discovery["rules"]
     count_threshold = rules_config["count_threshold"]
 
     # Set counts to 0 if they're under the count threshold, and we don't have full data access permissions for the
@@ -184,42 +141,40 @@ async def public_overview(request: DrfRequest):
             counts[public_model_name] = 0
 
     response = {
-        "layout": config_public["overview"],
+        "layout": discovery["overview"],
         "fields": {},
         "counts": {
             "individuals": counts["individual"],
             "biosamples": counts["biosample"],
             "experiments": counts["experiment"],
         },
-        # TODO: remove these in favour of public_rules endpoint
-        "max_query_parameters": rules_config["max_query_parameters"],
-        "count_threshold": count_threshold,
     }
 
     # Parse the public config to gather data for each field defined in the overview
 
-    fields = [chart["field"] for section in config_public["overview"] for chart in section["charts"]]
-    field_conf = config_public["fields"]
+    fields = [chart["field"] for section in discovery["overview"] for chart in section["charts"]]
+    field_conf = discovery["fields"]
 
-    async def _get_field_response(field_id: str, field_props: dict) -> dict:
+    async def _get_field_response(field: str) -> dict:
+        field_props = field_conf.get(field, {"datatype": None})
         stats: list[BinWithValue] | None
         if field_props["datatype"] == "string":
-            stats = await get_categorical_stats(field_props, project_id, dataset_id, low_counts_censored=True)
+            stats = await get_categorical_stats(field, discovery, project_id, dataset_id, low_counts_censored=True)
         elif field_props["datatype"] == "number":
-            stats = await get_range_stats(field_props, project_id, dataset_id, low_counts_censored=True)
+            stats = await get_range_stats(field, discovery, project_id, dataset_id, low_counts_censored=True)
         elif field_props["datatype"] == "date":
-            stats = await get_date_stats(field_props, project_id, dataset_id, low_counts_censored=True)
+            stats = await get_date_stats(field, discovery, project_id, dataset_id, low_counts_censored=True)
         else:
             raise NotImplementedError()
 
         return {
             **field_props,
-            "id": field_id,
+            "id": field,
             **({"data": stats} if stats is not None else {}),
         }
 
     # Parallel async collection of field responses for public overview
-    field_responses = await asyncio.gather(*(_get_field_response(field, field_conf[field]) for field in fields))
+    field_responses = await asyncio.gather(*(_get_field_response(field) for field in fields))
 
     for field, field_res in zip(fields, field_responses):
         response["fields"][field] = field_res
@@ -261,3 +216,14 @@ async def public_dataset(_request: DrfRequest):
 @permission_classes([AllowAny])
 async def discovery_schema(_request: DrfRequest):
     return Response(DISCOVERY_SCHEMA)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+async def public_rules(request: DrfRequest):
+    try:
+        discovery = await get_request_discovery(request)
+    except DiscoveryConfigException as e:
+        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+    rules = discovery["rules"] if discovery and "rules" in discovery else RULES_NO_PERMISSIONS
+    return Response(rules, status=status.HTTP_200_OK)

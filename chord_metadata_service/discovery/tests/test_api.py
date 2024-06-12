@@ -12,7 +12,9 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
+from chord_metadata_service.discovery.censorship import RULES_NO_PERMISSIONS
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
+from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -236,7 +238,7 @@ class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
             "experiments": exp_m.Experiment.objects.all().count()
         }
 
-    def assert_counts_censored(self, overview_response: dict, discovery: dict):
+    def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig):
         count_threshold = discovery["rules"]["count_threshold"]
         for data_type in self.data_type_counts.keys():
             response_count = overview_response["counts"][data_type]
@@ -245,7 +247,7 @@ class PublicOverviewTest(APITestCase, ScopedDiscoveryTestCase):
             else:
                 self.assertEqual(response_count, self.data_type_counts[data_type])
 
-    def assert_scoped_fields(self, overview_response: dict, discovery: dict):
+    def assert_scoped_fields(self, overview_response: dict, discovery: DiscoveryConfig):
         self.assertSetEqual(
             set(field for field in overview_response["fields"].keys()),
             set(chart["field"] for section in discovery["overview"] for chart in section["charts"])
@@ -441,3 +443,42 @@ class DiscoverySchemaTest(APITestCase):
         response = self.client.get(reverse("discovery-schema"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), DISCOVERY_SCHEMA)
+
+
+class DiscoveryRulesTest(ScopedDiscoveryTestCase):
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_rules(self):
+        # Node scope
+        url = reverse("public-rules")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), DISCOVERY_CONFIG_TEST["rules"])
+
+        # PROJECTS
+        response_p_a = self.client.get(f"{url}?project={self.id_proj_a}")
+        self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_p_a.json(), DISCOVERY_CONFIG_TEST["rules"])   # node discovery fallback
+
+        response_p_b = self.client.get(f"{url}?project={self.id_proj_b}")
+        self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_p_b.json(), self.project_b.discovery["rules"])
+
+        # Dataset scope
+        response_d_a = self.client.get(f"{url}?dataset={self.id_ds_a}")
+        self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_d_a.json(), self.dataset_a.discovery["rules"])
+
+        response_d_b = self.client.get(f"{url}?dataset={self.id_ds_b}")
+        self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
+        self.assertEqual(response_d_b.json(), self.project_b.discovery["rules"])
+
+    @override_settings(CONFIG_PUBLIC={})
+    def test_discovery_exp(self):
+        # Node scope not configured
+        url = reverse("public-rules")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), RULES_NO_PERMISSIONS)
+
+        response_exp = self.client.get(f"{url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
+        self.assertEqual(response_exp.status_code, status.HTTP_404_NOT_FOUND)

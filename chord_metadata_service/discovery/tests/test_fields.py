@@ -1,7 +1,9 @@
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
+from copy import deepcopy
 
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
@@ -18,37 +20,33 @@ from ..fields import (
 
 
 class TestGetFieldOptions(TransactionTestCase):
-
-    field_some_prop = {
-        "datatype": "string",
-        "mapping": "individual/extra_properties/some_prop",
-        "title": "Some Prop",
-        "description": "Some property",
-        "config": {
-            "enum": ["a", "b"],
-        },
+    discovery: DiscoveryConfig = {
+        "fields": {
+            "some_prop": {
+                "datatype": "string",
+                "mapping": "individual/extra_properties/some_prop",
+                "title": "Some Prop",
+                "description": "Some property",
+                "config": {
+                    "enum": ["a", "b"],
+                },
+            }
+        }
     }
 
     async def test_get_string_options(self):
-        self.assertListEqual(await get_field_options(self.field_some_prop, low_counts_censored=False), ["a", "b"])
+        self.assertListEqual(await get_field_options("some_prop", self.discovery, False), ["a", "b"])
 
     async def test_get_field_options_not_impl(self):
+        # {**self.field_some_prop, "datatype": "made_up"}
+        invalid_discovery = deepcopy(self.discovery)
+        invalid_discovery["fields"]["some_prop"]["datatype"] = "made_up"
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
-            await get_field_options({**self.field_some_prop, "datatype": "made_up"}, low_counts_censored=False)
+            await get_field_options("some_prop", invalid_discovery, low_counts_censored=False)
 
 
 class TestGetCategoricalStats(ProjectTestCase):
-
-    f_sex = {
-        "mapping": "individual/sex",
-        "datatype": "string",
-        "title": "Sex",
-        "description": "Sex",
-        "config": {
-            "enum": None,
-        },
-    }
 
     def setUp(self):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
@@ -61,13 +59,13 @@ class TestGetCategoricalStats(ProjectTestCase):
         )
 
     async def test_categorical_stats_lcf(self):
-        res = await get_categorical_stats(self.f_sex, project_id=self.project.identifier,
+        res = await get_categorical_stats("sex", DISCOVERY_CONFIG_TEST, project_id=self.project.identifier,
                                           dataset_id=self.dataset.identifier, low_counts_censored=False)
         self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
-        res = await get_categorical_stats(self.f_sex, project_id=self.project.identifier,
+        res = await get_categorical_stats("sex", DISCOVERY_CONFIG_TEST, project_id=self.project.identifier,
                                           dataset_id=self.dataset.identifier, low_counts_censored=True)
         self.assertListEqual(res, [{"label": "missing", "value": 0}])
 
@@ -87,7 +85,7 @@ class TestDateStatsExcept(APITestCase):
         }
 
         with self.assertRaises(NotImplementedError):
-            await get_date_stats(fp)
+            await get_date_stats("date_of_consent", DISCOVERY_CONFIG_TEST)
 
         with self.assertRaises(NotImplementedError):
             await get_month_date_range(fp)
@@ -105,7 +103,7 @@ class TestDateStatsExcept(APITestCase):
         }
 
         with self.assertRaises(NotImplementedError):
-            await get_date_stats(fp)
+            await get_date_stats("date_of_consent", DISCOVERY_CONFIG_TEST)
 
         with self.assertRaises(NotImplementedError):
             await get_month_date_range(fp)
@@ -133,8 +131,13 @@ class TestJsonFieldArrayStats(ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lcf(self):
-        res = await get_categorical_stats(self.dm_fp, project_id=self.project.identifier,
-                                          dataset_id=self.dataset.identifier, low_counts_censored=False)
+        res = await get_categorical_stats(
+            "diagnostic_markers",
+            DISCOVERY_CONFIG_TEST,
+            project_id=self.project.identifier,
+            dataset_id=self.dataset.identifier,
+            low_counts_censored=False
+        )
         ground_truth = [
             {"label": "Genetic Testing", "value": 1},
             {"label": "Hematology Test", "value": 1},
@@ -144,8 +147,13 @@ class TestJsonFieldArrayStats(ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
-        res = await get_categorical_stats(self.dm_fp, project_id=self.project.identifier,
-                                          dataset_id=self.dataset.identifier, low_counts_censored=True)
+        res = await get_categorical_stats(
+            "diagnostic_markers",
+            DISCOVERY_CONFIG_TEST,
+            project_id=self.project.identifier,
+            dataset_id=self.dataset.identifier,
+            low_counts_censored=True
+        )
         ground_truth = [
             {"label": "missing", "value": 0},
         ]
@@ -182,10 +190,10 @@ class TestJsonFieldArrayStats(ProjectTestCase):
         self.assertEqual(qs.count(), 0)
 
     async def test_get_distinct_values(self):
-        dm_values = await get_distinct_field_values(self.dm_fp, False)
+        dm_values = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, False)
         self.assertEqual(len(dm_values), 2)
         self.assertTrue("Genetic Testing" in dm_values)
         self.assertTrue("Hematology Test" in dm_values)
 
-        dm_values_censored = await get_distinct_field_values(self.dm_fp, True)
+        dm_values_censored = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, True)
         self.assertListEqual(dm_values_censored, [])
