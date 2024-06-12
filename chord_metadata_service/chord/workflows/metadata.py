@@ -33,8 +33,10 @@ WORKFLOW_TAG_CBIOPORTAL = "cbioportal"
 def json_file_input(id_: str, required: bool = True):
     return wm.WorkflowFileInput(id=id_, required=required, pattern=r"^.*\.json$")
 
+
 def boolean_input(id_: str, required: bool = True):
     return wm.WorkflowBooleanInput(id=id_, required=required, default="false")
+
 
 DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
 DIRECTORY_PATH_INPUT = wm.WorkflowDirectoryInput(id="directory")
