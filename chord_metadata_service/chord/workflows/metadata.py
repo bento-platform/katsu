@@ -103,7 +103,8 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON_WITH_FILES, wm.WorkflowDefin
         PROJECT_DATASET_INPUT,
         DIRECTORY_PATH_INPUT,
         json_file_input("json_document"),
-        boolean_input("filter_out_vcf_files"), 
+        boolean_input("filter_out_vcf_files"),
+
     ],
 ))
 
