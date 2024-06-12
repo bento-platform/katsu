@@ -33,6 +33,8 @@ WORKFLOW_TAG_CBIOPORTAL = "cbioportal"
 def json_file_input(id_: str, required: bool = True):
     return wm.WorkflowFileInput(id=id_, required=required, pattern=r"^.*\.json$")
 
+def boolean_input(id_: str, required: bool = True):
+    return wm.WorkflowBooleanInput(id=id_, required=required, default="false")
 
 DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
 DIRECTORY_PATH_INPUT = wm.WorkflowDirectoryInput(id="directory")
@@ -99,6 +101,7 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON_WITH_FILES, wm.WorkflowDefin
         PROJECT_DATASET_INPUT,
         DIRECTORY_PATH_INPUT,
         json_file_input("json_document"),
+        boolean_input("filter_out_vcf_files"), 
     ],
 ))
 
