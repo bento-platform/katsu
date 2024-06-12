@@ -7,6 +7,7 @@ workflow experiments_json_with_files {
         String drs_url
         String katsu_url
         String project_dataset
+        Boolean filter_out_vcf_files = false
         String access_token
         Boolean validate_ssl
     }
@@ -14,7 +15,8 @@ workflow experiments_json_with_files {
     call prepare_files_list {
         input:
             json_document = json_document,
-            directory = directory
+            directory = directory,
+            filter_out_vcf_files = filter_out_vcf_files
     }
 
     call prepare_for_drs {
@@ -72,6 +74,7 @@ task prepare_files_list {
     input {
         File json_document
         String directory
+        String filter_out_vcf_files
     }
     command <<<
     python3 -c "
@@ -79,6 +82,7 @@ import json
 import os
 
 directory = '~{directory}'
+filter_vcf = '~{filter_out_vcf_files}'
 
 with open('~{json_document}', 'r') as file:
     data = json.load(file)
@@ -89,6 +93,10 @@ for experiment in data.get('experiments', []):
         filename = result.get('filename', '')
         file_path = ''
         file_found = False
+        is_vcf = filename.endswith('.vcf') or filename.endswith('.vcf.gz')
+
+        if filter_vcf and is_vcf:
+            continue
 
         for root, dirs, files in os.walk(directory):
             if filename in files:
