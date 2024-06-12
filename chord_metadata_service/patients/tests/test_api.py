@@ -4,7 +4,7 @@ import csv
 import io
 import random
 from django.urls import reverse
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.discovery import responses as dres
@@ -13,6 +13,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets.utils import iso_duration_to_years
+from chord_metadata_service.restapi.api_renderers import render_age
 
 from . import constants as c
 
@@ -630,6 +631,35 @@ class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTes
 
         # overview for sex should have 0 entries due to small cell counts
         self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 0)  # path to sex field
+
+
+class RenderAgeTest(TestCase):
+    def setUp(self):
+        self.individual_three = c.VALID_INDIVIDUAL_3
+
+    def test_render_age(self):
+        result = render_age(self.individual_three, 'time_at_last_encounter')
+        self.assertIsNone(result)
+
+    def test_age_duration(self):
+        subject_with_age = {
+            **c.VALID_INDIVIDUAL_3,
+            "time_at_last_encounter": {
+                "age": {
+                    "iso8601duration": "P50Y"
+                }
+            }
+        }
+        result = render_age(subject_with_age, 'time_at_last_encounter')
+        self.assertEqual(result, "P50Y")
+
+    def test_age_none(self):
+        subject_with_age = {
+            **c.VALID_INDIVIDUAL_3,
+            "time_at_last_encounter": {}
+        }
+        result = render_age(subject_with_age, 'time_at_last_encounter')
+        self.assertIsNone(result)
 
 
 class PublicAgeRangeFilteringIndividualsTest(APITestCase):
