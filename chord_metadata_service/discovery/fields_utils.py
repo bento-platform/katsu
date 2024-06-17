@@ -51,7 +51,7 @@ def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
 def get_public_model_name(model: Type[Model]) -> PublicModelNames:
     model_name = [key for key, m in PUBLIC_MODEL_NAMES_TO_MODEL.items() if m == model]
     if len(model_name) != 1:
-        raise ValueError(f"Provided model {model} is not available for public.")
+        raise NotImplementedError(f"Provided model {model} is not available for public.")
     return model_name[0]
 
 
