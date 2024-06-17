@@ -6,15 +6,15 @@ from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALU
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
+    "experiment_resource",
+    "experiment_registry",
+    "experiment_resolver",
     "DATA_FILE_OR_RECORD_URL_SCHEMA",
     "EXPERIMENT_RESULT_FILE_INDEX_SCHEMA",
     "EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA",
     "EXPERIMENT_SCHEMA",
     "EXPERIMENT_RESULT_SCHEMA",
     "INSTRUMENT_SCHEMA",
-    "experiment_resource",
-    "experiment_registry",
-    "experiment_resolver",
 ]
 
 experiment_base_uri = f"{settings.SCHEMAS_BASE_URL}/experiment"

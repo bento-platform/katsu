@@ -50,8 +50,10 @@ LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").uppe
 BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
-if CHORD_URL:
-    SCHEMAS_BASE_URL = CHORD_URL + "/api/metadata/api/schemas"
+
+SERVICE_URL_BASE_PATH = os.environ.get("SERVICE_URL_BASE_PATH")
+if SERVICE_URL_BASE_PATH:
+    SCHEMAS_BASE_URL = SERVICE_URL_BASE_PATH + "/api/schemas"
 else:
     SCHEMAS_BASE_URL = "/chord_metadata_service/schemas"
 
