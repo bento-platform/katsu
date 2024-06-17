@@ -230,6 +230,7 @@ def get_chord_phenopacket_schema(_request):
     get:
     Chord phenopacket schema that can be shared with data providers.
     """
+    # TODO: project-scope
     return Response(PHENOPACKET_SCHEMA)
 
 
@@ -240,5 +241,6 @@ def get_chord_phenopacket_subschema(_request, subschema: str):
     get:
     Chord phenopacket schema that can be shared with data providers.
     """
+    # TODO: project-scope
     schema = phenopacket_resolver.lookup(ref=f"{phenopacket_base_uri}/{subschema}").contents
     return Response(schema)

@@ -146,6 +146,7 @@ def get_experiment_schema(_request):
     get:
     Experiment schema
     """
+    # TODO: project-scope
     return Response(EXPERIMENT_SCHEMA)
 
 
@@ -156,5 +157,6 @@ def get_experiment_subschema(_request, subschema: str):
     get:
     Experiment sub-schema
     """
+    # TODO: project-scope
     schema = experiment_resolver.lookup(ref=f"{experiment_base_uri}/{subschema}").contents
     return Response(schema)
