@@ -29,8 +29,8 @@ PUBLIC_MODEL_NAMES_TO_DATA_TYPE: dict[PublicModelNames, str] = {
 
 class ScopeFilter(TypedDict):
     filter: str
-    prefetch_related: tuple[str]
-    select_related: tuple[str]
+    prefetch_related: tuple[str, ...]
+    select_related: tuple[str, ...]
 
 
 class ProjectDatasetScopeFilters(TypedDict):

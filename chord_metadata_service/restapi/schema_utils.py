@@ -195,7 +195,7 @@ def tag_schema_with_search_properties(schema, search_descriptions: dict | None):
     return schema_with_search
 
 
-def tag_schema_with_nested_ids(schema: dict):
+def tag_schema_with_nested_ids(schema: dict, override_children: bool = False):
     if "$id" not in schema:
         raise ValueError("Schema to tag with nested IDs must have $id")
 
@@ -206,7 +206,10 @@ def tag_schema_with_nested_ids(schema: dict):
         return {
             **schema,
             "properties": {
-                k: tag_schema_with_nested_ids({**v, "$id": f"{schema_id}/{k}"} if "$id" not in v else v)
+                k: tag_schema_with_nested_ids(
+                    schema={**v, "$id": f"{schema_id}/{k}"} if override_children or "$id" not in v else v,
+                    override_children=override_children
+                )
                 for k, v in schema["properties"].items()
             },
         } if "properties" in schema else schema
@@ -217,15 +220,21 @@ def tag_schema_with_nested_ids(schema: dict):
             "items": tag_schema_with_nested_ids({
                 **schema["items"],
                 "$id": f"{schema_id}/item",
-            } if "$id" not in schema["items"] else schema["items"]),
+            } if override_children or "$id" not in schema["items"] else schema["items"], override_children),
         } if "items" in schema else schema
 
     # If nothing to tag, return itself (base case)
     return schema
 
 
-def tag_ids_and_describe(schema: dict, descriptions: dict):
-    return tag_schema_with_nested_ids(describe_schema(schema, descriptions))
+def tag_ids_and_describe(schema: dict, descriptions: dict, override_children: bool = False):
+    """
+    Adds descriptions and generates $id fields on a given schema.
+    Set override_children to True to ignore existing children IDs and use the parent's structure.
+    Helps to make sure that all the properties of a schema have a resolvable URIs, even if reusing definitions.
+    e.g. ontology_list may need to be resolved from an experiment or phenopacket URI.
+    """
+    return tag_schema_with_nested_ids(describe_schema(schema, descriptions), override_children)
 
 
 def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,

@@ -64,11 +64,11 @@ urlpatterns = [
     # apps schemas
     path('schemas/phenopacket', phenopacket_views.get_chord_phenopacket_schema,
          name="chord-phenopacket-schema"),
-    path('schemas/phenopacket/<str:subschema>', phenopacket_views.get_chord_phenopacket_subschema,
+    path('schemas/phenopacket/<path:subschema>', phenopacket_views.get_chord_phenopacket_subschema,
          name="chord-phenopacket-subschema"),
     path('schemas/experiment', experiment_views.get_experiment_schema,
          name="experiment-schema"),
-    path('schemas/experiment/<str:subschema>', experiment_views.get_experiment_subschema, name="experiment-subschema"),
+    path('schemas/experiment/<path:subschema>', experiment_views.get_experiment_subschema, name="experiment-subschema"),
     path('schemas/discovery', discovery_schema, name="discovery-schema"),
     # extra properties schema types
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),

@@ -103,6 +103,3 @@ DISCOVERY_SCHEMA = {
     },
     "additionalProperties": False
 }
-
-
-# DATS

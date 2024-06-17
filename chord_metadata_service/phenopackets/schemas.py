@@ -25,6 +25,7 @@ from chord_metadata_service.restapi.schema_utils import (
     named_one_of,
     sub_schema_uri,
     describe_schema,
+    tag_ids_and_describe,
 )
 
 from . import descriptions
@@ -642,7 +643,7 @@ PHENOPACKET_INTERPRETATION_SCHEMA = describe_schema({
     "required": ["id", "progress_status"]
 }, descriptions=descriptions.INTERPRETATION)
 
-PHENOPACKET_SCHEMA = describe_schema({
+PHENOPACKET_SCHEMA = tag_ids_and_describe({
     "$schema": DRAFT_07,
     "$id": phenopacket_base_uri,
     "title": "Phenopacket schema",

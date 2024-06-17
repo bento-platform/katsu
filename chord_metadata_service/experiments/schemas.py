@@ -12,6 +12,9 @@ __all__ = [
     "EXPERIMENT_SCHEMA",
     "EXPERIMENT_RESULT_SCHEMA",
     "INSTRUMENT_SCHEMA",
+    "experiment_resource",
+    "experiment_registry",
+    "experiment_resolver",
 ]
 
 experiment_base_uri = f"{settings.SCHEMAS_BASE_URL}/experiment"
@@ -198,7 +201,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "instrument": INSTRUMENT_SCHEMA
     },
     "required": ["id", "experiment_type"]
-}, EXPERIMENT)
+}, EXPERIMENT, override_children=True)
 
 # URI referencing
 experiment_resource = Resource.from_contents(EXPERIMENT_SCHEMA)
