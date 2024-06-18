@@ -91,7 +91,6 @@ path_list = []
 for experiment in data.get('experiments', []):
     for result in experiment.get('experiment_results', []):
         filename = result.get('filename', '')
-        file_path = ''
         file_found = False
         is_vcf = filename.endswith('.vcf') or filename.endswith('.vcf.gz')
 
