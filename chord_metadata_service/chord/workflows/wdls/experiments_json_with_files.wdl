@@ -101,7 +101,7 @@ for experiment in data.get('experiments', []):
             if filename in files:
                 file_found = True
                 file_path = os.path.join(root, filename)
-                path_list.append({'filename': filename, 'url': file_path})
+                path_list.append({'filename': filename, 'path': file_path})
                 break
         if not file_found:
             print(f'File not found for {filename}')
@@ -127,7 +127,7 @@ import json
 with open('~{json_path_list}', 'r') as file:
     path_list = json.load(file)
 
-consolidated_paths = [str(path['url']).strip() for path in path_list if str(path['url']).strip()]
+consolidated_paths = [str(path['path']).strip() for path in path_list if str(path['path']).strip()]
 
 print(json.dumps(consolidated_paths))
 
