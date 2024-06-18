@@ -1,13 +1,9 @@
 from django.conf import settings
-from pathlib import Path
 from chord_metadata_service.restapi.schema_utils import (
-    sub_schema_uri, array_of, base_type, SchemaTypes, enum_of, get_schema_app_id
+    sub_schema_uri, array_of, base_type, SchemaTypes, enum_of
 )
 
-if settings.SCHEMAS_BASE_URL:
-    base_uri = settings.SCHEMAS_BASE_URL
-else:
-    base_uri = get_schema_app_id(Path(__file__).parent.name)
+discovery_base_uri = sub_schema_uri(settings.SCHEMAS_BASE_URL, "discovery")
 
 DISCOVERY_FIELD_SCHEMA = {
     "description": "Field configuration",
@@ -86,7 +82,7 @@ DISCOVERY_SEARCH_SCHEMA = {
 }
 
 DISCOVERY_SCHEMA = {
-    "$id": sub_schema_uri(base_uri, "discovery"),
+    "$id": discovery_base_uri,
     "description": "Discovery configuration for public fields/search",
     "type": "object",
     "properties": {
