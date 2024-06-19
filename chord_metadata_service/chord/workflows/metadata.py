@@ -5,6 +5,7 @@ from bento_lib.workflows.workflow_set import WorkflowSet
 __all__ = [
     "WORKFLOW_PHENOPACKETS_JSON",
     "WORKFLOW_EXPERIMENTS_JSON",
+    "WORKFLOW_EXPERIMENTS_JSON_WITH_FILES",
     "WORKFLOW_FHIR_JSON",
     "WORKFLOW_READSET",
     "WORKFLOW_DOCUMENT",
@@ -18,6 +19,8 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_T
 
 WORKFLOW_PHENOPACKETS_JSON = "phenopackets_json"
 WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
+WORKFLOW_EXPERIMENTS_JSON_WITH_FILES = "experiments_json_with_files"
+
 WORKFLOW_FHIR_JSON = "fhir_json"
 WORKFLOW_READSET = "readset"
 WORKFLOW_DOCUMENT = "document"
@@ -31,7 +34,12 @@ def json_file_input(id_: str, required: bool = True):
     return wm.WorkflowFileInput(id=id_, required=required, pattern=r"^.*\.json$")
 
 
+def boolean_input(id_: str, required: bool = True):
+    return wm.WorkflowBooleanInput(id=id_, required=required, default="false")
+
+
 DRS_URL_INPUT = wm.WorkflowServiceUrlInput(id="drs_url", service_kind="drs")
+DIRECTORY_PATH_INPUT = wm.WorkflowDirectoryInput(id="directory")
 KATSU_URL_INPUT = wm.WorkflowServiceUrlInput(id="katsu_url", service_kind="metadata")
 PROJECT_DATASET_INPUT = wm.WorkflowProjectDatasetInput(id="project_dataset")
 ACCESS_TOKEN_INPUT = wm.WorkflowSecretInput(id="access_token", key="access_token")
@@ -75,6 +83,28 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON, wm.WorkflowDefinition(
         # user
         PROJECT_DATASET_INPUT,
         json_file_input("json_document"),
+    ],
+))
+
+workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON_WITH_FILES, wm.WorkflowDefinition(
+    type="ingestion",
+    name="Bento Experiments JSON With Files",
+    description="This workflow ingests experiments and related files into DRS.",
+    data_type=DATA_TYPE_EXPERIMENT,
+    tags=[DATA_TYPE_EXPERIMENT, "experiment_result"],
+    file="experiments_json_with_files.wdl",
+    inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        DRS_URL_INPUT,
+        KATSU_URL_INPUT,
+        VALIDATE_SSL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+        DIRECTORY_PATH_INPUT,
+        json_file_input("json_document"),
+        boolean_input("filter_out_vcf_files"),
+
     ],
 ))
 
