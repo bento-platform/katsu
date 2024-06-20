@@ -23,9 +23,6 @@ from rest_framework import status
 from typing import Callable
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
-from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
-from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_discovery
 from chord_metadata_service.logger import logger
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
