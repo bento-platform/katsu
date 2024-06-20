@@ -50,18 +50,18 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(_request: DrfRequest, dataset: Dataset, discovery: DiscoveryConfig):
+async def experiment_dataset_summary(dataset: Dataset):
     return await dt_experiment_summary(
         Experiment.objects.filter(dataset=dataset),
-        discovery,
+        discovery=None,
         low_counts_censored=False
     )
 
 
-async def phenopacket_dataset_summary(_request: DrfRequest, dataset: Dataset, discovery: DiscoveryConfig):
+async def phenopacket_dataset_summary(dataset: Dataset):
     return await dt_phenopacket_summary(
         Phenopacket.objects.filter(dataset=dataset),
-        discovery,
+        discovery=None,
         low_counts_censored=False
     )
 
@@ -561,15 +561,10 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 async def dataset_summary(request: DrfRequest, dataset_id: str):
     # TODO: PERMISSIONS
 
-    try:
-        discovery = await get_discovery(dataset_id=dataset_id)
-    except DiscoveryConfigException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-
     dataset = await Dataset.objects.aget(identifier=dataset_id)
 
     summaries = await asyncio.gather(
-        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset, discovery),
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](dataset),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 
