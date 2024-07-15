@@ -3,7 +3,7 @@ import asyncio
 from adrf.decorators import api_view
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status
+from rest_framework import serializers
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request as DrfRequest
@@ -11,9 +11,8 @@ from rest_framework.response import Response
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
-from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
 from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_discovery, get_request_discovery
+from chord_metadata_service.discovery.utils import get_discovery
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
@@ -99,10 +98,8 @@ async def search_overview(request: DrfRequest):
     """
 
     # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
-    try:
-        discovery = await get_request_discovery(request)
-    except DiscoveryConfigException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+    # use node level discovery config for private search overview
+    discovery = await get_discovery()
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
     phenopackets = pheno_models.Phenopacket.objects.all().filter(subject_id__in=individual_ids)
