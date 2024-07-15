@@ -13,7 +13,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
 from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_request_discovery
+from chord_metadata_service.discovery.utils import get_discovery, get_request_discovery
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
@@ -69,10 +69,8 @@ async def overview(request: DrfRequest):
     """
 
     # TODO: permissions based on project - this endpoint should be scrapped / completely rethought
-    try:
-        discovery = await get_request_discovery(request)
-    except DiscoveryConfigException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+    # use node level discovery config for private overview
+    discovery = await get_discovery()
 
     phenopackets = pheno_models.Phenopacket.objects.all()
     experiments = experiments_models.Experiment.objects.all()

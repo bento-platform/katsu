@@ -7,7 +7,8 @@ from chord_metadata_service.discovery.types import DiscoveryConfig
 from ..chord import models as cm
 
 __all__ = [
-    "get_request_discovery"
+    "get_discovery",
+    "get_request_discovery",
 ]
 
 

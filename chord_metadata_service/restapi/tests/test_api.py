@@ -1,5 +1,4 @@
 import json
-import uuid
 from asgiref.sync import async_to_sync
 
 from django.urls import reverse
@@ -112,17 +111,6 @@ class OverviewTest(APITestCase, ProjectTestCase):
         self.assertEqual(experiment_res['data_type_specific']['instruments']['count'], 1)
         self.assertEqual(experiment_res['data_type_specific']['instruments']['platform']['Illumina'], 2)
         self.assertEqual(experiment_res['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 2)
-
-    def test_scoped_overview(self):
-        # OK request
-        response = self.client.get(f'/api/overview?project={self.project.identifier}')
-        response_obj = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response_obj, dict)
-
-        # 404 request: wrong dataset
-        response = self.client.get(f'/api/overview?project={self.project.identifier}&dataset={uuid.uuid4()}')
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_search_overview(self):
         payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
