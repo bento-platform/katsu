@@ -47,7 +47,7 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(dataset: Dataset):
+async def experiment_dataset_summary(request: DrfRequest, dataset: Dataset):
     return await dt_experiment_summary(
         Experiment.objects.filter(dataset=dataset),
         discovery=None,
@@ -55,7 +55,7 @@ async def experiment_dataset_summary(dataset: Dataset):
     )
 
 
-async def phenopacket_dataset_summary(dataset: Dataset):
+async def phenopacket_dataset_summary(request: DrfRequest, dataset: Dataset):
     return await dt_phenopacket_summary(
         Phenopacket.objects.filter(dataset=dataset),
         discovery=None,
@@ -561,7 +561,7 @@ async def dataset_summary(request: DrfRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
 
     summaries = await asyncio.gather(
-        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](dataset),
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 

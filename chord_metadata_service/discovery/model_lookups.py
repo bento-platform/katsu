@@ -42,31 +42,31 @@ PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS: dict[PublicModelNames, ProjectDatasetScopeF
     "individual": {
         "project": {
             "filter": "phenopackets__dataset__project__identifier",
-            "prefetch_related": ("phenopackets__dataset__project")
+            "prefetch_related": ("phenopackets__dataset__project",)
         },
         "dataset": {
             "filter": "phenopackets__dataset__identifier",
-            "prefetch_related": ("phenopackets__dataset")
+            "prefetch_related": ("phenopackets__dataset",)
         },
     },
     "biosample": {
         "project": {
             "filter": "phenopacket__dataset__project__identifier",
-            "prefetch_related": ("phenopacket__dataset__project"),
+            "prefetch_related": ("phenopacket__dataset__project",),
         },
         "dataset": {
             "filter": "phenopacket__dataset__identifier",
-            "prefetch_related": ("phenopacket__dataset"),
+            "prefetch_related": ("phenopacket__dataset",),
         },
     },
     "experiment": {
         "project": {
             "filter": "dataset__project__identifier",
-            "prefetch_related": ("dataset__project"),
+            "prefetch_related": ("dataset__project",),
         },
         "dataset": {
             "filter": "dataset__identifier",
-            "prefetch_related": ("dataset"),
+            "prefetch_related": ("dataset",),
         },
     },
 }

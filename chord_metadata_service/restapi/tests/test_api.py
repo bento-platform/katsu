@@ -1,10 +1,12 @@
 import json
+import uuid
 from asgiref.sync import async_to_sync
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
@@ -38,7 +40,7 @@ class ExtraPropertiesSchemaTypesTest(APITestCase):
         self.assertEqual(response_obj, expected_response)
 
 
-class OverviewTest(APITestCase):
+class OverviewTest(APITestCase, ProjectTestCase):
 
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
@@ -48,7 +50,8 @@ class OverviewTest(APITestCase):
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.metadata_2 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_2)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
-            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1)
+            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
+            dataset=self.dataset,
         )
         self.phenopacket_2 = ph_m.Phenopacket.objects.create(
             id='phenopacket:2', subject=self.individual_2, meta_data=self.metadata_2
@@ -109,6 +112,17 @@ class OverviewTest(APITestCase):
         self.assertEqual(experiment_res['data_type_specific']['instruments']['count'], 1)
         self.assertEqual(experiment_res['data_type_specific']['instruments']['platform']['Illumina'], 2)
         self.assertEqual(experiment_res['data_type_specific']['instruments']['model']['Illumina HiSeq 4000'], 2)
+
+    def test_scoped_overview(self):
+        # OK request
+        response = self.client.get(f'/api/overview?project={self.project.identifier}')
+        response_obj = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(response_obj, dict)
+
+        # 404 request: wrong dataset
+        response = self.client.get(f'/api/overview?project={self.project.identifier}&dataset={uuid.uuid4()}')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_search_overview(self):
         payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
