@@ -151,6 +151,7 @@ async def public_discovery_filter_queryset(request: DrfRequest, queryset: QueryS
     # Check query parameters validity
     qp = request.query_params
     discovery = await get_request_discovery(request)
+    # TODO: allow exceeding max query parameters for authorized requests
     if len(qp) > get_max_query_parameters(discovery, low_counts_censored):
         raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
