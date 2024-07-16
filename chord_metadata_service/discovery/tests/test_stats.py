@@ -29,11 +29,11 @@ class IndividualPublicStatsTest(TransactionTestCase):
         self.experiment.experiment_results.set([self.experiment_result])
 
     async def test_individual_biosample_tissue_stats(self):
-        count, res = await individual_biosample_tissue_stats(pa_m.Individual.objects.all(), low_counts_censored=False)
+        count, res = await individual_biosample_tissue_stats(pa_m.Individual.objects.all(), None, False)
         self.assertEqual(count, 1)
         self.assertListEqual(res, [{"label": "wall of urinary bladder", "value": 1}])
 
     async def individual_experiment_type_stats(self):
-        count, res = await individual_experiment_type_stats(pa_m.Individual.objects.all(), low_counts_censored=False)
+        count, res = await individual_experiment_type_stats(pa_m.Individual.objects.all(), None, False)
         self.assertEqual(count, 1)
         self.assertListEqual(res, [{"label": "DNA Methylation", "value": 1}])

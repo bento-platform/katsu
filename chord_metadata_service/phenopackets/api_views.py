@@ -11,7 +11,7 @@ from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, 
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phenopacket_resolver, phenopacket_base_uri
 from . import models as m, serializers as s, filters as f
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
@@ -230,4 +230,17 @@ def get_chord_phenopacket_schema(_request):
     get:
     Chord phenopacket schema that can be shared with data providers.
     """
+    # TODO: project-scope
     return Response(PHENOPACKET_SCHEMA)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def get_chord_phenopacket_subschema(_request, subschema: str):
+    """
+    get:
+    Chord phenopacket schema that can be shared with data providers.
+    """
+    # TODO: project-scope
+    schema = phenopacket_resolver.lookup(ref=f"{phenopacket_base_uri}/{subschema}").contents
+    return Response(schema)

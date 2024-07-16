@@ -1,6 +1,8 @@
+from django.urls import reverse
 from jsonschema.validators import Draft7Validator
 
 from django.test import TestCase
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
 import csv
 import io
@@ -54,7 +56,7 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(response_data['id'], 'katsu.experiment:1')
 
     def test_get_experiment_schema(self):
-        response = self.client.get('/api/experiment_schema')
+        response = self.client.get('/api/schemas/experiment')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         Draft7Validator.check_schema(response_data)
@@ -188,3 +190,18 @@ class TestExperimentCSVRenderer(TestCase):
         for row in reader:
             for key in row:
                 self.assertEqual(row[key], '')
+
+
+class TestExperimentSchema(APITestCase):
+
+    def test_experiment_schema(self):
+        response = self.client.get(reverse("experiment-schema"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), EXPERIMENT_SCHEMA)
+
+    def test_experiment_subschema(self):
+        for subschema in EXPERIMENT_SCHEMA["properties"].values():
+            property = subschema["$id"].split('/')[-1]
+            response = self.client.get(reverse("experiment-subschema", kwargs={"subschema": property}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json(), subschema)

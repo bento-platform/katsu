@@ -2,7 +2,13 @@ from django.urls import path, include
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
-from chord_metadata_service.discovery.api_views import public_search_fields, public_overview, public_dataset
+from chord_metadata_service.discovery.api_views import (
+    public_rules,
+    public_search_fields,
+    public_overview,
+    public_dataset,
+    discovery_schema
+)
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
@@ -56,11 +62,14 @@ urlpatterns = [
     path('', include(batch_router.urls)),
 
     # apps schemas
-    path('chord_phenopacket_schema', phenopacket_views.get_chord_phenopacket_schema,
+    path('schemas/phenopacket', phenopacket_views.get_chord_phenopacket_schema,
          name="chord-phenopacket-schema"),
-    path('experiment_schema', experiment_views.get_experiment_schema,
+    path('schemas/phenopacket/<path:subschema>', phenopacket_views.get_chord_phenopacket_subschema,
+         name="chord-phenopacket-subschema"),
+    path('schemas/experiment', experiment_views.get_experiment_schema,
          name="experiment-schema"),
-
+    path('schemas/experiment/<path:subschema>', experiment_views.get_experiment_subschema, name="experiment-subschema"),
+    path('schemas/discovery', discovery_schema, name="discovery-schema"),
     # extra properties schema types
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 
@@ -78,9 +87,10 @@ urlpatterns = [
     # public endpoints (no confidential information leak)
     path('public', individual_views.PublicListIndividuals.as_view(),
          name='public',),
-    path('public_search_fields', public_search_fields, name='public-search-fields',),
+    path('public_search_fields', public_search_fields, name='public-search-fields'),
     path('public_overview', public_overview, name='public-overview',),
     path('public_dataset', public_dataset, name='public-dataset'),
+    path('public_rules', public_rules, name='public-rules'),
 
     # uncensored endpoint for beacon search using fields from config.json
     path('beacon_search', individual_views.BeaconListIndividuals.as_view(), name='beacon-search'),

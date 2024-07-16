@@ -1,11 +1,12 @@
 from typing import Any, Literal, TypedDict
 
 __all__ = [
-    "OverviewSectionChart",
-    "OverviewSection",
+    "BinWithValue",
     "DiscoveryFieldProps",
     "DiscoveryRules",
-    "BinWithValue",
+    "DiscoveryConfig",
+    "OverviewSectionChart",
+    "OverviewSection",
 ]
 
 
@@ -36,6 +37,13 @@ class DiscoveryFieldProps(TypedDict):
 class DiscoveryRules(TypedDict):
     max_query_parameters: int
     count_threshold: int
+
+
+class DiscoveryConfig(TypedDict):
+    overview: list[OverviewSection]
+    search: list[SearchSection]
+    fields: dict[str, DiscoveryFieldProps]
+    rules: DiscoveryRules
 
 
 class BinWithValue(TypedDict):

@@ -10,8 +10,8 @@ from ..logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
-from .stats import stats_for_field
-from .types import BinWithValue, DiscoveryFieldProps
+from .stats import stats_for_field, get_scoped_queryset
+from .types import BinWithValue, DiscoveryConfig, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
@@ -31,11 +31,12 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
     return stats
 
 
-async def get_field_options(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[Any]:
+async def get_field_options(field: str, discovery: DiscoveryConfig, low_counts_censored: bool) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
     """
+    field_props = discovery.get("fields", {}).get(field)
     if field_props["datatype"] == "string":
         options = field_props["config"].get("enum")
         # Special case: no list of values specified
@@ -43,7 +44,7 @@ async def get_field_options(field_props: DiscoveryFieldProps, low_counts_censore
             # We must be careful here not to leak 'small cell' values as options
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
-            options = await get_distinct_field_values(field_props, low_counts_censored)
+            options = await get_distinct_field_values(field, discovery, low_counts_censored)
     elif field_props["datatype"] == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     elif field_props["datatype"] == "date":
@@ -59,20 +60,20 @@ async def get_field_options(field_props: DiscoveryFieldProps, low_counts_censore
     return options
 
 
-async def get_distinct_field_values(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[Any]:
+async def get_distinct_field_values(field: str, discovery: DiscoveryConfig, low_counts_censored: bool) -> list[Any]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
+    field_props = discovery.get("fields", {}).get(field)
+    model, mapping_field = f_utils.get_model_and_field(field_props["mapping"])
+    threshold = get_threshold(discovery, low_counts_censored)
 
-    model, field = f_utils.get_model_and_field(field_props["mapping"])
-    threshold = get_threshold(low_counts_censored)
-
-    field_query = field
+    field_query = mapping_field
     if group_by := field_props.get("group_by"):
         # JSONField containing an array
         # use jsonb_path_query field expression
-        field_query = f_utils.get_jsonb_path_query(field, group_by)
-    values_with_counts = model.objects.values_list(field_query).annotate(count=Count(field))
+        field_query = f_utils.get_jsonb_path_query(mapping_field, group_by)
+    values_with_counts = model.objects.values_list(field_query).annotate(count=Count(mapping_field))
 
     return [
         val
@@ -103,7 +104,12 @@ async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> l
     return binned_ages
 
 
-async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int, low_counts_censored: bool) -> dict:
+async def get_age_numeric_binned(
+    individual_queryset: QuerySet,
+    bin_size: int,
+    discovery: DiscoveryConfig,
+    low_counts_censored: bool
+) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
     it might be unavailable and as a fallback must be computed from the age JSON field which
@@ -121,7 +127,7 @@ async def get_age_numeric_binned(individual_queryset: QuerySet, bin_size: int, l
     )
 
     return {
-        b: thresholded_count(bv, low_counts_censored)
+        b: thresholded_count(bv, discovery, low_counts_censored)
         for b, bv in individuals_age.items()
     }
 
@@ -164,8 +170,15 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
     return start, end
 
 
-async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
-    model, field = f_utils.get_model_and_field(field_props["mapping"])
+async def get_range_stats(
+    field: str,
+    discovery: DiscoveryConfig,
+    project_id: str | None = None,
+    dataset_id: str | None = None,
+    low_counts_censored: bool = True
+) -> list[BinWithValue]:
+    field_props = discovery.get("fields", {}).get(field)
+    model, field_mapping = f_utils.get_model_and_field(field_props["mapping"])
 
     # JSONField array specific field props
     group_by = field_props.get("group_by")
@@ -185,15 +198,15 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
     else:
         whens = [
             When(
-                **{f"{field}__gte": floor} if floor is not None else {},
-                **{f"{field}__lt": ceil} if ceil is not None else {},
+                **{f"{field_mapping}__gte": floor} if floor is not None else {},
+                **{f"{field_mapping}__lt": ceil} if ceil is not None else {},
                 then=Value(label),
             )
             for floor, ceil, label in f_utils.labelled_range_generator(field_props)
         ]
 
     query_set = (
-        model.objects
+        get_scoped_queryset(model, project_id, dataset_id)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
@@ -201,7 +214,7 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
     async for item in query_set:
-        stats[item["label"]] = thresholded_count(item["total"], low_counts_censored)
+        stats[item["label"]] = thresholded_count(item["total"], discovery, low_counts_censored)
 
     # All the bins between start and end must be represented and ordered
     bins: list[BinWithValue] = [
@@ -215,11 +228,17 @@ async def get_range_stats(field_props: DiscoveryFieldProps, low_counts_censored:
     return bins
 
 
-async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool) -> list[BinWithValue]:
+async def get_categorical_stats(
+    field: str,
+    discovery: DiscoveryConfig,
+    project_id: str | None = None,
+    dataset_id: str | None = None,
+    low_counts_censored: bool = True
+) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-
+    field_props = discovery.get("fields", {}).get(field)
     model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     # Collect stats for the field, censoring low cell counts along the way
@@ -227,8 +246,9 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_cen
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: Mapping[str, int] = await stats_for_field(model, field_name, low_counts_censored,
-                                                     add_missing=True, group_by=field_props.get("group_by"))
+    stats: Mapping[str, int] = await stats_for_field(model, field_name, discovery, low_counts_censored,
+                                                     add_missing=True, group_by=field_props.get("group_by"),
+                                                     project_id=project_id, dataset_id=dataset_id)
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -255,7 +275,13 @@ async def get_categorical_stats(field_props: DiscoveryFieldProps, low_counts_cen
     ]
 
 
-async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: bool = True) -> list[BinWithValue]:
+async def get_date_stats(
+    field: str,
+    discovery: DiscoveryConfig,
+    project_id: str | None = None,
+    dataset_id: str | None = None,
+    low_counts_censored: bool = True,
+) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -264,6 +290,10 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
      regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
+    field_props = discovery.get("fields", {}).get(field)
+    if not field_props:
+        msg = f"Field {field} is not in the provided discovery config."
+        raise NotImplementedError(msg)
 
     if (bin_by := field_props["config"]["bin_by"]) != "month":
         msg = f"Binning dates by `{bin_by}` method not implemented"
@@ -277,7 +307,7 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
 
     # Note: lexical sort works on ISO dates
     query_set = (
-        model.objects
+        get_scoped_queryset(model, project_id, dataset_id)
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
@@ -308,12 +338,12 @@ async def get_date_stats(field_props: DiscoveryFieldProps, low_counts_censored: 
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             bins.append({
                 "label": label,
-                "value": thresholded_count(stats.get(key, 0), low_counts_censored),
+                "value": thresholded_count(stats.get(key, 0), discovery, low_counts_censored),
             })
 
     # Append missing items at the end if any
     if "missing" in stats:
-        bins.append({"label": "missing", "value": thresholded_count(stats["missing"], low_counts_censored)})
+        bins.append({"label": "missing", "value": thresholded_count(stats["missing"], discovery, low_counts_censored)})
 
     return bins
 

@@ -47,12 +47,20 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(_request: DrfRequest, dataset):
-    return await dt_experiment_summary(Experiment.objects.filter(dataset=dataset), low_counts_censored=False)
+async def experiment_dataset_summary(request: DrfRequest, dataset: Dataset):
+    return await dt_experiment_summary(
+        Experiment.objects.filter(dataset=dataset),
+        discovery=None,
+        low_counts_censored=False
+    )
 
 
-async def phenopacket_dataset_summary(_request: DrfRequest, dataset: Dataset):
-    return await dt_phenopacket_summary(Phenopacket.objects.filter(dataset=dataset), low_counts_censored=False)
+async def phenopacket_dataset_summary(request: DrfRequest, dataset: Dataset):
+    return await dt_phenopacket_summary(
+        Phenopacket.objects.filter(dataset=dataset),
+        discovery=None,
+        low_counts_censored=False
+    )
 
 
 # TODO: CHORD-standardized logging

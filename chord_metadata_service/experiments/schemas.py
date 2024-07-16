@@ -1,10 +1,14 @@
-from pathlib import Path
+from django.conf import settings
+from referencing import Registry, Resource
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALUE_OBJECT
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, get_schema_app_id, sub_schema_uri
+from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
+    "experiment_resource",
+    "experiment_registry",
+    "experiment_resolver",
     "DATA_FILE_OR_RECORD_URL_SCHEMA",
     "EXPERIMENT_RESULT_FILE_INDEX_SCHEMA",
     "EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA",
@@ -13,11 +17,11 @@ __all__ = [
     "INSTRUMENT_SCHEMA",
 ]
 
-base_uri = get_schema_app_id(Path(__file__).parent.name)
+experiment_base_uri = f"{settings.SCHEMAS_BASE_URL}/experiment"
 
 DATA_FILE_OR_RECORD_URL_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": sub_schema_uri(base_uri, "data_file_or_record_url"),
+    "$id": sub_schema_uri(experiment_base_uri, "data_file_or_record_url"),
     "title": "Data file or record URL",
     "description": "A URL of a particular scheme, pointing to a data file OR a DRS record which itself points to a "
                    "data file.",
@@ -29,7 +33,7 @@ DATA_FILE_OR_RECORD_URL_SCHEMA = {
 
 EXPERIMENT_RESULT_FILE_INDEX_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": sub_schema_uri(base_uri, "experiment_result_file_index"),
+    "$id": sub_schema_uri(experiment_base_uri, "experiment_result_file_index"),
     "title": "Experiment result file index schema",
     "description": "Schema for describing an object representing an index of an experiment result file.",
     "type": "object",
@@ -51,7 +55,7 @@ EXPERIMENT_RESULT_FILE_INDEX_SCHEMA = {
 }
 EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA = {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": sub_schema_uri(base_uri, "experiment_result_file_index_list"),
+    "$id": sub_schema_uri(experiment_base_uri, "experiment_result_file_index_list"),
     "title": "Experiment result file index list schema",
     "description": "Schema for describing a list of object representing an indices of an experiment result file.",
     "type": "array",
@@ -60,7 +64,7 @@ EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA = {
 
 EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": sub_schema_uri(base_uri, "experiment_result"),
+    "$id": sub_schema_uri(experiment_base_uri, "experiment_result"),
     "title": "Experiment result schema",
     "description": "Schema for describing information about analysis of sequencing data in a file format.",
     "type": "object",
@@ -105,7 +109,7 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
 
 INSTRUMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": sub_schema_uri(base_uri, "instrument"),
+    "$id": sub_schema_uri(experiment_base_uri, "instrument"),
     "title": "Instrument schema",
     "description": "Schema for describing an instrument used for a sequencing experiment.",
     "type": "object",
@@ -129,7 +133,7 @@ INSTRUMENT_SCHEMA = tag_ids_and_describe({
 
 EXPERIMENT_SCHEMA = tag_ids_and_describe({
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": sub_schema_uri(base_uri, "experiment"),
+    "$id": experiment_base_uri,
     "title": "Experiment schema",
     "description": "Schema for describing an experiment.",
     "type": "object",
@@ -197,4 +201,9 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "instrument": INSTRUMENT_SCHEMA
     },
     "required": ["id", "experiment_type"]
-}, EXPERIMENT)
+}, EXPERIMENT, override_children=True)
+
+# URI referencing
+experiment_resource = Resource.from_contents(EXPERIMENT_SCHEMA)
+experiment_registry = Registry().with_resource(uri=experiment_base_uri, resource=experiment_resource)
+experiment_resolver = experiment_registry.resolver(base_uri=experiment_base_uri)

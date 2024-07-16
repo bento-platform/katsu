@@ -2,11 +2,13 @@ from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
 from django.db.models.base import ModelBase
 
-from chord_metadata_service.discovery.tests.constants import CONFIG_PUBLIC_TEST
+from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
+from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
     get_model_and_field,
+    get_public_model_name,
     labelled_range_generator,
     get_nested_json_condition
 )
@@ -29,6 +31,14 @@ class TestModelField(TransactionTestCase):
 
     def test_get_wrong_model(self):
         self.assertRaises(NotImplementedError, get_model_and_field, "junk/age_numeric")
+
+    def test_get_public_model_name(self):
+        for name, model in PUBLIC_MODEL_NAMES_TO_MODEL.items():
+            model_name = get_public_model_name(model)
+            self.assertEqual(name, model_name)
+
+    def test_get_public_model_name_wrong(self):
+        self.assertRaises(NotImplementedError, get_public_model_name, ModelBase)
 
 
 class TestLabelledRangeGenerator(TestCase):
@@ -201,7 +211,7 @@ class TestJsonFieldUtils(TestCase):
         })
 
     def test_get_json_range_condition(self):
-        field_props = CONFIG_PUBLIC_TEST["fields"]["measurement_tumor_length"]
+        field_props = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
 
         # GTE 0 an LT 20
         json_range_condition_0_20 = get_json_range_condition(field_props, min=0, max=20)

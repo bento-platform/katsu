@@ -5,6 +5,8 @@ import json
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
+
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from . import constants as c
 from .. import models as m, serializers as s
 
@@ -432,3 +434,19 @@ class GetPhenopacketsApiTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 0)
+
+
+class PhenopacketSchema(APITestCase):
+
+    def test_get_phenopacket_schema(self):
+        response = self.client.get("/api/schemas/phenopacket")
+        schema = response.json()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(schema, PHENOPACKET_SCHEMA)
+
+    def test_get_pheno_subschemas(self):
+        for subschema in PHENOPACKET_SCHEMA["properties"].values():
+            prop_key = subschema["$id"].split('/')[-1]
+            response = self.client.get(reverse("chord-phenopacket-subschema", kwargs={"subschema": prop_key}))
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.json(), subschema)

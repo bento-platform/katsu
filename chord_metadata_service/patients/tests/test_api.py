@@ -8,7 +8,11 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.discovery import responses as dres
-from chord_metadata_service.discovery.tests.constants import CONFIG_PUBLIC_TEST, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
+from chord_metadata_service.discovery.tests.constants import (
+    DISCOVERY_CONFIG_EXTRA_PROPERTIES,
+    DISCOVERY_CONFIG_TEST,
+    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
+)
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
@@ -17,7 +21,7 @@ from chord_metadata_service.restapi.api_renderers import render_age
 
 from . import constants as c
 
-CONFIG_PUBLIC_TEST_NO_THRESHOLD = deepcopy(CONFIG_PUBLIC_TEST)
+CONFIG_PUBLIC_TEST_NO_THRESHOLD = deepcopy(DISCOVERY_CONFIG_TEST)
 CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
 
 
@@ -298,7 +302,7 @@ class PublicListIndividualsTest(APITestCase):
         for individual in individuals:
             Individual.objects.create(**individual)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_get(self):
         # no filters GET request to /api/public, returns count or INSUFFICIENT_DATA_AVAILABLE
         response = self.client.get('/api/public')
@@ -330,7 +334,7 @@ class PublicListIndividualsTest(APITestCase):
 class PublicFilteringIndividualsTest(APITestCase):
     """ Test for api/public GET filtering """
 
-    response_threshold = CONFIG_PUBLIC_TEST["rules"]["count_threshold"]
+    response_threshold = DISCOVERY_CONFIG_TEST["rules"]["count_threshold"]
     num_individuals = 137
     random_seed = 341  # do not change this please :))
 
@@ -349,7 +353,7 @@ class PublicFilteringIndividualsTest(APITestCase):
 
         random.seed(self.random_seed)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_sex(self):
         # sex field search
         response = self.client.get('/api/public?sex=female')
@@ -365,7 +369,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(nb_female, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_2_fields(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
@@ -391,7 +395,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_1(self):
         # extra_properties string search (multiple values)
         response = self.client.get('/api/public?smoking=Non-smoker&death_dc=Deceased')
@@ -417,7 +421,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_2(self):
         # extra_properties string search (multiple values)
         response = self.client.get(
@@ -427,7 +431,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertEqual(response_obj["code"], 400)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Error
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
@@ -435,7 +439,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertEqual(response_obj["code"], 400)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_1(self):
         # extra_properties range search (both min and max ranges, single value)
         response = self.client.get(
@@ -454,7 +458,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj["count"])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_2(self):
         # extra_properties range search (above taper, single value)
         response = self.client.get(
@@ -472,7 +476,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_3(self):
         # extra_properties range search (below taper, single value)
         response = self.client.get(
@@ -490,7 +494,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_wrong_range(self):
         # extra_properties range search, unauthorized range
         response = self.client.get(
@@ -500,7 +504,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertEqual(response_obj["code"], 400)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_string_1(self):
         # sex string search and extra_properties range search
         response = self.client.get(
@@ -520,7 +524,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_string_2(self):
         # extra_properties range search and extra_properties string search (single value)
         response = self.client.get(
@@ -540,7 +544,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.client.get(
@@ -561,7 +565,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_date_range_1(self):
         # extra_properties date range search (only after or before, single value)
         # Testing with a date of consent from 1 year ago
@@ -580,7 +584,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
@@ -609,7 +613,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_overview_sex(self):
         response = self.client.get('/api/public_search_fields')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -623,7 +627,7 @@ class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTes
     num_individuals = 3  # below configured test threshold
     # rest of the methods are inherited
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_overview_sex(self):
         response = self.client.get('/api/public_search_fields')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -688,7 +692,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
                     individual.age_unit = age_unit if age_unit else ""
                     individual.save()
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_age_range(self):
         # age valid range search
         response = self.client.get('/api/public?age=[20, 30)')
@@ -701,7 +705,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         else:
             self.assertEqual(db_count, response_obj['count'])
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_age_invalid_range(self):
         # age invalid range max search
         response = self.client.get('/api/public?age=[10, 50)')
@@ -738,7 +742,7 @@ class BeaconSearchTest(APITestCase):
             Individual.objects.create(**individual)
 
     # test beacon formatted response
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_beacon_search_response(self):
         response = self.client.get('/api/beacon_search?sex=MALE')
         male_count = Individual.objects.filter(sex="MALE").count()
@@ -752,17 +756,17 @@ class BeaconSearchTest(APITestCase):
         response = self.client.get('/api/beacon_search?sex=MALE')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_beacon_search_response_invalid_search_key(self):
         response = self.client.get('/api/beacon_search?birdwatcher=yes')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_beacon_search_response_invalid_search_value(self):
         response = self.client.get('/api/beacon_search?smoking=on_Sundays')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST)
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_beacon_search_more_params_than_censorship_limit(self):
         response = self.client.get('/api/beacon_search?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
