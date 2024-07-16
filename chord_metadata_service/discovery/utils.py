@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 
-async def _get_project_discovery(project_id: str = None, project: cm.Project = None) -> dict:
+async def _get_project_discovery(project_id: str | None = None, project: cm.Project | None = None) -> dict:
     if not project and project_id:
         # retrieve project by ID if not provided
         project = await cm.Project.objects.aget(identifier=project_id)
@@ -30,7 +30,7 @@ async def _get_dataset_discovery(dataset_id: str) -> dict:
     return dataset.discovery
 
 
-async def get_discovery(project_id: str = None, dataset_id: str = None) -> DiscoveryConfig:
+async def get_discovery(project_id: str | None = None, dataset_id: str | None = None) -> DiscoveryConfig:
     if dataset_id and project_id:
         # check if the dataset belongs to the project
         is_scope_valid = await cm.Dataset.objects.filter(
