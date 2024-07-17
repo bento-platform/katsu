@@ -60,18 +60,15 @@ async def bento_public_format_count_and_stats_list(
 
     async for q in annotated_queryset:
         label = q["label"]
-        value = thresholded_count(int(q["value"]), discovery, low_counts_censored)
+        raw_value = int(q["value"])
+        thresholded_value = thresholded_count(int(q["value"]), discovery, low_counts_censored)
+
+        # increment with raw count for accurate total
+        total += raw_value
 
         # Be careful not to leak values if they're in the database but below threshold
-        if value == 0:
-            continue
-
-        # Skip 'missing' values
-        if label is None:
-            continue
-
-        total += value
-        stats_list.append({"label": label, "value": value})
+        if label is not None and thresholded_value > 0:
+            stats_list.append({"label": label, "value": thresholded_value})
 
     return thresholded_count(total, discovery, low_counts_censored), stats_list
 
