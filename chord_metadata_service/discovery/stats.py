@@ -58,10 +58,11 @@ async def bento_public_format_count_and_stats_list(
     stats_list: list[BinWithValue] = []
     total: int = 0
 
+    # TODO: improve censorship tests for search/beacon counts/stats
     async for q in annotated_queryset:
         label = q["label"]
         raw_value = int(q["value"])
-        thresholded_value = thresholded_count(int(q["value"]), discovery, low_counts_censored)
+        thresholded_value = thresholded_count(raw_value, discovery, low_counts_censored)
 
         # increment with raw count for accurate total
         total += raw_value
