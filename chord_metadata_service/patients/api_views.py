@@ -17,6 +17,8 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from chord_metadata_service.chord.views_search import append_biosamples_details
+from chord_metadata_service.chord.views_search import get_biosamples_with_experiment_details
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
@@ -82,6 +84,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
             # which serve a similar purpose)
             individual_ids = filterset.qs.values_list("id", flat=True)
             # TODO: code duplicated from chord/view_search.py
+            biosamples_experiments_details = get_biosamples_with_experiment_details(individual_ids)
             qs = Phenopacket.objects.filter(subject__id__in=individual_ids).values(
                 "subject_id",
                 alternate_ids=Coalesce(F("subject__alternate_ids"), [])
@@ -92,9 +95,20 @@ class IndividualViewSet(viewsets.ModelViewSet):
                     []
                 )
             )
-            return Response(build_search_response(list(qs), start))
+            experiments_with_biosamples = append_biosamples_details(biosamples_experiments_details)
+            results = [
+                {
+                    "subject_id": data['subject_id'],
+                    "alternate_ids": data['alternate_ids'],
+                    "num_experiments": data['num_experiments'],
+                    "biosamples": data['biosamples'],
+                    "experiments_with_biosamples": experiments_with_biosamples.get(data['subject_id'], [])
+                }
+                for data in qs
+            ]
+            return Response(build_search_response(results, start))
 
-        return super(IndividualViewSet, self).list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["GET", "POST"])
     def phenopackets(self, request, *_args, **_kwargs):
