@@ -162,6 +162,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
+    'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
