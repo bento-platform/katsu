@@ -1,5 +1,4 @@
 import json
-from django.db.utils import IntegrityError
 
 from django.urls import reverse
 from rest_framework import status
@@ -187,8 +186,9 @@ class CreateProjectJsonSchema(APITestCase):
                              data=json.dumps(self.project_json_schema_valid_payload),
                              content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-        with self.assertRaises(IntegrityError):
-            r_duplicate = self.client.post('/api/project_json_schemas',
-                                           data=json.dumps(self.project_json_schema_valid_payload),
-                                           content_type="application/json")
-            self.assertEqual(r_duplicate, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        r_duplicate = self.client.post('/api/project_json_schemas',
+                                       data=json.dumps(self.project_json_schema_valid_payload),
+                                       content_type="application/json")
+        # used to be an IntegrityError raised; upgrade to DRF 3.15 made this a 400:
+        self.assertEqual(r_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
