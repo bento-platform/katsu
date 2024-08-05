@@ -8,6 +8,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
+from typing import Literal
 
 from chord_metadata_service.discovery.censorship import RULES_NO_PERMISSIONS
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
@@ -19,7 +20,7 @@ from ..chord import models as cm
 from ..logger import logger
 
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS, PublicModelNames
 from .schemas import DISCOVERY_SCHEMA
 
 
@@ -75,7 +76,7 @@ async def public_search_fields(request: DrfRequest):
     })
 
 
-async def _counts_for_model_name(mn: str) -> tuple[str, int]:
+async def _counts_for_model_name(mn: PublicModelNames) -> tuple[PublicModelNames, int]:
     return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
 
 
@@ -110,17 +111,20 @@ async def public_overview(request: DrfRequest):
     if not discovery:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
-    async def _counts_for_scoped_model_name(mn: str) -> tuple[str, int]:
+    async def _counts_for_scoped_model_name(mn: PublicModelNames) -> tuple[PublicModelNames, int]:
+        scope: Literal["project", "dataset"]
         if dataset_id:
             scope = "dataset"
             value = dataset_id
         elif project_id and not dataset_id:
             scope = "project"
             value = project_id
-        elif not project_id and not dataset_id:
+        else:
             return await _counts_for_model_name(mn)
+
         filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["filter"]
         prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["prefetch_related"]
+
         return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(
             **{filter_query: value}
         ).acount()

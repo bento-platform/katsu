@@ -9,6 +9,7 @@ from chord_metadata_service.phenopackets import models as pheno_models
 __all__ = [
     "PUBLIC_MODEL_NAMES_TO_MODEL",
     "PUBLIC_MODEL_NAMES_TO_DATA_TYPE",
+    "PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS",
     "PublicModelNames"
 ]
 
