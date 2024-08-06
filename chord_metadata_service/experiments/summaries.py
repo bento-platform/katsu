@@ -2,6 +2,7 @@ import asyncio
 
 from django.db.models import QuerySet
 
+from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.stats import queryset_stats_for_field
 from chord_metadata_service.discovery.types import DiscoveryConfig
@@ -15,7 +16,9 @@ __all__ = [
 ]
 
 
-async def experiment_summary(experiments: QuerySet, discovery: DiscoveryConfig, low_counts_censored: bool) -> dict:
+async def experiment_summary(
+    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissionsDict
+) -> dict:
     # TODO: limit to authorized field list if we're in censored discovery mode - based on discovery config
 
     (
@@ -30,18 +33,18 @@ async def experiment_summary(experiments: QuerySet, discovery: DiscoveryConfig, 
         extraction_protocol,
     ) = await asyncio.gather(
         experiments.acount(),
-        queryset_stats_for_field(experiments, "study_type", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "experiment_type", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "molecule", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "library_strategy", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "library_source", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "library_selection", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "library_layout", discovery, low_counts_censored),
-        queryset_stats_for_field(experiments, "extraction_protocol", discovery, low_counts_censored),
+        queryset_stats_for_field(experiments, "study_type", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "experiment_type", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "molecule", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_strategy", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_source", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_selection", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_layout", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "extraction_protocol", discovery, experiment_permissions),
     )
 
     return {
-        "count": thresholded_count(count, discovery, low_counts_censored),
+        "count": thresholded_count(count, discovery, experiment_permissions),
         "study_type": study_type,
         "experiment_type": experiment_type,
         "molecule": molecule,
@@ -56,7 +59,7 @@ async def experiment_summary(experiments: QuerySet, discovery: DiscoveryConfig, 
 async def experiment_result_summary(
     experiments: QuerySet,
     discovery: DiscoveryConfig,
-    low_counts_censored: bool
+    experiment_permissions: DataPermissionsDict,
 ) -> dict:
     experiment_results = models.ExperimentResult.objects.filter(experiment__in=experiments)
 
@@ -67,36 +70,40 @@ async def experiment_result_summary(
         usage,
     ) = await asyncio.gather(
         experiment_results.acount(),
-        queryset_stats_for_field(experiment_results, "file_format", discovery, low_counts_censored),
-        queryset_stats_for_field(experiment_results, "data_output_type", discovery, low_counts_censored),
-        queryset_stats_for_field(experiment_results, "usage", discovery, low_counts_censored),
+        queryset_stats_for_field(experiment_results, "file_format", discovery, experiment_permissions),
+        queryset_stats_for_field(experiment_results, "data_output_type", discovery, experiment_permissions),
+        queryset_stats_for_field(experiment_results, "usage", discovery, experiment_permissions),
     )
 
     return {
-        "count": thresholded_count(count, discovery, low_counts_censored),
+        "count": thresholded_count(count, discovery, experiment_permissions),
         "file_format": file_format,
         "data_output_type": data_output_type,
         "usage": usage,
     }
 
 
-async def instrument_summary(experiments: QuerySet, discovery: DiscoveryConfig, low_counts_censored: bool) -> dict:
+async def instrument_summary(
+    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissionsDict
+) -> dict:
     instruments = models.Instrument.objects.filter(experiment__in=experiments).distinct()
 
     count, platform, model = await asyncio.gather(
         instruments.acount(),
-        queryset_stats_for_field(instruments, "platform", discovery, low_counts_censored),
-        queryset_stats_for_field(instruments, "model", discovery, low_counts_censored),
+        queryset_stats_for_field(instruments, "platform", discovery, experiment_permissions),
+        queryset_stats_for_field(instruments, "model", discovery, experiment_permissions),
     )
 
     return {
-        "count": thresholded_count(count, discovery, low_counts_censored),
+        "count": thresholded_count(count, discovery, experiment_permissions),
         "platform": platform,
         "model": model,
     }
 
 
-async def dt_experiment_summary(experiments: QuerySet, discovery: DiscoveryConfig, low_counts_censored: bool) -> dict:
+async def dt_experiment_summary(
+    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissionsDict
+) -> dict:
     # Parallel-gather all statistics we may need for this response
     (
         experiments_count,
@@ -105,13 +112,13 @@ async def dt_experiment_summary(experiments: QuerySet, discovery: DiscoveryConfi
         instrument_summary_val,
     ) = await asyncio.gather(
         experiments.acount(),
-        experiment_summary(experiments, discovery, low_counts_censored),
-        experiment_result_summary(experiments, discovery, low_counts_censored),
-        instrument_summary(experiments, discovery, low_counts_censored),
+        experiment_summary(experiments, discovery, experiment_permissions),
+        experiment_result_summary(experiments, discovery, experiment_permissions),
+        instrument_summary(experiments, discovery, experiment_permissions),
     )
 
     return {
-        "count": thresholded_count(experiments_count, discovery, low_counts_censored),
+        "count": thresholded_count(experiments_count, discovery, experiment_permissions),
         "data_type_specific": {
             "experiments": experiment_summary_val,
             "experiment_results": exp_res_summary_val,

@@ -10,10 +10,12 @@ __all__ = [
     "PUBLIC_MODEL_NAMES_TO_MODEL",
     "PUBLIC_MODEL_NAMES_TO_DATA_TYPE",
     "PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS",
-    "PublicModelNames"
+    "PublicModelNames",
+    "PublicScopeFilterKeys",
 ]
 
 PublicModelNames = Literal["individual", "biosample", "experiment"]
+PublicScopeFilterKeys = Literal["project", "dataset"]
 
 PUBLIC_MODEL_NAMES_TO_MODEL: dict[PublicModelNames, Type[Model]] = {
     "individual": patient_models.Individual,
@@ -28,7 +30,7 @@ PUBLIC_MODEL_NAMES_TO_DATA_TYPE: dict[PublicModelNames, str] = {
 }
 
 
-class ScopeFilter(TypedDict):
+class ScopeFilter(TypedDict, total=False):
     filter: str
     prefetch_related: tuple[str, ...]
     select_related: tuple[str, ...]

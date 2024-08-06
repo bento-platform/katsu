@@ -51,6 +51,15 @@ BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower()
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 
+# SECURITY WARNING: Don't run with AUTHZ_ENABLED turned off in production,
+# unless an alternative permissions system is in place.
+#  - This needs to be here to avoid a circular import with settings.py
+BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
+
+BENTO_AUTHZ_SERVICE_URL: str = (
+    os.environ.get("BENTO_AUTHZ_SERVICE_URL", "").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
+)
+
 SERVICE_URL_BASE_PATH = os.environ.get("SERVICE_URL_BASE_PATH")
 if SERVICE_URL_BASE_PATH:
     SCHEMAS_BASE_URL = SERVICE_URL_BASE_PATH + "/api/schemas"

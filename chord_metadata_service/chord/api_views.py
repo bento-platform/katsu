@@ -10,8 +10,9 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import action
 
 from django_filters.rest_framework import DjangoFilterBackend
-from chord_metadata_service.cleanup.run_all import run_all_cleanup
 
+from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly
+from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
@@ -43,7 +44,7 @@ class CHORDModelViewSet(viewsets.ModelViewSet):
 
 
 class CHORDPublicModelViewSet(CHORDModelViewSet):
-    permission_classes = [OverrideOrSuperUserOnly | ReadOnly]
+    permission_classes = [OverrideOrSuperUserOnly | BentoAllowAnyReadOnly]
 
 
 class ProjectViewSet(CHORDPublicModelViewSet):

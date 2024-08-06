@@ -2,6 +2,7 @@ from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 from copy import deepcopy
 
+from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.patients import models as pa_m
@@ -34,8 +35,14 @@ class TestGetFieldOptions(TransactionTestCase):
         }
     }
 
+    permissions: DataPermissionsDict = {
+        "bool_": True,
+        "counts": True,
+        "data": True,
+    }
+
     async def test_get_string_options(self):
-        self.assertListEqual(await get_field_options("some_prop", self.discovery, False), ["a", "b"])
+        self.assertListEqual(await get_field_options("some_prop", self.discovery, self.permissions), ["a", "b"])
 
     async def test_get_field_options_not_impl(self):
         # {**self.field_some_prop, "datatype": "made_up"}
@@ -43,7 +50,7 @@ class TestGetFieldOptions(TransactionTestCase):
         invalid_discovery["fields"]["some_prop"]["datatype"] = "made_up"
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
-            await get_field_options("some_prop", invalid_discovery, low_counts_censored=False)
+            await get_field_options("some_prop", invalid_discovery, self.permissions)
 
 
 class TestGetCategoricalStats(ProjectTestCase):

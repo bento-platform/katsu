@@ -2,9 +2,11 @@ from django.db.models import Count, F, Model, QuerySet
 
 from typing import Mapping, Type
 
+from ..authz.types import DataPermissionsDict
+
 from .censorship import thresholded_count
 from .fields_utils import get_jsonb_path_query, get_public_model_name
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS, PublicScopeFilterKeys
 from .types import BinWithValue, DiscoveryConfig
 
 __all__ = [
@@ -18,7 +20,7 @@ __all__ = [
 
 
 async def individual_experiment_type_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig, low_counts_censored: bool
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict,
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -30,12 +32,12 @@ async def individual_experiment_type_stats(
         .values(label=F("phenopackets__biosamples__experiment__experiment_type"))
         .annotate(value=Count("phenopackets__biosamples__experiment", distinct=True)),
         discovery,
-        low_counts_censored,
+        field_permissions,
     )
 
 
 async def individual_biosample_tissue_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig, low_counts_censored: bool
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -46,14 +48,14 @@ async def individual_biosample_tissue_stats(
         .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
         .annotate(value=Count("phenopackets__biosamples", distinct=True)),
         discovery,
-        low_counts_censored,
+        field_permissions,
     )
 
 
 async def bento_public_format_count_and_stats_list(
     annotated_queryset: QuerySet,
     discovery: DiscoveryConfig,
-    low_counts_censored: bool,
+    field_permissions: DataPermissionsDict,
 ) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
     total: int = 0
@@ -62,7 +64,7 @@ async def bento_public_format_count_and_stats_list(
     async for q in annotated_queryset:
         label = q["label"]
         raw_value = int(q["value"])
-        thresholded_value = thresholded_count(raw_value, discovery, low_counts_censored)
+        thresholded_value = thresholded_count(raw_value, discovery, field_permissions)
 
         # increment with raw count for accurate total
         total += raw_value
@@ -71,7 +73,7 @@ async def bento_public_format_count_and_stats_list(
         if label is not None and thresholded_value > 0:
             stats_list.append({"label": label, "value": thresholded_value})
 
-    return thresholded_count(total, discovery, low_counts_censored), stats_list
+    return thresholded_count(total, discovery, field_permissions), stats_list
 
 
 def get_scoped_queryset(
@@ -79,6 +81,7 @@ def get_scoped_queryset(
     project_id: str | None = None,
     dataset_id: str | None = None,
 ) -> QuerySet:
+    scope: PublicScopeFilterKeys
     if project_id and not dataset_id:
         scope = "project"
         value = project_id
@@ -97,7 +100,7 @@ async def stats_for_field(
     model: Type[Model],
     field: str,
     discovery: DiscoveryConfig,
-    low_counts_censored: bool,
+    field_permissions: DataPermissionsDict,
     add_missing: bool = False,
     group_by: str | None = None,
     project_id: str | None = None,
@@ -109,14 +112,14 @@ async def stats_for_field(
     """
     qs = get_scoped_queryset(model, project_id, dataset_id)
     return await queryset_stats_for_field(
-        qs, field, discovery, low_counts_censored=low_counts_censored, add_missing=add_missing, group_by=group_by)
+        qs, field, discovery, field_permissions, add_missing=add_missing, group_by=group_by)
 
 
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
     discovery: DiscoveryConfig,
-    low_counts_censored: bool,
+    field_permissions: DataPermissionsDict,
     add_missing: bool = False,
     group_by: str | None = None
 ) -> Mapping[str, int]:
@@ -150,12 +153,12 @@ async def queryset_stats_for_field(
 
         # Censor low cell counts if necessary - we don't want to betray that the value even exists in the database if
         # we have a low count for it.
-        if thresholded_count(item["total"], discovery, low_counts_censored) == 0:
+        if thresholded_count(item["total"], discovery, field_permissions) == 0:
             continue
 
         stats[key] = item["total"]
 
     if add_missing:
-        stats["missing"] = thresholded_count(num_missing, discovery, low_counts_censored)
+        stats["missing"] = thresholded_count(num_missing, discovery, field_permissions)
 
     return stats
