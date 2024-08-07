@@ -2,7 +2,6 @@ from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from rest_framework import serializers
-from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
@@ -17,7 +16,6 @@ __all__ = [
 ]
 
 
-DISCOVERY_SCHEMA_VALIDATOR = Draft7Validator(DISCOVERY_SCHEMA)
 BENTO_DATA_USE_SCHEMA_VALIDATOR = Draft7Validator(BENTO_DATA_USE_SCHEMA)
 LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 
@@ -163,14 +161,6 @@ class ProjectSerializer(serializers.ModelSerializer):
         if len(value.strip()) < 3:
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
-
-    # noinspection PyMethodMayBeStatic
-    def validate_discovery(self, value):
-        if not DISCOVERY_SCHEMA_VALIDATOR.is_valid(value):
-            raise serializers.ValidationError([
-                str(error.message) for error in DISCOVERY_SCHEMA_VALIDATOR.iter_errors(value)
-            ])
-        return value
 
     class Meta:
         model = Project
