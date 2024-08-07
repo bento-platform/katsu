@@ -1,3 +1,4 @@
+from aioresponses import aioresponses
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import (
@@ -11,16 +12,21 @@ import json
 
 class JSONLDDatasetTest(APITestCase):
     def setUp(self) -> None:
-        project = get_post_response('project-list', VALID_PROJECT_1)
-        self.project = project.json()
-        self.creators = VALID_DATS_CREATORS
-        self.dataset = dats_dataset(self.project['identifier'], self.creators)
-        client = APIClient()
-        client.post(
-            '/api/datasets',
-            data=json.dumps(self.dataset),
-            content_type='application/json'
-        )
+        with aioresponses() as m:
+            m.post("http://authz.local/policy/evaluate", payload={"result": [[True]]})
+            project = get_post_response('project-list', VALID_PROJECT_1)
+
+            self.project = project.json()
+            self.creators = VALID_DATS_CREATORS
+            self.dataset = dats_dataset(self.project['identifier'], self.creators)
+
+            m.post("http://authz.local/policy/evaluate", payload={"result": [[True]]})
+            client = APIClient()
+            client.post(
+                '/api/datasets',
+                data=json.dumps(self.dataset),
+                content_type='application/json'
+            )
 
     def test_jsonld(self):
         get_resp = self.client.get('/api/datasets?format=json-ld')

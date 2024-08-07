@@ -253,5 +253,11 @@ async def public_rules(request: DrfRequest):
         discovery = await get_request_discovery(request)
     except DiscoveryConfigException as e:
         return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-    rules = get_rules(discovery)  # TODO: censored or not
+
+    dt_permissions = await get_discovery_data_type_permissions(request)
+
+    # TODO: allow filtering by fields accessed?
+    fs_permissions, _ = get_discovery_field_set_permissions(discovery, None, dt_permissions)
+
+    rules = get_rules(discovery, data_permissions=fs_permissions)
     return Response(rules, status=status.HTTP_200_OK)

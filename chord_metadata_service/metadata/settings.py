@@ -57,7 +57,7 @@ CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for runn
 BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
 
 BENTO_AUTHZ_SERVICE_URL: str = (
-    os.environ.get("BENTO_AUTHZ_SERVICE_URL", "").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
+    os.environ.get("BENTO_AUTHZ_SERVICE_URL", "http://authz.local").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
 )
 
 SERVICE_URL_BASE_PATH = os.environ.get("SERVICE_URL_BASE_PATH")

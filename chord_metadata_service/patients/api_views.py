@@ -146,10 +146,12 @@ class IndividualBatchViewSet(BatchViewSet):
     def get_queryset(self):
         individual_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
-        queryset = Individual.objects.filter(**filter_by_id)\
-            .prefetch_related(
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-        ).order_by("id")
+        queryset = (
+            Individual.objects
+            .filter(**filter_by_id)
+            .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
+            .order_by("id")
+        )
 
         return queryset
 
@@ -220,10 +222,12 @@ class PublicListIndividuals(APIView):
         try:
             discovery = await get_request_discovery(request)
         except DiscoveryConfigException as e:
+            authz_middleware.mark_authz_done(request)
             return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
         if not discovery:
-            return Response(dres.NO_PUBLIC_DATA_AVAILABLE)
+            authz_middleware.mark_authz_done(request)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
         dt_permissions = await get_discovery_data_type_permissions(request)
         dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
@@ -243,7 +247,7 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-            ))
+            ), status=status.HTTP_400_BAD_REQUEST)
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
 
@@ -263,7 +267,7 @@ class PublicListIndividuals(APIView):
         return Response({
             "count": ind_qct,
             # Only if we have "query:data" - this field is for Beacon, which should have an access token:
-            **({"matches": await filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
+            **({"matches": filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues,

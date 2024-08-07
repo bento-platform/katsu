@@ -1,5 +1,6 @@
 import json
 
+from aioresponses import aioresponses
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -13,6 +14,7 @@ from .constants import (
     valid_project_json_schema,
 )
 from ..models import Project, Dataset, ProjectJsonSchema
+from chord_metadata_service.authz.tests.helpers import mock_authz_eval_one_result, mock_authz_eval_result
 
 
 class CreateProjectTest(APITestCase):
@@ -30,10 +32,10 @@ class CreateProjectTest(APITestCase):
             {
                 "title": "Project 1",
                 "description": "",
-                "data_use": {}
+                "data_use": {}  # invalid data use
             },
             {
-                "title": "aa",
+                "title": "aa",  # name must be at least 3 characters
                 "description": "",
                 "data_use": VALID_DATA_USE_1
             }
@@ -41,15 +43,21 @@ class CreateProjectTest(APITestCase):
 
     def test_create_project(self):
         for i, p in enumerate(self.valid_payloads, 1):
-            r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
+            with aioresponses() as m:
+                mock_authz_eval_one_result(m, True)
+                r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Project.objects.count(), i)
             self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
 
+        self.assertEqual(Project.objects.count(), len(self.valid_payloads))
+
+    def test_create_project_invalid(self):
         for p in self.invalid_payloads:
-            r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
+            with aioresponses() as m:
+                mock_authz_eval_one_result(m, True)
+                r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(Project.objects.count(), len(self.valid_payloads))
 
 
 # TODO: Update Project
@@ -57,7 +65,11 @@ class CreateProjectTest(APITestCase):
 
 class CreateDatasetTest(APITestCase):
     def setUp(self) -> None:
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1),
+                                 content_type="application/json")
+
         self.project = r.json()
 
         self.valid_payloads = [
@@ -97,29 +109,44 @@ class CreateDatasetTest(APITestCase):
 
     def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
-            r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
+            with aioresponses() as m:
+                mock_authz_eval_one_result(m, True)
+                r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
+
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
             self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
 
+        self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
+
+    def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
-            r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
+            with aioresponses() as m:
+                mock_authz_eval_one_result(m, True)
+                r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
+
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
-        r = self.client.post('/api/datasets', data=json.dumps(payload),
-                             content_type="application/json")
-        r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
-                                     content_type="application/json")
+
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.post('/api/datasets', data=json.dumps(payload),
+                                 content_type="application/json")
+
+            mock_authz_eval_one_result(m, True)
+            r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
+                                         content_type="application/json")
+
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Dataset.objects.count(), 1)
 
         dataset_id = Dataset.objects.first().identifier
 
+        # no auth needed for this
         url = f'/api/datasets/{dataset_id}/dats'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -162,7 +189,11 @@ class CreateProjectJsonSchema(APITestCase):
 
     def setUp(self) -> None:
         # Create project
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        with aioresponses() as m:
+            mock_authz_eval_result(m, [[True]])
+            r = self.client.post(
+                reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+
         self.project = r.json()
 
         # Valid payload and project_id

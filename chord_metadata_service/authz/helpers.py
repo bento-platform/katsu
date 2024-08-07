@@ -92,6 +92,7 @@ async def get_data_type_query_permissions(
     )[0]
 
     # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
+    #  - TODO: data type resources instead?
     return {
         dt: {
             "bool_": p_query_bool,

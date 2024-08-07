@@ -4,6 +4,7 @@ import json
 import logging
 
 from adrf.decorators import api_view as async_api_view
+from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
 
@@ -21,14 +22,22 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from typing import Callable
+
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
+from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.types import DataPermissionsDict
+
 from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
-from chord_metadata_service.logger import logger
+from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.discovery.utils import get_request_discovery
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
+
+from chord_metadata_service.logger import logger
 
 from chord_metadata_service.metadata.elastic import es
 
@@ -47,19 +56,19 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(request: DrfRequest, dataset: Dataset):
+async def experiment_dataset_summary(discovery: DiscoveryConfig, dataset: Dataset, permissions: DataPermissionsDict):
     return await dt_experiment_summary(
         Experiment.objects.filter(dataset=dataset),
-        discovery=None,
-        low_counts_censored=False
+        discovery=discovery,
+        experiment_permissions=permissions,
     )
 
 
-async def phenopacket_dataset_summary(request: DrfRequest, dataset: Dataset):
+async def phenopacket_dataset_summary(discovery: DiscoveryConfig, dataset: Dataset, permissions: DataPermissionsDict):
     return await dt_phenopacket_summary(
         Phenopacket.objects.filter(dataset=dataset),
-        discovery=None,
-        low_counts_censored=False
+        discovery=discovery,
+        phenopacket_permissions=permissions,
     )
 
 
@@ -554,14 +563,18 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 
 
 @async_api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+@permission_classes([BentoAllowAny])
 async def dataset_summary(request: DrfRequest, dataset_id: str):
-    # TODO: PERMISSIONS
-
     dataset = await Dataset.objects.aget(identifier=dataset_id)
+    discovery = await get_request_discovery(request)
+    dt_permissions = await get_data_type_query_permissions(
+        request,
+        data_types=list(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys()),
+        resource=build_resource(str(dataset.project_id), dataset_id),
+    )
 
     summaries = await asyncio.gather(
-        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset),
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery, dataset, dt_permissions[dt]),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 

@@ -1,53 +1,57 @@
 import sys
 from django.test import TestCase, override_settings
 
+from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.discovery.censorship import get_threshold, thresholded_count, get_max_query_parameters
 from .constants import DISCOVERY_CONFIG_TEST
 
 
-class CensorshipGetThresholdTest(TestCase):
+class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
 
     # get_threshold(...)
 
     def test_get_threshold_no_censorship(self):
-        self.assertEqual(get_threshold({}, low_counts_censored=False), 0)
+        self.assertEqual(get_threshold({}, self.permissions_full), 0)
+
+    def test_get_threshold_bool_only_perms(self):
+        self.assertEqual(get_threshold({}, self.permissions_bool), sys.maxsize)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_get_threshold_no_config(self):  # no public config configured
-        self.assertEqual(get_threshold({}, low_counts_censored=True), sys.maxsize)
+        self.assertEqual(get_threshold({}, self.permissions_counts), sys.maxsize)
 
 
-class CensorshipThresholdedCountTest(TestCase):
+class CensorshipThresholdedCountTest(TestCase, PermissionsTestCaseMixin):
 
     def test_get_threshold_configured(self):
-        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, low_counts_censored=False), 0)
-        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, low_counts_censored=True), 5)
+        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_full), 0)
+        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_counts), 5)
 
     # thresholded_count(...)
 
     def test_thresholded_count_no_censorship(self):
-        self.assertEqual(thresholded_count(1, {}, low_counts_censored=False), 1)
+        self.assertEqual(thresholded_count(1, {}, self.permissions_full), 1)
 
     def test_thresholded_count_no_config(self):
-        self.assertEqual(thresholded_count(100000, {}, low_counts_censored=True), 0)
+        self.assertEqual(thresholded_count(100000, {}, self.permissions_counts), 0)
 
     def test_thresholded_count_configured(self):
-        self.assertEqual(thresholded_count(5, DISCOVERY_CONFIG_TEST, low_counts_censored=False), 5)
-        self.assertEqual(thresholded_count(5, DISCOVERY_CONFIG_TEST, low_counts_censored=True), 0)
+        self.assertEqual(thresholded_count(5, DISCOVERY_CONFIG_TEST, self.permissions_full), 5)
+        self.assertEqual(thresholded_count(5, DISCOVERY_CONFIG_TEST, self.permissions_counts), 0)
 
 
-class CensorshipGetMaxQueryParametersTest(TestCase):
+class CensorshipGetMaxQueryParametersTest(TestCase, PermissionsTestCaseMixin):
 
     # get_max_query_parameters(...)
 
     def test_get_max_query_parameters_no_censorship(self):
-        self.assertEqual(get_max_query_parameters({}, low_counts_censored=False), sys.maxsize)
+        self.assertEqual(get_max_query_parameters({}, self.permissions_full), sys.maxsize)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_get_max_query_parameters_no_config(self):
-        self.assertEqual(get_max_query_parameters({}, low_counts_censored=True), 0)
+        self.assertEqual(get_max_query_parameters({}, self.permissions_counts), 0)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_get_max_query_parameters_configured(self):
-        self.assertEqual(get_max_query_parameters(DISCOVERY_CONFIG_TEST, low_counts_censored=False), sys.maxsize)
-        self.assertEqual(get_max_query_parameters(DISCOVERY_CONFIG_TEST, low_counts_censored=True), 2)
+        self.assertEqual(get_max_query_parameters(DISCOVERY_CONFIG_TEST, self.permissions_full), sys.maxsize)
+        self.assertEqual(get_max_query_parameters(DISCOVERY_CONFIG_TEST, self.permissions_counts), 2)

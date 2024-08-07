@@ -19,6 +19,7 @@ __all__ = [
     "get_discovery",
     "get_request_discovery",
     "get_project_id_and_dataset_id_from_request",
+    "get_discovery_queryable_fields",
     "get_discovery_data_type_permissions",
     "get_discovery_field_permissions",
     "get_discovery_field_set_permissions",
@@ -99,6 +100,7 @@ async def get_discovery_data_type_permissions(request: DrfRequest) -> DataTypeDi
 
         # Collect all data types that we need permissions for to give various parts of the public overview response.
         #  - individuals & biosamples are in the 'phenopacket' data type, experiments are in the 'experiment' data type
+        #  - TODO: filter to just data types which are ingested?
         data_types=list(set(PUBLIC_MODEL_NAMES_TO_DATA_TYPE.values())),
 
         # Pass scope for permissions as resource
@@ -108,14 +110,17 @@ async def get_discovery_data_type_permissions(request: DrfRequest) -> DataTypeDi
 
 
 def get_discovery_field_permissions(
-    discovery: DiscoveryConfig, field: str, dt_permissions: DataTypeDiscoveryPermissions
+    discovery: DiscoveryConfig,
+    field: str,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    queryable_fields: dict[str, DiscoveryFieldProps] | None = None,
 ) -> DataPermissionsDict:
-    queryable_fields = get_discovery_queryable_fields(discovery)
+    qf = queryable_fields or get_discovery_queryable_fields(discovery)
 
-    if field not in queryable_fields:
+    if field not in qf:
         raise ValidationError(f"Unsupported field used in query: {field}")
 
-    mn, _ = get_public_model_name_and_field_path(queryable_fields[field]["mapping"])
+    mn, _ = get_public_model_name_and_field_path(qf[field]["mapping"])
     return dt_permissions[PUBLIC_MODEL_NAMES_TO_DATA_TYPE[mn]]
 
 
