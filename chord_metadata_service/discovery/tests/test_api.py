@@ -3,13 +3,12 @@ import os
 from copy import deepcopy
 import uuid
 
-from aioresponses import aioresponses
 from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from chord_metadata_service.authz.tests.helpers import mock_authz_eval_result, AuthzAPITestCase
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
@@ -387,11 +386,7 @@ class PublicOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
-
-        with aioresponses() as m:
-            mock_authz_eval_result(m, [[True, True, True]])  # data type permissions: bool, counts, data
-            response = self.dt_authz_counts_get('/api/public_overview')
-
+        response = self.dt_authz_counts_get('/api/public_overview')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
@@ -452,48 +447,49 @@ class DiscoverySchemaTest(AuthzAPITestCase):
         self.assertEqual(response.json(), DISCOVERY_SCHEMA)
 
 
-class DiscoveryRulesTest(ScopedDiscoveryTestCase):
+class DiscoveryRulesTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
+    def setUp(self):
+        self.url = reverse("public-rules")
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_rules(self):
-        url = reverse("public-rules")
-        counts_perms = [[True, True, False]]
-
-        def _authz_get(u: str):
-            with aioresponses() as m:
-                mock_authz_eval_result(m, counts_perms)  # data type permissions: bool, counts, data
-                return self.client.get(u)
-
         # Node scope
         # SCOPE: whole node
-        response = _authz_get(url)
+        response = self.dt_authz_counts_get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), DISCOVERY_CONFIG_TEST["rules"])
 
         # PROJECTS
-        response_p_a = _authz_get(f"{url}?project={self.id_proj_a}")
+        response_p_a = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}")
         self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
         self.assertEqual(response_p_a.json(), DISCOVERY_CONFIG_TEST["rules"])   # node discovery fallback
 
-        response_p_b = _authz_get(f"{url}?project={self.id_proj_b}")
+        response_p_b = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_b}")
         self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
         self.assertEqual(response_p_b.json(), self.project_b.discovery["rules"])
 
         # Dataset scope
-        response_d_a = _authz_get(f"{url}?dataset={self.id_ds_a}")
+        response_d_a = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_a}")
         self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
         self.assertEqual(response_d_a.json(), self.dataset_a.discovery["rules"])
 
-        response_d_b = _authz_get(f"{url}?dataset={self.id_ds_b}")
+        response_d_b = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_b}")
         self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
         self.assertEqual(response_d_b.json(), self.project_b.discovery["rules"])
 
     @override_settings(CONFIG_PUBLIC={})
-    def test_discovery_exp(self):
+    def test_discovery_exp_1(self):
         # Node scope not configured
-        url = reverse("public-rules")
-        response = self.client.get(url)
+        response = self.dt_authz_none_get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), RULES_NO_PERMISSIONS)
+        self.assertEqual(response.json(), RULES_NO_PERMISSIONS)  # no permissions -> rules for no permissions
 
-        response_exp = self.client.get(f"{url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
+    @override_settings(CONFIG_PUBLIC={})
+    def test_discovery_exp_2(self):
+        # Node scope not configured
+        response = self.dt_authz_counts_get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), RULES_NO_PERMISSIONS)  # no config -> rules for no permissions
+
+        response_exp = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
         self.assertEqual(response_exp.status_code, status.HTTP_404_NOT_FOUND)

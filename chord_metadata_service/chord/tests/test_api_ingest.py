@@ -1,9 +1,11 @@
 import json
 
+from aioresponses import aioresponses
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.authz.tests.helpers import mock_authz_eval_one_result
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import (
     workflow_set,
@@ -58,11 +60,17 @@ class WorkflowTest(APITestCase):
 
 class APITestCaseWithDataset(APITestCase):
     def setUp(self) -> None:
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.post(
+                reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json"
+            )
         self.project = r.json()
 
-        r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
-                             content_type="application/json")
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
+                                 content_type="application/json")
         self.dataset = r.json()
         self.dataset_id = self.dataset["identifier"]
 

@@ -2,19 +2,19 @@ import json
 import csv
 import io
 import random
-from aioresponses import aioresponses
 from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
-from chord_metadata_service.authz.tests.helpers import mock_authz_eval_result, AuthzAPITestCase
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_EXTRA_PROPERTIES,
     DISCOVERY_CONFIG_TEST,
     CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 )
+from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
@@ -23,7 +23,7 @@ from chord_metadata_service.restapi.api_renderers import render_age
 
 from . import constants as c
 
-CONFIG_PUBLIC_TEST_NO_THRESHOLD = deepcopy(DISCOVERY_CONFIG_TEST)
+CONFIG_PUBLIC_TEST_NO_THRESHOLD: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
 CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
 
 
@@ -379,8 +379,9 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase):
         response = self.dt_authz_counts_get('/api/public?sex=female&smoking=Smoker')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.filter(sex__iexact='female')\
-            .filter(extra_properties__contains={"smoking": "Smoker"}).count()
+        db_count = Individual.objects.filter(
+            sex__iexact='female', extra_properties__contains={"smoking": "Smoker"}
+        ).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
             self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
@@ -430,7 +431,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase):
         response = self.dt_authz_counts_get(
             '/api/public?smoking=Non-smoker&death_dc=deceased&covidstatus=positive'
         )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
@@ -438,7 +439,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase):
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Error
         response = self.dt_authz_counts_get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
@@ -714,17 +715,17 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
     def test_public_filtering_age_invalid_range(self):
         # age invalid range max search
         response = self.dt_authz_counts_get('/api/public?age=[10, 50)')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
+        self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
     def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
         # test with config without age field, returns error
         response = self.dt_authz_counts_get('/api/public?age=[20, 30)')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
+        self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_filtering_age_range_min_and_max_no_config(self):

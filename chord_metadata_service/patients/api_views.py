@@ -172,7 +172,7 @@ async def public_discovery_filter_queryset(
         raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
     if not overall_permissions["counts"]:
-        raise ValidationError(f"Insufficient permissions to access counts")
+        raise ValidationError("Insufficient permissions to access counts")
 
     for field, value in qp.items():
         if field not in queryable_fields:

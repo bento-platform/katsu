@@ -67,7 +67,7 @@ async def get_discovery(project_id: str | None = None, dataset_id: str | None = 
 
 
 def get_project_id_and_dataset_id_from_request(request: DrfRequest) -> tuple[str | None, str | None]:
-    return request.query_params.get("project"), request.query_params.get("dataset")
+    return request.query_params.get("project") or None, request.query_params.get("dataset") or None
 
 
 async def get_request_discovery(request: DrfRequest) -> DiscoveryConfig:
@@ -82,9 +82,13 @@ def get_discovery_queryable_fields(discovery: DiscoveryConfig) -> dict[str, Disc
     }
 
 
-async def get_discovery_data_type_permissions(request: DrfRequest) -> DataTypeDiscoveryPermissions:
+async def get_discovery_data_type_permissions(
+    request: DrfRequest, project_id: str | None = None, dataset_id: str | None = None
+) -> DataTypeDiscoveryPermissions:
     # Do here instead of inside get_data_type_query_permissions, since this getter function is specific to discovery
-    project_id, dataset_id = get_project_id_and_dataset_id_from_request(request)
+
+    if project_id is None and dataset_id is None:
+        project_id, dataset_id = get_project_id_and_dataset_id_from_request(request)
 
     resource: dict = RESOURCE_EVERYTHING
     if project_id:
@@ -113,9 +117,9 @@ def get_discovery_field_permissions(
     discovery: DiscoveryConfig,
     field: str,
     dt_permissions: DataTypeDiscoveryPermissions,
-    queryable_fields: dict[str, DiscoveryFieldProps] | None = None,
+    fields: dict[str, DiscoveryFieldProps] | None = None,
 ) -> DataPermissionsDict:
-    qf = queryable_fields or get_discovery_queryable_fields(discovery)
+    qf = fields or discovery["fields"]
 
     if field not in qf:
         raise ValidationError(f"Unsupported field used in query: {field}")
@@ -132,14 +136,19 @@ def get_discovery_field_set_permissions(
     dts_accessed: set[str] = set()
     field_dts: dict[str, str] = {}
 
-    queryable_fields = get_discovery_queryable_fields(discovery)
-    field_set = set(fields_accessed) if fields_accessed is not None else set(queryable_fields.keys())
+    discovery_fields = discovery.get("fields", {})
+
+    if not discovery_fields:
+        # If no fields configured, default safe: fall back to no permissions
+        return {"bool_": False, "counts": False, "data": False}, {}
+
+    field_set = set(fields_accessed) if fields_accessed else set(discovery_fields.keys())
 
     for field in field_set:
-        if field not in queryable_fields:
+        if field not in discovery_fields:
             raise ValidationError(f"Unsupported field used in query: {field}")
 
-        mn, _ = get_public_model_name_and_field_path(queryable_fields[field]["mapping"])
+        mn, _ = get_public_model_name_and_field_path(discovery_fields[field]["mapping"])
 
         if (f_dt := PUBLIC_MODEL_NAMES_TO_DATA_TYPE.get(mn)) is not None:
             dts_accessed.add(f_dt)

@@ -1,6 +1,8 @@
 from copy import deepcopy
 
-DISCOVERY_CONFIG_TEST = {
+from ..types import DiscoveryConfig
+
+DISCOVERY_CONFIG_TEST: DiscoveryConfig = {
     "overview": [
         {
             "section_title": "First Section",
@@ -92,83 +94,83 @@ DISCOVERY_CONFIG_TEST = {
     }
 }
 
-DISCOVERY_CONFIG_EXTRA_PROPERTIES = deepcopy(DISCOVERY_CONFIG_TEST)
-DISCOVERY_CONFIG_EXTRA_PROPERTIES["fields"].update([
-        ("smoking", {
-            "mapping": "individual/extra_properties/smoking",
-            "title": "Smoking",
-            "description": "Smoking exposure",
-            "datatype": "string",
-            "config": {
-                "enum": [
-                    "Non-smoker",
-                    "Smoker",
-                    "Former smoker",
-                    "Passive smoker",
-                    "Not specified"
-                ]
-            }
-        }),
-        ("covidstatus", {
-            "mapping": "individual/extra_properties/covidstatus",
-            "title": "Covid status",
-            "description": "Covid status",
-            "datatype": "string",
-            "config": {
-                "enum": [
-                    "Positive",
-                    "Negative",
-                    "Indeterminate"
-                ]
-            }
-        }),
-        ("death_dc", {
-            "mapping": "individual/extra_properties/death_dc",
-            "title": "Death",
-            "description": "Death status",
-            "datatype": "string",
-            "config": {
-                "enum": [
-                    "Alive",
-                    "Deceased"
-                ]
-            }
-        }),
-        ("lab_test_result_value", {
-            "mapping": "individual/extra_properties/lab_test_result_value",
-            "title": "Lab Test Result",
-            "description": "This acts as a placeholder for numeric values",
-            "datatype": "number",
-            "config": {
-                "bins": [200, 300, 500, 1000, 1500, 2000],
-                "minimum": 0,
-                "units": "mg/L"
-            }
-        }),
-        ("baseline_creatinine", {
-            "mapping": "individual/extra_properties/baseline_creatinine",
-            "title": "Creatinine",
-            "description": "Baseline Creatinine",
-            "datatype": "number",
-            "config": {
-                "bin_size": 50,
-                "taper_left": 50,
-                "taper_right": 200,
-                "minimum": 30,
-                "maximum": 600,
-                "units": "mg/L"
-            }
-        }),
-        ("date_of_consent", {
-            "mapping": "individual/extra_properties/date_of_consent",
-            "title": "Verbal consent date",
-            "description": "Date of initial verbal consent(participant, legal representative or tutor), yyyy-mm-dd",
-            "datatype": "date",
-            "config": {
-                "bin_by": "month"
-            }
-        })
-])
+DISCOVERY_CONFIG_EXTRA_PROPERTIES: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
+DISCOVERY_CONFIG_EXTRA_PROPERTIES["fields"].update({
+    "smoking": {
+        "mapping": "individual/extra_properties/smoking",
+        "title": "Smoking",
+        "description": "Smoking exposure",
+        "datatype": "string",
+        "config": {
+            "enum": [
+                "Non-smoker",
+                "Smoker",
+                "Former smoker",
+                "Passive smoker",
+                "Not specified"
+            ]
+        }
+    },
+    "covidstatus": {
+        "mapping": "individual/extra_properties/covidstatus",
+        "title": "Covid status",
+        "description": "Covid status",
+        "datatype": "string",
+        "config": {
+            "enum": [
+                "Positive",
+                "Negative",
+                "Indeterminate"
+            ]
+        }
+    },
+    "death_dc": {
+        "mapping": "individual/extra_properties/death_dc",
+        "title": "Death",
+        "description": "Death status",
+        "datatype": "string",
+        "config": {
+            "enum": [
+                "Alive",
+                "Deceased"
+            ]
+        }
+    },
+    "lab_test_result_value": {
+        "mapping": "individual/extra_properties/lab_test_result_value",
+        "title": "Lab Test Result",
+        "description": "This acts as a placeholder for numeric values",
+        "datatype": "number",
+        "config": {
+            "bins": [200, 300, 500, 1000, 1500, 2000],
+            "minimum": 0,
+            "units": "mg/L"
+        }
+    },
+    "baseline_creatinine": {
+        "mapping": "individual/extra_properties/baseline_creatinine",
+        "title": "Creatinine",
+        "description": "Baseline Creatinine",
+        "datatype": "number",
+        "config": {
+            "bin_size": 50,
+            "taper_left": 50,
+            "taper_right": 200,
+            "minimum": 30,
+            "maximum": 600,
+            "units": "mg/L"
+        }
+    },
+    "date_of_consent": {
+        "mapping": "individual/extra_properties/date_of_consent",
+        "title": "Verbal consent date",
+        "description": "Date of initial verbal consent(participant, legal representative or tutor), yyyy-mm-dd",
+        "datatype": "date",
+        "config": {
+            "bin_by": "month"
+        }
+    },
+})
 DISCOVERY_CONFIG_EXTRA_PROPERTIES["search"][0]["fields"].extend(
     ["smoking", "covidstatus", "death_dc", "lab_test_result_value", "baseline_creatinine", "date_of_consent"]
 )
@@ -189,10 +191,10 @@ DISCOVERY_CONFIG_EXTRA_PROPERTIES["overview"].extend([
     },
 ])
 
-CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY = deepcopy(DISCOVERY_CONFIG_TEST)
+CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
 CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY["search"][0]["fields"] = ["sex"]
 
-CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS = deepcopy(DISCOVERY_CONFIG_TEST)
+CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
 CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS["fields"].update([
     ("unset_date",
      {

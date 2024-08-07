@@ -21,8 +21,14 @@ def mock_authz_eval_result(m: aioresponses, result: EvaluationResultMatrix | lis
 
 
 class AuthzAPITestCase(APITestCase):
+    dt_none_eval_res = [[False, False, False]]
     dt_counts_eval_res = [[True, True, False]]
     dt_full_eval_res = [[True, True, True]]
+
+    def dt_authz_none_get(self, u: str, *args, **kwargs):
+        with aioresponses() as m:
+            mock_authz_eval_result(m, self.dt_none_eval_res)  # data type permissions: bool, counts, data
+            return self.client.get(u, *args, **kwargs)
 
     def dt_authz_counts_get(self, u: str, *args, **kwargs):
         with aioresponses() as m:

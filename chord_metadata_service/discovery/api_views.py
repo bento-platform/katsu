@@ -27,7 +27,11 @@ from . import responses as dres
 from .censorship import get_rules
 from .schemas import DISCOVERY_SCHEMA
 from .types import BinWithValue
-from .utils import get_project_id_and_dataset_id_from_request, get_discovery_data_type_permissions, get_discovery_field_set_permissions
+from .utils import (
+    get_project_id_and_dataset_id_from_request,
+    get_discovery_data_type_permissions,
+    get_discovery_field_set_permissions,
+)
 
 
 @extend_schema(

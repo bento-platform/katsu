@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from .constants import (
     VALID_PROJECT_1,
-    VALID_DATA_USE_1,
     valid_dataset_1,
     dats_dataset,
     VALID_DATS_CREATORS,
@@ -24,7 +23,6 @@ class CreateProjectTest(APITestCase):
             {
                 "title": "Project 2",
                 "description": "",
-                "data_use": VALID_DATA_USE_1
             }
         ]
 
@@ -32,12 +30,11 @@ class CreateProjectTest(APITestCase):
             {
                 "title": "Project 1",
                 "description": "",
-                "data_use": {}  # invalid data use
+                "discovery": {"fake": "prop"}  # invalid discovery
             },
             {
                 "title": "aa",  # name must be at least 3 characters
                 "description": "",
-                "data_use": VALID_DATA_USE_1
             }
         ]
 
@@ -98,12 +95,17 @@ class CreateDatasetTest(APITestCase):
             {
                 "title": "Dataset 1",
                 "description": "Test Dataset",
-                "project": None
+                "project": None,
             },
             {
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 4",
                 "dats_file": "INVALID_JSON_STRING",
+            },
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 2",
+                "data_use": {},  # Invalid data use object
             },
         ]
 
@@ -165,13 +167,15 @@ class CreateDatasetTest(APITestCase):
         r = self.client.post("/api/resources", data=json.dumps(resource), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        r = self.client.post(
-            "/api/datasets",
-            data=json.dumps({
-                **valid_dataset_1(self.project["identifier"]),
-                "additional_resources": [resource["id"]],
-            }),
-            content_type="application/json")
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.post(
+                "/api/datasets",
+                data=json.dumps({
+                    **valid_dataset_1(self.project["identifier"]),
+                    "additional_resources": [resource["id"]],
+                }),
+                content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
         dataset_id = Dataset.objects.first().identifier

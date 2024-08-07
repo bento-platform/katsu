@@ -1,7 +1,8 @@
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
 
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase, PermissionsTestCaseMixin
+from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
 from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from ..views_data_types import get_count_for_data_type
 
@@ -10,9 +11,9 @@ POST_GET = ("POST", "GET")
 DATA_TYPE_NOT_REAL = "not_a_real_data_type"
 
 
-class DataTypeTest(APITestCase):
+class DataTypeTest(AuthzAPITestCase, PermissionsTestCaseMixin):
     def test_data_type_list(self):
-        r = self.client.get(reverse("data-type-list"))
+        r = self.dt_authz_counts_get(reverse("data-type-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
         self.assertEqual(len(c), len(DATA_TYPES))
@@ -22,17 +23,17 @@ class DataTypeTest(APITestCase):
 
     def test_data_type_list_non_uuid_project(self):
         # Non-UUID project
-        r = self.client.get(reverse("data-type-list"), {"project": "a"})
+        r = self.dt_authz_counts_get(reverse("data-type-list"), {"project": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_data_type_list_non_uuid_dataset(self):
         # Non-UUID dataset
-        r = self.client.get(reverse("data-type-list"), {"dataset": "a"})
+        r = self.dt_authz_counts_get(reverse("data-type-list"), {"dataset": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_data_type_detail(self):
         self.maxDiff = None
-        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
+        r = self.dt_authz_counts_get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         c = r.json()
         self.assertDictEqual(c, {
@@ -46,20 +47,24 @@ class DataTypeTest(APITestCase):
 
     def test_data_type_detail_non_uuid_project(self):
         # Non-UUID project
-        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"project": "a"})
+        r = self.dt_authz_counts_get(
+            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"project": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_data_type_detail_non_uuid_dataset(self):
         # Non-UUID dataset
-        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"dataset": "a"})
+        r = self.dt_authz_counts_get(
+            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"dataset": "a"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     async def test_data_type_count_bad_data_type(self):
         with self.assertRaises(ValueError):
-            await get_count_for_data_type(DATA_TYPE_NOT_REAL)
+            await get_count_for_data_type(
+                DATA_TYPE_NOT_REAL, None, None, DISCOVERY_CONFIG_TEST, self.permissions_full
+            )
 
     def test_data_type_detail_404(self):
-        r = self.client.get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_NOT_REAL}))
+        r = self.dt_authz_counts_get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_NOT_REAL}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
         r.json()  # assert json response
 
