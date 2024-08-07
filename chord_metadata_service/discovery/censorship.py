@@ -38,11 +38,11 @@ def get_threshold(discovery: DiscoveryConfig | None, field_set_permissions: Data
     return get_rules(discovery, field_set_permissions)["count_threshold"]
 
 
-def thresholded_count(c: int, discovery: DiscoveryConfig, field_set_permissions: DataPermissionsDict) -> int:
+def thresholded_count(c: int, discovery: DiscoveryConfig | None, field_set_permissions: DataPermissionsDict) -> int:
     return 0 if c <= get_threshold(discovery, field_set_permissions) else c
 
 
-def get_max_query_parameters(discovery: DiscoveryConfig, field_set_permissions: DataPermissionsDict) -> int:
+def get_max_query_parameters(discovery: DiscoveryConfig | None, field_set_permissions: DataPermissionsDict) -> int:
     """
     Gets the maximum number of query parameters allowed for discovery.
     """
