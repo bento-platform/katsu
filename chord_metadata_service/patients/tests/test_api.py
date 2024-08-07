@@ -429,7 +429,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
+        self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_invalid_3(self):
@@ -437,7 +437,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         response = self.client.get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
+        self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_1(self):
@@ -502,7 +502,7 @@ class PublicFilteringIndividualsTest(APITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        self.assertEqual(response_obj["code"], 400)
+        self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_string_1(self):
