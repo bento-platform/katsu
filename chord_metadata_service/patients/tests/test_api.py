@@ -732,7 +732,7 @@ class PublicAgeRangeFilteringIndividualsTest(APITestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class BeaconSearchTest(APITestCase):
+class PublicFilteringBeaconSearchTest(APITestCase):
 
     random_range = 20
 
@@ -744,7 +744,7 @@ class BeaconSearchTest(APITestCase):
     # test beacon formatted response
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_beacon_search_response(self):
-        response = self.client.get('/api/beacon_search?sex=MALE')
+        response = self.client.get('/api/public?sex=MALE')
         male_count = Individual.objects.filter(sex="MALE").count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -753,20 +753,20 @@ class BeaconSearchTest(APITestCase):
     @override_settings(CONFIG_PUBLIC={})
     def test_beacon_search_response_no_config(self):
         # test when config is not provided, returns NOT FOUND
-        response = self.client.get('/api/beacon_search?sex=MALE')
+        response = self.client.get('/api/public?sex=MALE')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_beacon_search_response_invalid_search_key(self):
-        response = self.client.get('/api/beacon_search?birdwatcher=yes')
+        response = self.client.get('/api/public?birdwatcher=yes')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_beacon_search_response_invalid_search_value(self):
-        response = self.client.get('/api/beacon_search?smoking=on_Sundays')
+        response = self.client.get('/api/public?smoking=on_Sundays')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_beacon_search_more_params_than_censorship_limit(self):
-        response = self.client.get('/api/beacon_search?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
+        response = self.client.get('/api/public?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

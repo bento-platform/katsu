@@ -17,12 +17,19 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
-from chord_metadata_service.discovery.utils import get_request_discovery
+from chord_metadata_service.discovery.utils import (
+    get_request_discovery,
+    get_discovery_queryable_fields,
+    get_discovery_data_type_permissions,
+    get_discovery_field_set_permissions,
+)
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -41,7 +48,7 @@ from chord_metadata_service.restapi.negociation import FormatInPostContentNegoti
 from .serializers import IndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter
-
+from ..authz.types import DataTypeDiscoveryPermissions
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -147,26 +154,30 @@ class IndividualBatchViewSet(BatchViewSet):
         return queryset
 
 
-async def public_discovery_filter_queryset(request: DrfRequest, queryset: QuerySet, low_counts_censored: bool):
+async def public_discovery_filter_queryset(
+    request: DrfRequest, dt_permissions: DataTypeDiscoveryPermissions, queryset: QuerySet
+):
     # Check query parameters validity
     qp = request.query_params
     discovery = await get_request_discovery(request)
-    # TODO: allow exceeding max query parameters for authorized requests
-    if len(qp) > get_max_query_parameters(discovery, low_counts_censored):
+
+    queryable_fields = get_discovery_queryable_fields(discovery)
+    queried_fields = list(set(qp.keys()))
+
+    overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
+
+    if len(qp) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
-    search_conf = discovery["search"]
-    field_conf = discovery["fields"]
-    queryable_fields = {
-        f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
-    }
+    if not overall_permissions["counts"]:
+        raise ValidationError(f"Insufficient permissions to access counts")
 
     for field, value in qp.items():
         if field not in queryable_fields:
             raise ValidationError(f"Unsupported field used in query: {field}")
 
         field_props = queryable_fields[field]
-        options = await get_field_options(field, discovery, low_counts_censored)
+        options = await get_field_options(field, discovery, qf_permissions[field])
         if (
             value not in options
             and not (
@@ -214,76 +225,53 @@ class PublicListIndividuals(APIView):
         if not discovery:
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE)
 
+        dt_permissions = await get_discovery_data_type_permissions(request)
+        dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
+        dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
+
+        # We can't respond if we don't have at least phenopackets counts permission
+        if not any(dt_perms_pheno.values()):
+            authz_middleware.mark_authz_done(request)
+            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+
+        perm_pheno_query_data = dt_perms_pheno["data"]
+
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = await public_discovery_filter_queryset(request, base_qs, low_counts_censored=True)
+            filtered_qs = await public_discovery_filter_queryset(request, dt_permissions, base_qs)
         except ValidationError as e:
+            authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ))
 
-        qct = thresholded_count(await filtered_qs.acount(), discovery, low_counts_censored=True)
+        ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
 
-        if qct == 0:
+        if ind_qct == 0:
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
-                f"sub-threshold count: {qct} <= {get_threshold(discovery, low_counts_censored=True)}")
+                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)}")
+            authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            individual_biosample_tissue_stats(filtered_qs, discovery, low_counts_censored=True),
-            individual_experiment_type_stats(filtered_qs, discovery, low_counts_censored=True),
+            individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
+            individual_experiment_type_stats(filtered_qs, discovery, dt_perms_exp),
         )
 
+        authz_middleware.mark_authz_done(request)
         return Response({
-            "count": qct,
+            "count": ind_qct,
+            # Only if we have "query:data" - this field is for Beacon, which should have an access token:
+            **({"matches": await filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues,
             },
-            "experiments": {
-                "count": experiments_count,
-                "experiment_type": experiment_types,
-            }
-        })
-
-
-# noinspection PyMethodMayBeStatic
-class BeaconListIndividuals(APIView):
-    """
-    View to return lists of individuals filtered using search terms from katsu's config.json.
-    Uncensored equivalent of PublicListIndividuals.
-    """
-
-    async def get(self, request, *_args, **_kwargs):
-        try:
-            discovery = await get_request_discovery(request)
-        except DiscoveryConfigException as e:
-            return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-
-        if not discovery:
-            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=404)
-
-        base_qs = Individual.objects.all()
-        try:
-            filtered_qs = await public_discovery_filter_queryset(request, base_qs, low_counts_censored=False)
-        except ValidationError as e:
-            return Response(errors.bad_request_error(
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
-
-        (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            individual_biosample_tissue_stats(filtered_qs, discovery, low_counts_censored=False),
-            individual_experiment_type_stats(filtered_qs, discovery, low_counts_censored=False),
-        )
-
-        return Response({
-            "matches": filtered_qs.values_list("id", flat=True),
-            "biosamples": {
-                "count": tissues_count,
-                "sampled_tissue": sampled_tissues
-            },
-            "experiments": {
-                "count": experiments_count,
-                "experiment_type": experiment_types
-            }
+            **({
+                "experiments": {
+                    "count": experiments_count,
+                    "experiment_type": experiment_types,
+                }
+            } if any(dt_perms_exp.values()) else {}),
         })
