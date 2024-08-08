@@ -134,7 +134,7 @@ async def public_overview(request: DrfRequest):
 
     dt_permissions = await get_discovery_data_type_permissions(request)
     if not any(d["counts"] for d in dt_permissions.values()):
-        return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+        return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
     project_id, dataset_id = get_project_id_and_dataset_id_from_request(request)
 

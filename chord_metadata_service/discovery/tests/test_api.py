@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
 
-from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
+from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITestCase
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
@@ -108,73 +108,43 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_search_fields_configured(self):
         search_fields_url = reverse("public-search-fields")
-        # SCOPE: whole node
-        response = self.dt_authz_counts_get(search_fields_url, content_type="application/json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC)
 
-        # SCOPE: project_a (same discovery as whole node)
-        response_p_a = self.dt_authz_counts_get(
-            f"{search_fields_url}?project={str(self.id_proj_a)}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response_p_a.json(), settings.CONFIG_PUBLIC)
+        subtest_params: list[tuple[DTAccessLevel, str, int, DiscoveryConfig | None]] = [
+            # SCOPE: whole node
+            ("counts", "", status.HTTP_200_OK, settings.CONFIG_PUBLIC),
+            # SCOPE: project_a (same discovery as whole node)
+            ("counts", f"?project={str(self.id_proj_a)}", status.HTTP_200_OK, settings.CONFIG_PUBLIC),
+            # SCOPE: project_b (discovery search sex only)
+            ("counts", f"?project={str(self.id_proj_b)}", status.HTTP_200_OK, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY),
+            # SCOPE: dataset_a (discovery with dataset specific extra_properties)
+            ("counts", f"?dataset={str(self.id_ds_a)}", status.HTTP_200_OK, DISCOVERY_CONFIG_EXTRA_PROPERTIES),
+            # SCOPE: non-existant dataset
+            ("counts", f"?dataset={uuid.uuid4()}", status.HTTP_404_NOT_FOUND, None),
+            # SCOPE: non-existant project
+            ("counts", f"?project={uuid.uuid4()}", status.HTTP_404_NOT_FOUND, None),
+            # SCOPE: dataset_b
+            #  - fallback on project's config, responses should be the same
+            #  - see above - CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
+            ("counts", f"?dataset={self.id_ds_b}", status.HTTP_200_OK, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY),
+            # SCOPE: project_a + dataset_b (invalid)
+            ("counts", f"?project={str(self.id_proj_a)}&dataset={self.id_ds_b}", status.HTTP_404_NOT_FOUND, None),
+            # SCOPE: project_a + dataset_a (valid)
+            #  - same as dataset_a - DISCOVERY_CONFIG_EXTRA_PROPERTIES
+            ("counts", f"?project={str(self.id_proj_a)}&dataset={self.id_ds_a}", status.HTTP_200_OK,
+             DISCOVERY_CONFIG_EXTRA_PROPERTIES),
+            # invalid UUID for project
+            ("counts", "?project=not-a-uuid", status.HTTP_400_BAD_REQUEST, None),
+            # invalid UUID for dataset
+            ("counts", "?dataset=not-a-uuid", status.HTTP_400_BAD_REQUEST, None),
+        ]
 
-        # SCOPE: project_b (discovery search sex only)
-        response_p_b = self.dt_authz_counts_get(
-            f"{search_fields_url}?project={str(self.id_proj_b)}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response_p_b.json(), CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
-
-        # SCOPE: dataset_a (discovery with dataset specific extra_properties)
-        response_d_a = self.dt_authz_counts_get(
-            f"{search_fields_url}?dataset={str(self.id_ds_a)}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response_d_a.json(), DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-
-        # SCOPE: non existing dataset
-        response_d_invalid = self.dt_authz_counts_get(
-            f"{search_fields_url}?dataset={uuid.uuid4()}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_d_invalid.status_code, status.HTTP_404_NOT_FOUND)
-
-        # SCOPE: non-existing project
-        response_p_invalid = self.dt_authz_counts_get(
-            f"{search_fields_url}?project={uuid.uuid4()}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_p_invalid.status_code, status.HTTP_404_NOT_FOUND)
-
-        # SCOPE: dataset_b
-        response_d_b = self.dt_authz_counts_get(
-            f"{search_fields_url}?dataset={self.id_ds_b}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
-        # fallback on project's config, responses should be the same
-        self.assertEqual(response_d_b.json(), response_p_b.json())
-
-        # SCOPE: project_a + dataset_b (invalid)
-        response_pd_invalid = self.dt_authz_counts_get(
-            f"{search_fields_url}?project={str(self.id_proj_a)}&dataset={self.id_ds_b}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_pd_invalid.status_code, status.HTTP_404_NOT_FOUND)
-
-        # SCOPE: project_a + dataset_a (valid)
-        response_pd_valid = self.dt_authz_counts_get(
-            f"{search_fields_url}?project={str(self.id_proj_a)}&dataset={self.id_ds_a}",
-            content_type="application/json",
-        )
-        self.assertEqual(response_pd_valid.status_code, status.HTTP_200_OK)
-        # same as dataset_a
-        self.assertEqual(response_pd_valid.json(), response_d_a.json())
+        for params in subtest_params:
+            with self.subTest(params=params):
+                level, qp, expected_status_code, expected_body = params
+                res = self.dt_get(level, f"{search_fields_url}{qp}")
+                self.assertEqual(res.status_code, expected_status_code)
+                if expected_body is not None:
+                    self.assert_response_section_fields(res.json(), expected_body)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
@@ -232,20 +202,31 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         experiment_2["id"] = "experiment:2"
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
-        self.data_type_counts: dict[str, int] = {
+        self.data_type_counts_ds_a: dict[str, int] = {
             "individuals": ph_m.Individual.objects.all().count(),
             "biosamples": ph_m.Biosample.objects.all().count(),
-            "experiments": exp_m.Experiment.objects.all().count()
+            "experiments": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
         }
 
-    def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig):
+        self.data_type_counts_ds_b: dict[str, int] = {
+            "individuals": 0,
+            "biosamples": 0,
+            "experiments": 0,
+        }
+
+    def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
         count_threshold = discovery["rules"]["count_threshold"]
-        for data_type in self.data_type_counts.keys():
+        for data_type in dts.keys():
             response_count = overview_response["counts"][data_type]
-            if response_count < count_threshold:
+            if response_count <= count_threshold:
                 self.assertEqual(response_count, 0)
             else:
-                self.assertEqual(response_count, self.data_type_counts[data_type])
+                self.assertEqual(response_count, dts[data_type])
+
+    def assert_counts_not_censored(self, overview_response: dict, dts: dict[str, int]):
+        for data_type in dts.keys():
+            response_count = overview_response["counts"][data_type]
+            self.assertEqual(response_count, dts[data_type])
 
     def assert_scoped_fields(self, overview_response: dict, discovery: DiscoveryConfig):
         self.assertSetEqual(
@@ -257,38 +238,58 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def test_overview(self):
         node_discovery = settings.CONFIG_PUBLIC
 
-        # SCOPE: whole node
-        response_whole = self.dt_authz_counts_get(self.url)
-        response_whole_obj = response_whole.json()
-        self.assertEqual(response_whole.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response_whole_obj, dict)
-        self.assert_counts_censored(response_whole_obj, node_discovery)
-        self.assert_scoped_fields(response_whole_obj, node_discovery)
+        subtest_params: list[tuple[str, int, dict | None, dict[str, int] | None]] = [
+            # --- VALID ---
+            # SCOPE: whole node
+            ("", status.HTTP_200_OK, node_discovery, self.data_type_counts_ds_a),  # everything is in dataset a
+            # SCOPE: project_a (whole node fallback)
+            (f"?project={self.id_proj_a}", status.HTTP_200_OK, node_discovery, self.data_type_counts_ds_a),
+            # SCOPE: dataset_a
+            (f"?dataset={self.id_ds_a}", status.HTTP_200_OK, self.dataset_a.discovery, self.data_type_counts_ds_a),
+            # SCOPE: project_b
+            (f"?project={self.id_proj_b}", status.HTTP_200_OK, self.project_b.discovery, self.data_type_counts_ds_b),
+            # SCOPE: dataset_b (project_b fallback)
+            (f"?dataset={self.id_ds_b}", status.HTTP_200_OK, self.project_b.discovery, self.data_type_counts_ds_b),
+            # --- INVALID ---
+            # invalid UUID for project
+            ("?project=not-a-uuid", status.HTTP_400_BAD_REQUEST, None, None),
+            # invalid UUID for dataset
+            ("?dataset=not-a-uuid", status.HTTP_400_BAD_REQUEST, None, None),
+        ]
 
-        # SCOPE: project_a (whole node fallback)
-        response_p_a = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}")
-        self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_p_a.json(), response_whole_obj)
-        self.assert_counts_censored(response_whole_obj, node_discovery)
-        self.assert_scoped_fields(response_whole_obj, node_discovery)
+        for params in subtest_params:
+            with self.subTest(params=params):
+                qp, expected_status_code, discovery, dts = params
+                url = f"{self.url}{qp}"
 
-        # SCOPE: dataset_a
-        response_d_a = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_a}")
-        self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
-        self.assert_counts_censored(response_d_a.json(), self.dataset_a.discovery)
-        self.assert_scoped_fields(response_d_a.json(), self.dataset_a.discovery)
+                if discovery:
+                    # none and bool-level permissions should get forbidden errors for overview, currently
+                    res = self.dt_get("none", url)
+                    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+                    res = self.dt_get("bool", url)
+                    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
-        # SCOPE: project_b
-        response_p_b = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_b}")
-        self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
-        self.assert_counts_censored(response_p_b.json(), self.project_b.discovery)
-        self.assert_scoped_fields(response_p_b.json(), self.project_b.discovery)
+                # with counts permissions, we should get the expected status code + (if success) censored counts
 
-        # SCOPE: dataset_b (project_b fallback)
-        response_d_b = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_b}")
-        self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
-        self.assert_counts_censored(response_d_b.json(), self.project_b.discovery)
-        self.assert_scoped_fields(response_d_b.json(), self.project_b.discovery)
+                res = self.dt_get("counts", url)
+                self.assertEqual(res.status_code, expected_status_code)
+
+                if discovery:
+                    res_json = res.json()
+                    self.assertIsInstance(res_json, dict)
+                    self.assert_counts_censored(res_json, discovery, dts)
+                    self.assert_scoped_fields(res_json, discovery)
+
+                # with full permissions, we should get the expected status code + (if success) uncensored counts
+
+                res = self.dt_get("full", url)
+                self.assertEqual(res.status_code, expected_status_code)
+
+                if discovery:
+                    res_json = res.json()
+                    self.assertIsInstance(res_json, dict)
+                    self.assert_counts_not_censored(res_json, dts)
+                    self.assert_scoped_fields(res_json, discovery)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_project_dataset(self):
