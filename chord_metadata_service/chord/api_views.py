@@ -23,14 +23,13 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
 from chord_metadata_service.authz.middleware import authz_middleware as authz
-from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
+from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler, OverrideOrSuperUserOnly
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 from .models import Project, Dataset, ProjectJsonSchema
-from .permissions import OverrideOrSuperUserOnly
 from .serializers import (
     ProjectJsonSchemaSerializer,
     ProjectSerializer,
