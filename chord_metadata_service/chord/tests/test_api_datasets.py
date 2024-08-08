@@ -151,7 +151,6 @@ class DatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
                 self.entities_by_data_type[dt]["entity"].refresh_from_db()  # Should NOT raise DoesNotExist
 
-
     def test_dataset_update(self):
         # Updates a dataset by changing its dats file
         url = f"/api/datasets/{self.dataset.identifier}"
