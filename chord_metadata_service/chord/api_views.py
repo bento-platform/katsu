@@ -16,11 +16,10 @@ from bento_lib.responses import errors
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
-from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 
 from chord_metadata_service.authz.middleware import authz_middleware as authz
@@ -43,11 +42,6 @@ logger = logging.getLogger(__name__)
 
 
 __all__ = ["ProjectViewSet", "DatasetViewSet"]
-
-
-class ReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS
 
 
 def bad_request(request: DrfRequest):
