@@ -200,7 +200,7 @@ async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str
     if data_type not in QUERYSET_FN:
         authz.mark_authz_done(request)
         return Response(
-            errors.bad_request_error(f"Data type {data_type} doesn't exist"), status=status.HTTP_400_BAD_REQUEST)
+            errors.bad_request_error(f"Data type {data_type} doesn't exist"), status=status.HTTP_404_NOT_FOUND)
 
     qs = QUERYSET_FN[data_type](dataset_id)
 
@@ -239,16 +239,18 @@ async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def dataset_datatype_summary(request: DrfRequest, dataset_id: str):
-    dataset = await Dataset.objects.aget(identifier=dataset_id)
-    project = await Project.objects.aget(datasets=dataset)
-    project_id = str(project.identifier)
-
+async def dataset_data_type_summary(request: DrfRequest, dataset_id: str):
     try:
-        discovery = await get_discovery(project_id, dataset_id)
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except Dataset.DoesNotExist as e:
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
     except ValidationError as e:
         return bad_request_from_exc(e)
 
+    project = await Project.objects.aget(datasets=dataset)
+    project_id = str(project.identifier)
+
+    discovery = await get_discovery(project_id, dataset_id)
     dt_permissions = await get_discovery_data_type_permissions(request, project_id, dataset_id)
 
     dt_response = []
