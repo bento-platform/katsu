@@ -50,6 +50,13 @@ class DatasetsTest(AuthzAPITestCase, PhenoTestCase):
         with self.assertRaises(Dataset.DoesNotExist):
             self.dataset.refresh_from_db()
 
+    def test_del_dataset_forbidden(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, False)
+            r = self.client.delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.dataset.refresh_from_db()  # confirm this still exists in database, otherwise it'll raise DoesNotExist
+
     def test_dataset_summary(self):
         r = self.dt_authz_full_get(reverse("chord-dataset-summary", kwargs={"dataset_id": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
