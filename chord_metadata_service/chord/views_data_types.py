@@ -47,13 +47,13 @@ async def _filtered_query(data_type: str, project: str | None = None, dataset: s
     q: QuerySet | None = None
 
     if data_type in (dt.DATA_TYPE_PHENOPACKET, dt.DATA_TYPE_EXPERIMENT):
-        q = (Phenopacket if data_type == dt.DATA_TYPE_PHENOPACKET else Experiment).objects.all()
+        q = (Phenopacket if data_type == dt.DATA_TYPE_PHENOPACKET else Experiment).objects.prefetch_related("dataset")
         if dataset:
             try:
                 q = q.filter(dataset_id=dataset)
             except ValidationError:
                 raise ValueError("Dataset ID must be a UUID")
-        elif project:
+        if project:
             try:
                 q = q.filter(dataset__project_id=project)
             except ValidationError:
@@ -71,21 +71,19 @@ async def get_count_for_data_type(
     dataset: str | None,
     discovery: DiscoveryConfig,
     permissions: DataPermissionsDict,
-) -> int | None:
+) -> int:
     """
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
     provided, the count will be for the whole node.
     """
     q = await _filtered_query(data_type, project, dataset)
-    return None if q is None else thresholded_count(await q.acount(), discovery, permissions)
+    return thresholded_count(await q.acount(), discovery, permissions)
 
 
 async def get_last_ingested_for_data_type(data_type: str, project: str | None = None,
                                           dataset: str | None = None) -> dict | None:
 
     q = await _filtered_query(data_type, project, dataset)
-    if q is None:
-        return None
     latest_obj = await q.order_by('-created').afirst()
 
     if not latest_obj:
@@ -124,19 +122,19 @@ async def data_type_list(request: DrfRequest):
         discovery, dt_permissions = await asyncio.gather(
             get_request_discovery(request), get_discovery_data_type_permissions(request)
         )
-    except ValidationError as e:  # invalid UUID as ID
+    except ValidationError as e:
+        # UUID most likely - used to be handled in get_count_for_data_type inside make_data_type_response_object, but
+        # now triggered earlier by discovery scoping
         return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
 
-    dt_response = []
-    for dt_id, dt_d in dt.DATA_TYPES.items():
-        try:
-            dt_response.append(
-                await make_data_type_response_object(
-                    dt_id, dt_d, project_id, dataset_id, discovery, dt_permissions[dt_id]
-                )
+    dt_response: list[dict] = list(
+        await asyncio.gather(*(
+            make_data_type_response_object(
+                dt_id, dt_d, project_id, dataset_id, discovery, dt_permissions[dt_id]
             )
-        except ValueError as e:  # TODO: from where?
-            return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
+            for dt_id, dt_d in dt.DATA_TYPES.items()
+        ))
+    )
 
     dt_response.sort(key=lambda d: d["id"])
     return Response(dt_response)
@@ -161,17 +159,16 @@ async def data_type_detail(request: DrfRequest, data_type: str):
         discovery, dt_permissions = await asyncio.gather(
             get_request_discovery(request), get_discovery_data_type_permissions(request)
         )
-    except ValidationError as e:  # UUID most likely
+    except ValidationError as e:
+        # UUID most likely - used to be handled in get_count_for_data_type inside make_data_type_response_object, but
+        # now triggered earlier by discovery scoping
         return bad_request_from_exc(e)
 
-    try:
-        return Response(
-            await make_data_type_response_object(
-                data_type, dt.DATA_TYPES[data_type], project_id, dataset_id, discovery, dt_permissions[data_type]
-            )
+    return Response(
+        await make_data_type_response_object(
+            data_type, dt.DATA_TYPES[data_type], project_id, dataset_id, discovery, dt_permissions[data_type]
         )
-    except ValueError as e:  # TODO: from what
-        return bad_request_from_exc(e)
+    )
 
 
 @api_view(["GET"])
