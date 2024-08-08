@@ -253,16 +253,12 @@ async def dataset_data_type_summary(request: DrfRequest, dataset_id: str):
     discovery = await get_discovery(project_id, dataset_id)
     dt_permissions = await get_discovery_data_type_permissions(request, project_id, dataset_id)
 
-    dt_response = []
-    for dt_id, dt_d in dt.DATA_TYPES.items():
-        try:
-            dt_response.append(
-                await make_data_type_response_object(
-                    dt_id, dt_d, project_id, dataset_id, discovery, dt_permissions[dt_id]
-                )
-            )
-        except ValueError as e:
-            return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
+    dt_response = sorted(
+        await asyncio.gather(*(
+            make_data_type_response_object(dt_id, dt_d, project_id, dataset_id, discovery, dt_permissions[dt_id])
+            for dt_id, dt_d in dt.DATA_TYPES.items()
+        )),
+        key=lambda d: d["id"]
+    )
 
-    dt_response.sort(key=lambda d: d["id"])
     return Response(dt_response)
