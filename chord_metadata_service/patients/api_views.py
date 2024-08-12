@@ -251,7 +251,9 @@ class PublicListIndividuals(APIView):
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
 
-        if ind_qct == 0:
+        if ind_qct == 0 and not perm_pheno_query_data:
+            # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
+            # data permissions.
             logger.info(
                 f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
                 f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)}")
