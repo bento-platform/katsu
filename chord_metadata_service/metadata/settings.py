@@ -164,9 +164,9 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -181,7 +181,8 @@ if os.getenv('INSIDE_CANDIG', ''):
     MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
     MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
 
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_PREFLIGHT_MAX_AGE = 0
 
