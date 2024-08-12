@@ -74,9 +74,9 @@ class DatasetsTest(AuthzAPITestCase, PhenoTestCase):
             reverse("chord-dataset-data-type-summary", kwargs={"dataset_id": "not-a-uuid"}))
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def _dataset_data_type_url(self, dt: str):
+    def _dataset_data_type_url(self, dt: str, ds_id: str = ""):
         return reverse("chord-dataset-data-type", kwargs={
-            "dataset_id": self.dataset.identifier,
+            "dataset_id": ds_id or self.dataset.identifier,
             "data_type": dt
         })
 
@@ -123,8 +123,16 @@ class DatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 })
 
     def test_get_dataset_data_type_dne(self):
-        r = self.dt_authz_full_get(self._dataset_data_type_url("does-not-exist"))
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+        subtest_params = [
+            (self._dataset_data_type_url(DATA_TYPE_PHENOPACKET, str(uuid.uuid4())), status.HTTP_404_NOT_FOUND),
+            (self._dataset_data_type_url(DATA_TYPE_PHENOPACKET, "not-a-uuid"), status.HTTP_400_BAD_REQUEST),
+            (self._dataset_data_type_url("does-not-exist"), status.HTTP_404_NOT_FOUND),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                r = self.dt_authz_full_get(params[0])
+                self.assertEqual(r.status_code, params[1])
 
     def test_del_dataset_data_type(self):
         for dt in DATA_TYPES:

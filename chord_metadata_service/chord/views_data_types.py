@@ -193,7 +193,13 @@ async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
 @api_view(["GET", "DELETE"])
 @permission_classes([BentoDeferToHandler])
 async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str):
-    dataset = await Dataset.objects.aget(identifier=dataset_id)
+    try:
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except Dataset.DoesNotExist as e:
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
+    except ValidationError as e:
+        return bad_request_from_exc(e)
+
     project = await Project.objects.aget(datasets=dataset)
     project_id = str(project.identifier)
 
