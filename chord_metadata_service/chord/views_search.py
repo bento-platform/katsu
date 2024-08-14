@@ -33,11 +33,10 @@ from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.elastic import es
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
-from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
+from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
-
-from chord_metadata_service.utils import build_experiments_by_subject
+from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset
@@ -113,25 +112,6 @@ def experiment_query_results(query, params, options=None):
 
     return queryset.select_related(*EXPERIMENT_SELECT_REL) \
         .prefetch_related(*EXPERIMENT_PREFETCH)
-
-
-def get_biosamples_with_experiment_details(subject_ids):
-    """
-    The function returns a queryset where each entry represents a biosample obtained from a subject, along with
-    details of any associated experiment. If a biosample does not have an associated experiment, the experiment
-    details are returned as None.
-    """
-    biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
-        .values(
-            subject_id=F("phenopacket__subject_id"),
-            biosample_id=F("id"),
-            experiment_id=F("experiment__id"),
-            experiment_type=F("experiment__experiment_type"),
-            study_type=F("experiment__study_type"),
-            tissue_id=F("sampled_tissue__id"),
-            tissue_label=F("sampled_tissue__label")
-        )
-    return biosamples_exp_tissue_details
 
 
 def phenopacket_query_results(query, params, options=None):

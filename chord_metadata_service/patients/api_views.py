@@ -17,8 +17,6 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from chord_metadata_service.chord.views_search import build_experiments_by_subject
-from chord_metadata_service.chord.views_search import get_biosamples_with_experiment_details
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
@@ -39,6 +37,8 @@ from chord_metadata_service.restapi.api_renderers import (
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
+
 
 from .serializers import IndividualSerializer
 from .models import Individual
@@ -98,11 +98,11 @@ class IndividualViewSet(viewsets.ModelViewSet):
             experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
             results = [
                 {
-                    "subject_id": data['subject_id'],
-                    "alternate_ids": data['alternate_ids'],
-                    "num_experiments": data['num_experiments'],
-                    "biosamples": data['biosamples'],
-                    "experiments_with_biosamples": experiments_with_biosamples.get(data['subject_id'], [])
+                    "subject_id": data["subject_id"],
+                    "alternate_ids": data["alternate_ids"],
+                    "num_experiments": data["num_experiments"],
+                    "biosamples": data["biosamples"],
+                    "experiments_with_biosamples": experiments_with_biosamples.get(data["subject_id"], [])
                 }
                 for data in qs
             ]
