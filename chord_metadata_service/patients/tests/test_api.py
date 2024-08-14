@@ -188,7 +188,7 @@ class IndividualWithPhenopacketSearchTest(APITestCase):
         self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
         response_obj_1 = get_resp_1.json()
         self.assertEqual(len(response_obj_1['results']), 1)
-        self.assertEqual(len(response_obj_1['results'][0]), 4)  # 4 fields in the bento search response
+        self.assertEqual(len(response_obj_1['results'][0]), 5)  # 5 fields in the bento search response
 
     def test_individual_phenopackets(self):
         get_resp = self.client.get(f"/api/individuals/{self.individual_one.id}/phenopackets")
