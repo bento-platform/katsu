@@ -39,7 +39,6 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
-
 from .serializers import IndividualSerializer
 from .models import Individual
 from .filters import IndividualFilter
@@ -98,10 +97,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
             experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
             results = [
                 {
-                    "subject_id": data["subject_id"],
-                    "alternate_ids": data["alternate_ids"],
-                    "num_experiments": data["num_experiments"],
-                    "biosamples": data["biosamples"],
+                    **data,
                     "experiments_with_biosamples": experiments_with_biosamples.get(data["subject_id"], [])
                 }
                 for data in qs
