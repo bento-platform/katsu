@@ -17,7 +17,7 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
-from chord_metadata_service.chord.views_search import append_biosamples_details
+from chord_metadata_service.chord.views_search import build_experiments_by_subject
 from chord_metadata_service.chord.views_search import get_biosamples_with_experiment_details
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
@@ -95,7 +95,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
                     []
                 )
             )
-            experiments_with_biosamples = append_biosamples_details(biosamples_experiments_details)
+            experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
             results = [
                 {
                     "subject_id": data['subject_id'],

@@ -37,10 +37,10 @@ from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 
+from chord_metadata_service.utils import build_experiments_by_subject
+
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
 from .models import Dataset
-
-from collections import defaultdict
 
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
@@ -134,24 +134,6 @@ def get_biosamples_with_experiment_details(subject_ids):
     return biosamples_exp_tissue_details
 
 
-def append_biosamples_details(biosamples_experiments_details):
-    experiments_with_biosamples = defaultdict(list)
-    for b in biosamples_experiments_details:
-        experiments_with_biosamples[b["subject_id"]].append({
-            "biosample_id": b["biosample_id"],
-            "sampled_tissue": {
-                "id": b["tissue_id"],
-                "label": b["tissue_label"]
-            },
-            "experiment": {
-                "experiment_id": b["experiment_id"],
-                "experiment_type": b["experiment_type"],
-                "study_type": b["study_type"]
-            }
-        })
-    return experiments_with_biosamples
-
-
 def phenopacket_query_results(query, params, options=None):
     queryset = Phenopacket.objects \
         .filter(id__in=data_type_results(query, params, "id"))
@@ -178,7 +160,7 @@ def phenopacket_query_results(query, params, options=None):
         biosamples_experiments_details = get_biosamples_with_experiment_details(phenopacket_ids)
 
         # Group the experiments with biosamples by subject_id
-        experiments_with_biosamples = append_biosamples_details(biosamples_experiments_details)
+        experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
 
         # Add the experiments_with_biosamples data to the results
         for result in results:
