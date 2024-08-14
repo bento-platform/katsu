@@ -37,6 +37,7 @@ from chord_metadata_service.restapi.api_renderers import (
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .serializers import IndividualSerializer
 from .models import Individual
@@ -82,6 +83,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
             # which serve a similar purpose)
             individual_ids = filterset.qs.values_list("id", flat=True)
             # TODO: code duplicated from chord/view_search.py
+            biosamples_experiments_details = get_biosamples_with_experiment_details(individual_ids)
             qs = Phenopacket.objects.filter(subject__id__in=individual_ids).values(
                 "subject_id",
                 alternate_ids=Coalesce(F("subject__alternate_ids"), [])
@@ -92,9 +94,17 @@ class IndividualViewSet(viewsets.ModelViewSet):
                     []
                 )
             )
-            return Response(build_search_response(list(qs), start))
+            experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
+            results = [
+                {
+                    **data,
+                    "experiments_with_biosamples": experiments_with_biosamples.get(data["subject_id"], [])
+                }
+                for data in qs
+            ]
+            return Response(build_search_response(results, start))
 
-        return super(IndividualViewSet, self).list(request, *args, **kwargs)
+        return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["GET", "POST"])
     def phenopackets(self, request, *_args, **_kwargs):
