@@ -4,11 +4,13 @@ import re
 from adrf.views import APIView
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
+from copy import deepcopy
 from datetime import datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
 from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Coalesce
+from django.http.request import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import viewsets, filters, mixins, serializers, status
@@ -24,6 +26,7 @@ from chord_metadata_service.discovery.censorship import get_max_query_parameters
 from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
+from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.discovery.utils import (
     get_request_discovery,
     get_discovery_queryable_fields,
@@ -167,11 +170,17 @@ class IndividualBatchViewSet(BatchViewSet):
 
 
 async def public_discovery_filter_queryset(
-    request: DrfRequest, dt_permissions: DataTypeDiscoveryPermissions, queryset: QuerySet
+    discovery: DiscoveryConfig, request: DrfRequest, dt_permissions: DataTypeDiscoveryPermissions, queryset: QuerySet
 ):
-    # Check query parameters validity
-    qp = request.query_params
-    discovery = await get_request_discovery(request)
+    # Process query parameters and check validity
+
+    qp: QueryDict = deepcopy(request.query_params)
+
+    # - remove project/dataset (i.e., scope) query parameters
+    if "project" in qp:
+        del qp["project"]
+    if "dataset" in qp:
+        del qp["dataset"]
 
     queryable_fields = get_discovery_queryable_fields(discovery)
     queried_fields = list(set(qp.keys()))
@@ -252,7 +261,7 @@ class PublicListIndividuals(APIView):
 
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = await public_discovery_filter_queryset(request, dt_permissions, base_qs)
+            filtered_qs = await public_discovery_filter_queryset(discovery, request, dt_permissions, base_qs)
         except ValidationError as e:
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
