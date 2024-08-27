@@ -439,14 +439,19 @@ def valid_biosample_1(individual, procedure=VALID_PROCEDURE_1):
     )
 
 
-def valid_biosample_2(individual, procedure=VALID_PROCEDURE_2):
+def valid_biosample_2(individual, procedure=VALID_PROCEDURE_2, **kwargs):
+    if "sampled_tissue" in kwargs:
+        sampled_tissue = kwargs["sampled_tissue"]
+    else:
+        sampled_tissue = {
+            "id": "UBERON_0001256",
+            "label": "urinary bladder"
+        }
+
     return dict(
         id='biosample_id:2',
         individual=individual,
-        sampled_tissue={
-            "id": "UBERON_0001256",
-            "label": "urinary bladder"
-        },
+        sampled_tissue=sampled_tissue,
         description='This is a test biosample.',
         taxonomy={
             "id": "NCBITaxon:9606",
