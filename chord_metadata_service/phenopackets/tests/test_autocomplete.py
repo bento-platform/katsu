@@ -71,8 +71,6 @@ class BiosapleSampledTissueAutocompleteWithNoneTest(APITestCase):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual))
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(self.individual, sampled_tissue=None))
-        import sys
-        print(self.biosample_2.sampled_tissue, file=sys.stderr)
 
     def test_autocomplete_response_no_q(self):
         # no q set used to trigger an error, since it was assumed sampled_tissue would be set; this is a regression test
