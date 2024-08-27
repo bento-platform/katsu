@@ -51,6 +51,12 @@ class BiosapleSampledTissueAutocompleteTest(APITestCase):
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual))
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(self.individual))
 
+    def test_autocomplete_response_no_q(self):
+        response = self.client.get('/api/biosample_sampled_tissue_autocomplete')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data["results"]), 2)
+
     def test_autocomplete_response(self):
         response = self.client.get('/api/biosample_sampled_tissue_autocomplete', {'q': 'bladder'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
