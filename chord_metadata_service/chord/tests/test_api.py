@@ -65,7 +65,42 @@ class CreateProjectAPITest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
-# TODO: Update Project
+class UpdateProjectTest(APITestCase):
+    def setUp(self) -> None:
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1),
+                                 content_type="application/json")
+
+        self.project = r.json()
+        self.update_body = {**self.without_times(self.project), "title": "Project 1!"}
+
+    @staticmethod
+    def without_times(d: dict) -> dict:
+        return {k: v for k, v in d.items() if k not in ("updated", "created")}
+
+    def test_project_update(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body),
+                                content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(self.without_times(r.json()), self.without_times(self.update_body))
+
+    def test_project_update_not_found(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.put("/api/projects/not-found", data=json.dumps(self.update_body),
+                                content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_project_update_forbidden(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, False)
+            r = self.client.put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body),
+                                content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class DeleteProjectTest(APITestCase):
     def setUp(self) -> None:
