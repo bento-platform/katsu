@@ -66,6 +66,11 @@ class AuthzAPITestCase(APITestCase):
 
 
 class PermissionsTestCaseMixin:
+    permissions_none: DataPermissionsDict = {
+        "bool_": False,
+        "counts": False,
+        "data": False,
+    }
     permissions_bool: DataPermissionsDict = {
         "bool_": True,
         "counts": False,

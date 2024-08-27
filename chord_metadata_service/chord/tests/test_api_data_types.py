@@ -34,67 +34,33 @@ class DataTypeHelperTest(TestCase, PermissionsTestCaseMixin):
             meta_data=self.meta_data,
         )
 
-    async def test_data_type_count(self):
-        self.assertEqual(
-            await get_count_for_data_type(
-                DATA_TYPE_PHENOPACKET,
-                None,
-                None,
-                DISCOVERY_CONFIG_TEST,
-                self.permissions_full,
-            ),
-            1
+    @staticmethod
+    async def get_count_for_phenopackets(permissions, project=None, dataset=None):
+        return await get_count_for_data_type(
+            DATA_TYPE_PHENOPACKET, project, dataset, DISCOVERY_CONFIG_TEST, permissions
         )
 
+    async def test_data_type_count(self):
+        self.assertEqual(await self.get_count_for_phenopackets(self.permissions_full), 1)
+
     async def test_data_type_count_censored(self):
-        self.assertEqual(
-            await get_count_for_data_type(
-                DATA_TYPE_PHENOPACKET,
-                None,
-                None,
-                DISCOVERY_CONFIG_TEST,
-                self.permissions_counts,
-            ),
-            0  # censored
-        )
+        self.assertEqual(await self.get_count_for_phenopackets(self.permissions_counts), 0)  # censored
+        self.assertEqual(await self.get_count_for_phenopackets(self.permissions_bool), 0)  # censored
+        self.assertEqual(await self.get_count_for_phenopackets(self.permissions_none), 0)  # censored
 
     async def test_data_type_count_bad_project_id(self):
         with self.assertRaises(ValueError):
-            await get_count_for_data_type(
-                DATA_TYPE_PHENOPACKET,
-                "not-uuid",
-                None,
-                DISCOVERY_CONFIG_TEST,
-                self.permissions_full,
-            )
+            await self.get_count_for_phenopackets(self.permissions_full, project="not-uuid")
 
         with self.assertRaises(ValueError):
-            await get_count_for_data_type(
-                DATA_TYPE_PHENOPACKET,
-                "not-uuid",
-                str(uuid.uuid4()),
-                DISCOVERY_CONFIG_TEST,
-                self.permissions_full,
-            )
+            await self.get_count_for_phenopackets(self.permissions_full, project="not-uuid", dataset=str(uuid.uuid4()))
 
     async def test_data_type_count_bad_dataset_id(self):
         with self.assertRaises(ValueError):
-            await get_count_for_data_type(
-                DATA_TYPE_PHENOPACKET,
-                str(uuid.uuid4()),
-                "not-uuid",
-                DISCOVERY_CONFIG_TEST,
-                self.permissions_full,
-            )
+            await self.get_count_for_phenopackets(self.permissions_full, project=str(uuid.uuid4()), dataset="not-uuid")
 
         with self.assertRaises(ValueError):
-            await get_count_for_data_type(
-                DATA_TYPE_PHENOPACKET,
-                None,
-                "not-uuid",
-                DISCOVERY_CONFIG_TEST,
-                self.permissions_full,
-            )
+            await self.get_count_for_phenopackets(self.permissions_full, project=None, dataset="not-uuid")
 
     async def test_data_type_count_bad_data_type(self):
         with self.assertRaises(ValueError):
@@ -137,16 +103,24 @@ class DataTypeTest(AuthzAPITestCase, PermissionsTestCaseMixin):
         })
 
     def test_data_type_detail_no_counts(self):
-        # bool permission - no counts
-        r = self.dt_authz_bool_get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), {
+        kwargs = {"data_type": DATA_TYPE_PHENOPACKET}
+        expected_res = {
             "id": DATA_TYPE_PHENOPACKET,
             "label": "Clinical Data",
             **DATA_TYPES[DATA_TYPE_PHENOPACKET],
             "queryable": True,
             "last_ingested": None,
-        })
+        }
+
+        # bool permission - no counts
+        r = self.dt_authz_bool_get(reverse("data-type-detail", kwargs=kwargs))
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(r.json(), expected_res)
+
+        # no data permissions - no counts
+        r = self.dt_authz_none_get(reverse("data-type-detail", kwargs=kwargs))
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(r.json(), expected_res)
 
     def test_data_type_detail_non_uuid_project(self):
         # Non-UUID project
