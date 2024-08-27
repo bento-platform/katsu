@@ -21,7 +21,6 @@ __all__ = [
     "get_project_id_and_dataset_id_from_request",
     "get_discovery_queryable_fields",
     "get_discovery_data_type_permissions",
-    "get_discovery_field_permissions",
     "get_discovery_field_set_permissions",
 ]
 
@@ -113,21 +112,6 @@ async def get_discovery_data_type_permissions(
     )
 
 
-def get_discovery_field_permissions(
-    discovery: DiscoveryConfig,
-    field: str,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    fields: dict[str, DiscoveryFieldProps] | None = None,
-) -> DataPermissionsDict:
-    qf = fields or discovery["fields"]
-
-    if field not in qf:
-        raise ValidationError(f"Unsupported field used in query: {field}")
-
-    mn, _ = get_public_model_name_and_field_path(qf[field]["mapping"])
-    return dt_permissions[PUBLIC_MODEL_NAMES_TO_DATA_TYPE[mn]]
-
-
 def get_discovery_field_set_permissions(
     discovery: DiscoveryConfig,
     fields_accessed: Iterable[str] | None,
@@ -149,10 +133,9 @@ def get_discovery_field_set_permissions(
             raise ValidationError(f"Unsupported field used in query: {field}")
 
         mn, _ = get_public_model_name_and_field_path(discovery_fields[field]["mapping"])
-
-        if (f_dt := PUBLIC_MODEL_NAMES_TO_DATA_TYPE.get(mn)) is not None:
-            dts_accessed.add(f_dt)
-            field_dts[field] = f_dt
+        f_dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[mn]
+        dts_accessed.add(f_dt)
+        field_dts[field] = f_dt
 
     field_permissions: FieldDiscoveryPermissions = {f: dt_permissions[field_dts[f]] for f in field_set}
 
