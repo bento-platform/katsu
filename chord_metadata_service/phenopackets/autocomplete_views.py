@@ -56,7 +56,13 @@ class BiosampleSampledTissueAutocomplete(autocomplete.Select2QuerySetView):
         return item.sampled_tissue["label"]
 
     def get_queryset(self):
-        qs = Biosample.objects.all().distinct("sampled_tissue__label").order_by("sampled_tissue__label")
+        qs = (
+            Biosample.objects
+            .filter(sampled_tissue__isnull=False)
+            .distinct("sampled_tissue__label")
+            .order_by("sampled_tissue__label")
+        )
+
         if self.q:
             # looks for a matching string everywhere in sampled_tissue label field
             qs = qs.filter(sampled_tissue__label__icontains=self.q)
