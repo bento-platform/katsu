@@ -13,6 +13,7 @@ from .constants import (
     INVALID_DATS_CREATORS,
     valid_project_json_schema,
 )
+from .helpers import ProjectTestCase
 from ..models import Project, Dataset, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import mock_authz_eval_one_result, mock_authz_eval_result
 
@@ -273,7 +274,31 @@ class CreateDatasetTest(APITestCase):
 
 
 # TODO: Update Dataset
-# TODO: Delete Dataset
+
+
+class DeleteDatasetTest(APITestCase, ProjectTestCase):
+
+    def test_delete_dataset(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.delete(f"/api/datasets/{self.dataset.identifier}")
+
+        assert r.status_code == status.HTTP_204_NO_CONTENT
+
+        with self.assertRaises(Dataset.DoesNotExist):
+            self.dataset.refresh_from_db()
+
+    def test_delete_dataset_forbidden(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, False)
+            r = self.client.delete(f"/api/datasets/{self.dataset.identifier}")
+
+        assert r.status_code == status.HTTP_403_FORBIDDEN
+        self.dataset.refresh_from_db()  # must not raise DoesNotExist
+
+    def test_delete_dataset_not_found(self):
+        r = self.client.delete(f"/api/datasets/{uuid.uuid4()}")
+        assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
 class CreateProjectJsonSchema(APITestCase):
