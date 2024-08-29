@@ -39,30 +39,30 @@ class AuthzAPITestCase(APITestCase):
         "full": dt_full_eval_res,
     }
 
-    def dt_get(self, level: Literal["none", "bool", "counts", "full"], u: str, *args, **kwargs):
+    def dt_get(self, level: Literal["none", "bool", "counts", "full"], url: str, *args, **kwargs):
         with aioresponses() as m:
             mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
-            return self.client.get(u, *args, **kwargs)
+            return self.client.get(url, *args, **kwargs)
 
-    def dt_post(self, level: Literal["none", "bool", "counts", "full"], u: str, *args, **kwargs):
+    def dt_post(self, level: Literal["none", "bool", "counts", "full"], url: str, *args, **kwargs):
         with aioresponses() as m:
             mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
-            return self.client.post(u, *args, **kwargs)
+            return self.client.post(url, *args, **kwargs)
 
-    def dt_authz_none_get(self, u: str, *args, **kwargs):
-        return self.dt_get("none", u, *args, **kwargs)
+    def dt_authz_none_get(self, url: str, *args, **kwargs):
+        return self.dt_get("none", url, *args, **kwargs)
 
-    def dt_authz_bool_get(self, u: str, *args, **kwargs):
-        return self.dt_get("bool", u, *args, **kwargs)
+    def dt_authz_bool_get(self, url: str, *args, **kwargs):
+        return self.dt_get("bool", url, *args, **kwargs)
 
-    def dt_authz_counts_get(self, u: str, *args, **kwargs):
-        return self.dt_get("counts", u, *args, **kwargs)
+    def dt_authz_counts_get(self, url: str, *args, **kwargs):
+        return self.dt_get("counts", url, *args, **kwargs)
 
-    def dt_authz_full_get(self, u: str, *args, **kwargs):
-        return self.dt_get("full", u, *args, **kwargs)
+    def dt_authz_full_get(self, url: str, *args, **kwargs):
+        return self.dt_get("full", url, *args, **kwargs)
 
-    def dt_authz_full_post(self, u: str, *args, **kwargs):
-        return self.dt_post("full", u, *args, **kwargs)
+    def dt_authz_full_post(self, url: str, *args, **kwargs):
+        return self.dt_post("full", url, *args, **kwargs)
 
 
 class PermissionsTestCaseMixin:
