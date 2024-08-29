@@ -1,9 +1,20 @@
-from django.test import TestCase
-from django.db.models import Model
+import json
 
+from django.db.models import Model
+from django.test import TestCase
+from django.urls import reverse
+
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Dataset, Project
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID_PROJECT_1
 from chord_metadata_service.restapi.utils import remove_computed_properties
+
+
+__all__ = [
+    "ProjectTestCase",
+    "ModelFieldsTestMixin",
+    "AuthzAPITestCaseWithProjectJSON",
+]
 
 
 class ProjectTestCase(TestCase):
@@ -61,3 +72,10 @@ class ModelFieldsTestMixin(TestCase):
             if gt_value:
                 # we expect the db_obj to contain this ground truth value
                 self.assertEqual(getattr(db_obj, model_field), gt_value)
+
+
+class AuthzAPITestCaseWithProjectJSON(AuthzAPITestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        r = self.one_authz_post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1))
+        self.project = r.json()

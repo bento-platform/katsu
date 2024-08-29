@@ -1,11 +1,11 @@
 import json
 import uuid
 import re
-from aioresponses import aioresponses
+
 from django.urls import reverse
 from rest_framework import status
 
-from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase, mock_authz_eval_one_result
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
@@ -43,17 +43,13 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(str(self.project.identifier), str(r.data["project"]))
 
     def test_del_dataset(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
+        r = self.one_authz_delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(Dataset.DoesNotExist):
             self.dataset.refresh_from_db()
 
     def test_del_dataset_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
+        r = self.one_no_authz_delete(reverse("chord-dataset-detail", kwargs={"dataset_id": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.dataset.refresh_from_db()  # confirm this still exists in database, otherwise it'll raise DoesNotExist
 
@@ -140,9 +136,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 continue
 
             with self.subTest(params=(dt,)):
-                with aioresponses() as m:
-                    mock_authz_eval_one_result(m, True)
-                    r = self.client.delete(self._dataset_data_type_url(dt))
+                r = self.one_authz_delete(self._dataset_data_type_url(dt))
                 self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
                 with self.assertRaises(self.entities_by_data_type[dt]["class"].DoesNotExist):
                     self.entities_by_data_type[dt]["entity"].refresh_from_db()
@@ -153,9 +147,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 continue
 
             with self.subTest(params=(dt,)):
-                with aioresponses() as m:
-                    mock_authz_eval_one_result(m, False)
-                    r = self.client.delete(self._dataset_data_type_url(dt))
+                r = self.one_no_authz_delete(self._dataset_data_type_url(dt))
                 self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
                 self.entities_by_data_type[dt]["entity"].refresh_from_db()  # Should NOT raise DoesNotExist
 
@@ -170,13 +162,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
             "title": "Updated title"
         }
 
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.put(
-                url,
-                data=json.dumps(payload),
-                content_type='application/json'
-            )
+        r = self.one_authz_put(url, data=json.dumps(payload))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
         # Check the updated dats file

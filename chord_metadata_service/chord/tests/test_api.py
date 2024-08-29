@@ -1,10 +1,8 @@
 import json
 import uuid
 
-from aioresponses import aioresponses
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
 from .constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
@@ -13,12 +11,12 @@ from .constants import (
     INVALID_DATS_CREATORS,
     valid_project_json_schema,
 )
-from .helpers import ProjectTestCase
+from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
 from ..models import Project, Dataset, ProjectJsonSchema
-from chord_metadata_service.authz.tests.helpers import mock_authz_eval_one_result, mock_authz_eval_result
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 
 
-class CreateProjectAPITest(APITestCase):
+class CreateProjectAPITest(AuthzAPITestCase):
     def setUp(self) -> None:
         self.valid_payloads = [
             VALID_PROJECT_1,
@@ -42,9 +40,7 @@ class CreateProjectAPITest(APITestCase):
 
     def test_create_project(self):
         for i, p in enumerate(self.valid_payloads, 1):
-            with aioresponses() as m:
-                mock_authz_eval_one_result(m, True)
-                r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
+            r = self.one_authz_post(reverse("project-list"), data=json.dumps(p))
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Project.objects.count(), i)
             self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
@@ -53,27 +49,17 @@ class CreateProjectAPITest(APITestCase):
 
     def test_create_project_invalid(self):
         for p in self.invalid_payloads:
-            with aioresponses() as m:
-                mock_authz_eval_one_result(m, True)
-                r = self.client.post(reverse("project-list"), data=json.dumps(p), content_type="application/json")
+            r = self.one_authz_post(reverse("project-list"), data=json.dumps(p))
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_project_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.post(
-                reverse("project-list"), data=json.dumps(self.valid_payloads[0]), content_type="application/json")
+        r = self.one_no_authz_post(reverse("project-list"), data=json.dumps(self.valid_payloads[0]))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class UpdateProjectTest(APITestCase):
+class UpdateProjectTest(AuthzAPITestCaseWithProjectJSON):
     def setUp(self) -> None:
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1),
-                                 content_type="application/json")
-
-        self.project = r.json()
+        super().setUp()
         self.update_body = {**self.without_times(self.project), "title": "Project 1!"}
 
     @staticmethod
@@ -81,62 +67,36 @@ class UpdateProjectTest(APITestCase):
         return {k: v for k, v in d.items() if k not in ("updated", "created")}
 
     def test_project_update(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body),
-                                content_type="application/json")
+        r = self.one_authz_put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertDictEqual(self.without_times(r.json()), self.without_times(self.update_body))
 
     def test_project_update_not_found(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.put("/api/projects/not-found", data=json.dumps(self.update_body),
-                                content_type="application/json")
+        r = self.one_authz_put("/api/projects/not-found", data=json.dumps(self.update_body))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_project_update_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body),
-                                content_type="application/json")
+        r = self.one_no_authz_put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class DeleteProjectTest(APITestCase):
-    def setUp(self) -> None:
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1),
-                                 content_type="application/json")
-
-        self.project = r.json()
-
+class DeleteProjectTest(AuthzAPITestCaseWithProjectJSON):
     def test_delete_project(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.delete(f"/api/projects/{self.project['identifier']}")
-            self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+        r = self.one_authz_delete(f"/api/projects/{self.project['identifier']}")
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_project_not_found(self):
         r = self.client.delete("/api/projects/not-found")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_project_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.delete(f"/api/projects/{self.project['identifier']}")
-            self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+        r = self.one_no_authz_delete(f"/api/projects/{self.project['identifier']}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class CreateDatasetTest(APITestCase):
+class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
     def setUp(self) -> None:
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1),
-                                 content_type="application/json")
-
-        self.project = r.json()
+        super().setUp()
 
         self.valid_payloads = [
             valid_dataset_1(self.project["identifier"]),
@@ -180,9 +140,7 @@ class CreateDatasetTest(APITestCase):
 
     def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
-            with aioresponses() as m:
-                mock_authz_eval_one_result(m, True)
-                r = self.client.post('/api/datasets', data=json.dumps(d), content_type="application/json")
+            r = self.one_authz_post("/api/datasets", data=json.dumps(d))
 
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
@@ -193,34 +151,22 @@ class CreateDatasetTest(APITestCase):
 
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
-            with aioresponses() as m:
-                mock_authz_eval_one_result(m, True)
-                r = self.client.post("/api/datasets", data=json.dumps(d), content_type="application/json")
-
+            r = self.one_authz_post("/api/datasets", data=json.dumps(d))
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_dataset_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.post(
-                "/api/datasets", data=json.dumps(self.valid_payloads[0]), content_type="application/json")
-
+        r = self.one_no_authz_post("/api/datasets", data=json.dumps(self.valid_payloads[0]))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
 
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.post('/api/datasets', data=json.dumps(payload),
-                                 content_type="application/json")
-
-            mock_authz_eval_one_result(m, True)
-            r_invalid = self.client.post('/api/datasets', data=json.dumps(self.dats_invalid_payload),
-                                         content_type="application/json")
-
+        r = self.one_authz_post('/api/datasets', data=json.dumps(payload))
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        r_invalid = self.one_authz_post("/api/datasets", data=json.dumps(self.dats_invalid_payload))
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
+
         self.assertEqual(Dataset.objects.count(), 1)
 
         dataset_id = Dataset.objects.first().identifier
@@ -251,15 +197,14 @@ class CreateDatasetTest(APITestCase):
         r = self.client.post("/api/resources", data=json.dumps(resource), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.post(
-                "/api/datasets",
-                data=json.dumps({
-                    **valid_dataset_1(self.project["identifier"]),
-                    "additional_resources": [resource["id"]],
-                }),
-                content_type="application/json")
+        r = self.one_authz_post(
+            "/api/datasets",
+            data=json.dumps({
+                **valid_dataset_1(self.project["identifier"]),
+                "additional_resources": [resource["id"]],
+            }),
+        )
+
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
         dataset_id = Dataset.objects.first().identifier
@@ -273,7 +218,7 @@ class CreateDatasetTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class UpdateDatasetTest(APITestCase, ProjectTestCase):
+class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def setUp(self):
         super().setUp()
@@ -286,49 +231,31 @@ class UpdateDatasetTest(APITestCase, ProjectTestCase):
         }
 
     def test_update_dataset(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update),
-                                content_type="application/json")
-
+        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update))
         assert r.status_code == status.HTTP_200_OK
         self.dataset.refresh_from_db()
         assert self.dataset.title == self.valid_update["title"]
 
     def test_update_dataset_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update),
-                                content_type="application/json")
-
+        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update))
         assert r.status_code == status.HTTP_403_FORBIDDEN
 
     def test_update_dataset_not_found(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.put(f"/api/datasets/{uuid.uuid4()}", data=json.dumps(self.valid_update),
-                                content_type="application/json")
-
+        r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", data=json.dumps(self.valid_update))
         assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-class DeleteDatasetTest(APITestCase, ProjectTestCase):
+class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_delete_dataset(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = self.client.delete(f"/api/datasets/{self.dataset.identifier}")
-
+        r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == status.HTTP_204_NO_CONTENT
 
-        with self.assertRaises(Dataset.DoesNotExist):
+        with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
             self.dataset.refresh_from_db()
 
     def test_delete_dataset_forbidden(self):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, False)
-            r = self.client.delete(f"/api/datasets/{self.dataset.identifier}")
-
+        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == status.HTTP_403_FORBIDDEN
         self.dataset.refresh_from_db()  # must not raise DoesNotExist
 
@@ -337,16 +264,10 @@ class DeleteDatasetTest(APITestCase, ProjectTestCase):
         assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
-class CreateProjectJsonSchema(APITestCase):
+class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
 
     def setUp(self) -> None:
-        # Create project
-        with aioresponses() as m:
-            mock_authz_eval_result(m, [[True]])
-            r = self.client.post(
-                reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
-
-        self.project = r.json()
+        super().setUp()
 
         # Valid payload and project_id
         self.project_json_schema_valid_payload = valid_project_json_schema(project_id=self.project["identifier"])
