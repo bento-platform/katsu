@@ -1,39 +1,21 @@
 import uuid
 
 from django.urls import reverse
-from django.test import TestCase
 from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase, PermissionsTestCaseMixin
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
-from chord_metadata_service.patients import models as pa_m
-from chord_metadata_service.phenopackets.tests import constants as ph_c
-from chord_metadata_service.phenopackets import models as ph_m
+from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 
 from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from ..models import Project, Dataset
 from ..views_data_types import get_count_for_data_type
-from .constants import VALID_DATA_USE_1
 
 POST_GET = ("POST", "GET")
 
 DATA_TYPE_NOT_REAL = "not_a_real_data_type"
 
 
-class DataTypeHelperTest(TestCase, PermissionsTestCaseMixin):
-    def setUp(self):
-        p = Project.objects.create(title="Project 1", description="")
-        d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1, project=p)
-
-        self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
-        self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-        self.phenopacket = ph_m.Phenopacket.objects.create(
-            id="phenopacket_id:1",
-            subject=self.individual_1,
-            dataset=d,
-            meta_data=self.meta_data,
-        )
-
+class DataTypeHelperTest(PhenoTestCase, PermissionsTestCaseMixin):
     @staticmethod
     async def get_count_for_phenopackets(permissions, project=None, dataset=None):
         return await get_count_for_data_type(
