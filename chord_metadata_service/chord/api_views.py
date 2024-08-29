@@ -23,7 +23,7 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
 from chord_metadata_service.authz.middleware import authz_middleware as authz
-from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler, OverrideOrSuperUserOnly
+from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
@@ -43,9 +43,9 @@ logger = logging.getLogger(__name__)
 __all__ = ["ProjectViewSet", "DatasetViewSet"]
 
 
-def bad_request(request: DrfRequest):
+def bad_request(request: DrfRequest, *args):
     authz.mark_authz_done(request)
-    return Response(errors.bad_request_error(), status=status.HTTP_400_BAD_REQUEST)
+    return Response(errors.bad_request_error(*args), status=status.HTTP_400_BAD_REQUEST)
 
 
 def forbidden(request: DrfRequest):
@@ -220,7 +220,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         project_id = request.data.get("project")
 
         if project_id is None:
-            return bad_request(request)  # side effect: sets authz done flag
+            return bad_request(request, "No project ID in request body")  # side effect: sets authz done flag
 
         if not (await authz.async_evaluate_one(request, build_resource(project=project_id), P_CREATE_DATASET)):
             return forbidden(request)  # side effect: sets authz done flag
@@ -228,7 +228,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         authz.mark_authz_done(request)
 
         if error_msg := self._parse_dats(request):
-            return Response(error_msg, status.HTTP_400_BAD_REQUEST)
+            return bad_request(request, error_msg)
 
         return await sync_to_async(super().create)(request, *args, **kwargs)
 
@@ -239,22 +239,25 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         except Http404:
             return not_found(request)  # side effect: sets authz done flag
 
+        dataset_project_id = str(dataset.project_id)
+
         if not (
             await authz.async_evaluate_one(
                 request,
-                build_resource(project=str(dataset.project_id), dataset=str(dataset.identifier)),
+                build_resource(project=dataset_project_id, dataset=str(dataset.identifier)),
                 P_EDIT_DATASET,
             )
         ):
             return forbidden(request)  # side effect: sets authz done flag
 
         # Do not allow datasets to change project
-        # TODO
+        if request.data["project"] != dataset_project_id:
+            return bad_request(request, "Dataset project ID cannot change")
 
         authz.mark_authz_done(request)
 
         if error_msg := self._parse_dats(request):
-            return Response(error_msg, status.HTTP_400_BAD_REQUEST)
+            return bad_request(request, error_msg)
 
         return await sync_to_async(super().update)(request, *args, **kwargs)  # TODO: handle invalid
 

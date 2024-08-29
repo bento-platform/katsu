@@ -223,6 +223,8 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
     def setUp(self):
         super().setUp()
 
+        self.project_2 = Project.objects.create(title="Project 2", description="")
+
         self.valid_update = {
             "title": self.dataset.title + "!",
             "description": self.dataset.description,
@@ -235,6 +237,19 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         assert r.status_code == status.HTTP_200_OK
         self.dataset.refresh_from_db()
         assert self.dataset.title == self.valid_update["title"]
+
+    def test_update_dataset_changed_project(self):
+        r = self.one_authz_put(
+            f"/api/datasets/{self.dataset.identifier}",
+            data=json.dumps({
+                **self.valid_update,
+                "project": str(self.project_2.identifier),
+            })
+        )
+        assert r.status_code == status.HTTP_400_BAD_REQUEST
+        res = r.json()
+        assert res["message"] == "Bad Request"
+        assert res["errors"][0]["message"] == "Dataset project ID cannot change"
 
     def test_update_dataset_forbidden(self):
         r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update))
