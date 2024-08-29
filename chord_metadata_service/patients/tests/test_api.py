@@ -347,8 +347,8 @@ class PublicListIndividualsTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_public_project_does_not_exist(self):
-        r = self.dt_authz_bool_get(f"f/api/public?project={uuid.uuid4()}")
+    def test_public_project_dataset_does_not_exist(self):
+        r = self.dt_authz_counts_get(f"/api/public?project={uuid.uuid4()}&dataset={uuid.uuid4()}")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
