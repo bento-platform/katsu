@@ -14,7 +14,7 @@ from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.chord.tests import constants
 
 
-class DatasetsTest(AuthzAPITestCase, PhenoTestCase):
+class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def setUp(self) -> None:
         super().setUp()
