@@ -1,12 +1,13 @@
-import json
 import csv
+import json
 import io
 import random
+import uuid
+
 from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
-from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery import responses as dres
@@ -338,12 +339,17 @@ class PublicListIndividualsTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_get_forbidden_none(self):
         r = self.dt_authz_none_get("/api/public")
-        self.assertEqual(r.status_code, HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_get_forbidden_bool(self):
         r = self.dt_authz_bool_get("/api/public")
-        self.assertEqual(r.status_code, HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_project_does_not_exist(self):
+        r = self.dt_authz_bool_get(f"f/api/public?project={uuid.uuid4()}")
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class PublicFilteringIndividualsTest(AuthzAPITestCase):
