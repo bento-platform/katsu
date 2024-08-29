@@ -1,14 +1,10 @@
 from typing import TypedDict
 
 __all__ = [
-    "Bools",
     "DataPermissionsDict",
     "DataTypeDiscoveryPermissions",
     "FieldDiscoveryPermissions",
 ]
-
-
-Bools = tuple[bool, ...]
 
 
 class DataPermissionsDict(TypedDict):
