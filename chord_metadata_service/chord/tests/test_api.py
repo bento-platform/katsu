@@ -273,7 +273,43 @@ class CreateDatasetTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
-# TODO: Update Dataset
+class UpdateDatasetTest(APITestCase, ProjectTestCase):
+
+    def setUp(self):
+        super().setUp()
+
+        self.valid_update = {
+            "title": self.dataset.title + "!",
+            "description": self.dataset.description,
+            "data_use": self.dataset.data_use,
+            "project": str(self.dataset.project.identifier),
+        }
+
+    def test_update_dataset(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update),
+                                content_type="application/json")
+
+        assert r.status_code == status.HTTP_200_OK
+        self.dataset.refresh_from_db()
+        assert self.dataset.title == self.valid_update["title"]
+
+    def test_update_dataset_forbidden(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, False)
+            r = self.client.put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update),
+                                content_type="application/json")
+
+        assert r.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_update_dataset_not_found(self):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, True)
+            r = self.client.put(f"/api/datasets/{uuid.uuid4()}", data=json.dumps(self.valid_update),
+                                content_type="application/json")
+
+        assert r.status_code == status.HTTP_404_NOT_FOUND
 
 
 class DeleteDatasetTest(APITestCase, ProjectTestCase):
