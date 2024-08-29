@@ -6,6 +6,7 @@ from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
+from rest_framework.status import HTTP_403_FORBIDDEN
 from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery import responses as dres
@@ -306,23 +307,24 @@ class PublicListIndividualsTest(AuthzAPITestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_get(self):
-
         # no filters GET request to /api/public, returns count or INSUFFICIENT_DATA_AVAILABLE
-        response = self.dt_authz_counts_get('/api/public')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        self.assertIn(
-            self.response_threshold_check(response_obj),
-            [Individual.objects.all().count(), dres.INSUFFICIENT_DATA_AVAILABLE]
-        )
-        if Individual.objects.all().count() <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(Individual.objects.all().count(), response_obj['count'])
-            self.assertEqual(response_obj['biosamples']['count'], 0)
-            self.assertIsInstance(response_obj['biosamples']['sampled_tissue'], list)
-            self.assertEqual(response_obj['experiments']['count'], 0)
-            self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
+        for fn in (self.dt_authz_counts_get, self.dt_authz_full_get):
+            with self.subTest(params=(fn,)):
+                response = fn("/api/public")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                self.assertIn(
+                    self.response_threshold_check(response_obj),
+                    [Individual.objects.all().count(), dres.INSUFFICIENT_DATA_AVAILABLE]
+                )
+                if Individual.objects.all().count() <= self.response_threshold:
+                    self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
+                else:
+                    self.assertEqual(Individual.objects.all().count(), response_obj['count'])
+                    self.assertEqual(response_obj['biosamples']['count'], 0)
+                    self.assertIsInstance(response_obj['biosamples']['sampled_tissue'], list)
+                    self.assertEqual(response_obj['experiments']['count'], 0)
+                    self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_get_no_config(self):
@@ -332,6 +334,16 @@ class PublicListIndividualsTest(AuthzAPITestCase):
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_get_forbidden_none(self):
+        r = self.dt_authz_none_get("/api/public")
+        self.assertEqual(r.status_code, HTTP_403_FORBIDDEN)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_get_forbidden_bool(self):
+        r = self.dt_authz_bool_get("/api/public")
+        self.assertEqual(r.status_code, HTTP_403_FORBIDDEN)
 
 
 class PublicFilteringIndividualsTest(AuthzAPITestCase):

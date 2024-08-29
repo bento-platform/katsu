@@ -253,7 +253,7 @@ class PublicListIndividuals(APIView):
         dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
 
         # We can't respond if we don't have at least phenopackets counts permission
-        if not any(dt_perms_pheno.values()):
+        if not dt_perms_pheno["counts"]:
             authz_middleware.mark_authz_done(request)
             return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
