@@ -58,17 +58,13 @@ def not_found(request: DrfRequest):
     return Response(errors.not_found_error(), status=status.HTTP_404_NOT_FOUND)
 
 
-class CHORDModelViewSet(ModelViewSet):
+class CHORDPublicModelViewSet(ModelViewSet):
+    permission_classes = [BentoAllowAnyReadOnly | BentoDeferToHandler]
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES) + (PhenopacketsRenderer,)
     pagination_class = LargeResultsSetPagination
-    permission_classes = [OverrideOrSuperUserOnly]  # Explicit
 
     async def get_obj_async(self):
         return await sync_to_async(self.get_object)()
-
-
-class CHORDPublicModelViewSet(CHORDModelViewSet):
-    permission_classes = [BentoAllowAnyReadOnly | BentoDeferToHandler]
 
 
 class ProjectViewSet(CHORDPublicModelViewSet):
@@ -142,7 +138,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     lookup_url_kwarg = "dataset_id"
 
     serializer_class = DatasetSerializer
-    renderer_classes = tuple(CHORDModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
+    renderer_classes = tuple(CHORDPublicModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
     queryset = Dataset.objects.all().order_by("title")
 
     @action(detail=True, methods=['get'])
