@@ -114,7 +114,7 @@ async def _counts_for_model_name(mn: PublicModelNames) -> tuple[PublicModelNames
         ),
     }
 )
-@api_view(["GET"])  # Don't use BentoAllowAny, we want to be more careful of cases here.
+@api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def public_overview(request: DrfRequest):
     """

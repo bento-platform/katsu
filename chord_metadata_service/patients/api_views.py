@@ -176,7 +176,8 @@ async def public_discovery_filter_queryset(
 
     qp: QueryDict = deepcopy(request.query_params)
 
-    # - remove project/dataset (i.e., scope) query parameters
+    # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
+    #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
     if "project" in qp:
         del qp["project"]
     if "dataset" in qp:
