@@ -81,11 +81,22 @@ class AuthzAPITestCase(APITestCase):
             mock_authz_eval_one_result(m, authz_res)
             return self.client.delete(url, *args, **kwargs)
 
+    async def _async_one_authz_delete(self, authz_res: bool, url: str, *args, **kwargs):
+        with aioresponses() as m:
+            mock_authz_eval_one_result(m, authz_res)
+            return await self.async_client.delete(url, *args, **kwargs)
+
     def one_authz_delete(self, url: str, *args, **kwargs):
         """
         Mocks a single True response from the authorization service and executes a DELETE request.
         """
         return self._one_authz_delete(True, url, *args, **kwargs)
+
+    async def async_one_authz_delete(self, url: str, *args, **kwargs):
+        """
+        Mocks a single True response from the authorization service and executes an asynchronous DELETE request.
+        """
+        return await self._async_one_authz_delete(True, url, *args, **kwargs)
 
     def one_no_authz_delete(self, url: str, *args, **kwargs):
         """

@@ -1,7 +1,6 @@
-from aioresponses import aioresponses
-from rest_framework.test import APITestCase
+from rest_framework import status
 
-from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase, mock_authz_eval_one_result
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments import cleanup as ec
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
@@ -126,10 +125,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         self.assertEqual(await clean_individuals(), 0)
         self.assertEqual(await clean_resources(), 0)
 
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = await self.async_client.delete(f"/api/datasets/{self.dataset.identifier}")
-
+        r = await self.async_one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == 204
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
@@ -200,7 +196,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
             await self.phenotypic_feature.arefresh_from_db()
 
 
-class CleanUpExperimentsTestCase(APITestCase):
+class CleanUpExperimentsTestCase(AuthzAPITestCase):
 
     def setUp(self):
         # Copied from test_api_search
@@ -238,11 +234,8 @@ class CleanUpExperimentsTestCase(APITestCase):
         self.assertEqual(await ec.clean_experiment_results(), 0)
         self.assertEqual(await ec.clean_instruments(), 0)
 
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, True)
-            r = await self.async_client.delete(f'/api/datasets/{self.dataset.identifier}')
-
-        assert r.status_code == 204
+        r = await self.async_one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
+        assert r.status_code == status.HTTP_204_NO_CONTENT
 
         with self.assertRaises(Experiment.DoesNotExist):
             await self.experiment.arefresh_from_db()
