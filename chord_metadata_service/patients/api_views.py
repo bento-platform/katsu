@@ -184,10 +184,12 @@ async def public_discovery_filter_queryset(
         del qp["dataset"]
 
     queryable_fields = get_discovery_queryable_fields(discovery)
-    queried_fields = list(set(qp.keys()))
 
+    queried_fields = list(set(qp.keys()))  # deduplicate fields for determining field permissions
     overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
 
+    # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
+    # than one value for the same field (not that this works most of the time, at the moment.)
     if len(qp) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {len(qp)}")
 
