@@ -167,7 +167,10 @@ async def public_overview(request: DrfRequest):
 
         # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
         if 0 < counts[public_model_name] <= count_threshold and count_threshold > 0:
-            logger.info(f"Public overview: {public_model_name} count is below count threshold of {count_threshold}")
+            logger.info(
+                f"Public overview: {public_model_name} count is below count threshold of {count_threshold} "
+                f"(project={project_id}, dataset={dataset_id})"
+            )
             counts[public_model_name] = 0
 
     response = {
