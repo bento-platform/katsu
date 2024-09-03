@@ -1,7 +1,6 @@
 import asyncio
 
 from adrf.decorators import api_view
-from bento_lib.auth.resources import RESOURCE_EVERYTHING
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
@@ -14,7 +13,7 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSu
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_discovery
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
@@ -76,13 +75,14 @@ async def overview(request: DrfRequest):
 
     # TODO: permissions based on project - this endpoint should be scrapped / completely rethought
     # use node level discovery config for private overview
-    discovery = await get_discovery()
+    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
+    discovery = await discovery_scope.get_discovery()
 
     phenopackets = pheno_models.Phenopacket.objects.all()
     experiments = experiments_models.Experiment.objects.all()
 
     dt_permissions = await get_data_type_query_permissions(
-        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], RESOURCE_EVERYTHING
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
     )
 
     return await build_overview_response(phenopackets, experiments, discovery, dt_permissions)
@@ -110,7 +110,8 @@ async def search_overview(request: DrfRequest):
 
     # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
     # use node level discovery config for private search overview
-    discovery = await get_discovery()
+    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
+    discovery = await discovery_scope.get_discovery()
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
     phenopackets = pheno_models.Phenopacket.objects.all().filter(subject_id__in=individual_ids)
@@ -123,7 +124,7 @@ async def search_overview(request: DrfRequest):
 
     # TODO: resource should be tied to search
     dt_permissions = await get_data_type_query_permissions(
-        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], RESOURCE_EVERYTHING
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
     )
 
     return await build_overview_response(phenopackets, experiments, discovery, dt_permissions)

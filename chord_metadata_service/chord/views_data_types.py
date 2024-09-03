@@ -18,12 +18,10 @@ from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.discovery.censorship import thresholded_count
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.discovery.utils import (
-    get_discovery,
-    get_project_id_and_dataset_id_from_request,
-    get_request_discovery,
     get_discovery_data_type_permissions,
+    ValidatedDiscoveryScope,
+    get_request_discovery_scope,
 )
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.cleanup import run_all_cleanup
@@ -32,6 +30,7 @@ from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
+from ..discovery.exceptions import DiscoveryScopeException
 
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
@@ -67,17 +66,15 @@ async def _filtered_query(data_type: str, project: str | None = None, dataset: s
 
 async def get_count_for_data_type(
     data_type: str,
-    project: str | None,
-    dataset: str | None,
-    discovery: DiscoveryConfig,
+    scope: ValidatedDiscoveryScope,
     permissions: DataPermissionsDict,
 ) -> int:
     """
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
     provided, the count will be for the whole node.
     """
-    q = await _filtered_query(data_type, project, dataset)
-    return thresholded_count(await q.acount(), discovery, permissions)
+    q = await _filtered_query(data_type, scope.project_id, scope.dataset_id)
+    return thresholded_count(await q.acount(), await scope.get_discovery(), permissions)
 
 
 async def get_last_ingested_for_data_type(data_type: str, project: str | None = None,
@@ -95,19 +92,17 @@ async def get_last_ingested_for_data_type(data_type: str, project: str | None = 
 async def make_data_type_response_object(
     data_type_id: str,
     data_type_details: dict,
-    project: str | None,
-    dataset: str | None,
-    discovery: DiscoveryConfig,
+    scope: ValidatedDiscoveryScope,
     permissions: DataPermissionsDict,
 ) -> dict:
     return {
         **data_type_details,
         "id": data_type_id,
         **(
-            {"count": await get_count_for_data_type(data_type_id, project, dataset, discovery, permissions)}
+            {"count": await get_count_for_data_type(data_type_id, scope, permissions)}
             if permissions["counts"] else {}
         ),
-        "last_ingested": await get_last_ingested_for_data_type(data_type_id, project, dataset)
+        "last_ingested": await get_last_ingested_for_data_type(data_type_id, scope.project_id, scope.dataset_id)
     }
 
 
@@ -116,22 +111,20 @@ async def make_data_type_response_object(
 async def data_type_list(request: DrfRequest):
     # TODO: Permissions: only return counts when we are authenticated/have access to counts or full data.
 
-    project_id, dataset_id = get_project_id_and_dataset_id_from_request(request)
-
     try:
-        discovery, dt_permissions = await asyncio.gather(
-            get_request_discovery(request), get_discovery_data_type_permissions(request)
-        )
-    except ValidationError as e:
-        # UUID most likely - used to be handled in get_count_for_data_type inside make_data_type_response_object, but
-        # now triggered earlier by discovery scoping
-        return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
+        discovery_scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        # Does not exist, or a UUID validation error - used to be triggered later but scope validation does some of the
+        # Django validation for us.
+        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+
+    discovery, dt_permissions = await asyncio.gather(
+        discovery_scope.get_discovery(), get_discovery_data_type_permissions(request, discovery_scope)
+    )
 
     dt_response: list[dict] = list(
         await asyncio.gather(*(
-            make_data_type_response_object(
-                dt_id, dt_d, project_id, dataset_id, discovery, dt_permissions[dt_id]
-            )
+            make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
             for dt_id, dt_d in dt.DATA_TYPES.items()
         ))
     )
@@ -152,21 +145,21 @@ async def data_type_detail(request: DrfRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
         return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
 
-    project_id, dataset_id = get_project_id_and_dataset_id_from_request(request)
-
     try:
-        # TODO: just get the one data type
-        discovery, dt_permissions = await asyncio.gather(
-            get_request_discovery(request), get_discovery_data_type_permissions(request)
-        )
-    except ValidationError as e:
-        # UUID most likely - used to be handled in get_count_for_data_type inside make_data_type_response_object, but
-        # now triggered earlier by discovery scoping
-        return bad_request_from_exc(e)
+        discovery_scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        # Does not exist, or a UUID validation error - used to be triggered later but scope validation does some of the
+        # Django validation for us.
+        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+
+    # TODO: just get the one data type
+    discovery, dt_permissions = await asyncio.gather(
+        discovery_scope.get_discovery(), get_discovery_data_type_permissions(request, discovery_scope)
+    )
 
     return Response(
         await make_data_type_response_object(
-            data_type, dt.DATA_TYPES[data_type], project_id, dataset_id, discovery, dt_permissions[data_type]
+            data_type, dt.DATA_TYPES[data_type], discovery_scope, dt_permissions[data_type]
         )
     )
 
@@ -195,10 +188,8 @@ async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
 async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str):
     try:
         dataset = await Dataset.objects.aget(identifier=dataset_id)
-    except Dataset.DoesNotExist as e:
+    except (Dataset.DoesNotExist, ValidationError) as e:
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
-    except ValidationError as e:
-        return bad_request_from_exc(e)
 
     project = await Project.objects.aget(datasets=dataset)
     project_id = str(project.identifier)
@@ -227,15 +218,16 @@ async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    discovery = await get_discovery(project_id, dataset_id)
-    dt_permissions = await get_discovery_data_type_permissions(request, project_id, dataset_id)
+    # we've already validated that the project and dataset exist above, so we are allowed to directly build a validated
+    # discovery scope.
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
+
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     response_object = await make_data_type_response_object(
         data_type,
         dt.DATA_TYPES[data_type],
-        project=str(project.identifier),
-        dataset=dataset_id,
-        discovery=discovery,
+        discovery_scope,
         permissions=dt_permissions[data_type],
     )
 
@@ -248,20 +240,17 @@ async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str
 async def dataset_data_type_summary(request: DrfRequest, dataset_id: str):
     try:
         dataset = await Dataset.objects.aget(identifier=dataset_id)
-    except Dataset.DoesNotExist as e:
+    except (Dataset.DoesNotExist, ValidationError) as e:
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
-    except ValidationError as e:
-        return bad_request_from_exc(e)
 
-    project = await Project.objects.aget(datasets=dataset)
-    project_id = str(project.identifier)
-
-    discovery = await get_discovery(project_id, dataset_id)
-    dt_permissions = await get_discovery_data_type_permissions(request, project_id, dataset_id)
+    # we've already validated that the project and dataset exist above, so we can build an instance of
+    # ValidatedDiscoveryScope directly.
+    discovery_scope = ValidatedDiscoveryScope(await Project.objects.aget(datasets=dataset), dataset)
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     dt_response = sorted(
         await asyncio.gather(*(
-            make_data_type_response_object(dt_id, dt_d, project_id, dataset_id, discovery, dt_permissions[dt_id])
+            make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
             for dt_id, dt_d in dt.DATA_TYPES.items()
         )),
         key=lambda d: d["id"]

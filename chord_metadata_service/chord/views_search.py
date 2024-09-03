@@ -4,7 +4,6 @@ import json
 import logging
 
 from adrf.decorators import api_view as async_api_view
-from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
 
@@ -28,7 +27,7 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSu
 from chord_metadata_service.authz.types import DataPermissionsDict
 
 from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_request_discovery
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -46,8 +45,7 @@ from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Dataset
-
+from .models import Dataset, Project
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -531,13 +529,16 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 @permission_classes([BentoAllowAny])
 async def dataset_summary(request: DrfRequest, dataset_id: str):
     dataset = await Dataset.objects.aget(identifier=dataset_id)
-    discovery = await get_request_discovery(request)
+    project = await Project.objects.aget(identifier=dataset.project_id)
+    # don't use request scope - the project/dataset are validated by the aget calls above and fixed
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_data_type_query_permissions(
         request,
         data_types=list(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys()),
-        resource=build_resource(str(dataset.project_id), dataset_id),
+        resource=discovery_scope.as_authz_resource(),
     )
 
+    discovery = await discovery_scope.get_discovery()
     summaries = await asyncio.gather(
         *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery, dataset, dt_permissions[dt]),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())

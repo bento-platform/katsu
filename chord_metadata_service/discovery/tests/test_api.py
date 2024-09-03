@@ -7,6 +7,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
+from typing import Literal, TypedDict
 
 from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITestCase
 from chord_metadata_service.chord import models as ch_m
@@ -72,6 +73,16 @@ class ScopedDiscoveryTestCase(TestCase):
         cls.id_ds_b = cls.dataset_b.identifier
 
 
+TestDiscoveryConfigKey = Literal["public", "sex_only", "extra_props", "none"]
+
+
+class TestDiscoveryConfigsDict(TypedDict):
+    public: DiscoveryConfig
+    sex_only: DiscoveryConfig
+    extra_props: DiscoveryConfig
+    none: None
+
+
 class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
@@ -105,46 +116,58 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             set(field for section in config["search"] for field in section["fields"])
         )
 
+    @staticmethod
+    def test_discovery_configs() -> TestDiscoveryConfigsDict:
+        return {
+            "public": settings.CONFIG_PUBLIC,
+            "sex_only": CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
+            "extra_props": DISCOVERY_CONFIG_EXTRA_PROPERTIES,
+            "none": None,
+        }
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_search_fields_configured(self):
         search_fields_url = reverse("public-search-fields")
 
-        subtest_params: list[tuple[DTAccessLevel, str, int, DiscoveryConfig | None]] = [
+        subtest_params: list[tuple[DTAccessLevel, str, int, TestDiscoveryConfigKey]] = [
             # SCOPE: whole node
-            ("counts", "", status.HTTP_200_OK, settings.CONFIG_PUBLIC),
+            ("counts", "", status.HTTP_200_OK, "public"),
             # SCOPE: project_a (same discovery as whole node)
-            ("counts", f"?project={str(self.id_proj_a)}", status.HTTP_200_OK, settings.CONFIG_PUBLIC),
+            ("counts", f"?project={str(self.id_proj_a)}", status.HTTP_200_OK, "public"),
             # SCOPE: project_b (discovery search sex only)
-            ("counts", f"?project={str(self.id_proj_b)}", status.HTTP_200_OK, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY),
+            ("counts", f"?project={str(self.id_proj_b)}", status.HTTP_200_OK, "sex_only"),
             # SCOPE: dataset_a (discovery with dataset specific extra_properties)
-            ("counts", f"?dataset={str(self.id_ds_a)}", status.HTTP_200_OK, DISCOVERY_CONFIG_EXTRA_PROPERTIES),
+            ("counts", f"?dataset={str(self.id_ds_a)}", status.HTTP_200_OK, "extra_props"),
             # SCOPE: non-existant dataset
-            ("counts", f"?dataset={uuid.uuid4()}", status.HTTP_404_NOT_FOUND, None),
+            ("counts", f"?dataset={uuid.uuid4()}", status.HTTP_404_NOT_FOUND, "none"),
             # SCOPE: non-existant project
-            ("counts", f"?project={uuid.uuid4()}", status.HTTP_404_NOT_FOUND, None),
+            ("counts", f"?project={uuid.uuid4()}", status.HTTP_404_NOT_FOUND, "none"),
             # SCOPE: dataset_b
             #  - fallback on project's config, responses should be the same
             #  - see above - CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
-            ("counts", f"?dataset={self.id_ds_b}", status.HTTP_200_OK, CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY),
+            ("counts", f"?dataset={self.id_ds_b}", status.HTTP_200_OK, "sex_only"),
             # SCOPE: project_a + dataset_b (invalid)
-            ("counts", f"?project={str(self.id_proj_a)}&dataset={self.id_ds_b}", status.HTTP_404_NOT_FOUND, None),
+            ("counts", f"?project={str(self.id_proj_a)}&dataset={self.id_ds_b}", status.HTTP_404_NOT_FOUND, "none"),
             # SCOPE: project_a + dataset_a (valid)
             #  - same as dataset_a - DISCOVERY_CONFIG_EXTRA_PROPERTIES
-            ("counts", f"?project={str(self.id_proj_a)}&dataset={self.id_ds_a}", status.HTTP_200_OK,
-             DISCOVERY_CONFIG_EXTRA_PROPERTIES),
+            ("counts", f"?project={str(self.id_proj_a)}&dataset={self.id_ds_a}", status.HTTP_200_OK, "extra_props"),
             # invalid UUID for project
-            ("counts", "?project=not-a-uuid", status.HTTP_400_BAD_REQUEST, None),
+            ("counts", "?project=not-a-uuid", status.HTTP_404_NOT_FOUND, "none"),
             # invalid UUID for dataset
-            ("counts", "?dataset=not-a-uuid", status.HTTP_400_BAD_REQUEST, None),
+            ("counts", "?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, "none"),
         ]
+
+        # use key aliases for configs to make subtest failure output more readable
+        tdc = self.test_discovery_configs()  # to get injected CONFIG_PUBLIC, need to calculate this in-test
 
         for params in subtest_params:
             with self.subTest(params=params):
-                level, qp, expected_status_code, expected_body = params
+                level, qp, expected_status_code, config_key = params
+                expected_body_config: DiscoveryConfig | None = tdc[config_key]
                 res = self.dt_get(level, f"{search_fields_url}{qp}")
                 self.assertEqual(res.status_code, expected_status_code)
-                if expected_body is not None:
-                    self.assert_response_section_fields(res.json(), expected_body)
+                if expected_body_config is not None:
+                    self.assert_response_section_fields(res.json(), expected_body_config)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
@@ -251,10 +274,10 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             # SCOPE: dataset_b (project_b fallback)
             (f"?dataset={self.id_ds_b}", status.HTTP_200_OK, self.project_b.discovery, self.data_type_counts_ds_b),
             # --- INVALID ---
-            # invalid UUID for project
-            ("?project=not-a-uuid", status.HTTP_400_BAD_REQUEST, None, None),
-            # invalid UUID for dataset
-            ("?dataset=not-a-uuid", status.HTTP_400_BAD_REQUEST, None, None),
+            # invalid UUID for project (not found; IDs are not of this format)
+            ("?project=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
+            # invalid UUID for dataset (not found; IDs are not of this format)
+            ("?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
         ]
 
         for params in subtest_params:
