@@ -25,9 +25,7 @@ from typing import Callable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly, ReadOnly
-from chord_metadata_service.authz.types import DataPermissionsDict
 
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
@@ -54,22 +52,6 @@ OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 def bad_request_response(message: str) -> Response:
     return Response(errors.bad_request_error(message), status=status.HTTP_400_BAD_REQUEST)
-
-
-async def experiment_dataset_summary(discovery: DiscoveryConfig, dataset: Dataset, permissions: DataPermissionsDict):
-    return await dt_experiment_summary(
-        Experiment.objects.filter(dataset=dataset),
-        discovery=discovery,
-        experiment_permissions=permissions,
-    )
-
-
-async def phenopacket_dataset_summary(discovery: DiscoveryConfig, dataset: Dataset, permissions: DataPermissionsDict):
-    return await dt_phenopacket_summary(
-        Phenopacket.objects.filter(dataset=dataset),
-        discovery=discovery,
-        phenopacket_permissions=permissions,
-    )
 
 
 # TODO: CHORD-standardized logging
@@ -514,8 +496,8 @@ def private_dataset_search(request: DrfRequest, dataset_id: str):
 
 
 DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
-    DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary,
-    DATA_TYPE_EXPERIMENT: experiment_dataset_summary,
+    DATA_TYPE_PHENOPACKET: dt_phenopacket_summary,
+    DATA_TYPE_EXPERIMENT: dt_experiment_summary,
 }
 
 
@@ -537,9 +519,8 @@ async def dataset_summary(request: DrfRequest, dataset_id: str):
         resource=discovery_scope.as_authz_resource(),
     )
 
-    discovery = discovery_scope.discovery
     summaries = await asyncio.gather(
-        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery, dataset, dt_permissions[dt]),
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery_scope, dt_permissions[dt]),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 

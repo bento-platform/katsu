@@ -4,8 +4,9 @@ from django.db.models import QuerySet
 
 from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.discovery.censorship import thresholded_count
-from chord_metadata_service.discovery.stats import stats_for_field, queryset_stats_for_field
+from chord_metadata_service.discovery.stats import queryset_stats_for_field
 from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from chord_metadata_service.patients.summaries import individual_summary
 
 from . import models
@@ -65,9 +66,12 @@ async def disease_summary(
 async def phenotypic_feature_summary(
     phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissionsDict
 ):
+    # we don't need to re-filter by scope with stats_for_field for PhenotypicFeature, since the phenopackets have
+    # already been filtered to the discovery scope.
+    qs = models.PhenotypicFeature.objects.filter(phenopacket__in=phenopackets)
     phenotypic_features_count, phenotypic_features_type = await asyncio.gather(
-        models.PhenotypicFeature.objects.filter(phenopacket__in=phenopackets).distinct('pftype').acount(),
-        stats_for_field(models.PhenotypicFeature, "pftype__label", discovery, phenopacket_permissions),
+        qs.distinct('pftype').acount(),
+        queryset_stats_for_field(qs, "pftype__label", discovery, phenopacket_permissions),
     )
     return {
         # count is a number of unique phenotypic feature types, not all phenotypic features in the database.
@@ -77,8 +81,19 @@ async def phenotypic_feature_summary(
 
 
 async def dt_phenopacket_summary(
-    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissionsDict
+    scope: ValidatedDiscoveryScope, phenopacket_permissions: DataPermissionsDict, queryset: QuerySet | None = None
 ) -> dict:
+    discovery = scope.discovery
+
+    # Start with either all phenopackets or a subset specified by a parameter
+    phenopackets = queryset if queryset is not None else models.Phenopacket.objects.all()
+
+    # Apply scope to existing queryset to enforce it on the summarization
+    if dataset_id := scope.dataset_id:
+        phenopackets = phenopackets.filter(dataset_id=dataset_id)
+    elif project_id := scope.project_id:
+        phenopackets = phenopackets.select_related("project").filter(dataset__project_id=project_id)
+
     # Parallel-gather all statistics we may need for this response
     (
         phenopackets_count,
@@ -95,7 +110,7 @@ async def dt_phenopacket_summary(
     )
 
     return {
-        "count": thresholded_count(phenopackets_count, discovery, phenopacket_permissions),
+        "count": thresholded_count(phenopackets_count, scope.discovery, phenopacket_permissions),
         "data_type_specific": {
             "biosamples": biosample_summary_val,
             "diseases": disease_summary_val,

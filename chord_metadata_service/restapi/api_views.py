@@ -12,7 +12,6 @@ from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
@@ -37,14 +36,14 @@ async def service_info(_request: DrfRequest):
 
 
 async def build_overview_response(
-    phenopackets: QuerySet,
-    experiments: QuerySet,
-    discovery: DiscoveryConfig,
+    scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
-):
+    phenopackets: QuerySet | None = None,
+    experiments: QuerySet | None = None,
+) -> Response:
     phenopackets_summary, experiments_summary = await asyncio.gather(
-        dt_phenopacket_summary(phenopackets, discovery, dt_permissions[DATA_TYPE_PHENOPACKET]),
-        dt_experiment_summary(experiments, discovery, dt_permissions[DATA_TYPE_EXPERIMENT]),
+        dt_phenopacket_summary(scope, dt_permissions[DATA_TYPE_PHENOPACKET], phenopackets),
+        dt_experiment_summary(scope, dt_permissions[DATA_TYPE_EXPERIMENT], experiments),
     )
 
     return Response({
@@ -77,14 +76,11 @@ async def overview(request: DrfRequest):
     # use node level discovery config for private overview
     discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
 
-    phenopackets = pheno_models.Phenopacket.objects.all()
-    experiments = experiments_models.Experiment.objects.all()
-
     dt_permissions = await get_data_type_query_permissions(
         request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
     )
 
-    return await build_overview_response(phenopackets, experiments, discovery_scope.discovery, dt_permissions)
+    return await build_overview_response(discovery_scope, dt_permissions)
 
 
 @api_view(["GET"])
@@ -125,4 +121,9 @@ async def search_overview(request: DrfRequest):
         request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
     )
 
-    return await build_overview_response(phenopackets, experiments, discovery_scope.discovery, dt_permissions)
+    return await build_overview_response(
+        discovery_scope,
+        dt_permissions,
+        phenopackets=phenopackets,
+        experiments=experiments,
+    )

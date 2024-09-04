@@ -72,7 +72,7 @@ async def get_count_for_data_type(
     provided, the count will be for the whole node.
     """
     q = await _filtered_query(data_type, scope)
-    return thresholded_count(await q.acount(), await scope.discovery, permissions)
+    return thresholded_count(await q.acount(), scope.discovery, permissions)
 
 
 async def get_last_ingested_for_data_type(data_type: str, scope: ValidatedDiscoveryScope) -> dict | None:

@@ -7,6 +7,7 @@ from django.urls import reverse
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID_PROJECT_1
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from chord_metadata_service.restapi.utils import remove_computed_properties
 
 
@@ -32,6 +33,7 @@ class ProjectTestCase(TestCase):
             data_use=VALID_DATA_USE_1,
             project=cls.project
         )
+        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset)
 
         return super().setUpTestData()
 

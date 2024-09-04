@@ -6,6 +6,7 @@ from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.stats import queryset_stats_for_field
 from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from . import models
 
 __all__ = [
@@ -102,8 +103,19 @@ async def instrument_summary(
 
 
 async def dt_experiment_summary(
-    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissionsDict
+    scope: ValidatedDiscoveryScope, experiment_permissions: DataPermissionsDict, queryset: QuerySet | None = None
 ) -> dict:
+    discovery = scope.discovery
+
+    # Start with either all experiments or a subset specified by a parameter
+    experiments = queryset if queryset is not None else models.Experiment.objects.all()
+
+    # Apply scope to existing queryset to enforce it on the summarization
+    if dataset_id := scope.dataset_id:
+        experiments = experiments.filter(dataset_id=dataset_id)
+    elif project_id := scope.project_id:
+        experiments = experiments.select_related("project").filter(dataset__project_id=project_id)
+
     # Parallel-gather all statistics we may need for this response
     (
         experiments_count,

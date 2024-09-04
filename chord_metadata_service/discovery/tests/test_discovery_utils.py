@@ -13,6 +13,16 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
 
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
 
+    def test_scope_getters(self):
+        self.assertIsNone(self.instance_scope.project_id)
+        self.assertIsNone(self.instance_scope.dataset_id)
+
+        self.assertEqual(self.project_scope.project_id, str(self.project.identifier))
+        self.assertIsNone(self.project_scope.dataset_id)
+
+        self.assertEqual(self.project_dataset_scope.project_id, str(self.project.identifier))
+        self.assertEqual(self.project_dataset_scope.dataset_id, str(self.dataset.identifier))
+
     def test_scope_init_fail_no_project(self):
         with self.assertRaises(DiscoveryScopeException):
             ValidatedDiscoveryScope(None, self.dataset)
