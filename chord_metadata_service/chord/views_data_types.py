@@ -42,7 +42,7 @@ def not_found_response(message: str) -> Response:
     return Response(errors.not_found_error(message), status=status.HTTP_404_NOT_FOUND)
 
 
-async def _filtered_query(data_type: str, project: str | None = None, dataset: str | None = None) -> QuerySet:
+async def _filtered_query(data_type: str, scope: ValidatedDiscoveryScope) -> QuerySet:
     """
     Returns a filtered query based on the data type, project, and dataset.
     """
@@ -51,16 +51,10 @@ async def _filtered_query(data_type: str, project: str | None = None, dataset: s
 
     if data_type in (dt.DATA_TYPE_PHENOPACKET, dt.DATA_TYPE_EXPERIMENT):
         q = (Phenopacket if data_type == dt.DATA_TYPE_PHENOPACKET else Experiment).objects.prefetch_related("dataset")
-        if dataset:
-            try:
-                q = q.filter(dataset_id=dataset)
-            except ValidationError:
-                raise ValueError("Dataset ID must be a UUID")
-        if project:
-            try:
-                q = q.filter(dataset__project_id=project)
-            except ValidationError:
-                raise ValueError("Project ID must be a UUID")
+        if (dataset := scope.dataset_id) is not None:
+            q = q.filter(dataset_id=dataset)
+        if (project := scope.project_id) is not None:
+            q = q.filter(dataset__project_id=project)
 
     if q is None:
         raise ValueError(f"Unsupported data type: {data_type}")
@@ -77,14 +71,13 @@ async def get_count_for_data_type(
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
     provided, the count will be for the whole node.
     """
-    q = await _filtered_query(data_type, scope.project_id, scope.dataset_id)
+    q = await _filtered_query(data_type, scope)
     return thresholded_count(await q.acount(), await scope.get_discovery(), permissions)
 
 
-async def get_last_ingested_for_data_type(data_type: str, project: str | None = None,
-                                          dataset: str | None = None) -> dict | None:
+async def get_last_ingested_for_data_type(data_type: str, scope: ValidatedDiscoveryScope) -> dict | None:
 
-    q = await _filtered_query(data_type, project, dataset)
+    q = await _filtered_query(data_type, scope)
     latest_obj = await q.order_by('-created').afirst()
 
     if not latest_obj:
@@ -106,7 +99,7 @@ async def make_data_type_response_object(
             {"count": await get_count_for_data_type(data_type_id, scope, permissions)}
             if permissions["counts"] else {}
         ),
-        "last_ingested": await get_last_ingested_for_data_type(data_type_id, scope.project_id, scope.dataset_id)
+        "last_ingested": await get_last_ingested_for_data_type(data_type_id, scope)
     }
 
 
