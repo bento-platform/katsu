@@ -2,6 +2,7 @@ from django.db.models import Count, F, Model, QuerySet
 
 from typing import Mapping, Type
 
+from .utils import ValidatedDiscoveryScope
 from ..authz.types import DataPermissionsDict
 
 from .censorship import thresholded_count
@@ -76,11 +77,10 @@ async def bento_public_format_count_and_stats_list(
     return thresholded_count(total, discovery, field_permissions), stats_list
 
 
-def get_scoped_queryset(
-    model: Type[Model],
-    project_id: str | None = None,
-    dataset_id: str | None = None,
-) -> QuerySet:
+def get_scoped_queryset(model: Type[Model], discovery_scope: ValidatedDiscoveryScope) -> QuerySet:
+    project_id = discovery_scope.project_id
+    dataset_id = discovery_scope.dataset_id
+
     scope: PublicScopeFilterKeys
     if project_id and not dataset_id:
         scope = "project"
@@ -98,21 +98,19 @@ def get_scoped_queryset(
 
 async def stats_for_field(
     model: Type[Model],
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig | None,
     field_permissions: DataPermissionsDict,
     add_missing: bool = False,
     group_by: str | None = None,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
 ) -> Mapping[str, int]:
     """
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
-    qs = get_scoped_queryset(model, project_id, dataset_id)
+    qs = get_scoped_queryset(model, scope)
     return await queryset_stats_for_field(
-        qs, field, discovery, field_permissions, add_missing=add_missing, group_by=group_by)
+        qs, field, scope.discovery, field_permissions, add_missing=add_missing, group_by=group_by)
 
 
 async def queryset_stats_for_field(

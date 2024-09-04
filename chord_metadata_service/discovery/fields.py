@@ -6,6 +6,7 @@ from django.db.models import Case, CharField, Count, F, Func, IntegerField, Quer
 from django.db.models.functions import Cast
 from typing import Any, Mapping
 
+from .utils import ValidatedDiscoveryScope
 from ..authz.types import DataPermissionsDict
 from ..logger import logger
 
@@ -176,13 +177,11 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
 
 
 async def get_range_stats(
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig,
     field_permissions: DataPermissionsDict,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
 ) -> list[BinWithValue]:
-    field_props = discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.get("fields", {}).get(field)
     model, field_mapping = f_utils.get_model_and_field(field_props["mapping"])
 
     # JSONField array specific field props
@@ -211,7 +210,7 @@ async def get_range_stats(
         ]
 
     query_set = (
-        get_scoped_queryset(model, project_id, dataset_id)
+        get_scoped_queryset(model, scope)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
@@ -219,7 +218,7 @@ async def get_range_stats(
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
     async for item in query_set:
-        stats[item["label"]] = thresholded_count(item["total"], discovery, field_permissions)
+        stats[item["label"]] = thresholded_count(item["total"], scope.discovery, field_permissions)
 
     # All the bins between start and end must be represented and ordered
     bins: list[BinWithValue] = [
@@ -234,16 +233,14 @@ async def get_range_stats(
 
 
 async def get_categorical_stats(
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig,
     field_permissions: DataPermissionsDict,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
 ) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    field_props = discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.get("fields", {}).get(field)
     model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     # Collect stats for the field, censoring low cell counts along the way
@@ -251,9 +248,8 @@ async def get_categorical_stats(
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: Mapping[str, int] = await stats_for_field(model, field_name, discovery, field_permissions,
-                                                     add_missing=True, group_by=field_props.get("group_by"),
-                                                     project_id=project_id, dataset_id=dataset_id)
+    stats: Mapping[str, int] = await stats_for_field(model, scope, field_name, field_permissions,
+                                                     add_missing=True, group_by=field_props.get("group_by"))
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -281,11 +277,9 @@ async def get_categorical_stats(
 
 
 async def get_date_stats(
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig,
     field_permissions: DataPermissionsDict,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
 ) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
@@ -295,7 +289,7 @@ async def get_date_stats(
      regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
-    field_props = discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.get("fields", {}).get(field)
     if not field_props:
         msg = f"Field {field} is not in the provided discovery config."
         raise NotImplementedError(msg)
@@ -312,7 +306,7 @@ async def get_date_stats(
 
     # Note: lexical sort works on ISO dates
     query_set = (
-        get_scoped_queryset(model, project_id, dataset_id)
+        get_scoped_queryset(model, scope)
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
@@ -343,12 +337,15 @@ async def get_date_stats(
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             bins.append({
                 "label": label,
-                "value": thresholded_count(stats.get(key, 0), discovery, field_permissions),
+                "value": thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
             })
 
     # Append missing items at the end if any
     if "missing" in stats:
-        bins.append({"label": "missing", "value": thresholded_count(stats["missing"], discovery, field_permissions)})
+        bins.append({
+            "label": "missing",
+            "value": thresholded_count(stats["missing"], scope.discovery, field_permissions),
+        })
 
     return bins
 

@@ -165,7 +165,7 @@ async def public_overview(request: DrfRequest):
         if 0 < counts[public_model_name] <= count_threshold and count_threshold > 0:
             logger.info(
                 f"Public overview: {public_model_name} count is below count threshold of {count_threshold} "
-                f"(project={project_id}, dataset={dataset_id})"
+                f"({repr(discovery_scope)})"
             )
             counts[public_model_name] = 0
 
@@ -196,11 +196,11 @@ async def public_overview(request: DrfRequest):
 
         stats: list[BinWithValue] | None
         if field_props["datatype"] == "string":
-            stats = await get_categorical_stats(field, discovery, field_perms, project_id, dataset_id)
+            stats = await get_categorical_stats(discovery_scope, field, field_perms)
         elif field_props["datatype"] == "number":
-            stats = await get_range_stats(field, discovery, field_perms, project_id, dataset_id)
+            stats = await get_range_stats(discovery_scope, field, field_perms)
         elif field_props["datatype"] == "date":
-            stats = await get_date_stats(field, discovery, field_perms, project_id, dataset_id)
+            stats = await get_date_stats(discovery_scope, field, field_perms)
         else:
             raise NotImplementedError()
 
