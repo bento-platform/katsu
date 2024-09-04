@@ -10,20 +10,14 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.utils import get_request_discovery_scope
+from chord_metadata_service.discovery.utils import get_request_discovery_scope, get_public_model_scoped_queryset
 
 from ..authz.permissions import BentoAllowAny
 from ..chord import data_types as dts, models as cm
 from ..logger import logger
 
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .model_lookups import (
-    PUBLIC_MODEL_NAMES_TO_DATA_TYPE,
-    PUBLIC_MODEL_NAMES_TO_MODEL,
-    PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS,
-    PublicModelNames,
-    PublicScopeFilterKeys,
-)
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
 from . import responses as dres
 from .censorship import get_rules
 from .schemas import DISCOVERY_SCHEMA
@@ -92,10 +86,6 @@ async def public_search_fields(request: DrfRequest):
     })
 
 
-async def _counts_for_model_name(mn: PublicModelNames) -> tuple[PublicModelNames, int]:
-    return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all().acount()
-
-
 @extend_schema(
     description="Overview of all public data in the database",
     responses={
@@ -131,26 +121,8 @@ async def public_overview(request: DrfRequest):
     if not any(d["counts"] for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
-    project_id = discovery_scope.project_id
-    dataset_id = discovery_scope.dataset_id
-
-    async def _counts_for_scoped_model_name(mn: PublicModelNames) -> tuple[PublicModelNames, int]:
-        scope: PublicScopeFilterKeys
-        if dataset_id:
-            scope = "dataset"
-            value = dataset_id
-        elif project_id and not dataset_id:
-            scope = "project"
-            value = project_id
-        else:
-            return await _counts_for_model_name(mn)
-
-        filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["filter"]
-        prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][scope]["prefetch_related"]
-
-        return mn, await PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(
-            **{filter_query: value}
-        ).acount()
+    async def _counts_for_scoped_model_name(mn: PublicModelName) -> tuple[PublicModelName, int]:
+        return mn, await get_public_model_scoped_queryset(discovery_scope, mn).acount()
 
     # Predefined counts
     counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))

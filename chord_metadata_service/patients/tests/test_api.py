@@ -10,6 +10,8 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
+from chord_metadata_service.chord import models as cm
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_EXTRA_PROPERTIES,
@@ -352,7 +354,7 @@ class PublicListIndividualsTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class PublicFilteringIndividualsTest(AuthzAPITestCase):
+class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     """ Test for api/public GET filtering """
 
     response_threshold = DISCOVERY_CONFIG_TEST["rules"]["count_threshold"]
@@ -364,13 +366,24 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase):
         return response['count'] if 'count' in response else dres.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
+        self.project_2 = cm.Project.objects.create(title="Project 2", description="")
+
         individuals = [
             c.generate_valid_individual(date_of_consent_range=(2020, 2023))
             for _ in range(self.num_individuals)
         ]
-        for individual in individuals:
-            Individual.objects.create(**individual)
+
+        individual_objs = [Individual.objects.create(**individual) for individual in individuals]
         ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
+
+        for idx, individual in enumerate(individual_objs, 1):
+            self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            self.phenopacket = ph_m.Phenopacket.objects.create(
+                id=f"phenopacket_id:{idx}",
+                subject=individual,
+                meta_data=self.meta_data,
+                dataset=self.dataset,
+            )
 
         random.seed(self.random_seed)
 
@@ -389,6 +402,21 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase):
             self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
         else:
             self.assertEqual(nb_female, response_obj['count'])
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_filtering_sex_none_in_project(self):
+        response = self.dt_authz_counts_get(f"/api/public?project={self.project_2.identifier}&sex=female")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.json(), dres.INSUFFICIENT_DATA_AVAILABLE)
+
+        response = self.dt_authz_full_get(f"/api/public?project={self.project_2.identifier}&sex=female")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.json(), {
+            "count": 0,
+            "matches": [],
+            "biosamples": {"count": 0, "sampled_tissue": []},
+            "experiments": {"count": 0, "experiment_type": []},
+        })
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_2_fields(self):

@@ -3,6 +3,7 @@ import uuid
 from bento_lib.auth.resources import build_resource
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import QuerySet
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable
 
@@ -14,7 +15,13 @@ from chord_metadata_service.chord import models as cm
 
 from .exceptions import DiscoveryScopeException
 from .fields_utils import get_public_model_name_and_field_path
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE
+from .model_lookups import (
+    PublicModelName,
+    PublicScopeFilterKeys,
+    PUBLIC_MODEL_NAMES_TO_DATA_TYPE,
+    PUBLIC_MODEL_NAMES_TO_MODEL,
+    PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS,
+)
 from .types import DiscoveryConfig, DiscoveryFieldProps, EmptyConfig
 
 __all__ = [
@@ -24,6 +31,7 @@ __all__ = [
     "get_discovery_queryable_fields",
     "get_discovery_data_type_permissions",
     "get_discovery_field_set_permissions",
+    "get_public_model_scoped_queryset",
 ]
 
 
@@ -221,3 +229,20 @@ def get_discovery_field_set_permissions(
         "counts": all(dt_permissions[dt]["counts"] for dt in dts_accessed),
         "data": all(dt_permissions[dt]["data"] for dt in dts_accessed),
     }, field_permissions
+
+
+def get_public_model_scoped_queryset(scope: ValidatedDiscoveryScope, mn: PublicModelName) -> QuerySet:
+    filter_scope: PublicScopeFilterKeys
+    if scope.dataset_id:
+        filter_scope = "dataset"
+        value = scope.dataset_id
+    elif scope.project_id and not scope.dataset_id:
+        filter_scope = "project"
+        value = scope.project_id
+    else:
+        return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all()
+
+    filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["filter"]
+    prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["prefetch_related"]
+
+    return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(**{filter_query: value})

@@ -20,6 +20,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
@@ -30,7 +31,9 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_queryable_fields,
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
-    get_request_discovery_scope, ValidatedDiscoveryScope,
+    get_request_discovery_scope,
+    get_public_model_scoped_queryset,
+    ValidatedDiscoveryScope,
 )
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -48,10 +51,9 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
-from .serializers import IndividualSerializer
-from .models import Individual
 from .filters import IndividualFilter
-from ..authz.types import DataTypeDiscoveryPermissions
+from .models import Individual
+from .serializers import IndividualSerializer
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -272,7 +274,9 @@ class PublicListIndividuals(APIView):
 
         perm_pheno_query_data = dt_perms_pheno["data"]
 
-        base_qs = Individual.objects.all()
+        # Get individuals filtered to the requested scope
+        base_qs = get_public_model_scoped_queryset(discovery_scope, "individual")
+
         try:
             filtered_qs = await public_discovery_filter_queryset(discovery_scope, request, dt_permissions, base_qs)
         except ValidationError as e:
