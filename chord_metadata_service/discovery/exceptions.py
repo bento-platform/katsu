@@ -1,15 +1,15 @@
 __all__ = [
-    "DiscoveryConfigException"
+    "DiscoveryScopeException",
 ]
 
 
-class DiscoveryConfigException(Exception):
+class DiscoveryScopeException(Exception):
 
-    def __init__(self, dataset_id: str | None = None, project_id: str | None = None, *args: object) -> None:
+    def __init__(self, dataset_id: str | None = None, project_id: str | None = None, *args) -> None:
         self.dataset_id = dataset_id
         self.project_id = project_id
 
-        message = "Error retrieving {0} scoped discovery config: {0} {1} does not exist."
+        message = "Error validating discovery scope: {0} {1} does not exist."
         if dataset_id and project_id:
             message = message.format("project-dataset", f"({project_id}, {dataset_id}) pair")
         elif dataset_id:

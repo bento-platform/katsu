@@ -23,15 +23,14 @@ from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
-from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
+from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.discovery.utils import (
-    get_request_discovery,
     get_discovery_queryable_fields,
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
+    get_request_discovery_scope, ValidatedDiscoveryScope,
 )
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -170,7 +169,10 @@ class IndividualBatchViewSet(BatchViewSet):
 
 
 async def public_discovery_filter_queryset(
-    discovery: DiscoveryConfig, request: DrfRequest, dt_permissions: DataTypeDiscoveryPermissions, queryset: QuerySet
+    scope: ValidatedDiscoveryScope,
+    request: DrfRequest,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    queryset: QuerySet,
 ):
     # Process query parameters and check validity
 
@@ -178,10 +180,16 @@ async def public_discovery_filter_queryset(
 
     # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
     #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
+    # - store project and dataset before we remove them for logging purposes.
     if "project" in qp:
         del qp["project"]
     if "dataset" in qp:
         del qp["dataset"]
+
+    # log/exception string to re-use for validation errors/log entries. TODO: in the future, these should be structured
+    scope_str = f"({repr(scope)})"
+
+    discovery = await scope.get_discovery()
 
     queryable_fields = get_discovery_queryable_fields(discovery)
 
@@ -191,14 +199,14 @@ async def public_discovery_filter_queryset(
     # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
     # than one value for the same field (not that this works most of the time, at the moment.)
     if len(qp) > get_max_query_parameters(discovery, overall_permissions):
-        raise ValidationError(f"Wrong number of fields: {len(qp)}")
+        raise ValidationError(f"Wrong number of fields: {len(qp)} {scope_str}")
 
     if not overall_permissions["counts"]:
-        raise ValidationError("Insufficient permissions to access counts")
+        raise ValidationError(f"Insufficient permissions to access counts {scope_str}")
 
     for field, value in qp.items():
         if field not in queryable_fields:
-            raise ValidationError(f"Unsupported field used in query: {field}")
+            raise ValidationError(f"Unsupported field used in query: {field} {scope_str}")
 
         field_props = queryable_fields[field]
         options = await get_field_options(field, discovery, qf_permissions[field])
@@ -215,7 +223,7 @@ async def public_discovery_filter_queryset(
                 and field_props["config"]["enum"] is None
             )
         ):
-            raise ValidationError(f"Invalid value used in query: {value}")
+            raise ValidationError(f"Invalid value used in query: {value} {scope_str}")
 
         # recursion
         queryset = filter_queryset_field_value(queryset, field_props, value)
@@ -242,16 +250,18 @@ class PublicListIndividuals(APIView):
 
     async def get(self, request, *_args, **_kwargs):
         try:
-            discovery = await get_request_discovery(request)
-        except DiscoveryConfigException as e:
+            discovery_scope = await get_request_discovery_scope(request)
+        except DiscoveryScopeException as e:
             authz_middleware.mark_authz_done(request)
             return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+
+        discovery = await discovery_scope.get_discovery()
 
         if not discovery:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
-        dt_permissions = await get_discovery_data_type_permissions(request)
+        dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
         dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
         dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
 
@@ -264,8 +274,9 @@ class PublicListIndividuals(APIView):
 
         base_qs = Individual.objects.all()
         try:
-            filtered_qs = await public_discovery_filter_queryset(discovery, request, dt_permissions, base_qs)
+            filtered_qs = await public_discovery_filter_queryset(discovery_scope, request, dt_permissions, base_qs)
         except ValidationError as e:
+            logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
@@ -277,8 +288,9 @@ class PublicListIndividuals(APIView):
             # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
             # data permissions.
             logger.info(
-                f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
-                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)}")
+                f"Public individuals endpoint recieved {len(request.query_params)} query params which resulted in "
+                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
+                f"({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 

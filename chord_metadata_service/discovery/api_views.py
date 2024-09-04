@@ -3,15 +3,14 @@ import asyncio
 from adrf.decorators import api_view
 from bento_lib.responses import errors
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
-from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
-from chord_metadata_service.discovery.utils import get_request_discovery
+from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
+from chord_metadata_service.discovery.utils import get_request_discovery_scope
 
 from ..authz.permissions import BentoAllowAny
 from ..chord import data_types as dts, models as cm
@@ -29,11 +28,7 @@ from . import responses as dres
 from .censorship import get_rules
 from .schemas import DISCOVERY_SCHEMA
 from .types import BinWithValue
-from .utils import (
-    get_project_id_and_dataset_id_from_request,
-    get_discovery_data_type_permissions,
-    get_discovery_field_set_permissions,
-)
+from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
 
 
 @extend_schema(
@@ -58,16 +53,16 @@ async def public_search_fields(request: DrfRequest):
     """
 
     try:
-        discovery = await get_request_discovery(request)
-    except DiscoveryConfigException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-    except ValidationError as e:  # UUID error
-        return Response(errors.bad_request_error(*e.messages), status=status.HTTP_400_BAD_REQUEST)
+        discovery_scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+
+    discovery = await discovery_scope.get_discovery()
 
     if not discovery:
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
 
-    dt_permissions = await get_discovery_data_type_permissions(request)
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     _, field_permissions = get_discovery_field_set_permissions(discovery, None, dt_permissions)
 
     # Note: the array is wrapped in a dictionary structure to help with JSON
@@ -123,20 +118,21 @@ async def public_overview(request: DrfRequest):
     """
 
     try:
-        discovery = await get_request_discovery(request)
-    except DiscoveryConfigException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-    except ValidationError as e:
-        return Response(errors.bad_request_error(*e.messages), status=status.HTTP_400_BAD_REQUEST)
+        discovery_scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+
+    discovery = await discovery_scope.get_discovery()
 
     if not discovery:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
-    dt_permissions = await get_discovery_data_type_permissions(request)
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     if not any(d["counts"] for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
-    project_id, dataset_id = get_project_id_and_dataset_id_from_request(request)
+    project_id = discovery_scope.project_id
+    dataset_id = discovery_scope.dataset_id
 
     async def _counts_for_scoped_model_name(mn: PublicModelNames) -> tuple[PublicModelNames, int]:
         scope: PublicScopeFilterKeys
@@ -263,11 +259,12 @@ async def discovery_schema(_request: DrfRequest):
 @permission_classes([BentoAllowAny])
 async def public_rules(request: DrfRequest):
     try:
-        discovery = await get_request_discovery(request)
-    except DiscoveryConfigException as e:
+        discovery_scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
         return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
-    dt_permissions = await get_discovery_data_type_permissions(request)
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+    discovery = await discovery_scope.get_discovery()
 
     # TODO: allow filtering by fields accessed?
     fs_permissions, _ = get_discovery_field_set_permissions(discovery, None, dt_permissions)

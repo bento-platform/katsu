@@ -5,6 +5,7 @@ __all__ = [
     "DiscoveryFieldProps",
     "DiscoveryRules",
     "DiscoveryConfig",
+    "EmptyConfig",
     "OverviewSectionChart",
     "OverviewSection",
 ]
@@ -44,6 +45,10 @@ class DiscoveryConfig(TypedDict):
     search: list[SearchSection]
     fields: dict[str, DiscoveryFieldProps]
     rules: DiscoveryRules
+
+
+class EmptyConfig(TypedDict):
+    pass
 
 
 class BinWithValue(TypedDict):

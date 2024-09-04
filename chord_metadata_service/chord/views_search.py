@@ -4,7 +4,6 @@ import json
 import logging
 
 from adrf.decorators import api_view as async_api_view
-from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
 
@@ -14,6 +13,7 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -28,7 +28,7 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSu
 from chord_metadata_service.authz.types import DataPermissionsDict
 
 from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_request_discovery
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -46,11 +46,14 @@ from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Dataset
-
+from .models import Dataset, Project
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
+
+
+def bad_request_response(message: str) -> Response:
+    return Response(errors.bad_request_error(message), status=status.HTTP_400_BAD_REQUEST)
 
 
 async def experiment_dataset_summary(discovery: DiscoveryConfig, dataset: Dataset, permissions: DataPermissionsDict):
@@ -184,7 +187,7 @@ def search(request, internal_data=False):
     """
     search_params, err = get_chord_search_parameters(request)
     if err:
-        return Response(errors.bad_request_error(err), status=400)
+        return bad_request_response(err)
 
     if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
        or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
@@ -327,7 +330,7 @@ def fhir_search(request, internal_data=False):
         query = request.query_params.get("query")
 
     if query is None:
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
+        return Response(errors.bad_request_error("Missing query in request body"), status=status.HTTP_400_BAD_REQUEST)
 
     start = datetime.now()
 
@@ -484,28 +487,17 @@ def chord_dataset_search(
     return serialized_data, None
 
 
-def chord_dataset_representation(dataset: Dataset):
-    return {
-        "id": dataset.identifier,
-        "title": dataset.title,
-        "metadata": {
-            "project_id": dataset.project_id,
-            "created": dataset.created.isoformat(),
-            "updated": dataset.updated.isoformat(),
-        },
-    }
-
-
 def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     start = datetime.now()
+
     search_params, err = get_chord_search_parameters(request=request)
     if err:
-        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request_response(err)
 
     data, err = chord_dataset_search(search_params, dataset_id, start, internal)
-
     if err:
-        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request_response(err)
+
     return Response(build_search_response(data, start) if internal else data)
 
 
@@ -530,14 +522,22 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 @async_api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def dataset_summary(request: DrfRequest, dataset_id: str):
-    dataset = await Dataset.objects.aget(identifier=dataset_id)
-    discovery = await get_request_discovery(request)
+    try:
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except (Dataset.DoesNotExist, ValidationError) as e:
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
+
+    project = await Project.objects.aget(identifier=dataset.project_id)
+
+    # don't use request scope - the project/dataset are validated by the aget calls above and fixed
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_data_type_query_permissions(
         request,
         data_types=list(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys()),
-        resource=build_resource(str(dataset.project_id), dataset_id),
+        resource=discovery_scope.as_authz_resource(),
     )
 
+    discovery = await discovery_scope.get_discovery()
     summaries = await asyncio.gather(
         *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery, dataset, dt_permissions[dt]),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())

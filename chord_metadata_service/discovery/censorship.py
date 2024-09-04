@@ -1,7 +1,7 @@
 import sys
 
 from ..authz.types import DataPermissionsDict
-from .types import DiscoveryConfig, DiscoveryRules
+from .types import DiscoveryConfig, DiscoveryRules, EmptyConfig
 
 __all__ = [
     "RULES_NO_PERMISSIONS",
@@ -23,7 +23,7 @@ RULES_FULL_PERMISSIONS: DiscoveryRules = {
 }
 
 
-def get_rules(discovery: DiscoveryConfig | None, data_permissions: DataPermissionsDict) -> DiscoveryRules:
+def get_rules(discovery: DiscoveryConfig | EmptyConfig | None, data_permissions: DataPermissionsDict) -> DiscoveryRules:
     if data_permissions["data"]:
         return RULES_FULL_PERMISSIONS
     elif not data_permissions["counts"] or not (discovery or {}).get("rules"):
@@ -38,11 +38,18 @@ def get_threshold(discovery: DiscoveryConfig | None, field_set_permissions: Data
     return get_rules(discovery, field_set_permissions)["count_threshold"]
 
 
-def thresholded_count(c: int, discovery: DiscoveryConfig | None, field_set_permissions: DataPermissionsDict) -> int:
+def thresholded_count(
+    c: int,
+    discovery: DiscoveryConfig | EmptyConfig | None,
+    field_set_permissions: DataPermissionsDict,
+) -> int:
     return 0 if c <= get_threshold(discovery, field_set_permissions) else c
 
 
-def get_max_query_parameters(discovery: DiscoveryConfig | None, field_set_permissions: DataPermissionsDict) -> int:
+def get_max_query_parameters(
+    discovery: DiscoveryConfig | EmptyConfig | None,
+    field_set_permissions: DataPermissionsDict,
+) -> int:
     """
     Gets the maximum number of query parameters allowed for discovery.
     """
