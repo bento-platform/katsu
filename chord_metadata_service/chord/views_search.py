@@ -13,6 +13,7 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -528,8 +529,13 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 @async_api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def dataset_summary(request: DrfRequest, dataset_id: str):
-    dataset = await Dataset.objects.aget(identifier=dataset_id)
+    try:
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except (Dataset.DoesNotExist, ValidationError) as e:
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+
     project = await Project.objects.aget(identifier=dataset.project_id)
+
     # don't use request scope - the project/dataset are validated by the aget calls above and fixed
     discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_data_type_query_permissions(
