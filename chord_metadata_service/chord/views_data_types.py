@@ -38,6 +38,10 @@ QUERYSET_FN: dict[str, Callable] = {
 }
 
 
+def not_found_response(message: str) -> Response:
+    return Response(errors.not_found_error(message), status=status.HTTP_404_NOT_FOUND)
+
+
 async def _filtered_query(data_type: str, project: str | None = None, dataset: str | None = None) -> QuerySet:
     """
     Returns a filtered query based on the data type, project, and dataset.
@@ -116,7 +120,7 @@ async def data_type_list(request: DrfRequest):
     except DiscoveryScopeException as e:
         # Does not exist, or a UUID validation error - used to be triggered later but scope validation does some of the
         # Django validation for us.
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+        return not_found_response(e.message)
 
     discovery, dt_permissions = await asyncio.gather(
         discovery_scope.get_discovery(), get_discovery_data_type_permissions(request, discovery_scope)
@@ -133,10 +137,6 @@ async def data_type_list(request: DrfRequest):
     return Response(dt_response)
 
 
-def bad_request_from_exc(e: Exception) -> Response:
-    return Response(errors.bad_request_error(str(e)), status=status.HTTP_400_BAD_REQUEST)
-
-
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def data_type_detail(request: DrfRequest, data_type: str):
@@ -150,7 +150,7 @@ async def data_type_detail(request: DrfRequest, data_type: str):
     except DiscoveryScopeException as e:
         # Does not exist, or a UUID validation error - used to be triggered later but scope validation does some of the
         # Django validation for us.
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+        return not_found_response(e.message)
 
     # TODO: just get the one data type
     discovery, dt_permissions = await asyncio.gather(
@@ -169,7 +169,7 @@ async def data_type_detail(request: DrfRequest, data_type: str):
 async def data_type_schema(_request: DrfRequest, data_type: str):
     # TODO: exclude extra_properties schema
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+        return not_found_response(f"Data type {data_type} not found")
 
     return Response(dt.DATA_TYPES[data_type]["schema"])
 
@@ -178,7 +178,7 @@ async def data_type_schema(_request: DrfRequest, data_type: str):
 @permission_classes([BentoAllowAny])
 async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
     if data_type not in dt.DATA_TYPES:
-        return Response(errors.not_found_error(f"Data type {data_type} not found"), status=status.HTTP_404_NOT_FOUND)
+        return not_found_response(errors.not_found_error(f"Data type {data_type} not found"))
 
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])
 
@@ -189,15 +189,15 @@ async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str
     try:
         dataset = await Dataset.objects.aget(identifier=dataset_id)
     except (Dataset.DoesNotExist, ValidationError) as e:
-        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
+        authz.mark_authz_done(request)
+        return not_found_response(str(e))
 
     project = await Project.objects.aget(datasets=dataset)
     project_id = str(project.identifier)
 
     if data_type not in QUERYSET_FN:
         authz.mark_authz_done(request)
-        return Response(
-            errors.bad_request_error(f"Data type {data_type} doesn't exist"), status=status.HTTP_404_NOT_FOUND)
+        return not_found_response(f"Data type {data_type} doesn't exist")
 
     qs = QUERYSET_FN[data_type](dataset_id)
 
@@ -241,7 +241,7 @@ async def dataset_data_type_summary(request: DrfRequest, dataset_id: str):
     try:
         dataset = await Dataset.objects.aget(identifier=dataset_id)
     except (Dataset.DoesNotExist, ValidationError) as e:
-        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
+        return not_found_response(str(e))
 
     # we've already validated that the project and dataset exist above, so we can build an instance of
     # ValidatedDiscoveryScope directly.

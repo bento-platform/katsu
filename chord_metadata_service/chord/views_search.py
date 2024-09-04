@@ -52,6 +52,10 @@ OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
+def bad_request_response(message: str) -> Response:
+    return Response(errors.bad_request_error(message), status=status.HTTP_400_BAD_REQUEST)
+
+
 async def experiment_dataset_summary(discovery: DiscoveryConfig, dataset: Dataset, permissions: DataPermissionsDict):
     return await dt_experiment_summary(
         Experiment.objects.filter(dataset=dataset),
@@ -183,7 +187,7 @@ def search(request, internal_data=False):
     """
     search_params, err = get_chord_search_parameters(request)
     if err:
-        return Response(errors.bad_request_error(err), status=400)
+        return bad_request_response(err)
 
     if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
        or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
@@ -326,7 +330,7 @@ def fhir_search(request, internal_data=False):
         query = request.query_params.get("query")
 
     if query is None:
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
+        return Response(errors.bad_request_error("Missing query in request body"), status=status.HTTP_400_BAD_REQUEST)
 
     start = datetime.now()
 
@@ -497,14 +501,15 @@ def chord_dataset_representation(dataset: Dataset):
 
 def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     start = datetime.now()
+
     search_params, err = get_chord_search_parameters(request=request)
     if err:
-        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request_response(err)
 
     data, err = chord_dataset_search(search_params, dataset_id, start, internal)
-
     if err:
-        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request_response(err)
+
     return Response(build_search_response(data, start) if internal else data)
 
 
@@ -532,7 +537,7 @@ async def dataset_summary(request: DrfRequest, dataset_id: str):
     try:
         dataset = await Dataset.objects.aget(identifier=dataset_id)
     except (Dataset.DoesNotExist, ValidationError) as e:
-        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 
     project = await Project.objects.aget(identifier=dataset.project_id)
 
