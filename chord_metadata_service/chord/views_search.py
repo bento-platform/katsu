@@ -487,18 +487,6 @@ def chord_dataset_search(
     return serialized_data, None
 
 
-def chord_dataset_representation(dataset: Dataset):
-    return {
-        "id": dataset.identifier,
-        "title": dataset.title,
-        "metadata": {
-            "project_id": dataset.project_id,
-            "created": dataset.created.isoformat(),
-            "updated": dataset.updated.isoformat(),
-        },
-    }
-
-
 def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     start = datetime.now()
 
