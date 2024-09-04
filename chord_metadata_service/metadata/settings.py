@@ -60,6 +60,9 @@ BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip(
 BENTO_AUTHZ_SERVICE_URL: str = (
     os.environ.get("BENTO_AUTHZ_SERVICE_URL", "http://authz.local").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
 )
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    # Override BENTO_AUTHZ_SERVICE_URL for testing purposes inside container - this is a bit hacky
+    BENTO_AUTHZ_SERVICE_URL = "http://authz.local"
 
 SERVICE_URL_BASE_PATH = os.environ.get("SERVICE_URL_BASE_PATH")
 if SERVICE_URL_BASE_PATH:
