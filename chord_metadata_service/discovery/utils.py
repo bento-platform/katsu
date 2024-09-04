@@ -118,8 +118,6 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
     project: cm.Project | None = None
     dataset: cm.Dataset | None = None
 
-    is_scope_valid: bool = True
-
     try:
         if project_id:
             uuid.UUID(project_id)
@@ -144,9 +142,6 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
             project = await _get_project_by_id(project_id)
 
     except ObjectDoesNotExist:
-        is_scope_valid = False
-
-    if not is_scope_valid:
         # We've already checked these are UUIDs, so they're fine to log
         raise DiscoveryScopeException(dataset_id, project_id)
 
