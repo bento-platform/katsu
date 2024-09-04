@@ -117,7 +117,7 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         )
 
     @staticmethod
-    def test_discovery_configs() -> TestDiscoveryConfigsDict:
+    def discovery_test_configs() -> TestDiscoveryConfigsDict:
         return {
             "public": settings.CONFIG_PUBLIC,
             "sex_only": CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
@@ -158,12 +158,12 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         ]
 
         # use key aliases for configs to make subtest failure output more readable
-        tdc = self.test_discovery_configs()  # to get injected CONFIG_PUBLIC, need to calculate this in-test
+        dtc = self.discovery_test_configs()  # to get injected CONFIG_PUBLIC, need to calculate this in-test
 
         for params in subtest_params:
             with self.subTest(params=params):
                 level, qp, expected_status_code, config_key = params
-                expected_body_config: DiscoveryConfig | None = tdc[config_key]
+                expected_body_config: DiscoveryConfig | None = dtc[config_key]
                 res = self.dt_get(level, f"{search_fields_url}{qp}")
                 self.assertEqual(res.status_code, expected_status_code)
                 if expected_body_config is not None:
