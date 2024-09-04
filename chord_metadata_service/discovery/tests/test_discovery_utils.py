@@ -1,3 +1,4 @@
+from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
@@ -10,9 +11,15 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
         self.project_scope = ValidatedDiscoveryScope(self.project, None)
         self.project_dataset_scope = ValidatedDiscoveryScope(self.project, self.dataset)
 
-    def test_scope_init_fail(self):
+        self.project_2 = cm.Project.objects.create(title="Project 2", description="")
+
+    def test_scope_init_fail_no_project(self):
         with self.assertRaises(DiscoveryScopeException):
             ValidatedDiscoveryScope(None, self.dataset)
+
+    def test_scope_init_fail_wrong_parent_project(self):
+        with self.assertRaises(DiscoveryScopeException):
+            ValidatedDiscoveryScope(self.project_2, self.dataset)
 
     def test_scope_repr(self):
         subtest_params = [

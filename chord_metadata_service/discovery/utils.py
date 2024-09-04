@@ -47,9 +47,14 @@ class ValidatedDiscoveryScope:
         self._project = project
         self._dataset = dataset
 
-        # Additional validation - make sure we have project set if dataset is set
-        if self._dataset and not self._project:
-            raise DiscoveryScopeException(dataset_id=str(self._dataset.identifier))
+        # Additional validation
+        if self._dataset:
+            if not self._project:
+                # - make sure we have project set if dataset is set
+                raise DiscoveryScopeException(dataset_id=str(self._dataset.identifier))
+            elif (project_id := self._project.identifier) != self._dataset.project_id:
+                # - make sure the specified project ID matches the dataset's project ID
+                raise DiscoveryScopeException(dataset_id=str(self._dataset.identifier), project_id=str(project_id))
 
         # We can cache get_discovery() after the first call, since instances of this class MUST NOT be mutated.
         self._discovery: DiscoveryConfig | EmptyConfig | None = None
