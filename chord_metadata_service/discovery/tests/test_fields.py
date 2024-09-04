@@ -158,33 +158,36 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()
-        qs = filter_queryset_field_value(base_qs, self.dm_fp, "Hematology Test")
-        self.assertEqual(qs.count(), 1)
-        qs = filter_queryset_field_value(base_qs, self.dm_fp, "Genetic Testing")
-        self.assertEqual(qs.count(), 1)
-        qs = filter_queryset_field_value(base_qs, self.dm_fp, "VALUE NOT IN DB")
-        self.assertEqual(qs.count(), 0)
+
+        subtest_params = [
+            ("Hematology Test", 1),
+            ("Genetic Testing", 1),
+            ("VALUE NOT IN DB", 0),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                q_val, expected_count = params
+                qs = filter_queryset_field_value(base_qs, self.dm_fp, q_val)
+                self.assertEqual(qs.count(), expected_count)
 
     def test_filter_queryset_field_value_number(self):
         base_qs = ph_m.Individual.objects.all()
 
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "≥ 0")
-        self.assertEqual(qs.count(), 1)
+        subtest_params = [
+            ("≥ 0", 1),
+            ("≥ 60", 0),
+            ("< 60", 1),
+            ("< 0", 0),
+            ("[30, 50)", 1),
+            ("[100, 200)", 0),
+        ]
 
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "≥ 60")
-        self.assertEqual(qs.count(), 0)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "< 60")
-        self.assertEqual(qs.count(), 1)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "< 0")
-        self.assertEqual(qs.count(), 0)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "[30, 50)")
-        self.assertEqual(qs.count(), 1)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "[100, 200)")
-        self.assertEqual(qs.count(), 0)
+        for params in subtest_params:
+            with self.subTest(params=params):
+                q_val, expected_count = params
+                qs = filter_queryset_field_value(base_qs, self.mtl_fp, q_val)
+                self.assertEqual(qs.count(), expected_count)
 
     async def test_get_distinct_values(self):
         dm_values = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, self.permissions_full)
