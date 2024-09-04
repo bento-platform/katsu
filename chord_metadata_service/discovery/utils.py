@@ -56,7 +56,8 @@ class ValidatedDiscoveryScope:
                 # - make sure the specified project ID matches the dataset's project ID
                 raise DiscoveryScopeException(dataset_id=str(self._dataset.identifier), project_id=str(project_id))
 
-        # We can cache get_discovery() after the first call, since instances of this class MUST NOT be mutated.
+        # We can cache the discovery property after the first call to the getter defined below, since instances of this
+        # class MUST NOT be mutated.
         self._discovery: DiscoveryConfig | EmptyConfig | None = None
 
     @property
@@ -76,23 +77,24 @@ class ValidatedDiscoveryScope:
     def __repr__(self):
         return f"<ValidatedDiscoveryScope project={self.project_id} dataset={self.dataset_id}>"
 
-    async def _get_project_discovery_or_fallback(self) -> DiscoveryConfig | EmptyConfig:
+    def _get_project_discovery_or_fallback(self) -> DiscoveryConfig | EmptyConfig:
         if self._project and (d := self._project.discovery):
             return d
         else:
             # fallback on global discovery config if project is not set or has None as discovery
             return settings.CONFIG_PUBLIC
 
-    async def _get_dataset_discovery_or_fallback(self) -> DiscoveryConfig | EmptyConfig:
+    def _get_dataset_discovery_or_fallback(self) -> DiscoveryConfig | EmptyConfig:
         """
         Gets the dataset discovery configuration dictionary, or falls back to the project (and eventually instance) one.
         """
         if self._dataset and (d := self._dataset.discovery):
             return d
         else:
-            return await self._get_project_discovery_or_fallback()
+            return self._get_project_discovery_or_fallback()
 
-    async def get_discovery(self) -> DiscoveryConfig | EmptyConfig:
+    @property
+    def discovery(self) -> DiscoveryConfig | EmptyConfig:
         """
         Get the discovery configuration dictionary for this scope, properly handling falling back
         (dataset -> project -> instance) as required.
@@ -100,7 +102,7 @@ class ValidatedDiscoveryScope:
         if self._discovery is not None:
             return self._discovery
         else:
-            d = await self._get_dataset_discovery_or_fallback()
+            d = self._get_dataset_discovery_or_fallback()
             self._discovery = d
             return d
 

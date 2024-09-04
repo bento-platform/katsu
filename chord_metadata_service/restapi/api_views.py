@@ -76,7 +76,6 @@ async def overview(request: DrfRequest):
     # TODO: permissions based on project - this endpoint should be scrapped / completely rethought
     # use node level discovery config for private overview
     discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
-    discovery = await discovery_scope.get_discovery()
 
     phenopackets = pheno_models.Phenopacket.objects.all()
     experiments = experiments_models.Experiment.objects.all()
@@ -85,7 +84,7 @@ async def overview(request: DrfRequest):
         request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
     )
 
-    return await build_overview_response(phenopackets, experiments, discovery, dt_permissions)
+    return await build_overview_response(phenopackets, experiments, discovery_scope.discovery, dt_permissions)
 
 
 @api_view(["GET"])
@@ -111,7 +110,6 @@ async def search_overview(request: DrfRequest):
     # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
     # use node level discovery config for private search overview
     discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
-    discovery = await discovery_scope.get_discovery()
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
     phenopackets = pheno_models.Phenopacket.objects.all().filter(subject_id__in=individual_ids)
@@ -127,4 +125,4 @@ async def search_overview(request: DrfRequest):
         request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
     )
 
-    return await build_overview_response(phenopackets, experiments, discovery, dt_permissions)
+    return await build_overview_response(phenopackets, experiments, discovery_scope.discovery, dt_permissions)

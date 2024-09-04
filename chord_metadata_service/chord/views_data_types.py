@@ -72,7 +72,7 @@ async def get_count_for_data_type(
     provided, the count will be for the whole node.
     """
     q = await _filtered_query(data_type, scope)
-    return thresholded_count(await q.acount(), await scope.get_discovery(), permissions)
+    return thresholded_count(await q.acount(), await scope.discovery, permissions)
 
 
 async def get_last_ingested_for_data_type(data_type: str, scope: ValidatedDiscoveryScope) -> dict | None:
@@ -115,9 +115,7 @@ async def data_type_list(request: DrfRequest):
         # Django validation for us.
         return not_found_response(e.message)
 
-    discovery, dt_permissions = await asyncio.gather(
-        discovery_scope.get_discovery(), get_discovery_data_type_permissions(request, discovery_scope)
-    )
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     dt_response: list[dict] = list(
         await asyncio.gather(*(
@@ -146,9 +144,7 @@ async def data_type_detail(request: DrfRequest, data_type: str):
         return not_found_response(e.message)
 
     # TODO: just get the one data type
-    discovery, dt_permissions = await asyncio.gather(
-        discovery_scope.get_discovery(), get_discovery_data_type_permissions(request, discovery_scope)
-    )
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     return Response(
         await make_data_type_response_object(

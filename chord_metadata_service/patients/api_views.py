@@ -189,7 +189,7 @@ async def public_discovery_filter_queryset(
     # log/exception string to re-use for validation errors/log entries. TODO: in the future, these should be structured
     scope_str = f"({repr(scope)})"
 
-    discovery = await scope.get_discovery()
+    discovery = scope.discovery
 
     queryable_fields = get_discovery_queryable_fields(discovery)
 
@@ -255,7 +255,7 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
-        discovery = await discovery_scope.get_discovery()
+        discovery = discovery_scope.discovery
 
         if not discovery:
             authz_middleware.mark_authz_done(request)

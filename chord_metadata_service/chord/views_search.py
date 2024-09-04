@@ -537,7 +537,7 @@ async def dataset_summary(request: DrfRequest, dataset_id: str):
         resource=discovery_scope.as_authz_resource(),
     )
 
-    discovery = await discovery_scope.get_discovery()
+    discovery = discovery_scope.discovery
     summaries = await asyncio.gather(
         *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery, dataset, dt_permissions[dt]),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())

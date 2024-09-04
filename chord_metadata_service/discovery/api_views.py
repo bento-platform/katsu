@@ -57,7 +57,7 @@ async def public_search_fields(request: DrfRequest):
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
-    discovery = await discovery_scope.get_discovery()
+    discovery = discovery_scope.discovery
 
     if not discovery:
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
@@ -122,7 +122,7 @@ async def public_overview(request: DrfRequest):
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
-    discovery = await discovery_scope.get_discovery()
+    discovery = discovery_scope.discovery
 
     if not discovery:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
@@ -264,7 +264,7 @@ async def public_rules(request: DrfRequest):
         return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    discovery = await discovery_scope.get_discovery()
+    discovery = discovery_scope.discovery
 
     # TODO: allow filtering by fields accessed?
     fs_permissions, _ = get_discovery_field_set_permissions(discovery, None, dt_permissions)
