@@ -3,7 +3,6 @@ import asyncio
 from adrf.decorators import api_view
 from bento_lib.responses import errors
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
@@ -56,9 +55,7 @@ async def public_search_fields(request: DrfRequest):
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-    except ValidationError as e:  # UUID error
-        return Response(errors.bad_request_error(*e.messages), status=status.HTTP_400_BAD_REQUEST)
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
     discovery = await discovery_scope.get_discovery()
 
@@ -123,9 +120,7 @@ async def public_overview(request: DrfRequest):
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-    except ValidationError as e:
-        return Response(errors.bad_request_error(*e.messages), status=status.HTTP_400_BAD_REQUEST)
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
     discovery = await discovery_scope.get_discovery()
 
