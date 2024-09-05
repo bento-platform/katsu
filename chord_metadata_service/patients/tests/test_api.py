@@ -11,6 +11,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as cm
+from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.tests.constants import (
@@ -349,6 +350,11 @@ class PublicListIndividualsTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_project_does_not_exist(self):
+        r = self.dt_authz_counts_get(f"/api/public?project={uuid.uuid4()}")
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_project_dataset_does_not_exist(self):
         r = self.dt_authz_counts_get(f"/api/public?project={uuid.uuid4()}&dataset={uuid.uuid4()}")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
@@ -367,6 +373,12 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
     def setUp(self):
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
+        self.dataset_2 = cm.Dataset.objects.create(
+            title="Dataset 2",
+            description="Some dataset",
+            data_use=VALID_DATA_USE_1,
+            project=self.project_2,
+        )
 
         individuals = [
             c.generate_valid_individual(date_of_consent_range=(2020, 2023))
@@ -404,12 +416,31 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.assertEqual(nb_female, response_obj['count'])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_public_filtering_sex_none_in_project(self):
+    def test_public_filtering_sex_none_in_project_counts(self):
         response = self.dt_authz_counts_get(f"/api/public?project={self.project_2.identifier}&sex=female")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), dres.INSUFFICIENT_DATA_AVAILABLE)
 
+        response = self.dt_authz_counts_get(
+            f"/api/public?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.json(), dres.INSUFFICIENT_DATA_AVAILABLE)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_filtering_sex_none_in_project_full(self):
         response = self.dt_authz_full_get(f"/api/public?project={self.project_2.identifier}&sex=female")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(response.json(), {
+            "count": 0,
+            "matches": [],
+            "biosamples": {"count": 0, "sampled_tissue": []},
+            "experiments": {"count": 0, "experiment_type": []},
+        })
+
+        response = self.dt_authz_full_get(
+            f"/api/public?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), {
             "count": 0,
