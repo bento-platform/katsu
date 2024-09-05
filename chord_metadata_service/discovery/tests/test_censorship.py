@@ -1,5 +1,5 @@
 import sys
-from django.test import TestCase, override_settings
+from django.test import TestCase
 
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.discovery.censorship import get_threshold, thresholded_count, get_max_query_parameters
@@ -14,10 +14,12 @@ class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
         self.assertEqual(get_threshold({}, self.permissions_full), 0)
 
     def test_get_threshold_bool_only_perms(self):
+        self.assertEqual(get_threshold(None, self.permissions_bool), sys.maxsize)
         self.assertEqual(get_threshold({}, self.permissions_bool), sys.maxsize)
+        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_bool), sys.maxsize)
 
-    @override_settings(CONFIG_PUBLIC={})
     def test_get_threshold_no_config(self):  # no public config configured
+        self.assertEqual(get_threshold(None, self.permissions_counts), sys.maxsize)
         self.assertEqual(get_threshold({}, self.permissions_counts), sys.maxsize)
 
 
@@ -47,11 +49,9 @@ class CensorshipGetMaxQueryParametersTest(TestCase, PermissionsTestCaseMixin):
     def test_get_max_query_parameters_no_censorship(self):
         self.assertEqual(get_max_query_parameters({}, self.permissions_full), sys.maxsize)
 
-    @override_settings(CONFIG_PUBLIC={})
     def test_get_max_query_parameters_no_config(self):
         self.assertEqual(get_max_query_parameters({}, self.permissions_counts), 0)
 
-    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_get_max_query_parameters_configured(self):
         self.assertEqual(get_max_query_parameters(DISCOVERY_CONFIG_TEST, self.permissions_full), sys.maxsize)
         self.assertEqual(get_max_query_parameters(DISCOVERY_CONFIG_TEST, self.permissions_counts), 2)

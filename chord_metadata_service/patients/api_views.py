@@ -33,7 +33,6 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_field_set_permissions,
     get_request_discovery_scope,
     get_public_model_scoped_queryset,
-    ValidatedDiscoveryScope,
 )
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -54,6 +53,7 @@ from chord_metadata_service.restapi.utils import build_experiments_by_subject, g
 from .filters import IndividualFilter
 from .models import Individual
 from .serializers import IndividualSerializer
+from ..discovery.types import DiscoveryConfig
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -171,11 +171,23 @@ class IndividualBatchViewSet(BatchViewSet):
 
 
 async def public_discovery_filter_queryset(
-    scope: ValidatedDiscoveryScope,
+    discovery: DiscoveryConfig,
     request: DrfRequest,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset: QuerySet,
+    scope_repr: str,  # We pass disc
 ):
+    """
+    Process query parameters, check validity, and filter the queryset by the passed parameters.
+    :param discovery: Pass discovery directly rather than scope object since we've type-narrowed to DiscoveryConfig,
+        i.e., a complete discovery configuration dictionary.
+    :param request: The request to extract the query parameters from.
+    :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
+    :param queryset: The queryset to filter using the request query parameters.
+    :param scope_repr: A string representation of the scope for including scope information during error-raising.
+        TODO: in the future, scope repr passing to exceptions should be structured data.
+    """
+
     # Process query parameters and check validity
 
     qp: QueryDict = deepcopy(request.query_params)
@@ -188,11 +200,6 @@ async def public_discovery_filter_queryset(
     if "dataset" in qp:
         del qp["dataset"]
 
-    # log/exception string to re-use for validation errors/log entries. TODO: in the future, these should be structured
-    scope_str = f"({repr(scope)})"
-
-    discovery = scope.discovery
-
     queryable_fields = get_discovery_queryable_fields(discovery)
 
     queried_fields = list(set(qp.keys()))  # deduplicate fields for determining field permissions
@@ -201,14 +208,14 @@ async def public_discovery_filter_queryset(
     # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
     # than one value for the same field (not that this works most of the time, at the moment.)
     if len(qp) > get_max_query_parameters(discovery, overall_permissions):
-        raise ValidationError(f"Wrong number of fields: {len(qp)} {scope_str}")
+        raise ValidationError(f"Wrong number of fields: {len(qp)} ({scope_repr})")
 
     if not overall_permissions["counts"]:
-        raise ValidationError(f"Insufficient permissions to access counts {scope_str}")
+        raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
     for field, value in qp.items():
         if field not in queryable_fields:
-            raise ValidationError(f"Unsupported field used in query: {field} {scope_str}")
+            raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
         field_props = queryable_fields[field]
         options = await get_field_options(field, discovery, qf_permissions[field])
@@ -225,7 +232,7 @@ async def public_discovery_filter_queryset(
                 and field_props["config"]["enum"] is None
             )
         ):
-            raise ValidationError(f"Invalid value used in query: {value} {scope_str}")
+            raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
 
         # recursion
         queryset = filter_queryset_field_value(queryset, field_props, value)
@@ -278,7 +285,9 @@ class PublicListIndividuals(APIView):
         base_qs = get_public_model_scoped_queryset(discovery_scope, "individual")
 
         try:
-            filtered_qs = await public_discovery_filter_queryset(discovery_scope, request, dt_permissions, base_qs)
+            filtered_qs = await public_discovery_filter_queryset(
+                discovery, request, dt_permissions, base_qs, repr(discovery_scope)
+            )
         except ValidationError as e:
             logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)

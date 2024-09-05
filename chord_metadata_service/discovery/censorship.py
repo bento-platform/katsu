@@ -1,7 +1,7 @@
 import sys
 
 from ..authz.types import DataPermissionsDict
-from .types import DiscoveryConfig, DiscoveryRules, EmptyConfig
+from .types import DiscoveryRules, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
     "RULES_NO_PERMISSIONS",
@@ -23,7 +23,7 @@ RULES_FULL_PERMISSIONS: DiscoveryRules = {
 }
 
 
-def get_rules(discovery: DiscoveryConfig | EmptyConfig | None, data_permissions: DataPermissionsDict) -> DiscoveryRules:
+def get_rules(discovery: OptionalDiscoveryOrEmptyConfig, data_permissions: DataPermissionsDict) -> DiscoveryRules:
     if data_permissions["data"]:
         return RULES_FULL_PERMISSIONS
     elif not data_permissions["counts"] or not (discovery or {}).get("rules"):
@@ -31,7 +31,7 @@ def get_rules(discovery: DiscoveryConfig | EmptyConfig | None, data_permissions:
     return discovery["rules"]
 
 
-def get_threshold(discovery: DiscoveryConfig | None, field_set_permissions: DataPermissionsDict) -> int:
+def get_threshold(discovery: OptionalDiscoveryOrEmptyConfig, field_set_permissions: DataPermissionsDict) -> int:
     """
     Gets the maximum count threshold for censoring counts data (i.e., rounding to 0).
     """
@@ -40,14 +40,14 @@ def get_threshold(discovery: DiscoveryConfig | None, field_set_permissions: Data
 
 def thresholded_count(
     c: int,
-    discovery: DiscoveryConfig | EmptyConfig | None,
+    discovery: OptionalDiscoveryOrEmptyConfig,
     field_set_permissions: DataPermissionsDict,
 ) -> int:
     return 0 if c <= get_threshold(discovery, field_set_permissions) else c
 
 
 def get_max_query_parameters(
-    discovery: DiscoveryConfig | EmptyConfig | None,
+    discovery: OptionalDiscoveryOrEmptyConfig,
     field_set_permissions: DataPermissionsDict,
 ) -> int:
     """

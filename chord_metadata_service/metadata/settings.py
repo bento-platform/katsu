@@ -21,7 +21,7 @@ from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
-from ..discovery.types import DiscoveryConfig, EmptyConfig
+from ..discovery.types import DiscoveryOrEmptyConfig
 
 load_dotenv()
 
@@ -355,7 +355,7 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 # Settings related to the Public APIs
 
 # Read project specific config.json that contains custom search fields
-CONFIG_PUBLIC: DiscoveryConfig | EmptyConfig
+CONFIG_PUBLIC: DiscoveryOrEmptyConfig
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_PUBLIC = json.load(config_file)

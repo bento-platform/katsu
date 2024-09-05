@@ -7,7 +7,7 @@ from ..authz.types import DataPermissionsDict
 
 from .censorship import thresholded_count
 from .fields_utils import get_jsonb_path_query, get_public_model_name
-from .types import BinWithValue, DiscoveryConfig
+from .types import BinWithValue, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -20,7 +20,7 @@ __all__ = [
 
 
 async def individual_experiment_type_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict,
+    queryset: QuerySet, discovery: OptionalDiscoveryOrEmptyConfig, field_permissions: DataPermissionsDict,
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -37,7 +37,7 @@ async def individual_experiment_type_stats(
 
 
 async def individual_biosample_tissue_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig | None, field_permissions: DataPermissionsDict
+    queryset: QuerySet, discovery: OptionalDiscoveryOrEmptyConfig, field_permissions: DataPermissionsDict
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -54,7 +54,7 @@ async def individual_biosample_tissue_stats(
 
 async def bento_public_format_count_and_stats_list(
     annotated_queryset: QuerySet,
-    discovery: DiscoveryConfig | None,
+    discovery: OptionalDiscoveryOrEmptyConfig,
     field_permissions: DataPermissionsDict,
 ) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
@@ -100,7 +100,7 @@ async def stats_for_field(
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
-    discovery: DiscoveryConfig | None,
+    discovery: OptionalDiscoveryOrEmptyConfig,
     field_permissions: DataPermissionsDict,
     add_missing: bool = False,
     group_by: str | None = None

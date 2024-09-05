@@ -22,7 +22,7 @@ from .model_lookups import (
     PUBLIC_MODEL_NAMES_TO_MODEL,
     PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS,
 )
-from .types import DiscoveryConfig, DiscoveryFieldProps, EmptyConfig
+from .types import DiscoveryConfig, DiscoveryFieldProps, DiscoveryOrEmptyConfig, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
     "ValidatedDiscoveryScope",
@@ -66,7 +66,7 @@ class ValidatedDiscoveryScope:
 
         # We can cache the discovery property after the first call to the getter defined below, since instances of this
         # class MUST NOT be mutated.
-        self._discovery: DiscoveryConfig | EmptyConfig | None = None
+        self._discovery: OptionalDiscoveryOrEmptyConfig = None
 
     @property
     def project_id(self) -> str | None:
@@ -85,14 +85,14 @@ class ValidatedDiscoveryScope:
     def __repr__(self):
         return f"<ValidatedDiscoveryScope project={self.project_id} dataset={self.dataset_id}>"
 
-    def _get_project_discovery_or_fallback(self) -> DiscoveryConfig | EmptyConfig:
+    def _get_project_discovery_or_fallback(self) -> DiscoveryOrEmptyConfig:
         if self._project and (d := self._project.discovery):
             return d
         else:
             # fallback on global discovery config if project is not set or has None as discovery
             return settings.CONFIG_PUBLIC
 
-    def _get_dataset_discovery_or_fallback(self) -> DiscoveryConfig | EmptyConfig:
+    def _get_dataset_discovery_or_fallback(self) -> DiscoveryOrEmptyConfig:
         """
         Gets the dataset discovery configuration dictionary, or falls back to the project (and eventually instance) one.
         """
@@ -102,7 +102,7 @@ class ValidatedDiscoveryScope:
             return self._get_project_discovery_or_fallback()
 
     @property
-    def discovery(self) -> DiscoveryConfig | EmptyConfig:
+    def discovery(self) -> DiscoveryOrEmptyConfig:
         """
         Get the discovery configuration dictionary for this scope, properly handling falling back
         (dataset -> project -> instance) as required.
