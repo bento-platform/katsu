@@ -92,6 +92,7 @@ async def dt_phenopacket_summary(
     if dataset_id := scope.dataset_id:
         phenopackets = phenopackets.filter(dataset_id=dataset_id)
     elif project_id := scope.project_id:
+        # Project is set but dataset isn't
         phenopackets = phenopackets.select_related("project").filter(dataset__project_id=project_id)
 
     # Parallel-gather all statistics we may need for this response
