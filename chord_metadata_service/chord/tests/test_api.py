@@ -223,6 +223,8 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
     def setUp(self):
         super().setUp()
 
+        self.dats_invalid_payload = dats_dataset(str(self.project.identifier), INVALID_DATS_CREATORS)
+
         self.project_2 = Project.objects.create(title="Project 2", description="")
 
         self.valid_update = {
@@ -250,6 +252,19 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         res = r.json()
         assert res["message"] == "Bad Request"
         assert res["errors"][0]["message"] == "Dataset project ID cannot change"
+
+    def test_update_dataset_bad_dats_json(self):
+        r = self.one_authz_put(
+            f"/api/datasets/{self.dataset.identifier}",
+            data=json.dumps({**self.valid_update, "dats_file": "asdf"}),  # asdf is not JSON
+        )
+        assert r.status_code == status.HTTP_400_BAD_REQUEST
+        res = r.json()
+        assert res["message"] == "Bad Request"
+        assert res["errors"][0]["message"] == (
+            "Submitted dataset.dats_file data is not a valid JSON string. Make sure the string value is JSON "
+            "compatible, or submit dats_file as a JSON object."
+        )
 
     def test_update_dataset_forbidden(self):
         r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update))
