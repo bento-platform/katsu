@@ -4,6 +4,8 @@ from adrf.decorators import api_view
 from bento_lib.responses import errors
 from django.conf import settings
 from drf_spectacular.utils import extend_schema, inline_serializer
+from functools import partial
+from operator import is_not
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
@@ -23,6 +25,9 @@ from .censorship import get_rules
 from .schemas import DISCOVERY_SCHEMA
 from .types import BinWithValue
 from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
+
+
+is_not_none = partial(is_not, None)
 
 
 @extend_schema(
@@ -75,14 +80,21 @@ async def public_search_fields(request: DrfRequest):
             "options": await get_field_options(field, discovery, field_permissions[field]),
         }
 
-    async def _get_section_response(section) -> dict:
+    async def _get_section_response(section) -> dict | None:
+        section_fields = list(filter(is_not_none, await asyncio.gather(*map(_get_field_response, section["fields"]))))
+
+        if not section_fields:
+            # No access to any field in the section (they were all None -> they all got filtered out), so we want to
+            # filter the section itself out - return a None which will get filtered out below.
+            return None
+
         return {
             **section,
-            "fields": await asyncio.gather(*filter(None, map(_get_field_response, section["fields"]))),
+            "fields": section_fields,
         }
 
     return Response({
-        "sections": await asyncio.gather(*map(_get_section_response, discovery["search"])),
+        "sections": list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery["search"])))),
     })
 
 

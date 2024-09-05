@@ -129,7 +129,7 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def test_public_search_fields_configured(self):
         search_fields_url = reverse("public-search-fields")
 
-        subtest_params: list[tuple[DTAccessLevel, str, int, TestDiscoveryConfigKey]] = [
+        subtest_params: list[tuple[DTAccessLevel, str, int, TestDiscoveryConfigKey | dict]] = [
             # SCOPE: whole node
             ("counts", "", status.HTTP_200_OK, "public"),
             # SCOPE: project_a (same discovery as whole node)
@@ -155,6 +155,10 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             ("counts", "?project=not-a-uuid", status.HTTP_404_NOT_FOUND, "none"),
             # invalid UUID for dataset
             ("counts", "?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, "none"),
+            # ------------------------------------------ lacking permissions ------------------------------------------
+            #  - no sections with permissions -> a response with no sections available
+            ("none", "", status.HTTP_200_OK, {"sections": []}),
+            ("bool", f"?project={str(self.id_proj_a)}", status.HTTP_200_OK, {"sections": []}),
         ]
 
         # use key aliases for configs to make subtest failure output more readable
@@ -162,12 +166,16 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
         for params in subtest_params:
             with self.subTest(params=params):
-                level, qp, expected_status_code, config_key = params
-                expected_body_config: DiscoveryConfig | None = dtc[config_key]
+                level, qp, expected_status_code, config_key_or_res = params
                 res = self.dt_get(level, f"{search_fields_url}{qp}")
                 self.assertEqual(res.status_code, expected_status_code)
-                if expected_body_config is not None:
-                    self.assert_response_section_fields(res.json(), expected_body_config)
+
+                if isinstance(config_key_or_res, dict):
+                    self.assertDictEqual(res.json(), config_key_or_res)
+                else:
+                    expected_body_config: DiscoveryConfig | None = dtc[config_key_or_res]
+                    if expected_body_config is not None:
+                        self.assert_response_section_fields(res.json(), expected_body_config)
 
     @override_settings(CONFIG_PUBLIC={})
     def test_public_search_fields_not_configured(self):
