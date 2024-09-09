@@ -13,6 +13,7 @@ from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -21,14 +22,18 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from typing import Callable
-from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly, ReadOnly
 
-from chord_metadata_service.logger import logger
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
+from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly, ReadOnly
+
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
+
+from chord_metadata_service.logger import logger
 
 from chord_metadata_service.metadata.elastic import es
 
@@ -39,27 +44,14 @@ from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Dataset
-
+from .models import Dataset, Project
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-async def experiment_dataset_summary(request: DrfRequest, dataset: Dataset):
-    return await dt_experiment_summary(
-        Experiment.objects.filter(dataset=dataset),
-        discovery=None,
-        low_counts_censored=False
-    )
-
-
-async def phenopacket_dataset_summary(request: DrfRequest, dataset: Dataset):
-    return await dt_phenopacket_summary(
-        Phenopacket.objects.filter(dataset=dataset),
-        discovery=None,
-        low_counts_censored=False
-    )
+def bad_request_response(message: str) -> Response:
+    return Response(errors.bad_request_error(message), status=status.HTTP_400_BAD_REQUEST)
 
 
 # TODO: CHORD-standardized logging
@@ -177,7 +169,7 @@ def search(request, internal_data=False):
     """
     search_params, err = get_chord_search_parameters(request)
     if err:
-        return Response(errors.bad_request_error(err), status=400)
+        return bad_request_response(err)
 
     if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
        or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
@@ -320,7 +312,7 @@ def fhir_search(request, internal_data=False):
         query = request.query_params.get("query")
 
     if query is None:
-        return Response(errors.bad_request_error("Missing query in request body"), status=400)
+        return Response(errors.bad_request_error("Missing query in request body"), status=status.HTTP_400_BAD_REQUEST)
 
     start = datetime.now()
 
@@ -477,28 +469,17 @@ def chord_dataset_search(
     return serialized_data, None
 
 
-def chord_dataset_representation(dataset: Dataset):
-    return {
-        "id": dataset.identifier,
-        "title": dataset.title,
-        "metadata": {
-            "project_id": dataset.project_id,
-            "created": dataset.created.isoformat(),
-            "updated": dataset.updated.isoformat(),
-        },
-    }
-
-
 def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
     start = datetime.now()
+
     search_params, err = get_chord_search_parameters(request=request)
     if err:
-        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request_response(err)
 
     data, err = chord_dataset_search(search_params, dataset_id, start, internal)
-
     if err:
-        return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request_response(err)
+
     return Response(build_search_response(data, start) if internal else data)
 
 
@@ -515,20 +496,31 @@ def private_dataset_search(request: DrfRequest, dataset_id: str):
 
 
 DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
-    DATA_TYPE_PHENOPACKET: phenopacket_dataset_summary,
-    DATA_TYPE_EXPERIMENT: experiment_dataset_summary,
+    DATA_TYPE_PHENOPACKET: dt_phenopacket_summary,
+    DATA_TYPE_EXPERIMENT: dt_experiment_summary,
 }
 
 
 @async_api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
+@permission_classes([BentoAllowAny])
 async def dataset_summary(request: DrfRequest, dataset_id: str):
-    # TODO: PERMISSIONS
+    try:
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except (Dataset.DoesNotExist, ValidationError) as e:
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 
-    dataset = await Dataset.objects.aget(identifier=dataset_id)
+    project = await Project.objects.aget(identifier=dataset.project_id)
+
+    # don't use request scope - the project/dataset are validated by the aget calls above and fixed
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
+    dt_permissions = await get_data_type_query_permissions(
+        request,
+        data_types=list(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys()),
+        resource=discovery_scope.as_authz_resource(),
+    )
 
     summaries = await asyncio.gather(
-        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](request, dataset),
+        *map(lambda dt: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[dt](discovery_scope, dt_permissions[dt]),
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 

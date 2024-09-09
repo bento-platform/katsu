@@ -9,25 +9,28 @@ from chord_metadata_service.phenopackets import models as pheno_models
 __all__ = [
     "PUBLIC_MODEL_NAMES_TO_MODEL",
     "PUBLIC_MODEL_NAMES_TO_DATA_TYPE",
-    "PublicModelNames"
+    "PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS",
+    "PublicModelName",
+    "PublicScopeFilterKeys",
 ]
 
-PublicModelNames = Literal["individual", "biosample", "experiment"]
+PublicModelName = Literal["individual", "biosample", "experiment"]
+PublicScopeFilterKeys = Literal["project", "dataset"]
 
-PUBLIC_MODEL_NAMES_TO_MODEL: dict[PublicModelNames, Type[Model]] = {
+PUBLIC_MODEL_NAMES_TO_MODEL: dict[PublicModelName, Type[Model]] = {
     "individual": patient_models.Individual,
     "biosample": pheno_models.Biosample,
     "experiment": exp_models.Experiment,
 }
 
-PUBLIC_MODEL_NAMES_TO_DATA_TYPE: dict[PublicModelNames, str] = {
+PUBLIC_MODEL_NAMES_TO_DATA_TYPE: dict[PublicModelName, str] = {
     "individual": DATA_TYPE_PHENOPACKET,
     "biosample": DATA_TYPE_PHENOPACKET,
     "experiment": DATA_TYPE_EXPERIMENT,
 }
 
 
-class ScopeFilter(TypedDict):
+class ScopeFilter(TypedDict, total=False):
     filter: str
     prefetch_related: tuple[str, ...]
     select_related: tuple[str, ...]
@@ -38,7 +41,7 @@ class ProjectDatasetScopeFilters(TypedDict):
     dataset: ScopeFilter
 
 
-PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS: dict[PublicModelNames, ProjectDatasetScopeFilters] = {
+PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS: dict[PublicModelName, ProjectDatasetScopeFilters] = {
     "individual": {
         "project": {
             "filter": "phenopackets__dataset__project__identifier",

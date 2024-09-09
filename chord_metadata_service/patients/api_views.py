@@ -4,11 +4,13 @@ import re
 from adrf.views import APIView
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
+from copy import deepcopy
 from datetime import datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
 from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Coalesce
+from django.http.request import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import viewsets, filters, mixins, serializers, status
@@ -17,12 +19,22 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
+from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
-from chord_metadata_service.discovery.exceptions import DiscoveryConfigException
+from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
-from chord_metadata_service.discovery.utils import get_request_discovery
+from chord_metadata_service.discovery.utils import (
+    get_discovery_queryable_fields,
+    get_discovery_data_type_permissions,
+    get_discovery_field_set_permissions,
+    get_request_discovery_scope,
+    get_public_model_scoped_queryset,
+    ValidatedDiscoveryScope,
+)
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -39,10 +51,9 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
-from .serializers import IndividualSerializer
-from .models import Individual
 from .filters import IndividualFilter
-
+from .models import Individual
+from .serializers import IndividualSerializer
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -149,34 +160,73 @@ class IndividualBatchViewSet(BatchViewSet):
     def get_queryset(self):
         individual_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
-        queryset = Individual.objects.filter(**filter_by_id)\
-            .prefetch_related(
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-        ).order_by("id")
+        queryset = (
+            Individual.objects
+            .filter(**filter_by_id)
+            .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
+            .order_by("id")
+        )
 
         return queryset
 
 
-async def public_discovery_filter_queryset(request: DrfRequest, queryset: QuerySet, low_counts_censored: bool):
-    # Check query parameters validity
-    qp = request.query_params
-    discovery = await get_request_discovery(request)
-    # TODO: allow exceeding max query parameters for authorized requests
-    if len(qp) > get_max_query_parameters(discovery, low_counts_censored):
-        raise ValidationError(f"Wrong number of fields: {len(qp)}")
+class EmptyDiscoveryException(Exception):
+    pass
 
-    search_conf = discovery["search"]
-    field_conf = discovery["fields"]
-    queryable_fields = {
-        f"{f}": field_conf[f] for section in search_conf for f in section["fields"]
-    }
+
+async def public_discovery_filter_queryset(
+    discovery_scope: ValidatedDiscoveryScope,
+    request: DrfRequest,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    queryset: QuerySet,
+) -> QuerySet:
+    """
+    Process query parameters, check validity, and filter the queryset by the passed parameters.
+    :param discovery_scope: Discovery scope for the queryset we're filtering.
+    :param request: The request to extract the query parameters from.
+    :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
+    :param queryset: The queryset to filter using the request query parameters.
+    """
+
+    discovery = discovery_scope.discovery
+
+    if not discovery:
+        raise EmptyDiscoveryException()
+
+    # Process query parameters and check validity
+
+    qp: QueryDict = deepcopy(request.query_params)
+
+    # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
+    #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
+    # - store project and dataset before we remove them for logging purposes.
+    if "project" in qp:
+        del qp["project"]
+    if "dataset" in qp:
+        del qp["dataset"]
+
+    queryable_fields = get_discovery_queryable_fields(discovery)
+
+    queried_fields = list(set(qp.keys()))  # deduplicate fields for determining field permissions
+    overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
+
+    # TODO: in the future, scope repr passing to exceptions should be structured data:
+    scope_repr = repr(discovery_scope)
+
+    # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
+    # than one value for the same field (not that this works most of the time, at the moment.)
+    if len(qp) > get_max_query_parameters(discovery, overall_permissions):
+        raise ValidationError(f"Wrong number of fields: {len(qp)} ({scope_repr})")
+
+    if not overall_permissions["counts"]:
+        raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
     for field, value in qp.items():
         if field not in queryable_fields:
-            raise ValidationError(f"Unsupported field used in query: {field}")
+            raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
         field_props = queryable_fields[field]
-        options = await get_field_options(field, discovery, low_counts_censored)
+        options = await get_field_options(field, discovery, qf_permissions[field])
         if (
             value not in options
             and not (
@@ -190,7 +240,7 @@ async def public_discovery_filter_queryset(request: DrfRequest, queryset: QueryS
                 and field_props["config"]["enum"] is None
             )
         ):
-            raise ValidationError(f"Invalid value used in query: {value}")
+            raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
 
         # recursion
         queryset = filter_queryset_field_value(queryset, field_props, value)
@@ -217,83 +267,71 @@ class PublicListIndividuals(APIView):
 
     async def get(self, request, *_args, **_kwargs):
         try:
-            discovery = await get_request_discovery(request)
-        except DiscoveryConfigException as e:
+            discovery_scope = await get_request_discovery_scope(request)
+        except DiscoveryScopeException as e:
+            authz_middleware.mark_authz_done(request)
             return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
-        if not discovery:
-            return Response(dres.NO_PUBLIC_DATA_AVAILABLE)
+        discovery = discovery_scope.discovery
 
-        base_qs = Individual.objects.all()
+        dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+        dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
+        dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
+
+        # We can't respond if we don't have at least phenopackets counts permission
+        if not dt_perms_pheno["counts"]:
+            authz_middleware.mark_authz_done(request)
+            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+
+        perm_pheno_query_data = dt_perms_pheno["data"]
+
+        # Get individuals filtered to the requested scope
+        base_qs = get_public_model_scoped_queryset(discovery_scope, "individual")
+
         try:
-            filtered_qs = await public_discovery_filter_queryset(request, base_qs, low_counts_censored=True)
+            filtered_qs = await public_discovery_filter_queryset(
+                discovery_scope, request, dt_permissions, base_qs
+            )
+        except EmptyDiscoveryException:
+            authz_middleware.mark_authz_done(request)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
+            logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
+            authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-            ))
+            ), status=status.HTTP_400_BAD_REQUEST)
 
-        qct = thresholded_count(await filtered_qs.acount(), discovery, low_counts_censored=True)
+        ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
 
-        if qct == 0:
+        if ind_qct == 0 and not perm_pheno_query_data:
+            # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
+            # data permissions.
             logger.info(
-                f"Public individuals endpoint recieved query params {request.query_params} which resulted in "
-                f"sub-threshold count: {qct} <= {get_threshold(discovery, low_counts_censored=True)}")
+                f"Public individuals endpoint recieved {len(request.query_params)} query params which resulted in "
+                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
+                f"({repr(discovery_scope)})")
+            authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            individual_biosample_tissue_stats(filtered_qs, discovery, low_counts_censored=True),
-            individual_experiment_type_stats(filtered_qs, discovery, low_counts_censored=True),
+            individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
+            individual_experiment_type_stats(filtered_qs, discovery, dt_perms_exp),
         )
 
+        authz_middleware.mark_authz_done(request)
         return Response({
-            "count": qct,
+            "count": ind_qct,
+            # Only if we have "query:data" - this field is for Beacon, which should have an access token:
+            **({"matches": filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues,
             },
-            "experiments": {
-                "count": experiments_count,
-                "experiment_type": experiment_types,
-            }
-        })
-
-
-# noinspection PyMethodMayBeStatic
-class BeaconListIndividuals(APIView):
-    """
-    View to return lists of individuals filtered using search terms from katsu's config.json.
-    Uncensored equivalent of PublicListIndividuals.
-    """
-
-    async def get(self, request, *_args, **_kwargs):
-        try:
-            discovery = await get_request_discovery(request)
-        except DiscoveryConfigException as e:
-            return Response(e.message, status=status.HTTP_404_NOT_FOUND)
-
-        if not discovery:
-            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=404)
-
-        base_qs = Individual.objects.all()
-        try:
-            filtered_qs = await public_discovery_filter_queryset(request, base_qs, low_counts_censored=False)
-        except ValidationError as e:
-            return Response(errors.bad_request_error(
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items())), status=400)
-
-        (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
-            individual_biosample_tissue_stats(filtered_qs, discovery, low_counts_censored=False),
-            individual_experiment_type_stats(filtered_qs, discovery, low_counts_censored=False),
-        )
-
-        return Response({
-            "matches": filtered_qs.values_list("id", flat=True),
-            "biosamples": {
-                "count": tissues_count,
-                "sampled_tissue": sampled_tissues
-            },
-            "experiments": {
-                "count": experiments_count,
-                "experiment_type": experiment_types
-            }
+            **({
+                "experiments": {
+                    "count": experiments_count,
+                    "experiment_type": experiment_types,
+                }
+            } if any(dt_perms_exp.values()) else {}),
         })

@@ -5,6 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.phenopackets import models as ph_m
@@ -39,7 +40,7 @@ class ExtraPropertiesSchemaTypesTest(APITestCase):
         self.assertEqual(response_obj, expected_response)
 
 
-class OverviewTest(APITestCase, ProjectTestCase):
+class OverviewTest(AuthzAPITestCase, ProjectTestCase):
 
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
@@ -73,7 +74,7 @@ class OverviewTest(APITestCase, ProjectTestCase):
         self.experiment.experiment_results.set([self.experiment_result])
 
     def test_overview(self):
-        response = self.client.get('/api/overview')
+        response = self.dt_authz_full_get('/api/overview')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
@@ -114,7 +115,7 @@ class OverviewTest(APITestCase, ProjectTestCase):
 
     def test_search_overview(self):
         payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
-        response = self.client.post(reverse('search-overview'), payload, content_type='application/json')
+        response = self.dt_authz_full_post(reverse('search-overview'), payload, content_type='application/json')
         response_obj = response.json()
         phenopacket_res = response_obj['phenopacket']['data_type_specific']
         self.assertEqual(response.status_code, status.HTTP_200_OK)

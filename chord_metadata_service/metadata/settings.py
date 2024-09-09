@@ -21,6 +21,7 @@ from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
+from ..discovery.types import DiscoveryOrEmptyConfig
 
 load_dotenv()
 
@@ -50,6 +51,18 @@ LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").uppe
 BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
+
+# SECURITY WARNING: Don't run with AUTHZ_ENABLED turned off in production,
+# unless an alternative permissions system is in place.
+#  - This needs to be here to avoid a circular import with settings.py
+BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
+
+BENTO_AUTHZ_SERVICE_URL: str = (
+    os.environ.get("BENTO_AUTHZ_SERVICE_URL", "http://authz.local").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
+)
+if len(sys.argv) > 1 and sys.argv[1] == "test":
+    # Override BENTO_AUTHZ_SERVICE_URL for testing purposes inside container - this is a bit hacky
+    BENTO_AUTHZ_SERVICE_URL = "http://authz.local"
 
 SERVICE_URL_BASE_PATH = os.environ.get("SERVICE_URL_BASE_PATH")
 if SERVICE_URL_BASE_PATH:
@@ -155,13 +168,14 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
+    'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -171,7 +185,8 @@ if os.getenv('INSIDE_CANDIG', ''):
     MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
     MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
 
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_PREFLIGHT_MAX_AGE = 0
 
@@ -282,7 +297,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.chord.permissions.OverrideOrSuperUserOnly'],
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.OverrideOrSuperUserOnly'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'JSON_UNDERSCOREIZE': {
@@ -340,6 +355,7 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 # Settings related to the Public APIs
 
 # Read project specific config.json that contains custom search fields
+CONFIG_PUBLIC: DiscoveryOrEmptyConfig
 if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
     with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
         CONFIG_PUBLIC = json.load(config_file)

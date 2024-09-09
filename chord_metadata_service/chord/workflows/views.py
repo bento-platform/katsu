@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from rest_framework.decorators import api_view, permission_classes, renderer_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.renderers import BaseRenderer
 from rest_framework.response import Response
 
 from bento_lib.responses import errors
 
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from .metadata import workflow_set
 
 
@@ -19,13 +19,13 @@ class WDLRenderer(BaseRenderer):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def workflow_list(_request):
     return Response(workflow_set.workflow_dicts_by_type_and_id())
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def workflow_item(_request, workflow_id):
     if (wf := workflow_set.get_workflow(workflow_id)) is not None:
         return Response(wf.model_dump(mode="json"))
@@ -33,7 +33,7 @@ def workflow_item(_request, workflow_id):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 @renderer_classes([WDLRenderer])
 def workflow_file(_request, workflow_id):
     if (wdl := workflow_set.get_workflow_wdl_path(workflow_id)) is not None:

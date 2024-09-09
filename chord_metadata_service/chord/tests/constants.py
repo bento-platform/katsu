@@ -6,6 +6,7 @@ __all__ = [
     "VALID_DATS_CREATORS",
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
+    "valid_project_json_schema",
     "valid_phenotypic_feature",
     "dats_dataset",
     "TEST_SEARCH_QUERY_1",

@@ -6,6 +6,8 @@ from django.db.models import Case, CharField, Count, F, Func, IntegerField, Quer
 from django.db.models.functions import Cast
 from typing import Any, Mapping
 
+from .utils import ValidatedDiscoveryScope
+from ..authz.types import DataPermissionsDict
 from ..logger import logger
 
 from . import fields_utils as f_utils
@@ -31,7 +33,9 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
     return stats
 
 
-async def get_field_options(field: str, discovery: DiscoveryConfig, low_counts_censored: bool) -> list[Any]:
+async def get_field_options(
+    field: str, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
+) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
@@ -44,7 +48,7 @@ async def get_field_options(field: str, discovery: DiscoveryConfig, low_counts_c
             # We must be careful here not to leak 'small cell' values as options
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
-            options = await get_distinct_field_values(field, discovery, low_counts_censored)
+            options = await get_distinct_field_values(field, discovery, field_permissions)
     elif field_props["datatype"] == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     elif field_props["datatype"] == "date":
@@ -60,13 +64,15 @@ async def get_field_options(field: str, discovery: DiscoveryConfig, low_counts_c
     return options
 
 
-async def get_distinct_field_values(field: str, discovery: DiscoveryConfig, low_counts_censored: bool) -> list[Any]:
+async def get_distinct_field_values(
+    field: str, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
+) -> list[Any]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
     field_props = discovery.get("fields", {}).get(field)
     model, mapping_field = f_utils.get_model_and_field(field_props["mapping"])
-    threshold = get_threshold(discovery, low_counts_censored)
+    threshold = get_threshold(discovery, field_permissions)
 
     field_query = mapping_field
     if group_by := field_props.get("group_by"):
@@ -108,7 +114,7 @@ async def get_age_numeric_binned(
     individual_queryset: QuerySet,
     bin_size: int,
     discovery: DiscoveryConfig,
-    low_counts_censored: bool
+    field_permissions: DataPermissionsDict,
 ) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
@@ -127,7 +133,7 @@ async def get_age_numeric_binned(
     )
 
     return {
-        b: thresholded_count(bv, discovery, low_counts_censored)
+        b: thresholded_count(bv, discovery, field_permissions)
         for b, bv in individuals_age.items()
     }
 
@@ -171,13 +177,11 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
 
 
 async def get_range_stats(
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
-    low_counts_censored: bool = True
+    field_permissions: DataPermissionsDict,
 ) -> list[BinWithValue]:
-    field_props = discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.get("fields", {}).get(field)
     model, field_mapping = f_utils.get_model_and_field(field_props["mapping"])
 
     # JSONField array specific field props
@@ -206,7 +210,7 @@ async def get_range_stats(
         ]
 
     query_set = (
-        get_scoped_queryset(model, project_id, dataset_id)
+        get_scoped_queryset(model, scope)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
@@ -214,7 +218,7 @@ async def get_range_stats(
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
     async for item in query_set:
-        stats[item["label"]] = thresholded_count(item["total"], discovery, low_counts_censored)
+        stats[item["label"]] = thresholded_count(item["total"], scope.discovery, field_permissions)
 
     # All the bins between start and end must be represented and ordered
     bins: list[BinWithValue] = [
@@ -229,16 +233,14 @@ async def get_range_stats(
 
 
 async def get_categorical_stats(
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
-    low_counts_censored: bool = True
+    field_permissions: DataPermissionsDict,
 ) -> list[BinWithValue]:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    field_props = discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.get("fields", {}).get(field)
     model, field_name = f_utils.get_model_and_field(field_props["mapping"])
 
     # Collect stats for the field, censoring low cell counts along the way
@@ -246,9 +248,8 @@ async def get_categorical_stats(
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: Mapping[str, int] = await stats_for_field(model, field_name, discovery, low_counts_censored,
-                                                     add_missing=True, group_by=field_props.get("group_by"),
-                                                     project_id=project_id, dataset_id=dataset_id)
+    stats: Mapping[str, int] = await stats_for_field(model, scope, field_name, field_permissions,
+                                                     add_missing=True, group_by=field_props.get("group_by"))
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = field_props["config"].get("enum")
@@ -276,11 +277,9 @@ async def get_categorical_stats(
 
 
 async def get_date_stats(
+    scope: ValidatedDiscoveryScope,
     field: str,
-    discovery: DiscoveryConfig,
-    project_id: str | None = None,
-    dataset_id: str | None = None,
-    low_counts_censored: bool = True,
+    field_permissions: DataPermissionsDict,
 ) -> list[BinWithValue]:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
@@ -290,7 +289,7 @@ async def get_date_stats(
      regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
-    field_props = discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.get("fields", {}).get(field)
     if not field_props:
         msg = f"Field {field} is not in the provided discovery config."
         raise NotImplementedError(msg)
@@ -307,7 +306,7 @@ async def get_date_stats(
 
     # Note: lexical sort works on ISO dates
     query_set = (
-        get_scoped_queryset(model, project_id, dataset_id)
+        get_scoped_queryset(model, scope)
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
@@ -338,12 +337,15 @@ async def get_date_stats(
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
             bins.append({
                 "label": label,
-                "value": thresholded_count(stats.get(key, 0), discovery, low_counts_censored),
+                "value": thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
             })
 
     # Append missing items at the end if any
     if "missing" in stats:
-        bins.append({"label": "missing", "value": thresholded_count(stats["missing"], discovery, low_counts_censored)})
+        bins.append({
+            "label": "missing",
+            "value": thresholded_count(stats["missing"], scope.discovery, field_permissions),
+        })
 
     return bins
 

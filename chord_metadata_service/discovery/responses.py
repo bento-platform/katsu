@@ -1,11 +1,15 @@
 __all__ = [
     "INSUFFICIENT_DATA_AVAILABLE",
+    "INSUFFICIENT_PRIVILEGES",
     "NO_PUBLIC_DATA_AVAILABLE",
     "NO_PUBLIC_FIELDS_CONFIGURED",
 ]
 
 # Public response when there is no enough data that passes the project-custom threshold
 INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
+
+# Public response when there is insufficient permissions to view the overview
+INSUFFICIENT_PRIVILEGES = {"message": "Insufficient privileges to view data."}
 
 # Public response when there is no public data available and config file is not provided
 NO_PUBLIC_DATA_AVAILABLE = {"message": "No public data available."}

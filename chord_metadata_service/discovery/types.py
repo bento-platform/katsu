@@ -2,12 +2,20 @@ from typing import Any, Literal, TypedDict
 
 __all__ = [
     "BinWithValue",
+    "OverviewSectionChart",
+    "OverviewSection",
     "DiscoveryFieldProps",
     "DiscoveryRules",
     "DiscoveryConfig",
-    "OverviewSectionChart",
-    "OverviewSection",
+    "EmptyConfig",
+    "DiscoveryOrEmptyConfig",
+    "OptionalDiscoveryOrEmptyConfig",
 ]
+
+
+class BinWithValue(TypedDict):
+    label: str
+    value: int
 
 
 class OverviewSectionChart(TypedDict):
@@ -46,6 +54,10 @@ class DiscoveryConfig(TypedDict):
     rules: DiscoveryRules
 
 
-class BinWithValue(TypedDict):
-    label: str
-    value: int
+class EmptyConfig(TypedDict):
+    pass
+
+
+# TODO: py3.12: type keyword
+DiscoveryOrEmptyConfig = DiscoveryConfig | EmptyConfig
+OptionalDiscoveryOrEmptyConfig = DiscoveryOrEmptyConfig | None

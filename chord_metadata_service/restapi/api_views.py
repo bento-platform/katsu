@@ -5,14 +5,14 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
+from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly
+from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.chord.permissions import OverrideOrSuperUserOnly
-from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import get_discovery
+from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
@@ -25,7 +25,7 @@ OVERVIEW_AGE_BIN_SIZE = 10
 
 
 @api_view()
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 async def service_info(_request: DrfRequest):
     """
     get:
@@ -35,10 +35,15 @@ async def service_info(_request: DrfRequest):
     return Response(await get_service_info())
 
 
-async def build_overview_response(phenopackets: QuerySet, experiments: QuerySet, discovery: DiscoveryConfig):
+async def build_overview_response(
+    scope: ValidatedDiscoveryScope,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    phenopackets: QuerySet | None = None,
+    experiments: QuerySet | None = None,
+) -> Response:
     phenopackets_summary, experiments_summary = await asyncio.gather(
-        dt_phenopacket_summary(phenopackets, discovery, low_counts_censored=False),
-        dt_experiment_summary(experiments, discovery, low_counts_censored=False),
+        dt_phenopacket_summary(scope, dt_permissions[DATA_TYPE_PHENOPACKET], phenopackets),
+        dt_experiment_summary(scope, dt_permissions[DATA_TYPE_EXPERIMENT], experiments),
     )
 
     return Response({
@@ -69,16 +74,17 @@ async def overview(request: DrfRequest):
 
     # TODO: permissions based on project - this endpoint should be scrapped / completely rethought
     # use node level discovery config for private overview
-    discovery = await get_discovery()
+    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
 
-    phenopackets = pheno_models.Phenopacket.objects.all()
-    experiments = experiments_models.Experiment.objects.all()
+    dt_permissions = await get_data_type_query_permissions(
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
+    )
 
-    return await build_overview_response(phenopackets, experiments, discovery)
+    return await build_overview_response(discovery_scope, dt_permissions)
 
 
 @api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
+@permission_classes([BentoAllowAny])
 def extra_properties_schema_types(_request: DrfRequest):
     """
     get:
@@ -99,7 +105,7 @@ async def search_overview(request: DrfRequest):
 
     # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
     # use node level discovery config for private search overview
-    discovery = await get_discovery()
+    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
     phenopackets = pheno_models.Phenopacket.objects.all().filter(subject_id__in=individual_ids)
@@ -110,4 +116,14 @@ async def search_overview(request: DrfRequest):
     #  - in general, this endpoint is less than ideal and should be derived from search results themselves vs. this
     #    hack-y mess of passing IDs around.
 
-    return await build_overview_response(phenopackets, experiments, discovery)
+    # TODO: resource should be tied to search
+    dt_permissions = await get_data_type_query_permissions(
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
+    )
+
+    return await build_overview_response(
+        discovery_scope,
+        dt_permissions,
+        phenopackets=phenopackets,
+        experiments=experiments,
+    )

@@ -1,5 +1,6 @@
 from django.test import TransactionTestCase
 
+from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.patients import models as pa_m
@@ -9,7 +10,7 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from ..stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 
 
-class IndividualPublicStatsTest(TransactionTestCase):
+class IndividualPublicStatsTest(TransactionTestCase, PermissionsTestCaseMixin):
 
     def setUp(self):
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
@@ -29,11 +30,13 @@ class IndividualPublicStatsTest(TransactionTestCase):
         self.experiment.experiment_results.set([self.experiment_result])
 
     async def test_individual_biosample_tissue_stats(self):
-        count, res = await individual_biosample_tissue_stats(pa_m.Individual.objects.all(), None, False)
+        count, res = await individual_biosample_tissue_stats(
+            pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
         self.assertListEqual(res, [{"label": "wall of urinary bladder", "value": 1}])
 
     async def individual_experiment_type_stats(self):
-        count, res = await individual_experiment_type_stats(pa_m.Individual.objects.all(), None, False)
+        count, res = await individual_experiment_type_stats(
+            pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
         self.assertListEqual(res, [{"label": "DNA Methylation", "value": 1}])

@@ -12,12 +12,13 @@ from chord_metadata_service.chord.workflows.metadata import (
 )
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
-from .constants import VALID_PROJECT_1, valid_dataset_1
+from .constants import valid_dataset_1
 from .example_ingest import (
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_EXPERIMENT_RESULT,
 )
+from .helpers import AuthzAPITestCaseWithProjectJSON
 
 
 def generate_phenopackets_ingest(dataset_id):
@@ -37,32 +38,30 @@ class WorkflowTest(APITestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertDictEqual(r.json(), workflow_set.workflow_dicts_by_type_and_id())
 
-        # Non-existent workflow
-        r = self.client.get(reverse("workflow-detail", args=("invalid_workflow",)), content_type="application/json")
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
-
         # Valid workflow
         r = self.client.get(reverse("workflow-detail", args=("phenopackets_json",)), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertDictEqual(r.json(), workflow_set.get_workflow(WORKFLOW_PHENOPACKETS_JSON).model_dump(mode="json"))
-
-        # Non-existent workflow file
-        r = self.client.get(reverse("workflow-file", args=("invalid_workflow",)), content_type="text/plain")
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
         # Valid workflow file
         r = self.client.get(reverse("workflow-file", args=("phenopackets_json",)), content_type="text/plain")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         # TODO: Check file contents
 
+    def test_workflow_404(self):
+        # Non-existent workflow
+        r = self.client.get(reverse("workflow-detail", args=("invalid_workflow",)), content_type="application/json")
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-class APITestCaseWithDataset(APITestCase):
+        # Non-existent workflow file
+        r = self.client.get(reverse("workflow-file", args=("invalid_workflow",)), content_type="text/plain")
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class APITestCaseWithDataset(AuthzAPITestCaseWithProjectJSON):
     def setUp(self) -> None:
-        r = self.client.post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1), content_type="application/json")
-        self.project = r.json()
-
-        r = self.client.post('/api/datasets', data=json.dumps(valid_dataset_1(self.project["identifier"])),
-                             content_type="application/json")
+        super().setUp()
+        r = self.one_authz_post("/api/datasets", data=json.dumps(valid_dataset_1(self.project["identifier"])))
         self.dataset = r.json()
         self.dataset_id = self.dataset["identifier"]
 

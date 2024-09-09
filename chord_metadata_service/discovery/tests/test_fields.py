@@ -2,6 +2,7 @@ from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 from copy import deepcopy
 
+from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.patients import models as pa_m
@@ -17,9 +18,10 @@ from ..fields import (
     get_month_date_range,
     filter_queryset_field_value,
 )
+# from ..utils import ValidatedDiscoveryScope
 
 
-class TestGetFieldOptions(TransactionTestCase):
+class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
     discovery: DiscoveryConfig = {
         "fields": {
             "some_prop": {
@@ -35,7 +37,7 @@ class TestGetFieldOptions(TransactionTestCase):
     }
 
     async def test_get_string_options(self):
-        self.assertListEqual(await get_field_options("some_prop", self.discovery, False), ["a", "b"])
+        self.assertListEqual(await get_field_options("some_prop", self.discovery, self.permissions_full), ["a", "b"])
 
     async def test_get_field_options_not_impl(self):
         # {**self.field_some_prop, "datatype": "made_up"}
@@ -43,10 +45,10 @@ class TestGetFieldOptions(TransactionTestCase):
         invalid_discovery["fields"]["some_prop"]["datatype"] = "made_up"
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
-            await get_field_options("some_prop", invalid_discovery, low_counts_censored=False)
+            await get_field_options("some_prop", invalid_discovery, self.permissions_full)
 
 
-class TestGetCategoricalStats(ProjectTestCase):
+class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     def setUp(self):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
@@ -58,19 +60,18 @@ class TestGetCategoricalStats(ProjectTestCase):
             meta_data=self.meta_data,
         )
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lcf(self):
-        res = await get_categorical_stats("sex", DISCOVERY_CONFIG_TEST, project_id=self.project.identifier,
-                                          dataset_id=self.dataset.identifier, low_counts_censored=False)
+        res = await get_categorical_stats(self.scope, "sex", field_permissions=self.permissions_full)
         self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
-        res = await get_categorical_stats("sex", DISCOVERY_CONFIG_TEST, project_id=self.project.identifier,
-                                          dataset_id=self.dataset.identifier, low_counts_censored=True)
+        res = await get_categorical_stats(self.scope, "sex", field_permissions=self.permissions_counts)
         self.assertListEqual(res, [{"label": "missing", "value": 0}])
 
 
-class TestDateStatsExcept(APITestCase):
+class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_wrong_bin_config(self):
@@ -85,7 +86,7 @@ class TestDateStatsExcept(APITestCase):
         }
 
         with self.assertRaises(NotImplementedError):
-            await get_date_stats("date_of_consent", DISCOVERY_CONFIG_TEST)
+            await get_date_stats(self.scope, "date_of_consent", self.permissions_full)
 
         with self.assertRaises(NotImplementedError):
             await get_month_date_range(fp)
@@ -103,13 +104,13 @@ class TestDateStatsExcept(APITestCase):
         }
 
         with self.assertRaises(NotImplementedError):
-            await get_date_stats("date_of_consent", DISCOVERY_CONFIG_TEST)
+            await get_date_stats(self.scope, "date_of_consent", self.permissions_full)
 
         with self.assertRaises(NotImplementedError):
             await get_month_date_range(fp)
 
 
-class TestJsonFieldArrayStats(ProjectTestCase):
+class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     tumor_lengths = range(1, 50, 5)
     dm_fp = DISCOVERY_CONFIG_TEST["fields"]["diagnostic_markers"]
@@ -132,11 +133,9 @@ class TestJsonFieldArrayStats(ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lcf(self):
         res = await get_categorical_stats(
+            self.scope,
             "diagnostic_markers",
-            DISCOVERY_CONFIG_TEST,
-            project_id=self.project.identifier,
-            dataset_id=self.dataset.identifier,
-            low_counts_censored=False
+            field_permissions=self.permissions_full,
         )
         ground_truth = [
             {"label": "Genetic Testing", "value": 1},
@@ -148,11 +147,9 @@ class TestJsonFieldArrayStats(ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
         res = await get_categorical_stats(
+            self.scope,
             "diagnostic_markers",
-            DISCOVERY_CONFIG_TEST,
-            project_id=self.project.identifier,
-            dataset_id=self.dataset.identifier,
-            low_counts_censored=True
+            field_permissions=self.permissions_counts,
         )
         ground_truth = [
             {"label": "missing", "value": 0},
@@ -161,39 +158,43 @@ class TestJsonFieldArrayStats(ProjectTestCase):
 
     def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()
-        qs = filter_queryset_field_value(base_qs, self.dm_fp, "Hematology Test")
-        self.assertEqual(qs.count(), 1)
-        qs = filter_queryset_field_value(base_qs, self.dm_fp, "Genetic Testing")
-        self.assertEqual(qs.count(), 1)
-        qs = filter_queryset_field_value(base_qs, self.dm_fp, "VALUE NOT IN DB")
-        self.assertEqual(qs.count(), 0)
+
+        subtest_params = [
+            ("Hematology Test", 1),
+            ("Genetic Testing", 1),
+            ("VALUE NOT IN DB", 0),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                q_val, expected_count = params
+                qs = filter_queryset_field_value(base_qs, self.dm_fp, q_val)
+                self.assertEqual(qs.count(), expected_count)
 
     def test_filter_queryset_field_value_number(self):
         base_qs = ph_m.Individual.objects.all()
 
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "≥ 0")
-        self.assertEqual(qs.count(), 1)
+        subtest_params = [
+            ("≥ 0", 1),
+            ("≥ 60", 0),
+            ("< 60", 1),
+            ("< 0", 0),
+            ("[30, 50)", 1),
+            ("[100, 200)", 0),
+        ]
 
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "≥ 60")
-        self.assertEqual(qs.count(), 0)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "< 60")
-        self.assertEqual(qs.count(), 1)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "< 0")
-        self.assertEqual(qs.count(), 0)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "[30, 50)")
-        self.assertEqual(qs.count(), 1)
-
-        qs = filter_queryset_field_value(base_qs, self.mtl_fp, "[100, 200)")
-        self.assertEqual(qs.count(), 0)
+        for params in subtest_params:
+            with self.subTest(params=params):
+                q_val, expected_count = params
+                qs = filter_queryset_field_value(base_qs, self.mtl_fp, q_val)
+                self.assertEqual(qs.count(), expected_count)
 
     async def test_get_distinct_values(self):
-        dm_values = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, False)
+        dm_values = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, self.permissions_full)
         self.assertEqual(len(dm_values), 2)
         self.assertTrue("Genetic Testing" in dm_values)
         self.assertTrue("Hematology Test" in dm_values)
 
-        dm_values_censored = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, True)
+        dm_values_censored = await get_distinct_field_values(
+            "diagnostic_markers", DISCOVERY_CONFIG_TEST, self.permissions_counts)
         self.assertListEqual(dm_values_censored, [])
