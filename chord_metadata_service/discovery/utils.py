@@ -22,7 +22,7 @@ from .model_lookups import (
     PUBLIC_MODEL_NAMES_TO_MODEL,
     PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS,
 )
-from .types import DiscoveryConfig, DiscoveryFieldProps, DiscoveryOrEmptyConfig, OptionalDiscoveryOrEmptyConfig
+from .types import DiscoveryFieldProps, DiscoveryOrEmptyConfig, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
     "ValidatedDiscoveryScope",
@@ -168,7 +168,9 @@ async def get_request_discovery_scope(request: DrfRequest) -> ValidatedDiscovery
     return await get_discovery_scope(project_id, dataset_id)
 
 
-def get_discovery_queryable_fields(discovery: DiscoveryConfig) -> dict[str, DiscoveryFieldProps]:
+def get_discovery_queryable_fields(discovery: DiscoveryOrEmptyConfig) -> dict[str, DiscoveryFieldProps]:
+    if not discovery:
+        return {}
     field_conf = discovery["fields"]
     return {
         f"{f}": field_conf[f] for section in discovery["search"] for f in section["fields"]
@@ -198,7 +200,7 @@ async def get_discovery_data_type_permissions(
 
 
 def get_discovery_field_set_permissions(
-    discovery: DiscoveryConfig,
+    discovery: DiscoveryOrEmptyConfig,
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissionsDict, FieldDiscoveryPermissions]:

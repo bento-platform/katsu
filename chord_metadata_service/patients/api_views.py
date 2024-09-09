@@ -33,6 +33,7 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_field_set_permissions,
     get_request_discovery_scope,
     get_public_model_scoped_queryset,
+    ValidatedDiscoveryScope,
 )
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -53,7 +54,6 @@ from chord_metadata_service.restapi.utils import build_experiments_by_subject, g
 from .filters import IndividualFilter
 from .models import Individual
 from .serializers import IndividualSerializer
-from ..discovery.types import DiscoveryConfig
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -170,23 +170,28 @@ class IndividualBatchViewSet(BatchViewSet):
         return queryset
 
 
+class EmptyDiscoveryException(Exception):
+    pass
+
+
 async def public_discovery_filter_queryset(
-    discovery: DiscoveryConfig,
+    discovery_scope: ValidatedDiscoveryScope,
     request: DrfRequest,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset: QuerySet,
-    scope_repr: str,  # We pass disc
-):
+) -> QuerySet:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
-    :param discovery: Pass discovery directly rather than scope object since we've type-narrowed to DiscoveryConfig,
-        i.e., a complete discovery configuration dictionary.
+    :param discovery_scope: Discovery scope for the queryset we're filtering.
     :param request: The request to extract the query parameters from.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
     :param queryset: The queryset to filter using the request query parameters.
-    :param scope_repr: A string representation of the scope for including scope information during error-raising.
-        TODO: in the future, scope repr passing to exceptions should be structured data.
     """
+
+    discovery = discovery_scope.discovery
+
+    if not discovery:
+        raise EmptyDiscoveryException()
 
     # Process query parameters and check validity
 
@@ -204,6 +209,9 @@ async def public_discovery_filter_queryset(
 
     queried_fields = list(set(qp.keys()))  # deduplicate fields for determining field permissions
     overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
+
+    # TODO: in the future, scope repr passing to exceptions should be structured data:
+    scope_repr = repr(discovery_scope)
 
     # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
     # than one value for the same field (not that this works most of the time, at the moment.)
@@ -266,10 +274,6 @@ class PublicListIndividuals(APIView):
 
         discovery = discovery_scope.discovery
 
-        if not discovery:
-            authz_middleware.mark_authz_done(request)
-            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
-
         dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
         dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
         dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
@@ -286,8 +290,11 @@ class PublicListIndividuals(APIView):
 
         try:
             filtered_qs = await public_discovery_filter_queryset(
-                discovery, request, dt_permissions, base_qs, repr(discovery_scope)
+                discovery_scope, request, dt_permissions, base_qs
             )
+        except EmptyDiscoveryException:
+            authz_middleware.mark_authz_done(request)
+            return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
             logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
