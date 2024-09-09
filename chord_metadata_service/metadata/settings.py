@@ -14,7 +14,6 @@ import os
 import sys
 import logging
 import json
-from os.path import exists
 
 from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
@@ -129,16 +128,6 @@ SERVICE_TEMP = os.environ.get("KATSU_TEMP", os.environ.get("SERVICE_TEMP"))
 NGINX_INTERNAL_SOCKET = quote(os.environ.get("NGINX_INTERNAL_SOCKET", "/chord/tmp/nginx_internal.sock"), safe="")
 DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/drs").strip().rstrip("/")
 
-# Candig-specific settings
-
-CANDIG_AUTHORIZATION = os.getenv("CANDIG_AUTHORIZATION", "")
-CANDIG_OPA_URL = os.getenv("CANDIG_OPA_URL", "")
-CANDIG_OPA_SECRET = os.getenv("CANDIG_OPA_SECRET", "my-secret-beacon-token")
-CANDIG_OPA_SITE_ADMIN_KEY = os.getenv("CANDIG_OPA_SITE_ADMIN_KEY", "site-admin")
-if exists("/run/secrets/opa-root-token"):
-    with open("/run/secrets/opa-root-token", "r") as f:
-        CANDIG_OPA_SECRET = f.read()
-
 # Application definition
 
 INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else []) + [
@@ -179,11 +168,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# This middlewares are specific to the CANDIG service
-if os.getenv('INSIDE_CANDIG', ''):
-    MIDDLEWARE.append('chord_metadata_service.restapi.preflight_req_middleware.PreflightRequestMiddleware')
-    MIDDLEWARE.append('chord_metadata_service.restapi.candig_authz_middleware.CandigAuthzMiddleware')
 
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
 CORS_ALLOW_CREDENTIALS = True
