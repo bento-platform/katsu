@@ -1,7 +1,7 @@
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from ..summaries import dt_experiment_summary
 from .helpers import ExperimentTestCase
 

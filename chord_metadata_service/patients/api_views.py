@@ -2,6 +2,7 @@ import asyncio
 import re
 
 from adrf.views import APIView
+from asgiref.sync import async_to_sync
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
 from copy import deepcopy
@@ -26,14 +27,12 @@ from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import (
     get_discovery_queryable_fields,
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
-    get_request_discovery_scope,
-    get_public_model_scoped_queryset,
-    ValidatedDiscoveryScope,
 )
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
@@ -76,11 +75,18 @@ class IndividualViewSet(viewsets.ModelViewSet):
     filterset_class = IndividualFilter
     ordering_fields = ["id"]
     search_fields = ["sex"]
-    queryset = Individual.objects.all().prefetch_related(
-        *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-        *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-    ).order_by("id")
     lookup_value_regex = MODEL_ID_PATTERN
+
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            Individual.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            .prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+            )
+            .order_by("id")
+        )
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
@@ -95,14 +101,19 @@ class IndividualViewSet(viewsets.ModelViewSet):
             individual_ids = filterset.qs.values_list("id", flat=True)
             # TODO: code duplicated from chord/view_search.py
             biosamples_experiments_details = get_biosamples_with_experiment_details(individual_ids)
-            qs = Phenopacket.objects.filter(subject__id__in=individual_ids).values(
-                "subject_id",
-                alternate_ids=Coalesce(F("subject__alternate_ids"), [])
-            ).annotate(
-                num_experiments=Count("biosamples__experiment"),
-                biosamples=Coalesce(
-                    ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                    []
+            qs = (
+                Phenopacket.objects
+                .filter(subject__id__in=individual_ids)
+                .values(
+                    "subject_id",
+                    alternate_ids=Coalesce(F("subject__alternate_ids"), [])
+                )
+                .annotate(
+                    num_experiments=Count("biosamples__experiment"),
+                    biosamples=Coalesce(
+                        ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
+                        []
+                    )
                 )
             )
             experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
@@ -286,12 +297,10 @@ class PublicListIndividuals(APIView):
         perm_pheno_query_data = dt_perms_pheno["data"]
 
         # Get individuals filtered to the requested scope
-        base_qs = get_public_model_scoped_queryset(discovery_scope, "individual")
+        base_qs = Individual.get_model_scoped_queryset(discovery_scope)
 
         try:
-            filtered_qs = await public_discovery_filter_queryset(
-                discovery_scope, request, dt_permissions, base_qs
-            )
+            filtered_qs = await public_discovery_filter_queryset(discovery_scope, request, dt_permissions, base_qs)
         except EmptyDiscoveryException:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)

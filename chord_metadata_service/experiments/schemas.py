@@ -6,6 +6,7 @@ from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, KEY_VALU
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
+    "experiment_base_uri",
     "experiment_resource",
     "experiment_registry",
     "experiment_resolver",

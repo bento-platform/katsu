@@ -1,20 +1,26 @@
+from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers, status, viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from chord_metadata_service.restapi.api_renderers import (PhenopacketsRenderer, FHIRRenderer,
-                                                          BiosamplesCSVRenderer, ARGORenderer,
-                                                          IndividualBentoSearchRenderer)
+from chord_metadata_service.discovery.scope import get_request_discovery_scope
+from chord_metadata_service.restapi.api_renderers import (
+    PhenopacketsRenderer,
+    FHIRRenderer,
+    BiosamplesCSVRenderer,
+    ARGORenderer,
+    IndividualBentoSearchRenderer,
+)
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phenopacket_resolver, phenopacket_base_uri
+
 from . import models as m, serializers as s, filters as f
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status
 
 
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
@@ -96,6 +102,14 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
     lookup_value_regex = MODEL_ID_PATTERN
 
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            m.Biosample.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            .prefetch_related(*BIOSAMPLE_PREFETCH)
+            .order_by("id")
+        )
+
 
 class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
     """
@@ -163,8 +177,15 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
-    queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
     lookup_value_regex = MODEL_ID_PATTERN
+
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            m.Phenopacket.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            .prefetch_related(*PHENOPACKET_PREFETCH)
+            .order_by("id")
+        )
 
 
 class GenomicInterpretationViewSet(PhenopacketsModelViewSet):

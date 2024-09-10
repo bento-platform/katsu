@@ -20,11 +20,8 @@ from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.utils import (
-    get_discovery_data_type_permissions,
-    ValidatedDiscoveryScope,
-    get_request_discovery_scope,
-)
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
+from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket

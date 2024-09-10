@@ -1,3 +1,4 @@
+from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
@@ -6,21 +7,20 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .serializers import ExperimentSerializer, ExperimentResultSerializer
-from .models import Experiment, ExperimentResult
-from .schemas import EXPERIMENT_SCHEMA, experiment_resolver, experiment_base_uri
-from .filters import ExperimentFilter, ExperimentResultFilter
-from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
-from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
-
-
+from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
     PhenopacketsRenderer,
     ExperimentCSVRenderer,
 )
-
+from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
+from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
+
+from .serializers import ExperimentSerializer, ExperimentResultSerializer
+from .models import Experiment, ExperimentResult
+from .schemas import EXPERIMENT_SCHEMA, experiment_resolver, experiment_base_uri
+from .filters import ExperimentFilter, ExperimentResultFilter
 
 __all__ = [
     "EXPERIMENT_SELECT_REL",
@@ -48,10 +48,6 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     Create a new experiment
     """
 
-    queryset = Experiment.objects.all() \
-        .select_related(*EXPERIMENT_SELECT_REL) \
-        .prefetch_related(*EXPERIMENT_PREFETCH) \
-        .order_by("id")
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
@@ -59,8 +55,14 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     filterset_class = ExperimentFilter
     lookup_value_regex = MODEL_ID_PATTERN
 
-    def dispatch(self, *args, **kwargs):
-        return super(ExperimentViewSet, self).dispatch(*args, **kwargs)
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            .select_related(*EXPERIMENT_SELECT_REL)
+            .prefetch_related(*EXPERIMENT_PREFETCH)
+            .order_by("id")
+        )
 
 
 class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):

@@ -10,6 +10,7 @@ __all__ = [
     "EmptyConfig",
     "DiscoveryOrEmptyConfig",
     "OptionalDiscoveryOrEmptyConfig",
+    "ModelScopeFilters",
 ]
 
 
@@ -61,3 +62,13 @@ class EmptyConfig(TypedDict):
 # TODO: py3.12: type keyword
 DiscoveryOrEmptyConfig = DiscoveryConfig | EmptyConfig
 OptionalDiscoveryOrEmptyConfig = DiscoveryOrEmptyConfig | None
+
+
+class ScopeLevelFilters(TypedDict):
+    filter: str
+    prefetch_related: tuple[str, ...]
+
+
+class ModelScopeFilters(TypedDict):
+    project: ScopeLevelFilters
+    dataset: ScopeLevelFilters

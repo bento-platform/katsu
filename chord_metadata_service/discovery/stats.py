@@ -1,12 +1,12 @@
-from django.db.models import Count, F, Model, QuerySet
-
+from django.db.models import Count, F, QuerySet
 from typing import Mapping, Type
 
-from .utils import ValidatedDiscoveryScope, get_public_model_scoped_queryset
-from ..authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissionsDict
 
 from .censorship import thresholded_count
-from .fields_utils import get_jsonb_path_query, get_public_model_name
+from .fields_utils import get_jsonb_path_query
+from .scope import ValidatedDiscoveryScope
+from .scopeable_model import BaseScopeableModel
 from .types import BinWithValue, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
@@ -15,7 +15,6 @@ __all__ = [
     "bento_public_format_count_and_stats_list",
     "stats_for_field",
     "queryset_stats_for_field",
-    "get_scoped_queryset",
 ]
 
 
@@ -76,12 +75,8 @@ async def bento_public_format_count_and_stats_list(
     return thresholded_count(total, discovery, field_permissions), stats_list
 
 
-def get_scoped_queryset(model: Type[Model], discovery_scope: ValidatedDiscoveryScope) -> QuerySet:
-    return get_public_model_scoped_queryset(discovery_scope, get_public_model_name(model))
-
-
 async def stats_for_field(
-    model: Type[Model],
+    model: Type[BaseScopeableModel],
     scope: ValidatedDiscoveryScope,
     field: str,
     field_permissions: DataPermissionsDict,
@@ -92,7 +87,7 @@ async def stats_for_field(
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
-    qs = get_scoped_queryset(model, scope)
+    qs = model.get_model_scoped_queryset(scope)
     return await queryset_stats_for_field(
         qs, field, scope.discovery, field_permissions, add_missing=add_missing, group_by=group_by)
 

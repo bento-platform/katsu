@@ -1,0 +1,44 @@
+from __future__ import annotations  # need to use string-based annotations to make the below type-checking imports work
+from abc import abstractmethod
+from django.db.models import Model, QuerySet
+from typing import Literal, TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: no cover
+    # gross hack to make type-checking possible without causing circular import issues.
+    # see: https://stackoverflow.com/a/39757388
+    from .scope import ValidatedDiscoveryScope
+    from .types import ModelScopeFilters
+
+__all__ = ["BaseScopeableModel"]
+
+PublicScopeFilterKeys = Literal["project", "dataset"]
+
+
+class BaseScopeableModel(Model):
+
+    class Meta:
+        abstract = True
+
+    @staticmethod
+    @abstractmethod
+    def get_scope_filters() -> ModelScopeFilters:  # pragma: no cover
+        pass
+
+    @classmethod
+    def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
+        filter_scope: PublicScopeFilterKeys
+        if scope.dataset_id:
+            filter_scope = "dataset"
+            value = scope.dataset_id
+        elif scope.project_id and not scope.dataset_id:
+            filter_scope = "project"
+            value = scope.project_id
+        else:
+            return cls.objects.all()
+
+        scope_filter_spec = cls.get_scope_filters()[filter_scope]
+
+        filter_query = scope_filter_spec["filter"]
+        prefetch = scope_filter_spec["prefetch_related"]
+
+        return cls.objects.prefetch_related(*prefetch).filter(**{filter_query: value})

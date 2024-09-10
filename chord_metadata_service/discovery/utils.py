@@ -1,9 +1,4 @@
-import uuid
-
-from bento_lib.auth.resources import build_resource
-from django.conf import settings
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import QuerySet
+from django.core.exceptions import ValidationError
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable
 
@@ -11,161 +6,17 @@ from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.types import (
     DataPermissionsDict, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
-from chord_metadata_service.chord import models as cm
 
-from .exceptions import DiscoveryScopeException
 from .fields_utils import get_public_model_name_and_field_path
-from .model_lookups import (
-    PublicModelName,
-    PublicScopeFilterKeys,
-    PUBLIC_MODEL_NAMES_TO_DATA_TYPE,
-    PUBLIC_MODEL_NAMES_TO_MODEL,
-    PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS,
-)
-from .types import DiscoveryFieldProps, DiscoveryOrEmptyConfig, OptionalDiscoveryOrEmptyConfig
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE
+from .scope import ValidatedDiscoveryScope
+from .types import DiscoveryFieldProps, DiscoveryOrEmptyConfig
 
 __all__ = [
-    "ValidatedDiscoveryScope",
-    "get_discovery_scope",
-    "get_request_discovery_scope",
     "get_discovery_queryable_fields",
     "get_discovery_data_type_permissions",
     "get_discovery_field_set_permissions",
-    "get_public_model_scoped_queryset",
 ]
-
-
-class ValidatedDiscoveryScope:
-    """
-    Contains discovery scope information (i.e., project and dataset), as well as helper methods for accessing the
-    scope's discovery configuration, Bento authorization resource representation, and IDs.
-
-    Projects and datasets are passed into the constructor rather than IDs to allow discovery calculations *and* ensure
-    the project/dataset actually exist before scope object creation, thus the name - the project and dataset's
-    existences are pre-validated. Of course, a project/dataset could be deleted asynchronously elsewhere, which could
-    result in this becoming invalid.
-    """
-
-    def __init__(self, project: cm.Project | None, dataset: cm.Dataset | None):
-        """
-        Constructor for an already-validated discovery scope - i.e., since we are getting fed project/dataset instances
-        rather than just string IDs, we know these objects exist at the time of construction.
-        """
-
-        self._project = project
-        self._dataset = dataset
-
-        # Additional validation
-        if self._dataset:
-            if not self._project:
-                # - make sure we have project set if dataset is set
-                raise DiscoveryScopeException(dataset_id=str(self._dataset.identifier))
-            elif (project_id := self._project.identifier) != self._dataset.project_id:
-                # - make sure the specified project ID matches the dataset's project ID
-                raise DiscoveryScopeException(dataset_id=str(self._dataset.identifier), project_id=str(project_id))
-
-        # We can cache the discovery property after the first call to the getter defined below, since instances of this
-        # class MUST NOT be mutated.
-        self._discovery: OptionalDiscoveryOrEmptyConfig = None
-
-    @property
-    def project_id(self) -> str | None:
-        """
-        String representation of the scope project's ID, if set.
-        """
-        return str(self._project.identifier) if self._project else None
-
-    @property
-    def dataset_id(self) -> str | None:
-        """
-        String representation of the scope dataset's ID, if set.
-        """
-        return str(self._dataset.identifier) if self._dataset else None
-
-    def __repr__(self):
-        return f"<ValidatedDiscoveryScope project={self.project_id} dataset={self.dataset_id}>"
-
-    def _get_project_discovery_or_fallback(self) -> DiscoveryOrEmptyConfig:
-        if self._project and (d := self._project.discovery):
-            return d
-        else:
-            # fallback on global discovery config if project is not set or has None as discovery
-            return settings.CONFIG_PUBLIC
-
-    def _get_dataset_discovery_or_fallback(self) -> DiscoveryOrEmptyConfig:
-        """
-        Gets the dataset discovery configuration dictionary, or falls back to the project (and eventually instance) one.
-        """
-        if self._dataset and (d := self._dataset.discovery):
-            return d
-        else:
-            return self._get_project_discovery_or_fallback()
-
-    @property
-    def discovery(self) -> DiscoveryOrEmptyConfig:
-        """
-        Get the discovery configuration dictionary for this scope, properly handling falling back
-        (dataset -> project -> instance) as required.
-        """
-        if self._discovery is not None:
-            return self._discovery
-        else:
-            d = self._get_dataset_discovery_or_fallback()
-            self._discovery = d
-            return d
-
-    def as_authz_resource(self) -> dict:
-        """
-        Build a Bento authorization system-compatible resource dictionary from this discovery scope.
-        """
-        return build_resource(self.project_id, self.dataset_id)
-
-
-def _get_project_id_and_dataset_id_from_request(request: DrfRequest) -> tuple[str | None, str | None]:
-    return request.query_params.get("project") or None, request.query_params.get("dataset") or None
-
-
-async def _get_project_by_id(project_id: str) -> cm.Project:
-    return await cm.Project.objects.filter(identifier=project_id).aget()
-
-
-async def get_discovery_scope(project_id: str | None, dataset_id: str | None) -> ValidatedDiscoveryScope:
-    project: cm.Project | None = None
-    dataset: cm.Dataset | None = None
-
-    try:
-        if project_id:
-            uuid.UUID(project_id)
-        if dataset_id:
-            uuid.UUID(dataset_id)
-    except ValueError:
-        # We don't want to facilitate log injection, so replace the true values with placeholders
-        raise DiscoveryScopeException("<not UUID>", "<not UUID>")
-
-    try:
-        if dataset_id:
-            qs = cm.Dataset.objects.filter(identifier=dataset_id)
-            if project_id:
-                # check if the dataset exists and belongs to the specified project if project ID is specified;
-                # otherwise, infer the project from the dataset.
-                qs = qs.filter(project_id=project_id)
-
-            dataset = await qs.aget()
-            project = await _get_project_by_id(dataset.project_id)
-
-        elif project_id:
-            project = await _get_project_by_id(project_id)
-
-    except ObjectDoesNotExist:
-        # We've already checked these are UUIDs, so they're fine to log
-        raise DiscoveryScopeException(dataset_id, project_id)
-
-    return ValidatedDiscoveryScope(project=project, dataset=dataset)
-
-
-async def get_request_discovery_scope(request: DrfRequest) -> ValidatedDiscoveryScope:
-    project_id, dataset_id = _get_project_id_and_dataset_id_from_request(request)
-    return await get_discovery_scope(project_id, dataset_id)
 
 
 def get_discovery_queryable_fields(discovery: DiscoveryOrEmptyConfig) -> dict[str, DiscoveryFieldProps]:
@@ -231,20 +82,3 @@ def get_discovery_field_set_permissions(
         "counts": all(dt_permissions[dt]["counts"] for dt in dts_accessed),
         "data": all(dt_permissions[dt]["data"] for dt in dts_accessed),
     }, field_permissions
-
-
-def get_public_model_scoped_queryset(scope: ValidatedDiscoveryScope, mn: PublicModelName) -> QuerySet:
-    filter_scope: PublicScopeFilterKeys
-    if scope.dataset_id:
-        filter_scope = "dataset"
-        value = scope.dataset_id
-    elif scope.project_id and not scope.dataset_id:
-        filter_scope = "project"
-        value = scope.project_id
-    else:
-        return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all()
-
-    filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["filter"]
-    prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["prefetch_related"]
-
-    return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(**{filter_query: value})

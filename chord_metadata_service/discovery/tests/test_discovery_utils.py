@@ -1,7 +1,7 @@
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 
 
 class DiscoveryScopeBuildingTestCase(ProjectTestCase):

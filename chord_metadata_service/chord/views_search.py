@@ -26,7 +26,7 @@ from typing import Callable
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly, ReadOnly
 
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment

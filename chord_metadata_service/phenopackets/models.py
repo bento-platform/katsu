@@ -3,6 +3,8 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
@@ -13,6 +15,7 @@ from chord_metadata_service.restapi.validators import (
     ontology_validator,
     ontology_list_validator
 )
+from chord_metadata_service.restapi.schemas import TIME_ELEMENT_SCHEMA
 from . import descriptions as d
 from .schemas import (
     EXPRESSION_SCHEMA,
@@ -25,7 +28,6 @@ from .schemas import (
     PHENOPACKET_MEDICAL_ACTION_SCHEMA,
 )
 from .validators import vrs_variation_validator
-from ..restapi.schemas import TIME_ELEMENT_SCHEMA
 
 
 #############################################################
@@ -131,12 +133,25 @@ class Disease(BaseTimeStamp, IndexableMixin):
         return str(self.id)
 
 
-class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
+class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeableModel):
     """
     Class to describe a unit of biological material
 
     FHIR: Specimen
     """
+
+    @staticmethod
+    def get_scope_filters() -> ModelScopeFilters:
+        return {
+            "project": {
+                "filter": "phenopacket__dataset__project__identifier",
+                "prefetch_related": ("phenopacket__dataset__project",),
+            },
+            "dataset": {
+                "filter": "phenopacket__dataset__identifier",
+                "prefetch_related": ("phenopacket__dataset",),
+            },
+        }
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))
     # if Individual instance is deleted Biosample instance is deleted too
@@ -409,7 +424,7 @@ class Interpretation(BaseTimeStamp):
 #                                                           #
 #############################################################
 
-class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
+class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 
@@ -424,6 +439,19 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
+
+    @staticmethod
+    def get_scope_filters() -> ModelScopeFilters:
+        return {
+            "project": {
+                "filter": "dataset__project__identifier",
+                "prefetch_related": ("dataset__project",),
+            },
+            "dataset": {
+                "filter": "dataset__identifier",
+                "prefetch_related": ("dataset",),
+            },
+        }
 
     def get_project_id(self) -> str | None:
         model = apps.get_model("chord.Project")

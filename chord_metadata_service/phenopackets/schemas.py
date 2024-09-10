@@ -32,6 +32,7 @@ from . import descriptions
 
 
 __all__ = [
+    "phenopacket_base_uri",
     "PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
     "PHENOPACKET_UPDATE_SCHEMA",
     "PHENOPACKET_META_DATA_SCHEMA",

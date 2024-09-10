@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import CharField, JSONField
 from django.contrib.postgres.fields import ArrayField
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
@@ -17,7 +19,7 @@ __all__ = ["Experiment", "ExperimentResult", "Instrument"]
 # model for the desired purposes.
 
 
-class Experiment(models.Model, IndexableMixin):
+class Experiment(BaseScopeableModel, IndexableMixin):
     """
     Class to store Experiment information. This model is primarily designed for genomic experiments; it is thus
     linked to a specific bisample.
@@ -26,6 +28,19 @@ class Experiment(models.Model, IndexableMixin):
     may be derived from multiple experiments. Consider, for example, the results of a pairwise analysis derived from
     two Experiments, each of which was performed on a different Biosample.
     """
+
+    @staticmethod
+    def get_scope_filters() -> ModelScopeFilters:
+        return {
+            "project": {
+                "filter": "dataset__project__identifier",
+                "prefetch_related": ("dataset__project",),
+            },
+            "dataset": {
+                "filter": "dataset__identifier",
+                "prefetch_related": ("dataset",),
+            },
+        }
 
     id = CharField(primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id"))
     # STUDY TYPE

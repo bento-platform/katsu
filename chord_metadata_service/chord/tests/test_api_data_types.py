@@ -5,8 +5,8 @@ from django.urls import reverse
 from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase, PermissionsTestCaseMixin
+from chord_metadata_service.discovery.scope import get_discovery_scope
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
-from chord_metadata_service.discovery.utils import get_discovery_scope
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 
 from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES

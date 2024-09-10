@@ -2,10 +2,12 @@ from django.apps import apps
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.schemas import TIME_ELEMENT_SCHEMA
 from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator
 from .values import PatientStatus, Sex, KaryotypicSex
+from ..discovery.types import ModelScopeFilters
 
 
 class VitalStatus(BaseTimeStamp, IndexableMixin):
@@ -21,12 +23,25 @@ class VitalStatus(BaseTimeStamp, IndexableMixin):
                                                                                  " after their primary diagnosis")
 
 
-class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
+class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
 
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.INDIVIDUAL
+
+    @staticmethod
+    def get_scope_filters() -> ModelScopeFilters:
+        return {
+            "project": {
+                "filter": "phenopackets__dataset__project__identifier",
+                "prefetch_related": ("phenopackets__dataset__project",)
+            },
+            "dataset": {
+                "filter": "phenopackets__dataset__identifier",
+                "prefetch_related": ("phenopackets__dataset",)
+            }
+        }
 
     def get_project_id(self) -> str | None:
         if not self.phenopackets.count():

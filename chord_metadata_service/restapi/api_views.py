@@ -12,7 +12,7 @@ from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info

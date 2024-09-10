@@ -32,7 +32,7 @@ router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
 router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls
-router.register(r'experiments', experiment_views.ExperimentViewSet)
+router.register(r'experiments', experiment_views.ExperimentViewSet, basename="experiments")
 router.register(r'experimentresults', experiment_views.ExperimentResultViewSet, basename="experimentresults")
 router.register(r'batch/experiments', experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
 

@@ -6,13 +6,13 @@ from django.db.models import Case, CharField, Count, F, Func, IntegerField, Quer
 from django.db.models.functions import Cast
 from typing import Any, Mapping
 
-from .utils import ValidatedDiscoveryScope
-from ..authz.types import DataPermissionsDict
-from ..logger import logger
+from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
-from .stats import stats_for_field, get_scoped_queryset
+from .scope import ValidatedDiscoveryScope
+from .stats import stats_for_field
 from .types import BinWithValue, DiscoveryConfig, DiscoveryFieldProps
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -210,7 +210,7 @@ async def get_range_stats(
         ]
 
     query_set = (
-        get_scoped_queryset(model, scope)
+        model.get_model_scoped_queryset(scope)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
@@ -306,7 +306,7 @@ async def get_date_stats(
 
     # Note: lexical sort works on ISO dates
     query_set = (
-        get_scoped_queryset(model, scope)
+        model.get_model_scoped_queryset(scope)
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
