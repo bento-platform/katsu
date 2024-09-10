@@ -3,7 +3,7 @@ from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel, TOP_LEVEL_MODEL_SCOPE_FILTERS
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
@@ -442,16 +442,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
-        return {
-            "project": {
-                "filter": "dataset__project__identifier",
-                "prefetch_related": ("dataset__project",),
-            },
-            "dataset": {
-                "filter": "dataset__identifier",
-                "prefetch_related": ("dataset",),
-            },
-        }
+        return TOP_LEVEL_MODEL_SCOPE_FILTERS
 
     def get_project_id(self) -> str | None:
         model = apps.get_model("chord.Project")

@@ -9,7 +9,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .scope import ValidatedDiscoveryScope
     from .types import ModelScopeFilters
 
-__all__ = ["BaseScopeableModel"]
+__all__ = ["BaseScopeableModel", "TOP_LEVEL_MODEL_SCOPE_FILTERS"]
 
 PublicScopeFilterKeys = Literal["project", "dataset"]
 
@@ -42,3 +42,16 @@ class BaseScopeableModel(Model):
         prefetch = scope_filter_spec["prefetch_related"]
 
         return cls.objects.prefetch_related(*prefetch).filter(**{filter_query: value})
+
+
+# Common model scope filters for phenopacket + experiment, which share a top-level dataset property.
+TOP_LEVEL_MODEL_SCOPE_FILTERS: ModelScopeFilters = {
+    "project": {
+        "filter": "dataset__project__identifier",
+        "prefetch_related": ("dataset__project",),
+    },
+    "dataset": {
+        "filter": "dataset__identifier",
+        "prefetch_related": ("dataset",),
+    },
+}
