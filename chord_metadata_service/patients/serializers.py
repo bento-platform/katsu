@@ -1,8 +1,11 @@
 from chord_metadata_service.phenopackets.serializers import BiosampleSerializer, SimplePhenopacketSerializer
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.fhir_utils import fhir_patient
-from chord_metadata_service.restapi.argo_utils import argo_donor
 from .models import Individual
+
+__all__ = [
+    "IndividualSerializer",
+]
 
 
 class IndividualSerializer(GenericSerializer):
@@ -15,6 +18,3 @@ class IndividualSerializer(GenericSerializer):
         # meta info for converting to FHIR
         fhir_datatype_plural = 'patients'
         class_converter = fhir_patient
-        # meta info for converting to ARGO
-        argo_profile_plural = 'donors'
-        argo_converter = argo_donor
