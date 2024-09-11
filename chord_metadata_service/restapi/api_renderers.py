@@ -12,6 +12,18 @@ from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from chord_metadata_service.phenopackets.utils import parse_onset
 from .jsonld_utils import dataset_to_jsonld
 
+__all__ = [
+    "FHIRRenderer",
+    "PhenopacketsRenderer",
+    "JSONLDDatasetRenderer",
+    "RDFDatasetRenderer",
+    "render_age",
+    "IndividualCSVRenderer",
+    "BiosamplesCSVRenderer",
+    "ExperimentCSVRenderer",
+    "IndividualBentoSearchRenderer",
+]
+
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
@@ -43,26 +55,6 @@ class FHIRRenderer(JSONRenderer):
         else:
             final_data = class_converter(data)
         return super(FHIRRenderer, self).render(final_data, media_type, renderer_context)
-
-
-class ARGORenderer(JSONRenderer):
-    media_type = 'application/json'
-    format = 'argo'
-
-    def render(self, data, media_type=None, renderer_context=None):
-        argo_profile_plural = getattr(
-            renderer_context.get('view').get_serializer().Meta,
-            'argo_profile_plural', 'objects'
-        )
-        class_converter = getattr(
-            renderer_context.get('view').get_serializer().Meta,
-            'argo_converter', 'objects'
-        )
-        if 'results' in data:
-            final_data = {argo_profile_plural: [class_converter(item) for item in data['results']]}
-        else:
-            final_data = class_converter(data)
-        return super(ARGORenderer, self).render(final_data, media_type, renderer_context)
 
 
 class PhenopacketsRenderer(CamelCaseJSONRenderer):

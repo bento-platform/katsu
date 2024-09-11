@@ -12,7 +12,6 @@ from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     FHIRRenderer,
     BiosamplesCSVRenderer,
-    ARGORenderer,
     IndividualBentoSearchRenderer,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
@@ -123,9 +122,13 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
     pagination_class = BatchResultsSetPagination
-    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, BiosamplesCSVRenderer, ARGORenderer,
-                        IndividualBentoSearchRenderer)
+    renderer_classes = (
+        *api_settings.DEFAULT_RENDERER_CLASSES,
+        FHIRRenderer,
+        PhenopacketsRenderer,
+        BiosamplesCSVRenderer,
+        IndividualBentoSearchRenderer,
+    )
     content_negotiation_class = FormatInPostContentNegotiation
 
     def _get_filtered_queryset(self, ids_list=None):

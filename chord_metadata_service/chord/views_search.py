@@ -524,4 +524,4 @@ async def dataset_summary(request: DrfRequest, dataset_id: str):
              DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
     )
 
-    return Response({dt: s} for dt, s in zip(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(), summaries))
+    return Response({dt: s for dt, s in zip(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(), summaries)})
