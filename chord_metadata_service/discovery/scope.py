@@ -97,11 +97,12 @@ class ValidatedDiscoveryScope:
             self._discovery = d
             return d
 
-    def as_authz_resource(self) -> dict:
+    def as_authz_resource(self, data_type: str | None = None) -> dict:
         """
         Build a Bento authorization system-compatible resource dictionary from this discovery scope.
+        Optionally, a data type can be passed to narrow the resource to a specific data type.
         """
-        return build_resource(self.project_id, self.dataset_id)
+        return build_resource(self.project_id, self.dataset_id, data_type=data_type)
 
 
 def _get_project_id_and_dataset_id_from_request(request: DrfRequest) -> tuple[str | None, str | None]:
