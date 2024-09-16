@@ -13,15 +13,16 @@ NAME_TO_SCHEMA: dict[str, object] = {
   "discovery": DISCOVERY_SCHEMA,
 }
 
+
 class Command(BaseCommand):
-  help = """
-      Compiles and returns a JSON-schema in a single JSON file for artifact.
-      Use in GitHub Actions in order to publish usable schemas on releases.
-  """
+    help = """
+        Compiles and returns a JSON-schema in a single JSON file for artifact.
+        Use in GitHub Actions in order to publish usable schemas on releases.
+    """
 
-  def add_arguments(self, parser: CommandParser) -> None:
-    parser.add_argument("schema", action="store", type=str, choices=NAME_TO_SCHEMA.keys())
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument("schema", action="store", type=str, choices=NAME_TO_SCHEMA.keys())
 
-  def handle(self, *args: Any, **options: Any) -> str | None:
-    schema = NAME_TO_SCHEMA[options["schema"]]
-    self.stdout.write(json.dumps(schema))
+    def handle(self, *args: Any, **options: Any) -> str | None:
+        schema = NAME_TO_SCHEMA[options["schema"]]
+        self.stdout.write(json.dumps(schema))
