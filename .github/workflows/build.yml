@@ -37,6 +37,7 @@ jobs:
       # TODO: test, maybe just add to a protected build directory?
       - name: Make release artifacts
         run: |
+          mkdir -p ./dist/schemas
           ./manage.py schema phenopacket >> ./dist/schemas/phenopacket_schema.json
           ./manage.py schema experiment >> ./dist/schemas/experiment_schema.json
           ./manage.py schema discovery >> ./dist/schemas/discovery.json
