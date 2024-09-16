@@ -14,6 +14,7 @@ __all__ = [
     "ValidatedDiscoveryScope",
     "get_discovery_scope",
     "get_request_discovery_scope",
+    "INSTANCE_SCOPE",
 ]
 
 
@@ -148,3 +149,6 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
 async def get_request_discovery_scope(request: DrfRequest) -> ValidatedDiscoveryScope:
     project_id, dataset_id = _get_project_id_and_dataset_id_from_request(request)
     return await get_discovery_scope(project_id, dataset_id)
+
+
+INSTANCE_SCOPE = ValidatedDiscoveryScope(None, None)  # re-usable singleton for instance-wide scope
