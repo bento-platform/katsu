@@ -4,10 +4,9 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status, viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission
+from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission, BentoAllowAny
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
@@ -258,7 +257,7 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     }
 )
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_chord_phenopacket_schema(_request):
     """
     get:
@@ -269,7 +268,7 @@ def get_chord_phenopacket_schema(_request):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_chord_phenopacket_subschema(_request, subschema: str):
     """
     get:
