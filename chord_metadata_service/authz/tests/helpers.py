@@ -1,3 +1,5 @@
+import json
+
 from aioresponses import aioresponses
 from bento_lib.auth.types import EvaluationResultMatrix
 from rest_framework.test import APITestCase
@@ -42,38 +44,51 @@ class AuthzAPITestCase(APITestCase):
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    def _one_authz_post(self, authz_res: bool, url: str, *args, **kwargs):
+    def _one_authz_generic(
+        self, method: Literal["get", "post", "put", "delete"], authz_res: bool, url: str, *args, **kwargs
+    ):
+        if "json" in kwargs:
+            kwargs["data"] = json.dumps(kwargs["json"])
+            del kwargs["json"]
+
+        if method in ("post", "put"):
+            kwargs["content_type"] = "application/json"
+
         with aioresponses() as m:
             mock_authz_eval_one_result(m, authz_res)
-            return self.client.post(url, *args, content_type="application/json", **kwargs)
+            return getattr(self.client, method)(url, *args, **kwargs)
+
+    def _one_authz_get(self, authz_res: bool, url: str, *args, **kwargs):
+        return self._one_authz_generic("get", authz_res, url, *args, **kwargs)
+
+    def one_authz_get(self, url: str, *args, **kwargs):
+        """Mocks a single True response from the authorization service and executes a GET request."""
+        return self._one_authz_get(True, url, *args, **kwargs)
+
+    def one_no_authz_get(self, url: str, *args, **kwargs):
+        """Mocks a single False response from the authorization service and executes a GET request."""
+        return self._one_authz_get(False, url, *args, **kwargs)
+
+    def _one_authz_post(self, authz_res: bool, url: str, *args, **kwargs):
+        return self._one_authz_generic("post", authz_res, url, *args, **kwargs)
 
     def one_authz_post(self, url: str, *args, **kwargs):
-        """
-        Mocks a single True response from the authorization service and executes a JSON POST request.
-        """
+        """Mocks a single True response from the authorization service and executes a JSON POST request."""
         return self._one_authz_post(True, url, *args, **kwargs)
 
     def one_no_authz_post(self, url: str, *args, **kwargs):
-        """
-        Mocks a single False response from the authorization service and executes a JSON POST request.
-        """
+        """Mocks a single False response from the authorization service and executes a JSON POST request."""
         return self._one_authz_post(False, url, *args, **kwargs)
 
     def _one_authz_put(self, authz_res: bool, url: str, *args, **kwargs):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, authz_res)
-            return self.client.put(url, *args, content_type="application/json", **kwargs)
+        return self._one_authz_generic("put", authz_res, url, *args, **kwargs)
 
     def one_authz_put(self, url: str, *args, **kwargs):
-        """
-        Mocks a single True response from the authorization service and executes a JSON PUT request.
-        """
+        """Mocks a single True response from the authorization service and executes a JSON PUT request."""
         return self._one_authz_put(True, url, *args, **kwargs)
 
     def one_no_authz_put(self, url: str, *args, **kwargs):
-        """
-        Mocks a single False response from the authorization service and executes a JSON PUT request.
-        """
+        """Mocks a single False response from the authorization service and executes a JSON PUT request."""
         return self._one_authz_put(False, url, *args, **kwargs)
 
     def _one_authz_delete(self, authz_res: bool, url: str, *args, **kwargs):

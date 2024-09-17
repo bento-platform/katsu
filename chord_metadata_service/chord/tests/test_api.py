@@ -235,7 +235,7 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         }
 
     def test_update_dataset(self):
-        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update))
+        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         assert r.status_code == status.HTTP_200_OK
         self.dataset.refresh_from_db()
         assert self.dataset.title == self.valid_update["title"]
@@ -267,11 +267,11 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         )
 
     def test_update_dataset_forbidden(self):
-        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", data=json.dumps(self.valid_update))
+        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         assert r.status_code == status.HTTP_403_FORBIDDEN
 
     def test_update_dataset_not_found(self):
-        r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", data=json.dumps(self.valid_update))
+        r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", json=self.valid_update)
         assert r.status_code == status.HTTP_404_NOT_FOUND
 
 

@@ -79,5 +79,5 @@ class ModelFieldsTestMixin(TestCase):
 class AuthzAPITestCaseWithProjectJSON(AuthzAPITestCase):
     def setUp(self) -> None:
         super().setUp()
-        r = self.one_authz_post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1))
+        r = self.one_authz_post(reverse("project-list"), json=VALID_PROJECT_1)
         self.project = r.json()

@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
@@ -25,6 +26,7 @@ from . import models as m, serializers as s, filters as f
 class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
+    permission_classes = (BentoPhenopacketDataPermission,)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
@@ -95,11 +97,15 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     post:
     Create a new biosample
     """
+
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
-    queryset = m.Biosample.objects.all().prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
     lookup_value_regex = MODEL_ID_PATTERN
+
+    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
+    # permissions.
+    scope_enabled = True
 
     @async_to_sync
     async def get_queryset(self):
@@ -181,6 +187,10 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
     lookup_value_regex = MODEL_ID_PATTERN
+
+    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
+    # permissions.
+    scope_enabled = True
 
     @async_to_sync
     async def get_queryset(self):
