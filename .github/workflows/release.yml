@@ -1,0 +1,59 @@
+name: Create and upload release artifacts
+on:
+  release:
+    types: [published, prereleased]
+  # temporary PR trigger for test
+  pull_request:
+    branches:
+      - develop
+      - 'features/**'
+
+jobs:
+  release-artifacts:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: python -m pip install poetry
+      - name: Install dependencies
+        run: poetry install
+      - name: Make release artifacts
+        run: |
+          mkdir -p ./dist/schemas
+          ./manage.py schema phenopacket >> ./dist/schemas/phenopacket_schema.json
+          ./manage.py schema experiment >> ./dist/schemas/experiment_schema.json
+          ./manage.py schema discovery >> ./dist/schemas/discovery.json
+      - name: Upload release artifacts
+        uses: actions/github-scripts@v7
+        with:
+          script: |
+            const fs = require(fs);
+
+            # temporary hardcoding for test
+            const tag = "v8.0.2-test"
+            # const tag = context.ref.replace("refs/tags/", "");
+            console.log("tag = ", tag);
+
+            const release = await github.rest.repos.getReleaseByTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag
+            });
+            await github.rest.repos.uploadReleaseAsset({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.data.id,
+              name: "JSON Schemas",
+              data: await fs.readdirSync("./dist/schemas")
+            });
