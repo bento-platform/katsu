@@ -58,5 +58,5 @@ jobs:
               repo: context.repo.repo,
               release_id: release.data.id,
               name: "json-schemas.zip",
-              data: await fs.readFile("./json-schemas.zip"),
+              data: await fs.readFileSync("./json-schemas.zip"),
             });
