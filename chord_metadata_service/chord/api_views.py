@@ -35,7 +35,6 @@ from .serializers import (
     ProjectSerializer,
     DatasetSerializer
 )
-from .filters import AuthorizedDatasetFilter
 
 logger = logging.getLogger(__name__)
 
@@ -134,7 +133,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     """
 
     filter_backends = [DjangoFilterBackend]
-    filterset_class = AuthorizedDatasetFilter
     lookup_url_kwarg = "dataset_id"
 
     serializer_class = DatasetSerializer

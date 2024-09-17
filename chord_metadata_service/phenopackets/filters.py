@@ -44,21 +44,6 @@ def filter_extra_properties(qs, name, value):
     return qs.filter(extra_properties__icontains=value)
 
 
-def authorize_datasets(qs, name, value):
-    """
-    Filter by authorized datasets.
-
-    If value is 'NO_DATASETS_AUTHORIZED', returns no objects.
-    Otherwise, returns objects that are in the specified datasets.
-    """
-    if value == 'NO_DATASETS_AUTHORIZED':
-        lookup = "__".join([name, "in"])
-        return qs.filter(**{lookup: []})
-    else:
-        lookup = "__".join([name, "in"])
-        return qs.filter(**{lookup: value.split(',')}).distinct()
-
-
 def filter_datasets(qs, name, value):
     """
     Filters by datasets.
@@ -89,10 +74,6 @@ class MetaDataFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets, field_name="phenopacket__dataset__title", label="Datasets")
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets, field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
 
     class Meta:
         model = m.MetaData
@@ -120,11 +101,6 @@ class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
         method=filter_datasets,
         field_name="phenopacket__dataset__title",
         label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
     )
 
     class Meta:
@@ -166,11 +142,6 @@ class DiseaseFilter(django_filters.rest_framework.FilterSet):
         field_name="phenopacket__dataset__title",
         label="Datasets"
     )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
 
     class Meta:
         model = m.Disease
@@ -199,11 +170,6 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
         field_name="phenopacket__dataset__title",
         label="Datasets"
     )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
     procedure = django_filters.CharFilter(
         method=filter_time_element, field_name="procedure", label="Procedure")
 
@@ -225,11 +191,6 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
         method=filter_datasets,
         field_name="dataset__title",
         label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="dataset__title",
-        label="Authorized datasets"
     )
 
     class Meta:
@@ -293,11 +254,6 @@ class DiagnosisFilter(django_filters.rest_framework.FilterSet):
         field_name="disease__phenopacket__dataset__title",
         label="Datasets"
     )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="disease__phenopacket__dataset__title",
-        label="Authorized datasets"
-    )
 
     class Meta:
         model = m.Diagnosis
@@ -311,11 +267,6 @@ class InterpretationFilter(django_filters.rest_framework.FilterSet):
         method=filter_datasets,
         field_name="phenopacket__dataset__title",
         label="Datasets"
-    )
-    authorized_datasets = django_filters.CharFilter(
-        method=authorize_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Authorized datasets"
     )
 
     class Meta:
