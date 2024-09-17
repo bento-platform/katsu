@@ -25,4 +25,4 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any) -> str | None:
         schema = NAME_TO_SCHEMA[options["schema"]]
-        self.stdout.write(json.dumps(schema))
+        self.stdout.write(json.dumps(schema, indent=2))
