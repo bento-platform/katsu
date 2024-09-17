@@ -2,9 +2,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     FHIRRenderer,
@@ -231,7 +231,7 @@ class InterpretationViewSet(PhenopacketsModelViewSet):
     }
 )
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_chord_phenopacket_schema(_request):
     """
     get:
@@ -242,7 +242,7 @@ def get_chord_phenopacket_schema(_request):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_chord_phenopacket_subschema(_request, subschema: str):
     """
     get:
