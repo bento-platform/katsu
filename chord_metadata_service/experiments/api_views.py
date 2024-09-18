@@ -3,13 +3,13 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
 from .schemas import EXPERIMENT_SCHEMA, experiment_resolver, experiment_base_uri
 from .filters import ExperimentFilter, ExperimentResultFilter
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 
@@ -140,7 +140,7 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     }
 )
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_experiment_schema(_request):
     """
     get:
@@ -151,7 +151,7 @@ def get_experiment_schema(_request):
 
 
 @api_view(["GET"])
-@permission_classes([AllowAny])
+@permission_classes([BentoAllowAny])
 def get_experiment_subschema(_request, subschema: str):
     """
     get:
