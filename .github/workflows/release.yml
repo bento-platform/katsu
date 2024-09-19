@@ -1,7 +1,7 @@
 name: Create and upload release artifacts
 on:
   release:
-    types: [published, prereleased]
+    types: [published]
 
 jobs:
   release-artifacts:
