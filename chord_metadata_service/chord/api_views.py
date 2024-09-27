@@ -251,7 +251,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return forbidden(request)  # side effect: sets authz done flag
 
         # Do not allow datasets to change project
-        if request.data["project"] != dataset_project_id:
+        if "project" in request.data and request.data["project"] != dataset_project_id:
             return bad_request(request, "Dataset project ID cannot change")
 
         authz.mark_authz_done(request)
