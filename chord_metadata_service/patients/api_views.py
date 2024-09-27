@@ -82,8 +82,15 @@ class IndividualViewSet(viewsets.ModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
+        scope = await get_request_discovery_scope(self.request)
+
+        if "project" in self.request.query_params:
+            del self.request.query_params["project"]
+        if "dataset" in self.request.query_params:
+            del self.request.query_params["dataset"]
+
         return (
-            Individual.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            Individual.get_model_scoped_queryset(scope)
             .prefetch_related(
                 *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
                 *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),

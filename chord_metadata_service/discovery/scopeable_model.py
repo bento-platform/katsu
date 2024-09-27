@@ -22,10 +22,26 @@ class BaseScopeableModel(Model):
     @staticmethod
     @abstractmethod
     def get_scope_filters() -> ModelScopeFilters:  # pragma: no cover
+        """
+        TODO
+        """
         pass
+
+    def scope_contains_object(self, scope: ValidatedDiscoveryScope) -> bool:
+        """
+        TODO
+        """
+        return self.get_model_scoped_queryset(scope).filter(pk=self.pk).exists()
+
+    async def scope_contains_object_async(self, scope: ValidatedDiscoveryScope) -> bool:
+        return await self.get_model_scoped_queryset(scope).filter(pk=self.pk).aexists()
 
     @classmethod
     def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
+        """
+        TODO
+        """
+
         filter_scope: PublicScopeFilterKeys
         if scope.dataset_id:
             filter_scope = "dataset"

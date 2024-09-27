@@ -1,6 +1,7 @@
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.reverse import reverse
 
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.patients.tests.constants import VALID_INDIVIDUAL, VALID_INDIVIDUAL_2
 from chord_metadata_service.phenopackets.models import (
@@ -24,7 +25,7 @@ from chord_metadata_service.restapi.tests.utils import get_post_response
 # Tests for FHIR conversion functions
 
 
-class FHIRPhenopacketTest(APITestCase):
+class FHIRPhenopacketTest(AuthzAPITestCase):
 
     def setUp(self):
         self.subject = Individual.objects.create(**VALID_INDIVIDUAL_1)
@@ -39,7 +40,7 @@ class FHIRPhenopacketTest(APITestCase):
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
     def test_get_fhir(self):
-        get_resp = self.client.get('/api/phenopackets?format=fhir')
+        get_resp = self.one_authz_get('/api/phenopackets?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         self.assertEqual(get_resp_obj['compositions'][0]['resourceType'], 'Composition')
@@ -61,8 +62,12 @@ class FHIRPhenopacketTest(APITestCase):
         self.assertIsInstance(get_resp_obj['compositions'][0]['section'][0]['entry'], list)
         self.assertEqual(len(get_resp_obj['compositions'][0]['section'][0]['entry']), 2)
 
+    def test_get_fhir_no_permissions(self):
+        get_resp = self.one_no_authz_get('/api/phenopackets?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
-class FHIRIndividualTest(APITestCase):
+
+class FHIRIndividualTest(AuthzAPITestCase):
     """ Test module for creating an Individual. """
 
     def setUp(self):
@@ -70,7 +75,7 @@ class FHIRIndividualTest(APITestCase):
         self.individual_second = Individual.objects.create(**VALID_INDIVIDUAL_2)
 
     def test_get_fhir(self):
-        get_resp = self.client.get('/api/individuals?format=fhir')
+        get_resp = self.one_authz_get('/api/individuals?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         self.assertEqual(get_resp_obj['patients'][0]['resourceType'], 'Patient')
@@ -83,8 +88,14 @@ class FHIRIndividualTest(APITestCase):
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/individual-birthdate')
         self.assertIsInstance(get_resp_obj['patients'][1]['extension'][2]['valueDate'], str)
 
+    def test_get_fhir_no_permissions(self):
+        get_resp = self.one_no_authz_get('/api/individuals?format=fhir')
+        import sys
+        print(get_resp.json(), file=sys.stderr)
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
-class FHIRPhenotypicFeatureTest(APITestCase):
+
+class FHIRPhenotypicFeatureTest(AuthzAPITestCase):
 
     def setUp(self):
         self.individual_1 = Individual.objects.create(**VALID_INDIVIDUAL_1)
@@ -98,7 +109,7 @@ class FHIRPhenotypicFeatureTest(APITestCase):
             **valid_phenotypic_feature(biosample=self.biosample_2))
 
     def test_get_fhir(self):
-        get_resp = self.client.get('/api/phenotypicfeatures?format=fhir')
+        get_resp = self.one_authz_get('/api/phenotypicfeatures?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         severity = {
@@ -126,8 +137,12 @@ class FHIRPhenotypicFeatureTest(APITestCase):
         self.assertIsInstance(get_resp_obj['observations'][0]['specimen'], dict)
         self.assertEqual(get_resp_obj['observations'][0]['specimen']['reference'], 'katsu.biosample_id:1')
 
+    def test_get_fhir_no_permissions(self):
+        get_resp = self.one_no_authz_get('/api/phenotypicfeatures?format=fhir')
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
-class FHIRBiosampleTest(APITestCase):
+
+class FHIRBiosampleTest(AuthzAPITestCase):
     """ Test module for creating an Biosample. """
 
     def setUp(self):
@@ -138,8 +153,8 @@ class FHIRBiosampleTest(APITestCase):
     def test_get_fhir(self):
         """ POST a new biosample. """
 
-        get_post_response('biosamples-list', self.valid_payload)
-        get_resp = self.client.get('/api/biosamples?format=fhir')
+        self.one_authz_post(reverse("biosamples-list"), json=self.valid_payload)
+        get_resp = self.one_authz_get('/api/biosamples?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         self.assertEqual(get_resp_obj['specimens'][0]['resourceType'], 'Specimen')
@@ -151,15 +166,19 @@ class FHIRBiosampleTest(APITestCase):
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
                               list)
 
+    def test_get_fhir_no_permissions(self):
+        get_resp = self.one_no_authz_get("/api/biosamples?format=fhir")
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
-class FHIRDiseaseTest(APITestCase):
+
+class FHIRDiseaseTest(AuthzAPITestCase):
 
     def setUp(self):
         self.disease = VALID_DISEASE_1
 
     def test_get_fhir(self):
-        get_post_response('diseases-list', self.disease)
-        get_resp = self.client.get('/api/diseases?format=fhir')
+        self.one_authz_post(reverse('diseases-list'), json=self.disease)
+        get_resp = self.one_authz_get('/api/diseases?format=fhir')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         get_resp_obj = get_resp.json()
         self.assertEqual(get_resp_obj['conditions'][0]['resourceType'], 'Condition')
@@ -168,3 +187,7 @@ class FHIRDiseaseTest(APITestCase):
         self.assertEqual(get_resp_obj['conditions'][0]['extension'][0]['url'],
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage')
         self.assertEqual(get_resp_obj['conditions'][0]['subject']['reference'], 'unknown')
+
+    def test_get_fhir_no_permissions(self):
+        get_resp = self.one_no_authz_get("/api/diseases?format=fhir")
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)

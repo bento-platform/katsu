@@ -6,6 +6,7 @@ from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from django.http import HttpResponse
+from rest_framework.exceptions import ErrorDetail
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
@@ -42,6 +43,10 @@ class FHIRRenderer(JSONRenderer):
     format = 'fhir'
 
     def render(self, data, media_type=None, renderer_context=None):
+        # TODO: should this happen at all?
+        if not data or "detail" in data and isinstance(data["detail"], ErrorDetail):
+            return super().render(data, media_type, renderer_context)
+
         fhir_datatype_plural = getattr(
             renderer_context.get('view').get_serializer().Meta,
             'fhir_datatype_plural', 'objects'
