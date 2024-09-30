@@ -184,6 +184,34 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         response = self.client.get("/api/datasets/does-not-exist/dats")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_dats_as_attachment(self):
+        payload = {**self.dats_valid_payload, 'dats_file': {}}
+
+        r = self.one_authz_post('/api/datasets', data=json.dumps(payload))
+
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        dataset_id = Dataset.objects.first().identifier
+
+        subtest_params = [
+            ("?attachment=true", True),
+            ("?attachment=false", False),
+            ("?attachment=", False),
+            ("", False),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                response = self.client.get(f"/api/datasets/{dataset_id}/dats{params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertDictEqual(response.data, payload['dats_file'])
+                if params[1]:
+                    self.assertEqual(
+                        response.headers["Content-Disposition"],
+                        f"attachment; filename=\"{dataset_id}_dats.json\""
+                    )
+                else:
+                    self.assertNotIn("Content-Disposition", response.headers)
+
     def test_resources(self):
         resource = {
             "id": "NCBITaxon:2023-09-14",

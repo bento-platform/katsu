@@ -1,11 +1,29 @@
 from __future__ import annotations
-from chord_metadata_service.phenopackets.models import Biosample
+
+import re
+
 from collections import defaultdict
 from django.db.models import F
+from rest_framework.request import Request as DrfRequest
+from rest_framework.response import Response
 from typing import Any
+
+from chord_metadata_service.phenopackets.models import Biosample
+
+__all__ = [
+    "transform_keys",
+    "computed_property",
+    "remove_computed_properties",
+    "get_biosamples_with_experiment_details",
+    "build_experiments_by_subject",
+    "response_as_attachment",
+    "attachment_content_disposition",
+    "response_optionally_as_attachment",
+]
 
 
 COMPUTED_PROPERTY_PREFIX = "__"
+FILENAME_REPLACE_PATTERN = re.compile(r"[\\/:*?\"<>|]")
 
 
 def camel_case_field_names(string) -> str:
@@ -88,3 +106,20 @@ def build_experiments_by_subject(biosamples_experiments_details: list[dict]) -> 
             }
         })
     return experiments_with_biosamples
+
+
+def response_as_attachment(request: DrfRequest) -> bool:
+    """
+    Helper function for processing the as_attachment query parameter, for consistent behaviour when returning JSON
+    responses as file attachments.
+    """
+    return request.query_params.get("attachment", "").strip().lower() in ("1", "true", "yes")
+
+
+def attachment_content_disposition(filename: str) -> dict[str, str]:
+    filename_safe = FILENAME_REPLACE_PATTERN.sub("_", filename)
+    return {"Content-Disposition": f"attachment; filename=\"{filename_safe}\""}
+
+
+def response_optionally_as_attachment(request: DrfRequest, data, filename: str) -> Response:
+    return Response(data, headers=attachment_content_disposition(filename) if response_as_attachment(request) else {})
