@@ -156,7 +156,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         authz.mark_authz_done(request)
 
-        return response_optionally_as_attachment(dataset.dats_file, f"{dataset.identifier}_dats.json")
+        return response_optionally_as_attachment(request, dataset.dats_file, f"{dataset.identifier}_dats.json")
 
     @action(detail=True, methods=["get"])
     def resources(self, request, *_args, **_kwargs):
