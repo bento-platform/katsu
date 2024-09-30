@@ -11,8 +11,6 @@ from typing import Any
 from chord_metadata_service.phenopackets.models import Biosample
 
 __all__ = [
-    "COMPUTED_PROPERTY_PREFIX",
-    "camel_case_field_names",
     "transform_keys",
     "computed_property",
     "remove_computed_properties",
@@ -25,6 +23,7 @@ __all__ = [
 
 
 COMPUTED_PROPERTY_PREFIX = "__"
+FILENAME_REPLACE_PATTERN = re.compile(r"[\\/:*?\"<>|]")
 
 
 def camel_case_field_names(string) -> str:
@@ -115,9 +114,6 @@ def response_as_attachment(request: DrfRequest) -> bool:
     responses as file attachments.
     """
     return request.query_params.get("attachment", "").strip().lower() in ("1", "true", "yes")
-
-
-FILENAME_REPLACE_PATTERN = re.compile(r"[\\/:*?\"<>|]")
 
 
 def attachment_content_disposition(filename: str) -> dict[str, str]:

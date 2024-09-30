@@ -192,15 +192,25 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         dataset_id = Dataset.objects.first().identifier
 
-        response = self.client.get(f"/api/datasets/{dataset_id}/dats?attachment=true")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.data, payload['dats_file'])
-        self.assertEqual(response.headers["Content-Disposition"], f"attachment; filename=\"{dataset_id}_dats.json\"")
+        subtest_params = [
+            ("?attachment=true", True),
+            ("?attachment=false", False),
+            ("?attachment=", False),
+            ("", False),
+        ]
 
-        response = self.client.get(f"/api/datasets/{dataset_id}/dats?attachment=false")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.data, payload['dats_file'])
-        self.assertNotIn("Content-Disposition", response.headers)
+        for params in subtest_params:
+            with self.subTest(params=params):
+                response = self.client.get(f"/api/datasets/{dataset_id}/dats{params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertDictEqual(response.data, payload['dats_file'])
+                if params[1]:
+                    self.assertEqual(
+                        response.headers["Content-Disposition"],
+                        f"attachment; filename=\"{dataset_id}_dats.json\""
+                    )
+                else:
+                    self.assertNotIn("Content-Disposition", response.headers)
 
     def test_resources(self):
         resource = {
