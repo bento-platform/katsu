@@ -6,7 +6,6 @@ from chord_metadata_service.discovery.api_views import (
     public_rules,
     public_search_fields,
     public_overview,
-    public_dataset,
     discovery_schema
 )
 from chord_metadata_service.experiments import api_views as experiment_views
