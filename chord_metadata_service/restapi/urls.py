@@ -6,7 +6,6 @@ from chord_metadata_service.discovery.api_views import (
     public_rules,
     public_search_fields,
     public_overview,
-    public_dataset,
     discovery_schema
 )
 from chord_metadata_service.experiments import api_views as experiment_views
@@ -89,6 +88,5 @@ urlpatterns = [
          name='public',),
     path('public_search_fields', public_search_fields, name='public-search-fields'),
     path('public_overview', public_overview, name='public-overview',),
-    path('public_dataset', public_dataset, name='public-dataset'),
     path('public_rules', public_rules, name='public-rules'),
 ]

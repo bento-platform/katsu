@@ -17,7 +17,7 @@ pattern_get = re.compile(r"^GET$")
 #          be protected by the gateway.
 include_pattern_public = (
     re.compile(r"^(GET|POST|PUT|DELETE)$"),
-    re.compile(r"^/api/(projects|datasets|public|public_overview|public_search_fields|public_dataset|public_rules)$"),
+    re.compile(r"^/api/(projects|datasets|public|public_overview|public_search_fields|public_rules)$"),
 )
 include_pattern_workflows = (pattern_get, re.compile(r"^(/workflows$|/workflows/)"))
 include_pattern_si = (pattern_get, re.compile(r"^/service-info"))
