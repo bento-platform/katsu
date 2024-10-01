@@ -89,6 +89,5 @@ urlpatterns = [
          name='public',),
     path('public_search_fields', public_search_fields, name='public-search-fields'),
     path('public_overview', public_overview, name='public-overview',),
-    path('public_dataset', public_dataset, name='public-dataset'),
     path('public_rules', public_rules, name='public-rules'),
 ]

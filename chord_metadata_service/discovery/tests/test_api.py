@@ -428,49 +428,6 @@ class PublicOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
-class PublicDatasetsMetadataTest(AuthzAPITestCase):
-
-    def setUp(self) -> None:
-        project = ch_m.Project.objects.create(title="Test project", description="test description")
-        dats_path = os.path.join(os.path.dirname(__file__), "example_dats_provenance.json")
-        with open(dats_path) as f:
-            dats_content = json.loads(f.read())
-
-        ch_m.Dataset.objects.create(
-            title="Dataset 1",
-            description="Test dataset",
-            contact_info="Test contact info",
-            types=["test type 1", "test type 2"],
-            privacy="Open",
-            keywords=["test keyword 1", "test keyword 2"],
-            data_use=ch_c.VALID_DATA_USE_1,
-            project=project,
-            dats_file=dats_content
-        )
-
-    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_public_dataset(self):
-        response = self.dt_authz_counts_get(reverse("public-dataset"))
-        response_obj = response.json()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(response_obj, dict)
-
-        # datasets
-        self.assertIsInstance(response_obj["datasets"], list)
-        for i, dataset in enumerate(response_obj["datasets"]):
-            self.assertIn("title", dataset.keys())
-            self.assertIsNotNone(dataset["title"])
-            if i == 0:
-                self.assertTrue("keywords" in dataset["dats_file"])
-
-    @override_settings(CONFIG_PUBLIC={})
-    def test_public_dataset_response_no_config(self):
-        response = self.dt_authz_counts_get(reverse("public-dataset"))
-        response_obj = response.json()
-        self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
-
-
 class DiscoverySchemaTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discover_schema(self):
