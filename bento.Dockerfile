@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.06.01
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.10.01
 
 SHELL ["/bin/bash", "-c"]
 
@@ -6,8 +6,7 @@ SHELL ["/bin/bash", "-c"]
 # Install Poetry for dependency management and uvicorn to serve the API
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
-    rm -rf /var/lib/apt/lists/* && \
-    pip install --no-cache-dir "uvicorn[standard]==0.30.1"
+    rm -rf /var/lib/apt/lists/*
 
 # Backwards-compatible with old BentoV2 container layout
 WORKDIR /app
