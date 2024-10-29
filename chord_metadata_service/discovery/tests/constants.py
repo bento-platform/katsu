@@ -23,7 +23,7 @@ DISCOVERY_CONFIG_TEST: DiscoveryConfig = {
     "search": [
         {
             "section_title": "First Section",
-            "fields": ["sex", "age", "tissues"]
+            "fields": ["sex", "age", "tissues", "extraction_protocol"]
         }
     ],
     "fields": {
@@ -86,6 +86,16 @@ DISCOVERY_CONFIG_TEST: DiscoveryConfig = {
                 "taper_right": 200,
                 "units": "mm"
             }
+        },
+        "extraction_protocol": {
+            "mapping": "experiment/extraction_protocol",
+            "mapping_for_search_filter": "individual/biosamples/experiment/extraction_protocol",
+            "title": "Experiment Extraction Protocol",
+            "description": "experiment extraction protocol",
+            "datatype": "string",
+            "config": {
+                "enum": ["NGS"]
+            },
         },
     },
     "rules": {
