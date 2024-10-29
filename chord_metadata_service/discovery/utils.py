@@ -242,9 +242,14 @@ def get_public_model_scoped_queryset(scope: ValidatedDiscoveryScope, mn: PublicM
         filter_scope = "project"
         value = scope.project_id
     else:
-        return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all()
+        return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.distinct()
 
     filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["filter"]
     prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["prefetch_related"]
 
-    return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(**{filter_query: value})
+    return (
+        PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects
+        .distinct()
+        .prefetch_related(*prefetch)
+        .filter(**{filter_query: value})
+    )
