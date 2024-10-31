@@ -147,7 +147,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
         wm.WorkflowFileArrayInput(
             id="document_files",
             required=True,
-            pattern=r"^.*\.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|mp3|m4a|mp4)$",
+            pattern=r"^.*\.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|html|mp3|m4a|mp4)$",
         ),
     ],
 ))

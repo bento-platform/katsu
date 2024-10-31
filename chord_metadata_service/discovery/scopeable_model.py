@@ -50,14 +50,14 @@ class BaseScopeableModel(Model):
             filter_scope = "project"
             value = scope.project_id
         else:
-            return cls.objects.all()
+            return cls.objects.distinct()
 
         scope_filter_spec = cls.get_scope_filters()[filter_scope]
 
         filter_query = scope_filter_spec["filter"]
         prefetch = scope_filter_spec["prefetch_related"]
 
-        return cls.objects.prefetch_related(*prefetch).filter(**{filter_query: value})
+        return cls.objects.distinct().prefetch_related(*prefetch).filter(**{filter_query: value})
 
 
 # Common model scope filters for phenopacket + experiment, which share a top-level dataset property.

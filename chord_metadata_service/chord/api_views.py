@@ -28,12 +28,13 @@ from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
+from chord_metadata_service.restapi.utils import response_optionally_as_attachment
 
 from .models import Project, Dataset, ProjectJsonSchema
 from .serializers import (
     ProjectJsonSchemaSerializer,
     ProjectSerializer,
-    DatasetSerializer
+    DatasetSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -140,7 +141,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     queryset = Dataset.objects.all().order_by("title")
 
     @action(detail=True, methods=['get'])
-    def dats(self, request, *_args, **_kwargs):
+    def dats(self, request: DrfRequest, *_args, **_kwargs):
         """
         Retrieve a specific DATS file for a given dataset.
 
@@ -152,7 +153,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return not_found(request)  # side effect: sets authz done flag
 
         authz.mark_authz_done(request)
-        return Response(dataset.dats_file)
+
+        return response_optionally_as_attachment(request, dataset.dats_file, f"{dataset.identifier}_dats.json")
 
     @action(detail=True, methods=["get"])
     def resources(self, request, *_args, **_kwargs):
@@ -249,7 +251,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return forbidden(request)  # side effect: sets authz done flag
 
         # Do not allow datasets to change project
-        if request.data["project"] != dataset_project_id:
+        if "project" in request.data and request.data["project"] != dataset_project_id:
             return bad_request(request, "Dataset project ID cannot change")
 
         authz.mark_authz_done(request)

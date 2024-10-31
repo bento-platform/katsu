@@ -184,6 +184,34 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         response = self.client.get("/api/datasets/does-not-exist/dats")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_dats_as_attachment(self):
+        payload = {**self.dats_valid_payload, 'dats_file': {}}
+
+        r = self.one_authz_post('/api/datasets', data=json.dumps(payload))
+
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        dataset_id = Dataset.objects.first().identifier
+
+        subtest_params = [
+            ("?attachment=true", True),
+            ("?attachment=false", False),
+            ("?attachment=", False),
+            ("", False),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                response = self.client.get(f"/api/datasets/{dataset_id}/dats{params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assertDictEqual(response.data, payload['dats_file'])
+                if params[1]:
+                    self.assertEqual(
+                        response.headers["Content-Disposition"],
+                        f"attachment; filename=\"{dataset_id}_dats.json\""
+                    )
+                else:
+                    self.assertNotIn("Content-Disposition", response.headers)
+
     def test_resources(self):
         resource = {
             "id": "NCBITaxon:2023-09-14",
@@ -236,9 +264,17 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_update_dataset(self):
         r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
-        assert r.status_code == status.HTTP_200_OK
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
-        assert self.dataset.title == self.valid_update["title"]
+        self.assertEqual(self.dataset.title, self.valid_update["title"])
+
+    def test_update_dataset_partial(self):
+        r = self.one_authz_patch(
+            f"/api/datasets/{self.dataset.identifier}", data=json.dumps({"title": self.valid_update["title"]})
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.title, self.valid_update["title"])
 
     def test_update_dataset_changed_project(self):
         r = self.one_authz_put(
@@ -248,50 +284,53 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
                 "project": str(self.project_2.identifier),
             })
         )
-        assert r.status_code == status.HTTP_400_BAD_REQUEST
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         res = r.json()
-        assert res["message"] == "Bad Request"
-        assert res["errors"][0]["message"] == "Dataset project ID cannot change"
+        self.assertEqual(res["message"], "Bad Request")
+        self.assertEqual(res["errors"][0]["message"], "Dataset project ID cannot change")
 
     def test_update_dataset_bad_dats_json(self):
         r = self.one_authz_put(
             f"/api/datasets/{self.dataset.identifier}",
             data=json.dumps({**self.valid_update, "dats_file": "asdf"}),  # asdf is not JSON
         )
-        assert r.status_code == status.HTTP_400_BAD_REQUEST
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         res = r.json()
-        assert res["message"] == "Bad Request"
-        assert res["errors"][0]["message"] == (
-            "Submitted dataset.dats_file data is not a valid JSON string. Make sure the string value is JSON "
-            "compatible, or submit dats_file as a JSON object."
+        self.assertEqual(res["message"], "Bad Request")
+        self.assertEqual(
+            res["errors"][0]["message"],
+            (
+                "Submitted dataset.dats_file data is not a valid JSON string. Make sure the string value is JSON "
+                "compatible, or submit dats_file as a JSON object."
+            )
         )
 
     def test_update_dataset_forbidden(self):
         r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
-        assert r.status_code == status.HTTP_403_FORBIDDEN
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_dataset_not_found(self):
         r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", json=self.valid_update)
-        assert r.status_code == status.HTTP_404_NOT_FOUND
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_delete_dataset(self):
         r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
-        assert r.status_code == status.HTTP_204_NO_CONTENT
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
             self.dataset.refresh_from_db()
 
     def test_delete_dataset_forbidden(self):
         r = self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
-        assert r.status_code == status.HTTP_403_FORBIDDEN
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.dataset.refresh_from_db()  # must not raise DoesNotExist
 
     def test_delete_dataset_not_found(self):
         r = self.client.delete(f"/api/datasets/{uuid.uuid4()}")
-        assert r.status_code == status.HTTP_404_NOT_FOUND
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):

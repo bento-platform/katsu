@@ -1,5 +1,4 @@
 import asyncio
-import re
 
 from adrf.views import APIView
 from asgiref.sync import async_to_sync
@@ -47,7 +46,11 @@ from chord_metadata_service.restapi.api_renderers import (
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
+from chord_metadata_service.restapi.utils import (
+    build_experiments_by_subject,
+    get_biosamples_with_experiment_details,
+    response_optionally_as_attachment,
+)
 
 from .filters import IndividualFilter
 from .models import Individual
@@ -139,8 +142,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["GET", "POST"])
-    def phenopackets(self, request, *_args, **_kwargs):
-        as_attachment = request.query_params.get("attachment", "") in ("1", "true", "yes")
+    def phenopackets(self, request: DrfRequest, *_args, **_kwargs):
         individual = self.get_object()
 
         phenopackets = (
@@ -150,13 +152,10 @@ class IndividualViewSet(viewsets.ModelViewSet):
             .order_by("id")
         )
 
-        filename_safe_id = re.sub(r"[\\/:*?\"<>|]", "_", individual.id)
-        return Response(
+        return response_optionally_as_attachment(
+            request,
             PhenopacketSerializer(phenopackets, many=True).data,
-            headers=(
-                {"Content-Disposition": f"attachment; filename=\"{filename_safe_id}_phenopackets.json\""}
-                if as_attachment else {}
-            ),
+            f"{individual.id}_phenopackets.json"
         )
 
 

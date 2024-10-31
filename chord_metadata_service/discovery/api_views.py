@@ -2,7 +2,6 @@ import asyncio
 
 from adrf.decorators import api_view
 from bento_lib.responses import errors
-from django.conf import settings
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
 from operator import is_not
@@ -12,10 +11,9 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from typing import Type
 
-from .scopeable_model import BaseScopeableModel
-from ..authz.permissions import BentoAllowAny
-from ..chord import data_types as dts, models as cm
-from ..logger import logger
+from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.chord import data_types as dts
+from chord_metadata_service.logger import logger
 
 from . import responses as dres
 from .censorship import get_rules
@@ -24,6 +22,7 @@ from .fields import get_field_options, get_range_stats, get_categorical_stats, g
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
+from .scopeable_model import BaseScopeableModel
 from .types import BinWithValue
 from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
 
@@ -205,36 +204,6 @@ async def public_overview(request: DrfRequest):
         response["fields"][field] = field_res
 
     return Response(response)
-
-
-@api_view(["GET"])
-@permission_classes([BentoAllowAny])
-async def public_dataset(_request: DrfRequest):
-    """
-    get:
-    Properties of the datasets
-    """
-
-    # For now, we don't have any permissions checks for this.
-    # In the future, we could introduce a view:dataset permission or something.
-
-    if not settings.CONFIG_PUBLIC:
-        return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
-
-    # Datasets provenance metadata
-    datasets = cm.Dataset.objects.values(
-        "title", "description", "contact_info",
-        "dates", "stored_in", "spatial_coverage",
-        "types", "privacy", "distributions",
-        "dimensions", "primary_publications", "citations",
-        "produced_by", "creators", "licenses",
-        "acknowledges", "keywords", "version", "dats_file",
-        "extra_properties", "identifier", "discovery"
-    )
-
-    return Response({
-        "datasets": datasets
-    })
 
 
 @api_view(["GET"])
