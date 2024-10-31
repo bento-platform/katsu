@@ -234,6 +234,19 @@ def get_discovery_field_set_permissions(
 
 
 def get_public_model_scoped_queryset(scope: ValidatedDiscoveryScope, mn: PublicModelName) -> QuerySet:
+    """
+    Discovery models can be scoped to either a project or dataset; for downstream filtering, we need to pre-scope the
+    model queryset to the project/dataset being queried.
+
+    Since downstream filtering may be applied to (possibly deeply)nested fields/models (e.g., biosamples, experiments),
+    we use `.distinct()` instead of `.all()`. Otherwise, there may be multiple instances of the same top-level object
+    (individual especially, which has this deep nesting) for each nested instance, for example, in the case of multiple
+    experiments for a biosample for an individual.
+
+    :param scope: The scope to filter the queryset to.
+    :param mn: The discovery/"public" model name for
+    """
+
     filter_scope: PublicScopeFilterKeys
     if scope.dataset_id:
         filter_scope = "dataset"
@@ -242,9 +255,14 @@ def get_public_model_scoped_queryset(scope: ValidatedDiscoveryScope, mn: PublicM
         filter_scope = "project"
         value = scope.project_id
     else:
-        return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.all()
+        return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.distinct()
 
     filter_query = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["filter"]
     prefetch = PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS[mn][filter_scope]["prefetch_related"]
 
-    return PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects.prefetch_related(*prefetch).filter(**{filter_query: value})
+    return (
+        PUBLIC_MODEL_NAMES_TO_MODEL[mn].objects
+        .distinct()
+        .prefetch_related(*prefetch)
+        .filter(**{filter_query: value})
+    )

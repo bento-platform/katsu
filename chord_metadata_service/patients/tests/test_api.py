@@ -20,6 +20,8 @@ from chord_metadata_service.discovery.tests.constants import (
     CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 )
 from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.experiments import models as ex_m
+from chord_metadata_service.experiments.tests import constants as ex_c
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
@@ -380,13 +382,13 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             project=self.project_2,
         )
 
-        individuals = [
+        self.individuals = [
             c.generate_valid_individual(date_of_consent_range=(2020, 2023))
             for _ in range(self.num_individuals)
         ]
 
-        individual_objs = [Individual.objects.create(**individual) for individual in individuals]
-        ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
+        individual_objs = [Individual.objects.create(**individual) for individual in self.individuals]
+        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
 
         for idx, individual in enumerate(individual_objs, 1):
             self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
@@ -396,6 +398,13 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 meta_data=self.meta_data,
                 dataset=self.dataset,
             )
+            if idx == 1:
+                self.phenopacket.biosamples.add(biosample)
+                self.phenopacket.save()
+
+        instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 2))
 
         random.seed(self.random_seed)
 
@@ -693,6 +702,15 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
+
+    @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
+    def test_public_filtering_two_experiments(self):
+        response = self.dt_authz_counts_get(f"/api/public?sex={self.individuals[0]['sex']}&extraction_protocol=NGS")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(response_obj["count"], 1)
+        self.assertEqual(response_obj["biosamples"]["count"], 1)
+        self.assertEqual(response_obj["experiments"]["count"], 2)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_overview_sex(self):

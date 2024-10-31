@@ -25,12 +25,16 @@ async def individual_experiment_type_stats(
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for experiment type
-    note that queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys
+    Note: queryset_stats_for_field() does not count "missing" correctly when the field has multiple foreign keys.
     """
+
+    # Note: the queryset used to join through phenopackets, but individuals can be created without a phenopacket (which
+    # occurs sometimes in tests or in the case of a new packet model), which would cause this to return the wrong stats.
+
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("phenopackets__biosamples__experiment__experiment_type"))
-        .annotate(value=Count("phenopackets__biosamples__experiment", distinct=True)),
+        .values(label=F("biosamples__experiment__experiment_type"))
+        .annotate(value=Count("biosamples__experiment", distinct=True)),
         discovery,
         field_permissions,
     )
@@ -43,10 +47,14 @@ async def individual_biosample_tissue_stats(
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for biosample sampled_tissue
     """
+
+    # Note: the queryset used to join through phenopackets, but individuals can be created without a phenopacket (which
+    # occurs sometimes in tests or in the case of a new packet model), which would cause this to return the wrong stats.
+
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
-        .annotate(value=Count("phenopackets__biosamples", distinct=True)),
+        .values(label=F("biosamples__sampled_tissue__label"))
+        .annotate(value=Count("biosamples", distinct=True)),
         discovery,
         field_permissions,
     )
