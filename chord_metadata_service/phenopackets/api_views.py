@@ -119,7 +119,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
         )
 
 
-class BiosampleBatchViewSet(viewsets.ModelViewSet):
+class BiosampleBatchViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     get:
     Return a list of all existing biosamples
