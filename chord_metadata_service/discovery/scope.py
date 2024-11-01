@@ -148,8 +148,17 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
 
 
 async def get_request_discovery_scope(request: DrfRequest) -> ValidatedDiscoveryScope:
+    if (existing_scope := getattr(request, "discovery_scope", None)) is not None:
+        return existing_scope  # already cached by a previous call to this function
+
     project_id, dataset_id = _get_project_id_and_dataset_id_from_request(request)
-    return await get_discovery_scope(project_id, dataset_id)
+    scope = await get_discovery_scope(project_id, dataset_id)
+
+    # hack: cache discovery scope for this request on the object itself as an arbitrary property for future calls to
+    # this function, to avoid database request spam.
+    request.discovery_scope = scope
+
+    return scope
 
 
 INSTANCE_SCOPE = ValidatedDiscoveryScope(None, None)  # re-usable singleton for instance-wide scope
