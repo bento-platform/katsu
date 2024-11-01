@@ -79,7 +79,7 @@ async def view_request_has_data_type_permission(
     )
 
 
-async def _has_data_type_permission_obj(request: DrfRequest, view, obj: BaseScopeableModel) -> bool:
+async def obj_is_in_request_scope(request: DrfRequest, view, obj: BaseScopeableModel) -> bool:
     scope = await _get_scope_for_request_and_api_view(request, view)
     return await obj.scope_contains_object_async(scope)
 
@@ -93,7 +93,7 @@ class BentoPhenopacketDataPermission(BasePermission):
     async def has_object_permission(self, request, view, obj: BaseScopeableModel):
         # if this is called, has_data_type_permission has already been called and handled the overall action type
         # TODO: eliminate duplicate scope check somehow without enabling permissions on objects outside of scope
-        return await _has_data_type_permission_obj(request, view, obj)
+        return await obj_is_in_request_scope(request, view, obj)
 
 
 class BentoExperimentDataPermission(BasePermission):
@@ -105,7 +105,7 @@ class BentoExperimentDataPermission(BasePermission):
     async def has_object_permission(self, request, view, obj: BaseScopeableModel):
         # if this is called, has_data_type_permission has already been called and handled the overall action type
         # TODO: eliminate duplicate scope check somehow without enabling permissions on objects outside of scope
-        return await _has_data_type_permission_obj(request, view, obj)
+        return await obj_is_in_request_scope(request, view, obj)
 
 
 class ReadOnly(BasePermission):
