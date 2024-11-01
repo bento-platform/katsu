@@ -20,6 +20,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
@@ -77,6 +78,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
         IndividualCSVRenderer,
         IndividualBentoSearchRenderer,
     )
+    permission_classes = (BentoPhenopacketDataPermission,)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IndividualFilter
     ordering_fields = ["id"]
