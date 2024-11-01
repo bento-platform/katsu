@@ -179,7 +179,14 @@ class BiosamplesCSVRenderer(JSONRenderer):
 
     def render(self, data, media_type=None, renderer_context=None):
         if not data:
-            return
+            return b""
+
+        if renderer_context and (res_status := renderer_context["response"].status_code) != 200:  # error response
+            return HttpResponse(
+                json.dumps(data).encode("utf-8"),
+                status=res_status,
+                content_type="application/json; charset=utf-8",
+            )
 
         biosamples = []
         for biosample in data:

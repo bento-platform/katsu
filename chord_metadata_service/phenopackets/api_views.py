@@ -1,4 +1,6 @@
 from asgiref.sync import async_to_sync
+from bento_lib.auth.permissions import P_QUERY_DATA
+from bento_lib.responses import errors
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status, viewsets
@@ -6,7 +8,9 @@ from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission, BentoAllowAny
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
@@ -115,7 +119,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
         )
 
 
-class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
+class BiosampleBatchViewSet(viewsets.ModelViewSet):
     """
     get:
     Return a list of all existing biosamples
@@ -136,24 +140,43 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
     )
     content_negotiation_class = FormatInPostContentNegotiation
 
-    def _get_filtered_queryset(self, ids_list=None):
-        queryset = m.Biosample.objects.all()
+    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
+    # permissions.
+    scope_enabled = True
+
+    # TODO: this shouldn't be its own separate viewset maybe...
+
+    @async_to_sync
+    async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
+        # We pre-filter biosamples to the scope. This way, if they specify an ID outside the scope, it's just ignored
+        #  - the requester won't even know if it exists.
+        queryset = m.Biosample.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
 
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        queryset = queryset.prefetch_related(*BIOSAMPLE_PREFETCH) \
-            .order_by("id")
-
-        return queryset
+        return queryset.prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
 
     def get_queryset(self):
-        individual_ids = self.request.data.get("id", None)
-        return self._get_filtered_queryset(ids_list=individual_ids)
+        return self._get_filtered_queryset(ids_list=self.request.data.get("id", None))
+
+    @async_to_sync
+    async def check_batch_permissions(self, request):
+        scope = await get_request_discovery_scope(request)
+        return await authz_middleware.async_evaluate_one(
+            request, scope.as_authz_resource(data_type=DATA_TYPE_PHENOPACKET), P_QUERY_DATA, mark_authz_done=True
+        )
 
     def create(self, request, *args, **kwargs):
-        ids_list = request.data.get('id', [])
-        queryset = self._get_filtered_queryset(ids_list=ids_list)
+        """
+        Despite the name, this is a POST request for returning a list of biosamples. Since query parameters have a
+        maximum size, POST requests can be used for large batches.
+        """
+
+        if not self.check_batch_permissions(request):
+            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+
+        queryset = self._get_filtered_queryset(ids_list=request.data.get("id", []))
 
         serializer = s.BiosampleSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
