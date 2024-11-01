@@ -179,6 +179,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         ("search=NCBITaxon:9606", 2, None),
         # 5 fields in the bento search response:
         ("search=P49Y&format=bento_search_result", 1, 5),
+        ("search=NCBITaxon:9606&format=bento_search_result", 1, 5),  # only 1 of the individuals has a phenopacket
     )
 
     def setUp(self):
@@ -211,12 +212,20 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         response_obj_1 = get_resp.json()
         self.assertEqual(len(response_obj_1), 1)  # 1 phenopacket for individual
 
+    def test_individual_phenopackets_forbidden(self):
+        get_resp = self.one_no_authz_get(f"/api/individuals/{self.individual_one.id}/phenopackets")
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_individual_phenopackets_attachment(self):
         post_resp = self.one_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
         self.assertEqual(post_resp.status_code, status.HTTP_200_OK)
         self.assertIn("attachment; filename=", post_resp.headers.get("Content-Disposition", ""))
         response_obj_2 = post_resp.json()
         self.assertEqual(len(response_obj_2), 1)  # 1 phenopacket for individual, still
+
+    def test_individual_phenopackets_attachment_forbidden(self):
+        post_resp = self.one_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
+        self.assertEqual(post_resp.status_code, status.HTTP_403_FORBIDDEN)
 
 
 # Note: the next five tests use the same setUp method. Initially they were
