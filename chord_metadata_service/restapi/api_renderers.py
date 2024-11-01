@@ -6,6 +6,7 @@ from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from django.http import HttpResponse
+from rest_framework import status
 from rest_framework.exceptions import ErrorDetail
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
@@ -46,7 +47,7 @@ class FHIRRenderer(JSONRenderer):
         if (
             not data
             or ("detail" in data and isinstance(data["detail"], ErrorDetail))
-            or (renderer_context and renderer_context["response"].status_code != 200)
+            or (renderer_context and renderer_context["response"].status_code != status.HTTP_200_OK)
         ):
             return super().render(data, media_type, renderer_context)
 
@@ -108,13 +109,17 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
         return rdf_data
 
 
-def generate_csv_response(data, filename, columns):
-    headers = {key: key.replace('_', ' ').capitalize() for key in columns}
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = f"attachment; filename='{filename}'"
+def generate_csv_response(file_name: str, columns: list[str], data: list[dict]):
+    # remove underscore and capitalize column names
+    headers = {key: key.replace("_", " ").capitalize() for key in columns}
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f"attachment; filename='{file_name}'"
+
     dict_writer = csv.DictWriter(response, fieldnames=columns)
     dict_writer.writerow(headers)
     dict_writer.writerows(data)
+
     return response
 
 
@@ -133,111 +138,143 @@ def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
     return None
 
 
-class IndividualCSVRenderer(JSONRenderer):
-    media_type = 'text/csv'
-    format = 'csv'
+class KatsuCSVRenderer(JSONRenderer):
+    media_type = "text/csv"
+    format = "csv"
 
-    def render(self, data, media_type=None, renderer_context=None):
-        if not data or 'results' not in data or not data['results']:
-            return
+    file_name: str = "data.csv"
 
-        individuals = []
-        for individual in data['results']:
-            ind_obj = {
-                'id': individual['id'],
-                'sex': individual.get('sex', None),
-                'date_of_birth': individual.get('date_of_birth', None),
-                'taxonomy': None,
-                'karyotypic_sex': individual['karyotypic_sex'],
-                'age': render_age(individual, 'time_at_last_encounter'),
-                'diseases': None,
-                'created': individual['created'],
-                'updated': individual['updated']
-            }
-            if 'taxonomy' in individual:
-                ind_obj['taxonomy'] = individual['taxonomy'].get('label', None)
-            if 'phenopackets' in individual:
-                all_diseases = []
-                for phenopacket in individual['phenopackets']:
-                    if 'diseases' in phenopacket:
-                        # use ; because some disease terms might contain , in their label
-                        single_phenopacket_diseases = '; '.join(
-                            [
-                                f"{d['term']['label']} ({parse_onset(d['onset'])})"
-                                if 'onset' in d else d['term']['label'] for d in phenopacket['diseases']
-                            ]
-                        )
-                        all_diseases.append(single_phenopacket_diseases)
-                if all_diseases:
-                    ind_obj['diseases'] = '; '.join(all_diseases)
-            individuals.append(ind_obj)
-        columns = individuals[0].keys()
-        # remove underscore and capitalize column names
-        return generate_csv_response(individuals, 'data.csv', columns)
+    def get_columns(self) -> list[str]:  # pragma: no cover
+        raise NotImplementedError("get_columns() not implemented")
 
+    def get_dicts(self, data, renderer_context) -> list[dict]:  # pragma: no cover
+        raise NotImplementedError("get_dicts() not implemented")
 
-class BiosamplesCSVRenderer(JSONRenderer):
-    media_type = 'text/csv'
-    format = 'csv'
-
-    def render(self, data, media_type=None, renderer_context=None):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
         if not data:
             return b""
 
-        if renderer_context and (res_status := renderer_context["response"].status_code) != 200:  # error response
+        if renderer_context and (res_status := renderer_context["response"].status_code) != status.HTTP_200_OK:
+            # error response as JSON instead of CSV
             return HttpResponse(
                 json.dumps(data).encode("utf-8"),
                 status=res_status,
                 content_type="application/json; charset=utf-8",
             )
 
-        biosamples = []
-        for biosample in data:
-            bio_obj = {
-                'id': biosample['id'],
-                'description': biosample.get('description', 'NA'),
-                'sampled_tissue': biosample.get('sampled_tissue', {}).get('label', 'NA'),
-                'time_of_collection': render_age(biosample, "time_of_collection"),
-                'histological_diagnosis': biosample.get('histological_diagnosis', {}).get('label', 'NA'),
-                'extra_properties': f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
-                'created': biosample['created'],
-                'updated': biosample['updated'],
-                'individual': biosample['individual']
+        return generate_csv_response(self.file_name, self.get_columns(), self.get_dicts(data, renderer_context))
+
+
+class IndividualCSVRenderer(KatsuCSVRenderer):
+    file_name = "individuals.csv"
+
+    def get_columns(self) -> list[str]:
+        return ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+
+    def get_dicts(self, data, _renderer_context):
+        individuals = []
+
+        for individual in data["results"]:
+            ind_obj = {
+                "id": individual["id"],
+                "sex": individual.get("sex", None),
+                "date_of_birth": individual.get("date_of_birth", None),
+                "taxonomy": individual.get("taxonomy", {}).get("label", None),
+                "karyotypic_sex": individual["karyotypic_sex"],
+                "age": render_age(individual, "time_at_last_encounter"),
+                "diseases": None,
+                "created": individual["created"],
+                "updated": individual["updated"]
             }
-            biosamples.append(bio_obj)
+            if "phenopackets" in individual:
+                all_diseases = []
+                for phenopacket in individual["phenopackets"]:
+                    if "diseases" in phenopacket:
+                        # use ; because some disease terms might contain , in their label
+                        single_phenopacket_diseases = "; ".join(
+                            [
+                                f"{d['term']['label']} ({parse_onset(d['onset'])})"
+                                if "onset" in d else d["term"]["label"] for d in phenopacket["diseases"]
+                            ]
+                        )
+                        all_diseases.append(single_phenopacket_diseases)
+                if all_diseases:
+                    ind_obj["diseases"] = "; ".join(all_diseases)
+            individuals.append(ind_obj)
 
-        columns = biosamples[0].keys()
-        return generate_csv_response(biosamples, 'biosamples.csv', columns)
+        return individuals
 
 
-class ExperimentCSVRenderer(JSONRenderer):
-    media_type = 'text/csv'
-    format = 'csv'
+class BiosamplesCSVRenderer(KatsuCSVRenderer):
+    file_name = "biosamples.csv"
 
-    def render(self, data, media_type=None, renderer_context=None):
-        if not data:
-            return
+    def get_columns(self) -> list[str]:
+        return [
+            "id",
+            "description",
+            "sampled_tissue",
+            "time_of_collection",
+            "histological_diagnosis",
+            "extra_properties",
+            "created",
+            "updated",
+            "individual",
+        ]
 
-        experiments = []
-        for experiment in data:
-            exp_obj = {
-                'id': experiment.get('id'),
-                'study_type': experiment.get('study_type'),
-                'experiment_type': experiment.get('experiment_type', 'NA'),
-                'molecule': experiment.get('molecule'),
-                'library_strategy': experiment.get('library_strategy'),
-                'library_source': experiment.get('library_source', 'NA'),
-                'library_selection': experiment.get('library_selection'),
-                'library_layout': experiment.get('library_layout'),
-                'created': experiment.get('created'),
-                'updated': experiment.get('updated'),
-                'biosample': experiment.get('biosample'),
-                'individual_id': experiment.get('biosample_individual', {}).get('id', 'NA'),
+    def get_dicts(self, data, _renderer_context) -> list[dict]:
+        return [
+            {
+                "id": biosample["id"],
+                "description": biosample.get("description", "NA"),
+                "sampled_tissue": biosample.get("sampled_tissue", {}).get("label", "NA"),
+                "time_of_collection": render_age(biosample, "time_of_collection"),
+                "histological_diagnosis": biosample.get("histological_diagnosis", {}).get("label", "NA"),
+                "extra_properties": f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
+                "created": biosample["created"],
+                "updated": biosample["updated"],
+                "individual": biosample["individual"]
             }
-            experiments.append(exp_obj)
+            for biosample in data
+        ]
 
-        columns = experiments[0].keys()
-        return generate_csv_response(experiments, 'experiments.csv', columns)
+
+class ExperimentCSVRenderer(KatsuCSVRenderer):
+    file_name = "experiments.csv"
+    
+    def get_columns(self) -> list[str]:
+        return [
+            "id",
+            "study_type",
+            "experiment_type",
+            "molecule",
+            "library_strategy",
+            "library_source",
+            "library_selection",
+            "library_layout",
+            "created",
+            "updated",
+            "biosample",
+            "individual_id",
+        ]
+
+    def get_dicts(self, data, _renderer_context) -> list[dict]:
+        return [
+            {
+                "id": experiment.get("id"),
+                "study_type": experiment.get("study_type"),
+                "experiment_type": experiment.get("experiment_type", "NA"),
+                "molecule": experiment.get("molecule"),
+                "library_strategy": experiment.get("library_strategy"),
+                "library_source": experiment.get("library_source", "NA"),
+                "library_selection": experiment.get("library_selection"),
+                "library_layout": experiment.get("library_layout"),
+                "created": experiment.get("created"),
+                "updated": experiment.get("updated"),
+                "biosample": experiment.get("biosample"),
+                "individual_id": experiment.get("biosample_individual", {}).get("id", "NA"),
+            }
+            for experiment in data
+        ]
 
 
 class IndividualBentoSearchRenderer(JSONRenderer):
