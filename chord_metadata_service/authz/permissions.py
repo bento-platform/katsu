@@ -65,7 +65,9 @@ async def view_request_has_data_type_permission(
 
     p: Permission
 
-    if request.method == "GET":
+    if (p_to_check := getattr(request, "permission_to_check", None)) is not None:
+        p = p_to_check
+    elif request.method == "GET":
         p = P_QUERY_DATA
     elif request.method in ("POST", "PUT"):
         p = P_INGEST_DATA

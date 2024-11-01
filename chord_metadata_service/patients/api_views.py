@@ -2,6 +2,7 @@ import asyncio
 
 from adrf.views import APIView
 from asgiref.sync import async_to_sync
+from bento_lib.auth.permissions import P_QUERY_DATA
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
 from copy import deepcopy
@@ -149,10 +150,17 @@ class IndividualViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["GET", "POST"])
     def phenopackets(self, request: DrfRequest, *_args, **_kwargs):
+        # ensure we have permissions for getting/posting (both are reading data)
+        #  - override permission to check for POST request, as we're querying data not writing it here.
+        request.permission_to_check = P_QUERY_DATA
+        self.check_permissions(request)
+
+        scope = async_to_sync(get_request_discovery_scope)(request)
+
         individual = self.get_object()
 
         phenopackets = (
-            Phenopacket.objects
+            Phenopacket.get_model_scoped_queryset(scope)
             .filter(subject=individual)
             .prefetch_related(*PHENOPACKET_PREFETCH)
             .order_by("id")
