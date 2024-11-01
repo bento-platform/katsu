@@ -5,16 +5,16 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
-from . import constants as c
-from .. import models as m, serializers as s
-
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.restapi.tests import constants as restapi_c
+
+from . import constants as c
+from ..schemas import PHENOPACKET_SCHEMA
+from .. import models as m, serializers as s
 
 
 class CreateBiosampleTest(AuthzAPITestCase):
@@ -175,6 +175,13 @@ class CreatePhenotypicFeatureTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.PhenotypicFeature.objects.count(), 1)
 
+    def test_create_phenotypic_feature_forbidden(self):
+        """ POST a new phenotypic feature. """
+
+        response = self.one_no_authz_post(reverse("phenotypicfeatures-list"), json=self.valid_phenotypic_feature)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(m.PhenotypicFeature.objects.count(), 0)
+
     def test_modifier(self):
         serializer = s.PhenotypicFeatureSerializer(data=self.invalid_phenotypic_feature)
         self.assertEqual(serializer.is_valid(), False)
@@ -186,12 +193,17 @@ class CreateDiseaseTest(AuthzAPITestCase):
         self.disease = c.VALID_DISEASE_1
         self.invalid_disease = c.INVALID_DISEASE_2
 
-    def test_disease(self):
+    def test_create_disease(self):
         response = self.one_authz_post(reverse('diseases-list'), json=self.disease)
         serializer = s.DiseaseSerializer(data=self.disease)
         self.assertEqual(serializer.is_valid(), True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Disease.objects.count(), 1)
+
+    def test_create_disease_forbidden(self):
+        response = self.one_no_authz_post(reverse('diseases-list'), json=self.disease)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(m.Disease.objects.count(), 0)
 
     def test_invalid_disease(self):
         serializer = s.DiseaseSerializer(data=self.invalid_disease)
@@ -264,11 +276,22 @@ class CreateGenomicInterpretationTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
+    def test_genomic_interpretation_gene_forbidden(self):
+        response = self.one_no_authz_post(reverse('genomicinterpretations-list'), json=self.genomic_interpretation_gene)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(m.GenomicInterpretation.objects.count(), 0)
+
     def test_genomic_interpretation_variant(self):
         response = self.one_authz_post(
             reverse('genomicinterpretations-list'), json=self.genomic_interpretation_variant)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
+
+    def test_genomic_interpretation_variant_forbidden(self):
+        response = self.one_no_authz_post(
+            reverse('genomicinterpretations-list'), json=self.genomic_interpretation_variant)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(m.GenomicInterpretation.objects.count(), 0)
 
     def test_serializer(self):
         serializer = s.GenomicInterpretationSerializer(data=self.genomic_interpretation_gene)
@@ -287,6 +310,10 @@ class CreateDiagnosisTest(AuthzAPITestCase):
     def test_diagnosis(self):
         response = self.one_authz_post(reverse('diagnoses-list'), json=self.diagnosis)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_diagnosis_forbidden(self):
+        response = self.one_no_authz_post(reverse('diagnoses-list'), json=self.diagnosis)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_serializer(self):
         serializer = s.DiagnosisSerializer(data=self.diagnosis)
@@ -307,9 +334,13 @@ class CreateInterpretationTest(AuthzAPITestCase):
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease_ontology)).id
         self.interpretation = c.valid_interpretation(diagnosis=self.diagnosis)
 
-    def test_interpretation_list(self):
+    def test_interpretation_create(self):
         response = self.one_authz_post(reverse('interpretations-list'), json=self.interpretation)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_interpretation_create_forbidden(self):
+        response = self.one_no_authz_post(reverse('interpretations-list'), json=self.interpretation)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_interpretation_filter(self):
         # create interpretation with progress_status IN_PROGRESS
@@ -334,6 +365,16 @@ class CreateInterpretationTest(AuthzAPITestCase):
         )
         self.assertEqual(valid_response.data["count"], 1)
         self.assertEqual(valid_response.data['results'][0]['id'], self.interpretation['id'])
+
+        # forbidden get
+        forbidden_response = self.one_no_authz_get(
+            request_url,
+            data={
+                # Should return a single Interpretation
+                'progress_status': "IN_PROGRESS"
+            }
+        )
+        self.assertEqual(forbidden_response.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class GetPhenopacketsApiTest(AuthzAPITestCase):

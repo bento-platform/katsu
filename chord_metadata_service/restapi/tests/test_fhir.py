@@ -19,7 +19,6 @@ from chord_metadata_service.phenopackets.tests.constants import (
     valid_biosample_2,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.restapi.tests.utils import get_post_response
 
 
 # Tests for FHIR conversion functions
@@ -90,8 +89,6 @@ class FHIRIndividualTest(AuthzAPITestCase):
 
     def test_get_fhir_no_permissions(self):
         get_resp = self.one_no_authz_get('/api/individuals?format=fhir')
-        import sys
-        print(get_resp.json(), file=sys.stderr)
         self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
 

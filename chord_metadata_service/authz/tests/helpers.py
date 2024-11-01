@@ -2,7 +2,7 @@ import json
 
 from aioresponses import aioresponses
 from bento_lib.auth.types import EvaluationResultMatrix
-from rest_framework.test import APITestCase
+from rest_framework.test import APITransactionTestCase
 from typing import Literal
 
 from ..types import DataPermissionsDict
@@ -28,7 +28,7 @@ def mock_authz_eval_result(m: aioresponses, result: EvaluationResultMatrix | lis
 DTAccessLevel = Literal["none", "bool", "counts", "full"]
 
 
-class AuthzAPITestCase(APITestCase):
+class AuthzAPITestCase(APITransactionTestCase):
     # data type permissions: bool, counts, data
     dt_none_eval_res = [[False, False, False]]
     dt_bool_eval_res = [[True, False, False]]

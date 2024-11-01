@@ -85,6 +85,10 @@ class IndividualViewSet(viewsets.ModelViewSet):
     search_fields = ["sex"]
     lookup_value_regex = MODEL_ID_PATTERN
 
+    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
+    # permissions.
+    scope_enabled = True
+
     @async_to_sync
     async def get_queryset(self):
         scope = await get_request_discovery_scope(self.request)

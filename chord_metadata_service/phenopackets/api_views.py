@@ -3,13 +3,13 @@ from bento_lib.auth.permissions import P_QUERY_DATA
 from bento_lib.responses import errors
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status, viewsets
+from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission, BentoAllowAny
+from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission, BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
@@ -139,12 +139,7 @@ class BiosampleBatchViewSet(viewsets.ModelViewSet):
         IndividualBentoSearchRenderer,
     )
     content_negotiation_class = FormatInPostContentNegotiation
-
-    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
-    # permissions.
-    scope_enabled = True
-
-    # TODO: this shouldn't be its own separate viewset maybe...
+    permission_classes = (BentoDeferToHandler,)
 
     @async_to_sync
     async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
@@ -166,6 +161,11 @@ class BiosampleBatchViewSet(viewsets.ModelViewSet):
         return await authz_middleware.async_evaluate_one(
             request, scope.as_authz_resource(data_type=DATA_TYPE_PHENOPACKET), P_QUERY_DATA, mark_authz_done=True
         )
+
+    def list(self, request, *args, **kwargs):
+        if not self.check_batch_permissions(request):
+            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+        return super().list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """

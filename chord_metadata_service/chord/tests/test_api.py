@@ -222,7 +222,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_",
         }
 
-        r = self.client.post("/api/resources", data=json.dumps(resource), content_type="application/json")
+        r = self.one_authz_post("/api/resources", json=resource)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
         r = self.one_authz_post(

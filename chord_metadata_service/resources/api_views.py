@@ -2,6 +2,7 @@ from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from django_filters.rest_framework import DjangoFilterBackend
 
+from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
@@ -25,3 +26,5 @@ class ResourceViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = ResourceFilter
+
+    permission_classes = (BentoPhenopacketDataPermission,)

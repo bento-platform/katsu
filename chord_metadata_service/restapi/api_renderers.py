@@ -43,8 +43,11 @@ class FHIRRenderer(JSONRenderer):
     format = 'fhir'
 
     def render(self, data, media_type=None, renderer_context=None):
-        # TODO: should this happen at all?
-        if not data or "detail" in data and isinstance(data["detail"], ErrorDetail):
+        if (
+            not data
+            or ("detail" in data and isinstance(data["detail"], ErrorDetail))
+            or (renderer_context and renderer_context["response"].status_code != 200)
+        ):
             return super().render(data, media_type, renderer_context)
 
         fhir_datatype_plural = getattr(
@@ -67,7 +70,7 @@ class PhenopacketsRenderer(CamelCaseJSONRenderer):
     format = 'phenopackets'
 
     def render(self, data, media_type=None, renderer_context=None):
-        return super(PhenopacketsRenderer, self).render(data, media_type, renderer_context)
+        return super().render(data, media_type, renderer_context)
 
 
 class JSONLDDatasetRenderer(PhenopacketsRenderer):
@@ -80,7 +83,7 @@ class JSONLDDatasetRenderer(PhenopacketsRenderer):
         else:
             json_obj = dataset_to_jsonld(data)
 
-        return super(JSONLDDatasetRenderer, self).render(json_obj, media_type, renderer_context)
+        return super().render(json_obj, media_type, renderer_context)
 
 
 class RDFDatasetRenderer(PhenopacketsRenderer):
@@ -135,7 +138,7 @@ class IndividualCSVRenderer(JSONRenderer):
     format = 'csv'
 
     def render(self, data, media_type=None, renderer_context=None):
-        if 'results' not in data or not data['results']:
+        if not data or 'results' not in data or not data['results']:
             return
 
         individuals = []

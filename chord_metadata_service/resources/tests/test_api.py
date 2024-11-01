@@ -13,10 +13,15 @@ class CreateResourceTest(AuthzAPITestCase):
         self.resource = VALID_RESOURCE_2
         self.duplicate_resource = DUPLICATE_RESOURCE_3
 
-    def test_resource(self):
+    def test_create_resource(self):
         response = self.one_authz_post(reverse('resource-list'), json=self.resource)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Resource.objects.count(), 1)
+
+    def test_create_resource_forbidden(self):
+        response = self.one_no_authz_post(reverse('resource-list'), json=self.resource)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Resource.objects.count(), 0)
 
     def test_serializer(self):
         serializer = ResourceSerializer(data=self.resource)

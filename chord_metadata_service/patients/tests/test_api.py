@@ -34,7 +34,7 @@ CONFIG_PUBLIC_TEST_NO_THRESHOLD: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TES
 CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
 
 
-class CreateIndividualTest(APITestCase):
+class CreateIndividualTest(AuthzAPITestCase):
     """ Test module for creating an Individual. """
 
     def setUp(self):
@@ -45,19 +45,19 @@ class CreateIndividualTest(APITestCase):
     def test_create_individual(self):
         """ POST a new individual. """
 
-        response = self.client.post(
-            reverse('individuals-list'),
-            data=json.dumps(self.valid_payload),
-            content_type='application/json'
-        )
+        response = self.one_authz_post(reverse('individuals-list'), json=self.valid_payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Individual.objects.count(), 1)
         self.assertEqual(Individual.objects.get().id, 'patient:1')
 
+    def test_create_individual_forbidden(self):
+        response = self.one_no_authz_post(reverse('individuals-list'), json=self.valid_payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_create_invalid_individual(self):
         """ POST a new individual with invalid data. """
 
-        invalid_response = self.client.post(
+        invalid_response = self.one_authz_post(
             reverse('individuals-list'),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
@@ -66,7 +66,7 @@ class CreateIndividualTest(APITestCase):
         self.assertEqual(Individual.objects.count(), 0)
 
 
-class UpdateIndividualTest(APITestCase):
+class UpdateIndividualTest(AuthzAPITestCase):
     """ Test module for updating an existing Individual record. """
 
     def setUp(self):
@@ -96,31 +96,30 @@ class UpdateIndividualTest(APITestCase):
     def test_update_individual(self):
         """ PUT new data in an existing Individual record. """
 
-        response = self.client.put(
-            reverse(
-                'individuals-detail',
-                kwargs={'pk': self.individual_one.id}
-            ),
-            data=json.dumps(self.put_valid_payload),
-            content_type='application/json'
+        response = self.one_authz_put(
+            reverse('individuals-detail', kwargs={'pk': self.individual_one.id}),
+            json=self.put_valid_payload
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_individual_forbidden(self):
+        response = self.one_no_authz_put(
+            reverse('individuals-detail', kwargs={'pk': self.individual_one.id}),
+            json=self.put_valid_payload
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_invalid_individual(self):
         """ PUT new invalid data in an existing Individual record. """
 
-        response = self.client.put(
-            reverse(
-                'individuals-detail',
-                kwargs={'pk': self.individual_one.id}
-            ),
-            data=json.dumps(self.invalid_payload),
-            content_type='application/json'
+        response = self.one_authz_put(
+            reverse('individuals-detail', kwargs={'pk': self.individual_one.id}),
+            json=self.invalid_payload,
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteIndividualTest(APITestCase):
+class DeleteIndividualTest(AuthzAPITestCase):
     """ Test module for deleting an existing Individual record. """
 
     def setUp(self):
@@ -129,34 +128,34 @@ class DeleteIndividualTest(APITestCase):
     def test_delete_individual(self):
         """ DELETE an existing Individual record. """
 
-        response = self.client.delete(
-            reverse(
-                'individuals-detail',
-                kwargs={'pk': self.individual_one.id}
-            )
+        response = self.one_authz_delete(
+            reverse('individuals-detail', kwargs={'pk': self.individual_one.id})
         )
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_individual_forbidden(self):
+        response = self.one_no_authz_delete(
+            reverse('individuals-detail', kwargs={'pk': self.individual_one.id})
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_non_existing_individual(self):
         """ DELETE a non-existing Individual record. """
 
-        response = self.client.delete(
-            reverse(
-                'individuals-detail',
-                kwargs={'pk': 'patient:what'}
-            )
+        response = self.one_authz_delete(
+            reverse('individuals-detail', kwargs={'pk': 'patient:what'})
         )
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class IndividualCSVRendererTest(APITestCase):
+class IndividualCSVRendererTest(AuthzAPITestCase):
     """ Test csv export for Individuals. """
 
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
     def test_csv_export(self):
-        get_resp = self.client.get('/api/individuals?format=csv')
+        get_resp = self.one_authz_get('/api/individuals?format=csv')
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         content = get_resp.content.decode('utf-8')
         cvs_reader = csv.reader(io.StringIO(content))
@@ -167,9 +166,20 @@ class IndividualCSVRendererTest(APITestCase):
                        'age', 'diseases', 'created', 'updated']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
+    def test_csv_export_forbidden(self):
+        get_resp = self.one_no_authz_get('/api/individuals?format=csv')
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
-class IndividualWithPhenopacketSearchTest(APITestCase):
+
+class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
     """ Test for api/individuals?search= """
+
+    search_test_params = (
+        ("search=P49Y", 1, None),
+        ("search=NCBITaxon:9606", 2, None),
+        # 5 fields in the bento search response:
+        ("search=P49Y&format=bento_search_result", 1, 5),
+    )
 
     def setUp(self):
         self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
@@ -179,31 +189,30 @@ class IndividualWithPhenopacketSearchTest(APITestCase):
             **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
         )
 
-    def test_search(self):  # test full-text search
-        get_resp_1 = self.client.get('/api/individuals?search=P49Y')
-        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
-        response_obj_1 = get_resp_1.json()
-        self.assertEqual(len(response_obj_1['results']), 1)
+    def test_search(self):  # test full-text search (standard + bento search format)
+        for params in self.search_test_params:
+            with self.subTest(params=params):
+                res = self.one_authz_get(f"/api/individuals?{params[0]}")
+                self.assertEqual(res.status_code, status.HTTP_200_OK)
+                res_data = res.json()
+                self.assertEqual(len(res_data["results"]), params[1])
+                if (n_keys := params[2]) is not None:
+                    self.assertEqual(len(res_data["results"][0]), n_keys)
 
-        get_resp_2 = self.client.get('/api/individuals?search=NCBITaxon:9606')
-        self.assertEqual(get_resp_2.status_code, status.HTTP_200_OK)
-        response_obj_2 = get_resp_2.json()
-        self.assertEqual(len(response_obj_2['results']), 2)
-
-    def test_search_bento_search_format(self):  # test full-text search - bento search result format
-        get_resp_1 = self.client.get('/api/individuals?search=P49Y&format=bento_search_result')
-        self.assertEqual(get_resp_1.status_code, status.HTTP_200_OK)
-        response_obj_1 = get_resp_1.json()
-        self.assertEqual(len(response_obj_1['results']), 1)
-        self.assertEqual(len(response_obj_1['results'][0]), 5)  # 5 fields in the bento search response
+    def test_search_forbidden(self):
+        for params in self.search_test_params:
+            with self.subTest(params=params):
+                res = self.one_no_authz_get(f"/api/individuals?{params[0]}")
+                self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_individual_phenopackets(self):
-        get_resp = self.client.get(f"/api/individuals/{self.individual_one.id}/phenopackets")
+        get_resp = self.one_authz_get(f"/api/individuals/{self.individual_one.id}/phenopackets")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         response_obj_1 = get_resp.json()
         self.assertEqual(len(response_obj_1), 1)  # 1 phenopacket for individual
 
-        post_resp = self.client.post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
+    def test_individual_phenopackets_attachment(self):
+        post_resp = self.one_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
         self.assertEqual(post_resp.status_code, status.HTTP_200_OK)
         self.assertIn("attachment; filename=", post_resp.headers.get("Content-Disposition", ""))
         response_obj_2 = post_resp.json()
