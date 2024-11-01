@@ -10,7 +10,6 @@ from . import constants as c
 from .. import models as m, serializers as s
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
-from chord_metadata_service.restapi.tests.utils import get_post_response
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
@@ -122,14 +121,14 @@ class BatchBiosamplesCSVTest(AuthzAPITestCase):
             'format': 'csv'
         }
 
-    def test_get_all_biosamples(self):
+    def test_get_all_biosamples_batch(self):
         response = self.one_authz_get(reverse(self.view))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 1),
+        self.assertEqual(len(response.data['results']), 1)
 
-    def test_get_all_biosamples_forbidden(self):
-        response = self.one_authz_get(reverse(self.view))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN),
+    def test_get_all_biosamples_batch_forbidden(self):
+        response = self.one_no_authz_get(reverse(self.view))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_biosamples_with_ids(self):
         response = self.one_authz_post(reverse(self.view), json=self.post_biosamples_body)
@@ -146,13 +145,13 @@ class BatchBiosamplesCSVTest(AuthzAPITestCase):
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
     def test_post_biosamples_with_ids_forbidden(self):
-        response = self.one_authz_post(reverse(self.view), json=self.post_biosamples_body)
+        response = self.one_no_authz_post(reverse(self.view), json=self.post_biosamples_body)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # TODO: fine-grain authz tests
 
 
-class CreatePhenotypicFeatureTest(APITestCase):
+class CreatePhenotypicFeatureTest(AuthzAPITestCase):
 
     def setUp(self):
         valid_payload = c.valid_phenotypic_feature()
@@ -172,7 +171,7 @@ class CreatePhenotypicFeatureTest(APITestCase):
     def test_create_phenotypic_feature(self):
         """ POST a new phenotypic feature. """
 
-        response = get_post_response('phenotypicfeatures-list', self.valid_phenotypic_feature)
+        response = self.one_authz_post(reverse("phenotypicfeatures-list"), json=self.valid_phenotypic_feature)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.PhenotypicFeature.objects.count(), 1)
 
@@ -181,14 +180,14 @@ class CreatePhenotypicFeatureTest(APITestCase):
         self.assertEqual(serializer.is_valid(), False)
 
 
-class CreateDiseaseTest(APITestCase):
+class CreateDiseaseTest(AuthzAPITestCase):
 
     def setUp(self):
         self.disease = c.VALID_DISEASE_1
         self.invalid_disease = c.INVALID_DISEASE_2
 
     def test_disease(self):
-        response = get_post_response('diseases-list', self.disease)
+        response = self.one_authz_post(reverse('diseases-list'), json=self.disease)
         serializer = s.DiseaseSerializer(data=self.disease)
         self.assertEqual(serializer.is_valid(), True)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -246,7 +245,7 @@ class CreatePhenopacketTest(AuthzAPITestCase):
         self.assertEqual(serializer.is_valid(), True)
 
 
-class CreateGenomicInterpretationTest(APITestCase):
+class CreateGenomicInterpretationTest(AuthzAPITestCase):
 
     def setUp(self):
         gene_description = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
@@ -261,12 +260,13 @@ class CreateGenomicInterpretationTest(APITestCase):
             variant_interpretation=variant_interpretation.id)
 
     def test_genomic_interpretation_gene(self):
-        response = get_post_response('genomicinterpretations-list', self.genomic_interpretation_gene)
+        response = self.one_authz_post(reverse('genomicinterpretations-list'), json=self.genomic_interpretation_gene)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
     def test_genomic_interpretation_variant(self):
-        response = get_post_response('genomicinterpretations-list', self.genomic_interpretation_variant)
+        response = self.one_authz_post(
+            reverse('genomicinterpretations-list'), json=self.genomic_interpretation_variant)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
@@ -278,14 +278,14 @@ class CreateGenomicInterpretationTest(APITestCase):
         self.assertEqual(serializer.is_valid(), True)
 
 
-class CreateDiagnosisTest(APITestCase):
+class CreateDiagnosisTest(AuthzAPITestCase):
 
     def setUp(self):
         self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
         self.diagnosis = c.valid_diagnosis(self.disease_ontology, "interpretation:unique_id")
 
     def test_diagnosis(self):
-        response = get_post_response('diagnoses-list', self.diagnosis)
+        response = self.one_authz_post(reverse('diagnoses-list'), json=self.diagnosis)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_serializer(self):
@@ -293,7 +293,7 @@ class CreateDiagnosisTest(APITestCase):
         self.assertEqual(serializer.is_valid(), True)
 
 
-class CreateInterpretationTest(APITestCase):
+class CreateInterpretationTest(AuthzAPITestCase):
 
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
@@ -308,15 +308,15 @@ class CreateInterpretationTest(APITestCase):
         self.interpretation = c.valid_interpretation(diagnosis=self.diagnosis)
 
     def test_interpretation_list(self):
-        response = get_post_response('interpretations-list', self.interpretation)
+        response = self.one_authz_post(reverse('interpretations-list'), json=self.interpretation)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_interpretation_filter(self):
         # create interpretation with progress_status IN_PROGRESS
-        _ = get_post_response('interpretations-list', self.interpretation)
+        self.one_authz_post(reverse('interpretations-list'), json=self.interpretation)
 
         request_url = reverse('interpretations-list')
-        empty_response = self.client.get(
+        empty_response = self.one_authz_get(
             request_url,
             data={
                 # Should return an empty list
@@ -325,7 +325,7 @@ class CreateInterpretationTest(APITestCase):
         )
         self.assertEqual(empty_response.data["count"], 0)
 
-        valid_response = self.client.get(
+        valid_response = self.one_authz_get(
             request_url,
             data={
                 # Should return a single Interpretation
@@ -410,6 +410,7 @@ class GetPhenopacketsApiTest(AuthzAPITestCase):
 
 
 class PhenopacketSchema(APITestCase):
+    # No authz needed for these endpoints
 
     def test_get_phenopacket_schema(self):
         response = self.client.get("/api/schemas/phenopacket")

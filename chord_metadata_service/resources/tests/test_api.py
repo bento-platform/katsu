@@ -1,20 +1,20 @@
 from rest_framework import status
-from rest_framework.test import APITestCase
-from chord_metadata_service.restapi.tests.utils import get_post_response
+from rest_framework.reverse import reverse
 
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from ..models import Resource
 from ..serializers import ResourceSerializer
 from .constants import VALID_RESOURCE_2, DUPLICATE_RESOURCE_3
 
 
-class CreateResourceTest(APITestCase):
+class CreateResourceTest(AuthzAPITestCase):
 
     def setUp(self):
         self.resource = VALID_RESOURCE_2
         self.duplicate_resource = DUPLICATE_RESOURCE_3
 
     def test_resource(self):
-        response = get_post_response('resource-list', self.resource)
+        response = self.one_authz_post(reverse('resource-list'), json=self.resource)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Resource.objects.count(), 1)
 
