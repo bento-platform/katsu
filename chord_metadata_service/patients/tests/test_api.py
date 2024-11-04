@@ -224,7 +224,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         self.assertEqual(len(response_obj_2), 1)  # 1 phenopacket for individual, still
 
     def test_individual_phenopackets_attachment_forbidden(self):
-        post_resp = self.one_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
+        post_resp = self.one_no_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
         self.assertEqual(post_resp.status_code, status.HTTP_403_FORBIDDEN)
 
 
