@@ -147,6 +147,7 @@ class BatchBiosamplesCSVTest(AuthzAPITestCase):
     def test_post_biosamples_with_ids_forbidden(self):
         response = self.one_no_authz_post(reverse(self.view), json=self.post_biosamples_body)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # TODO: test content
 
     # TODO: fine-grain authz tests
 

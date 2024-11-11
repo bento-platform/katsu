@@ -21,6 +21,8 @@ class ResourceViewSet(BentoAuthzModelViewSet):
 
     """
 
+    # TODO: scoping
+
     data_type = DATA_TYPE_PHENOPACKET
 
     queryset = Resource.objects.all().order_by("id")
@@ -30,3 +32,4 @@ class ResourceViewSet(BentoAuthzModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ResourceFilter
 
+    # TODO: either phenopackets or experiments permissions... multiple data types?
