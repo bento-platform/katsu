@@ -2,6 +2,8 @@ from django.urls import reverse
 from jsonschema.validators import Draft7Validator
 
 from django.test import TestCase
+
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
 import csv
@@ -20,7 +22,7 @@ EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON = load_local_json("example_experiments.j
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON = load_local_json("example_phenopackets.json")
 
 
-class GetExperimentsAppApisTest(APITestCase):
+class GetExperimentsAppApisTest(AuthzAPITestCase):
     """
     Test Experiments app APIs.
     """
@@ -46,81 +48,87 @@ class GetExperimentsAppApisTest(APITestCase):
         self.assertEqual(len(response_data["results"]), assert_len)
 
     def test_get_experiments(self):
-        response = self.client.get('/api/experiments')
+        response = self.one_authz_get('/api/experiments')
         self.assert_response_200_and_length(response, 2)
 
+    def test_get_experiments_forbidden(self):
+        response = self.one_no_authz_get('/api/experiments')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_get_experiment_one(self):
-        response = self.client.get('/api/experiments/katsu.experiment:1')
+        response = self.one_authz_get('/api/experiments/katsu.experiment:1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(response_data['id'], 'katsu.experiment:1')
 
+    def test_get_experiment_one_forbidden(self):
+        response = self.one_no_authz_get('/api/experiments/katsu.experiment:1')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_get_experiment_schema(self):
-        response = self.client.get('/api/schemas/experiment')
+        # endpoint is open to everyone
+        response = self.one_authz_get('/api/schemas/experiment')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         Draft7Validator.check_schema(response_data)
 
     def test_filter_experiments(self):
-        response = self.client.get('/api/experiments?study_type=epigenetics')
-        self.assert_response_200_and_length(response, 0)
+        filter_params = [
+            ("study_type=epigenetics", 0),
+            (f"datasets={self.d1_id}", 2),
+            (f"datasets={self.d2_id}", 0),
+            (f"datasets={self.d2_id},{self.d1_id}", 2),
+        ]
 
-    def test_filter_experiments_by_dataset_1(self):
-        response = self.client.get(f'/api/experiments?datasets={self.d1_id}')
-        self.assert_response_200_and_length(response, 2)
-
-    def test_filter_experiments_by_dataset_2(self):
-        response = self.client.get(f'/api/experiments?datasets={self.d2_id}')
-        self.assert_response_200_and_length(response, 0)
-
-    def test_filter_experiments_by_datasets_list(self):
-        response = self.client.get(f'/api/experiments?datasets={self.d2_id},{self.d1_id}')
-        self.assert_response_200_and_length(response, 2)
+        for params in filter_params:
+            with self.subTest(params=params):
+                response = self.one_authz_get(f"/api/experiments?{params[0]}")
+                self.assert_response_200_and_length(response, params[1])
 
     def test_get_experiment_results(self):
-        response = self.client.get('/api/experimentresults')
+        response = self.one_authz_get('/api/experimentresults')
         self.assert_response_200_and_length(response, 4)
 
     def test_filter_experiment_results(self):
-        response = self.client.get('/api/experimentresults?file_format=vcf')
+        response = self.one_authz_get('/api/experimentresults?file_format=vcf')
         self.assert_response_200_and_length(response, 2)
 
     def test_filter_experiment_results_url(self):
-        response = self.client.get('/api/experimentresults?url=example.org')
+        response = self.one_authz_get('/api/experimentresults?url=example.org')
         self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_indices(self):
-        response = self.client.get('/api/experimentresults?indices=tabix')
+        response = self.one_authz_get('/api/experimentresults?indices=tabix')
         self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_by_dataset_1(self):
-        response = self.client.get(f'/api/experimentresults?datasets={self.d1_id}')
+        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d1_id}')
         self.assert_response_200_and_length(response, 4)
 
     def test_filter_experiment_results_by_dataset_2(self):
-        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id}')
+        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id}')
         self.assert_response_200_and_length(response, 0)
 
     def test_filter_experiment_results_by_datasets_list(self):
-        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}')
+        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}')
         self.assert_response_200_and_length(response, 4)
 
     def test_combine_filters_experiment_results(self):
-        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}&file_format=cram')
+        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}&file_format=cram')
         self.assert_response_200_and_length(response, 2)
 
     def test_combine_filters_experiment_results_2(self):
         # there are no experiments in dataset_2
-        response = self.client.get(f'/api/experimentresults?datasets={self.d2_id}&file_format=vcf')
+        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id}&file_format=vcf')
         self.assert_response_200_and_length(response, 0)
 
     def test_post_experiment_batch_no_data(self):
-        response = self.client.post('/api/batch/experiments', format='json')
+        response = self.one_authz_get('/api/batch/experiments', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 2)
 
     def test_post_experiment_batch_with_ids(self):
-        response = self.client.post('/api/batch/experiments', {'id': ['katsu.experiment:1']}, format='json')
+        response = self.one_authz_get('/api/batch/experiments', {'id': ['katsu.experiment:1']}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data), 1)

@@ -2,7 +2,7 @@ import asyncio
 
 from adrf.views import APIView
 from asgiref.sync import async_to_sync
-from bento_lib.auth.permissions import P_QUERY_DATA
+from bento_lib.auth.permissions import Permission, P_QUERY_DATA
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
 from copy import deepcopy
@@ -21,7 +21,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission
+from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
@@ -61,7 +61,7 @@ from .serializers import IndividualSerializer
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-class IndividualViewSet(viewsets.ModelViewSet):
+class IndividualViewSet(BentoAuthzModelViewSet):
     """
     get:
     Return a list of all existing individuals
@@ -70,6 +70,7 @@ class IndividualViewSet(viewsets.ModelViewSet):
     Create a new individual
 
     """
+
     serializer_class = IndividualSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = (
@@ -79,16 +80,22 @@ class IndividualViewSet(viewsets.ModelViewSet):
         IndividualCSVRenderer,
         IndividualBentoSearchRenderer,
     )
-    permission_classes = (BentoPhenopacketDataPermission,)
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = IndividualFilter
     ordering_fields = ["id"]
     search_fields = ["sex"]
     lookup_value_regex = MODEL_ID_PATTERN
 
+    data_type = dts.DATA_TYPE_PHENOPACKET
     # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
     # permissions.
     scope_enabled = True
+
+    def permission_from_request(self, request: DrfRequest) -> Permission | None:
+        if self.action == "phenopackets":
+            # GET or POST; either way, we're querying data for this action
+            return P_QUERY_DATA
+        return super().permission_from_request(request)
 
     @async_to_sync
     async def get_queryset(self):
@@ -150,11 +157,6 @@ class IndividualViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["GET", "POST"])
     def phenopackets(self, request: DrfRequest, *_args, **_kwargs):
-        # ensure we have permissions for getting/posting (both are reading data)
-        #  - override permission to check for POST request, as we're querying data not writing it here.
-        request.permission_to_check = P_QUERY_DATA
-        self.check_permissions(request)
-
         scope = async_to_sync(get_request_discovery_scope)(request)
 
         individual = self.get_object()

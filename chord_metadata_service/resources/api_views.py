@@ -1,8 +1,8 @@
-from rest_framework import viewsets
 from rest_framework.settings import api_settings
 from django_filters.rest_framework import DjangoFilterBackend
 
-from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission
+from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
@@ -11,7 +11,7 @@ from .serializers import ResourceSerializer
 from .filters import ResourceFilter
 
 
-class ResourceViewSet(viewsets.ModelViewSet):
+class ResourceViewSet(BentoAuthzModelViewSet):
     """
     get:
     Return a list of all existing resources
@@ -20,6 +20,9 @@ class ResourceViewSet(viewsets.ModelViewSet):
     Create a new resource
 
     """
+
+    data_type = DATA_TYPE_PHENOPACKET
+
     queryset = Resource.objects.all().order_by("id")
     serializer_class = ResourceSerializer
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
@@ -27,4 +30,3 @@ class ResourceViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ResourceFilter
 
-    permission_classes = (BentoPhenopacketDataPermission,)

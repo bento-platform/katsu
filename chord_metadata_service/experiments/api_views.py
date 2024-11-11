@@ -7,6 +7,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
     FHIRRenderer,
@@ -29,6 +31,7 @@ __all__ = [
     "get_experiment_schema",
 ]
 
+
 EXPERIMENT_SELECT_REL = (
     "instrument",
 )
@@ -39,7 +42,7 @@ EXPERIMENT_PREFETCH = (
 )
 
 
-class ExperimentViewSet(viewsets.ModelViewSet):
+class ExperimentViewSet(BentoAuthzModelViewSet):
     """
     get:
     Return a list of all existing experiments
@@ -47,6 +50,9 @@ class ExperimentViewSet(viewsets.ModelViewSet):
     post:
     Create a new experiment
     """
+
+    data_type = DATA_TYPE_EXPERIMENT
+    scope_enabled = True
 
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
@@ -124,10 +130,6 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExperimentResultFilter
-
-    # Cache page for the requested url for 2 hours
-    def dispatch(self, *args, **kwargs):
-        return super(ExperimentResultViewSet, self).dispatch(*args, **kwargs)
 
 
 @extend_schema(

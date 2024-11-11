@@ -9,7 +9,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoPhenopacketDataPermission, BentoAllowAny, BentoDeferToHandler
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
+from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
@@ -26,10 +27,11 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phen
 from . import models as m, serializers as s, filters as f
 
 
-class PhenopacketsModelViewSet(viewsets.ModelViewSet):
+class PhenopacketsModelViewSet(BentoAuthzModelViewSet):
+    data_type = DATA_TYPE_PHENOPACKET
+
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
-    permission_classes = (BentoPhenopacketDataPermission,)
 
 
 class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
