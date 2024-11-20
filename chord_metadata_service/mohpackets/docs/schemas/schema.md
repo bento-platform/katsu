@@ -10,14 +10,14 @@ Base URLs:
 - HTTP Authentication, scheme: bearer
 
 * API Key (IngestTokenAuth)
-    - Parameter Name: **X-Service-Token**, in: header.
+    - Parameter Name: **X-Service-Token**, in: header. 
 
 - HTTP Authentication, scheme: bearer
 
 - HTTP Authentication, scheme: bearer
 
 * API Key (ServiceTokenAuth)
-    - Parameter Name: **X-Service-Token**, in: header.
+    - Parameter Name: **X-Service-Token**, in: header. 
 
 <h1 id="moh-service-api-default">Default</h1>
 

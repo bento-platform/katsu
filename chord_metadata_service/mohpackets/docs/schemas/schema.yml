@@ -6751,24 +6751,6 @@ paths:
       summary: Discover Donors
       tags:
       - discovery
-  /v3/discovery/overview/program_count/:
-    get:
-      description: Return the number of programs in the database.
-      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_program_count
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: integer
-                title: Response
-                type: object
-          description: OK
-      summary: Discover Program Count
-      tags:
-      - overview
   /v3/discovery/overview/diagnosis_age_count/:
     get:
       description: Return the count for age of diagnosis by calculating the date of
@@ -6858,6 +6840,24 @@ paths:
                 type: array
           description: OK
       summary: Discover Primary Site Count
+      tags:
+      - overview
+  /v3/discovery/overview/program_count/:
+    get:
+      description: Return the number of programs in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_program_count
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: integer
+                title: Response
+                type: object
+          description: OK
+      summary: Discover Program Count
       tags:
       - overview
   /v3/discovery/overview/treatment_type_count/:
