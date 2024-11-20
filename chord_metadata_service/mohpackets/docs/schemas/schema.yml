@@ -570,10 +570,10 @@ components:
       type: string
     DonorExplorerFilterSchema:
       properties:
-        exclude_cohorts:
+        exclude_programs:
           items:
             type: string
-          title: Exclude Cohorts
+          title: Exclude Programs
           type: array
         primary_site:
           items:
@@ -2441,7 +2441,7 @@ components:
       - previous_page
       title: PagedTreatmentModelSchema
       type: object
-    PatientPerCohortSchema:
+    PatientPerProgramSchema:
       properties:
         patients_count:
           title: Patients Count
@@ -2452,7 +2452,7 @@ components:
       required:
       - program_id
       - patients_count
-      title: PatientPerCohortSchema
+      title: PatientPerProgramSchema
       type: object
     PercentCellsRangeEnum:
       enum:
@@ -5918,12 +5918,12 @@ paths:
           title: Systemic Therapy Drug Name
           type: array
       - in: query
-        name: exclude_cohorts
+        name: exclude_programs
         required: false
         schema:
           items:
             type: string
-          title: Exclude Cohorts
+          title: Exclude Programs
           type: array
       - in: query
         name: page
@@ -6729,9 +6729,9 @@ paths:
       - authorized
   /v3/discovery/donors/:
     get:
-      description: 'Return the number of donors per cohort in the database.
+      description: 'Return the number of donors per program in the database.
 
-        Note: This function is identical to `discover_patients_per_cohort`
+        Note: This function is identical to `discover_patients_per_program`
 
         and is here because the frontend ingest uses it. It''s probably best
 
@@ -6751,10 +6751,10 @@ paths:
       summary: Discover Donors
       tags:
       - discovery
-  /v3/discovery/overview/cohort_count/:
+  /v3/discovery/overview/program_count/:
     get:
-      description: Return the number of cohorts in the database.
-      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_cohort_count
+      description: Return the number of programs in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_program_count
       parameters: []
       responses:
         '200':
@@ -6766,7 +6766,7 @@ paths:
                 title: Response
                 type: object
           description: OK
-      summary: Discover Cohort Count
+      summary: Discover Program Count
       tags:
       - overview
   /v3/discovery/overview/diagnosis_age_count/:
@@ -6824,10 +6824,10 @@ paths:
       summary: Discover Individual Count
       tags:
       - overview
-  /v3/discovery/overview/patients_per_cohort/:
+  /v3/discovery/overview/patients_per_program/:
     get:
-      description: Return the number of patients per cohort in the database.
-      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort
+      description: Return the number of patients per program in the database.
+      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_program
       parameters: []
       responses:
         '200':
@@ -6835,11 +6835,11 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/PatientPerCohortSchema'
+                  $ref: '#/components/schemas/PatientPerProgramSchema'
                 title: Response
                 type: array
           description: OK
-      summary: Discover Patients Per Cohort
+      summary: Discover Patients Per Program
       tags:
       - overview
   /v3/discovery/overview/primary_site_count/:
@@ -6946,12 +6946,12 @@ paths:
           title: Systemic Therapy Drug Name
           type: array
       - in: query
-        name: exclude_cohorts
+        name: exclude_programs
         required: false
         schema:
           items:
             type: string
-          title: Exclude Cohorts
+          title: Exclude Programs
           type: array
       responses:
         '200':

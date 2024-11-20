@@ -23,7 +23,7 @@ from chord_metadata_service.mohpackets.tests.factories import (
 class OverviewTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
-        self.patients_per_cohort_url = "/v3/discovery/overview/patients_per_cohort/"
+        self.patients_per_program_url = "/v3/discovery/overview/patients_per_program/"
         self.individual_count_url = "/v3/discovery/overview/individual_count/"
         self.gender_count_url = "/v3/discovery/overview/gender_count/"
         self.primary_site_count_url = "/v3/discovery/overview/primary_site_count/"
@@ -94,16 +94,16 @@ class OverviewTestCase(BaseTestCase):
         self.assertLess(len(donors), 5)
         self.assertEqual(individual_count_value, "<5")
 
-    def test_patients_per_cohort_api_censoring(self):
+    def test_patients_per_program_api_censoring(self):
         """
-        Verify the censoring of patient counts per cohort endpoint.
+        Verify the censoring of patient counts per program endpoint.
 
         Testing Strategy:
         - Program 0 has 7, Program 1 has 2 donors
-        - Send a request to patients_per_cohort endpoint.
+        - Send a request to patients_per_program endpoint.
         - Ensure that the response does not reveal the number when it is less than 5 donors.
         """
-        response = self.client.get(self.patients_per_cohort_url)
+        response = self.client.get(self.patients_per_program_url)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         for item in response.json():
             patients_count_value = item["patients_count"]

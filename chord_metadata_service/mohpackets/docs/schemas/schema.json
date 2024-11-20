@@ -66,7 +66,7 @@
                         }
                     }
                 },
-                "description": "Return the number of donors per cohort in the database.\nNote: This function is identical to `discover_patients_per_cohort`\nand is here because the frontend ingest uses it. It's probably best\nto clean up later.",
+                "description": "Return the number of donors per program in the database.\nNote: This function is identical to `discover_patients_per_program`\nand is here because the frontend ingest uses it. It's probably best\nto clean up later.",
                 "tags": [
                     "discovery"
                 ]
@@ -96,10 +96,10 @@
                 ]
             }
         },
-        "/v3/discovery/overview/cohort_count/": {
+        "/v3/discovery/overview/program_count/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_discovery_discover_cohort_count",
-                "summary": "Discover Cohort Count",
+                "operationId": "chord_metadata_service_mohpackets_apis_discovery_discover_program_count",
+                "summary": "Discover Program Count",
                 "parameters": [],
                 "responses": {
                     "200": {
@@ -117,16 +117,16 @@
                         }
                     }
                 },
-                "description": "Return the number of cohorts in the database.",
+                "description": "Return the number of programs in the database.",
                 "tags": [
                     "overview"
                 ]
             }
         },
-        "/v3/discovery/overview/patients_per_cohort/": {
+        "/v3/discovery/overview/patients_per_program/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort",
-                "summary": "Discover Patients Per Cohort",
+                "operationId": "chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_program",
+                "summary": "Discover Patients Per Program",
                 "parameters": [],
                 "responses": {
                     "200": {
@@ -135,7 +135,7 @@
                             "application/json": {
                                 "schema": {
                                     "items": {
-                                        "$ref": "#/components/schemas/PatientPerCohortSchema"
+                                        "$ref": "#/components/schemas/PatientPerProgramSchema"
                                     },
                                     "title": "Response",
                                     "type": "array"
@@ -144,7 +144,7 @@
                         }
                     }
                 },
-                "description": "Return the number of patients per cohort in the database.",
+                "description": "Return the number of patients per program in the database.",
                 "tags": [
                     "overview"
                 ]
@@ -1156,12 +1156,12 @@
                     },
                     {
                         "in": "query",
-                        "name": "exclude_cohorts",
+                        "name": "exclude_programs",
                         "schema": {
                             "items": {
                                 "type": "string"
                             },
-                            "title": "Exclude Cohorts",
+                            "title": "Exclude Programs",
                             "type": "array"
                         },
                         "required": false
@@ -3854,12 +3854,12 @@
                     },
                     {
                         "in": "query",
-                        "name": "exclude_cohorts",
+                        "name": "exclude_programs",
                         "schema": {
                             "items": {
                                 "type": "string"
                             },
-                            "title": "Exclude Cohorts",
+                            "title": "Exclude Programs",
                             "type": "array"
                         },
                         "required": false
@@ -3930,7 +3930,7 @@
                 "title": "DiscoveryDonorSchema",
                 "type": "object"
             },
-            "PatientPerCohortSchema": {
+            "PatientPerProgramSchema": {
                 "properties": {
                     "program_id": {
                         "title": "Program Id",
@@ -3945,7 +3945,7 @@
                     "program_id",
                     "patients_count"
                 ],
-                "title": "PatientPerCohortSchema",
+                "title": "PatientPerProgramSchema",
                 "type": "object"
             },
             "GenderCountSchema": {
@@ -9023,11 +9023,11 @@
                         "title": "Systemic Therapy Drug Name",
                         "type": "array"
                     },
-                    "exclude_cohorts": {
+                    "exclude_programs": {
                         "items": {
                             "type": "string"
                         },
-                        "title": "Exclude Cohorts",
+                        "title": "Exclude Programs",
                         "type": "array"
                     }
                 },

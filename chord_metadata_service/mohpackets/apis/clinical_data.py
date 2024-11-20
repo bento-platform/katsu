@@ -211,8 +211,8 @@ def query_donors(request, filters: DonorExplorerFilterSchema = Query(...)):
             systemictherapy__drug_name__in=filter_dict["systemic_therapy_drug_name"]
         )
 
-    if filter_dict["exclude_cohorts"]:
-        queryset = queryset.exclude(program_id__in=filter_dict["exclude_cohorts"])
+    if filter_dict["exclude_programs"]:
+        queryset = queryset.exclude(program_id__in=filter_dict["exclude_programs"])
 
     class Unnest(Func):
         contains_subquery = True
