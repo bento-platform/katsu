@@ -62,8 +62,8 @@ Return all the programs in the database.
 
 *Discover Donors*
 
-Return the number of donors per cohort in the database.
-Note: This function is identical to `discover_patients_per_cohort`
+Return the number of donors per program in the database.
+Note: This function is identical to `discover_patients_per_program`
 and is here because the frontend ingest uses it. It's probably best
 to clean up later.
 
@@ -100,15 +100,15 @@ Retrieve the list of drug names and treatment for frontend usage
 
 <h1 id="moh-service-api-overview">overview</h1>
 
-## chord_metadata_service_mohpackets_apis_discovery_discover_cohort_count
+## chord_metadata_service_mohpackets_apis_discovery_discover_program_count
 
-<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_cohort_count"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_program_count"></a>
 
-`GET /v3/discovery/overview/cohort_count/`
+`GET /v3/discovery/overview/program_count/`
 
-*Discover Cohort Count*
+*Discover Program Count*
 
-Return the number of cohorts in the database.
+Return the number of programs in the database.
 
 > Example responses
 
@@ -121,15 +121,15 @@ Return the number of cohorts in the database.
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort
+## chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_program
 
-<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_patients_per_program"></a>
 
-`GET /v3/discovery/overview/patients_per_cohort/`
+`GET /v3/discovery/overview/patients_per_program/`
 
-*Discover Patients Per Cohort*
+*Discover Patients Per Program*
 
-Return the number of patients per cohort in the database.
+Return the number of patients per program in the database.
 
 > Example responses
 
@@ -876,7 +876,7 @@ Used by the query service to return donors along with their sample IDs, treatmen
 |treatment_type|query|array[string]|false|none|
 |primary_site|query|array[string]|false|none|
 |systemic_therapy_drug_name|query|array[string]|false|none|
-|exclude_cohorts|query|array[string]|false|none|
+|exclude_programs|query|array[string]|false|none|
 |page|query|integer|false|none|
 |page_size|query|integer|false|none|
 
@@ -1608,7 +1608,7 @@ This endpoint is called by the query service and bypasses user authorization.
 |treatment_type|query|array[string]|false|none|
 |primary_site|query|array[string]|false|none|
 |systemic_therapy_drug_name|query|array[string]|false|none|
-|exclude_cohorts|query|array[string]|false|none|
+|exclude_programs|query|array[string]|false|none|
 
 > Example responses
 
@@ -1683,12 +1683,12 @@ DiscoveryDonorSchema
 |program_id|string|true|none|none|
 |donors_count|string|true|none|none|
 
-<h2 id="tocS_PatientPerCohortSchema">PatientPerCohortSchema</h2>
+<h2 id="tocS_PatientPerProgramSchema">PatientPerProgramSchema</h2>
 
-<a id="schemapatientpercohortschema"></a>
-<a id="schema_PatientPerCohortSchema"></a>
-<a id="tocSpatientpercohortschema"></a>
-<a id="tocspatientpercohortschema"></a>
+<a id="schemapatientperprogramschema"></a>
+<a id="schema_PatientPerProgramSchema"></a>
+<a id="tocSpatientperprogramschema"></a>
+<a id="tocspatientperprogramschema"></a>
 
 ```json
 {
@@ -1698,7 +1698,7 @@ DiscoveryDonorSchema
 
 ```
 
-PatientPerCohortSchema
+PatientPerProgramSchema
 
 ### Properties
 
@@ -10547,7 +10547,7 @@ or
   "systemic_therapy_drug_name": [
     "string"
   ],
-  "exclude_cohorts": [
+  "exclude_programs": [
     "string"
   ]
 }
@@ -10563,7 +10563,7 @@ DonorExplorerFilterSchema
 |treatment_type|[string]|false|none|none|
 |primary_site|[string]|false|none|none|
 |systemic_therapy_drug_name|[string]|false|none|none|
-|exclude_cohorts|[string]|false|none|none|
+|exclude_programs|[string]|false|none|none|
 
 <h2 id="tocS_PagedQueryDonorSchema">PagedQueryDonorSchema</h2>
 

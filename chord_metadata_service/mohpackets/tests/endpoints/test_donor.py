@@ -288,9 +288,9 @@ class DonorExplorerTestCase(BaseTestCase):
         )
         self.assertEqual(sample_registrations, 32)  # 32 sample registrations
 
-    def test_filter_cohorts(self):
+    def test_filter_programs(self):
         """
-        Test filtering donors by cohort.
+        Test filtering donors by program.
         Verifies the correct count of donors, excluding a specified program.
 
         Testing Strategy:
@@ -300,7 +300,7 @@ class DonorExplorerTestCase(BaseTestCase):
         """
         response = self.client.get(
             self.donor_url,
-            {"exclude_cohorts": [self.programs[0].program_id]},  # exclude the first one
+            {"exclude_programs": [self.programs[0].program_id]},  # exclude the first one
             HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
         )
         donors = response.json()
@@ -564,9 +564,9 @@ class DonorQueryTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
-    def test_filter_cohorts(self):
+    def test_filter_programs(self):
         """
-        Test filtering donors by cohort.
+        Test filtering donors by program.
         Verifies the correct count of donors, excluding a specified program.
 
         Testing Strategy:
@@ -576,7 +576,7 @@ class DonorQueryTestCase(BaseTestCase):
         """
         response = self.client.get(
             self.donor_url,
-            {"exclude_cohorts": [self.programs[0].program_id]},  # exclude the first one
+            {"exclude_programs": [self.programs[0].program_id]},  # exclude the first one
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         donors = response.json()["items"]

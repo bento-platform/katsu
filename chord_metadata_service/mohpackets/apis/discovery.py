@@ -32,7 +32,7 @@ from chord_metadata_service.mohpackets.schemas.discovery import (
     DiagnosisAgeCountSchema,
     DiscoveryDonorSchema,
     GenderCountSchema,
-    PatientPerCohortSchema,
+    PatientPerProgramSchema,
     PrimarySiteCountSchema,
     ProgramDiscoverySchema,
     TreatmentTypeCountSchema,
@@ -74,8 +74,8 @@ def discover_programs(request):
 @discovery_router.get("/donors/", response=List[DiscoveryDonorSchema])
 def discover_donors(request):
     """
-    Return the number of donors per cohort in the database.
-    Note: This function is identical to `discover_patients_per_cohort`
+    Return the number of donors per program in the database.
+    Note: This function is identical to `discover_patients_per_program`
     and is here because the frontend ingest uses it. It's probably best
     to clean up later.
     """
@@ -126,20 +126,20 @@ def discover_sidebar_list(request):
 ###############################################
 
 
-@overview_router.get("/cohort_count/", response=Dict[str, int])
+@overview_router.get("/program_count/", response=Dict[str, int])
 @decorate_view(cache_page(CACHE_DURATION))
-def discover_cohort_count(request):
+def discover_program_count(request):
     """
-    Return the number of cohorts in the database.
+    Return the number of programs in the database.
     """
-    return {"cohort_count": Program.objects.count()}
+    return {"program_count": Program.objects.count()}
 
 
-@overview_router.get("/patients_per_cohort/", response=List[PatientPerCohortSchema])
+@overview_router.get("/patients_per_program/", response=List[PatientPerProgramSchema])
 @decorate_view(cache_page(CACHE_DURATION))
-def discover_patients_per_cohort(request):
+def discover_patients_per_program(request):
     """
-    Return the number of patients per cohort in the database.
+    Return the number of patients per program in the database.
     """
     result = (
         Donor.objects.values("program_id")
