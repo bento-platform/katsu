@@ -47,7 +47,7 @@ class BentoDataTypePermission(BasePermission):
     async def has_permission(self, request: DrfRequest, view):
         # view: BentoAuthzModelViewSet (cannot annotate due to circular import)
         if view.data_type is None:
-            raise NotImplemented("BentoAuthzModelViewSet DATA_TYPE must be set")
+            raise NotImplementedError("BentoAuthzModelViewSet DATA_TYPE must be set")
         return await view.request_has_data_type_permissions(request)
 
     @async_to_sync

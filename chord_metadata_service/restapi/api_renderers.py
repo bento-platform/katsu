@@ -240,7 +240,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
 
 class ExperimentCSVRenderer(KatsuCSVRenderer):
     file_name = "experiments.csv"
-    
+
     def get_columns(self) -> list[str]:
         return [
             "id",

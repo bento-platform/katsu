@@ -39,7 +39,9 @@ class BentoAuthzModelViewSet(viewsets.ModelViewSet):
         else:
             return None
 
-    async def request_has_data_type_permissions(self, request: DrfRequest, scope: ValidatedDiscoveryScope | None = None):
+    async def request_has_data_type_permissions(
+        self, request: DrfRequest, scope: ValidatedDiscoveryScope | None = None
+    ):
         # We MUST specifically mark view sets as scope-enabled (which means their queryset handles scope correctly);
         # otherwise, we cannot scope into a specific project/dataset and must use the whole instance as the scope.
         # Otherwise, we can could leak data from other projects/datasets.
