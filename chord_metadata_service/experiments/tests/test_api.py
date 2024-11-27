@@ -123,12 +123,12 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assert_response_200_and_length(response, 0)
 
     def test_post_experiment_batch_no_data(self):
-        response = self.one_authz_get('/api/batch/experiments', format='json')
+        response = self.one_authz_post('/api/batch/experiments', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 2)
 
     def test_post_experiment_batch_with_ids(self):
-        response = self.one_authz_get('/api/batch/experiments', {'id': ['katsu.experiment:1']}, format='json')
+        response = self.one_authz_post('/api/batch/experiments', {'id': ['katsu.experiment:1']}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data), 1)
