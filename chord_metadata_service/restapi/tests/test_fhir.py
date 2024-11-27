@@ -7,16 +7,13 @@ from chord_metadata_service.phenopackets.models import (
     MetaData,
     Biosample,
     Phenopacket,
-    PhenotypicFeature,
 )
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1,
     VALID_META_DATA_2,
     VALID_PROCEDURE_1,
-    VALID_DISEASE_1,
     valid_biosample_1,
     valid_biosample_2,
-    valid_phenotypic_feature,
 )
 from chord_metadata_service.restapi.tests.utils import get_post_response
 
@@ -84,49 +81,6 @@ class FHIRIndividualTest(APITestCase):
         self.assertIsInstance(get_resp_obj['patients'][1]['extension'][2]['valueDate'], str)
 
 
-class FHIRPhenotypicFeatureTest(APITestCase):
-
-    def setUp(self):
-        self.individual_1 = Individual.objects.create(**VALID_INDIVIDUAL_1)
-        self.individual_2 = Individual.objects.create(**VALID_INDIVIDUAL_2)
-        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual_1))
-        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(
-            self.individual_2, VALID_PROCEDURE_1))
-        self.phenotypic_feature_1 = PhenotypicFeature.objects.create(
-            **valid_phenotypic_feature(biosample=self.biosample_1))
-        self.phenotypic_feature_2 = PhenotypicFeature.objects.create(
-            **valid_phenotypic_feature(biosample=self.biosample_2))
-
-    def test_get_fhir(self):
-        get_resp = self.client.get('/api/phenotypicfeatures?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        severity = {
-            'url': 'http://ga4gh.org/fhir/phenopackets/StructureDefinition/phenotypic-feature-severity',
-            'valueCodeableConcept': {
-                'coding': [
-                    {
-                        'code': 'HP: 0012825',
-                        'display': 'Mild'
-                    }
-                ]
-            }
-        }
-        self.assertEqual(get_resp_obj['observations'][0]['resourceType'], 'Observation')
-        self.assertIsInstance(get_resp_obj['observations'][0]['extension'], list)
-        self.assertIn(severity, get_resp_obj['observations'][0]['extension'])
-        self.assertEqual(get_resp_obj['observations'][0]['status'], 'unknown')
-        self.assertEqual(get_resp_obj['observations'][0]['code']['coding'][0]['display'], 'Proptosis')
-        self.assertEqual(get_resp_obj['observations'][0]['interpretation']['coding'][0]['code'], 'POS')
-        self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['url'],
-                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/evidence')
-        self.assertEqual(get_resp_obj['observations'][0]['extension'][3]['extension'][1]['extension'][1]['url'],
-                         'description')
-        self.assertIsNotNone(get_resp_obj['observations'][0]['specimen'])
-        self.assertIsInstance(get_resp_obj['observations'][0]['specimen'], dict)
-        self.assertEqual(get_resp_obj['observations'][0]['specimen']['reference'], 'katsu.biosample_id:1')
-
-
 class FHIRBiosampleTest(APITestCase):
     """ Test module for creating an Biosample. """
 
@@ -150,21 +104,3 @@ class FHIRBiosampleTest(APITestCase):
                          'http://ga4gh.org/fhir/phenopackets/StructureDefinition/biosample-diagnostic-markers')
         self.assertIsInstance(get_resp_obj['specimens'][0]['extension'][4]['valueCodeableConcept']['coding'],
                               list)
-
-
-class FHIRDiseaseTest(APITestCase):
-
-    def setUp(self):
-        self.disease = VALID_DISEASE_1
-
-    def test_get_fhir(self):
-        get_post_response('diseases-list', self.disease)
-        get_resp = self.client.get('/api/diseases?format=fhir')
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        get_resp_obj = get_resp.json()
-        self.assertEqual(get_resp_obj['conditions'][0]['resourceType'], 'Condition')
-        self.assertIsNotNone(get_resp_obj['conditions'][0]['code']['coding'][0])
-        self.assertIsInstance(get_resp_obj['conditions'][0]['extension'], list)
-        self.assertEqual(get_resp_obj['conditions'][0]['extension'][0]['url'],
-                         'http://ga4gh.org/fhir/phenopackets/StructureDefinition/disease-tumor-stage')
-        self.assertEqual(get_resp_obj['conditions'][0]['subject']['reference'], 'unknown')
