@@ -25,7 +25,7 @@ jobs:
           submodules: "recursive"
 
       - name: Run Bento build action
-        uses: bento-platform/bento_build_action@v0.11.1
+        uses: bento-platform/bento_build_action@v1.0.0
         with:
           registry: ghcr.io
           registry-username: ${{ github.actor }}
