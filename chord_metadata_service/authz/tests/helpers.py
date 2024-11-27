@@ -51,7 +51,7 @@ class AuthzAPITestCase(APITransactionTestCase):
             kwargs["data"] = json.dumps(kwargs["json"])
             del kwargs["json"]
 
-        if method in ("post", "put"):
+        if method in ("post", "put") and "format" not in kwargs:
             kwargs["content_type"] = "application/json"
 
         with aioresponses() as m:
