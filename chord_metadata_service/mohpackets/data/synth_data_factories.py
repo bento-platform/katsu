@@ -101,6 +101,14 @@ class AllSynthDonorFactory(DonorFactory):
 
     submitter_donor_id = factory.Sequence(lambda n: f"DONOR_ALL_{str(n).zfill(4)}")
     is_deceased = factory.Iterator(PERM_VAL.UBOOLEAN)
+    gender = factory.Faker("random_element", elements=SYNTH_VAL.ALL_GENDER)
+    sex_at_birth = factory.Faker("random_element", elements=SYNTH_VAL.ALL_SEX_AT_BIRTH)
+
+    @factory.post_generation
+    def set_sex_at_birth(self, create, extracted, **kwargs):
+        """This shouldn't be necessary but was finding null values sometimes"""
+        if not self.sex_at_birth:
+            self.sex_at_birth = random.choice(["Male", "Female", "Other"])
 
 
 class SynthPrimaryDiagnosisFactory(PrimaryDiagnosisFactory):
@@ -243,6 +251,21 @@ class AllSynthPrimaryDiagnosisFactory(PrimaryDiagnosisFactory):
     )
     cancer_type_code = "C06.9"
     primary_site = "Floor of mouth"
+    basis_of_diagnosis = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_BASIS_OF_DIAGNOSIS
+    )
+    laterality = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_PRIMARY_DIAGNOSIS_LATERALITY
+    )
+    clinical_tumour_staging_system = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TUMOUR_STAGING_SYSTEM
+    )
+    clinical_stage_group = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_STAGE_GROUP
+    )
+    pathological_tumour_staging_system = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TUMOUR_STAGING_SYSTEM
+    )
 
     @factory.post_generation
     def set_clinical_event_identifier(self, create, extracted, **kwargs):
@@ -267,16 +290,16 @@ class AllSynthPrimaryDiagnosisFactory(PrimaryDiagnosisFactory):
             donor.date_of_death = None
             donor.save()
         elif donor.is_deceased == "Yes":
-            donor.cause_of_death = random.choice(PERM_VAL.CAUSE_OF_DEATH)
+            donor.cause_of_death = random.choice(SYNTH_VAL.ALL_CAUSE_OF_DEATH)
             donor.date_of_death = {"day_interval": random.randint(3650, 16425)}
             donor.date_of_death["month_interval"] = days_to_months(donor.date_of_death["day_interval"])
 
     @factory.post_generation
     def all_staging_filled(self, create, extracted, **kwargs):
         if self.clinical_tumour_staging_system is None:
-            self.clinical_tumour_staging_system = random.choice(PERM_VAL.TUMOUR_STAGING_SYSTEM)
+            self.clinical_tumour_staging_system = random.choice(SYNTH_VAL.ALL_TUMOUR_STAGING_SYSTEM)
         if self.clinical_stage_group is None:
-            self.clinical_stage_group = random.choice(PERM_VAL.STAGE_GROUP)
+            self.clinical_stage_group = random.choice(SYNTH_VAL.ALL_STAGE_GROUP)
         if self.clinical_n_category is None:
             self.clinical_n_category = random.choice(PERM_VAL.N_CATEGORY)
         if self.clinical_m_category is None:
@@ -284,9 +307,9 @@ class AllSynthPrimaryDiagnosisFactory(PrimaryDiagnosisFactory):
         if self.clinical_t_category is None:
             self.clinical_t_category = random.choice(PERM_VAL.T_CATEGORY)
         if self.pathological_tumour_staging_system is None:
-            self.pathological_tumour_staging_system = random.choice(PERM_VAL.TUMOUR_STAGING_SYSTEM)
+            self.pathological_tumour_staging_system = random.choice(SYNTH_VAL.ALL_TUMOUR_STAGING_SYSTEM)
         if self.pathological_stage_group is None:
-            self.pathological_stage_group = random.choice(PERM_VAL.STAGE_GROUP)
+            self.pathological_stage_group = random.choice(SYNTH_VAL.ALL_STAGE_GROUP)
         if self.pathological_n_category is None:
             self.pathological_n_category = random.choice(PERM_VAL.N_CATEGORY)
         if self.pathological_m_category is None:
@@ -385,8 +408,32 @@ class AllSynthSpecimenFactory(SpecimenFactory):
     submitter_specimen_id = factory.Sequence(
         lambda n: f"SPECIMEN_ALL_{str(n).zfill(4)}"
     )
+    specimen_storage = factory.Faker("random_element", elements=SYNTH_VAL.ALL_STORAGE)
+    specimen_processing = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_SPECIMEN_PROCESSING
+    )
+    tumour_histological_type = None
     specimen_anatomic_location = factory.Faker(
-        "random_element", elements=SYNTH_VAL.TOPOGRAPHY_CODES
+        "random_element", elements=SYNTH_VAL.ALL_TOPOGRAPHY_CODES
+    )
+    specimen_laterality = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_SPECIMEN_LATERALITY
+    )
+    reference_pathology_confirmed_diagnosis = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_CONFIRMED_DIAGNOSIS_TUMOUR
+    )
+    reference_pathology_confirmed_tumour_presence = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_CONFIRMED_DIAGNOSIS_TUMOUR
+    )
+    tumour_grading_system = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TUMOUR_GRADING_SYSTEM
+    )
+    tumour_grade = factory.Faker("random_element", elements=SYNTH_VAL.ALL_TUMOUR_GRADE)
+    percent_tumour_cells_range = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_PERCENT_CELLS_RANGE
+    )
+    percent_tumour_cells_measurement_method = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_CELLS_MEASURE_METHOD
     )
 
     @factory.post_generation
@@ -425,6 +472,11 @@ class AllSynthSampleRegistrationFactory(SampleRegistrationFactory):
         django_get_or_create = ("submitter_sample_id",)
 
     submitter_sample_id = factory.Sequence(lambda n: f"SAMPLE_ALL_{str(n).zfill(4)}")
+    specimen_tissue_source = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_SPECIMEN_TISSUE_SOURCE
+    )
+    specimen_type = factory.Faker("random_element", elements=SYNTH_VAL.ALL_SPECIMEN_TYPE)
+    sample_type = factory.Faker("random_element", elements=SYNTH_VAL.ALL_SAMPLE_TYPE)
 
 
 class SynthTreatmentFactory(TreatmentFactory):
@@ -523,6 +575,18 @@ class AllSynthTreatmentFactory(TreatmentFactory):
         elements=SYNTH_VAL.TREATMENT_TYPE_FOR_ALL,
         unique=True,
         length=random.randint(1, 3),
+    )
+    treatment_intent = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TREATMENT_INTENT
+    )
+    response_to_treatment_criteria_method = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TREATMENT_RESPONSE_METHOD
+    )
+    response_to_treatment = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TREATMENT_RESPONSE
+    )
+    status_of_treatment = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TREATMENT_STATUS
     )
 
     @factory.post_generation
@@ -847,14 +911,16 @@ class NullSynthRadiationFactory(RadiationFactory):
 class AllSynthRadiationFactory(SynthRadiationFactory):
     fill_dosage_fraction = True
     radiation_therapy_modality = factory.Faker(
-        "random_element", elements=PERM_VAL.RADIATION_THERAPY_MODALITY
+        "random_element", elements=SYNTH_VAL.ALL_RADIATION_THERAPY_MODALITY
     )
     radiation_therapy_type = factory.Faker(
-        "random_element", elements=PERM_VAL.THERAPY_TYPE
+        "random_element", elements=SYNTH_VAL.ALL_THERAPY_TYPE
     )
     anatomical_site_irradiated = factory.Faker(
-        "random_element", elements=PERM_VAL.RADIATION_ANATOMICAL_SITE
+        "random_element", elements=SYNTH_VAL.ALL_RADIATION_ANATOMICAL_SITE
     )
+    radiation_therapy_fractions = factory.Faker("random_int", min=1, max=30)
+    radiation_therapy_dosage = factory.Faker("random_int", min=1, max=100)
 
 
 class SynthSurgeryFactory(SurgeryFactory):
@@ -952,7 +1018,40 @@ class NullSynthSurgeryFactory(SurgeryFactory):
 
 
 class AllSynthSurgeryFactory(SurgeryFactory):
-    surgery_site = factory.Faker("random_element", elements=SYNTH_VAL.TOPOGRAPHY_CODES)
+    surgery_site = factory.Faker("random_element", elements=SYNTH_VAL.ALL_TOPOGRAPHY_CODES)
+    surgery_location = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_SURGERY_LOCATION
+    )
+    tumour_length = factory.Faker("random_int", min=1, max=10)
+    tumour_length_not_available = False
+    tumour_width = factory.Faker("random_int", min=1, max=10)
+    tumour_width_not_available = False
+    greatest_dimension_tumour = factory.Faker("random_int", min=1, max=10)
+    greatest_dimension_tumour_not_available = False
+    tumour_focality = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TUMOUR_FOCALITY
+    )
+    residual_tumour_classification = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_TUMOUR_CLASSIFICATION
+    )
+    margin_types_involved = factory.Faker(
+            "random_elements",
+            elements=SYNTH_VAL.ALL_MARGIN_TYPES,
+            length=random.randint(1, 3),
+            unique=True,
+        )
+    margin_types_not_involved = factory.Faker(
+            "random_elements",
+            elements=SYNTH_VAL.ALL_MARGIN_TYPES,
+            length=random.randint(1, 3),
+            unique=True,
+        )
+    margin_types_not_assessed = factory.Faker(
+            "random_elements",
+            elements=SYNTH_VAL.MARGIN_TYPES,
+            length=random.randint(1, 3),
+            unique=True,
+        )
 
     @factory.post_generation
     def add_surgery_type(self, create, extracted, **kwargs):
@@ -1140,6 +1239,23 @@ class AllSynthBiomarkerFactory(SynthBiomarkerFactory):
             "followup_uuid",
         )
 
+    er_status = factory.Faker("random_element", elements=SYNTH_VAL.ALL_ER_PR_HPV_STATUS)
+    pr_status = factory.Faker("random_element", elements=SYNTH_VAL.ALL_ER_PR_HPV_STATUS)
+    her2_ihc_status = factory.Faker("random_element", elements=SYNTH_VAL.ALL_HER2_STATUS)
+    her2_ish_status = factory.Faker("random_element", elements=SYNTH_VAL.ALL_HER2_STATUS)
+    psa_level_not_available = False
+    psa_level = factory.Faker("pyint", min_value=0, max_value=100)
+    ca125_not_available = False
+    ca125 = factory.Faker("pyint", min_value=0, max_value=100)
+    cea_not_available = False
+    cea = factory.Faker("pyint", min_value=0, max_value=100)
+    hpv_strain = factory.Faker(
+        "random_elements",
+        elements=PERM_VAL.HPV_STRAIN,
+        length=random.randint(1, 5),
+        unique=True,
+    )
+
     @factory.post_generation
     def set_date(self, create, extracted, **kwargs):
         donor = self.donor_uuid
@@ -1253,11 +1369,20 @@ class AllSynthComorbidityFactory(SynthComorbidityFactory):
     is_prior_malignancy = factory.Faker("pybool")
     prior_malignancy = factory.Maybe("is_prior_malignancy",
                                      "Yes",
-                                     factory.Faker("random_element", elements=["No", "Not available"]))
+                                     "No")
     laterality_of_prior_malignancy = (
         factory.Maybe("is_prior_malignancy",
-                      factory.Faker("random_element", elements=PERM_VAL.MALIGNANCY_LATERALITY),
+                      factory.Faker("random_element", elements=SYNTH_VAL.ALL_MALIGNANCY_LATERALITY),
                       None))
+    comorbidity_type_code = factory.Maybe("is_prior_malignancy",
+                                          "C18.6",
+                                          "F00")
+    comorbidity_treatment_status = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_UBOOLEAN
+    )
+    comorbidity_treatment = factory.Maybe("is_prior_malignancy",
+                                          "Treated with surgery and chemotherapy (Oxaliplatin).",
+                                          "Treated with Donepezil (Aricept).")
 
 
 class SynthFollowUpFactory(FollowUpFactory):
@@ -1385,6 +1510,47 @@ class AllSynthFollowUpFactory(SynthFollowUpFactory):
     submitter_follow_up_id = factory.Sequence(
         lambda n: f"FOLLOW_UP_ALL_{str(n).zfill(4)}"
     )
+    disease_status_at_followup = factory.Faker(
+        "random_element", elements=SYNTH_VAL.ALL_DISEASE_STATUS_FOLLOWUP
+    )
+    method_of_progression_status = factory.Faker(
+        "random_elements",
+        elements=SYNTH_VAL.ALL_PROGRESSION_STATUS_METHOD,
+        length=random.randint(1, 5),
+        unique=True,
+    )
+
+    @factory.post_generation
+    def set_followup_date(self, create, extracted, **kwargs):
+        if self.submitter_treatment_id:
+            treatment = self.treatment_uuid
+            if treatment.treatment_start_date:
+                day_int = random.randint(
+                    treatment.treatment_start_date["day_interval"] + 365,
+                    treatment.treatment_start_date["day_interval"] + 1000,
+                )
+                self.date_of_followup = {
+                    "day_interval": day_int,
+                    "month_interval": days_to_months(day_int),
+                }
+        else:
+            if self.donor_uuid.date_of_death:
+                day_int = random.randint(
+                    400, self.donor_uuid.date_of_death["day_interval"]
+                )
+            elif self.donor_uuid.date_alive_after_lost_to_followup:
+                day_int = random.randint(
+                    400,
+                    self.donor_uuid.date_alive_after_lost_to_followup[
+                        "day_interval"
+                    ],
+                )
+            else:
+                day_int = random.randint(400, 2000)
+            self.date_of_followup = {
+                "day_interval": day_int,
+                "month_interval": days_to_months(day_int),
+            }
 
     @factory.post_generation
     def set_relapse_type_date(self, create, extracted, **kwargs):
@@ -1397,6 +1563,8 @@ class AllSynthFollowUpFactory(SynthFollowUpFactory):
         ]:
             donor = self.donor_uuid
             self.relapse_type = random.choice(PERM_VAL.RELAPSE_TYPE)
+            self.anatomic_site_progression_or_recurrence = random.choices(SYNTH_VAL.TOPOGRAPHY_CODES,
+                                                                          k=random.randint(1, 3))
             if donor.date_of_death:
                 relapse_day_int = random.randint(0, donor.date_of_death["day_interval"])
                 relapse_month_int = days_to_months(relapse_day_int)
@@ -1454,7 +1622,23 @@ class SynthExposureFactory(ExposureFactory):
 
 
 class AllSynthExposureFactory(SynthExposureFactory):
-    fill_status = True
+    tobacco_smoking_status = factory.Faker("random_element", elements=SYNTH_VAL.ALL_SMOKING_STATUS)
+
+    @factory.post_generation
+    def set_smoking_information(self, create, extracted, **kwargs):
+        if self.tobacco_smoking_status:
+            if self.tobacco_smoking_status not in [
+                "Not applicable",
+                "Not available",
+                "Lifelong non-smoker (<100 cigarettes smoked in lifetime)",
+            ]:
+                self.tobacco_type = random.sample(
+                    SYNTH_VAL.SMOKER_TOBACCO_TYPE, k=random.randint(1, 3)
+                )
+                if len(self.tobacco_type) > 1 and "Unknown" in self.tobacco_type:
+                    self.tobacco_type.remove("Unknown")
+                    self.pack_years_smoked_not_available = False
+                    self.pack_years_smoked = random.randint(5, 70)
 
 
 class NullSynthExposureFactory(ExposureFactory):
