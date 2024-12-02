@@ -12,7 +12,6 @@ from django.db import connection
 from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from psycopg2 import sql
 from rest_framework.decorators import api_view, permission_classes
@@ -34,8 +33,6 @@ from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
 from chord_metadata_service.logger import logger
-
-from chord_metadata_service.metadata.elastic import es
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -300,76 +297,6 @@ def phenopacket_filter_results(subject_ids, disease_ids, biosample_ids,
     res = query.prefetch_related(*PHENOPACKET_PREFETCH)
 
     return res
-
-
-def fhir_search(request, internal_data=False):
-    # TODO: not all that sure about the query format we'll want
-    # keep it simple for now
-
-    if request.method == "POST":
-        query = (request.data or {}).get("query")
-    else:
-        query = request.query_params.get("query")
-
-    if query is None:
-        return Response(errors.bad_request_error("Missing query in request body"), status=status.HTTP_400_BAD_REQUEST)
-
-    start = datetime.now()
-
-    if not es:
-        return Response(build_search_response([], start))
-
-    res = es.search(index=settings.FHIR_INDEX_NAME, body=query)
-
-    def hits_for(resource_type: str):
-        return frozenset(hit["_id"].split("|")[1] for hit in res["hits"]["hits"]
-                         if hit['_source']['resourceType'] == resource_type)
-
-    subject_ids = hits_for('Patient')
-    disease_ids = hits_for('Condition')
-    biosample_ids = hits_for('Specimen')
-    phenotypicfeature_ids = hits_for('Observation')
-    phenopacket_ids = hits_for('Composition')
-
-    if all((not subject_ids, not disease_ids, not biosample_ids, not phenotypicfeature_ids,
-            not phenopacket_ids)):
-        return Response(build_search_response([], start))
-
-    phenopackets = phenopacket_filter_results(
-        subject_ids,
-        disease_ids,
-        biosample_ids,
-        phenotypicfeature_ids,
-        phenopacket_ids
-    )
-
-    if not internal_data:
-        # TODO: Maybe can avoid hitting DB here
-        datasets = Dataset.objects.filter(identifier__in=frozenset(p.dataset_id for p in phenopackets))
-        return Response(build_search_response([{"id": d.identifier, "data_type": DATA_TYPE_PHENOPACKET}
-                                               for d in datasets], start))
-
-    ext_result = {
-        dataset_id: {
-            "data_type": DATA_TYPE_PHENOPACKET,
-            "matches": list(PhenopacketSerializer(p).data for p in dataset_phenopackets)
-        } for dataset_id, dataset_phenopackets in itertools.groupby(phenopackets, key=lambda p: str(p.dataset_id))
-    }
-    return Response(build_search_response(ext_result, start))
-
-
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def fhir_public_search(request):
-    return fhir_search(request)
-
-
-# Mounted on /private/, so will get protected anyway
-# TODO: Ugly and misleading permissions
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def fhir_private_search(request):
-    return fhir_search(request, internal_data=True)
 
 
 def get_chord_search_parameters(request, data_type=None):

@@ -1,7 +1,5 @@
 import json
 
-from unittest.mock import patch
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -19,7 +17,6 @@ from chord_metadata_service.experiments.tests.constants import (
     valid_experiment, valid_experiment_result, valid_instrument
 )
 
-from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
@@ -34,7 +31,6 @@ from .constants import (
     TEST_SEARCH_QUERY_8,
     TEST_SEARCH_QUERY_9,
     TEST_SEARCH_QUERY_10,
-    TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset
 from ..data_types import (
@@ -499,37 +495,3 @@ class SearchTest(APITestCase):
             dataset_id = list(c["results"].keys())[0]
             matches = c["results"][dataset_id]["matches"]
             self.assertEqual(len(matches), 2)   # 2 biosamples in list
-
-    @patch('chord_metadata_service.chord.views_search.es')
-    def test_fhir_search(self, mocked_es):
-        mocked_es.search.return_value = SEARCH_SUCCESS
-        # Valid search with result
-        for method in POST_GET:
-            r = self._search_call("fhir-search", data={
-                "query": TEST_FHIR_SEARCH_QUERY
-            }, method=method)
-
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-
-            self.assertEqual(len(c["results"]), 1)
-            self.assertDictEqual(c["results"][0], {
-                "id": str(self.dataset.identifier),
-                "data_type": DATA_TYPE_PHENOPACKET
-            })
-
-    @patch('chord_metadata_service.chord.views_search.es')
-    def test_private_fhir_search(self, mocked_es):
-        mocked_es.search.return_value = SEARCH_SUCCESS
-        # Valid search with result
-        for method in POST_GET:
-            r = self._search_call("fhir-private-search", data={
-                "query": TEST_FHIR_SEARCH_QUERY
-            }, method=method)
-
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-
-            self.assertIn(str(self.dataset.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
-            self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])

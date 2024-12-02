@@ -15,7 +15,6 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 
 
 from chord_metadata_service.restapi.api_renderers import (
-    FHIRRenderer,
     PhenopacketsRenderer,
     ExperimentCSVRenderer,
 )
@@ -82,8 +81,7 @@ class ExperimentBatchViewSet(BatchViewSet):
 
     serializer_class = ExperimentSerializer
     pagination_class = BatchResultsSetPagination
-    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, ExperimentCSVRenderer)
+    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer, ExperimentCSVRenderer)
     content_negotiation_class = FormatInPostContentNegotiation
 
     def get_queryset(self):

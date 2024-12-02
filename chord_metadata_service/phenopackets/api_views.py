@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
-    FHIRRenderer,
     BiosamplesCSVRenderer,
     IndividualBentoSearchRenderer,
 )
@@ -25,17 +24,13 @@ class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
 
 
-class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
-    renderer_classes = (*PhenopacketsModelViewSet.renderer_classes, FHIRRenderer)
-
-
 BIOSAMPLE_PREFETCH = (
     "phenotypic_features",
     "experiment_set",
 )
 
 
-class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
+class BiosampleViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing biosamples
@@ -50,7 +45,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     lookup_value_regex = MODEL_ID_PATTERN
 
 
-class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
+class BiosampleBatchViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing biosamples
@@ -64,7 +59,6 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
     pagination_class = BatchResultsSetPagination
     renderer_classes = (
         *api_settings.DEFAULT_RENDERER_CLASSES,
-        FHIRRenderer,
         PhenopacketsRenderer,
         BiosamplesCSVRenderer,
         IndividualBentoSearchRenderer,
@@ -108,7 +102,7 @@ PHENOPACKET_SELECT_REL = (
 )
 
 
-class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
+class PhenopacketViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing phenopackets

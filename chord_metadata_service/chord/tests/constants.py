@@ -19,7 +19,6 @@ __all__ = [
     "TEST_SEARCH_QUERY_8",
     "TEST_SEARCH_QUERY_9",
     "TEST_SEARCH_QUERY_10",
-    "TEST_FHIR_SEARCH_QUERY",
 ]
 
 VALID_DATA_USE_1 = {
@@ -253,4 +252,3 @@ TEST_SEARCH_QUERY_8 = ["#eq", ["#resolve", "experiment_type"], "DNA Methylation"
 TEST_SEARCH_QUERY_9 = ["#eq", ["#resolve", "subject", "id"], "patient:1"]
 TEST_SEARCH_QUERY_10 = ["#in", ["#resolve", "biosamples", "[item]", "id"],
                         ["#list", "biosample_id:1", "biosample_id:2"]]
-TEST_FHIR_SEARCH_QUERY = {"query": {"match": {"gender": "FEMALE"}}}

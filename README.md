@@ -53,7 +53,7 @@ CANARIE funded initial development of the Katsu Metadata service under the CHORD
 Katsu Metadata Service is a service to store epigenomic metadata.
 
 1. Patients service handles anonymized individual’s data (individual id, sex, age or date of birth)
-    * Data model: aggregated profile from GA4GH Phenopackets Individual, and FHIR Patient.
+    * Data model: extended from GA4GH Phenopackets Individual.
 
 2. Phenopackets service handles phenotypic and clinical data
     * Data model: [GA4GH Phenopackets schema](https://github.com/phenopackets/phenopacket-schema)
@@ -80,11 +80,6 @@ Katsu Metadata Service is a service to store epigenomic metadata.
 To retrieved data in json compliant with phenopackets that uses camelCase append `?format=phenopackets` .
 
 * Data can be ingested and retrieved in snake_case or camelCase.
-
-* Other available renderers:
-Phenopackets model is mapped to [FHIR](https://www.hl7.org/fhir/) using
-[Phenopackets on FHIR](https://aehrc.github.io/fhir-phenopackets-ig/) implementation guide.
-To retrieve data in fhir append `?format=fhir` .
 
 * Ingest endpoint: `/private/ingest`.
 
@@ -377,24 +372,6 @@ Ingested data successfully.
 * `./examples/1000g_phenopackets_1_of_3.json`: Data to ingest (in the format
   accepted by the Phenopackets workflow or the Experiments workflow, depending
   on the data type of the table)
-
-#### Patient Commands
-
-```
-$ ./manage.py patients_build_index
-...
-```
-
-Builds an ElasticSearch index for patients in the database.
-
-#### Phenopacket Commands
-
-```
-$ ./manage.py phenopackets_build_index
-...
-```
-
-Builds an ElasticSearch index for Phenopackets in the database.
 
 ### Accessing the Django Shell from inside a Bento Container
 
