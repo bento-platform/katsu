@@ -71,10 +71,6 @@ class Individual(BaseExtraProperties, BaseTimeStamp, IndexableMixin):
     gender = JSONField(blank=True, null=True, validators=[ontology_validator],
                        help_text='Self-identified gender')
 
-    # FHIR specific
-    active = models.BooleanField(default=False, help_text='Whether this patient\'s record is in active use.')
-    deceased = models.BooleanField(default=False, help_text='Indicates if the individual is deceased or not.')
-
     # extra
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
