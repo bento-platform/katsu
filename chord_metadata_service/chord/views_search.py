@@ -152,16 +152,13 @@ QUERY_RESULT_SERIALIZERS = {
 }
 
 
-def search(request, internal_data=False):
+def search(request):
     """
     Generic function that takes a request object containing the following parameters:
     - query: a Bento specific string representation of a query. e.g.
         ["#eq", ["#resolve", "experiment_results", "[item]", "file_format"], "VCF"]
     - data_type: one of "experiment", "phenopacket"
-    If internal_data is False, this function returns the tables id where matches
-    are found.
-    If internal_data is True, this function returns matches grouped by their
-    "owning" tables.
+    This function returns matches grouped by their "owning" datasets.
     The request can be made using POST or GET methods.
     """
     search_params, err = get_chord_search_parameters(request)
@@ -176,14 +173,6 @@ def search(request, internal_data=False):
     data_type = search_params["data_type"]
     compiled_query = search_params["compiled_query"]
     query_params = search_params["params"]
-
-    if not internal_data:
-        datasets = Dataset.objects.filter(identifier__in=data_type_results(
-            query=compiled_query,
-            params=query_params,
-            key="dataset_id"
-        ))
-        return Response(build_search_response([{"id": d.identifier, "data_type": data_type} for d in datasets], start))
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
@@ -231,17 +220,6 @@ def search(request, internal_data=False):
     }, start))
 
 
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def chord_search(request):
-    """
-    Free-form search using Bento specific syntax. Returns the list of tables
-    having matches (does not leak values from records)
-    - request parameters: see chord_private_search
-    """
-    return search(request, internal_data=False)
-
-
 # Mounted on /private/, so will get protected anyway; this allows for access from federation service
 # TODO: Ugly and misleading permissions
 @api_view(["GET", "POST"])
@@ -272,7 +250,7 @@ def chord_private_search(request):
         response.
     """
     # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return search(request, internal_data=True)
+    return search(request)
 
 
 def phenopacket_filter_results(subject_ids, disease_ids, biosample_ids,
