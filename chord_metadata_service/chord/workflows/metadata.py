@@ -7,8 +7,7 @@ __all__ = [
     "WORKFLOW_EXPERIMENTS_JSON",
     "WORKFLOW_EXPERIMENTS_JSON_WITH_FILES",
     "WORKFLOW_FHIR_JSON",
-    "WORKFLOW_READSET",
-    "WORKFLOW_DOCUMENT",
+    "WORKFLOW_EXPERIMENT_RESULTS_FILES",
     "WORKFLOW_VCF2MAF",
     "WORKFLOW_CBIOPORTAL",
 
@@ -22,8 +21,7 @@ WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_EXPERIMENTS_JSON_WITH_FILES = "experiments_json_with_files"
 
 WORKFLOW_FHIR_JSON = "fhir_json"
-WORKFLOW_READSET = "readset"
-WORKFLOW_DOCUMENT = "document"
+WORKFLOW_EXPERIMENT_RESULTS_FILES = "experiment_results_files"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
@@ -108,35 +106,13 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENTS_JSON_WITH_FILES, wm.WorkflowDefin
     ],
 ))
 
-workflow_set.add_workflow(WORKFLOW_READSET, wm.WorkflowDefinition(
+workflow_set.add_workflow(WORKFLOW_EXPERIMENT_RESULTS_FILES, wm.WorkflowDefinition(
     type="ingestion",
-    name="Readset",
-    description="This workflow will copy readset files over to DRS.",
-    data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=[DATA_TYPE_EXPERIMENT, "readset"],
-    file="readset.wdl",
-    inputs=[
-        # injected
-        ACCESS_TOKEN_INPUT,
-        DRS_URL_INPUT,
-        VALIDATE_SSL_INPUT,
-        # user
-        PROJECT_DATASET_INPUT,
-        wm.WorkflowFileArrayInput(
-            id="readset_files",
-            required=True,
-            pattern=r"^.*\.(cram|bam|bigWig|bigBed|bw|bb)$",
-        ),
-    ],
-))
-
-workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
-    type="ingestion",
-    name="Document",
-    description="This workflow ingests into DRS documents which have been already listed as experiment results.",
+    name="Experiment Results Files",
+    description="This workflow ingests files into DRS which have been already listed as experiment results.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
     tags=[DATA_TYPE_EXPERIMENT, "experiment_result"],
-    file="document.wdl",
+    file="experiment_results_files.wdl",
     inputs=[
         # injected
         ACCESS_TOKEN_INPUT,
@@ -144,11 +120,7 @@ workflow_set.add_workflow(WORKFLOW_DOCUMENT, wm.WorkflowDefinition(
         VALIDATE_SSL_INPUT,
         # user
         PROJECT_DATASET_INPUT,
-        wm.WorkflowFileArrayInput(
-            id="document_files",
-            required=True,
-            pattern=r"^.*\.(pdf|csv|tsv|txt|docx|xlsx|jpeg|jpg|png|gif|md|markdown|html|mp3|m4a|mp4)$",
-        ),
+        wm.WorkflowFileArrayInput(id="files", required=True, pattern=r".+"),
     ],
 ))
 

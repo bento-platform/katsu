@@ -1,15 +1,15 @@
 version 1.0
 
-workflow document {
+workflow experiment_results_files {
     input {
-        Array[File] document_files
+        Array[File] files
         String drs_url
         String project_dataset
         String access_token
         Boolean validate_ssl
     }
 
-    scatter(file in document_files) {
+    scatter(file in files) {
         call post_to_drs {
             input:
                 file_path = file,
