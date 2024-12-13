@@ -19,16 +19,6 @@ INDIVIDUAL = {
         "taxonomy": ontology_class("specified when more than one organism may be studied. It is advised that codes"
                                    "from the NCBI Taxonomy resource are used, e.g. NCBITaxon:9606 for humans"),
 
-        # FHIR-specific
-        "active": {
-            "description": "Whether a patient's record is in active use.",
-            "help": "FHIR-specific property."
-        },
-        "deceased": {
-            "description": "Whether a patient is deceased.",
-            "help": "FHIR-specific property."
-        },
-
         **EXTRA_PROPERTIES
     }
 }

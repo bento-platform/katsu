@@ -11,7 +11,6 @@ from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
-    FHIRRenderer,
     PhenopacketsRenderer,
     ExperimentCSVRenderer,
 )
@@ -90,8 +89,7 @@ class ExperimentBatchViewSet(BatchViewSet):
 
     serializer_class = ExperimentSerializer
     pagination_class = BatchResultsSetPagination
-    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, FHIRRenderer,
-                        PhenopacketsRenderer, ExperimentCSVRenderer)
+    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer, ExperimentCSVRenderer)
     content_negotiation_class = FormatInPostContentNegotiation
 
     def get_queryset(self):

@@ -16,7 +16,6 @@ from .models import (
 )
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
-from chord_metadata_service.restapi import fhir_utils
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
 
@@ -67,9 +66,6 @@ class PhenotypicFeatureSerializer(GenericSerializer):
     class Meta:
         model = PhenotypicFeature
         exclude = ['pftype']
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'observations'
-        class_converter = fhir_utils.fhir_observation
 
 
 class DiseaseSerializer(GenericSerializer):
@@ -80,9 +76,6 @@ class DiseaseSerializer(GenericSerializer):
     class Meta:
         model = Disease
         fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'conditions'
-        class_converter = fhir_utils.fhir_condition
 
 
 class BiosampleSerializer(GenericSerializer):
@@ -93,9 +86,6 @@ class BiosampleSerializer(GenericSerializer):
     class Meta:
         model = Biosample
         fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'specimens'
-        class_converter = fhir_utils.fhir_specimen
 
     def create(self, validated_data):
         biosample = Biosample.objects.create(**validated_data)
@@ -217,9 +207,6 @@ class SimplePhenopacketSerializer(GenericSerializer):
     class Meta:
         model = Phenopacket
         fields = '__all__'
-        # meta info for converting to FHIR
-        fhir_datatype_plural = 'compositions'
-        class_converter = fhir_utils.fhir_composition
 
     def to_representation(self, instance):
         """"
