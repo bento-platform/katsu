@@ -88,7 +88,6 @@ class UpdateIndividualTest(APITestCase):
                 }
             },
             "sex": "FEMALE",
-            "active": False
         }
 
         self.invalid_payload = c.INVALID_INDIVIDUAL
