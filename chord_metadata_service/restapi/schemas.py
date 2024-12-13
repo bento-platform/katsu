@@ -1,8 +1,9 @@
 from django.conf import settings
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
-from .schema_utils import DATE_TIME, DRAFT_07, SchemaTypes, base_type, tag_ids_and_describe, \
-    tag_schema_with_nested_ids, named_one_of, sub_schema_uri
+from .schema_utils import (
+    DATE_TIME, DRAFT_07, SchemaTypes, base_type, tag_ids_and_describe, named_one_of, sub_schema_uri
+)
 
 # Individual schemas for validation of JSONField values
 
@@ -17,7 +18,6 @@ __all__ = [
     "AGE_OR_AGE_RANGE",
     "TIME_INTERVAL",
     "EXTRA_PROPERTIES_SCHEMA",
-    "FHIR_BUNDLE_SCHEMA",
     "GESTATIONAL_AGE",
     "TIME_ELEMENT_SCHEMA"
 ]
