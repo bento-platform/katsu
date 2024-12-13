@@ -7,7 +7,6 @@ from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.exceptions import ErrorDetail
 from rest_framework.renderers import JSONRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
