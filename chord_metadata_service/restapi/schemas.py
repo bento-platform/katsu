@@ -184,35 +184,3 @@ TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
         named_one_of("interval", TIME_INTERVAL)
     ]
 }, descriptions.TIME_ELEMENT)
-
-
-# ============================ FHIR INGEST SCHEMAS ============================
-# The schema used to validate FHIR data for ingestion
-
-
-FHIR_BUNDLE_SCHEMA = tag_schema_with_nested_ids({
-    "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "fhir_bundle"),
-    "description": "FHIR Bundle schema",
-    "type": "object",
-    "properties": {
-        "resourceType": {
-            "type": "string",
-            "const": "Bundle",
-            "description": "Collection of resources."
-        },
-        "entry": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "resource": {"type": "object"}
-                },
-                "additionalProperties": True,
-                "required": ["resource"]
-            }
-        }
-    },
-    "additionalProperties": True,
-    "required": ["resourceType", "entry"]
-})
