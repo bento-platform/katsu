@@ -51,12 +51,6 @@ INDIVIDUAL_SCHEMA = tag_ids_and_describe({
         "gender": ONTOLOGY_CLASS,
         "taxonomy": ONTOLOGY_CLASS,
         # extended fields
-        "active": {
-            "type": "boolean"
-        },
-        "deceased": {
-            "type": "boolean"
-        },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA,
     },
     "required": ["id"]

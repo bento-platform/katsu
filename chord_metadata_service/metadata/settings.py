@@ -266,11 +266,6 @@ CACHES = {
     }
 }
 
-FHIR_INDEX_NAME = 'fhir_metadata'
-
-# Set to True to run ES for FHIR index
-ELASTICSEARCH = False
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'

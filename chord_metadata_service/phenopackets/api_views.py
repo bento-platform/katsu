@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
-    FHIRRenderer,
     BiosamplesCSVRenderer,
     IndividualBentoSearchRenderer,
 )
@@ -25,67 +24,13 @@ class PhenopacketsModelViewSet(viewsets.ModelViewSet):
     pagination_class = LargeResultsSetPagination
 
 
-class ExtendedPhenopacketsModelViewSet(PhenopacketsModelViewSet):
-    renderer_classes = (*PhenopacketsModelViewSet.renderer_classes, FHIRRenderer)
-
-
-class PhenotypicFeatureViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing phenotypic features
-
-    post:
-    Create a new phenotypic feature
-
-    """
-    serializer_class = s.PhenotypicFeatureSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.PhenotypicFeatureFilter
-    queryset = m.PhenotypicFeature.objects.all().order_by("id")
-
-
-class DiseaseViewSet(ExtendedPhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing diseases
-
-    post:
-    Create a new disease
-
-    """
-    serializer_class = s.DiseaseSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.DiseaseFilter
-    queryset = m.Disease.objects.all().order_by("id")
-
-
-META_DATA_PREFETCH = (
-    "resources",
-)
-
-
-class MetaDataViewSet(PhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing metadata records
-
-    post:
-    Create a new metadata record
-
-    """
-    serializer_class = s.MetaDataSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.MetaDataFilter
-    queryset = m.MetaData.objects.all().prefetch_related(*META_DATA_PREFETCH).order_by("id")
-
-
 BIOSAMPLE_PREFETCH = (
     "phenotypic_features",
     "experiment_set",
 )
 
 
-class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
+class BiosampleViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing biosamples
@@ -100,7 +45,7 @@ class BiosampleViewSet(ExtendedPhenopacketsModelViewSet):
     lookup_value_regex = MODEL_ID_PATTERN
 
 
-class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
+class BiosampleBatchViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing biosamples
@@ -114,7 +59,6 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
     pagination_class = BatchResultsSetPagination
     renderer_classes = (
         *api_settings.DEFAULT_RENDERER_CLASSES,
-        FHIRRenderer,
         PhenopacketsRenderer,
         BiosamplesCSVRenderer,
         IndividualBentoSearchRenderer,
@@ -146,7 +90,7 @@ class BiosampleBatchViewSet(ExtendedPhenopacketsModelViewSet):
 
 PHENOPACKET_PREFETCH = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-    *(f"meta_data__{p}" for p in META_DATA_PREFETCH),
+    "meta_data__resources",
     "phenotypic_features",
     "subject",
     "interpretations",
@@ -158,7 +102,7 @@ PHENOPACKET_SELECT_REL = (
 )
 
 
-class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
+class PhenopacketViewSet(PhenopacketsModelViewSet):
     """
     get:
     Return a list of all existing phenopackets
@@ -172,51 +116,6 @@ class PhenopacketViewSet(ExtendedPhenopacketsModelViewSet):
     filterset_class = f.PhenopacketFilter
     queryset = m.Phenopacket.objects.all().prefetch_related(*PHENOPACKET_PREFETCH).order_by("id")
     lookup_value_regex = MODEL_ID_PATTERN
-
-
-class GenomicInterpretationViewSet(PhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing genomic interpretations
-
-    post:
-    Create a new genomic interpretation
-
-    """
-    queryset = m.GenomicInterpretation.objects.all().order_by("id")
-    serializer_class = s.GenomicInterpretationSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.GenomicInterpretationFilter
-
-
-class DiagnosisViewSet(PhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing diagnoses
-
-    post:
-    Create a new diagnosis
-
-    """
-    serializer_class = s.DiagnosisSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.DiagnosisFilter
-    queryset = m.Diagnosis.objects.all().order_by("id")
-
-
-class InterpretationViewSet(PhenopacketsModelViewSet):
-    """
-    get:
-    Return a list of all existing interpretations
-
-    post:
-    Create a new interpretation
-
-    """
-    serializer_class = s.InterpretationSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = f.InterpretationFilter
-    queryset = m.Interpretation.objects.all().order_by("id")
 
 
 @extend_schema(

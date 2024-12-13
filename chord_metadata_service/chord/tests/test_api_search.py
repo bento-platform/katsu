@@ -1,7 +1,5 @@
 import json
 
-from unittest.mock import patch
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -19,7 +17,6 @@ from chord_metadata_service.experiments.tests.constants import (
     valid_experiment, valid_experiment_result, valid_instrument
 )
 
-from chord_metadata_service.chord.tests.es_mocks import SEARCH_SUCCESS
 from .constants import (
     VALID_PROJECT_1,
     valid_dataset_1,
@@ -34,7 +31,6 @@ from .constants import (
     TEST_SEARCH_QUERY_8,
     TEST_SEARCH_QUERY_9,
     TEST_SEARCH_QUERY_10,
-    TEST_FHIR_SEARCH_QUERY,
 )
 from ..models import Project, Dataset
 from ..data_types import (
@@ -105,25 +101,25 @@ class SearchTest(APITestCase):
     def test_common_search_1(self):
         # No body
         for method in POST_GET:
-            r = self._search_call("search", method=method)
+            r = self._search_call("private-search", method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_2(self):
         # No data type
         for method in POST_GET:
-            r = self._search_call("search", data={"query": TEST_SEARCH_QUERY_1}, method=method)
+            r = self._search_call("private-search", data={"query": TEST_SEARCH_QUERY_1}, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_3(self):
         # No query
         for method in POST_GET:
-            r = self._search_call("search", data={"data_type": DATA_TYPE_PHENOPACKET}, method=method)
+            r = self._search_call("private-search", data={"data_type": DATA_TYPE_PHENOPACKET}, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_4(self):
         # Bad data type
         for method in POST_GET:
-            r = self._search_call("search", data={
+            r = self._search_call("private-search", data={
                 "data_type": "bad_data_type",
                 "query": TEST_SEARCH_QUERY_1,
             }, method=method)
@@ -132,33 +128,16 @@ class SearchTest(APITestCase):
     def test_common_search_5(self):
         # Bad syntax for query
         for method in POST_GET:
-            r = self._search_call("search", data={
+            r = self._search_call("private-search", data={
                 "data_type": DATA_TYPE_PHENOPACKET,
                 "query": ["hello", "world"]
             }, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_search_with_result(self):
-        # Valid search with result
-        for method in POST_GET:
-            r = self._search_call("search", data={
-                "data_type": DATA_TYPE_PHENOPACKET,
-                "query": TEST_SEARCH_QUERY_1
-            }, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-
-            c = r.json()
-
-            self.assertEqual(len(c["results"]), 1)
-            self.assertDictEqual(c["results"][0], {
-                "id": str(self.dataset.identifier),
-                "data_type": DATA_TYPE_PHENOPACKET
-            })
-
     def test_search_without_result(self):
         # Valid search without result
         for method in POST_GET:
-            r = self._search_call("search", data={
+            r = self._search_call("private-search", data={
                 "data_type": DATA_TYPE_PHENOPACKET,
                 "query": TEST_SEARCH_QUERY_2
             }, method=method)
@@ -499,37 +478,3 @@ class SearchTest(APITestCase):
             dataset_id = list(c["results"].keys())[0]
             matches = c["results"][dataset_id]["matches"]
             self.assertEqual(len(matches), 2)   # 2 biosamples in list
-
-    @patch('chord_metadata_service.chord.views_search.es')
-    def test_fhir_search(self, mocked_es):
-        mocked_es.search.return_value = SEARCH_SUCCESS
-        # Valid search with result
-        for method in POST_GET:
-            r = self._search_call("fhir-search", data={
-                "query": TEST_FHIR_SEARCH_QUERY
-            }, method=method)
-
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-
-            self.assertEqual(len(c["results"]), 1)
-            self.assertDictEqual(c["results"][0], {
-                "id": str(self.dataset.identifier),
-                "data_type": DATA_TYPE_PHENOPACKET
-            })
-
-    @patch('chord_metadata_service.chord.views_search.es')
-    def test_private_fhir_search(self, mocked_es):
-        mocked_es.search.return_value = SEARCH_SUCCESS
-        # Valid search with result
-        for method in POST_GET:
-            r = self._search_call("fhir-private-search", data={
-                "query": TEST_FHIR_SEARCH_QUERY
-            }, method=method)
-
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-
-            self.assertIn(str(self.dataset.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
-            self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])

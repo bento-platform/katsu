@@ -64,8 +64,7 @@ INVALID_INDIVIDUAL = {
             "age": "P49Y"
         }
     },
-    "sex": "FEM",
-    "active": True
+    "sex": "FEM"
 }
 
 VALID_INDIVIDUAL_2 = {

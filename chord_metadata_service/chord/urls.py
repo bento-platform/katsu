@@ -24,9 +24,6 @@ urlpatterns = [
     path('data-types/<str:data_type>/metadata_schema', views_data_types.data_type_metadata_schema,
          name="data-type-metadata-schema"),
 
-    path('search', views_search.chord_search, name="search"),
-    path('fhir-search', views_search.fhir_public_search, name="fhir-search"),
-    path('private/fhir-search', views_search.fhir_private_search, name="fhir-private-search"),
     path('private/search', views_search.chord_private_search, name="private-search"),
 
     path('datasets', DatasetViewSet.as_view({'get': 'list'}), name="chord-dataset-list"),

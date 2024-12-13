@@ -1,8 +1,9 @@
 from django.conf import settings
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
-from .schema_utils import DATE_TIME, DRAFT_07, SchemaTypes, base_type, tag_ids_and_describe, \
-    tag_schema_with_nested_ids, named_one_of, sub_schema_uri
+from .schema_utils import (
+    DATE_TIME, DRAFT_07, SchemaTypes, base_type, tag_ids_and_describe, named_one_of, sub_schema_uri
+)
 
 # Individual schemas for validation of JSONField values
 
@@ -17,7 +18,6 @@ __all__ = [
     "AGE_OR_AGE_RANGE",
     "TIME_INTERVAL",
     "EXTRA_PROPERTIES_SCHEMA",
-    "FHIR_BUNDLE_SCHEMA",
     "GESTATIONAL_AGE",
     "TIME_ELEMENT_SCHEMA"
 ]
@@ -184,35 +184,3 @@ TIME_ELEMENT_SCHEMA = tag_ids_and_describe({
         named_one_of("interval", TIME_INTERVAL)
     ]
 }, descriptions.TIME_ELEMENT)
-
-
-# ============================ FHIR INGEST SCHEMAS ============================
-# The schema used to validate FHIR data for ingestion
-
-
-FHIR_BUNDLE_SCHEMA = tag_schema_with_nested_ids({
-    "$schema": DRAFT_07,
-    "$id": sub_schema_uri(base_uri, "fhir_bundle"),
-    "description": "FHIR Bundle schema",
-    "type": "object",
-    "properties": {
-        "resourceType": {
-            "type": "string",
-            "const": "Bundle",
-            "description": "Collection of resources."
-        },
-        "entry": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "resource": {"type": "object"}
-                },
-                "additionalProperties": True,
-                "required": ["resource"]
-            }
-        }
-    },
-    "additionalProperties": True,
-    "required": ["resourceType", "entry"]
-})

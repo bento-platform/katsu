@@ -34,8 +34,7 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = Individual
-        fields = ["id", "alternate_ids", "active", "deceased",
-                  "phenopackets__biosamples", "phenopackets"]
+        fields = ["id", "alternate_ids", "phenopackets__biosamples", "phenopackets"]
 
     def filter_found_phenotypic_feature(self, qs, name, value):
         """
