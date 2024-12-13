@@ -23,7 +23,6 @@ A Phenopackets-based clinical and phenotypic metadata service for the Bento plat
   - [Standalone PostGres db and AdMiner](#standalone-postgres-db-and-adminer)
   - [Authentication](#authentication)
     - [Note on Permissions](#note-on-permissions)
-    - [Authorization inside CanDIG](#authorization-inside-candig)
   - [Developing](#developing)
     - [Branching](#branching)
     - [Tests](#tests)
@@ -156,13 +155,6 @@ CHORD_URL=
 #  - If true, will enforce permissions. Do not run with this not set to true in production! 
 #    Defaults to (not DEBUG)
 CHORD_PERMISSIONS=
-
-# CanDIG-specific variables:
-CANDIG_AUTHORIZATION=
-CANDIG_OPA_URL=
-CANDIG_OPA_SECRET=
-CANDIG_OPA_SITE_ADMIN_KEY=
-INSIDE_CANDIG=
 ```
 
 ## Standalone Postgres db and Adminer
@@ -222,15 +214,6 @@ functions as follows:
 
 This can be turned off with the `CHORD_PERMISSIONS` environment variable and/or
 Django setting, or with the `AUTH_OVERRIDE` Django setting.
-
-### Authorization inside CanDIG
-
-When ran inside the CanDIG context, to properly implement authorization you'll
-have to do the following:
-
-1. Make sure the CHORD_PERMISSIONS is set to "false".
-2. Set CANDIG_AUTHORIZATION to "OPA".
-3. Configure CANDIG_OPA_URL and CANDIG_OPA_SECRET.
 
 
 ## Developing
