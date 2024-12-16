@@ -1,14 +1,13 @@
-import json
 import os
 import shutil
 import tempfile
 
 from django.urls import reverse
+from rest_framework import status
+
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.export.cbioportal import CBIO_FILES_SET
 from chord_metadata_service.chord.export.utils import EXPORT_DIR
-from rest_framework import status
-from rest_framework.test import APITestCase
-
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
@@ -17,7 +16,7 @@ from .constants import VALID_DATA_USE_1
 from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
 
 
-class ExportTest(APITestCase):
+class ExportTest(AuthzAPITestCase):
     def setUp(self) -> None:
         # Creates a test database and populate with a phenopacket test file
 
@@ -30,7 +29,7 @@ class ExportTest(APITestCase):
 
     def test_export_cbio(self):
         # Test with no export body
-        r = self.client.post(reverse("export"), content_type="application/json")
+        r = self.one_authz_post(reverse("export"), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -43,13 +42,13 @@ class ExportTest(APITestCase):
             }
 
             # Test with no output_path: expect a tar archive to be returned
-            r = self.client.post(reverse("export"), data=json.dumps(export_payload), content_type="application/json")
+            r = self.one_authz_post(reverse("export"), json=export_payload)
             self.assertEqual(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
 
             # Test with output_path provided: expect files created in this directory
             export_payload["output_path"] = tmp_dir
 
-            r = self.client.post(reverse("export"), data=json.dumps(export_payload), content_type="application/json")
+            r = self.one_authz_post(reverse("export"), json=export_payload)
             self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
             # TODO: just write within the directory that has been provided
             export_path = os.path.join(tmp_dir, EXPORT_DIR, self.study_id)
@@ -61,3 +60,5 @@ class ExportTest(APITestCase):
             shutil.rmtree(tmp_dir)
 
         # TODO: More
+
+    # TODO: test forbidden

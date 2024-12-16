@@ -84,7 +84,20 @@ class Experiment(BaseScopeableModel, IndexableMixin):
         return str(self.id)
 
 
-class ExperimentResult(models.Model, IndexableMixin):
+class ExperimentResult(BaseScopeableModel, IndexableMixin):
+    @staticmethod
+    def get_scope_filters() -> ModelScopeFilters:
+        return {
+            "project": {
+                "filter": "experiment__dataset__project_id",
+                "prefetch_related": ("experiment__dataset",),
+            },
+            "dataset": {
+                "filter": "experiment__dataset_id",
+                "prefetch_related": ("experiemnt",),
+            },
+        }
+
     """ Class to represent information about analysis of sequencing data in a file format. """
     # TODO identifier assigned by lab (?)
     identifier = CharField(max_length=200, blank=True, null=True,

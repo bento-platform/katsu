@@ -14,14 +14,14 @@ from django.db.models.functions import Coalesce
 from django.http.request import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import viewsets, filters, mixins, serializers, status
+from rest_framework import filters, mixins, serializers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzModelGenericViewSet, BentoAuthzModelViewSet
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
@@ -115,6 +115,8 @@ class IndividualViewSet(BentoAuthzModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+            scope = async_to_sync(get_request_discovery_scope)(self.request)
+
             start = datetime.now()
             # filterset applies filtering from the GET parameters
             filterset = self.filterset_class(request.query_params, queryset=self.queryset)
@@ -127,7 +129,8 @@ class IndividualViewSet(BentoAuthzModelViewSet):
             # TODO: code duplicated from chord/view_search.py
             biosamples_experiments_details = get_biosamples_with_experiment_details(individual_ids)
             qs = (
-                Phenopacket.objects
+                Phenopacket
+                .get_model_scoped_queryset(scope)
                 .filter(subject__id__in=individual_ids)
                 .values(
                     "subject_id",
@@ -173,15 +176,7 @@ class IndividualViewSet(BentoAuthzModelViewSet):
         )
 
 
-class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """
-    A viewset that only implements the 'list' action.
-    To be used with the BatchListRouter which maps the POST method to .list()
-    """
-    pass
-
-
-class IndividualBatchViewSet(BatchViewSet):
+class IndividualBatchViewSet(mixins.ListModelMixin, BentoAuthzModelGenericViewSet):
 
     serializer_class = IndividualSerializer
     pagination_class = BatchResultsSetPagination
@@ -194,11 +189,18 @@ class IndividualBatchViewSet(BatchViewSet):
     # Override to infer the renderer based on a `format` argument from the POST request body
     content_negotiation_class = FormatInPostContentNegotiation
 
-    def get_queryset(self):
+    data_type = dts.DATA_TYPE_PHENOPACKET
+    scope_enabled = True
+
+    @async_to_sync
+    async def get_queryset(self):
+        scope = await get_request_discovery_scope(self.request)
+
         individual_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
         queryset = (
-            Individual.objects
+            Individual
+            .get_model_scoped_queryset(scope)
             .filter(**filter_by_id)
             .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
             .order_by("id")

@@ -1,5 +1,4 @@
 from asgiref.sync import async_to_sync
-from django.conf import settings
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.request import Request as DrfRequest
 
@@ -13,8 +12,6 @@ __all__ = [
     "BentoAllowAnyReadOnly",
     "BentoDeferToHandler",
     "BentoDataTypePermission",
-    "ReadOnly",
-    "OverrideOrSuperUserOnly",
 ]
 
 
@@ -56,15 +53,3 @@ class BentoDataTypePermission(BasePermission):
         # if this is called, has_data_type_permission has already been called and handled the overall action type
         # TODO: eliminate duplicate scope check somehow without enabling permissions on objects outside of scope
         return await view.obj_is_in_request_scope(request, obj)
-
-
-class ReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS
-
-
-class OverrideOrSuperUserOnly(BasePermission):
-    def has_permission(self, request, view):
-        # If in CHORD production, is_superuser will be set by remote user headers.
-        # TODO: Configuration: Allow configurable read-only APIs or other external access
-        return settings.AUTH_OVERRIDE or request.user.is_superuser

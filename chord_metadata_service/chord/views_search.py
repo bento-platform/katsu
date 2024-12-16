@@ -4,9 +4,10 @@ import json
 import logging
 
 from adrf.decorators import api_view as async_api_view
+from asgiref.sync import sync_to_async
+from bento_lib.auth.permissions import P_QUERY_DATA
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
-
 from datetime import datetime
 from django.db import connection
 from django.db.models import Count, F, Q
@@ -14,8 +15,7 @@ from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
 from psycopg2 import sql
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework import status
@@ -23,9 +23,10 @@ from rest_framework import status
 from typing import Callable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
-from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly, ReadOnly
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 
-from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
@@ -89,23 +90,22 @@ def data_type_results(query: sql.SQL, params, key="id"):
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
 
-def experiment_query_results(query, params, options=None):
+async def experiment_query_results(scope: ValidatedDiscoveryScope, query, params, options=None):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    queryset = Experiment.objects\
-        .filter(id__in=data_type_results(query, params, "id"))
+    queryset = Experiment.get_model_scoped_queryset(scope).filter(
+        id__in=await sync_to_async(data_type_results)(query, params, "id"))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         return get_values_list(queryset, options)
 
-    return queryset.select_related(*EXPERIMENT_SELECT_REL) \
-        .prefetch_related(*EXPERIMENT_PREFETCH)
+    return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH)
 
 
-def phenopacket_query_results(query, params, options=None):
-    queryset = Phenopacket.objects \
-        .filter(id__in=data_type_results(query, params, "id"))
+async def phenopacket_query_results(scope: ValidatedDiscoveryScope, query, params, options=None):
+    queryset = Phenopacket.get_model_scoped_queryset(scope).filter(
+        id__in=await sync_to_async(data_type_results)(query, params, "id"))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -125,20 +125,19 @@ def phenopacket_query_results(query, params, options=None):
         )
 
         # Get the biosamples with experiments data
-        phenopacket_ids = [result['subject_id'] for result in results]
-        biosamples_experiments_details = get_biosamples_with_experiment_details(phenopacket_ids)
+        subject_ids = [result['subject_id'] async for result in results]
+        biosamples_experiments_details = get_biosamples_with_experiment_details(subject_ids)
 
         # Group the experiments with biosamples by subject_id
-        experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
+        experiments_with_biosamples = await sync_to_async(build_experiments_by_subject)(biosamples_experiments_details)
 
         # Add the experiments_with_biosamples data to the results
-        for result in results:
-            result["experiments_with_biosamples"] = experiments_with_biosamples[result['subject_id']]
+        async for result in results:
+            result["experiments_with_biosamples"] = experiments_with_biosamples[result["subject_id"]]
 
         return results
     else:
-        return queryset.select_related(*PHENOPACKET_SELECT_REL) \
-            .prefetch_related(*PHENOPACKET_PREFETCH)
+        return queryset.select_related(*PHENOPACKET_SELECT_REL).prefetch_related(*PHENOPACKET_PREFETCH)
 
 
 QUERY_RESULTS_FN: dict[str, Callable] = {
@@ -152,7 +151,21 @@ QUERY_RESULT_SERIALIZERS = {
 }
 
 
-def search(request):
+def _search_response(data_type, serializer_class, queryset, start):
+    return Response(
+        build_search_response({
+            dataset_id: {
+                "data_type": data_type,
+                "matches": list(serializer_class(p).data for p in dataset_objects)
+            } for dataset_id, dataset_objects in itertools.groupby(
+                queryset if queryset is not None else [],
+                key=lambda o: str(o.dataset_id)  # object here
+            )
+        }, start)
+    )
+
+
+async def search(request: DrfRequest):
     """
     Generic function that takes a request object containing the following parameters:
     - query: a Bento specific string representation of a query. e.g.
@@ -161,8 +174,12 @@ def search(request):
     This function returns matches grouped by their "owning" datasets.
     The request can be made using POST or GET methods.
     """
+
+    scope = await get_request_discovery_scope(request)
+
     search_params, err = get_chord_search_parameters(request)
     if err:
+        authz_middleware.mark_authz_done(request)
         return bad_request_response(err)
 
     if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
@@ -174,9 +191,15 @@ def search(request):
     compiled_query = search_params["compiled_query"]
     query_params = search_params["params"]
 
+    res = await authz_middleware.async_evaluate_one(
+        request, scope.as_authz_resource(data_type), P_QUERY_DATA, mark_authz_done=True
+    )
+    if not res:
+        return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
+
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
-    queryset = query_function(compiled_query, query_params, search_params)
+    queryset = await query_function(scope, compiled_query, query_params, search_params)
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         result = {
@@ -184,7 +207,7 @@ def search(request):
                 "data_type": data_type,
                 "matches": [p["value"] for p in dataset_dicts]
             } for dataset_id, dataset_dicts in itertools.groupby(
-                queryset,
+                [r async for r in queryset],
                 key=lambda d: str(d["dataset_id"])    # dict here
             )
         }
@@ -203,28 +226,18 @@ def search(request):
                     for p in dataset_dicts
                 ]
             } for dataset_id, dataset_dicts in itertools.groupby(
-                queryset,
+                [r async for r in queryset],
                 key=lambda d: str(d["dataset_id"])    # dict here
             )
         }
         return Response(build_search_response(result, start))
 
-    return Response(build_search_response({
-        dataset_id: {
-            "data_type": data_type,
-            "matches": list(serializer_class(p).data for p in dataset_objects)
-        } for dataset_id, dataset_objects in itertools.groupby(
-            queryset if queryset is not None else [],
-            key=lambda o: str(o.dataset_id)  # object here
-        )
-    }, start))
+    return await sync_to_async(_search_response)(data_type, serializer_class, queryset, start)
 
 
-# Mounted on /private/, so will get protected anyway; this allows for access from federation service
-# TODO: Ugly and misleading permissions
-@api_view(["GET", "POST"])
-@permission_classes([AllowAny])
-def chord_private_search(request):
+@async_api_view(["GET", "POST"])
+@permission_classes([BentoDeferToHandler])
+async def chord_private_search(request: DrfRequest):
     """
     Free-form search using Bento specific syntax. Results are grouped by table
     of origin.
@@ -250,31 +263,7 @@ def chord_private_search(request):
         response.
     """
     # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return search(request)
-
-
-def phenopacket_filter_results(subject_ids, disease_ids, biosample_ids,
-                               phenotypicfeature_ids, phenopacket_ids):
-    query = Phenopacket.objects.get_queryset()
-
-    if subject_ids:
-        query = query.filter(subject__id__in=subject_ids)
-
-    if disease_ids:
-        query = query.filter(diseases__id__in=disease_ids)
-
-    if biosample_ids:
-        query = query.filter(biosamples__id__in=biosample_ids)
-
-    if phenotypicfeature_ids:
-        query = query.filter(phenotypic_features__id__in=phenotypicfeature_ids)
-
-    if phenopacket_ids:
-        query = query.filter(id__in=phenopacket_ids)
-
-    res = query.prefetch_related(*PHENOPACKET_PREFETCH)
-
-    return res
+    return await search(request)
 
 
 def get_chord_search_parameters(request, data_type=None):
@@ -299,6 +288,7 @@ def get_chord_search_parameters(request, data_type=None):
             - field: optional parameter, set when output is "values_list"
         }
     """
+
     query_params = request.query_params if request.method == "GET" else (request.data or {})
     data_type = query_params.get("data_type") or data_type
 
@@ -313,7 +303,6 @@ def get_chord_search_parameters(request, data_type=None):
         return None, "Missing query in request body"
 
     if request.method == "GET":     # Query passed as a JSON in the URL: must be decoded.
-        # print(request.query_params)
         try:
             query = json.loads(query)
         except json.decoder.JSONDecodeError:
@@ -342,10 +331,13 @@ def get_chord_search_parameters(request, data_type=None):
     }, None
 
 
-def chord_dataset_search(
-        search_params,
-        dataset_id, start,
-        internal=False) -> tuple[bool | list | None, str | None]:
+def _serialize_many(serializer_class, queryset):
+    return serializer_class(queryset, many=True).data
+
+
+async def chord_dataset_search(
+    scope: ValidatedDiscoveryScope, search_params, start
+) -> tuple[bool | list | None, str | None]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
     to a given table.
@@ -354,50 +346,57 @@ def chord_dataset_search(
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
 
-    queryset = query_function(
+    queryset = await query_function(
+        scope,
         query=sql.SQL("{} AND dataset_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
-        params=search_params["params"] + (dataset_id,),
+        params=search_params["params"] + (scope.dataset_id,),
         options=search_params
     )
-    if not internal:
-        return queryset.exists(), None    # True if at least one match
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
-        return list(queryset), None
+        return [v async for v in queryset], None
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
-        return list(queryset), None
+        return [v async for v in queryset], None
 
     debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
-    serialized_data = serializer_class(queryset, many=True).data
+    serialized_data = await sync_to_async(_serialize_many)(serializer_class, queryset)
     debug_log(f"Finished running query and serializing in {datetime.now() - start}")
 
     return serialized_data, None
 
 
-def dataset_search(request: DrfRequest, dataset_id: str, internal=False):
+@async_api_view(["GET", "POST"])
+@permission_classes([BentoDeferToHandler])
+async def private_dataset_search(request: DrfRequest, dataset_id: str):
+    try:
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except (Dataset.DoesNotExist, ValidationError) as e:
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
+
+    project = await Project.objects.aget(identifier=dataset.project_id)
+
+    # don't use request scope - the project/dataset are validated by the aget calls above and fixed
+    scope = ValidatedDiscoveryScope(project, dataset)
+
+    # TODO: narrow based on queried data types
+    if not await authz_middleware.async_evaluate_one(
+        request, scope.as_authz_resource(), P_QUERY_DATA, mark_authz_done=True
+    ):
+        return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
+
+    # perform search: --------------------------------------------------------------------------------------------------
+
     start = datetime.now()
 
     search_params, err = get_chord_search_parameters(request=request)
     if err:
         return bad_request_response(err)
 
-    data, err = chord_dataset_search(search_params, dataset_id, start, internal)
+    data, err = await chord_dataset_search(scope, search_params, start)
     if err:
         return bad_request_response(err)
 
-    return Response(build_search_response(data, start) if internal else data)
-
-
-@api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def public_dataset_search(request: DrfRequest, dataset_id: str):
-    return dataset_search(request=request, dataset_id=dataset_id)
-
-
-@api_view(["GET", "POST"])
-@permission_classes([OverrideOrSuperUserOnly | ReadOnly])
-def private_dataset_search(request: DrfRequest, dataset_id: str):
-    return dataset_search(request=request, dataset_id=dataset_id, internal=True)
+    return Response(build_search_response(data, start))
 
 
 DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {

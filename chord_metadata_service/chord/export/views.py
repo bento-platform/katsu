@@ -2,32 +2,33 @@ import json
 import logging
 import traceback
 
+from adrf.decorators import api_view as async_api_view
+from bento_lib.auth.permissions import P_EXPORT_DATA
+from bento_lib.auth.resources import RESOURCE_EVERYTHING
 from django.http import FileResponse
 
 from jsonschema import Draft7Validator
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework import status
+from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
-from rest_framework.request import Request
+from rest_framework.request import Request as DrfRequest
 
-
-from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
 from bento_lib.responses import errors
 
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import BentoDeferToHandler
+from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
 from .metadata import EXPORT_FORMAT_FUNCTION_MAP, EXPORT_FORMAT_OBJECT_TYPE_MAP, EXPORT_FORMATS, EXPORT_OBJECT_TYPE
 from .utils import ExportError, ExportFileContext
-
 
 BENTO_EXPORT_SCHEMA_VALIDATOR = Draft7Validator(EXPORT_SCHEMA)
 
 logger = logging.getLogger(__name__)
 
 
-# Mounted on /private/, so will get protected anyway; this allows for access from WES
-# TODO: Ugly and misleading permissions
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def export(request: Request):
+@async_api_view(["POST"])
+@permission_classes([BentoDeferToHandler])
+async def export(request: DrfRequest):
     """Export data from Katsu
 
     Exports the requested data object (e.g. a Dataset or a Project) in the given
@@ -40,6 +41,10 @@ def export(request: Request):
         the payload as a JSON following the export schema.
     """
     # Private endpoints are protected by URL namespace, not by Django permissions.
+
+    res = await authz_middleware.async_evaluate_one(request, RESOURCE_EVERYTHING, P_EXPORT_DATA, mark_authz_done=True)
+    if not res:
+        return Response(errors.forbidden_error("Fobidden"), status=status.HTTP_403_FORBIDDEN)
 
     # TODO: Schema for OpenAPI doc
 
@@ -56,10 +61,10 @@ def export(request: Request):
     object_type: str = request.data["object_type"]   # 'project', 'dataset',...
 
     model = EXPORT_OBJECT_TYPE[object_type]["model"]
-    if not model.objects.filter(identifier=object_id).exists():
+    if not await model.objects.filter(identifier=object_id).aexists():
         return Response(errors.bad_request_error(
             f"{object_type.capitalize()} with ID {object_id} does not exist"),
-            status=400
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     fmt = request.data["format"].strip()
@@ -68,13 +73,13 @@ def export(request: Request):
     if fmt not in EXPORT_FORMATS:  # Check that the workflow exists
         return Response(errors.bad_request_error(
             f"Export in format {fmt} is not implemented"),
-            status=400
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     if object_type not in EXPORT_FORMAT_OBJECT_TYPE_MAP[fmt]:
         return Response(errors.bad_request_error(
             f"Exporting entities of type {object_type} in format {fmt} is not implemented"),
-             status=400
+             status=status.HTTP_400_BAD_REQUEST,
         )
 
     # TODO: secure the output_path value
@@ -82,7 +87,7 @@ def export(request: Request):
     try:
         with ExportFileContext(output_path, object_id) as file_export:
             # Pass a callable to generate the proper file paths within the export context.
-            EXPORT_FORMAT_FUNCTION_MAP[fmt](file_export.get_path, object_id)
+            await EXPORT_FORMAT_FUNCTION_MAP[fmt](file_export.get_path, object_id)
 
             # If no output path parameter has been provided, the generated export
             # is returned as an attachment to the Response and everything will
@@ -95,14 +100,14 @@ def export(request: Request):
                 return FileResponse(open(tarfile, "rb"), as_attachment=True)
 
     except ExportError as e:
-        return Response(errors.bad_request_error(f"Encountered export error: {e}"), status=400)
+        return Response(errors.bad_request_error(f"Encountered export error: {e}"), status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # Encountered some other error from the export attempt, return a somewhat detailed message
         logger.error(f"Encountered an exception while processing an export attempt:\n{traceback.format_exc()}")
         return Response(errors.internal_server_error(
             f"Encountered an exception while processing an export attempt (error: {repr(e)}"),
-            status=500
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-    return Response(status=204)
+    return Response(status=status.HTTP_204_NO_CONTENT)

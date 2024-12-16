@@ -85,9 +85,6 @@ CHORD_SERVICE_TYPE: GA4GHServiceType = {
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 BENTO_SERVICE_KIND = "metadata"
 
-# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
-AUTH_OVERRIDE = not CHORD_PERMISSIONS
-
 # When Katsu is hosted on a subpath (e.g. http://myportal.com/api/katsu), this
 # parameter is used by Django to compute correct URLs in templates (for example
 # in DRF API discovery pages, or swagger UI)
@@ -276,7 +273,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.OverrideOrSuperUserOnly'],
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.BentoDeferToHandler'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'JSON_UNDERSCOREIZE': {

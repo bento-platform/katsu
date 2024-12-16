@@ -2,8 +2,8 @@ import json
 
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
 
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket, PhenotypicFeature
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
@@ -41,7 +41,7 @@ from ..data_types import (
 POST_GET = ("POST", "GET")
 
 
-class SearchTest(APITestCase):
+class SearchTest(AuthzAPITestCase):
     def setUp(self) -> None:
         self.project = Project.objects.create(**VALID_PROJECT_1)
         self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
@@ -93,10 +93,8 @@ class SearchTest(APITestCase):
                 "query": json.dumps(data["query"]),
             }
 
-        return (self.client.post if method == "POST" else self.client.get)(
-            reverse(endpoint, args=args),
-            data=data,
-            **({"content_type": "application/json"} if method == "POST" else {}))
+        return (self.one_authz_post if method == "POST" else self.one_authz_get)(
+            reverse(endpoint, args=args), data=data)
 
     def test_common_search_1(self):
         # No body
@@ -161,23 +159,17 @@ class SearchTest(APITestCase):
 
         # TODO: Check schema?
 
-    def test_dataset_search_1(self):
-        # No body
-        for method in POST_GET:
-            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_private_dataset_search_2(self):
         # No query
         for method in POST_GET:
-            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data={}, method=method)
+            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data={}, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_dataset_search_3(self):
         # Bad syntax for query
         d = {"query": ["hello", "world"]}
         for method in POST_GET:
-            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_private_dataset_search_4(self):
@@ -189,11 +181,6 @@ class SearchTest(APITestCase):
         }
 
         for method in POST_GET:
-            r = self._search_call("public-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(c, True)
-
             r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()

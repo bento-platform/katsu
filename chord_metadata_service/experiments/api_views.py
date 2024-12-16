@@ -1,13 +1,13 @@
 from asgiref.sync import async_to_sync
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import mixins, serializers, status, viewsets
+from rest_framework import mixins, serializers, status
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet, BentoAuthzModelGenericViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
@@ -63,22 +63,15 @@ class ExperimentViewSet(BentoAuthzModelViewSet):
     @async_to_sync
     async def get_queryset(self):
         return (
-            Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            Experiment
+            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             .select_related(*EXPERIMENT_SELECT_REL)
             .prefetch_related(*EXPERIMENT_PREFETCH)
             .order_by("id")
         )
 
 
-class BatchViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """
-    A viewset that only implements the 'list' action.
-    To be used with the BatchListRouter which maps the POST method to .list()
-    """
-    pass
-
-
-class ExperimentBatchViewSet(BatchViewSet):
+class ExperimentBatchViewSet(mixins.ListModelMixin, BentoAuthzModelGenericViewSet):
     """
     get:
     Return a list of all existing experiments
@@ -92,12 +85,17 @@ class ExperimentBatchViewSet(BatchViewSet):
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer, ExperimentCSVRenderer)
     content_negotiation_class = FormatInPostContentNegotiation
 
-    def get_queryset(self):
+    data_type = DATA_TYPE_EXPERIMENT
+    scope_enabled = True
+
+    @async_to_sync
+    async def get_queryset(self):
         experiment_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": experiment_ids} if experiment_ids else {}
 
         return (
-            Experiment.objects
+            Experiment
+            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             .filter(**filter_by_id)
             .select_related(*EXPERIMENT_SELECT_REL)
             .prefetch_related(*EXPERIMENT_PREFETCH)
@@ -113,7 +111,7 @@ class ExperimentBatchViewSet(BatchViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ExperimentResultViewSet(viewsets.ModelViewSet):
+class ExperimentResultViewSet(BentoAuthzModelViewSet):
     """
     get:
     Return a list of all existing experiment results
@@ -122,12 +120,22 @@ class ExperimentResultViewSet(viewsets.ModelViewSet):
     Create a new experiment result
     """
 
-    queryset = ExperimentResult.objects.all().order_by("id")
+    data_type = DATA_TYPE_EXPERIMENT
+    scope_enabled = True
+
     serializer_class = ExperimentResultSerializer
     pagination_class = LargeResultsSetPagination
     renderer_classes = tuple(api_settings.DEFAULT_RENDERER_CLASSES)
     filter_backends = [DjangoFilterBackend]
     filterset_class = ExperimentResultFilter
+
+    @async_to_sync
+    async def get_queryset(self):
+        return (
+            ExperimentResult
+            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            .order_by("id")
+        )
 
 
 @extend_schema(

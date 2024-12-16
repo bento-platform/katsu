@@ -2,6 +2,7 @@ import io
 from typing import TextIO
 from os import walk, path
 
+from asgiref.sync import async_to_sync
 from django.db.models import F
 from django.test import TestCase
 
@@ -74,7 +75,7 @@ class ExportCBioTest(TestCase):
         """
 
         with ExportFileContext(None, self.study_id) as file_export:
-            exp.study_export(file_export.get_path, self.study_id)
+            async_to_sync(exp.study_export)(file_export.get_path, self.study_id)
             export_dir = file_export.get_path()
             self.assertTrue(path.exists(export_dir))
 
@@ -118,7 +119,7 @@ class ExportCBioTest(TestCase):
     def test_export_cbio_patient_data(self):
         indiv = Individual.objects.filter(phenopackets=self.p)
         with io.StringIO() as output:
-            exp.individual_export(indiv, output)
+            async_to_sync(exp.individual_export)(indiv, output)
             # Check header
             output.seek(0)
             field_count = None
@@ -156,7 +157,7 @@ class ExportCBioTest(TestCase):
         samples = pm.Biosample.objects.filter(phenopacket=self.p)
 
         with io.StringIO() as output:
-            exp.sample_export(samples, output)
+            async_to_sync(exp.sample_export)(samples, output)
             # Check header
             output.seek(0)
             field_count = None

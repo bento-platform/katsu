@@ -1,4 +1,3 @@
-import json
 import uuid
 
 from django.urls import reverse
@@ -40,7 +39,7 @@ class CreateProjectAPITest(AuthzAPITestCase):
 
     def test_create_project(self):
         for i, p in enumerate(self.valid_payloads, 1):
-            r = self.one_authz_post(reverse("project-list"), data=json.dumps(p))
+            r = self.one_authz_post(reverse("project-list"), json=p)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Project.objects.count(), i)
             self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
@@ -49,11 +48,11 @@ class CreateProjectAPITest(AuthzAPITestCase):
 
     def test_create_project_invalid(self):
         for p in self.invalid_payloads:
-            r = self.one_authz_post(reverse("project-list"), data=json.dumps(p))
+            r = self.one_authz_post(reverse("project-list"), json=p)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_project_forbidden(self):
-        r = self.one_no_authz_post(reverse("project-list"), data=json.dumps(self.valid_payloads[0]))
+        r = self.one_no_authz_post(reverse("project-list"), json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -67,16 +66,16 @@ class UpdateProjectTest(AuthzAPITestCaseWithProjectJSON):
         return {k: v for k, v in d.items() if k not in ("updated", "created")}
 
     def test_project_update(self):
-        r = self.one_authz_put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body))
+        r = self.one_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertDictEqual(self.without_times(r.json()), self.without_times(self.update_body))
 
     def test_project_update_not_found(self):
-        r = self.one_authz_put("/api/projects/not-found", data=json.dumps(self.update_body))
+        r = self.one_authz_put("/api/projects/not-found", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_project_update_forbidden(self):
-        r = self.one_no_authz_put(f"/api/projects/{self.project['identifier']}", data=json.dumps(self.update_body))
+        r = self.one_no_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -86,7 +85,7 @@ class DeleteProjectTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_delete_project_not_found(self):
-        r = self.client.delete("/api/projects/not-found")
+        r = self.one_authz_delete("/api/projects/not-found")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_project_forbidden(self):
@@ -140,7 +139,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
     def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
-            r = self.one_authz_post("/api/datasets", data=json.dumps(d))
+            r = self.one_authz_post("/api/datasets", json=d)
 
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
@@ -151,20 +150,20 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
-            r = self.one_authz_post("/api/datasets", data=json.dumps(d))
+            r = self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_dataset_forbidden(self):
-        r = self.one_no_authz_post("/api/datasets", data=json.dumps(self.valid_payloads[0]))
+        r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
 
-        r = self.one_authz_post('/api/datasets', data=json.dumps(payload))
+        r = self.one_authz_post('/api/datasets', json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        r_invalid = self.one_authz_post("/api/datasets", data=json.dumps(self.dats_invalid_payload))
+        r_invalid = self.one_authz_post("/api/datasets", json=self.dats_invalid_payload)
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
 
         self.assertEqual(Dataset.objects.count(), 1)
@@ -187,7 +186,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
     def test_dats_as_attachment(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
 
-        r = self.one_authz_post('/api/datasets', data=json.dumps(payload))
+        r = self.one_authz_post('/api/datasets', json=payload)
 
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         dataset_id = Dataset.objects.first().identifier
@@ -227,10 +226,10 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
         r = self.one_authz_post(
             "/api/datasets",
-            data=json.dumps({
+            json={
                 **valid_dataset_1(self.project["identifier"]),
                 "additional_resources": [resource["id"]],
-            }),
+            },
         )
 
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
@@ -270,7 +269,7 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_update_dataset_partial(self):
         r = self.one_authz_patch(
-            f"/api/datasets/{self.dataset.identifier}", data=json.dumps({"title": self.valid_update["title"]})
+            f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]}
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
@@ -279,10 +278,10 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
     def test_update_dataset_changed_project(self):
         r = self.one_authz_put(
             f"/api/datasets/{self.dataset.identifier}",
-            data=json.dumps({
+            json={
                 **self.valid_update,
                 "project": str(self.project_2.identifier),
-            })
+            }
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         res = r.json()
@@ -292,7 +291,7 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
     def test_update_dataset_bad_dats_json(self):
         r = self.one_authz_put(
             f"/api/datasets/{self.dataset.identifier}",
-            data=json.dumps({**self.valid_update, "dats_file": "asdf"}),  # asdf is not JSON
+            json={**self.valid_update, "dats_file": "asdf"},  # asdf is not JSON
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         res = r.json()
@@ -344,24 +343,20 @@ class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
         self.project_json_schema_invalid_payload = valid_project_json_schema(project_id="an-id-that-does-not-exist")
 
     def test_create_project_json_schema(self):
-        r = self.client.post('/api/project_json_schemas',
-                             data=json.dumps(self.project_json_schema_valid_payload),
-                             content_type="application/json")
-        r_invalid = self.client.post('/api/project_json_schemas',
-                                     data=json.dumps(self.project_json_schema_invalid_payload),
-                                     content_type="application/json")
+        r = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
+        r_invalid = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_invalid_payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(ProjectJsonSchema.objects.count(), 1)
 
+    def test_create_project_json_schema_forbidden(self):
+        r = self.one_no_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_create_constraint(self):
-        r = self.client.post('/api/project_json_schemas',
-                             data=json.dumps(self.project_json_schema_valid_payload),
-                             content_type="application/json")
+        r = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        r_duplicate = self.client.post('/api/project_json_schemas',
-                                       data=json.dumps(self.project_json_schema_valid_payload),
-                                       content_type="application/json")
+        r_duplicate = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
         # used to be an IntegrityError raised; upgrade to DRF 3.15 made this a 400:
         self.assertEqual(r_duplicate.status_code, status.HTTP_400_BAD_REQUEST)

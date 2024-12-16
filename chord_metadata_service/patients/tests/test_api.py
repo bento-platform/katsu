@@ -1,5 +1,4 @@
 import csv
-import json
 import io
 import random
 import uuid
@@ -8,7 +7,6 @@ from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
-from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
@@ -57,11 +55,7 @@ class CreateIndividualTest(AuthzAPITestCase):
     def test_create_invalid_individual(self):
         """ POST a new individual with invalid data. """
 
-        invalid_response = self.one_authz_post(
-            reverse('individuals-list'),
-            data=json.dumps(self.invalid_payload),
-            content_type='application/json'
-        )
+        invalid_response = self.one_authz_post(reverse('individuals-list'), json=self.invalid_payload)
         self.assertEqual(invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Individual.objects.count(), 0)
 
@@ -233,7 +227,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
 # One hypothesis is that using POST requests without actually
 # adding data to the database creates unexpected behaviour with one of the
 # libraries used  during the testing (?) maybe at teardown time.
-class BatchIndividualsCSVTest(APITestCase):
+class BatchIndividualsCSVTest(AuthzAPITestCase):
     """ Test for getting a batch of individuals as csv. """
 
     def setUp(self):
@@ -241,12 +235,15 @@ class BatchIndividualsCSVTest(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_no_ids(self):
-        data = json.dumps({'format': 'csv'})
-        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        response = self.one_authz_post(reverse('batch/individuals'), json={'format': 'csv'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_batch_individuals_csv_forbidden(self):
+        response = self.one_no_authz_post(reverse('batch/individuals'), json={'format': 'csv'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-class BatchIndividualsCSVTest1(APITestCase):
+
+class BatchIndividualsCSVTest1(AuthzAPITestCase):
     """ Test for getting a batch of individuals as csv. """
 
     def setUp(self):
@@ -254,8 +251,10 @@ class BatchIndividualsCSVTest1(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv(self):
-        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, self.individual_two.id]})
-        get_resp = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        get_resp = self.one_authz_post(
+            reverse('batch/individuals'),
+            json={'format': 'csv', 'id': [self.individual_one.id, self.individual_two.id]}
+        )
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
 
         content = get_resp.content.decode('utf-8')
@@ -270,7 +269,7 @@ class BatchIndividualsCSVTest1(APITestCase):
             self.assertEqual(resp_body[i][:-2], correct_body[i][:-2])
 
 
-class BatchIndividualsCSVTest2(APITestCase):
+class BatchIndividualsCSVTest2(AuthzAPITestCase):
     """ Test for getting a batch of individuals as csv. """
 
     def setUp(self):
@@ -278,12 +277,11 @@ class BatchIndividualsCSVTest2(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_ids(self):
-        data = json.dumps({'format': 'csv', 'id': ['invalid']})
-        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        response = self.one_authz_post(reverse('batch/individuals'), json={'format': 'csv', 'id': ['invalid']})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class BatchIndividualsCSVTest3(APITestCase):
+class BatchIndividualsCSVTest3(AuthzAPITestCase):
     """ Test for getting a batch of individuals as csv. """
 
     def setUp(self):
@@ -291,15 +289,17 @@ class BatchIndividualsCSVTest3(APITestCase):
         self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_ids(self):
-        data = json.dumps({'format': 'csv', 'id': [self.individual_one.id, 'invalid', "I don't exist"]})
-        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        response = self.one_authz_post(
+            reverse('batch/individuals'),
+            json={'format': 'csv', 'id': [self.individual_one.id, 'invalid', "I don't exist"]},
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         lines = response.content.decode('utf8').split('\n')
         nb_lines = len([line for line in lines if line])    # ignore trailing line break
         self.assertEqual(nb_lines, 2)   # 2 lines expected: header + individual_one
 
 
-class BatchIndividualsCSVTest4(APITestCase):
+class BatchIndividualsCSVTest4(AuthzAPITestCase):
     """ Test for getting a batch of individuals as csv. """
 
     def setUp(self):
@@ -308,8 +308,8 @@ class BatchIndividualsCSVTest4(APITestCase):
 
     def test_batch_individuals_csv_invalid_format(self):
         # defaults to default renderer
-        data = json.dumps({'format': 'invalid', 'id': [self.individual_one.id]})
-        response = self.client.post(reverse('batch/individuals'), data, content_type='application/json')
+        response = self.one_authz_post(
+            reverse('batch/individuals'), json={'format': 'invalid', 'id': [self.individual_one.id]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 

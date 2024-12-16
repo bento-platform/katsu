@@ -63,11 +63,11 @@ class BaseScopeableModel(Model):
 # Common model scope filters for phenopacket + experiment, which share a top-level dataset property.
 TOP_LEVEL_MODEL_SCOPE_FILTERS: ModelScopeFilters = {
     "project": {
-        "filter": "dataset__project__identifier",
-        "prefetch_related": ("dataset__project",),
+        "filter": "dataset__project_id",
+        "prefetch_related": ("dataset",),
     },
     "dataset": {
-        "filter": "dataset__identifier",
-        "prefetch_related": ("dataset",),
+        "filter": "dataset_id",
+        "prefetch_related": (),
     },
 }

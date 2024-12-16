@@ -1,18 +1,20 @@
 import asyncio
 
 from adrf.decorators import api_view
+from bento_lib.responses import errors
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
-from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
@@ -65,7 +67,7 @@ async def build_overview_response(
     }
 )
 @api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
+@permission_classes([BentoAllowAny])
 async def overview(request: DrfRequest):
     """
     get:
@@ -101,16 +103,19 @@ async def search_overview(request: DrfRequest):
     Overview statistics of a list of patients (associated with a search result)
     - Parameter
         - id: a list of patient ids
+        - project (optional), dataset (optional): scope for search overview
     """
 
-    # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
-    # use node level discovery config for private search overview
-    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
+    # TODO: this probably shouldn't even exist as-is
+    scope = await get_request_discovery_scope(request)
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
-    phenopackets = pheno_models.Phenopacket.objects.all().filter(subject_id__in=individual_ids)
-    experiments = experiments_models.Experiment.objects.all().filter(
-        biosample_id__in=phenopackets.values_list("biosamples__id", flat=True))
+    phenopackets = pheno_models.Phenopacket.get_model_scoped_queryset(scope).filter(subject_id__in=individual_ids)
+    experiments = (
+        experiments_models.Experiment
+        .get_model_scoped_queryset(scope)
+        .filter(biosample_id__in=[b async for b in phenopackets.values_list("biosamples__id", flat=True)])
+    )
 
     # TODO: this hardcodes the biosample linked field set relationship
     #  - in general, this endpoint is less than ideal and should be derived from search results themselves vs. this
@@ -118,11 +123,17 @@ async def search_overview(request: DrfRequest):
 
     # TODO: resource should be tied to search
     dt_permissions = await get_data_type_query_permissions(
-        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], scope.as_authz_resource()
     )
 
+    authz_middleware.mark_authz_done(request)
+
+    if not dt_permissions[DATA_TYPE_PHENOPACKET]["data"]:
+        # If we don't have query:data on phenopackets, we cannot request a search overview
+        return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
+
     return await build_overview_response(
-        discovery_scope,
+        scope,
         dt_permissions,
         phenopackets=phenopackets,
         experiments=experiments,

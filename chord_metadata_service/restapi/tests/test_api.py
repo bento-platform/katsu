@@ -115,7 +115,7 @@ class OverviewTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_search_overview(self):
         payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
-        response = self.dt_authz_full_post(reverse('search-overview'), payload, content_type='application/json')
+        response = self.dt_authz_full_post(reverse('search-overview'), data=payload, content_type='application/json')
         response_obj = response.json()
         phenopacket_res = response_obj['phenopacket']['data_type_specific']
         self.assertEqual(response.status_code, status.HTTP_200_OK)

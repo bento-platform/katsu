@@ -45,13 +45,13 @@ class AuthzAPITestCase(APITransactionTestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _one_authz_generic(
-        self, method: Literal["get", "post", "put", "delete"], authz_res: bool, url: str, *args, **kwargs
+        self, method: Literal["get", "post", "put", "patch", "delete"], authz_res: bool, url: str, *args, **kwargs
     ):
         if "json" in kwargs:
             kwargs["data"] = json.dumps(kwargs["json"])
             del kwargs["json"]
 
-        if method in ("post", "put") and "format" not in kwargs:
+        if method in ("post", "put", "patch") and "format" not in kwargs:
             kwargs["content_type"] = "application/json"
 
         with aioresponses() as m:
@@ -92,9 +92,7 @@ class AuthzAPITestCase(APITransactionTestCase):
         return self._one_authz_put(False, url, *args, **kwargs)
 
     def _one_authz_patch(self, authz_res: bool, url: str, *args, **kwargs):
-        with aioresponses() as m:
-            mock_authz_eval_one_result(m, authz_res)
-            return self.client.patch(url, *args, content_type="application/json", **kwargs)
+        return self._one_authz_generic("patch", authz_res, url, *args, **kwargs)
 
     def one_authz_patch(self, url: str, *args, **kwargs):
         """

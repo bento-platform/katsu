@@ -1,4 +1,3 @@
-import json
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import VALID_DATS_CREATORS, dats_dataset
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
@@ -9,7 +8,7 @@ class JSONLDDatasetTest(AuthzAPITestCaseWithProjectJSON):
         super().setUp()
         self.creators = VALID_DATS_CREATORS
         self.dataset = dats_dataset(self.project['identifier'], self.creators)
-        self.one_authz_post("/api/datasets", data=json.dumps(self.dataset))
+        self.one_authz_post("/api/datasets", json=self.dataset)
 
     def test_jsonld(self):
         get_resp = self.client.get('/api/datasets?format=json-ld')
