@@ -149,6 +149,9 @@ class AuthzAPITestCase(APITransactionTestCase):
     def dt_authz_counts_get(self, url: str, *args, **kwargs):
         return self.dt_get("counts", url, *args, **kwargs)
 
+    def dt_authz_counts_post(self, url: str, *args, **kwargs):
+        return self.dt_post("counts", url, *args, **kwargs)
+
     def dt_authz_full_get(self, url: str, *args, **kwargs):
         return self.dt_get("full", url, *args, **kwargs)
 

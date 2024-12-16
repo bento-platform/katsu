@@ -124,3 +124,9 @@ class OverviewTest(AuthzAPITestCase, ProjectTestCase):
         self.assertIn('wall of urinary bladder', phenopacket_res['biosamples']['sampled_tissue'])
         self.assertIn('Proptosis', phenopacket_res['phenotypic_features']['type'])
         self.assertIn(ph_c.VALID_DISEASE_1['term']['label'], phenopacket_res['diseases']['term'])
+
+    def test_search_overview_forbidden(self):
+        payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
+        response = self.dt_authz_counts_post(reverse('search-overview'), data=payload, content_type='application/json')
+        # search overview should be forbidden with counts, since we have to be able to query by ID:
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
