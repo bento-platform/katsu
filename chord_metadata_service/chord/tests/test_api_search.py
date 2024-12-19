@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.urls import reverse
 from rest_framework import status
@@ -39,6 +40,17 @@ from ..data_types import (
 )
 
 POST_GET = ("POST", "GET")
+
+SQ1_DATA = {
+    "data_type": DATA_TYPE_PHENOPACKET,
+    "query": TEST_SEARCH_QUERY_1
+}
+
+# Valid query to search for phenotypic feature type
+SQ3_DATA = {
+    "query": TEST_SEARCH_QUERY_3,
+    "data_type": DATA_TYPE_PHENOPACKET,
+}
 
 
 class SearchTest(AuthzAPITestCase):
@@ -82,7 +94,7 @@ class SearchTest(AuthzAPITestCase):
             biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset))
         self.experiment.experiment_results.set([self.experiment_result])
 
-    def _search_call(self, endpoint, args=None, data=None, method="GET"):
+    def _search_call(self, endpoint, args=None, data=None, method="GET", authz: bool = True):
         args = args or []
 
         if method == "POST":
@@ -93,122 +105,124 @@ class SearchTest(AuthzAPITestCase):
                 "query": json.dumps(data["query"]),
             }
 
-        return (self.one_authz_post if method == "POST" else self.one_authz_get)(
-            reverse(endpoint, args=args), data=data)
+        if authz:
+            fn = (self.one_authz_post if method == "POST" else self.one_authz_get)
+        else:
+            fn = (self.one_no_authz_post if method == "POST" else self.one_no_authz_get)
+
+        return fn(reverse(endpoint, args=args), data=data)
 
     def test_common_search_1(self):
         # No body
         for method in POST_GET:
-            r = self._search_call("private-search", method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", method=method)
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_2(self):
         # No data type
         for method in POST_GET:
-            r = self._search_call("private-search", data={"query": TEST_SEARCH_QUERY_1}, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data={"query": TEST_SEARCH_QUERY_1}, method=method)
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_3(self):
         # No query
         for method in POST_GET:
-            r = self._search_call("private-search", data={"data_type": DATA_TYPE_PHENOPACKET}, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data={"data_type": DATA_TYPE_PHENOPACKET}, method=method)
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_4(self):
         # Bad data type
         for method in POST_GET:
-            r = self._search_call("private-search", data={
-                "data_type": "bad_data_type",
-                "query": TEST_SEARCH_QUERY_1,
-            }, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data={
+                    "data_type": "bad_data_type",
+                    "query": TEST_SEARCH_QUERY_1,
+                }, method=method)
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_5(self):
         # Bad syntax for query
         for method in POST_GET:
-            r = self._search_call("private-search", data={
-                "data_type": DATA_TYPE_PHENOPACKET,
-                "query": ["hello", "world"]
-            }, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data={
+                    "data_type": DATA_TYPE_PHENOPACKET,
+                    "query": ["hello", "world"]
+                }, method=method)
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_search_without_result(self):
         # Valid search without result
         for method in POST_GET:
-            r = self._search_call("private-search", data={
-                "data_type": DATA_TYPE_PHENOPACKET,
-                "query": TEST_SEARCH_QUERY_2
-            }, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 0)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data={
+                    "data_type": DATA_TYPE_PHENOPACKET,
+                    "query": TEST_SEARCH_QUERY_2
+                }, method=method)
+                self.assertEqual(r.status_code, status.HTTP_200_OK)
+                c = r.json()
+                self.assertEqual(len(c["results"]), 0)
 
     def test_private_search(self):
         # Valid search with result
         for method in POST_GET:
-            r = self._search_call("private-search", data={
-                "data_type": DATA_TYPE_PHENOPACKET,
-                "query": TEST_SEARCH_QUERY_1
-            }, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data=SQ1_DATA, method=method)
+                self.assertEqual(r.status_code, status.HTTP_200_OK)
+                c = r.json()
 
-            self.assertIn(str(self.dataset.identifier), c["results"])
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
-            self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
+                self.assertIn(str(self.dataset.identifier), c["results"])
+                self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_PHENOPACKET)
+                self.assertEqual(self.phenopacket.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
 
         # TODO: Check schema?
 
-    def test_private_dataset_search_2(self):
-        # No query
+    def test_private_search_forbidden(self):
         for method in POST_GET:
-            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data={}, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-search", data=SQ1_DATA, method=method, authz=False)
+                self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_private_dataset_search_3(self):
-        # Bad syntax for query
-        d = {"query": ["hello", "world"]}
+    def test_private_dataset_search_basic(self):
+        param_set = [
+            ({}, status.HTTP_400_BAD_REQUEST),  # No query
+            ({"query": ["hello", "world"]}, status.HTTP_400_BAD_REQUEST),  # Bad syntax for query
+            (SQ1_DATA, status.HTTP_200_OK),  # Valid query with one result
+            ({"query": True, "data_type": DATA_TYPE_PHENOPACKET}, status.HTTP_200_OK),  # Valid query with one result
+        ]
+        args = [str(self.dataset.identifier)]
+
+        for params in param_set:
+            for method in POST_GET:
+                with self.subTest(params=(*params, method)):
+                    r = self._search_call("private-dataset-search", args=args, data=params[0], method=method)
+                    self.assertEqual(r.status_code, params[1])
+                    if params[1] == status.HTTP_200_OK:
+                        c = r.json()
+                        self.assertEqual(len(c["results"]), 1)
+                        self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
+
+                    r_forbidden = self._search_call(
+                        "private-dataset-search", args=args, data=params[0], method=method, authz=False)
+                    self.assertEqual(r_forbidden.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_private_dataset_search_not_found(self):
         for method in POST_GET:
-            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+            with self.subTest(params=(method,)):
+                r = self._search_call("private-dataset-search", args=["does-not-exist"], data=SQ3_DATA, method=method)
+                self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_private_dataset_search_4(self):
-        # Valid query with one result
-
-        d = {
-            "data_type": DATA_TYPE_PHENOPACKET,
-            "query": TEST_SEARCH_QUERY_1,
-        }
-
-        for method in POST_GET:
-            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
-
-    def test_private_search_5(self):
-        d = {
-            "query": True,
-            "data_type": DATA_TYPE_PHENOPACKET
-        }
-        for method in POST_GET:
-            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
-            self.assertEqual(r.status_code, status.HTTP_200_OK)
-            c = r.json()
-            self.assertEqual(len(c["results"]), 1)
-            self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
+                r = self._search_call("private-dataset-search", args=[str(uuid.uuid4())], data=SQ3_DATA, method=method)
+                self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_private_dataset_search_6(self):
         # Valid query to search for phenotypic feature type
 
-        d = {
-            "query": TEST_SEARCH_QUERY_3,
-            "data_type": DATA_TYPE_PHENOPACKET,
-        }
-
         for method in POST_GET:
-            r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
+            r = self._search_call(
+                "private-dataset-search", args=[str(self.dataset.identifier)], data=SQ3_DATA, method=method)
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)

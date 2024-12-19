@@ -57,6 +57,15 @@ class CreateProjectAPITest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
+class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
+
+    def test_list_projects(self):
+        r = self.client.get("/api/projects")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        res = r.json()
+        self.assertEqual(len(res["results"]), 1)
+
+
 class UpdateProjectTest(AuthzAPITestCaseWithProjectJSON):
     def setUp(self) -> None:
         super().setUp()
