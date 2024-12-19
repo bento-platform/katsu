@@ -69,10 +69,6 @@ if SERVICE_URL_BASE_PATH:
 else:
     SCHEMAS_BASE_URL = "/chord_metadata_service/schemas"
 
-# SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
-# unless an alternative permissions system is in place.
-CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
-
 CHORD_SERVICE_ARTIFACT = "metadata"
 # NOTE: LEAVE CHORD UNLESS YOU WANT A BUNCH OF BROKEN TABLES... vvv
 CHORD_SERVICE_TYPE_NO_VER = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}"
@@ -168,7 +164,6 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'

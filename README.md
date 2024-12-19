@@ -152,9 +152,6 @@ POSTGRES_PORT=5432
 # CHORD/Bento-specific variables:
 #  - If set, used for setting an allowed host & other API-calling purposes
 CHORD_URL=
-#  - If true, will enforce permissions. Do not run with this not set to true in production! 
-#    Defaults to (not DEBUG)
-CHORD_PERMISSIONS=
 ```
 
 ## Standalone Postgres db and Adminer
