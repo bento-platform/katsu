@@ -8,6 +8,7 @@ from .constants import (
     dats_dataset,
     VALID_DATS_CREATORS,
     INVALID_DATS_CREATORS,
+    PROJECT_JSON_SCHEMA_MISSING_PROJECT,
     valid_project_json_schema,
 )
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
@@ -349,6 +350,10 @@ class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(ProjectJsonSchema.objects.count(), 1)
 
+    def test_create_project_json_schema_missing_project(self):
+        r = self.one_authz_post("/api/project_json_schemas", json=PROJECT_JSON_SCHEMA_MISSING_PROJECT)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_create_project_json_schema_forbidden(self):
         r = self.one_no_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
@@ -360,3 +365,54 @@ class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
         r_duplicate = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
         # used to be an IntegrityError raised; upgrade to DRF 3.15 made this a 400:
         self.assertEqual(r_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
+
+    def setUp(self) -> None:
+        super().setUp()
+
+        self.pjs = self.one_authz_post(
+            "/api/project_json_schemas", json=valid_project_json_schema(project_id=self.project["identifier"])
+        ).json()
+
+        upd = valid_project_json_schema(project_id=self.project["identifier"], )
+        upd["required"] = True
+        self.upd = upd
+
+    def test_update_project_json_schema(self):
+        self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs['id']).required, False)
+        r = self.one_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs['id']).required, True)
+
+    def test_update_project_json_schema_not_found(self):
+        # don't need auth
+        r = self.client.put("/api/project_json_schemas/does-not-exist", json=self.upd)
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_project_json_schema_forbidden(self):
+        r = self.one_no_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class DeleteProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
+
+    def setUp(self) -> None:
+        super().setUp()
+
+        self.pjs = self.one_authz_post(
+            "/api/project_json_schemas", json=valid_project_json_schema(project_id=self.project["identifier"])
+        ).json()
+
+    def test_delete_project_json_schema(self):
+        r = self.one_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_delete_project_json_schema_not_found(self):
+        r = self.one_authz_delete("/api/project_json_schemas/does-not-exist")
+        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_project_json_schema_forbidden(self):
+        r = self.one_no_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)

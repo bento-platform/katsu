@@ -6,6 +6,7 @@ __all__ = [
     "VALID_DATS_CREATORS",
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
+    "PROJECT_JSON_SCHEMA_MISSING_PROJECT",
     "valid_project_json_schema",
     "valid_phenotypic_feature",
     "dats_dataset",
@@ -87,6 +88,13 @@ def valid_dataset_1(project_id):
         "data_use": VALID_DATA_USE_1,
         "project": project_id
     }
+
+
+PROJECT_JSON_SCHEMA_MISSING_PROJECT = {
+    "required": False,
+    "schema_type": SchemaType.PHENOPACKET,
+    "json_schema": DEFAULT_PROJECT_JSON_SCHEMA,
+}
 
 
 def valid_project_json_schema(project_id: str,
