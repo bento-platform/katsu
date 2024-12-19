@@ -371,6 +371,7 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     try:
         dataset = await Dataset.objects.aget(identifier=dataset_id)
     except (Dataset.DoesNotExist, ValidationError) as e:
+        authz_middleware.mark_authz_done(request)
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 
     project = await Project.objects.aget(identifier=dataset.project_id)
@@ -382,6 +383,7 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     if not await authz_middleware.async_evaluate_one(
         request, scope.as_authz_resource(), P_QUERY_DATA, mark_authz_done=True
     ):
+        authz_middleware.mark_authz_done(request)
         return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
     # perform search: --------------------------------------------------------------------------------------------------
