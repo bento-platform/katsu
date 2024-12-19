@@ -28,7 +28,7 @@ class BentoAuthzModelGenericViewSet(viewsets.GenericViewSet):
 
     async def obj_is_in_request_scope(self, request: DrfRequest, obj: BaseScopeableModel) -> bool:
         scope = await self._get_scope_for_request(request)
-        return await obj.scope_contains_object_async(scope)
+        return await obj.scope_contains_object(scope)
 
     def permission_from_request(self, request: DrfRequest) -> Permission | None:
         if self.action in ("list", "retrieve"):

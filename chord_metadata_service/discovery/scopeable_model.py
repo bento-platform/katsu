@@ -23,23 +23,24 @@ class BaseScopeableModel(Model):
     @abstractmethod
     def get_scope_filters() -> ModelScopeFilters:  # pragma: no cover
         """
-        TODO
+        Abstract static method (essentially a property) which returns a dictionary matching the ModelScopeFilters
+        format, which defines which lookups are used to filter a queryset of objects of this model to just those which
+        fall under a given scope.
         """
         pass
 
-    def scope_contains_object(self, scope: ValidatedDiscoveryScope) -> bool:
+    async def scope_contains_object(self, scope: ValidatedDiscoveryScope) -> bool:
         """
-        TODO
+        Returns whether the scoped queryset for the model and the passed scope contains this particular object.
+        Useful for checking permissions.
         """
-        return self.get_model_scoped_queryset(scope).filter(pk=self.pk).exists()
-
-    async def scope_contains_object_async(self, scope: ValidatedDiscoveryScope) -> bool:
         return await self.get_model_scoped_queryset(scope).filter(pk=self.pk).aexists()
 
     @classmethod
     def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
         """
-        TODO
+        Returns a queryset (and subset) of objects of this model which belong to the passed scope. This method uses the
+        defined get_scope_filters() function to narrow the queryset.
         """
 
         filter_scope: PublicScopeFilterKeys
