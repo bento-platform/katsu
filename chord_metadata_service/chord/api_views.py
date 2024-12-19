@@ -79,12 +79,6 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     queryset = Project.objects.all().order_by("identifier")
     serializer_class = ProjectSerializer
 
-    def list(self, request, *args, **kwargs):
-        # For now, we don't have a view:project type permission - we can always view
-        # TODO: check permissions for project viewing instead
-        authz.mark_authz_done(request)
-        return super().list(request, *args, **kwargs)
-
     @async_to_sync
     async def create(self, request, *args, **kwargs):
         if not (await authz.async_evaluate_one(request, RESOURCE_EVERYTHING, P_CREATE_PROJECT)):
