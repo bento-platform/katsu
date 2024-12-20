@@ -141,6 +141,63 @@ class DeleteIndividualTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
+class IndividualListFilterTest(AuthzAPITestCase):
+
+    def setUp(self):
+        self.project_1 = cm.Project.objects.create(title="Project 1", description="p1")
+        self.dataset_1 = cm.Dataset.objects.create(**{
+            "title": "Dataset 1",
+            "description": "Test Dataset 1",
+            "data_use": VALID_DATA_USE_1,
+            "project": self.project_1
+        })
+
+        self.project_2 = cm.Project.objects.create(title="Project 2", description="p2")
+        self.dataset_2 = cm.Dataset.objects.create(**{
+            "title": "Dataset 2",
+            "description": "Test Dataset 2",
+            "data_use": VALID_DATA_USE_1,
+            "project": self.project_2
+        })
+
+        # ----
+
+        self.md1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+
+        self.ind1 = Individual.objects.create(**c.VALID_INDIVIDUAL)
+        self.pheno1 = ph_m.Phenopacket.objects.create(**ph_c.valid_phenopacket(self.ind1, self.md1, "phenopacket:1"))
+        self.pheno1.dataset = self.dataset_1
+        self.pheno1.save()
+
+        self.ind2 = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+        self.pheno2 = ph_m.Phenopacket.objects.create(**ph_c.valid_phenopacket(self.ind2, self.md1, "phenopacket:2"))
+        self.pheno2.dataset = self.dataset_2
+        self.pheno2.save()
+
+    def test_individuals_list(self):
+        r = self.one_authz_get("/api/individuals")
+        data = r.json()
+        self.assertEqual(len(data["results"]), 2)
+
+    def test_individuals_project_scope(self):
+        r = self.one_authz_get(f"/api/individuals?project={self.project_1.identifier}")
+        data = r.json()
+        self.assertEqual(len(data["results"]), 1)
+        self.assertEqual(data["results"][0]["id"], self.ind1.id)
+
+        r = self.one_authz_get(f"/api/individuals?project={self.project_2.identifier}")
+        data = r.json()
+        self.assertEqual(len(data["results"]), 1)
+        self.assertEqual(data["results"][0]["id"], self.ind2.id)
+
+    def test_individuals_forbidden(self):
+        r = self.one_no_authz_get("/api/individuals")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+        r = self.one_no_authz_get(f"/api/individuals?project={self.project_1.identifier}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+
 class IndividualCSVRendererTest(AuthzAPITestCase):
     """ Test csv export for Individuals. """
 
