@@ -1,4 +1,4 @@
-ARG venv_python
+ARG venv_python=3.12
 FROM python:${venv_python}
 
 LABEL Maintainer="CanDIG Team"
@@ -19,7 +19,7 @@ WORKDIR /app
 COPY ./requirements /app/requirements
 
 # Conditionally install dependencies based on the environment
-ARG debug_mode 
+ARG debug_mode
 RUN if [ ${debug_mode} = 1 ]; then \
     pip install --no-cache-dir -r requirements/dev.txt; \
 else \
