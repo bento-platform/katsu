@@ -1,6 +1,6 @@
 from __future__ import annotations  # need to use string-based annotations to make the below type-checking imports work
 from abc import abstractmethod
-from django.db.models import Model, QuerySet
+from django.db.models import Model, Q, QuerySet
 from typing import Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -55,10 +55,21 @@ class BaseScopeableModel(Model):
 
         scope_filter_spec = cls.get_scope_filters()[filter_scope]
 
-        filter_query = scope_filter_spec["filter"]
         prefetch = scope_filter_spec["prefetch_related"]
 
-        return cls.objects.distinct().prefetch_related(*prefetch).filter(**{filter_query: value})
+        filter_query = scope_filter_spec["filter"]
+        if isinstance(filter_query, tuple):
+            # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for,
+            # e.g., the Resource model, where there are multiple possible paths one can take from the object to the
+            # parent dataset(s).
+            obj_q = Q(**{filter_query[0]: value})
+            for fq in filter_query[1:]:
+                obj_q = obj_q | Q(**{fq: value})
+        else:
+            # Just one filter to get the scoped queryset
+            obj_q = Q(**{filter_query: value})
+
+        return cls.objects.distinct().prefetch_related(*prefetch).filter(obj_q)
 
 
 # Common model scope filters for phenopacket + experiment, which share a top-level dataset property.
