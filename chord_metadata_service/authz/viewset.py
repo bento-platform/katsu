@@ -67,4 +67,8 @@ class BentoAuthzModelViewSet(
     mixins.ListModelMixin,
     BentoAuthzModelGenericViewSet
 ):
+    """
+    This class is equivalent to the DRF viewsets.ModelViewSet class, except with our BentoAuthzModelGenericViewSet
+    replacing the base viewsets.GenericViewSet. In this way, we get all the scoping / permissions helper functions.
+    """
     pass
