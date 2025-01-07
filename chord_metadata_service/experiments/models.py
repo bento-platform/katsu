@@ -22,7 +22,7 @@ __all__ = ["Experiment", "ExperimentResult", "Instrument"]
 class Experiment(BaseScopeableModel, IndexableMixin):
     """
     Class to store Experiment information. This model is primarily designed for genomic experiments; it is thus
-    linked to a specific bisample.
+    linked to a specific biosample.
 
     Experiments can be linked via a many-to-many relationship to ExperimentResults; many-to-many because a result
     may be derived from multiple experiments. Consider, for example, the results of a pairwise analysis derived from
@@ -94,7 +94,7 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
             },
             "dataset": {
                 "filter": "experiment__dataset_id",
-                "prefetch_related": ("experiemnt",),
+                "prefetch_related": ("experiment",),
             },
         }
 
