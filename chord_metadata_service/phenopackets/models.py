@@ -41,22 +41,7 @@ class MetaData(BaseTimeStamp):
     """
     Class to store structured definitions of the resources
     and ontologies used within the phenopacket
-
-    FHIR: Metadata
     """
-
-    @staticmethod
-    def get_scope_filters() -> ModelScopeFilters:
-        return {
-            "project": {
-                "filter": "phenopacket_set__dataset__project__identifier",
-                "prefetch_related": ("phenopacket_set__dataset__project",),
-            },
-            "dataset": {
-                "filter": "phenopacket_set__dataset__identifier",
-                "prefetch_related": ("phenopacket_set__dataset",),
-            },
-        }
 
     created_by = models.CharField(max_length=200, blank=True, null=True, default=None,
                                   help_text=rec_help(d.META_DATA, "created_by"))
