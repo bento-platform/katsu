@@ -42,14 +42,14 @@ class BentoDeferToHandler(BasePermission):
 class BentoDataTypePermission(BasePermission):
     @async_to_sync
     async def has_permission(self, request: DrfRequest, view):
-        # view: BentoAuthzModelViewSet (cannot annotate due to circular import)
+        # view: BentoAuthzScopedModelViewSet (cannot annotate due to circular import)
         if view.data_type is None:
-            raise NotImplementedError("BentoAuthzModelViewSet DATA_TYPE must be set")
+            raise NotImplementedError("BentoAuthzScopedModelViewSet DATA_TYPE must be set")
         return await view.request_has_data_type_permissions(request)
 
     @async_to_sync
     async def has_object_permission(self, request: DrfRequest, view, obj: BaseScopeableModel):
-        # view: BentoAuthzModelViewSet (cannot annotate due to circular import)
+        # view: BentoAuthzScopedModelViewSet (cannot annotate due to circular import)
         # if this is called, has_data_type_permission has already been called and handled the overall action type
         # TODO: eliminate duplicate scope check somehow without enabling permissions on objects outside of scope
         return await view.obj_is_in_request_scope(request, obj)

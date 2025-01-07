@@ -1,16 +1,15 @@
 from asgiref.sync import async_to_sync
 from bento_lib.auth.permissions import P_QUERY_DATA
-from bento_lib.responses import errors
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers, status
+from rest_framework import mixins, serializers, status
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
-from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
-from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet
+from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
@@ -26,7 +25,7 @@ from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phen
 from . import models as m, serializers as s, filters as f
 
 
-class PhenopacketsModelViewSet(BentoAuthzModelViewSet):
+class PhenopacketsModelViewSet(BentoAuthzScopedModelViewSet):
     data_type = DATA_TYPE_PHENOPACKET
 
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
@@ -53,10 +52,7 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
     filterset_class = f.BiosampleFilter
     lookup_value_regex = MODEL_ID_PATTERN
 
-    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
-    # permissions.
-    scope_enabled = True
-
+    # required to have discovery-scope-enabled queryset here to use a BentoAuthzScopedModelViewSet-derived viewset
     @async_to_sync
     async def get_queryset(self):
         return (
@@ -66,7 +62,10 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
         )
 
 
-class BiosampleBatchViewSet(PhenopacketsModelViewSet):
+class BiosampleBatchViewSet(
+    mixins.ListModelMixin,
+    BentoAuthzScopedModelGenericViewSet,
+):
     """
     get:
     Return a list of all existing biosamples
@@ -74,6 +73,7 @@ class BiosampleBatchViewSet(PhenopacketsModelViewSet):
     post:
     Filter biosamples by a list of ids
     """
+
     serializer_class = s.BiosampleSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.BiosampleFilter
@@ -85,7 +85,8 @@ class BiosampleBatchViewSet(PhenopacketsModelViewSet):
         IndividualBentoSearchRenderer,
     )
     content_negotiation_class = FormatInPostContentNegotiation
-    permission_classes = (BentoDeferToHandler,)
+
+    data_type = DATA_TYPE_PHENOPACKET
 
     @async_to_sync
     async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
@@ -101,26 +102,16 @@ class BiosampleBatchViewSet(PhenopacketsModelViewSet):
     def get_queryset(self):
         return self._get_filtered_queryset(ids_list=self.request.data.get("id", None))
 
-    @async_to_sync
-    async def check_batch_permissions(self, request):
-        scope = await get_request_discovery_scope(request)
-        return await authz_middleware.async_evaluate_one(
-            request, scope.as_authz_resource(data_type=DATA_TYPE_PHENOPACKET), P_QUERY_DATA, mark_authz_done=True
-        )
-
-    def list(self, request, *args, **kwargs):
-        if not self.check_batch_permissions(request):
-            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
-        return super().list(request, *args, **kwargs)
+    def permission_from_request(self, request: DrfRequest):
+        if self.action in ("list", "create"):
+            return P_QUERY_DATA
+        return None  # viewset not implemented for any other action
 
     def create(self, request, *args, **kwargs):
         """
         Despite the name, this is a POST request for returning a list of biosamples. Since query parameters have a
         maximum size, POST requests can be used for large batches.
         """
-
-        if not self.check_batch_permissions(request):
-            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
         queryset = self._get_filtered_queryset(ids_list=request.data.get("id", []))
 
@@ -149,17 +140,14 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
 
     post:
     Create a new phenopacket
-
     """
+
     serializer_class = s.PhenopacketSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = f.PhenopacketFilter
     lookup_value_regex = MODEL_ID_PATTERN
 
-    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
-    # permissions.
-    scope_enabled = True
-
+    # required to have discovery-scope-enabled queryset here to use a BentoAuthzScopedModelViewSet-derived viewset
     @async_to_sync
     async def get_queryset(self):
         return (

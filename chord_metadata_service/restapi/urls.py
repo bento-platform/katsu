@@ -42,7 +42,7 @@ router.register(r'biosamples', phenopacket_views.BiosampleViewSet, basename="bio
 router.register(r'phenopackets', phenopacket_views.PhenopacketViewSet, basename="phenopackets")
 
 # Resources app urls
-router.register(r'resources', resources_views.ResourceViewSet)
+router.register(r'resources', resources_views.ResourceViewSet, basename="resource")
 
 urlpatterns = [
     path('', include(router.urls)),

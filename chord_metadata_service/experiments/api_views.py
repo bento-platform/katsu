@@ -1,13 +1,15 @@
 from asgiref.sync import async_to_sync
+from bento_lib.auth.permissions import P_QUERY_DATA
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.authz.viewset import BentoAuthzModelViewSet, BentoAuthzModelGenericViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
@@ -41,7 +43,7 @@ EXPERIMENT_PREFETCH = (
 )
 
 
-class ExperimentViewSet(BentoAuthzModelViewSet):
+class ExperimentViewSet(BentoAuthzScopedModelViewSet):
     """
     get:
     Return a list of all existing experiments
@@ -51,7 +53,6 @@ class ExperimentViewSet(BentoAuthzModelViewSet):
     """
 
     data_type = DATA_TYPE_EXPERIMENT
-    scope_enabled = True
 
     serializer_class = ExperimentSerializer
     pagination_class = LargeResultsSetPagination
@@ -71,7 +72,7 @@ class ExperimentViewSet(BentoAuthzModelViewSet):
         )
 
 
-class ExperimentBatchViewSet(mixins.ListModelMixin, BentoAuthzModelGenericViewSet):
+class ExperimentBatchViewSet(mixins.ListModelMixin, BentoAuthzScopedModelGenericViewSet):
     """
     get:
     Return a list of all existing experiments
@@ -86,32 +87,34 @@ class ExperimentBatchViewSet(mixins.ListModelMixin, BentoAuthzModelGenericViewSe
     content_negotiation_class = FormatInPostContentNegotiation
 
     data_type = DATA_TYPE_EXPERIMENT
-    scope_enabled = True
+
+    @async_to_sync
+    async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
+        # We pre-filter experiments to the scope. This way, if they specify an ID outside the scope, it's just ignored
+        #  - the requester won't even know if it exists.
+        queryset = Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+
+        if ids_list:
+            queryset = queryset.filter(id__in=ids_list)
+
+        return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH).order_by("id")
 
     @async_to_sync
     async def get_queryset(self):
-        experiment_ids = self.request.data.get("id", None)
-        filter_by_id = {"id__in": experiment_ids} if experiment_ids else {}
+        return self._get_filtered_queryset(self.request.data.get("id", None))
 
-        return (
-            Experiment
-            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
-            .filter(**filter_by_id)
-            .select_related(*EXPERIMENT_SELECT_REL)
-            .prefetch_related(*EXPERIMENT_PREFETCH)
-            .order_by("id")
-        )
+    def permission_from_request(self, request: DrfRequest):
+        if self.action in ("list", "create"):
+            return P_QUERY_DATA
+        return None  # viewset not implemented for any other action
 
     def create(self, request, *_args, **_kwargs):
-        ids_list = request.data.get('id', [])
-        request.data["id"] = ids_list
-        queryset = self.get_queryset()
-
+        queryset = self._get_filtered_queryset(request.data.get("id", []))
         serializer = ExperimentSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-class ExperimentResultViewSet(BentoAuthzModelViewSet):
+class ExperimentResultViewSet(BentoAuthzScopedModelViewSet):
     """
     get:
     Return a list of all existing experiment results
@@ -121,7 +124,6 @@ class ExperimentResultViewSet(BentoAuthzModelViewSet):
     """
 
     data_type = DATA_TYPE_EXPERIMENT
-    scope_enabled = True
 
     serializer_class = ExperimentResultSerializer
     pagination_class = LargeResultsSetPagination

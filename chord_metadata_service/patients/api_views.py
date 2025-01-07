@@ -21,7 +21,7 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.viewset import BentoAuthzModelGenericViewSet, BentoAuthzModelViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericViewSet
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
@@ -60,7 +60,7 @@ from .serializers import IndividualSerializer
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
-class IndividualViewSet(BentoAuthzModelViewSet):
+class IndividualViewSet(BentoAuthzScopedModelViewSet):
     """
     get:
     Return a list of all existing individuals
@@ -85,9 +85,6 @@ class IndividualViewSet(BentoAuthzModelViewSet):
     lookup_value_regex = MODEL_ID_PATTERN
 
     data_type = dts.DATA_TYPE_PHENOPACKET
-    # We scope the queryset according to requested discovery scope below, which lets us have more fine-grained
-    # permissions.
-    scope_enabled = True
 
     def permission_from_request(self, request: DrfRequest) -> Permission | None:
         if self.action == "phenopackets":
@@ -170,7 +167,7 @@ class IndividualViewSet(BentoAuthzModelViewSet):
         )
 
 
-class IndividualBatchViewSet(mixins.ListModelMixin, BentoAuthzModelGenericViewSet):
+class IndividualBatchViewSet(mixins.ListModelMixin, BentoAuthzScopedModelGenericViewSet):
 
     serializer_class = IndividualSerializer
     pagination_class = BatchResultsSetPagination
@@ -184,7 +181,6 @@ class IndividualBatchViewSet(mixins.ListModelMixin, BentoAuthzModelGenericViewSe
     content_negotiation_class = FormatInPostContentNegotiation
 
     data_type = dts.DATA_TYPE_PHENOPACKET
-    scope_enabled = True
 
     @async_to_sync
     async def get_queryset(self):
