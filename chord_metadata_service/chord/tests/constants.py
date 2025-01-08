@@ -3,6 +3,7 @@ from chord_metadata_service.restapi.models import SchemaType
 __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",
+    "VALID_PROJECT_2",
     "VALID_DATS_CREATORS",
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
@@ -40,6 +41,11 @@ VALID_DATA_USE_1 = {
 VALID_PROJECT_1 = {
     "title": "Project 1",
     "description": "Some description",
+}
+
+VALID_PROJECT_2 = {
+    "title": "Project 2",
+    "description": "Some description too",
 }
 
 VALID_DATS_CREATORS = [
