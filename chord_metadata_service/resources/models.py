@@ -8,6 +8,8 @@ from chord_metadata_service.restapi.description_utils import rec_help
 
 from . import descriptions as d
 
+__all__ = ["Resource"]
+
 
 class Resource(BaseScopeableModel):
     """
@@ -25,11 +27,11 @@ class Resource(BaseScopeableModel):
         return {
             "project": {
                 "filter": ("dataset__project_id", "metadata__phenopacket__dataset__project_id"),
-                "prefetch_related": ("dataset", "metadata__phenopacket__dataset"),
+                "prefetch_related": ("dataset_set", "metadata_set__phenopacket__dataset"),
             },
             "dataset": {
                 "filter": ("dataset__identifier", "metadata__phenopacket__dataset_id"),
-                "prefetch_related": ("dataset", "metadata__phenopacket"),
+                "prefetch_related": ("dataset_set", "metadata_set__phenopacket"),
             },
         }
 
