@@ -42,7 +42,7 @@ class ModelFieldsTestMixin(TestCase):
     """
 
     def assert_model_fields_list_equal(self, db_list: list[Model], ground_truths: list[dict],
-                                       ignore_fields: list[str], field_maps={}):
+                                       ignore_fields: list[str], field_maps: dict | None = None):
         """
         List wrapper for assert_model_fields_equal.
         """
@@ -57,18 +57,18 @@ class ModelFieldsTestMixin(TestCase):
             )
 
     def assert_model_fields_equal(self, db_obj: Model, ground_truth: dict,
-                                  ignore_fields: list[str], field_maps={}):
+                                  ignore_fields: list[str], field_maps: dict | None = None):
         """
         Compares the fields of db_obj (exluding ignore_fields, if any) with the values of ground_truth.
         """
-        MODEL_FIELDS = [f.name for f in db_obj._meta.get_fields() if f.name not in ignore_fields]
-        for field in MODEL_FIELDS:
+        model_fields = [f.name for f in db_obj._meta.get_fields() if f.name not in ignore_fields]
+        for field in model_fields:
             gt_value = ground_truth.get(field)
             if gt_value and field == "extra_properties":
                 # remove non-ingested computed properties from gt to compare
                 gt_value = remove_computed_properties(gt_value)
             # Apply field mapping, if any
-            model_field = field_maps.get(field, field)
+            model_field = (field_maps or {}).get(field, field)
             if gt_value:
                 # we expect the db_obj to contain this ground truth value
                 self.assertEqual(getattr(db_obj, model_field), gt_value)
