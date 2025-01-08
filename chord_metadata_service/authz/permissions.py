@@ -41,7 +41,7 @@ class BentoDeferToHandler(BasePermission):
 
 class BentoDataTypePermission(BasePermission):
     @async_to_sync
-    async def has_permission(self, request: DrfRequest, view):
+    async def has_permission(self, request: DrfRequest, view) -> bool:
         # view: BentoAuthzScopedModelViewSet (cannot annotate due to circular import)
         if view.data_type is None:
             raise NotImplementedError("BentoAuthzScopedModelViewSet DATA_TYPE must be set")

@@ -2,11 +2,12 @@ from bento_lib.auth.permissions import P_QUERY_DATA, Permission, P_INGEST_DATA, 
 from rest_framework import mixins, viewsets
 from rest_framework.request import Request as DrfRequest
 
+from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import get_request_discovery_scope, ValidatedDiscoveryScope
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 
-from .permissions import BentoDataTypePermission
 from .middleware import authz_middleware
+from .permissions import BentoDataTypePermission
 
 __all__ = [
     "BentoAuthzScopedModelGenericViewSet",
@@ -25,8 +26,10 @@ class BentoAuthzScopedModelGenericViewSet(viewsets.GenericViewSet):
 
     @staticmethod
     async def obj_is_in_request_scope(request: DrfRequest, obj: BaseScopeableModel) -> bool:
-        scope = await get_request_discovery_scope(request)
-        return await obj.scope_contains_object(scope)
+        try:
+            return await obj.scope_contains_object(await get_request_discovery_scope(request))
+        except DiscoveryScopeException:  # project/dataset does not exist, or non-UUID request for a project/dataset
+            return False
 
     def permission_from_request(self, request: DrfRequest) -> Permission | None:
         if self.action in ("list", "retrieve"):
@@ -41,7 +44,10 @@ class BentoAuthzScopedModelGenericViewSet(viewsets.GenericViewSet):
     async def request_has_data_type_permissions(
         self, request: DrfRequest, scope: ValidatedDiscoveryScope | None = None
     ):
-        _scope: ValidatedDiscoveryScope = scope or await get_request_discovery_scope(request)
+        try:
+            _scope: ValidatedDiscoveryScope = scope or await get_request_discovery_scope(request)
+        except DiscoveryScopeException:  # project/dataset does not exist, or non-UUID request for a project/dataset
+            return False
 
         p: Permission | None = self.permission_from_request(request)
         if p is None:
