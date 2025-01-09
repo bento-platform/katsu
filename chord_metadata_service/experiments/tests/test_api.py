@@ -114,6 +114,29 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         response = self.one_authz_get('/api/experimentresults')
         self.assert_response_200_and_length(response, 4)
 
+    def test_get_experiment_results_scoped(self):
+        r = self.one_authz_get(f"/api/experimentresults?project={self.p.identifier}")
+        self.assert_response_200_and_length(r, 4)
+
+        r = self.one_authz_get(f"/api/experimentresults?project={self.p.identifier}&dataset={self.d1_id}")
+        self.assert_response_200_and_length(r, 4)
+
+        # nothing ingested under this dataset
+        r = self.one_authz_get(f"/api/experimentresults?project={self.p.identifier}&dataset={self.d2_id}")
+        self.assert_response_200_and_length(r, 0)
+
+        # nothing ingested under this project
+        r = self.one_authz_get(f"/api/experimentresults?project={self.p2.identifier}")
+        self.assert_response_200_and_length(r, 0)
+
+    def test_get_experiment_results_scoped_forbidden(self):
+        r = self.one_no_authz_get(f"/api/experimentresults?project={self.p.identifier}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+        # not found, yields 403 even "with auto"
+        r = self.one_authz_get(f"/api/experimentresults?project={uuid.uuid4()}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_filter_experiment_results(self):
         response = self.one_authz_get('/api/experimentresults?file_format=vcf')
         self.assert_response_200_and_length(response, 2)
