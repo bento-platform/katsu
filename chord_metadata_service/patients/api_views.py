@@ -208,7 +208,7 @@ async def public_discovery_filter_queryset(
     request: DrfRequest,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset: QuerySet,
-) -> QuerySet:
+) -> tuple[QuerySet, list[str]]:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
     :param discovery_scope: Discovery scope for the queryset we're filtering.
@@ -274,7 +274,7 @@ async def public_discovery_filter_queryset(
         # recursion
         queryset = filter_queryset_field_value(queryset, field_props, value)
 
-    return queryset
+    return queryset, queried_fields
 
 
 # noinspection PyMethodMayBeStatic
@@ -318,7 +318,9 @@ class PublicListIndividuals(APIView):
         base_qs = Individual.get_model_scoped_queryset(discovery_scope)
 
         try:
-            filtered_qs = await public_discovery_filter_queryset(discovery_scope, request, dt_permissions, base_qs)
+            filtered_qs, queried_fields = await public_discovery_filter_queryset(
+                discovery_scope, request, dt_permissions, base_qs
+            )
         except EmptyDiscoveryException:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
@@ -335,11 +337,13 @@ class PublicListIndividuals(APIView):
             # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
             # data permissions.
             logger.info(
-                f"Public individuals endpoint recieved {len(request.query_params)} query params which resulted in "
+                f"Public individuals endpoint queried fields {queried_fields} which resulted in "
                 f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
                 f"({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
+
+        logger.info(f"Public individuals search queried fields {queried_fields}, resulting in {ind_qct} individuals")
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
