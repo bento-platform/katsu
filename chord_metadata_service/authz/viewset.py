@@ -17,8 +17,12 @@ __all__ = [
 
 class BentoAuthzScopedModelGenericViewSet(viewsets.GenericViewSet):
     """
-    An extension of the DRF generic viewset which TODO
-    Security note: Subclasses MUST implement a get_queryset(...) which returns a model-scoped queryset!
+    An extension of the DRF generic viewset which adds utility functions for Bento Django permissions classes.
+    These work together to properly implement scoped Bento permissions based on the request being made.
+
+    <!!!>
+    Security note: Subclasses MUST implement a get_queryset(...) which returns a model-scoped, request-based queryset!
+    </!!!>
     """
 
     data_type: str | None = None
