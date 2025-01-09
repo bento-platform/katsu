@@ -14,14 +14,14 @@ from django.db.models.functions import Coalesce
 from django.http.request import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import filters, mixins, serializers, status
+from rest_framework import filters, serializers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericListViewSet
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
@@ -167,7 +167,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
         )
 
 
-class IndividualBatchViewSet(mixins.ListModelMixin, BentoAuthzScopedModelGenericViewSet):
+class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
     serializer_class = IndividualSerializer
     pagination_class = BatchResultsSetPagination

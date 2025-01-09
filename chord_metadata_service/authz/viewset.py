@@ -10,12 +10,12 @@ from .middleware import authz_middleware
 from .permissions import BentoDataTypePermission
 
 __all__ = [
-    "BentoAuthzScopedModelGenericViewSet",
+    "BentoAuthzScopedModelGenericListViewSet",
     "BentoAuthzScopedModelViewSet",
 ]
 
 
-class BentoAuthzScopedModelGenericViewSet(viewsets.GenericViewSet):
+class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
     """
     An extension of the DRF generic viewset which adds utility functions for Bento Django permissions classes.
     These work together to properly implement scoped Bento permissions based on the request being made.
@@ -67,8 +67,7 @@ class BentoAuthzScopedModelViewSet(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    mixins.ListModelMixin,
-    BentoAuthzScopedModelGenericViewSet
+    BentoAuthzScopedModelGenericListViewSet
 ):
     """
     This class is equivalent to the DRF viewsets.ModelViewSet class, except with our BentoAuthzModelGenericViewSet

@@ -2,14 +2,14 @@ from asgiref.sync import async_to_sync
 from bento_lib.auth.permissions import P_QUERY_DATA
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import mixins, serializers, status
+from rest_framework import serializers, status
 from rest_framework.settings import api_settings
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericListViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
@@ -62,10 +62,7 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
         )
 
 
-class BiosampleBatchViewSet(
-    mixins.ListModelMixin,
-    BentoAuthzScopedModelGenericViewSet,
-):
+class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
     """
     get:
     Return a list of all existing biosamples
