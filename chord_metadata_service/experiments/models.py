@@ -90,11 +90,11 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
         return {
             "project": {
                 "filter": "experiment__dataset__project_id",
-                "prefetch_related": ("experiment__dataset",),
+                "prefetch_related": ("experiment_set__dataset",),
             },
             "dataset": {
                 "filter": "experiment__dataset_id",
-                "prefetch_related": ("experiment",),
+                "prefetch_related": ("experiment_set",),
             },
         }
 
