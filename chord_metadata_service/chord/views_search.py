@@ -10,7 +10,7 @@ from bento_lib.responses import errors
 from bento_lib.search import build_search_response, postgres
 from datetime import datetime
 from django.db import connection
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Q, QuerySet
 from django.db.models.functions import Coalesce
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
@@ -65,7 +65,7 @@ def get_field_lookup(field: list[str]) -> str:
     return "__".join(f for f in field if f != "[item]")
 
 
-def get_values_list(queryset, options):
+def get_values_list(queryset: QuerySet, options):
     field_lookup = get_field_lookup(options.get("field", []))
 
     # Filter out null values because these values will be used to make joins,
@@ -151,7 +151,7 @@ QUERY_RESULT_SERIALIZERS = {
 }
 
 
-def _search_response(data_type, serializer_class, queryset, start):
+def _search_response(data_type, serializer_class, queryset: QuerySet, start):
     return Response(
         build_search_response({
             dataset_id: {
@@ -162,6 +162,15 @@ def _search_response(data_type, serializer_class, queryset, start):
                 key=lambda o: str(o.dataset_id)  # object here
             )
         }, start)
+    )
+
+
+async def _async_group_by_dataset_id(queryset: QuerySet) -> itertools.groupby:
+    # Queryset is in an async context, so it becomes an async iterator. We need to convert it to a "normal"
+    # iterable object for itertools.groupby.
+    return itertools.groupby(
+        [r async for r in queryset],
+        key=lambda d: str(d["dataset_id"])
     )
 
 
@@ -206,14 +215,11 @@ async def search(request: DrfRequest):
             dataset_id: {
                 "data_type": data_type,
                 "matches": [p["value"] for p in dataset_dicts]
-            } for dataset_id, dataset_dicts in itertools.groupby(
-                [r async for r in queryset],
-                key=lambda d: str(d["dataset_id"])    # dict here
-            )
+            } for dataset_id, dataset_dicts in await _async_group_by_dataset_id(queryset)
         }
         return Response(build_search_response(result, start))
 
-    if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+    elif search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         # The queryset for the bento_search_result output is based on the
         # usage of Django ORM `values()` to restrict its content to specific fields.
         # This result in a slight change of the queryset iterable where
@@ -225,10 +231,7 @@ async def search(request: DrfRequest):
                     {key: value for key, value in p.items() if key != "dataset_id"}
                     for p in dataset_dicts
                 ]
-            } for dataset_id, dataset_dicts in itertools.groupby(
-                [r async for r in queryset],
-                key=lambda d: str(d["dataset_id"])    # dict here
-            )
+            } for dataset_id, dataset_dicts in await _async_group_by_dataset_id(queryset)
         }
         return Response(build_search_response(result, start))
 
