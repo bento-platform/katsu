@@ -1,20 +1,20 @@
-from django.urls import reverse
-from jsonschema.validators import Draft7Validator
-
-from django.test import TestCase
-
-from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
-from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
-from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
 import csv
 import io
+import uuid
 
+from django.test import TestCase
+from django.urls import reverse
+from jsonschema.validators import Draft7Validator
 from rest_framework import status
 from rest_framework.test import APITestCase
+
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Project, Dataset
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID_PROJECT_2, VALID_PROJECT_1
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
+from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
 
@@ -31,15 +31,17 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         """
         Create two datasets but ingest phenopackets and experiments in just one dataset
         """
-        p = Project.objects.create(title="Test Project", description="Test")
+        self.p = Project.objects.create(**VALID_PROJECT_1)
         self.d1 = Dataset.objects.create(title="dataset_1", description="Some dataset 1", data_use=VALID_DATA_USE_1,
-                                         project=p)
+                                         project=self.p)
         self.d1_id = self.d1.identifier
         self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset 2", data_use=VALID_DATA_USE_1,
-                                         project=p)
+                                         project=self.p)
         self.d2_id = self.d2.identifier
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1_id)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.d1_id)
+
+        self.p2 = Project.objects.create(**VALID_PROJECT_2)
 
     def assert_response_200_and_length(self, response, assert_len: int):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -54,6 +56,29 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
     def test_get_experiments_forbidden(self):
         response = self.one_no_authz_get('/api/experiments')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_get_experiments_scoped(self):
+        r = self.one_authz_get(f"/api/experiments?project={self.p.identifier}")
+        self.assert_response_200_and_length(r, 2)
+
+        r = self.one_authz_get(f"/api/experiments?project={self.p.identifier}&dataset={self.d1_id}")
+        self.assert_response_200_and_length(r, 2)
+
+        # nothing ingested under this dataset
+        r = self.one_authz_get(f"/api/experiments?project={self.p.identifier}&dataset={self.d2_id}")
+        self.assert_response_200_and_length(r, 0)
+
+        # nothing ingested under this project
+        r = self.one_authz_get(f"/api/experiments?project={self.p2.identifier}")
+        self.assert_response_200_and_length(r, 0)
+
+    def test_get_experiments_scoped_forbidden(self):
+        r = self.one_no_authz_get(f"/api/experiments?project={self.p.identifier}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+        # not found, yields 403 even "with auto"
+        r = self.one_authz_get(f"/api/experiments?project={uuid.uuid4()}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_experiment_one(self):
         response = self.one_authz_get('/api/experiments/katsu.experiment:1')
