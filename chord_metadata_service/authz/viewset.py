@@ -5,6 +5,7 @@ from rest_framework.request import Request as DrfRequest
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import get_request_discovery_scope, ValidatedDiscoveryScope
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.logger import logger
 
 from .middleware import authz_middleware
 from .permissions import BentoDataTypePermission
@@ -43,6 +44,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
         elif self.action == "destroy":
             return P_DELETE_DATA
         else:
+            logger.error("viewset permission_from_request(...) is not implemented for action: %s", self.action)
             return None
 
     async def request_has_data_type_permissions(
