@@ -1,7 +1,7 @@
-import logging
+import structlog
 
 __all__ = [
     "logger",
 ]
 
-logger = logging.getLogger("katsu")
+logger = structlog.getLogger("katsu")

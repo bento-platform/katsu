@@ -7,7 +7,7 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.1/howto/deployment/wsgi/
 """
 
-import logging
+import structlog
 import os
 
 from django.conf import settings
@@ -15,7 +15,7 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chord_metadata_service.metadata.settings')
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # debugger section
 if settings.DEBUG:

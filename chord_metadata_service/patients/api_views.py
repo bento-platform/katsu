@@ -325,25 +325,29 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
-            logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
+            await logger.ainfo(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ), status=status.HTTP_400_BAD_REQUEST)
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
+        threshold = get_threshold(discovery, dt_perms_pheno)
+
+        # structured event logging for public search: embed search details
+        await logger.ainfo(
+            "public individuals search",
+            queried_fields=queried_fields,
+            individual_count=ind_qct,
+            threshold=threshold,
+            sub_threshold=ind_qct <= threshold,
+        )
 
         if ind_qct == 0 and not perm_pheno_query_data:
             # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
             # data permissions.
-            logger.info(
-                f"Public individuals endpoint queried fields {queried_fields} which resulted in "
-                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
-                f"({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
-
-        logger.info(f"Public individuals search queried fields {queried_fields}, resulting in {ind_qct} individuals")
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),

@@ -14,6 +14,7 @@ import os
 import sys
 import logging
 import json
+import structlog
 
 from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
@@ -23,8 +24,6 @@ from .. import __version__
 from ..discovery.types import DiscoveryOrEmptyConfig
 
 load_dotenv()
-
-logging.getLogger().setLevel(logging.INFO)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -144,6 +143,7 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
 
     'corsheaders',
     'django_filters',
+    'django_structlog',
     'rest_framework',
     'adrf',
     'drf_spectacular',
@@ -159,6 +159,7 @@ MIDDLEWARE = [
     'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django_structlog.middlewares.RequestMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
@@ -186,12 +187,30 @@ TEMPLATES = [
 ASGI_APPLICATION = 'chord_metadata_service.metadata.asgi.application'
 WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
+# Logging --------------------------------------------------------------------------------------------------------------
+
+STRUCTLOG_COMMON_PROCESSORS = [
+    structlog.contextvars.merge_contextvars,
+    structlog.stdlib.add_logger_name,
+    structlog.stdlib.add_log_level,
+    # format events (messages) with % using positional arguments, like Python's standard logging library:
+    structlog.stdlib.PositionalArgumentsFormatter(),
+    structlog.stdlib.ExtraAdder(),
+    structlog.processors.TimeStamper(fmt="iso"),
+]
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'console': {
-            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+            '()': structlog.stdlib.ProcessorFormatter,
+            'foreign_pre_chain': STRUCTLOG_COMMON_PROCESSORS,
+            'processors': [
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.dev.ConsoleRenderer(),
+            ],
+            # 'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
         },
     },
     'handlers': {
@@ -205,12 +224,42 @@ LOGGING = {
             'level': LOG_LEVEL,
             'handlers': ['console'],
         },
+        'asyncio': {
+            'handlers': [],
+            'propogate': True,
+        },
+        'daphne': {
+            # suppress daphne's DEBUG log spam
+            'level': 'INFO',
+            'handlers': [],
+            'propogate': True,
+        },
+        'daphne.server': {'handlers': [], 'propogate': True},
+        'django': {'handlers': [], 'propogate': True},
+        # 'django.channels.server': {
+        #     'handlers': [],
+        #     'propogate': False,
+        # },
+        'django.request': {'handlers': [], 'propogate': True},
+        'katsu': {
+            # 'level': LOG_LEVEL,
+            'handlers': [],
+            'propogate': True,
+        }
     },
 }
+
+structlog.configure(
+    processors=STRUCTLOG_COMMON_PROCESSORS + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
 
 # if we are running the test suite, only log CRITICAL messages
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     logging.disable(logging.CRITICAL)
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 # function to read postgres password file

@@ -198,9 +198,9 @@ async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str
 
         await qs.adelete()
 
-        logger.info(f"Running cleanup after clearing data type {data_type} in dataset {dataset_id} via API")
+        await logger.ainfo(f"Running cleanup after clearing data type {data_type} in dataset {dataset_id} via API")
         n_removed = await run_all_cleanup()
-        logger.info(f"Cleanup: removed {n_removed} objects in total")
+        await logger.ainfo(f"Cleanup: removed {n_removed} objects in total")
 
         return Response(status=status.HTTP_204_NO_CONTENT)
 
