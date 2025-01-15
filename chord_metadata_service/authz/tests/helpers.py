@@ -9,20 +9,10 @@ from ..types import DataPermissionsDict
 
 
 __all__ = [
-    "mock_authz_eval_one_result",
-    "mock_authz_eval_result",
     "DTAccessLevel",
     "AuthzAPITestCase",
     "PermissionsTestCaseMixin",
 ]
-
-
-def mock_authz_eval_one_result(m: aioresponses, result: bool):
-    m.post("http://authz.local/policy/evaluate", payload={"result": [[result]]})
-
-
-def mock_authz_eval_result(m: aioresponses, result: EvaluationResultMatrix | list[list[bool]]):
-    m.post("http://authz.local/policy/evaluate", payload={"result": result})
 
 
 DTAccessLevel = Literal["none", "bool", "counts", "full"]
@@ -44,6 +34,16 @@ class AuthzAPITestCase(APITransactionTestCase):
 
     # ------------------------------------------------------------------------------------------------------------------
 
+    @staticmethod
+    def mock_authz_eval_one_result(m: aioresponses, result: bool):
+        m.post("http://authz.local/policy/evaluate", payload={"result": [[result]]})
+
+    @staticmethod
+    def mock_authz_eval_result(m: aioresponses, result: EvaluationResultMatrix | list[list[bool]]):
+        m.post("http://authz.local/policy/evaluate", payload={"result": result})
+
+    # ------------------------------------------------------------------------------------------------------------------
+
     def _one_authz_generic(
         self, method: Literal["get", "post", "put", "patch", "delete"], authz_res: bool, url: str, *args, **kwargs
     ):
@@ -55,7 +55,7 @@ class AuthzAPITestCase(APITransactionTestCase):
             kwargs["content_type"] = "application/json"
 
         with aioresponses() as m:
-            mock_authz_eval_one_result(m, authz_res)
+            self.mock_authz_eval_one_result(m, authz_res)
             return getattr(self.client, method)(url, *args, **kwargs)
 
     def _one_authz_get(self, authz_res: bool, url: str, *args, **kwargs):
@@ -102,12 +102,12 @@ class AuthzAPITestCase(APITransactionTestCase):
 
     def _one_authz_delete(self, authz_res: bool, url: str, *args, **kwargs):
         with aioresponses() as m:
-            mock_authz_eval_one_result(m, authz_res)
+            self.mock_authz_eval_one_result(m, authz_res)
             return self.client.delete(url, *args, **kwargs)
 
     async def _async_one_authz_delete(self, authz_res: bool, url: str, *args, **kwargs):
         with aioresponses() as m:
-            mock_authz_eval_one_result(m, authz_res)
+            self.mock_authz_eval_one_result(m, authz_res)
             return await self.async_client.delete(url, *args, **kwargs)
 
     def one_authz_delete(self, url: str, *args, **kwargs):
@@ -132,12 +132,12 @@ class AuthzAPITestCase(APITransactionTestCase):
 
     def dt_get(self, level: Literal["none", "bool", "counts", "full"], url: str, *args, **kwargs):
         with aioresponses() as m:
-            mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
+            self.mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
             return self.client.get(url, *args, **kwargs)
 
     def dt_post(self, level: Literal["none", "bool", "counts", "full"], url: str, *args, **kwargs):
         with aioresponses() as m:
-            mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
+            self.mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
             return self.client.post(url, *args, **kwargs)
 
     def dt_authz_none_get(self, url: str, *args, **kwargs):
