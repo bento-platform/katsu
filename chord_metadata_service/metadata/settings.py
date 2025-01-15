@@ -271,6 +271,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.BentoDeferToHandler'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'EXCEPTION_HANDLER': 'chord_metadata_service.restapi.exception_handler.katsu_exception_handler',
     'JSON_UNDERSCOREIZE': {
         'no_underscore_before_number': True
     }

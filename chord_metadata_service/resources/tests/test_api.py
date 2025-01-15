@@ -72,11 +72,11 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
     def test_list_resources_scope_dne(self):
         res = self.one_authz_get(f"{self.url}?project=does-not-exist")
         # non-UUID - triggers scope error when handling permissions:
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
         res = self.one_authz_get(f"{self.url}?project={uuid.uuid4()}")
         # does not exist - triggers scope error when handling permissions:
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_list_resources_forbidden(self):
         response = self.one_no_authz_get(self.url)

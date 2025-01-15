@@ -76,9 +76,10 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         r = self.one_no_authz_get(f"/api/experiments?project={self.p.identifier}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-        # not found, yields 403 even "with auto"
+    def test_get_experiments_scope_not_found(self):
+        # not found, yields scope bad request
         r = self.one_authz_get(f"/api/experiments?project={uuid.uuid4()}")
-        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_experiment_one(self):
         response = self.one_authz_get('/api/experiments/katsu.experiment:1')
@@ -133,9 +134,10 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         r = self.one_no_authz_get(f"/api/experimentresults?project={self.p.identifier}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-        # not found, yields 403 even "with auto"
+    def test_get_experiment_results_scope_not_found(self):
+        # not found (bad request for scope)
         r = self.one_authz_get(f"/api/experimentresults?project={uuid.uuid4()}")
-        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_filter_experiment_results(self):
         response = self.one_authz_get('/api/experimentresults?file_format=vcf')

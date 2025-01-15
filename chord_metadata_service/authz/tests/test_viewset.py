@@ -7,6 +7,7 @@ from rest_framework.request import Request as DrfRequest
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.authz.viewset import BentoAuthzScopedModelGenericListViewSet
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 
@@ -40,13 +41,15 @@ class AuthzBaseViewsetTest(AuthzAPITestCase, ProjectTestCase):
         mock_req.GET["project"] = "does-not-exist"
         mock_drf_req = DrfRequest(mock_req)
 
-        self.assertFalse(await TestNotImplViewSet.obj_is_in_request_scope(mock_drf_req, self.individual))
+        with self.assertRaises(DiscoveryScopeException):
+            await TestNotImplViewSet.obj_is_in_request_scope(mock_drf_req, self.individual)
 
         mock_req_2 = HttpRequest()
         mock_req_2.GET["project"] = str(uuid.uuid4())
         mock_drf_req_2 = DrfRequest(mock_req_2)
 
-        self.assertFalse(await TestNotImplViewSet.obj_is_in_request_scope(mock_drf_req_2, self.individual))
+        with self.assertRaises(DiscoveryScopeException):
+            await TestNotImplViewSet.obj_is_in_request_scope(mock_drf_req_2, self.individual)
 
     async def test_request_has_data_type_permissions(self):
         vs = TestNotImplViewSet()
@@ -74,10 +77,12 @@ class AuthzBaseViewsetTest(AuthzAPITestCase, ProjectTestCase):
 
         vs = TestNotImplViewSet()
 
-        self.assertFalse(await vs.request_has_data_type_permissions(mock_drf_req, None))
+        with self.assertRaises(DiscoveryScopeException):
+            await vs.request_has_data_type_permissions(mock_drf_req, None)
 
         mock_req_2 = HttpRequest()
         mock_req_2.GET["project"] = str(uuid.uuid4())
         mock_drf_req_2 = DrfRequest(mock_req_2)
 
-        self.assertFalse(await vs.request_has_data_type_permissions(mock_drf_req_2, None))
+        with self.assertRaises(DiscoveryScopeException):
+            await vs.request_has_data_type_permissions(mock_drf_req_2, None)

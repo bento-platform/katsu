@@ -2,8 +2,14 @@ __all__ = [
     "DiscoveryScopeException",
 ]
 
+from rest_framework import status
+from rest_framework.exceptions import APIException
 
-class DiscoveryScopeException(Exception):
+
+class DiscoveryScopeException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = "Error validating discovery scope (does not exist)"
+    default_code = "bad_request"
 
     def __init__(self, dataset_id: str | None = None, project_id: str | None = None, *args) -> None:
         self.dataset_id = dataset_id
@@ -18,4 +24,4 @@ class DiscoveryScopeException(Exception):
             message = message.format("project", project_id)
         self.message = {"message": message}
 
-        super().__init__(*args)
+        super().__init__(*args, detail=message)
