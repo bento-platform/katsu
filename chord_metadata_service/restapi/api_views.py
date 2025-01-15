@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.experiments import models as experiments_models
@@ -46,6 +46,7 @@ def extra_properties_schema_types(_request: DrfRequest):
 
 
 @api_view(["GET", "POST"])
+@permission_classes([BentoDeferToHandler])  # careful here since it's private - mark authz done as we go.
 async def search_overview(request: DrfRequest):
     """
     get+post:
