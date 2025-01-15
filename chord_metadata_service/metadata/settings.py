@@ -156,7 +156,6 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'bento_lib.auth.django_remote_user.BentoRemoteUserMiddleware',
     'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -259,9 +258,6 @@ CACHES = {
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'bento_lib.auth.django_remote_user.BentoRemoteUserAuthentication'
-    ],
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
