@@ -35,7 +35,7 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexab
         return {
             "project": {
                 "filter": "phenopackets__dataset__project_id",
-                "prefetch_related": ("phenopackets__dataset_set",)
+                "prefetch_related": ("phenopackets__dataset",)
             },
             "dataset": {
                 "filter": "phenopackets__dataset_id",
