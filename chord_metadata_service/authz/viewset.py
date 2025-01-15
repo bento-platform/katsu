@@ -29,6 +29,9 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
     data_type: str | None = None
     permission_classes = (BentoDataTypePermission,)
 
+    def get_queryset(self):
+        raise NotImplementedError("Subclasses must implement scoped get_queryset")
+
     @staticmethod
     async def obj_is_in_request_scope(request: DrfRequest, obj: BaseScopeableModel) -> bool:
         try:
@@ -51,7 +54,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
         self, request: DrfRequest, scope: ValidatedDiscoveryScope | None = None
     ):
         try:
-            _scope: ValidatedDiscoveryScope = scope or await get_request_discovery_scope(request)
+            scope_: ValidatedDiscoveryScope = scope or await get_request_discovery_scope(request)
         except DiscoveryScopeException:  # project/dataset does not exist, or non-UUID request for a project/dataset
             return False
 
@@ -60,7 +63,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
             return False
 
         return await authz_middleware.async_evaluate_one(
-            request, _scope.as_authz_resource(data_type=self.data_type), p, mark_authz_done=True
+            request, scope_.as_authz_resource(data_type=self.data_type), p, mark_authz_done=True
         )
 
 
