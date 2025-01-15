@@ -1,20 +1,9 @@
 import json
 import inspect
 import os
-from django.urls import reverse
-from rest_framework.test import APIClient
 
 
 # Helper functions for tests
-
-def get_post_response(viewname, obj):
-    """ Generic POST function. """
-    client = APIClient()
-    return client.post(
-        reverse(viewname),
-        data=json.dumps(obj),
-        content_type='application/json'
-    )
 
 
 def load_local_json(file_name):

@@ -69,10 +69,6 @@ if SERVICE_URL_BASE_PATH:
 else:
     SCHEMAS_BASE_URL = "/chord_metadata_service/schemas"
 
-# SECURITY WARNING: Don't run with CHORD_PERMISSIONS turned off in production,
-# unless an alternative permissions system is in place.
-CHORD_PERMISSIONS = os.environ.get("CHORD_PERMISSIONS", str(not DEBUG)).lower() == "true"
-
 CHORD_SERVICE_ARTIFACT = "metadata"
 # NOTE: LEAVE CHORD UNLESS YOU WANT A BUNCH OF BROKEN TABLES... vvv
 CHORD_SERVICE_TYPE_NO_VER = f"ca.c3g.chord:{CHORD_SERVICE_ARTIFACT}"
@@ -84,9 +80,6 @@ CHORD_SERVICE_TYPE: GA4GHServiceType = {
 }
 CHORD_SERVICE_ID = os.environ.get("SERVICE_ID", CHORD_SERVICE_TYPE_NO_VER)
 BENTO_SERVICE_KIND = "metadata"
-
-# SECURITY WARNING: don't run with AUTH_OVERRIDE turned on in production!
-AUTH_OVERRIDE = not CHORD_PERMISSIONS
 
 # When Katsu is hosted on a subpath (e.g. http://myportal.com/api/katsu), this
 # parameter is used by Django to compute correct URLs in templates (for example
@@ -171,7 +164,6 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_PREFLIGHT_MAX_AGE = 0
 
 ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
@@ -276,9 +268,10 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.OverrideOrSuperUserOnly'],
+    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.BentoDeferToHandler'],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'EXCEPTION_HANDLER': 'chord_metadata_service.restapi.exception_handler.katsu_exception_handler',
     'JSON_UNDERSCOREIZE': {
         'no_underscore_before_number': True
     }

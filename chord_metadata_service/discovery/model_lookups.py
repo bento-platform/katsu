@@ -1,23 +1,21 @@
-from django.db.models import Model
-from typing import Literal, Type, TypedDict
+from typing import Literal, Type
 
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as exp_models
 from chord_metadata_service.patients import models as patient_models
 from chord_metadata_service.phenopackets import models as pheno_models
 
+from .scopeable_model import BaseScopeableModel
+
 __all__ = [
     "PUBLIC_MODEL_NAMES_TO_MODEL",
     "PUBLIC_MODEL_NAMES_TO_DATA_TYPE",
-    "PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS",
     "PublicModelName",
-    "PublicScopeFilterKeys",
 ]
 
 PublicModelName = Literal["individual", "biosample", "experiment"]
-PublicScopeFilterKeys = Literal["project", "dataset"]
 
-PUBLIC_MODEL_NAMES_TO_MODEL: dict[PublicModelName, Type[Model]] = {
+PUBLIC_MODEL_NAMES_TO_MODEL: dict[PublicModelName, Type[BaseScopeableModel]] = {
     "individual": patient_models.Individual,
     "biosample": pheno_models.Biosample,
     "experiment": exp_models.Experiment,
@@ -27,49 +25,4 @@ PUBLIC_MODEL_NAMES_TO_DATA_TYPE: dict[PublicModelName, str] = {
     "individual": DATA_TYPE_PHENOPACKET,
     "biosample": DATA_TYPE_PHENOPACKET,
     "experiment": DATA_TYPE_EXPERIMENT,
-}
-
-
-class ScopeFilter(TypedDict, total=False):
-    filter: str
-    prefetch_related: tuple[str, ...]
-    select_related: tuple[str, ...]
-
-
-class ProjectDatasetScopeFilters(TypedDict):
-    project: ScopeFilter
-    dataset: ScopeFilter
-
-
-PUBLIC_MODEL_NAMES_TO_SCOPE_FILTERS: dict[PublicModelName, ProjectDatasetScopeFilters] = {
-    "individual": {
-        "project": {
-            "filter": "phenopackets__dataset__project__identifier",
-            "prefetch_related": ("phenopackets__dataset__project",)
-        },
-        "dataset": {
-            "filter": "phenopackets__dataset__identifier",
-            "prefetch_related": ("phenopackets__dataset",)
-        },
-    },
-    "biosample": {
-        "project": {
-            "filter": "phenopacket__dataset__project__identifier",
-            "prefetch_related": ("phenopacket__dataset__project",),
-        },
-        "dataset": {
-            "filter": "phenopacket__dataset__identifier",
-            "prefetch_related": ("phenopacket__dataset",),
-        },
-    },
-    "experiment": {
-        "project": {
-            "filter": "dataset__project__identifier",
-            "prefetch_related": ("dataset__project",),
-        },
-        "dataset": {
-            "filter": "dataset__identifier",
-            "prefetch_related": ("dataset",),
-        },
-    },
 }

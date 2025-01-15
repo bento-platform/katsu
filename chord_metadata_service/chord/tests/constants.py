@@ -3,9 +3,12 @@ from chord_metadata_service.restapi.models import SchemaType
 __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",
+    "VALID_PROJECT_2",
     "VALID_DATS_CREATORS",
     "INVALID_DATS_CREATORS",
     "valid_dataset_1",
+    "valid_dataset_2",
+    "PROJECT_JSON_SCHEMA_MISSING_PROJECT",
     "valid_project_json_schema",
     "valid_phenotypic_feature",
     "dats_dataset",
@@ -39,6 +42,11 @@ VALID_DATA_USE_1 = {
 VALID_PROJECT_1 = {
     "title": "Project 1",
     "description": "Some description",
+}
+
+VALID_PROJECT_2 = {
+    "title": "Project 2",
+    "description": "Some description too",
 }
 
 VALID_DATS_CREATORS = [
@@ -85,8 +93,24 @@ def valid_dataset_1(project_id):
         "title": "Dataset 1",
         "description": "Test Dataset",
         "data_use": VALID_DATA_USE_1,
-        "project": project_id
+        "project": project_id,
     }
+
+
+def valid_dataset_2(project_id):
+    return {
+        "title": "Dataset 2",
+        "description": "Test Dataset Too",
+        "data_use": VALID_DATA_USE_1,
+        "project": project_id,
+    }
+
+
+PROJECT_JSON_SCHEMA_MISSING_PROJECT = {
+    "required": False,
+    "schema_type": SchemaType.PHENOPACKET,
+    "json_schema": DEFAULT_PROJECT_JSON_SCHEMA,
+}
 
 
 def valid_project_json_schema(project_id: str,

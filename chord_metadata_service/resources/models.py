@@ -2,12 +2,16 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import JSONField
 
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.description_utils import rec_help
 
 from . import descriptions as d
 
+__all__ = ["Resource"]
 
-class Resource(models.Model):
+
+class Resource(BaseScopeableModel):
     """
     Class to represent a description of an external resource
     used for referencing an object
@@ -17,6 +21,19 @@ class Resource(models.Model):
 
     class Meta:
         unique_together = (("namespace_prefix", "version"),)
+
+    @staticmethod
+    def get_scope_filters() -> ModelScopeFilters:
+        return {
+            "project": {
+                "filter": ("dataset__project_id", "metadata__phenopacket__dataset__project_id"),
+                "prefetch_related": ("dataset_set", "metadata_set__phenopacket_set__dataset"),
+            },
+            "dataset": {
+                "filter": ("dataset__identifier", "metadata__phenopacket__dataset_id"),
+                "prefetch_related": ("dataset_set", "metadata_set__phenopacket_set"),
+            },
+        }
 
     # resource_id e.g. "id": "uniprot:2019_07"
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.RESOURCE, "id"))

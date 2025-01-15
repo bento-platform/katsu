@@ -36,7 +36,6 @@ from .serializers import (
     ProjectSerializer,
     DatasetSerializer,
 )
-from .filters import AuthorizedDatasetFilter
 
 logger = logging.getLogger(__name__)
 
@@ -79,12 +78,6 @@ class ProjectViewSet(CHORDPublicModelViewSet):
 
     queryset = Project.objects.all().order_by("identifier")
     serializer_class = ProjectSerializer
-
-    def list(self, request, *args, **kwargs):
-        # For now, we don't have a view:project type permission - we can always view
-        # TODO: check permissions for project viewing instead
-        authz.mark_authz_done(request)
-        return super().list(request, *args, **kwargs)
 
     @async_to_sync
     async def create(self, request, *args, **kwargs):
@@ -135,7 +128,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     """
 
     filter_backends = [DjangoFilterBackend]
-    filterset_class = AuthorizedDatasetFilter
     lookup_url_kwarg = "dataset_id"
 
     serializer_class = DatasetSerializer
@@ -275,3 +267,42 @@ class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
 
     queryset = ProjectJsonSchema.objects.all().order_by("project_id")
     serializer_class = ProjectJsonSchemaSerializer
+
+    @async_to_sync
+    async def create(self, request, *args, **kwargs):
+        project_id = request.data.get("project")
+
+        if project_id is None:
+            return bad_request(request, "No project ID in request body")  # side effect: sets authz done flag
+
+        if not (await authz.async_evaluate_one(request, build_resource(project=project_id), P_EDIT_PROJECT)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().create)(request, *args, **kwargs)
+
+    @async_to_sync
+    async def update(self, request, *args, **kwargs):
+        try:
+            pjs = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        if not (await authz.async_evaluate_one(request, build_resource(project=str(pjs.project_id)), P_EDIT_PROJECT)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().update)(request, *args, **kwargs)
+
+    @async_to_sync
+    async def destroy(self, request, *args, **kwargs):
+        try:
+            pjs = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        if not (await authz.async_evaluate_one(request, build_resource(project=str(pjs.project_id)), P_EDIT_PROJECT)):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().destroy)(request, *args, **kwargs)

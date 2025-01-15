@@ -1,5 +1,3 @@
-import json
-
 from django.db.models import Model
 from django.test import TestCase
 from django.urls import reverse
@@ -7,7 +5,7 @@ from django.urls import reverse
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID_PROJECT_1
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.restapi.utils import remove_computed_properties
 
 
@@ -44,7 +42,7 @@ class ModelFieldsTestMixin(TestCase):
     """
 
     def assert_model_fields_list_equal(self, db_list: list[Model], ground_truths: list[dict],
-                                       ignore_fields: list[str], field_maps={}):
+                                       ignore_fields: list[str], field_maps: dict | None = None):
         """
         List wrapper for assert_model_fields_equal.
         """
@@ -59,18 +57,18 @@ class ModelFieldsTestMixin(TestCase):
             )
 
     def assert_model_fields_equal(self, db_obj: Model, ground_truth: dict,
-                                  ignore_fields: list[str], field_maps={}):
+                                  ignore_fields: list[str], field_maps: dict | None = None):
         """
         Compares the fields of db_obj (exluding ignore_fields, if any) with the values of ground_truth.
         """
-        MODEL_FIELDS = [f.name for f in db_obj._meta.get_fields() if f.name not in ignore_fields]
-        for field in MODEL_FIELDS:
+        model_fields = [f.name for f in db_obj._meta.get_fields() if f.name not in ignore_fields]
+        for field in model_fields:
             gt_value = ground_truth.get(field)
             if gt_value and field == "extra_properties":
                 # remove non-ingested computed properties from gt to compare
                 gt_value = remove_computed_properties(gt_value)
             # Apply field mapping, if any
-            model_field = field_maps.get(field, field)
+            model_field = (field_maps or {}).get(field, field)
             if gt_value:
                 # we expect the db_obj to contain this ground truth value
                 self.assertEqual(getattr(db_obj, model_field), gt_value)
@@ -79,5 +77,5 @@ class ModelFieldsTestMixin(TestCase):
 class AuthzAPITestCaseWithProjectJSON(AuthzAPITestCase):
     def setUp(self) -> None:
         super().setUp()
-        r = self.one_authz_post(reverse("project-list"), data=json.dumps(VALID_PROJECT_1))
+        r = self.one_authz_post(reverse("project-list"), json=VALID_PROJECT_1)
         self.project = r.json()

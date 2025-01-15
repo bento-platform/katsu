@@ -9,18 +9,20 @@ from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
+from typing import Type
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord import data_types as dts
-from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.utils import get_request_discovery_scope, get_public_model_scoped_queryset
 from chord_metadata_service.logger import logger
 
-from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
 from . import responses as dres
 from .censorship import get_rules
+from .exceptions import DiscoveryScopeException
+from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
 from .schemas import DISCOVERY_SCHEMA
+from .scope import get_request_discovery_scope
+from .scopeable_model import BaseScopeableModel
 from .types import BinWithValue
 from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
 
@@ -131,11 +133,14 @@ async def public_overview(request: DrfRequest):
     if not any(d["counts"] for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
-    async def _counts_for_scoped_model_name(mn: PublicModelName) -> tuple[PublicModelName, int]:
-        return mn, await get_public_model_scoped_queryset(discovery_scope, mn).acount()
+    async def _counts_for_scoped_model_name(
+        m: tuple[PublicModelName, Type[BaseScopeableModel]]
+    ) -> tuple[PublicModelName, int]:
+        mn, model = m
+        return mn, await model.get_model_scoped_queryset(discovery_scope).acount()
 
     # Predefined counts
-    counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL)))
+    counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
 
     # Set counts to 0 if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:

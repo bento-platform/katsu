@@ -72,12 +72,12 @@ SAMPLE_DATATYPE = "SAMPLE"
 REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_\.\-]")
 
 
-def study_export(get_path: Callable[[str], str], dataset_id: str):
+async def study_export(get_path: Callable[[str], str], dataset_id: str):
     """Export a given Project as a cBioPortal study"""
     # TODO: a Dataset is a Study (associated with a publication), not a Project!
 
     try:
-        dataset = Dataset.objects.get(identifier=dataset_id)
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
     except Dataset.DoesNotExist:
         raise ExportError(f"no dataset exists with ID {dataset_id}")
 
@@ -90,16 +90,18 @@ def study_export(get_path: Callable[[str], str], dataset_id: str):
     # Export patients.
     with open(get_path(PATIENT_DATA_FILENAME), "w", newline="\n") as file_patient:
         # Note: plural in `phenopackets` is intentional (related_name property in model)
-        indiv = Individual.objects.filter(phenopackets__dataset_id=dataset.identifier)
-        individual_export(indiv, file_patient)
+        indiv = Individual.objects.filter(phenopackets__dataset_id=dataset.identifier).prefetch_related("phenopackets")
+        await individual_export(indiv, file_patient)
 
     with open(get_path(PATIENT_META_FILENAME), "w", newline="\n") as file_patient_meta:
         clinical_meta_export(cbio_study_id, PATIENT_DATATYPE, file_patient_meta)
 
     # Export samples
     with open(get_path(SAMPLE_DATA_FILENAME), "w", newline="\n") as file_sample:
-        sampl = pm.Biosample.objects.filter(phenopacket__dataset_id=dataset.identifier)
-        sample_export(sampl, file_sample)
+        biosamples = (
+            pm.Biosample.objects.filter(phenopacket__dataset_id=dataset.identifier).prefetch_related("phenopacket_set")
+        )
+        await sample_export(biosamples, file_sample)
 
     with open(get_path(SAMPLE_META_FILENAME), "w", newline="\n") as file_sample_meta:
         clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
@@ -109,12 +111,15 @@ def study_export(get_path: Callable[[str], str], dataset_id: str):
          open(get_path(CASE_LIST_SEQUENCED), "w", newline="\n") as file_case_list:
         exp_res = (
             ExperimentResult.objects
+            .prefetch_related("experiment_set")
             .filter(experiment__dataset_id=dataset.identifier, file_format="MAF")
             .annotate(biosample_id=F("experiment__biosample"))
         )
 
-        write_maf_list(exp_res, file_maf_list)
-        case_list_export(cbio_study_id, exp_res, file_case_list)
+        exp_res_list = [r async for r in exp_res]
+
+        write_maf_list(exp_res_list, file_maf_list)
+        case_list_export(cbio_study_id, exp_res_list, file_case_list)
 
     with open(get_path(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
         mutation_meta_export(cbio_study_id, file_mutation_meta)
@@ -171,7 +176,7 @@ def clinical_meta_export(study_id: str, datatype: str, file_handle: TextIO):
     write_dict_in_cbioportal_format(lines, file_handle)
 
 
-def individual_export(results, file_handle: TextIO):
+async def individual_export(results, file_handle: TextIO):
     """
     Renders Individuals as a clinical_patient text file suitable for
     importing by cBioPortal.
@@ -192,7 +197,7 @@ def individual_export(results, file_handle: TextIO):
     individuals = [{
         'id': sanitize_id(individual.id),
         'sex': individual.sex,
-    } for individual in results]
+    } async for individual in results]
 
     columns = list(individuals[0].keys())
     headers = individual_to_patient_header(columns)
@@ -202,7 +207,7 @@ def individual_export(results, file_handle: TextIO):
     dict_writer.writerows(individuals)
 
 
-def sample_export(results, file_handle: TextIO):
+async def sample_export(results, file_handle: TextIO):
     """
     Renders Biosamples as a clinical_sample text file suitable for
     importing by cBioPortal.
@@ -238,11 +243,11 @@ def sample_export(results, file_handle: TextIO):
     """
 
     samples = []
-    for sample in results:
-        if sample.individual is None:
+    async for sample in results:
+        if sample.individual_id is None:
             continue
 
-        subject_id = sample.individual
+        subject_id = sample.individual_id
 
         sample_obj = {
             "individual_id": sanitize_id(subject_id),

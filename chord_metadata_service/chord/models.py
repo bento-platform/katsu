@@ -3,12 +3,12 @@ import uuid
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import SchemaType
-from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 
 
 __all__ = ["Project", "Dataset", "ProjectJsonSchema"]

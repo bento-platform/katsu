@@ -1,7 +1,7 @@
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE
 from ..summaries import dt_experiment_summary
 from .helpers import ExperimentTestCase
 
@@ -42,13 +42,13 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
 
         for params in subtest_params:
             with self.subTest(params=params):
-                r = await dt_experiment_summary(ValidatedDiscoveryScope(None, None), params[0])
+                r = await dt_experiment_summary(INSTANCE_SCOPE, params[0])
                 self.assertDictEqual(r, params[1])
 
     async def test_summary_1_exp_full_perms_whole_instance(self):
         self.maxDiff = None
 
-        r = await dt_experiment_summary(ValidatedDiscoveryScope(None, None), self.permissions_full)
+        r = await dt_experiment_summary(INSTANCE_SCOPE, self.permissions_full)
         self.assertDictEqual(r, {
             "count": 1,
             "data_type_specific": {

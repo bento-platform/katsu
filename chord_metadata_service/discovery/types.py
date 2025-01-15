@@ -10,6 +10,7 @@ __all__ = [
     "EmptyConfig",
     "DiscoveryOrEmptyConfig",
     "OptionalDiscoveryOrEmptyConfig",
+    "ModelScopeFilters",
 ]
 
 
@@ -61,3 +62,15 @@ class EmptyConfig(TypedDict):
 # TODO: py3.12: type keyword
 DiscoveryOrEmptyConfig = DiscoveryConfig | EmptyConfig
 OptionalDiscoveryOrEmptyConfig = DiscoveryOrEmptyConfig | None
+
+
+class ScopeLevelFilters(TypedDict):
+    # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for, e.g., the
+    # Resource model, where there are multiple possible paths one can take from the object to the parent dataset(s).
+    filter: str | tuple[str, ...]
+    prefetch_related: tuple[str, ...]
+
+
+class ModelScopeFilters(TypedDict):
+    project: ScopeLevelFilters
+    dataset: ScopeLevelFilters

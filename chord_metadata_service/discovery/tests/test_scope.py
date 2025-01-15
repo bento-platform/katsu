@@ -1,13 +1,14 @@
 from chord_metadata_service.chord import models as cm
+from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE
 
 
 class DiscoveryScopeBuildingTestCase(ProjectTestCase):
 
     def setUp(self):
-        self.instance_scope = ValidatedDiscoveryScope(None, None)
+        self.instance_scope = INSTANCE_SCOPE
         self.project_scope = ValidatedDiscoveryScope(self.project, None)
         self.project_dataset_scope = ValidatedDiscoveryScope(self.project, self.dataset)
 
@@ -53,14 +54,29 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
 
     def test_scope_authz_repr(self):
         subtest_params = [
-            (self.instance_scope, {"everything": True}),
-            (self.project_scope, {"project": str(self.project.identifier)}),
+            (self.instance_scope, {"everything": True}, None),
+            (self.project_scope, {"project": str(self.project.identifier)}, None),
+            (
+                self.project_scope,
+                {"project": str(self.project.identifier), "data_type": DATA_TYPE_PHENOPACKET},
+                DATA_TYPE_PHENOPACKET,
+            ),
             (
                 self.project_dataset_scope,
                 {"project": str(self.project.identifier), "dataset": str(self.dataset.identifier)},
+                None,
+            ),
+            (
+                self.project_dataset_scope,
+                {
+                    "project": str(self.project.identifier),
+                    "dataset": str(self.dataset.identifier),
+                    "data_type": DATA_TYPE_PHENOPACKET,
+                },
+                DATA_TYPE_PHENOPACKET,
             ),
         ]
 
         for params in subtest_params:
             with self.subTest(params=params):
-                self.assertDictEqual(params[0].as_authz_resource(), params[1])
+                self.assertDictEqual(params[0].as_authz_resource(params[2]), params[1])

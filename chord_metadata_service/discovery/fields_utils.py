@@ -2,6 +2,7 @@ from typing import Any, Iterator, Type
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
 from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
@@ -28,7 +29,7 @@ def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str,
     return model_name, tuple(field_path)
 
 
-def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
+def get_model_and_field(field_id: str) -> tuple[Type[BaseScopeableModel], str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
@@ -39,7 +40,7 @@ def get_model_and_field(field_id: str) -> tuple[Type[Model], str]:
 
     model_name, field_path = get_public_model_name_and_field_path(field_id)
 
-    model: Type[Model] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
+    model: Type[BaseScopeableModel] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
     if model is None:
         msg = f"Accessing field on model {model_name} not implemented"
         raise NotImplementedError(msg)

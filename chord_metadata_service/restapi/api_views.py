@@ -1,18 +1,17 @@
 import asyncio
 
 from adrf.decorators import api_view
-from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import serializers
+from bento_lib.responses import errors
+from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
-from chord_metadata_service.authz.permissions import BentoAllowAny, OverrideOrSuperUserOnly
-from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
+from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 from chord_metadata_service.metadata.service_info import get_service_info
@@ -35,54 +34,6 @@ async def service_info(_request: DrfRequest):
     return Response(await get_service_info())
 
 
-async def build_overview_response(
-    scope: ValidatedDiscoveryScope,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    phenopackets: QuerySet | None = None,
-    experiments: QuerySet | None = None,
-) -> Response:
-    phenopackets_summary, experiments_summary = await asyncio.gather(
-        dt_phenopacket_summary(scope, dt_permissions[DATA_TYPE_PHENOPACKET], phenopackets),
-        dt_experiment_summary(scope, dt_permissions[DATA_TYPE_EXPERIMENT], experiments),
-    )
-
-    return Response({
-        DATA_TYPE_PHENOPACKET: phenopackets_summary,
-        DATA_TYPE_EXPERIMENT: experiments_summary,
-    })
-
-
-@extend_schema(
-    description="Overview of all Phenopackets in the database",
-    responses={
-        200: inline_serializer(
-            name='overview_response',
-            fields={
-                'phenopackets': serializers.IntegerField(),
-                'data_type_specific': serializers.JSONField(),
-            }
-        )
-    }
-)
-@api_view(["GET"])
-@permission_classes([OverrideOrSuperUserOnly])
-async def overview(request: DrfRequest):
-    """
-    get:
-    Overview of all Phenopackets and experiments in the database - private endpoint
-    """
-
-    # TODO: permissions based on project - this endpoint should be scrapped / completely rethought
-    # use node level discovery config for private overview
-    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
-
-    dt_permissions = await get_data_type_query_permissions(
-        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
-    )
-
-    return await build_overview_response(discovery_scope, dt_permissions)
-
-
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
 def extra_properties_schema_types(_request: DrfRequest):
@@ -95,22 +46,26 @@ def extra_properties_schema_types(_request: DrfRequest):
 
 
 @api_view(["GET", "POST"])
+@permission_classes([BentoDeferToHandler])  # careful here since it's private - mark authz done as we go.
 async def search_overview(request: DrfRequest):
     """
     get+post:
     Overview statistics of a list of patients (associated with a search result)
     - Parameter
         - id: a list of patient ids
+        - project (optional), dataset (optional): scope for search overview
     """
 
-    # TODO: this should be project / dataset-scoped and probably shouldn't even exist as-is
-    # use node level discovery config for private search overview
-    discovery_scope = ValidatedDiscoveryScope(project=None, dataset=None)
+    # TODO: this probably shouldn't even exist as-is
+    scope = await get_request_discovery_scope(request)
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
-    phenopackets = pheno_models.Phenopacket.objects.all().filter(subject_id__in=individual_ids)
-    experiments = experiments_models.Experiment.objects.all().filter(
-        biosample_id__in=phenopackets.values_list("biosamples__id", flat=True))
+    phenopackets = pheno_models.Phenopacket.get_model_scoped_queryset(scope).filter(subject_id__in=individual_ids)
+    experiments = (
+        experiments_models.Experiment
+        .get_model_scoped_queryset(scope)
+        .filter(biosample_id__in=[b async for b in phenopackets.values_list("biosamples__id", flat=True)])
+    )
 
     # TODO: this hardcodes the biosample linked field set relationship
     #  - in general, this endpoint is less than ideal and should be derived from search results themselves vs. this
@@ -118,12 +73,21 @@ async def search_overview(request: DrfRequest):
 
     # TODO: resource should be tied to search
     dt_permissions = await get_data_type_query_permissions(
-        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], discovery_scope.as_authz_resource()
+        request, [DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT], scope.as_authz_resource()
     )
 
-    return await build_overview_response(
-        discovery_scope,
-        dt_permissions,
-        phenopackets=phenopackets,
-        experiments=experiments,
+    authz_middleware.mark_authz_done(request)
+
+    if not dt_permissions[DATA_TYPE_PHENOPACKET]["data"]:
+        # If we don't have query:data on phenopackets, we cannot request a search overview
+        return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
+
+    phenopackets_summary, experiments_summary = await asyncio.gather(
+        dt_phenopacket_summary(scope, dt_permissions[DATA_TYPE_PHENOPACKET], phenopackets),
+        dt_experiment_summary(scope, dt_permissions[DATA_TYPE_EXPERIMENT], experiments),
     )
+
+    return Response({
+        DATA_TYPE_PHENOPACKET: phenopackets_summary,
+        DATA_TYPE_EXPERIMENT: experiments_summary,
+    })

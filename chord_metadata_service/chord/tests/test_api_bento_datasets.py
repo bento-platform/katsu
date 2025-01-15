@@ -1,4 +1,3 @@
-import json
 import uuid
 import re
 
@@ -246,7 +245,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
             "title": "Updated title"
         }
 
-        r = self.one_authz_put(url, data=json.dumps(payload))
+        r = self.one_authz_put(url, json=payload)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
         # Check the updated dats file

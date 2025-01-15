@@ -12,7 +12,7 @@ from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.resources import api_views as resources_views
-from chord_metadata_service.restapi.api_views import overview, search_overview, extra_properties_schema_types
+from chord_metadata_service.restapi.api_views import search_overview, extra_properties_schema_types
 from chord_metadata_service.restapi.routers import BatchListRouter
 
 __all__ = ["router", "batch_router", "urlpatterns"]
@@ -22,11 +22,11 @@ batch_router = BatchListRouter()
 
 # CHORD app urls
 router.register(r'projects', chord_views.ProjectViewSet)
-router.register(r'datasets', chord_views.DatasetViewSet, basename="datasets")
+router.register(r'datasets', chord_views.DatasetViewSet, basename="dataset")
 router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls
-router.register(r'experiments', experiment_views.ExperimentViewSet)
+router.register(r'experiments', experiment_views.ExperimentViewSet, basename="experiments")
 router.register(r'experimentresults', experiment_views.ExperimentResultViewSet, basename="experimentresults")
 router.register(r'batch/experiments', experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
 
@@ -42,7 +42,7 @@ router.register(r'biosamples', phenopacket_views.BiosampleViewSet, basename="bio
 router.register(r'phenopackets', phenopacket_views.PhenopacketViewSet, basename="phenopackets")
 
 # Resources app urls
-router.register(r'resources', resources_views.ResourceViewSet)
+router.register(r'resources', resources_views.ResourceViewSet, basename="resource")
 
 urlpatterns = [
     path('', include(router.urls)),
@@ -61,7 +61,6 @@ urlpatterns = [
     path('extra_properties_schema_types', extra_properties_schema_types, name="extra-properties-schema-types"),
 
     # overviews (statistics)
-    path('overview', overview, name="overview"),
     path('search_overview', search_overview, name="search-overview"),
 
     # public endpoints (no confidential information leak)

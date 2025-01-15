@@ -1,24 +1,23 @@
 import csv
 import io
-import json
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
-from . import constants as c
-from .. import models as m, serializers as s
-
-from chord_metadata_service.restapi.tests.utils import get_post_response
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.restapi.tests import constants as restapi_c
 
+from . import constants as c
+from ..schemas import PHENOPACKET_SCHEMA
+from .. import models as m, serializers as s
 
-class CreateBiosampleTest(APITestCase):
+
+class CreateBiosampleTest(AuthzAPITestCase):
     """ Test module for creating an Biosample. """
 
     def setUp(self):
@@ -65,30 +64,36 @@ class CreateBiosampleTest(APITestCase):
     def test_create_biosample(self):
         """ POST a new biosample. """
 
-        response = get_post_response('biosamples-list', self.valid_payload)
+        response = self.one_authz_post(reverse("biosamples-list"), json=self.valid_payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Biosample.objects.count(), 1)
         self.assertEqual(m.Biosample.objects.get().id, 'katsu.biosample_id:1')
 
+    def test_create_biosample_forbidden(self):
+        """ POST a new biosample. """
+
+        response = self.one_no_authz_post(reverse("biosamples-list"), json=self.valid_payload)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_create_invalid_biosample(self):
         """ POST a new biosample with invalid data. """
 
-        invalid_response = get_post_response('biosamples-list', self.invalid_payload)
+        invalid_response = self.one_authz_post(reverse('biosamples-list'), self.invalid_payload)
         self.assertEqual(
             invalid_response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(m.Biosample.objects.count(), 0)
 
-    def test_seriliazer_validate_invalid(self):
+    def test_serializer_validate_invalid(self):
         serializer = s.BiosampleSerializer(data=self.invalid_payload)
         self.assertEqual(serializer.is_valid(), False)
 
-    def test_seriliazer_validate_valid(self):
+    def test_serializer_validate_valid(self):
         serializer = s.BiosampleSerializer(data=self.valid_payload)
         self.assertEqual(serializer.is_valid(), True)
 
     def test_update(self):
         # Create initial biosample
-        response = get_post_response('biosamples-list', self.valid_payload)
+        response = self.one_authz_post(reverse("biosamples-list"), json=self.valid_payload)
         biosample_id = response.data['id']
 
         # Should be 1
@@ -96,12 +101,7 @@ class CreateBiosampleTest(APITestCase):
 
         # Update the biosample.procedure.performed field
         self.valid_payload["procedure"]["performed"] = self.procedure_age_performed
-        # response = get_post_response('biosamples-list', self.valid_payload)
-        response = self.client.put(
-            f"/api/biosamples/{biosample_id}",
-            data=json.dumps(self.valid_payload),
-            content_type='application/json',
-        )
+        response = self.one_authz_put(f"/api/biosamples/{biosample_id}", json=self.valid_payload)
 
         # Should be 1 as well
         post_update_count = m.Biosample.objects.all().count()
@@ -110,24 +110,28 @@ class CreateBiosampleTest(APITestCase):
         self.assertEqual(response.data['procedure']['performed'], self.procedure_age_performed)
 
 
-class BatchBiosamplesCSVTest(APITestCase):
+class BatchBiosamplesCSVTest(AuthzAPITestCase):
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.valid_payload = c.valid_biosample_1(self.individual)
         self.biosample = m.Biosample.objects.create(**self.valid_payload)
         self.view = 'batch/biosamples-list'
-
-    def test_get_all_biosamples(self):
-        response = self.client.get(reverse(self.view))
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data['results']), 1),
-
-    def test_post_biosamples_with_ids(self):
-        data = {
+        self.post_biosamples_body = {
             'id': [str(self.biosample.id)],
             'format': 'csv'
         }
-        response = get_post_response(self.view, data)
+
+    def test_get_all_biosamples_batch(self):
+        response = self.one_authz_get(reverse(self.view))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 1)
+
+    def test_get_all_biosamples_batch_forbidden(self):
+        response = self.one_no_authz_get(reverse(self.view))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_biosamples_with_ids(self):
+        response = self.one_authz_post(reverse(self.view), json=self.post_biosamples_body)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         content = response.content.decode('utf-8')
@@ -140,8 +144,13 @@ class BatchBiosamplesCSVTest(APITestCase):
                        'created', 'updated', 'individual']:
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
+    def test_post_biosamples_with_ids_forbidden(self):
+        response = self.one_no_authz_post(reverse(self.view), json=self.post_biosamples_body)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # TODO: test content
 
-class CreatePhenopacketTest(APITestCase):
+
+class CreatePhenopacketTest(AuthzAPITestCase):
 
     def setUp(self):
         individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
@@ -152,17 +161,22 @@ class CreatePhenopacketTest(APITestCase):
             subject=self.subject,
             meta_data=self.metadata)
 
-    def test_phenopacket(self):
-        response = get_post_response('phenopackets-list', self.phenopacket)
+    def test_phenopacket_create(self):
+        response = self.one_authz_post(reverse("phenopackets-list"), json=self.phenopacket)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(m.Phenopacket.objects.count(), 1)
+
+    def test_phenopacket_create_forbidden(self):
+        response = self.one_no_authz_post(reverse("phenopackets-list"), json=self.phenopacket)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(m.Phenopacket.objects.count(), 0)
 
     def test_serializer(self):
         serializer = s.PhenopacketSerializer(data=self.phenopacket)
         self.assertEqual(serializer.is_valid(), True)
 
 
-class GetPhenopacketsApiTest(APITestCase):
+class GetPhenopacketsApiTest(AuthzAPITestCase):
     """
     Test that we can retrieve phenopackets with valid dataset titles or without dataset title.
     """
@@ -182,107 +196,61 @@ class GetPhenopacketsApiTest(APITestCase):
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             restapi_c.VALID_PHENOPACKET_2, self.d2.identifier)
 
+    def test_get_phenopackets_no_access(self):
+        """
+        Test that we cannot get the complete set of phenopackets without authorization.
+        """
+        response = self.one_no_authz_get("/api/phenopackets")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def test_get_phenopackets(self):
         """
         Test that we can get 2 phenopackets without a dataset title.
         """
-        response = self.client.get('/api/phenopackets')
+        response = self.one_authz_get("/api/phenopackets")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 2)
+        self.assertEqual(len(response.json()["results"]), 2)
 
-    def test_get_phenopackets_with_valid_dataset(self):
+    def test_get_phenopackets_with_valid_dataset_via_scope(self):
         """
-        Test that we can get 1 phenopacket under dataset_1.
+        Test that we can get 1 phenopacket under dataset_1 via discovery scoping.
         """
-        response = self.client.get('/api/phenopackets?datasets=dataset_1')
+        response = self.one_authz_get(f"/api/phenopackets?dataset={self.d.identifier}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
 
-    def test_get_phenopackets_with_valid_dataset_2(self):
+    def test_get_phenopackets_with_valid_dataset_via_scope_no_access(self):
         """
-        Test that we can get 1 phenopacket under dataset_2.
+        Test that we can get 1 phenopacket under dataset_1 via discovery scoping.
         """
-        response = self.client.get('/api/phenopackets?datasets=dataset_2')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 1)
+        response = self.one_no_authz_get(f"/api/phenopackets?dataset={self.d.identifier}")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_get_phenopackets_with_valid_dataset_3(self):
+    def test_get_phenopackets_with_valid_dataset_via_filter(self):
         """
-        Test that we can get 2 phenopackets under both dataset_1 and dataset_2.
+        Test that we can get phenopackets under specific datasets via title using Django filter.
         """
-        response = self.client.get('/api/phenopackets?datasets=dataset_1,dataset_2')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 2)
 
-    def test_get_phenopackets_with_valid_dataset_4(self):
-        """
-        Test that we can get 1 phenopacket under dataset_1 and an invalid dataset.
-        """
-        response = self.client.get('/api/phenopackets?datasets=dataset_1,noSuchDataset')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 1)
+        subtest_params = [
+            ("dataset_1", 1),
+            ("dataset_2", 1),
+            ("dataset_1,dataset_2", 2),
+            ("dataset_1,noSuchDataset", 1),
+            ("notADataset", 0),
+        ]
 
-    def test_get_phenopackets_with_invalid_dataset(self):
-        """
-        Test that we cannot get phenopackets with invalid dataset titles.
-        """
-        response = self.client.get('/api/phenopackets?datasets=notADataset')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 0)
-
-    def test_get_phenopackets_with_authz_dataset_1(self):
-        """
-        Test that we cannot get phenopackets with no authorized datasets.
-        """
-        response = self.client.get('/api/phenopackets?datasets=dataset_1&authorized_datasets=dataset2')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 0)
-
-    def test_get_phenopackets_with_authz_dataset_2(self):
-        """
-        Test that we can get 1 phenopacket with 1 authorized datasets.
-        """
-        response = self.client.get('/api/phenopackets?authorized_datasets=dataset_1')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 1)
-
-    def test_get_phenopackets_with_authz_dataset_3(self):
-        """
-        Test that we can get 2 phenopackets with 2 authorized datasets.
-        """
-        response = self.client.get('/api/phenopackets?authorized_datasets=dataset_1,dataset_2')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 2)
-
-    def test_get_phenopackets_with_authz_dataset_4(self):
-        """
-        Test that we can get 1 phenopackets with 1 authorized datasets.
-        """
-        response = self.client.get('/api/phenopackets?datasets=dataset_1&authorized_datasets=dataset_1')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 1)
-
-    def test_get_phenopackets_with_authz_dataset_5(self):
-        """
-        Test that we can get 0 phenopackets with 0 authorized datasets.
-        """
-        response = self.client.get('/api/phenopackets?authorized_datasets=NO_DATASETS_AUTHORIZED')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_data = response.json()
-        self.assertEqual(len(response_data["results"]), 0)
+        for params in subtest_params:
+            with self.subTest(params=params):
+                ds_title, exp_count = params
+                response = self.one_authz_get(f"/api/phenopackets?datasets={ds_title}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_data = response.json()
+                self.assertEqual(len(response_data["results"]), exp_count)
 
 
 class PhenopacketSchema(APITestCase):
+    # No authz needed for these endpoints
 
     def test_get_phenopacket_schema(self):
         response = self.client.get("/api/schemas/phenopacket")

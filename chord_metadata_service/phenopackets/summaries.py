@@ -4,9 +4,9 @@ from django.db.models import QuerySet
 
 from chord_metadata_service.authz.types import DataPermissionsDict
 from chord_metadata_service.discovery.censorship import thresholded_count
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.stats import queryset_stats_for_field
 from chord_metadata_service.discovery.types import DiscoveryConfig
-from chord_metadata_service.discovery.utils import ValidatedDiscoveryScope
 from chord_metadata_service.patients.summaries import individual_summary
 
 from . import models

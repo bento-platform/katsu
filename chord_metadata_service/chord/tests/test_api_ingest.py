@@ -1,5 +1,3 @@
-import json
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -61,29 +59,27 @@ class WorkflowTest(APITestCase):
 class APITestCaseWithDataset(AuthzAPITestCaseWithProjectJSON):
     def setUp(self) -> None:
         super().setUp()
-        r = self.one_authz_post("/api/datasets", data=json.dumps(valid_dataset_1(self.project["identifier"])))
+        r = self.one_authz_post("/api/datasets", json=valid_dataset_1(self.project["identifier"]))
         self.dataset = r.json()
         self.dataset_id = self.dataset["identifier"]
 
 
 class IngestTest(APITestCaseWithDataset):
-    def test_phenopackets_ingest(self):
+    def test_phenopackets_ingest_400s(self):
         # Invalid workflow ID
-        r = self.client.post(
+        r = self.one_authz_post(
             reverse("ingest-into-dataset", args=(self.dataset_id, "phenopackets_json_invalid")),
-            content_type="application/json",
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # No ingestion body
-        r = self.client.post(
+        r = self.one_authz_post(
             reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
-            content_type="application/json",
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
         # Bad ingestion body JSON - JSON parse error 400
-        r = self.client.post(
+        r = self.one_authz_post(
             reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
             content_type="application/json",
             data="{}}",  # noqa: W605
@@ -92,21 +88,27 @@ class IngestTest(APITestCaseWithDataset):
 
         # Invalid phenopacket JSON validation
         invalid_phenopacket = load_local_json("example_invalid_phenopacket.json")
-        r = self.client.post(
+        r = self.one_authz_post(
             reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
-            content_type="application/json",
-            data=json.dumps(invalid_phenopacket),
+            json=invalid_phenopacket,
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_phenopackets_ingest_valid(self):
         # Success
-        valid_phenopacket = load_local_json("example_phenopacket_v2.json")
-        r = self.client.post(
+        r = self.one_authz_post(
             reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
-            content_type="application/json",
-            data=json.dumps(valid_phenopacket),
+            json=load_local_json("example_phenopacket_v2.json"),
         )
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_phenopackets_ingest_forbidden(self):
+        # Forbidden
+        r = self.one_no_authz_post(
+            reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
+            json=load_local_json("example_phenopacket_v2.json"),
+        )
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class IngestDerivedExperimentResultsTest(APITestCaseWithDataset):
@@ -114,9 +116,17 @@ class IngestDerivedExperimentResultsTest(APITestCaseWithDataset):
         # ingest list of experiments
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset_id)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_EXPERIMENT, self.dataset_id)
+
         # ingest list of experiment results
-        self.client.post(
+        r = self.one_authz_post(
             reverse("ingest-derived-experiment-results", args=(self.dataset_id,)),
-            content_type="application/json",
-            data=json.dumps(EXAMPLE_INGEST_EXPERIMENT_RESULT),
+            json=EXAMPLE_INGEST_EXPERIMENT_RESULT,
         )
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+
+        # forbidden
+        r = self.one_no_authz_post(
+            reverse("ingest-derived-experiment-results", args=(self.dataset_id,)),
+            json=EXAMPLE_INGEST_EXPERIMENT_RESULT,
+        )
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
