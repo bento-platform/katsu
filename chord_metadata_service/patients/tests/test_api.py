@@ -190,6 +190,21 @@ class IndividualListFilterTest(AuthzAPITestCase):
         self.assertEqual(len(data["results"]), 1)
         self.assertEqual(data["results"][0]["id"], self.ind2.id)
 
+    def test_individuals_dataset_scope(self):
+        r = self.one_authz_get(
+            f"/api/individuals?project={self.project_1.identifier}&dataset={self.dataset_1.identifier}"
+        )
+        data = r.json()
+        self.assertEqual(len(data["results"]), 1)
+        self.assertEqual(data["results"][0]["id"], self.ind1.id)
+
+        r = self.one_authz_get(
+            f"/api/individuals?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}"
+        )
+        data = r.json()
+        self.assertEqual(len(data["results"]), 1)
+        self.assertEqual(data["results"][0]["id"], self.ind2.id)
+
     def test_individuals_forbidden(self):
         r = self.one_no_authz_get("/api/individuals")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
