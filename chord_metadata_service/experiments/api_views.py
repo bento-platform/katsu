@@ -105,10 +105,17 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
     def permission_from_request(self, request: DrfRequest):
         if self.action in ("list", "create"):
+            # Here, "create" maps to the data query permission because we use create(..) (i.e., POST) as a way to run a
+            # query with a large body.
+            # TODO: distant future: replace with HTTP QUERY verb.
             return P_QUERY_DATA
         return None  # viewset not implemented for any other action
 
     def create(self, request, *_args, **_kwargs):
+        """
+        Despite the name, this is a POST request for returning a list of experiments. Since query parameters have a
+        maximum size, POST requests can be used for large batches.
+        """
         queryset = self._get_filtered_queryset(request.data.get("id", []))
         serializer = ExperimentSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

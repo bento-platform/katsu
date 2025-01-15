@@ -101,6 +101,8 @@ class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
     def permission_from_request(self, request: DrfRequest):
         if self.action in ("list", "create"):
+            # Here, "create" maps to the data query permission because we use create(..) (i.e., POST) as a way to run a
+            # query with a large body.
             return P_QUERY_DATA
         return None  # viewset not implemented for any other action
 
