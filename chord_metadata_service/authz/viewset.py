@@ -2,7 +2,6 @@ from bento_lib.auth.permissions import P_QUERY_DATA, Permission, P_INGEST_DATA, 
 from rest_framework import mixins, viewsets
 from rest_framework.request import Request as DrfRequest
 
-from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import get_request_discovery_scope, ValidatedDiscoveryScope
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.logger import logger
