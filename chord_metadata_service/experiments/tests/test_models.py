@@ -116,8 +116,7 @@ class InstrumentTest(TestCase):
         self.assertRaises(
             serializers.ValidationError,
             self.create,
-            platform="Illumina",
+            device="Illumina",
             description="Test description 2",
-            model="Illumina HiScanSQ",
             extra_properties={"date": 2021}
         )

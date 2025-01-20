@@ -53,9 +53,8 @@
       ],
       "instrument": {
         "identifier": "instrument:01",
-        "platform": "Illumina",
+        "device": "Illumina",
         "description": "Test description",
-        "model": "Illumina HiSeq 4000",
         "extra_properties": {
           "date": "2021-06-21"
         }

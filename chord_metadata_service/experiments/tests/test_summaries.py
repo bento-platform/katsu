@@ -23,7 +23,7 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
                 "extraction_protocol": {},
             },
             "experiment_results": {"count": 0, "file_format": {}, "data_output_type": {}, "usage": {}},
-            "instruments": {"count": 0, "model": {}, "platform": {}},
+            "instruments": {"count": 0, "device": {}},
         },
     }
 
@@ -64,7 +64,7 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
                     "molecule": {"total RNA": 1},
                 },
                 "experiment_results": {"count": 0, "file_format": {}, "data_output_type": {}, "usage": {}},
-                "instruments": {"count": 0, "model": {}, "platform": {}},
+                "instruments": {"count": 0, "device": {}},
             }
         })
 

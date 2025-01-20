@@ -125,8 +125,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                     },
                     "instruments": {
                         "count": 0,
-                        "model": {},
-                        "platform": {}
+                        "device": {}
                     }
                 },
             }

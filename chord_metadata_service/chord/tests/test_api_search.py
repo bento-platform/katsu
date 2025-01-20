@@ -301,10 +301,8 @@ class SearchTest(AuthzAPITestCase):
             )
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["identifier"],
                              "instrument:01")
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["platform"],
+            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["device"],
                              "Illumina")
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["model"],
-                             "Illumina HiSeq 4000")
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["extra_properties"],
                              {"date": "2021-06-21"})
 
