@@ -118,13 +118,11 @@ INSTRUMENT_SCHEMA = tag_ids_and_describe({
         "identifier": {
             "type": "string"
         },
-        "platform": {
+        "device": {
             "type": "string"
         },
+        "device_ontology": ONTOLOGY_CLASS_LIST,
         "description": {
-            "type": "string"
-        },
-        "model": {
             "type": "string"
         },
         "extra_properties": KEY_VALUE_OBJECT,

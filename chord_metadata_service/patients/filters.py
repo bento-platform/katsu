@@ -178,9 +178,8 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
                                     TextField()
                                 ),
                                 # Experiments: Instrument fields
-                                "phenopackets__biosamples__experiment__instrument__platform",
+                                "phenopackets__biosamples__experiment__instrument__device",
                                 "phenopackets__biosamples__experiment__instrument__description",
-                                "phenopackets__biosamples__experiment__instrument__model",
                                 Cast(
                                     "phenopackets__biosamples__experiment__instrument__extra_properties",
                                     TextField()

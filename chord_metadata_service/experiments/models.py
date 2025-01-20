@@ -141,9 +141,10 @@ class Instrument(models.Model, IndexableMixin):
     # TODO identifier assigned by lab (?)
     identifier = CharField(max_length=200, blank=True, null=True,
                            help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
-    platform = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "platform"))
+    device = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "device"))
+    device_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
+                                  help_text=rec_help(d.INSTRUMENT, "device_ontology"))
     description = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "description"))
-    model = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "model"))
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
                                  help_text=rec_help(d.INSTRUMENT, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
