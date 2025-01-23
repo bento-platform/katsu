@@ -12,7 +12,6 @@ from rest_framework.response import Response
 from typing import Type
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
@@ -140,13 +139,19 @@ async def public_overview(request: DrfRequest):
         return mn, await model.get_model_scoped_queryset(discovery_scope).acount()
 
     # Predefined counts
-    counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
+    counts: dict[PublicModelName, int] = dict(
+        await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
+
+    counts_res: dict[PublicModelName, int | bool] = {}
 
     # Set counts to 0 if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
         dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
-        rules = get_rules(discovery, dt_permissions[dt])
+        model_permissions = dt_permissions[dt]
+        rules = get_rules(discovery, model_permissions)
         count_threshold = rules["count_threshold"]
+
+        model_count = counts[public_model_name]
 
         # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
         if 0 < counts[public_model_name] <= count_threshold and count_threshold > 0:
@@ -154,20 +159,17 @@ async def public_overview(request: DrfRequest):
                 f"Public overview: {public_model_name} count is below count threshold of {count_threshold} "
                 f"({repr(discovery_scope)})"
             )
-            counts[public_model_name] = 0
+            model_count = 0
+
+        if any(model_permissions.values()):  # if we have any permissions, then add a response for the overview
+            # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
+            # didn't get censored down to 0 above.
+            counts_res[public_model_name] = model_count if model_permissions["counts"] else (model_count > 0)
 
     response = {
         "layout": discovery["overview"],
         "fields": {},
-        "counts": {
-            **({
-                "individuals": counts["individual"],
-                "biosamples": counts["biosample"],
-            } if dt_permissions[dts.DATA_TYPE_PHENOPACKET]["counts"] else {}),
-            **({
-                "experiments": counts["experiment"],
-            } if dt_permissions[dts.DATA_TYPE_EXPERIMENT]["counts"] else {}),
-        },
+        "counts": counts_res,
     }
 
     # Parse the public config to gather data for each field defined in the overview

@@ -26,7 +26,7 @@ RULES_FULL_PERMISSIONS: DiscoveryRules = {
 def get_rules(discovery: OptionalDiscoveryOrEmptyConfig, data_permissions: DataPermissionsDict) -> DiscoveryRules:
     if data_permissions["data"]:
         return RULES_FULL_PERMISSIONS
-    elif not data_permissions["counts"] or not (discovery or {}).get("rules"):
+    elif not (data_permissions["counts"] or data_permissions["bool_"]) or not (discovery or {}).get("rules"):
         return RULES_NO_PERMISSIONS
     return discovery["rules"]
 
