@@ -16,7 +16,7 @@ class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
     def test_get_threshold_bool_only_perms(self):
         self.assertEqual(get_threshold(None, self.permissions_bool), sys.maxsize)
         self.assertEqual(get_threshold({}, self.permissions_bool), sys.maxsize)
-        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_bool), sys.maxsize)
+        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_bool), 5)  # True-threshold
 
     def test_get_threshold_no_config(self):  # no public config configured
         self.assertEqual(get_threshold(None, self.permissions_counts), sys.maxsize)

@@ -129,7 +129,7 @@ async def public_overview(request: DrfRequest):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    if not any(d["counts"] for d in dt_permissions.values()):
+    if not any(d["bool_"] for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
     async def _counts_for_scoped_model_name(
@@ -142,7 +142,7 @@ async def public_overview(request: DrfRequest):
     counts: dict[PublicModelName, int] = dict(
         await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
 
-    counts_res: dict[PublicModelName, int | bool] = {}
+    counts_res: dict[str, int | bool] = {}
 
     # Set counts to 0 if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
@@ -164,7 +164,8 @@ async def public_overview(request: DrfRequest):
         if any(model_permissions.values()):  # if we have any permissions, then add a response for the overview
             # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
             # didn't get censored down to 0 above.
-            counts_res[public_model_name] = model_count if model_permissions["counts"] else (model_count > 0)
+            # - hacky pluralize - works for current public model names
+            counts_res[f"{public_model_name}s"] = model_count if model_permissions["counts"] else (model_count > 0)
 
     response = {
         "layout": discovery["overview"],
@@ -179,12 +180,15 @@ async def public_overview(request: DrfRequest):
 
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
-    async def _get_field_response(field: str) -> dict:
+    async def _get_field_response(field: str) -> dict | None:
         field_props = field_conf.get(field, {"datatype": None})
         field_perms = field_permissions[field]
 
-        stats: list[BinWithValue] | None
-        if field_props["datatype"] == "string":
+        stats: list[BinWithValue]
+
+        if not field_perms["counts"]:
+            return None  # cannot compute stats right now for boolean-level responses
+        elif field_props["datatype"] == "string":
             stats = await get_categorical_stats(discovery_scope, field, field_perms)
         elif field_props["datatype"] == "number":
             stats = await get_range_stats(discovery_scope, field, field_perms)
@@ -193,17 +197,14 @@ async def public_overview(request: DrfRequest):
         else:
             raise NotImplementedError()
 
-        return {
-            **field_props,
-            "id": field,
-            **({"data": stats} if stats is not None else {}),
-        }
+        return {**field_props, "id": field, "data": stats}
 
     # Parallel async collection of field responses for public overview
     field_responses = await asyncio.gather(*(_get_field_response(field) for field in fields))
 
     for field, field_res in zip(fields, field_responses):
-        response["fields"][field] = field_res
+        if field_res is not None:
+            response["fields"][field] = field_res
 
     return Response(response)
 

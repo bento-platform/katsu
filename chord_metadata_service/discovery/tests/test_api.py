@@ -247,10 +247,19 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         count_threshold = discovery["rules"]["count_threshold"]
         for data_type in dts.keys():
             response_count = overview_response["counts"][data_type]
-            if response_count <= count_threshold:
+            if dts[data_type] <= count_threshold:
                 self.assertEqual(response_count, 0)
             else:
                 self.assertEqual(response_count, dts[data_type])
+
+    def assert_bools_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
+        count_threshold = discovery["rules"]["count_threshold"]
+        for data_type in dts.keys():
+            response_val = overview_response["counts"][data_type]
+            if dts[data_type] <= count_threshold:
+                self.assertEqual(response_val, False)  # sub-threshold --> false response
+            else:
+                self.assertEqual(response_val, True)  # above-threshold --> true response
 
     def assert_counts_not_censored(self, overview_response: dict, dts: dict[str, int]):
         for data_type in dts.keys():
@@ -295,8 +304,18 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     # none and bool-level permissions should get forbidden errors for overview, currently
                     res = self.dt_get("none", url)
                     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-                    res = self.dt_get("bool", url)
-                    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+                # with bool permissions, we should get the expected status code + (if success) True/False
+                #  based on censored count
+                res = self.dt_get("bool", url)
+                self.assertEqual(res.status_code, expected_status_code)
+
+                if discovery:
+                    res_json = res.json()
+                    self.assertIsInstance(res_json, dict)
+                    self.assert_bools_censored(res_json, discovery, dts)
+                    # scoped fields but without any data right now for bools:
+                    self.assert_scoped_fields(res_json, discovery)
 
                 # with counts permissions, we should get the expected status code + (if success) censored counts
 
