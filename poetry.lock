@@ -771,12 +771,12 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-autocomplete-light"
-version = "3.12.0"
+version = "3.11.0"
 description = "Fresh autocompletes for Django"
 optional = false
 python-versions = "*"
 files = [
-    {file = "django_autocomplete_light-3.12.0.tar.gz", hash = "sha256:cc90dbbfea2dde132ff8a22ea39937924db2f53c2c519c6ac7ab885a3f2874d2"},
+    {file = "django-autocomplete-light-3.11.0.tar.gz", hash = "sha256:212576a17e3308ef7ca77e280b86684167916d2091d4b73640f38845d9516328"},
 ]
 
 [package.dependencies]
