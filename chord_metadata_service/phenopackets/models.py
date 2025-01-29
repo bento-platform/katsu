@@ -5,6 +5,7 @@ from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel, TOP_LEVEL_MODEL_SCOPE_FILTERS
 from chord_metadata_service.discovery.types import ModelScopeFilters
+from chord_metadata_service.geo import models as geo_models
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.description_utils import rec_help
@@ -191,8 +192,20 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
     diagnostic_markers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                                    help_text=rec_help(d.BIOSAMPLE, "diagnostic_markers"))
     procedure = models.JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "procedure"))
+
+    # non-phenopacket-standard fields ----------------------------------------------------------------------------------
+
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
+    collection_location = models.OneToOneField(
+        geo_models.GeoLocation,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.BIOSAMPLE, "collection_location"),
+    )
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
+
+    # ------------------------------------------------------------------------------------------------------------------
 
     def __str__(self):
         return str(self.id)
