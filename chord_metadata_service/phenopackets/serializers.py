@@ -14,8 +14,9 @@ from .models import (
     VariationDescriptor,
     GeneDescriptor,
 )
-from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.geo.serializers import GeoLocationSerializer
+from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
 
@@ -82,6 +83,7 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
+    collection_location = GeoLocationSerializer()
 
     class Meta:
         model = Biosample
@@ -100,6 +102,7 @@ class BiosampleSerializer(GenericSerializer):
         instance.tumor_grade = validated_data.get('tumor_grade', instance.tumor_grade)
         instance.diagnostic_markers = validated_data.get('diagnostic_markers', instance.diagnostic_markers)
         instance.procedure = validated_data.get('procedure', instance.procedure)
+        instance.collection_location = validated_data.get('collection_location', instance.collection_location)
         instance.save()
         return instance
 
