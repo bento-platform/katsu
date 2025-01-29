@@ -20,10 +20,12 @@ class GeoLocation(geo_models.Model):
 
     # metadata / free-text data:
     #  - serializes into a GeoJSON properties object when rendering any instances as JSON
-    label = geo_models.TextField()
-    city = geo_models.TextField()
-    country = geo_models.TextField()
-    iso_a3_code = geo_models.CharField(max_length=3, choices=ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES, null=True)
-    precision = geo_models.TextField()
+    label = geo_models.TextField(blank=True)
+    city = geo_models.TextField(blank=True)
+    country = geo_models.TextField(blank=True)
+    iso_a3_code = geo_models.CharField(
+        max_length=3, choices=ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES, null=True, default=None
+    )
+    precision = geo_models.TextField(blank=True)
 
     # TODO: extra properties
