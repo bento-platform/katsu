@@ -2,7 +2,10 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from .models import GeoLocation
 
-__all__ = ["GeoLocationSerializer"]
+__all__ = [
+    "GeoLocationPropertiesSerializer",
+    "GeoLocationSerializer",
+]
 
 
 def type_is_feature(value):
