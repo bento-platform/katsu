@@ -13,10 +13,10 @@ LABEL devcontainer.metadata='[{ \
 
 SHELL ["/bin/bash", "-c"]
 
-# - Install GDAL for GeoDjango
+# - Install binutils, GDAL, and PROJ for GeoDjango
 # - Install Postgres client for checking if database is ready
 RUN apt-get update -y && \
-    apt-get install -y gdal postgresql-client && \
+    apt-get install -y binutils gdal-bin libproj-dev postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Backwards-compatible with old BentoV2 container layout
