@@ -1,5 +1,7 @@
+from django.contrib.gis.geos import Point
 from django.test import TestCase
 
+from ..models import GeoLocation
 from ..serializers import GeoLocationPropertiesSerializer, GeoLocationSerializer
 
 VALID_GEO_LOCATION_PROPERTIES = (
@@ -44,6 +46,9 @@ INVALID_GEO_LOCATIONS = (
 
 class GeoLocationSerializersTest(TestCase):
 
+    def setUp(self):
+        self.loc_1 = GeoLocation.objects.create(point=Point(44.2380626, -76.512335), label="Kingston")
+
     def test_valid_geo_location_properties(self):
         for props in VALID_GEO_LOCATION_PROPERTIES:
             with self.subTest(params=(props,)):
@@ -77,3 +82,14 @@ class GeoLocationSerializersTest(TestCase):
         for loc in INVALID_GEO_LOCATIONS:
             with self.subTest(params=(loc,)):
                 self.assertFalse(GeoLocationSerializer(data=loc).is_valid())
+
+    def test_serialize_model_instance(self):
+        s = GeoLocationSerializer(instance=self.loc_1)
+        self.assertDictEqual(s.data, {
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [44.2380626, -76.512335],
+            },
+            "properties": {"label": "Kingston"},
+        })
