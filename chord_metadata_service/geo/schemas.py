@@ -50,7 +50,7 @@ GEO_LOCATION_SCHEMA = tag_ids_and_describe({
                 "country": base_type(SchemaTypes.STRING),
                 "ISO3166alpha3": enum_of(constants.ISO_3166_1_ALPHA_3_COUNTRY_CODES),
                 "precision": base_type(SchemaTypes.STRING),
-            }
+            },
         }
     },
     "required": ["type", "geometry", "properties"],
