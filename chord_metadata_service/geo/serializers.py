@@ -33,6 +33,15 @@ class GeoLocationPropertiesSerializer(serializers.Serializer):
     precision: serializers.CharField(required=False, allow_blank=True)
 
 
+MODEL_ATTRS_TO_PREDEF_PROPS = {
+    "label": "label",
+    "city": "city",
+    "country": "country",
+    "iso_a3_code": "ISO3166alpha3",
+    "precision": "precision",
+}
+
+
 class GeoLocationSerializer(GenericSerializer):
 
     type = serializers.CharField(validators=[type_is_feature])
@@ -48,11 +57,11 @@ class GeoLocationSerializer(GenericSerializer):
             "type": "Feature",
             "geometry": {
                 "type": "Point",
-                "coordinates": instance.point.coords,
+                "coordinates": list(instance.point.coords),
             },
             "properties": {
-                k: getattr(instance, k)
-                for k in ("label", "city", "country", "ISO3166alpha3", "precision")
+                MODEL_ATTRS_TO_PREDEF_PROPS[k]: getattr(instance, k)
+                for k in ("label", "city", "country", "iso_a3_code", "precision")
                 if getattr(instance, k)
             },
         }
