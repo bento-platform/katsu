@@ -83,7 +83,7 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
-    collection_location = GeoLocationSerializer()
+    collection_location = GeoLocationSerializer(required=False)
 
     class Meta:
         model = Biosample
