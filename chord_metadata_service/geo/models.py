@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models as geo_models
+from django.contrib.gis.geos import Point
 
 from .constants import ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES
 
@@ -29,3 +30,8 @@ class GeoLocation(geo_models.Model):
     precision = geo_models.TextField(blank=True)
 
     # TODO: extra properties
+
+    def __str__(self):
+        # noinspection PyTypeChecker
+        pt: Point = self.point
+        return f"{self.label} {pt.coords}" if self.label else str(pt.coords)
