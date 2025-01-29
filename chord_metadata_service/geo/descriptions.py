@@ -17,7 +17,7 @@ GEO_LOCATION = {
         "properties": {
             "description": (
                 "Additional properties on the GeoJSON. Partially structured via the GA4GH/Progenetix GeoLocation "
-                "schema block.",
+                "schema block."
             ),
             "properties": {
                 "label": "Address or other human-readable location name.",
