@@ -34,7 +34,7 @@ class GeoLocationPropertiesSerializer(serializers.Serializer):
     precision: serializers.CharField(required=False, allow_blank=True)
 
 
-class GeoLocationSerializer(GenericSerializer):
+class GeoLocationSerializer(serializers.Serializer):
 
     type = serializers.CharField(validators=[type_is_feature])
     geometry = PointSerializer()
@@ -57,7 +57,3 @@ class GeoLocationSerializer(GenericSerializer):
                 if getattr(instance, k)
             },
         }
-
-    class Meta:
-        model = GeoLocation
-        fields = "__all__"
