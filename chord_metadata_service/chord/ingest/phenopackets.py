@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from humps import decamelize
-
 from dateutil.parser import isoparse
 from decimal import Decimal
+from django.contrib.gis.geos import Point
+from humps import decamelize
+
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
+from chord_metadata_service.geo import constants as gc, models as gm, serializers as gs
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
@@ -141,11 +143,30 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     return subject_obj
 
 
+def get_or_create_collection_location(geoloc_json: dict | None) -> gm.GeoLocation | None:
+    if not geoloc_json:
+        return None
+    import sys
+    print(geoloc_json, file=sys.stderr)
+    gs.GeoLocationSerializer(data=geoloc_json).is_valid(raise_exception=True)
+    return gm.GeoLocation.objects.get_or_create(
+        point=Point(geoloc_json["geometry"]["coordinates"]),
+        **{
+            gc.MODEL_PREDEF_PROPS_TO_ATTRS[gk]: gv
+            for gk, gv in geoloc_json.items()
+            if gk in gc.MODEL_PREDEF_PROPS_TO_ATTRS
+        },
+        # TODO: extra properties
+    )
+
+
 def get_or_create_biosample(bs: dict) -> pm.Biosample:
     bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
     for k in ("sampled_tissue", "taxonomy", "time_of_collection", "histological_diagnosis",
               "tumor_progression", "tumor_grade"):
         bs_query.update(query_and_check_nulls(bs, k))
+
+    bs_query.update(query_and_check_nulls(bs, "collection_location_id", get_or_create_collection_location))
 
     bs_obj, bs_created = pm.Biosample.objects.get_or_create(
         id=bs["id"],

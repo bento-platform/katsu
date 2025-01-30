@@ -98,6 +98,14 @@
           "id": "NCIT:C5189",
           "label": "Radical Cystoprostatectomy"
         }
+      },
+      "collection_location": {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [45.4732202, -73.6034936]
+        },
+        "properties": {"label": "MUHC"}
       }
     },
     {
