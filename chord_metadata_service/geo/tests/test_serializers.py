@@ -1,7 +1,4 @@
-from django.contrib.gis.geos import Point
-from django.test import TestCase
-
-from ..models import GeoLocation
+from .constants import KINGSTON_GEOM_JSON, GeoLocationTestCase
 from ..serializers import GeoLocationPropertiesSerializer, GeoLocationSerializer
 
 VALID_GEO_LOCATION_PROPERTIES = (
@@ -23,7 +20,7 @@ VALID_GEO_LOCATION_PROPERTIES = (
 INVALID_GEO_LOCATIONS = (
     {
         "type": "FeatureCollection",
-        "geometry": {"type": "Point", "coordinates": [44.2380626, -76.512335]},
+        "geometry": KINGSTON_GEOM_JSON,
         "properties": {},
     },
     {
@@ -44,10 +41,7 @@ INVALID_GEO_LOCATIONS = (
 )
 
 
-class GeoLocationSerializersTest(TestCase):
-
-    def setUp(self):
-        self.loc_1 = GeoLocation.objects.create(point=Point(44.2380626, -76.512335), label="Kingston")
+class GeoLocationSerializersTest(GeoLocationTestCase):
 
     def test_valid_geo_location_properties(self):
         for props in VALID_GEO_LOCATION_PROPERTIES:
@@ -59,10 +53,7 @@ class GeoLocationSerializersTest(TestCase):
             with self.subTest(params=(props,)):
                 self.assertTrue(GeoLocationSerializer(data={
                     "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [44.2380626, -76.512335],
-                    },
+                    "geometry": KINGSTON_GEOM_JSON,
                     "properties": props,
                 }))
 
@@ -84,12 +75,23 @@ class GeoLocationSerializersTest(TestCase):
                 self.assertFalse(GeoLocationSerializer(data=loc).is_valid())
 
     def test_serialize_model_instance(self):
-        s = GeoLocationSerializer(instance=self.loc_1)
-        self.assertDictEqual(s.data, {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [44.2380626, -76.512335],
+        for loc, loc_json in zip(self.locations, (
+            {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+                "properties": {"label": "Kingston"},
             },
-            "properties": {"label": "Kingston"},
-        })
+            {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+                "properties": {"label": "Kingston", "city": "Kingston", "country": "Canada", "ISO3166alpha3": "CDN"},
+            },
+            {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+                "properties": {},
+            },
+        )):
+            with self.subTest(params=(loc, loc_json)):
+                s = GeoLocationSerializer(instance=loc)
+                self.assertDictEqual(s.data, loc_json)
