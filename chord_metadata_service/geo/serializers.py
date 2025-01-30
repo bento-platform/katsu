@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from chord_metadata_service.restapi.serializers import GenericSerializer
+from .constants import MODEL_ATTRS_TO_PREDEF_PROPS
 from .models import GeoLocation
 
 __all__ = [
@@ -31,15 +32,6 @@ class GeoLocationPropertiesSerializer(serializers.Serializer):
     country: serializers.CharField(required=False, allow_blank=True)
     ISO3166alpha3: serializers.CharField(required=False, allow_blank=True)
     precision: serializers.CharField(required=False, allow_blank=True)
-
-
-MODEL_ATTRS_TO_PREDEF_PROPS = {
-    "label": "label",
-    "city": "city",
-    "country": "country",
-    "iso_a3_code": "ISO3166alpha3",
-    "precision": "precision",
-}
 
 
 class GeoLocationSerializer(GenericSerializer):
