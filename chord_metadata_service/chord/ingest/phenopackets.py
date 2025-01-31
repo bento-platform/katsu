@@ -143,21 +143,23 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     return subject_obj
 
 
-def get_or_create_collection_location(geoloc_json: dict | None) -> gm.GeoLocation | None:
-    if not geoloc_json:
-        return None
-    import sys
-    print(geoloc_json, file=sys.stderr)
+def get_or_create_geo_location(geoloc_json: dict) -> gm.GeoLocation:
+    """
+    Given a GeoJSON-based representation of a location, return an existing (re-used) or new GeoLocation object, now
+    saved in the database. The provided dictionary should be compatible with the Katsu GeoLocation format, based on the
+    GA4GH schema block / Progenetix GeoLocation schema< https://schemablocks.org/schema_pages/Progenetix/GeoLocation/>.
+    """
     gs.GeoLocationSerializer(data=geoloc_json).is_valid(raise_exception=True)
-    return gm.GeoLocation.objects.get_or_create(
+    geoloc, _ = gm.GeoLocation.objects.get_or_create(
         point=Point(geoloc_json["geometry"]["coordinates"]),
         **{
             gc.MODEL_PREDEF_PROPS_TO_ATTRS[gk]: gv
-            for gk, gv in geoloc_json.items()
+            for gk, gv in geoloc_json.get("properties", {}).items()
             if gk in gc.MODEL_PREDEF_PROPS_TO_ATTRS
         },
         # TODO: extra properties
     )
+    return geoloc
 
 
 def get_or_create_biosample(bs: dict) -> pm.Biosample:
@@ -165,8 +167,6 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
     for k in ("sampled_tissue", "taxonomy", "time_of_collection", "histological_diagnosis",
               "tumor_progression", "tumor_grade"):
         bs_query.update(query_and_check_nulls(bs, k))
-
-    bs_query.update(query_and_check_nulls(bs, "collection_location_id", get_or_create_collection_location))
 
     bs_obj, bs_created = pm.Biosample.objects.get_or_create(
         id=bs["id"],
@@ -181,6 +181,10 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
         **bs_query
     )
+
+    if isinstance(bs_loc_json := bs.get("location_collected"), dict):
+        bs_obj.location_collected = get_or_create_geo_location(bs_loc_json)
+        bs_obj.save()
 
     if derived_from_id := bs.get("derived_from_id"):
         try:

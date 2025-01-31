@@ -305,7 +305,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         "sample_storage": ONTOLOGY_CLASS,
 
         # Extended fields
-        "collection_location": GEO_LOCATION_SCHEMA,
+        "location_collected": GEO_LOCATION_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id"],

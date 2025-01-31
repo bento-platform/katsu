@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='biosample',
-            name='collection_location',
+            name='location_collected',
             field=models.ForeignKey(blank=True, help_text='A GeoJSON-compatible object representing a geographic location.', null=True, on_delete=django.db.models.deletion.CASCADE, to='geo.geolocation'),
         ),
     ]

@@ -353,7 +353,7 @@ BIOSAMPLE = {
             "items": VARIANT
         },
         "is_control_sample": "Whether the sample is being used as a normal control.",
-        "collection_location": GEO_LOCATION,
+        "location_collected": GEO_LOCATION,
         **EXTRA_PROPERTIES
     }
 }

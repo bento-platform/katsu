@@ -99,7 +99,7 @@
           "label": "Radical Cystoprostatectomy"
         }
       },
-      "collection_location": {
+      "location_collected": {
         "type": "Feature",
         "geometry": {
           "type": "Point",

@@ -18,7 +18,7 @@ async def clean_geolocations() -> int:
     locations_referenced = set()
 
     # Collect references to locations from biosamples
-    locations_referenced |= await build_id_set_from_model(pm.Biosample, "collection_location_id")
+    locations_referenced |= await build_id_set_from_model(pm.Biosample, "location_collected_id")
 
     # Remove individuals not collected above
     return await remove_not_referenced(GeoLocation, locations_referenced, "geolocations")

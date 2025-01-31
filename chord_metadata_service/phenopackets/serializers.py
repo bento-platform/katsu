@@ -83,7 +83,7 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
-    collection_location = GeoLocationSerializer(required=False)
+    location_collected = GeoLocationSerializer(required=False)
 
     class Meta:
         model = Biosample
@@ -102,7 +102,7 @@ class BiosampleSerializer(GenericSerializer):
         instance.tumor_grade = validated_data.get('tumor_grade', instance.tumor_grade)
         instance.diagnostic_markers = validated_data.get('diagnostic_markers', instance.diagnostic_markers)
         instance.procedure = validated_data.get('procedure', instance.procedure)
-        instance.collection_location = validated_data.get('collection_location', instance.collection_location)
+        instance.location_collected = validated_data.get('location_collected', instance.location_collected)
         instance.save()
         return instance
 

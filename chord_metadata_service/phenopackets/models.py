@@ -196,12 +196,12 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
     # non-phenopacket-standard fields ----------------------------------------------------------------------------------
 
     is_control_sample = models.BooleanField(default=False, help_text=rec_help(d.BIOSAMPLE, "is_control_sample"))
-    collection_location = models.ForeignKey(
+    location_collected = models.ForeignKey(
         geo_models.GeoLocation,
         on_delete=models.CASCADE,
         blank=True,
         null=True,
-        help_text=rec_help(d.BIOSAMPLE, "collection_location"),
+        help_text=rec_help(d.BIOSAMPLE, "location_collected"),
     )
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.BIOSAMPLE, "extra_properties"))
 

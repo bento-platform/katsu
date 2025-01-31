@@ -54,14 +54,14 @@ class BiosampleTest(ProjectTestCase):
         # does not belong to a phenopacket => has no project
         self.assertIsNone(self.biosample_3.get_project_id())
 
-    def test_biosample_with_collection_location(self):
+    def test_biosample_with_location_collected(self):
         geo = GeoLocation.objects.create(**GEO_LOCATION_1)
         bs = c.valid_biosample_1(self.individual)
         bs["id"] = "katsu.biosample_id:4"
-        bs["collection_location"] = geo
+        bs["location_collected"] = geo
         b = m.Biosample.objects.create(**bs)
 
-        self.assertEqual(str(b.collection_location), "Kingston (44.2380626, -76.512335)")
+        self.assertEqual(str(b.location_collected), "Kingston (44.2380626, -76.512335)")
 
     def test_string_representations(self):
         # Test __str__
