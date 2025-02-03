@@ -4576,7 +4576,7 @@
                     "ug/m2",
                     "g/m2",
                     "mg/kg",
-                    "cells/kg",
+                    "mg",
                     "Not available"
                 ],
                 "title": "DosageUnitsEnum",
