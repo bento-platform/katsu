@@ -611,7 +611,7 @@ DOSAGE_UNITS = [
     "ug/m2",
     "g/m2",
     "mg/kg",
-    "cells/kg",
+    "mg",
     "Not available",
 ]
 

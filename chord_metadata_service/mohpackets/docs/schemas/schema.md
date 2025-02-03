@@ -2814,7 +2814,7 @@ DosageUnitsEnum
 |DosageUnitsEnum|ug/m2|
 |DosageUnitsEnum|g/m2|
 |DosageUnitsEnum|mg/kg|
-|DosageUnitsEnum|cells/kg|
+|DosageUnitsEnum|mg|
 |DosageUnitsEnum|Not available|
 
 <h2 id="tocS_DrugReferenceDbEnum">DrugReferenceDbEnum</h2>
