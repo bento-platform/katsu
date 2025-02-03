@@ -41,6 +41,7 @@ GEO_LOCATION_SCHEMA = tag_ids_and_describe({
                 },
             },
             "required": ["type", "coordinates"],
+            "additionalProperties": False,  # Geometry must be just type and coordinates
         },
         "properties": {
             "type": "object",
@@ -51,6 +52,7 @@ GEO_LOCATION_SCHEMA = tag_ids_and_describe({
                 "ISO3166alpha3": enum_of(constants.ISO_3166_1_ALPHA_3_COUNTRY_CODES),
                 "precision": base_type(SchemaTypes.STRING),
             },
+            "additionalProperties": True,  # Explicitly allow "extra properties"
         }
     },
     "required": ["type", "geometry", "properties"],

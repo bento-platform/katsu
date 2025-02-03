@@ -1,6 +1,9 @@
-from django.contrib.gis.db import models as geo_models
+from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 
+from chord_metadata_service.restapi.validators import base_extra_properties_validator
+
+from . import descriptions as d
 from .constants import ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES
 
 
@@ -9,7 +12,7 @@ __all__ = [
 ]
 
 
-class GeoLocation(geo_models.Model):
+class GeoLocation(models.Model):
     """
     Model describing a specific geographical location. Heavily inspired by the Progenetix GeoLocation schema block:
     https://schemablocks.org/schema_pages/Progenetix/GeoLocation/
@@ -17,19 +20,38 @@ class GeoLocation(geo_models.Model):
 
     # geometry:
     #  - serializes into a GeoJSON geometry object when rendering any instances as JSON
-    point = geo_models.PointField(spatial_index=True)
+    point = models.PointField(
+        spatial_index=True, help_text="Point (coordinates) specifying a precise geographic location."
+    )
 
     # metadata / free-text data:
     #  - serializes into a GeoJSON properties object when rendering any instances as JSON
-    label = geo_models.TextField(blank=True)
-    city = geo_models.TextField(blank=True)
-    country = geo_models.TextField(blank=True)
-    iso_a3_code = geo_models.CharField(
-        max_length=3, choices=ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES, null=True, default=None
+    label = models.TextField(blank=True, default="", help_text=d.PROP_LABEL)
+    city = models.TextField(blank=True, default="", help_text=d.PROP_CITY)
+    country = models.TextField(blank=True, default="", help_text=d.PROP_COUNTRY)
+    iso_a3_code = models.CharField(
+        max_length=3,
+        choices=ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES,
+        null=True,
+        default=None,
+        help_text=d.PROP_ISO3166_ALPHA_3,
     )
-    precision = geo_models.TextField(blank=True)
+    precision = models.TextField(blank=True, default="", help_text=d.PROP_ISO3166_ALPHA_3)
 
-    # TODO: extra properties
+    # properties (mapping to other properties in the GeoJSON object) which do not map to any of the above fields:
+    extra_properties = models.JSONField(
+        blank=True,
+        default=dict,
+        validators=[base_extra_properties_validator],
+        help_text="Extra properties that do not have a predefined field in the database.",
+    )
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    # ------------------------------------------------------------------------------------------------------------------
 
     def __str__(self):
         # noinspection PyTypeChecker

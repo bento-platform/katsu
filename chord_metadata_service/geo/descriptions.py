@@ -1,4 +1,17 @@
-__all__ = ["GEO_LOCATION"]
+__all__ = [
+    "PROP_LABEL",
+    "PROP_CITY",
+    "PROP_COUNTRY",
+    "PROP_ISO3166_ALPHA_3",
+    "PROP_PRECISION",
+    "GEO_LOCATION",
+]
+
+PROP_LABEL = "Address or other human-readable location name."
+PROP_CITY = "Optional name of the city where this location rests."
+PROP_COUNTRY = "Optional name of the country where this location rests."
+PROP_ISO3166_ALPHA_3 = "Optional ISO 3166-1 alpha 3 country code (three letters)."
+PROP_PRECISION = "Optional, human-readable indication of how precise this location is (e.g., \"city\")."
 
 GEO_LOCATION = {
     "description": "A GeoJSON-compatible object representing a geographic location.",
@@ -20,11 +33,11 @@ GEO_LOCATION = {
                 "schema block."
             ),
             "properties": {
-                "label": "Address or other human-readable location name.",
-                "city": "Optional name of the city where this location rests.",
-                "country": "Optional name of the country where this location rests.",
-                "ISO3166alpha3": "Optional ISO 3166-1 alpha 3 country code (three letters).",
-                "precision": "Optional, human-readable indication of how precise this location is (e.g., \"city\")."
+                "label": PROP_LABEL,
+                "city": PROP_CITY,
+                "country": PROP_COUNTRY,
+                "ISO3166alpha3": PROP_ISO3166_ALPHA_3,
+                "precision": PROP_PRECISION,
             },
         },
     },

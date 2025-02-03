@@ -1,12 +1,14 @@
 from .constants import KINGSTON_GEOM_JSON, GeoLocationTestCase
 from ..serializers import GeoLocationPropertiesSerializer, GeoLocationSerializer
 
+
 VALID_GEO_LOCATION_PROPERTIES = (
     {},
     {"label": "my location"},
     {
         "country": "Canada",
         "ISO3166alpha3": "CDN",
+        "my_cool_extra_prop": 5324,
     },
     {
         "label": "David's Hometown",
