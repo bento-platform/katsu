@@ -25,6 +25,7 @@ class GeoLocationTestCase(TestCase):
             city="Kingston",
             country="Canada",
             iso_a3_code="CDN",
+            extra_properties={"my_extra_property": 4321},
         )
         self.loc_3 = GeoLocation.objects.create(point=Point(44.2380626, -76.512335))
 

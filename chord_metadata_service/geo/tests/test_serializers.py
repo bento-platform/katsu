@@ -86,7 +86,15 @@ class GeoLocationSerializersTest(GeoLocationTestCase):
             {
                 "type": "Feature",
                 "geometry": KINGSTON_GEOM_JSON,
-                "properties": {"label": "Kingston", "city": "Kingston", "country": "Canada", "ISO3166alpha3": "CDN"},
+                "properties": {
+                    "label": "Kingston",
+                    "city": "Kingston",
+                    "country": "Canada",
+                    "ISO3166alpha3": "CDN",
+                    # extra properties from model should be serialized into a flat representation in properties to be
+                    # close to GeoJSON and support arbitrary GeoJSON consumers' demands for properties (e.g., colour).
+                    "my_extra_property": 4321,
+                },
             },
             {
                 "type": "Feature",
