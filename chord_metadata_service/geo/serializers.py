@@ -42,6 +42,8 @@ class GeoLocationSerializer(serializers.Serializer):
     geometry = PointSerializer()
     properties = GeoLocationPropertiesSerializer()
 
+    # TODO: test setting via api?
+
     def to_representation(self, instance: GeoLocation):
         """
         Completely custom override of to_representation to generate proper nested GeoJSON-compatible dictionary.
