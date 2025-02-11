@@ -15,7 +15,6 @@ from ninja import Query
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
-    SystemicTherapy,
     Comorbidity,
     Donor,
     Exposure,
@@ -26,6 +25,7 @@ from chord_metadata_service.mohpackets.models import (
     SampleRegistration,
     Specimen,
     Surgery,
+    SystemicTherapy,
     Treatment,
 )
 from chord_metadata_service.mohpackets.pagination import (
@@ -33,10 +33,9 @@ from chord_metadata_service.mohpackets.pagination import (
 )
 from chord_metadata_service.mohpackets.schemas.filter import (
     BiomarkerFilterSchema,
-    SystemicTherapyFilterSchema,
     ComorbidityFilterSchema,
-    DonorFilterSchema,
     DonorExplorerFilterSchema,
+    DonorFilterSchema,
     ExposureFilterSchema,
     FollowUpFilterSchema,
     PrimaryDiagnosisFilterSchema,
@@ -45,11 +44,11 @@ from chord_metadata_service.mohpackets.schemas.filter import (
     SampleRegistrationFilterSchema,
     SpecimenFilterSchema,
     SurgeryFilterSchema,
+    SystemicTherapyFilterSchema,
     TreatmentFilterSchema,
 )
 from chord_metadata_service.mohpackets.schemas.model import (
     BiomarkerModelSchema,
-    SystemicTherapyModelSchema,
     ComorbidityModelSchema,
     DonorModelSchema,
     ExposureModelSchema,
@@ -61,6 +60,7 @@ from chord_metadata_service.mohpackets.schemas.model import (
     SampleRegistrationModelSchema,
     SpecimenModelSchema,
     SurgeryModelSchema,
+    SystemicTherapyModelSchema,
     TreatmentModelSchema,
 )
 from chord_metadata_service.mohpackets.schemas.nested_data import (
@@ -90,6 +90,7 @@ def require_donor_by_program(func):
     `program_id`. Returns an error if `program_id` is missing, preventing filtering
     by `submitter_donor_id` alone.
     """
+
     @wraps(func)
     def wrapper(request, filters):
         if filters.submitter_donor_id and not filters.program_id:
