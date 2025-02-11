@@ -2,7 +2,7 @@
     "openapi": "3.1.0",
     "info": {
         "title": "MoH Service API",
-        "version": "5.1.0",
+        "version": "5.2.0",
         "description": "This is the RESTful API for the MoH Service."
     },
     "paths": {
@@ -42,33 +42,11 @@
                 "description": "Return all the programs in the database.",
                 "tags": [
                     "discovery"
-                ]
-            }
-        },
-        "/v3/discovery/donors/": {
-            "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_discovery_discover_donors",
-                "summary": "Discover Donors",
-                "parameters": [],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "items": {
-                                        "$ref": "#/components/schemas/DiscoveryDonorSchema"
-                                    },
-                                    "title": "Response",
-                                    "type": "array"
-                                }
-                            }
-                        }
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
                     }
-                },
-                "description": "Return the number of donors per program in the database.\nNote: This function is identical to `discover_patients_per_program`\nand is here because the frontend ingest uses it. It's probably best\nto clean up later.",
-                "tags": [
-                    "discovery"
                 ]
             }
         },
@@ -93,6 +71,11 @@
                 "description": "Retrieve the list of drug names and treatment for frontend usage",
                 "tags": [
                     "discovery"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -120,6 +103,11 @@
                 "description": "Return the number of programs in the database.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -147,6 +135,11 @@
                 "description": "Return the number of patients per program in the database.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -174,6 +167,11 @@
                 "description": "Return the number of individuals in the database.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -201,6 +199,11 @@
                 "description": "Return the count for every gender in the database.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -228,6 +231,11 @@
                 "description": "Return the count for every cancer type in the database.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -255,6 +263,11 @@
                 "description": "Return the count for every treatment type in the database.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -282,6 +295,11 @@
                 "description": "Return the count for age of diagnosis by calculating the date of birth interval.",
                 "tags": [
                     "overview"
+                ],
+                "security": [
+                    {
+                        "ServiceTokenAuth": []
+                    }
                 ]
             }
         },
@@ -317,7 +335,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -354,7 +372,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -391,7 +409,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -428,7 +446,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -465,7 +483,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -502,7 +520,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -539,7 +557,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -576,7 +594,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -613,7 +631,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -650,7 +668,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -687,7 +705,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -724,7 +742,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -761,7 +779,7 @@
                         "IngestAuth": []
                     },
                     {
-                        "IngestTokenAuth": []
+                        "ServiceTokenAuth": []
                     }
                 ]
             }
@@ -812,7 +830,7 @@
         },
         "/v3/authorized/donor_with_clinical_data/program/{program_id}/donor/{donor_id}": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_get_donor_with_clinical_data",
                 "summary": "Get Donor With Clinical Data",
                 "parameters": [
                     {
@@ -873,7 +891,7 @@
         },
         "/v3/authorized/programs/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_programs",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_programs",
                 "summary": "List Programs",
                 "parameters": [
                     {
@@ -937,7 +955,7 @@
         },
         "/v3/authorized/donors/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_donors",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_donors",
                 "summary": "List Donors",
                 "parameters": [
                     {
@@ -1114,7 +1132,7 @@
         },
         "/v3/authorized/query/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_query_donors",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_query_donors",
                 "summary": "Query Donors",
                 "parameters": [
                     {
@@ -1212,7 +1230,7 @@
         },
         "/v3/authorized/primary_diagnoses/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_primary_diagnoses",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_primary_diagnoses",
                 "summary": "List Primary Diagnoses",
                 "parameters": [
                     {
@@ -1532,7 +1550,7 @@
         },
         "/v3/authorized/biomarkers/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_biomarkers",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_biomarkers",
                 "summary": "List Biomarkers",
                 "parameters": [
                     {
@@ -1865,7 +1883,7 @@
         },
         "/v3/authorized/systemic_therapies/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_systemic_therapies",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_systemic_therapies",
                 "summary": "List Systemic Therapies",
                 "parameters": [
                     {
@@ -2105,7 +2123,7 @@
         },
         "/v3/authorized/comorbidities/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_comorbidities",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_comorbidities",
                 "summary": "List Comorbidities",
                 "parameters": [
                     {
@@ -2281,7 +2299,7 @@
         },
         "/v3/authorized/exposures/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_exposures",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_exposures",
                 "summary": "List Exposures",
                 "parameters": [
                     {
@@ -2406,7 +2424,7 @@
         },
         "/v3/authorized/follow_ups/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_follow_ups",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_follow_ups",
                 "summary": "List Follow Ups",
                 "parameters": [
                     {
@@ -2592,7 +2610,7 @@
         },
         "/v3/authorized/radiations/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_radiations",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_radiations",
                 "summary": "List Radiations",
                 "parameters": [
                     {
@@ -2800,7 +2818,7 @@
         },
         "/v3/authorized/sample_registrations/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_sample_registrations",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_sample_registrations",
                 "summary": "List Sample Registrations",
                 "parameters": [
                     {
@@ -2976,7 +2994,7 @@
         },
         "/v3/authorized/specimens/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_specimens",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_specimens",
                 "summary": "List Specimens",
                 "parameters": [
                     {
@@ -3280,7 +3298,7 @@
         },
         "/v3/authorized/surgeries/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_surgeries",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_surgeries",
                 "summary": "List Surgeries",
                 "parameters": [
                     {
@@ -3607,7 +3625,7 @@
         },
         "/v3/authorized/treatments/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_clinical_data_list_treatments",
+                "operationId": "chord_metadata_service_mohpackets_apis_authorized_list_treatments",
                 "summary": "List Treatments",
                 "parameters": [
                     {
@@ -3812,7 +3830,7 @@
         },
         "/v3/explorer/donors/": {
             "get": {
-                "operationId": "chord_metadata_service_mohpackets_apis_explorer_explorer_donor",
+                "operationId": "chord_metadata_service_mohpackets_apis_discovery_explorer_donor",
                 "summary": "Explorer Donor",
                 "parameters": [
                     {
@@ -3910,24 +3928,6 @@
                     "metadata"
                 ],
                 "title": "ProgramDiscoverySchema",
-                "type": "object"
-            },
-            "DiscoveryDonorSchema": {
-                "properties": {
-                    "program_id": {
-                        "title": "Program Id",
-                        "type": "string"
-                    },
-                    "donors_count": {
-                        "title": "Donors Count",
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "program_id",
-                    "donors_count"
-                ],
-                "title": "DiscoveryDonorSchema",
                 "type": "object"
             },
             "PatientPerProgramSchema": {
@@ -12889,14 +12889,14 @@
             }
         },
         "securitySchemes": {
-            "IngestAuth": {
-                "type": "http",
-                "scheme": "bearer"
-            },
-            "IngestTokenAuth": {
+            "ServiceTokenAuth": {
                 "type": "apiKey",
                 "in": "header",
                 "name": "X-Service-Token"
+            },
+            "IngestAuth": {
+                "type": "http",
+                "scheme": "bearer"
             },
             "DeleteAuth": {
                 "type": "http",
@@ -12905,11 +12905,6 @@
             "GetAuth": {
                 "type": "http",
                 "scheme": "bearer"
-            },
-            "ServiceTokenAuth": {
-                "type": "apiKey",
-                "in": "header",
-                "name": "X-Service-Token"
             }
         }
     },
