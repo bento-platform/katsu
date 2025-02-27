@@ -1,9 +1,8 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.11.01
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.01.21
 
 SHELL ["/bin/bash", "-c"]
 
 # Install Postgres client for checking if database is ready
-# Install Poetry for dependency management and uvicorn to serve the API
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/*

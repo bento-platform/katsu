@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2024.11.01
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.01.21
 
 LABEL org.opencontainers.image.description="Local development image for Katsu."
 LABEL devcontainer.metadata='[{ \
@@ -14,7 +14,6 @@ LABEL devcontainer.metadata='[{ \
 SHELL ["/bin/bash", "-c"]
 
 # Install Postgres client for checking if database is ready
-# Install Poetry for dependency management
 RUN apt-get update -y && \
     apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/*
