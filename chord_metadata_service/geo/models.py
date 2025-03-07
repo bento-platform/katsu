@@ -37,7 +37,7 @@ class GeoLocation(BaseTimeStamp):
         default=None,
         help_text=d.PROP_ISO3166_ALPHA_3,
     )
-    precision = models.TextField(blank=True, default="", help_text=d.PROP_ISO3166_ALPHA_3)
+    precision = models.TextField(blank=True, default="", help_text=d.PROP_PRECISION)
 
     # properties (mapping to other properties in the GeoJSON object) which do not map to any of the above fields:
     extra_properties = models.JSONField(
