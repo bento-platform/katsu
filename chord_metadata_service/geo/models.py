@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 
+from chord_metadata_service.restapi.models import BaseTimeStamp
 from chord_metadata_service.restapi.validators import base_extra_properties_validator
 
 from . import descriptions as d
@@ -12,7 +13,7 @@ __all__ = [
 ]
 
 
-class GeoLocation(models.Model):
+class GeoLocation(BaseTimeStamp):
     """
     Model describing a specific geographical location. Heavily inspired by the Progenetix GeoLocation schema block:
     https://schemablocks.org/schema_pages/Progenetix/GeoLocation/
@@ -45,11 +46,6 @@ class GeoLocation(models.Model):
         validators=[base_extra_properties_validator],
         help_text="Extra properties that do not have a predefined field in the database.",
     )
-
-    # ------------------------------------------------------------------------------------------------------------------
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     # ------------------------------------------------------------------------------------------------------------------
 
