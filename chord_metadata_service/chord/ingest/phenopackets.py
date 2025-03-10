@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from dateutil.parser import isoparse
 from decimal import Decimal
-from django.contrib.gis.geos import Point
 from humps import decamelize
 
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
-from chord_metadata_service.geo import constants as gc, models as gm, serializers as gs
+from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
@@ -141,25 +140,6 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
         subject_obj.save()
 
     return subject_obj
-
-
-def get_or_create_geo_location(geoloc_json: dict) -> gm.GeoLocation:
-    """
-    Given a GeoJSON-based representation of a location, return an existing (re-used) or new GeoLocation object, now
-    saved in the database. The provided dictionary should be compatible with the Katsu GeoLocation format, based on the
-    GA4GH schema block / Progenetix GeoLocation schema< https://schemablocks.org/schema_pages/Progenetix/GeoLocation/>.
-    """
-    gs.GeoLocationSerializer(data=geoloc_json).is_valid(raise_exception=True)
-    geoloc, _ = gm.GeoLocation.objects.get_or_create(
-        point=Point(geoloc_json["geometry"]["coordinates"]),
-        **{
-            gc.MODEL_PREDEF_PROPS_TO_ATTRS[gk]: gv
-            for gk, gv in geoloc_json.get("properties", {}).items()
-            if gk in gc.MODEL_PREDEF_PROPS_TO_ATTRS
-        },
-        # TODO: extra properties
-    )
-    return geoloc
 
 
 def get_or_create_biosample(bs: dict) -> pm.Biosample:
