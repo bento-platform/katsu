@@ -3,7 +3,6 @@ from .constants import MODEL_ATTRS_TO_PREDEF_PROPS
 from .models import GeoLocation
 
 __all__ = [
-    "GeoLocationPropertiesSerializer",
     "GeoLocationSerializer",
 ]
 
@@ -25,15 +24,6 @@ class PointSerializer(serializers.Serializer):
     )
 
 
-class GeoLocationPropertiesSerializer(serializers.Serializer):
-    label: serializers.CharField(required=False, allow_blank=True)
-    city: serializers.CharField(required=False, allow_blank=True)
-    country: serializers.CharField(required=False, allow_blank=True)
-    ISO3166alpha3: serializers.CharField(required=False, allow_blank=True)
-    precision: serializers.CharField(required=False, allow_blank=True)
-    # other properties implicitly allowed
-
-
 GEO_LOCATION_PREDEF_ATTRS = ("label", "city", "country", "iso_a3_code", "precision")
 
 
@@ -41,9 +31,7 @@ class GeoLocationSerializer(serializers.Serializer):
 
     type = serializers.CharField(validators=[type_is_feature])
     geometry = PointSerializer()
-    properties = GeoLocationPropertiesSerializer(required=False)
-
-    # TODO: test setting via api?
+    properties = serializers.DictField(required=False, write_only=True)
 
     def to_representation(self, instance: GeoLocation):
         """

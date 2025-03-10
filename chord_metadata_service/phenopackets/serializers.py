@@ -15,6 +15,7 @@ from .models import (
     GeneDescriptor,
 )
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.geo.serializers import GeoLocationSerializer
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.serializers import GenericSerializer
@@ -90,6 +91,11 @@ class BiosampleSerializer(GenericSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
+        if (
+            "location_collected" in validated_data
+            and isinstance(location_collected := validated_data["location_collected"], dict)
+        ):
+            validated_data["location_collected"] = get_or_create_geo_location(location_collected)
         biosample = Biosample.objects.create(**validated_data)
         return biosample
 

@@ -10,6 +10,7 @@ from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.geo.tests.constants import KINGSTON_GEOM_JSON
 from chord_metadata_service.restapi.tests import constants as restapi_c
 
 from . import constants as c
@@ -108,6 +109,36 @@ class CreateBiosampleTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(initial_count, post_update_count)
         self.assertEqual(response.data['procedure']['performed'], self.procedure_age_performed)
+
+    def test_create_biosample_with_location(self):
+        response = self.one_authz_post(reverse("biosamples-list"), json={
+            **self.valid_payload,
+            "location_collected": {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+                "properties": {
+                    "label": "Kingston",
+                    "abc": "def",
+                },
+            },
+        })
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(m.Biosample.objects.count(), 1)
+        self.assertEqual(m.Biosample.objects.get().location_collected.label, "Kingston")
+        self.assertDictEqual(m.Biosample.objects.get().location_collected.extra_properties, {"abc": "def"})
+
+    def test_create_biosample_with_invalid_location(self):
+        response = self.one_authz_post(reverse("biosamples-list"), json={
+            **self.valid_payload,
+            "location_collected": {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+                "properties": ["a", "b", "c"],  # not a dict
+            },
+        })
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        with self.assertRaises(m.Biosample.DoesNotExist):
+            m.Biosample.objects.get()
 
 
 class BatchBiosamplesCSVTest(AuthzAPITestCase):
