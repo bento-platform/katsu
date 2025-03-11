@@ -108,7 +108,10 @@ class BiosampleSerializer(GenericSerializer):
         instance.tumor_grade = validated_data.get('tumor_grade', instance.tumor_grade)
         instance.diagnostic_markers = validated_data.get('diagnostic_markers', instance.diagnostic_markers)
         instance.procedure = validated_data.get('procedure', instance.procedure)
-        instance.location_collected = validated_data.get('location_collected', instance.location_collected)
+
+        if location_collected := validated_data.get("location_collected"):
+            instance.location_collected = get_or_create_geo_location(location_collected)
+
         instance.save()
         return instance
 
