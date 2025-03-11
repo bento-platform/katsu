@@ -100,6 +100,12 @@ class AuthzAPITestCase(APITransactionTestCase):
         """
         return self._one_authz_patch(True, url, *args, **kwargs)
 
+    def one_no_authz_patch(self, url: str, *args, **kwargs):
+        """
+        Mocks a single False response from the authorization service and executes a JSON PATCH request.
+        """
+        return self._one_authz_patch(False, url, *args, **kwargs)
+
     def _one_authz_delete(self, authz_res: bool, url: str, *args, **kwargs):
         with aioresponses() as m:
             self.mock_authz_eval_one_result(m, authz_res)

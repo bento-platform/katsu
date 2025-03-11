@@ -129,13 +129,15 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
+    'django.contrib.gis',
     'django.contrib.messages',
+    'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
 
     'chord_metadata_service.chord.apps.ChordConfig',
     'chord_metadata_service.experiments.apps.ExperimentsConfig',
+    'chord_metadata_service.geo.apps.GeoConfig',
     'chord_metadata_service.patients.apps.PatientsConfig',
     'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
     'chord_metadata_service.resources.apps.ResourcesConfig',
@@ -285,7 +287,7 @@ def get_secret(path):
 
 DATABASES = {
     'default': {
-        'ENGINE': "django.db.backends.postgresql",
+        'ENGINE': "django.contrib.gis.db.backends.postgis",
         'NAME': os.environ.get("POSTGRES_DATABASE", "metadata"),
         'USER': os.environ.get("POSTGRES_USER", "admin"),
         'PASSWORD': (
@@ -341,8 +343,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-AUTHENTICATION_BACKENDS = ['bento_lib.auth.django_remote_user.BentoRemoteUserBackend'] + (
-    ['django.contrib.auth.backends.ModelBackend'] if DEBUG else [])
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] if DEBUG else []
 
 # Models
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

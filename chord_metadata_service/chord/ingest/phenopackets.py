@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from humps import decamelize
-
 from dateutil.parser import isoparse
 from decimal import Decimal
+from humps import decamelize
+
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
+from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
@@ -160,6 +161,10 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
         extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
         **bs_query
     )
+
+    if isinstance(bs_loc_json := bs.get("location_collected"), dict):
+        bs_obj.location_collected = get_or_create_geo_location(bs_loc_json)
+        bs_obj.save()
 
     if derived_from_id := bs.get("derived_from_id"):
         try:

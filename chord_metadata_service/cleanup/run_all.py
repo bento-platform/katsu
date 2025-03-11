@@ -1,4 +1,5 @@
 from chord_metadata_service.experiments import cleanup as ec
+from chord_metadata_service.geo import cleanup as gc
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.phenopackets import cleanup as pc
 from chord_metadata_service.resources.cleanup import clean_resources
@@ -22,6 +23,9 @@ async def run_all_cleanup() -> int:
     n_removed += await pc.clean_interpretations()
     n_removed += await pc.clean_diagnoses()
     n_removed += await pc.clean_genomic_interpretations()
+
+    # Geographic locations - referenced by biosamples (we first need to have cleaned biosamples above)
+    n_removed += await gc.clean_geolocations()
 
     # Experiment artifacts
     n_removed += await ec.clean_experiment_results()
