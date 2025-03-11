@@ -14,9 +14,8 @@ import os
 import sys
 import logging
 import json
-import structlog
 
-from bento_lib.logging.structured.configure import STRUCTLOG_COMMON_PROCESSORS, CONSOLE_LOG_PROCESSORS
+from bento_lib.logging.structured import configure_structlog
 from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
@@ -192,61 +191,27 @@ WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 # Logging --------------------------------------------------------------------------------------------------------------
 
+LOGGING_PROPOGATE_TO_ROOT = {'handlers': [], 'propogate': True}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            '()': structlog.stdlib.ProcessorFormatter,
-            'foreign_pre_chain': STRUCTLOG_COMMON_PROCESSORS,
-            'processors': [
-                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                *CONSOLE_LOG_PROCESSORS,
-            ],
-            # 'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'console',
-        },
-    },
+    # formatter + handler configured by configure_structlog(...) function below
     'loggers': {
-        '': {
-            'level': LOG_LEVEL,
-            'handlers': ['console'],
-        },
-        'asyncio': {
-            'handlers': [],
-            'propogate': True,
-        },
+        'asyncio': LOGGING_PROPOGATE_TO_ROOT,
         'daphne': {
             # suppress daphne's DEBUG log spam
             'level': 'INFO',
-            'handlers': [],
-            'propogate': True,
+            **LOGGING_PROPOGATE_TO_ROOT,
         },
-        'daphne.server': {'handlers': [], 'propogate': True},
-        'django': {'handlers': [], 'propogate': True},
-        # 'django.channels.server': {
-        #     'handlers': [],
-        #     'propogate': False,
-        # },
-        'django.request': {'handlers': [], 'propogate': True},
-        'katsu': {
-            # 'level': LOG_LEVEL,
-            'handlers': [],
-            'propogate': True,
-        }
+        'daphne.server': LOGGING_PROPOGATE_TO_ROOT,
+        'django': LOGGING_PROPOGATE_TO_ROOT,
+        'django.request': LOGGING_PROPOGATE_TO_ROOT,
+        'katsu': LOGGING_PROPOGATE_TO_ROOT
     },
 }
 
-structlog.configure(
-    processors=STRUCTLOG_COMMON_PROCESSORS + [structlog.stdlib.ProcessorFormatter.wrap_for_formatter],
-    logger_factory=structlog.stdlib.LoggerFactory(),
-    cache_logger_on_first_use=True,
-)
+configure_structlog(False, LOG_LEVEL.lower())
 
 # if we are running the test suite, only log CRITICAL messages
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
