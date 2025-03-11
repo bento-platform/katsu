@@ -5,6 +5,7 @@ from chord_metadata_service.restapi.schemas import (
     ONTOLOGY_CLASS,
     ONTOLOGY_CLASS_LIST,
     KEY_VALUE_OBJECT,
+    EXTRA_PROPERTIES_SCHEMA,
 )
 
 
@@ -14,6 +15,7 @@ __all__ = [
     "ontology_validator",
     "ontology_list_validator",
     "key_value_validator",
+    "base_extra_properties_validator",
 ]
 
 
@@ -52,3 +54,4 @@ age_or_age_range_validator = JsonSchemaValidator(AGE_OR_AGE_RANGE)
 ontology_validator = JsonSchemaValidator(ONTOLOGY_CLASS)
 ontology_list_validator = JsonSchemaValidator(ONTOLOGY_CLASS_LIST)
 key_value_validator = JsonSchemaValidator(KEY_VALUE_OBJECT)
+base_extra_properties_validator = JsonSchemaValidator(EXTRA_PROPERTIES_SCHEMA)

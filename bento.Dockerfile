@@ -2,9 +2,10 @@ FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.01.21
 
 SHELL ["/bin/bash", "-c"]
 
-# Install Postgres client for checking if database is ready
+# - Install binutils, GDAL, PROJ, and GDAL for GeoDjango
+# - Install Postgres client for checking if database is ready
 RUN apt-get update -y && \
-    apt-get install -y postgresql-client && \
+    apt-get install -y binutils gdal-bin libproj-dev gdal-bin postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 # Backwards-compatible with old BentoV2 container layout

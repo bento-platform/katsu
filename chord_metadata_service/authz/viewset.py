@@ -40,7 +40,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
     def permission_from_request(self, request: DrfRequest) -> Permission | None:
         if self.action in ("list", "retrieve"):
             return P_QUERY_DATA
-        elif self.action in ("create", "update"):
+        elif self.action in ("create", "update", "partial_update"):
             return P_INGEST_DATA
         elif self.action == "destroy":
             return P_DELETE_DATA

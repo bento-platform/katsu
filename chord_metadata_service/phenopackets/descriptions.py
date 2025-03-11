@@ -35,6 +35,7 @@
 #   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+from chord_metadata_service.geo.descriptions import GEO_LOCATION
 from chord_metadata_service.patients.descriptions import INDIVIDUAL
 from chord_metadata_service.resources.descriptions import RESOURCE
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
@@ -352,6 +353,7 @@ BIOSAMPLE = {
             "items": VARIANT
         },
         "is_control_sample": "Whether the sample is being used as a normal control.",
+        "location_collected": GEO_LOCATION,
         **EXTRA_PROPERTIES
     }
 }

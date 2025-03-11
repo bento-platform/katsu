@@ -168,7 +168,15 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_list_equal(
             db_list=biosamples,
             ground_truths=EXAMPLE_INGEST_PHENOPACKET["biosamples"],
-            ignore_fields=IGNORE_COMMON_FIELDS
+            ignore_fields=[*IGNORE_COMMON_FIELDS, "location_collected"],
+        )
+        self.assertEqual(
+            biosamples[0].location_collected.point.coords,
+            tuple(EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["location_collected"]["geometry"]["coordinates"])
+        )
+        self.assertEqual(
+            biosamples[0].location_collected.label,
+            EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["location_collected"]["properties"]["label"]
         )
 
         # Make sure biosamples are properly associated with phenopacket subject
