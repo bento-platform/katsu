@@ -59,8 +59,10 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
     r = requests.get(http_uri)
 
     if not r.ok:
-        err = f"HTTP error encountered while downloading ingestion URI: {http_uri}"
-        logger.error(f"{err} (Status: {r.status_code}; Contents: {r.content.decode('utf-8')})")
+        err = "HTTP error encountered while downloading ingestion URI"
+        logger.error(
+            err, ingestion_uri=http_uri, response_status=r.status_code, response_body=r.content.decode("utf-8")
+        )
         raise IngestError(err)
 
     data_path = f"{tmp_dir}ingest_download_data"
@@ -99,7 +101,9 @@ def workflow_file_output_to_path(file_uri_or_path: str):
         should_del = True
 
     if not os.access(tmp_dir, os.W_OK):
-        raise IngestError(f"Directory does not exist or is not writable: {tmp_dir}")
+        err = "directory does not exist or is not writable"
+        logger.error(err, tmp_dir=tmp_dir)
+        raise IngestError(f"{err}: {tmp_dir}")
 
     try:
         tmp_dir = tmp_dir.rstrip("/") + "/"

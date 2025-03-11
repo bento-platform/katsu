@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import traceback
 import uuid
 
 from adrf.decorators import api_view
@@ -28,33 +27,35 @@ from ..data_types import DATA_TYPE_EXPERIMENT
 from ..workflows.metadata import workflow_set
 
 
-DATASET_DNE = "Dataset does not exist"
+DATASET_DNE = "dataset does not exist"
 
 
 def call_ingest_function_and_handle(fn: Callable[[Any, str], Any], data, dataset_id: str) -> Response:
+    lg = logger.bind(dataset_id=dataset_id)
+
     try:
         with transaction.atomic():
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
             fn(data, dataset_id)
 
     except IngestError as e:
-        err = f"Encountered ingest error: {e}\n{traceback.format_exc()}"
-        logger.error(err)
+        err = "encountered ingestion error"
+        lg.exception(err, exc_info=e)
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
     except ValidationError as e:
         validation_errors = tuple(e.error_list if hasattr(e, "error_list") else e.error_dict.items())
-        logger.error(f"Encountered validation errors during ingestion: {validation_errors}")
-        return Response(errors.bad_request_error(
-            "Encountered validation errors during ingestion",
-            *validation_errors,
-        ))
+        err = "encountered validation errors during ingestion"
+        lg.error(err, validation_errors=validation_errors)
+        return Response(errors.bad_request_error(err, *validation_errors))
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message
-        logger.error(f"Encountered an exception while processing an ingest attempt:\n{traceback.format_exc()}")
-        return Response(errors.internal_server_error(f"Encountered an exception while processing an ingest attempt "
-                                                     f"(error: {repr(e)}"), status=500)
+        err = "encountered an exception while processing an ingest attempt"
+        lg.exception(err, exc_info=e)
+        return Response(
+            errors.internal_server_error(f"{err} (error: {repr(e)})"), status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -63,8 +64,10 @@ def call_ingest_function_and_handle(fn: Callable[[Any, str], Any], data, dataset
 async def ingest_derived_experiment_results(request: DrfRequest, dataset_id: str):
     dataset = await Dataset.objects.filter(identifier=dataset_id).afirst()
 
+    lg = logger.bind(dataset_id=dataset_id)
+
     if not dataset:
-        logger.error(f"Error encountered while ingesting derived experiment results: {DATASET_DNE}")
+        lg.error(f"error encountered while ingesting derived experiment results: {DATASET_DNE}")
         authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(DATASET_DNE), status=status.HTTP_400_BAD_REQUEST)
 
@@ -84,20 +87,22 @@ async def ingest_derived_experiment_results(request: DrfRequest, dataset_id: str
 @api_view(["POST"])
 @permission_classes([BentoDeferToHandler])
 async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id: str):
-    logger.info(f"Received a {workflow_id} ingest request for dataset {dataset_id}.")
+    lg = logger.bind(dataset_id=dataset_id, workflow_id=workflow_id)  # bind diagnostic metadata to logger
+
+    lg.info("received ingest request")
 
     # Check that the workflow exists
     if workflow_id not in WORKFLOW_INGEST_FUNCTION_MAP:
-        err = "Ingestion workflow ID does not exist"
-        logger.error(f"Error encountered while ingesting into dataset: {err}")
+        err = "ingestion workflow ID does not exist"
+        lg.error(err)
         authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
     dataset = await Dataset.objects.filter(identifier=dataset_id).afirst()
 
     if not dataset:
-        logger.error(
-            f"Error encountered while ingesting into dataset with workflow {workflow_id}: {DATASET_DNE}")
+        # for logging, make it a bit more clear where this error is coming from
+        lg.error(f"error encountered while ingesting: {DATASET_DNE}")
         authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(DATASET_DNE), status=status.HTTP_400_BAD_REQUEST)
 

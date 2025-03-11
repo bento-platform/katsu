@@ -368,7 +368,7 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, Extens
 
         if schema_id and schema_id in extension_schemas:
             ext_schema = extension_schemas[schema_id]
-            logger.debug(f"Applying ProjectJsonSchema to extra_properties of {ext_schema['schema_type']}.")
+            logger.debug("applying ProjectJsonSchema to extra_properties", schema_type=ext_schema["schema_type"])
 
             # Append or create 'required' field according to ProjectJsonSchema in use
             required = patched_schema.get("required", [])

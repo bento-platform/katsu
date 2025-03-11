@@ -314,7 +314,7 @@ def get_chord_search_parameters(request, data_type=None):
     try:
         compiled_query, params = postgres.search_query_to_psycopg2_sql(query, DATA_TYPES[data_type]["schema"])
     except (SyntaxError, TypeError, ValueError) as e:
-        logger.exception(f"[CHORD Metadata] Error encountered compiling query {query}:\n    {str(e)}")
+        logger.exception("error encountered compiling query", exc_info=e, query=query)
         return None, f"Error compiling query (message: {str(e)})"
 
     field = query_params.get("field", None)

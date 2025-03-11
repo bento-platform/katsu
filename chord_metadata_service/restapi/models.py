@@ -76,7 +76,9 @@ class BaseExtraProperties(models.Model):
             )
             json_schema = project_json_schema.json_schema
         except ObjectDoesNotExist:
-            logger.debug(f"No ProjectJsonSchema found for project ID {project_id} and schema type {self.schema_type}")
+            logger.debug(
+                "no ProjectJsonSchema found for schema type", project_id=project_id, schema_type=self.schema_type
+            )
         return json_schema
 
     def validate_json_schema(self) -> list[str]:
@@ -90,8 +92,12 @@ class BaseExtraProperties(models.Model):
         validator = Draft7Validator(json_schema)
         for err in validator.iter_errors(self.extra_properties):
             errors.append(err)
-            logger.error(("JSON schema vaildation error on extra_properties for type "
-                          f"{self.schema_type}, in project {project_id}: {err.message}"))
+            logger.error(
+                "JSON schema validation error on extra_properties",
+                project_id=project_id,
+                schema_type=self.schema_type,
+                err_msg=err.message,
+            )
         return errors
 
     def clean(self):

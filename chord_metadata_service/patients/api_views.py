@@ -325,7 +325,9 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
-            await logger.ainfo(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
+            await logger.ainfo(
+                "public individuals endpoint recieved validation error", exc=e, scope_repr=repr(discovery_scope)
+            )
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),

@@ -410,6 +410,6 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
     else:
         raise NotImplementedError()
 
-    logger.debug(f"Filtering {model}.{field} with {condition}")
+    logger.debug("filtering model field with condition", model=model, field=field, condition=condition)
 
     return qs.filter(condition)
