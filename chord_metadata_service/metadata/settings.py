@@ -16,6 +16,7 @@ import logging
 import json
 import structlog
 
+from bento_lib.logging.structured.configure import STRUCTLOG_COMMON_PROCESSORS, CONSOLE_LOG_PROCESSORS
 from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
@@ -191,16 +192,6 @@ WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 # Logging --------------------------------------------------------------------------------------------------------------
 
-STRUCTLOG_COMMON_PROCESSORS = [
-    structlog.contextvars.merge_contextvars,
-    structlog.stdlib.add_logger_name,
-    structlog.stdlib.add_log_level,
-    # format events (messages) with % using positional arguments, like Python's standard logging library:
-    structlog.stdlib.PositionalArgumentsFormatter(),
-    structlog.stdlib.ExtraAdder(),
-    structlog.processors.TimeStamper(fmt="iso"),
-]
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -210,7 +201,7 @@ LOGGING = {
             'foreign_pre_chain': STRUCTLOG_COMMON_PROCESSORS,
             'processors': [
                 structlog.stdlib.ProcessorFormatter.remove_processors_meta,
-                structlog.dev.ConsoleRenderer(),
+                *CONSOLE_LOG_PROCESSORS,
             ],
             # 'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
         },
