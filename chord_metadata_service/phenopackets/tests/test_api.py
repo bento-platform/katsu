@@ -92,24 +92,6 @@ class CreateBiosampleTest(AuthzAPITestCase):
         serializer = s.BiosampleSerializer(data=self.valid_payload)
         self.assertEqual(serializer.is_valid(), True)
 
-    def test_update(self):
-        # Create initial biosample
-        response = self.one_authz_post(reverse("biosamples-list"), json=self.valid_payload)
-        biosample_id = response.data['id']
-
-        # Should be 1
-        initial_count = m.Biosample.objects.all().count()
-
-        # Update the biosample.procedure.performed field
-        self.valid_payload["procedure"]["performed"] = self.procedure_age_performed
-        response = self.one_authz_put(f"/api/biosamples/{biosample_id}", json=self.valid_payload)
-
-        # Should be 1 as well
-        post_update_count = m.Biosample.objects.all().count()
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(initial_count, post_update_count)
-        self.assertEqual(response.data['procedure']['performed'], self.procedure_age_performed)
-
     def test_create_biosample_with_location(self):
         response = self.one_authz_post(reverse("biosamples-list"), json={
             **self.valid_payload,
@@ -139,6 +121,64 @@ class CreateBiosampleTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         with self.assertRaises(m.Biosample.DoesNotExist):
             m.Biosample.objects.get()
+
+
+class UpdateBiosampleTest(AuthzAPITestCase):
+    def setUp(self):
+        self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
+        self.procedure = c.VALID_PROCEDURE_1
+        self.valid_payload = c.valid_biosample_1(self.individual.id, self.procedure)
+
+        self.procedure_age_performed = {
+            "age": {
+                "iso_8601_duration": "P25Y"
+            }
+        }
+
+        self.location_collected_patch = {
+            "location_collected": {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+                "properties": {},
+            },
+        }
+
+        # Create initial biosample
+        response = self.one_authz_post(reverse("biosamples-list"), json=self.valid_payload)
+        self.biosample_id = response.data['id']
+
+    def test_update(self):
+        # Should be 1
+        initial_count = m.Biosample.objects.all().count()
+
+        # Update the biosample.procedure.performed field
+        response = self.one_authz_put(
+            f"/api/biosamples/{self.biosample_id}",
+            json={
+                **self.valid_payload,
+                "procedure": {
+                    **self.valid_payload["procedure"],
+                    "performed": self.procedure_age_performed,
+                },
+            }
+        )
+
+        # Should be 1 as well
+        post_update_count = m.Biosample.objects.all().count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(initial_count, post_update_count)
+        self.assertEqual(response.data['procedure']['performed'], self.procedure_age_performed)
+
+    def test_update_biosample_location(self):
+        r = self.one_authz_patch(f"/api/biosamples/{self.biosample_id}", json=self.location_collected_patch)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        r = self.one_authz_get(f"/api/biosamples/{self.biosample_id}")
+        self.assertDictEqual(r.json()["location_collected"], self.location_collected_patch["location_collected"])
+
+    def test_update_biosample_forbidden(self):
+        r = self.one_no_authz_patch(f"/api/biosamples/{self.biosample_id}")
+        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class BatchBiosamplesCSVTest(AuthzAPITestCase):
