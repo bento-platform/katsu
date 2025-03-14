@@ -1,5 +1,4 @@
 import json
-import logging
 
 from asgiref.sync import async_to_sync, sync_to_async
 from bento_lib.auth.permissions import (
