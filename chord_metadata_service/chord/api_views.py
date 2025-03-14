@@ -25,6 +25,7 @@ from rest_framework.viewsets import ModelViewSet
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
+from chord_metadata_service.logger import logger
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
@@ -36,8 +37,6 @@ from .serializers import (
     ProjectSerializer,
     DatasetSerializer,
 )
-
-logger = logging.getLogger(__name__)
 
 
 __all__ = ["ProjectViewSet", "DatasetViewSet"]
@@ -183,9 +182,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         await dataset.adelete()
 
-        logger.info(f"Running cleanup after deleting dataset {dataset.identifier} via DRF API")
         n_removed = await run_all_cleanup()
-        logger.info(f"Cleanup: removed {n_removed} objects in total")
+        logger.info(
+            "ran cleanup after deleting dataset via DRF API",
+            dataset_id=str(dataset.identifier), n_removed=n_removed
+        )
 
         authz.mark_authz_done(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

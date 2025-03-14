@@ -77,6 +77,7 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
 def workflow_file_output_to_path(file_uri_or_path: str):
     # TODO: Should be able to download from DRS instead of using file URIs directly
 
+    lg = logger.bind(file_uri_or_path=file_uri_or_path)
     parsed_file_uri = urlparse(file_uri_or_path)
 
     if WINDOWS_DRIVE_SCHEME.match(parsed_file_uri.scheme):
@@ -102,14 +103,14 @@ def workflow_file_output_to_path(file_uri_or_path: str):
 
     if not os.access(tmp_dir, os.W_OK):
         err = "directory does not exist or is not writable"
-        logger.error(err, tmp_dir=tmp_dir)
+        lg.error(err, tmp_dir=tmp_dir)
         raise IngestError(f"{err}: {tmp_dir}")
 
     try:
         tmp_dir = tmp_dir.rstrip("/") + "/"
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
-            drs_obj = fetch_drs_record_by_uri(file_uri_or_path, settings.DRS_URL)
+            drs_obj = fetch_drs_record_by_uri(file_uri_or_path)
 
             file_access = get_access_method_of_type(drs_obj, "file")
             if file_access:
@@ -125,14 +126,18 @@ def workflow_file_output_to_path(file_uri_or_path: str):
                 return
 
             # If we get here, we have a DRS object we cannot handle; raise an error.
-            raise IngestError(f"Cannot handle DRS object {file_uri_or_path}: No file or http access methods")
+            err = "cannot handle DRS object: no file or http access methods"
+            lg.error(err, drs_obj=drs_obj)
+            raise IngestError(f"{err} ({file_uri_or_path})")
 
         elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
             yield workflow_http_download(tmp_dir, file_uri_or_path)
 
         else:
             # If we get here, we have a scheme we cannot handle; raise an error.
-            raise IngestError(f"Cannot handle workflow output URI scheme: {parsed_file_uri.scheme}")
+            err = "cannot handle workflow output URI scheme"
+            lg.error(err, uri_scheme=parsed_file_uri.scheme)
+            raise IngestError(f"{err}: {parsed_file_uri.scheme}")
 
     finally:
         # Clean up the temporary directory if necessary

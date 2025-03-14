@@ -1,7 +1,3 @@
-import json
-import logging
-import traceback
-
 from adrf.decorators import api_view as async_api_view
 from bento_lib.auth.permissions import P_EXPORT_DATA
 from bento_lib.auth.resources import RESOURCE_EVERYTHING
@@ -18,12 +14,11 @@ from bento_lib.responses import errors
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoDeferToHandler
 from chord_metadata_service.chord.schemas import EXPORT_SCHEMA
+from chord_metadata_service.logger import logger
 from .metadata import EXPORT_FORMAT_FUNCTION_MAP, EXPORT_FORMAT_OBJECT_TYPE_MAP, EXPORT_FORMATS, EXPORT_OBJECT_TYPE
 from .utils import ExportError, ExportFileContext
 
 BENTO_EXPORT_SCHEMA_VALIDATOR = Draft7Validator(EXPORT_SCHEMA)
-
-logger = logging.getLogger(__name__)
 
 
 @async_api_view(["POST"])
@@ -48,7 +43,7 @@ async def export(request: DrfRequest):
 
     # TODO: Schema for OpenAPI doc
 
-    logger.info(f"Received export request: {json.dumps(request.data)}")
+    await logger.ainfo("received export request", request_data=request.data)
 
     if not BENTO_EXPORT_SCHEMA_VALIDATOR.is_valid(request.data):
         msg_list = [err.message for err in BENTO_EXPORT_SCHEMA_VALIDATOR.iter_errors(request.data)]
@@ -100,13 +95,15 @@ async def export(request: DrfRequest):
                 return FileResponse(open(tarfile, "rb"), as_attachment=True)
 
     except ExportError as e:
+        await logger.aexception("encountered export error", exc_info=e)
         return Response(errors.bad_request_error(f"Encountered export error: {e}"), status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # Encountered some other error from the export attempt, return a somewhat detailed message
-        logger.error(f"Encountered an exception while processing an export attempt:\n{traceback.format_exc()}")
+        err_msg = "encountered exception while processing export attempt"
+        await logger.aexception(err_msg, exc_info=e)
         return Response(errors.internal_server_error(
-            f"Encountered an exception while processing an export attempt (error: {repr(e)}"),
+            f"{err_msg} (error: {repr(e)}"),
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 

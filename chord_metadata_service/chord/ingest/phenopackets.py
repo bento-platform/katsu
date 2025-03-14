@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import structlog.stdlib
+
 from dateutil.parser import isoparse
 from decimal import Decimal
 from humps import decamelize
 
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.geo.ingest import get_or_create_geo_location
+from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
@@ -19,7 +22,6 @@ from .exceptions import IngestError
 from .resources import ingest_resource
 from .schema import schema_validation
 from .utils import map_if_list, query_and_check_nulls
-from .logger import logger
 from typing import Any, Callable, Iterable, TypeVar
 from django.db.models import Model
 
@@ -142,7 +144,7 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
     return subject_obj
 
 
-def get_or_create_biosample(bs: dict) -> pm.Biosample:
+def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Biosample:
     bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
     for k in ("sampled_tissue", "taxonomy", "time_of_collection", "histological_diagnosis",
               "tumor_progression", "tumor_grade"):
@@ -172,8 +174,10 @@ def get_or_create_biosample(bs: dict) -> pm.Biosample:
             parent_biosample.derived_biosamples.add(bs_obj)
             parent_biosample.save()
         except pm.Biosample.DoesNotExist:
-            logger.warning(
-                f"Biosample {bs['id']} refers to a non-existing 'derived_from_id' Biosample {derived_from_id}.")
+            lg.warning(
+                "biosample refers to non-existing 'derived_from_id' biosample",
+                biosample_id=bs["id"], derived_from_id=derived_from_id
+            )
 
     if bs_created:
         bs_pfs = [get_or_create_phenotypic_feature(pf) for pf in bs.get("phenotypic_features", [])]
@@ -349,14 +353,16 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #  meta_data: {..., resources: [...]}
 
     if phenopacket_data.get("files", []):
-        logger.warning("Found files in phenopacket.files are not ingested by Katsu.")
+        logger.warning("found files in phenopacket.files: these will not be ingested")
 
     # Abort the ingestion if the phenopacket's ID exists in the DB
     phenopacket_id = phenopacket_data.get("id")
+
+    lg = logger.bind(phenopacket_id=phenopacket_id)
+
     if pm.Phenopacket.objects.filter(id=phenopacket_id).exists():
-        error_msg = f"Cannot ingest Phenopacket with ID {phenopacket_id}, ID already exists in the database."
-        logger.error(error_msg)
-        raise IngestError(error_msg)
+        logger.error("cannot ingest phenopacket: ID already exists in the database"),
+        raise IngestError(f"Cannot ingest phenopacket with ID {phenopacket_id}: ID already exists in the database.")
 
     subject = phenopacket_data.get("subject")
 
@@ -391,7 +397,7 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     phenotypic_features_db = [get_or_create_phenotypic_feature(pf) for pf in phenotypic_features]
 
     # Get or create all biosamples in the phenopacket
-    biosamples_db = [get_or_create_biosample(bs) for bs in biosamples]
+    biosamples_db = [get_or_create_biosample(bs, lg) for bs in biosamples]
 
     # Get or create all resources (ontologies, etc.) in the phenopacket
     resources_db = [ingest_resource(rs) for rs in resources]

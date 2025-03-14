@@ -4,4 +4,4 @@ __all__ = [
     "logger",
 ]
 
-logger = structlog.getLogger("katsu")
+logger: structlog.stdlib.BoundLogger = structlog.stdlib.get_logger("katsu")

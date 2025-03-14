@@ -5,9 +5,9 @@ import uuid
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
+from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets import models as pm
 
-from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
 
@@ -102,7 +102,7 @@ def ingest_experiment(
         try:
             biosample = pm.Biosample.objects.get(id=biosample_id)
         except pm.Biosample.DoesNotExist as e:
-            logger.error(f"Could not find biosample with ID: {biosample_id}")
+            logger.error("ingest_experiment: could not find biosample", biosample_id=biosample_id)
             raise e
 
     # create related experiment results
@@ -185,8 +185,12 @@ def ingest_derived_experiment_results(json_data: list[dict], dataset_id: str) ->
         derived_identifier = exp_result['extra_properties']['derived_from']
         experiment_id = exp_result2exp.get(derived_identifier, None)
         if experiment_id is None:
-            logger.warning(f"{exp_result['file_format']} file {exp_result['filename']} derived from \
-                file {derived_identifier} could not be associated with an experiment.")
+            logger.warning(
+                "ingest_derived_experiment_results: derived file could not be associated with experiment",
+                file_format=exp_result["file_format"],
+                filename=exp_result["filename"],
+                derived_id=derived_identifier,
+            )
             continue
 
         new_experiment_results = em.ExperimentResult.objects.create(**exp_result)

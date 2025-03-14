@@ -1,4 +1,3 @@
-import logging
 import os
 import shutil
 import tarfile
@@ -11,8 +10,6 @@ __all__ = [
     "ExportFileContext",
     "EXPORT_DIR",
 ]
-
-logger = logging.getLogger(__name__)
 
 EXPORT_DIR = "export"
 
