@@ -1,5 +1,5 @@
 
-<h1 id="moh-service-api">MoH Service API v5.1.0</h1>
+<h1 id="moh-service-api">MoH Service API v5.2.0</h1>
 
 This is the RESTful API for the MoH Service.
 
@@ -7,17 +7,14 @@ Base URLs:
 
 # Authentication
 
-- HTTP Authentication, scheme: bearer
-
-* API Key (IngestTokenAuth)
-    - Parameter Name: **X-Service-Token**, in: header. 
-
-- HTTP Authentication, scheme: bearer
-
-- HTTP Authentication, scheme: bearer
-
 * API Key (ServiceTokenAuth)
     - Parameter Name: **X-Service-Token**, in: header. 
+
+- HTTP Authentication, scheme: bearer
+
+- HTTP Authentication, scheme: bearer
+
+- HTTP Authentication, scheme: bearer
 
 <h1 id="moh-service-api-default">Default</h1>
 
@@ -54,32 +51,6 @@ Return all the programs in the database.
 ]
 ```
 
-## chord_metadata_service_mohpackets_apis_discovery_discover_donors
-
-<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_donors"></a>
-
-`GET /v3/discovery/donors/`
-
-*Discover Donors*
-
-Return the number of donors per cohort in the database.
-Note: This function is identical to `discover_patients_per_cohort`
-and is here because the frontend ingest uses it. It's probably best
-to clean up later.
-
-> Example responses
-
-> 200 Response
-
-```json
-[
-  {
-    "program_id": "string",
-    "donors_count": "string"
-  }
-]
-```
-
 ## chord_metadata_service_mohpackets_apis_discovery_discover_sidebar_list
 
 <a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_sidebar_list"></a>
@@ -100,15 +71,15 @@ Retrieve the list of drug names and treatment for frontend usage
 
 <h1 id="moh-service-api-overview">overview</h1>
 
-## chord_metadata_service_mohpackets_apis_discovery_discover_cohort_count
+## chord_metadata_service_mohpackets_apis_discovery_discover_program_count
 
-<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_cohort_count"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_program_count"></a>
 
-`GET /v3/discovery/overview/cohort_count/`
+`GET /v3/discovery/overview/program_count/`
 
-*Discover Cohort Count*
+*Discover Program Count*
 
-Return the number of cohorts in the database.
+Return the number of programs in the database.
 
 > Example responses
 
@@ -121,15 +92,15 @@ Return the number of cohorts in the database.
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort
+## chord_metadata_service_mohpackets_apis_discovery_discover_patients_per_program
 
-<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_patients_per_cohort"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_discovery_discover_patients_per_program"></a>
 
-`GET /v3/discovery/overview/patients_per_cohort/`
+`GET /v3/discovery/overview/patients_per_program/`
 
-*Discover Patients Per Cohort*
+*Discover Patients Per Program*
 
-Return the number of patients per cohort in the database.
+Return the number of patients per program in the database.
 
 > Example responses
 
@@ -470,9 +441,9 @@ Return the count for age of diagnosis by calculating the date of birth interval.
 
 <h1 id="moh-service-api-authorized">authorized</h1>
 
-## chord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data
+## chord_metadata_service_mohpackets_apis_authorized_get_donor_with_clinical_data
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_get_donor_with_clinical_data"></a>
 
 `GET /v3/authorized/donor_with_clinical_data/program/{program_id}/donor/{donor_id}`
 
@@ -480,7 +451,7 @@ Return the count for age of diagnosis by calculating the date of birth interval.
 
 Retrieves a single donor along with all related clinical data, organized in a nested JSON format.
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_get_donor_with_clinical_data-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -763,15 +734,15 @@ Retrieves a single donor along with all related clinical data, organized in a ne
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_programs
+## chord_metadata_service_mohpackets_apis_authorized_list_programs
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_programs"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_programs"></a>
 
 `GET /v3/authorized/programs/`
 
 *List Programs*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_programs-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_programs-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -799,15 +770,15 @@ Retrieves a single donor along with all related clinical data, organized in a ne
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_donors
+## chord_metadata_service_mohpackets_apis_authorized_list_donors
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_donors"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_donors"></a>
 
 `GET /v3/authorized/donors/`
 
 *List Donors*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_donors-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_donors-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -859,9 +830,9 @@ Retrieves a single donor along with all related clinical data, organized in a ne
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_query_donors
+## chord_metadata_service_mohpackets_apis_authorized_query_donors
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_query_donors"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_query_donors"></a>
 
 `GET /v3/authorized/query/`
 
@@ -869,14 +840,14 @@ Retrieves a single donor along with all related clinical data, organized in a ne
 
 Used by the query service to return donors along with their sample IDs, treatment types, and primary sites.
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_query_donors-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_query_donors-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |treatment_type|query|array[string]|false|none|
 |primary_site|query|array[string]|false|none|
 |systemic_therapy_drug_name|query|array[string]|false|none|
-|exclude_cohorts|query|array[string]|false|none|
+|exclude_programs|query|array[string]|false|none|
 |page|query|integer|false|none|
 |page_size|query|integer|false|none|
 
@@ -926,15 +897,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_primary_diagnoses
+## chord_metadata_service_mohpackets_apis_authorized_list_primary_diagnoses
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_primary_diagnoses"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_primary_diagnoses"></a>
 
 `GET /v3/authorized/primary_diagnoses/`
 
 *List Primary Diagnoses*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_primary_diagnoses-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_primary_diagnoses-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -995,15 +966,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_biomarkers
+## chord_metadata_service_mohpackets_apis_authorized_list_biomarkers
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_biomarkers"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_biomarkers"></a>
 
 `GET /v3/authorized/biomarkers/`
 
 *List Biomarkers*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_biomarkers-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_biomarkers-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1073,15 +1044,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_systemic_therapies
+## chord_metadata_service_mohpackets_apis_authorized_list_systemic_therapies
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_systemic_therapies"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_systemic_therapies"></a>
 
 `GET /v3/authorized/systemic_therapies/`
 
 *List Systemic Therapies*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_systemic_therapies-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_systemic_therapies-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1134,15 +1105,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_comorbidities
+## chord_metadata_service_mohpackets_apis_authorized_list_comorbidities
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_comorbidities"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_comorbidities"></a>
 
 `GET /v3/authorized/comorbidities/`
 
 *List Comorbidities*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_comorbidities-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_comorbidities-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1182,15 +1153,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_exposures
+## chord_metadata_service_mohpackets_apis_authorized_list_exposures
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_exposures"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_exposures"></a>
 
 `GET /v3/authorized/exposures/`
 
 *List Exposures*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_exposures-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_exposures-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1226,15 +1197,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_follow_ups
+## chord_metadata_service_mohpackets_apis_authorized_list_follow_ups
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_follow_ups"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_follow_ups"></a>
 
 `GET /v3/authorized/follow_ups/`
 
 *List Follow Ups*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_follow_ups-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_follow_ups-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1287,15 +1258,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_radiations
+## chord_metadata_service_mohpackets_apis_authorized_list_radiations
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_radiations"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_radiations"></a>
 
 `GET /v3/authorized/radiations/`
 
 *List Radiations*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_radiations-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_radiations-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1340,15 +1311,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_sample_registrations
+## chord_metadata_service_mohpackets_apis_authorized_list_sample_registrations
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_sample_registrations"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_sample_registrations"></a>
 
 `GET /v3/authorized/sample_registrations/`
 
 *List Sample Registrations*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_sample_registrations-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_sample_registrations-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1387,15 +1358,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_specimens
+## chord_metadata_service_mohpackets_apis_authorized_list_specimens
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_specimens"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_specimens"></a>
 
 `GET /v3/authorized/specimens/`
 
 *List Specimens*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_specimens-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_specimens-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1451,15 +1422,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_surgeries
+## chord_metadata_service_mohpackets_apis_authorized_list_surgeries
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_surgeries"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_surgeries"></a>
 
 `GET /v3/authorized/surgeries/`
 
 *List Surgeries*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_surgeries-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_surgeries-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1527,15 +1498,15 @@ Used by the query service to return donors along with their sample IDs, treatmen
 }
 ```
 
-## chord_metadata_service_mohpackets_apis_clinical_data_list_treatments
+## chord_metadata_service_mohpackets_apis_authorized_list_treatments
 
-<a id="opIdchord_metadata_service_mohpackets_apis_clinical_data_list_treatments"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_authorized_list_treatments"></a>
 
 `GET /v3/authorized/treatments/`
 
 *List Treatments*
 
-<h3 id="chord_metadata_service_mohpackets_apis_clinical_data_list_treatments-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_authorized_list_treatments-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
@@ -1590,9 +1561,9 @@ Used by the query service to return donors along with their sample IDs, treatmen
 
 <h1 id="moh-service-api-explorer">explorer</h1>
 
-## chord_metadata_service_mohpackets_apis_explorer_explorer_donor
+## chord_metadata_service_mohpackets_apis_discovery_explorer_donor
 
-<a id="opIdchord_metadata_service_mohpackets_apis_explorer_explorer_donor"></a>
+<a id="opIdchord_metadata_service_mohpackets_apis_discovery_explorer_donor"></a>
 
 `GET /v3/explorer/donors/`
 
@@ -1601,14 +1572,14 @@ Used by the query service to return donors along with their sample IDs, treatmen
 Returns a list of donors with their sample IDs, treatment types, age, and primary site.
 This endpoint is called by the query service and bypasses user authorization.
 
-<h3 id="chord_metadata_service_mohpackets_apis_explorer_explorer_donor-parameters">Parameters</h3>
+<h3 id="chord_metadata_service_mohpackets_apis_discovery_explorer_donor-parameters">Parameters</h3>
 
 |Name|In|Type|Required|Description|
 |---|---|---|---|---|
 |treatment_type|query|array[string]|false|none|
 |primary_site|query|array[string]|false|none|
 |systemic_therapy_drug_name|query|array[string]|false|none|
-|exclude_cohorts|query|array[string]|false|none|
+|exclude_programs|query|array[string]|false|none|
 
 > Example responses
 
@@ -1659,36 +1630,12 @@ ProgramDiscoverySchema
 |program_id|string|true|none|none|
 |metadata|any|true|none|none|
 
-<h2 id="tocS_DiscoveryDonorSchema">DiscoveryDonorSchema</h2>
+<h2 id="tocS_PatientPerProgramSchema">PatientPerProgramSchema</h2>
 
-<a id="schemadiscoverydonorschema"></a>
-<a id="schema_DiscoveryDonorSchema"></a>
-<a id="tocSdiscoverydonorschema"></a>
-<a id="tocsdiscoverydonorschema"></a>
-
-```json
-{
-  "program_id": "string",
-  "donors_count": "string"
-}
-
-```
-
-DiscoveryDonorSchema
-
-### Properties
-
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|program_id|string|true|none|none|
-|donors_count|string|true|none|none|
-
-<h2 id="tocS_PatientPerCohortSchema">PatientPerCohortSchema</h2>
-
-<a id="schemapatientpercohortschema"></a>
-<a id="schema_PatientPerCohortSchema"></a>
-<a id="tocSpatientpercohortschema"></a>
-<a id="tocspatientpercohortschema"></a>
+<a id="schemapatientperprogramschema"></a>
+<a id="schema_PatientPerProgramSchema"></a>
+<a id="tocSpatientperprogramschema"></a>
+<a id="tocspatientperprogramschema"></a>
 
 ```json
 {
@@ -1698,7 +1645,7 @@ DiscoveryDonorSchema
 
 ```
 
-PatientPerCohortSchema
+PatientPerProgramSchema
 
 ### Properties
 
@@ -2814,7 +2761,7 @@ DosageUnitsEnum
 |DosageUnitsEnum|ug/m2|
 |DosageUnitsEnum|g/m2|
 |DosageUnitsEnum|mg/kg|
-|DosageUnitsEnum|cells/kg|
+|DosageUnitsEnum|mg|
 |DosageUnitsEnum|Not available|
 
 <h2 id="tocS_DrugReferenceDbEnum">DrugReferenceDbEnum</h2>
@@ -10547,7 +10494,7 @@ or
   "systemic_therapy_drug_name": [
     "string"
   ],
-  "exclude_cohorts": [
+  "exclude_programs": [
     "string"
   ]
 }
@@ -10563,7 +10510,7 @@ DonorExplorerFilterSchema
 |treatment_type|[string]|false|none|none|
 |primary_site|[string]|false|none|none|
 |systemic_therapy_drug_name|[string]|false|none|none|
-|exclude_cohorts|[string]|false|none|none|
+|exclude_programs|[string]|false|none|none|
 
 <h2 id="tocS_PagedQueryDonorSchema">PagedQueryDonorSchema</h2>
 

@@ -258,7 +258,7 @@ class DonorExplorerTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_with_no_filter(self):
+    def test_request_with_no_filter(self):
         """
         Test request without applying any filters.
         Verifies request returns all donors as expected.
@@ -288,9 +288,9 @@ class DonorExplorerTestCase(BaseTestCase):
         )
         self.assertEqual(sample_registrations, 32)  # 32 sample registrations
 
-    def test_filter_cohorts(self):
+    def test_filter_programs(self):
         """
-        Test filtering donors by cohort.
+        Test filtering donors by program.
         Verifies the correct count of donors, excluding a specified program.
 
         Testing Strategy:
@@ -300,7 +300,9 @@ class DonorExplorerTestCase(BaseTestCase):
         """
         response = self.client.get(
             self.donor_url,
-            {"exclude_cohorts": [self.programs[0].program_id]},  # exclude the first one
+            {
+                "exclude_programs": [self.programs[0].program_id]
+            },  # exclude the first one
             HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
         )
         donors = response.json()
@@ -332,12 +334,13 @@ class DonorExplorerTestCase(BaseTestCase):
         """
         selected_primary_site = self.primary_diagnoses[0].primary_site
 
-        # Calculate total count of the primary_site in all primary diagnoses
-        primary_site_count = sum(
-            1
+        # Calculate count of unique donors that have this primary site
+        donors_with_primary_site = set(
+            pd.donor_uuid.submitter_donor_id
             for pd in self.primary_diagnoses
             if selected_primary_site == pd.primary_site
         )
+        primary_site_count = len(donors_with_primary_site)
 
         response = self.client.get(
             self.donor_url,
@@ -451,7 +454,7 @@ class DonorExplorerTestCase(BaseTestCase):
 
         assert len(donors) == len(donors_with_selected_drug_names)
 
-    def test_donor_with_missing_data(self):
+    def test_verify_donor_with_missing_data(self):
         """
         Test donor with missing data.
         Verifies that the API can still return the donor correctly.
@@ -564,9 +567,9 @@ class DonorQueryTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
 
-    def test_filter_cohorts(self):
+    def test_filter_programs(self):
         """
-        Test filtering donors by cohort.
+        Test filtering donors by program.
         Verifies the correct count of donors, excluding a specified program.
 
         Testing Strategy:
@@ -576,7 +579,9 @@ class DonorQueryTestCase(BaseTestCase):
         """
         response = self.client.get(
             self.donor_url,
-            {"exclude_cohorts": [self.programs[0].program_id]},  # exclude the first one
+            {
+                "exclude_programs": [self.programs[0].program_id]
+            },  # exclude the first one
             HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         donors = response.json()["items"]
@@ -608,17 +613,18 @@ class DonorQueryTestCase(BaseTestCase):
         """
         selected_primary_site = self.primary_diagnoses[0].primary_site
 
-        # Calculate total count of the primary_site in all primary diagnoses
-        primary_site_count = sum(
-            1
+        # Calculate count of unique donors that have this primary site
+        donors_with_primary_site = set(
+            pd.donor_uuid.submitter_donor_id
             for pd in self.primary_diagnoses
             if selected_primary_site == pd.primary_site
         )
+        primary_site_count = len(donors_with_primary_site)
 
         response = self.client.get(
             self.donor_url,
             {"primary_site": [selected_primary_site]},
-            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         donors = response.json()["items"]
 
@@ -657,7 +663,7 @@ class DonorQueryTestCase(BaseTestCase):
         response = self.client.get(
             self.donor_url,
             {"treatment_type": [selected_treatment_type]},
-            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}"
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
         )
         donors = response.json()["items"]
 
@@ -727,7 +733,7 @@ class DonorQueryTestCase(BaseTestCase):
 
         assert len(donors) == len(donors_with_selected_drug_names)
 
-    def test_donor_with_missing_data(self):
+    def test_verify_donor_with_missing_data(self):
         """
         Test donor with missing data.
         Verifies that the API can still return the donor correctly.

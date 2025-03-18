@@ -19,7 +19,7 @@ class DiscoveryDonorSchema(Schema):
     donors_count: str
 
 
-class PatientPerCohortSchema(Schema):
+class PatientPerProgramSchema(Schema):
     program_id: str
     patients_count: str
 
