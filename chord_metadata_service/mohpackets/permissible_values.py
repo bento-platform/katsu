@@ -211,6 +211,7 @@ M_CATEGORY = [
     "M1d(1)",
     "M1e",
     "MX",
+    "Not applicable"
 ]
 
 STAGE_GROUP = [
