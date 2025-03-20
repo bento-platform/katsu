@@ -5175,7 +5175,8 @@
                     "M1d(0)",
                     "M1d(1)",
                     "M1e",
-                    "MX"
+                    "MX",
+                    "Not applicable"
                 ],
                 "title": "MCategoryEnum",
                 "type": "string"
