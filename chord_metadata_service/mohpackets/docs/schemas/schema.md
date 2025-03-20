@@ -3773,6 +3773,7 @@ MCategoryEnum
 |MCategoryEnum|M1d(1)|
 |MCategoryEnum|M1e|
 |MCategoryEnum|MX|
+|MCategoryEnum|Not applicable|
 
 <h2 id="tocS_NCategoryEnum">NCategoryEnum</h2>
 
