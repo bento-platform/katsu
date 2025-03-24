@@ -9,14 +9,14 @@ workflow experiment_results_files {
         Boolean validate_ssl
     }
 
-    scatter(file in files) {
+    scatter (file in files) {
         call post_to_drs {
             input:
-                file_path = file,
-                drs_url = drs_url,
+                file_path       = file,
+                drs_url         = drs_url,
                 project_dataset = project_dataset,
-                token = access_token,
-                validate_ssl = validate_ssl
+                token           = access_token,
+                validate_ssl    = validate_ssl
         }
     }
 
