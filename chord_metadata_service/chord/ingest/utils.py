@@ -9,6 +9,7 @@ import tempfile
 
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 from django.conf import settings
+from structlog.stdlib import BoundLogger
 from urllib.parse import urlparse
 
 from typing import Any, Callable
@@ -51,7 +52,7 @@ def query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x
     return {f"{key}__isnull": True} if value is None else {key: transform(value)}
 
 
-def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
+def workflow_http_download(tmp_dir: str, http_uri: str, lg: BoundLogger) -> str:
     # TODO: Sanity check: no external insecure HTTP calls
     # TODO: Disable HTTPS cert check in debug mode
     # TODO: Handle response exceptions
@@ -60,7 +61,7 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
 
     if not r.ok:
         err = "HTTP error encountered while downloading ingestion URI"
-        logger.error(
+        lg.error(
             err, ingestion_uri=http_uri, response_status=r.status_code, response_body=r.content.decode("utf-8")
         )
         raise IngestError(err)
@@ -122,7 +123,7 @@ def workflow_file_output_to_path(file_uri_or_path: str):
             if http_access:
                 # TODO: Handle DRS headers field if available - how to do this with grace and compatibility with
                 #  Bento's auth system?
-                yield workflow_http_download(tmp_dir, http_access["access_url"]["url"])
+                yield workflow_http_download(tmp_dir, http_access["access_url"]["url"], lg)
                 return
 
             # If we get here, we have a DRS object we cannot handle; raise an error.
@@ -131,7 +132,7 @@ def workflow_file_output_to_path(file_uri_or_path: str):
             raise IngestError(f"{err} ({file_uri_or_path})")
 
         elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
-            yield workflow_http_download(tmp_dir, file_uri_or_path)
+            yield workflow_http_download(tmp_dir, file_uri_or_path, lg)
 
         else:
             # If we get here, we have a scheme we cannot handle; raise an error.

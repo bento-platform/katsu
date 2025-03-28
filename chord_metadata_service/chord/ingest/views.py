@@ -8,6 +8,7 @@ from bento_lib.auth.permissions import P_INGEST_DATA
 from bento_lib.auth.resources import build_resource
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from structlog.stdlib import BoundLogger
 from rest_framework import status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
@@ -30,13 +31,13 @@ from ..workflows.metadata import workflow_set
 DATASET_DNE = "dataset does not exist"
 
 
-def call_ingest_function_and_handle(fn: Callable[[Any, str], Any], data, dataset_id: str) -> Response:
-    lg = logger.bind(dataset_id=dataset_id)
-
+def call_ingest_function_and_handle(
+    fn: Callable[[Any, str, BoundLogger], Any], data, dataset_id: str, lg: BoundLogger
+) -> Response:
     try:
         with transaction.atomic():
             # Wrap ingestion in a transaction, so if it fails we don't end up in a partial state in the database.
-            fn(data, dataset_id)
+            fn(data, dataset_id, lg)
 
     except IngestError as e:
         err = "encountered ingestion error"
@@ -62,25 +63,28 @@ def call_ingest_function_and_handle(fn: Callable[[Any, str], Any], data, dataset
 @api_view(["POST"])
 @permission_classes([BentoDeferToHandler])
 async def ingest_derived_experiment_results(request: DrfRequest, dataset_id: str):
-    dataset = await Dataset.objects.filter(identifier=dataset_id).afirst()
-
     lg = logger.bind(dataset_id=dataset_id)
+
+    dataset = await Dataset.objects.filter(identifier=dataset_id).afirst()
 
     if not dataset:
         lg.error(f"error encountered while ingesting derived experiment results: {DATASET_DNE}")
         authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(DATASET_DNE), status=status.HTTP_400_BAD_REQUEST)
 
+    project_id_str = str(dataset.project_id)
+    lg = lg.bind(project_id=project_id_str)
+
     if not await authz_middleware.async_evaluate_one(
         request,
-        build_resource(str(dataset.project_id), str(dataset.identifier), DATA_TYPE_EXPERIMENT),
+        build_resource(project_id_str, str(dataset.identifier), DATA_TYPE_EXPERIMENT),
         P_INGEST_DATA,
         mark_authz_done=True,
     ):
         return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
     return await sync_to_async(call_ingest_function_and_handle)(
-        experiments.ingest_derived_experiment_results, request.data, dataset_id
+        experiments.ingest_derived_experiment_results, request.data, dataset_id, lg
     )
 
 
@@ -106,6 +110,8 @@ async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id:
         authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(DATASET_DNE), status=status.HTTP_400_BAD_REQUEST)
 
+    lg = lg.bind(project_id=str(dataset.project_id))
+
     workflow = workflow_set.get_workflow(workflow_id)
 
     dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
@@ -120,5 +126,5 @@ async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id:
         return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
     return await sync_to_async(call_ingest_function_and_handle)(
-        WORKFLOW_INGEST_FUNCTION_MAP[workflow_id], request.data, dataset_id
+        WORKFLOW_INGEST_FUNCTION_MAP[workflow_id], request.data, dataset_id, lg
     )

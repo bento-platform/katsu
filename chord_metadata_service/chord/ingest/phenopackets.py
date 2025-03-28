@@ -5,10 +5,10 @@ import structlog.stdlib
 from dateutil.parser import isoparse
 from decimal import Decimal
 from humps import decamelize
+from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.geo.ingest import get_or_create_geo_location
-from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
@@ -76,12 +76,15 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
     return pf_obj
 
 
-def validate_phenopacket(phenopacket_data: dict[str, Any],
-                         schema: dict = PHENOPACKET_SCHEMA,
-                         idx: int | None = None) -> None:
+def validate_phenopacket(
+    phenopacket_data: dict[str, Any],
+    lg: BoundLogger,
+    schema: dict = PHENOPACKET_SCHEMA,
+    idx: int | None = None
+) -> None:
     # Validate phenopacket data against phenopackets schema.
     # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
-    validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY)
+    validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY, logger=lg)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(
@@ -329,17 +332,20 @@ def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
     return interp_obj
 
 
-def ingest_phenopacket(phenopacket_data: dict[str, Any],
-                       dataset_id: str,
-                       json_schema: dict = PHENOPACKET_SCHEMA,
-                       validate: bool = True,
-                       idx: int | None = None) -> pm.Phenopacket:
+def ingest_phenopacket(
+    phenopacket_data: dict[str, Any],
+    dataset_id: str,
+    lg: BoundLogger,
+    json_schema: dict = PHENOPACKET_SCHEMA,
+    validate: bool = True,
+    idx: int | None = None,
+) -> pm.Phenopacket:
     """Ingests a single phenopacket."""
 
     if validate:
         # Validate phenopacket data against phenopackets schema prior to ingestion, if specified.
         # `validate` may be false if the phenopacket has already been validated.
-        validate_phenopacket(phenopacket_data, json_schema, idx)
+        validate_phenopacket(phenopacket_data, lg, json_schema, idx)
 
     # Rough phenopackets structure:
     #  id: ...
@@ -352,16 +358,16 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     #  medical_actions: [...]
     #  meta_data: {..., resources: [...]}
 
-    if phenopacket_data.get("files", []):
-        logger.warning("found files in phenopacket.files: these will not be ingested")
-
-    # Abort the ingestion if the phenopacket's ID exists in the DB
     phenopacket_id = phenopacket_data.get("id")
 
-    lg = logger.bind(phenopacket_id=phenopacket_id)
+    lg = lg.bind(phenopacket_id=phenopacket_id)
 
+    if phenopacket_data.get("files", []):
+        lg.warning("found files in phenopacket.files: these will not be ingested")
+
+    # Abort the ingestion if the phenopacket's ID exists in the DB
     if pm.Phenopacket.objects.filter(id=phenopacket_id).exists():
-        logger.error("cannot ingest phenopacket: ID already exists in the database"),
+        lg.error("cannot ingest phenopacket: ID already exists in the database"),
         raise IngestError(f"Cannot ingest phenopacket with ID {phenopacket_id}: ID already exists in the database.")
 
     subject = phenopacket_data.get("subject")
@@ -440,12 +446,18 @@ def ingest_phenopacket(phenopacket_data: dict[str, Any],
     return phenopacket
 
 
-def ingest_phenopacket_workflow(json_data, dataset_id) -> list[pm.Phenopacket] | pm.Phenopacket:
-    project_id = Project.objects.get(datasets=dataset_id)
-    project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(project_id=project_id).values(
-        "json_schema",
-        "required",
-        "schema_type",
+def ingest_phenopacket_workflow(json_data, dataset_id, lg: BoundLogger) -> list[pm.Phenopacket] | pm.Phenopacket:
+    project = Project.objects.get(datasets=dataset_id)
+    lg = lg.bind(project_id=str(project.identifier), dataset_id=dataset_id)
+
+    project_schemas: Iterable[ExtensionSchemaDict] = (
+        ProjectJsonSchema.objects
+        .filter(project_id=project.identifier)
+        .values(
+            "json_schema",
+            "required",
+            "schema_type",
+        )
     )
 
     # Map with key:schema_type and value:json_schema
@@ -460,7 +472,7 @@ def ingest_phenopacket_workflow(json_data, dataset_id) -> list[pm.Phenopacket] |
     json_data = decamelize(json_data)
 
     # First, validate all phenopackets
-    map_if_list(validate_phenopacket, json_data, json_schema)
+    map_if_list(validate_phenopacket, json_data, lg, json_schema)
 
     # Then, actually try to ingest them (if the validation passes); we don't need to re-do validation here.
-    return map_if_list(ingest_phenopacket, json_data, dataset_id, json_schema=json_schema, validate=False)
+    return map_if_list(ingest_phenopacket, json_data, dataset_id, lg, json_schema=json_schema, validate=False)

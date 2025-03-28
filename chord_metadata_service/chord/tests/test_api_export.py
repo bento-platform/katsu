@@ -11,6 +11,7 @@ from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
+from chord_metadata_service.logger import logger
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
@@ -25,7 +26,9 @@ class ExportTest(AuthzAPITestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET, self.d.identifier, logger
+        )
 
         self.base_export_payload = {
             "format": "cbioportal",

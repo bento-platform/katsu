@@ -1,20 +1,23 @@
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
 from referencing import Registry
+from structlog.stdlib import BoundLogger
 
-from chord_metadata_service.logger import logger
+from chord_metadata_service.logger import logger as logger_
 
 __all__ = ["schema_validation"]
 
 
-def schema_validation(obj, schema, registry: Registry = None, obj_idx: int | None = None):
+def schema_validation(
+    obj, schema, registry: Registry = None, obj_idx: int | None = None, logger: BoundLogger | None = None
+):
     """
     Validates an object (obj) against a json-schema (schema).
     May use a referencing.Registry object to resolve schema definitions (e.g. VRS variation schemas).
     An object index may be passed for logging/debugging purposes.
     """
 
-    lg = logger
+    lg: BoundLogger = logger or logger_
     if schema_id := schema.get("$id"):
         lg = lg.bind(schema_id=schema_id)
     if obj_idx is not None:

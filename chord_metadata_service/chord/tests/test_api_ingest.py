@@ -8,6 +8,7 @@ from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_PHENOPACKETS_JSON,
     WORKFLOW_EXPERIMENTS_JSON,
 )
+from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
 from .constants import valid_dataset_1
@@ -114,14 +115,15 @@ class IngestTest(APITestCaseWithDataset):
 class IngestDerivedExperimentResultsTest(APITestCaseWithDataset):
     def test_ingest_derived_experiment_results(self):
         # ingest list of experiments
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset_id)
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_EXPERIMENT, self.dataset_id)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset_id, logger)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_EXPERIMENT, self.dataset_id, logger)
 
         # ingest list of experiment results
         r = self.one_authz_post(
             reverse("ingest-derived-experiment-results", args=(self.dataset_id,)),
             json=EXAMPLE_INGEST_EXPERIMENT_RESULT,
         )
+
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
         # forbidden
