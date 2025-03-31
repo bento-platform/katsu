@@ -1,4 +1,5 @@
 import io
+import uuid
 from typing import TextIO
 from os import walk, path
 
@@ -16,7 +17,7 @@ from chord_metadata_service.chord.export.cbioportal import (
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
 )
-from chord_metadata_service.chord.export.utils import ExportFileContext
+from chord_metadata_service.chord.export.utils import ExportError, ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
@@ -88,6 +89,12 @@ class ExportCBioTest(TestCase):
                 files_set.update([path.relpath(path.join(dirpath, fn), export_dir) for fn in filenames])
 
             self.assertTrue(CBIO_FILES_SET.issubset(files_set))
+
+    def test_file_creation_study_dne(self):
+        with ExportFileContext(None, self.study_id) as file_export:
+            # random uuid - does not exist; raised by study_export
+            with self.assertRaises(ExportError):
+                async_to_sync(exp.study_export)(file_export.get_path, str(uuid.uuid4()))
 
     def test_export_cbio_study_meta(self):
         with io.StringIO() as output:
