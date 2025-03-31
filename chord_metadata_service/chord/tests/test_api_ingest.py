@@ -69,6 +69,13 @@ class APITestCaseWithDataset(AuthzAPITestCaseWithProjectJSON):
 
 class IngestTest(APITestCaseWithDataset):
     def test_phenopackets_ingest_400s(self):
+        # Bad dataset ID
+        r = self.one_authz_post(
+            reverse("ingest-into-dataset", args=(str(uuid.uuid4()), WORKFLOW_PHENOPACKETS_JSON)),
+            json=load_local_json("example_phenopacket_v2.json"),
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
         # Invalid workflow ID
         r = self.one_authz_post(
             reverse("ingest-into-dataset", args=(self.dataset_id, "phenopackets_json_invalid")),
