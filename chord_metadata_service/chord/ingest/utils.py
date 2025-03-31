@@ -19,7 +19,6 @@ from .exceptions import IngestError
 
 __all__ = [
     "map_if_list",
-    "get_output_or_raise",
     "query_and_check_nulls",
     "workflow_file_output_to_path",
 ]
@@ -38,13 +37,6 @@ def map_if_list(fn: Callable, data: Any, *args, **kwargs) -> Any:
         [fn(d, *args, idx=idx, **kwargs) for idx, d in enumerate(data)] if isinstance(data, list)
         else fn(data, *args, **kwargs)
     )
-
-
-def get_output_or_raise(workflow_outputs, key):
-    if key not in workflow_outputs:
-        raise IngestError(f"Missing workflow output: {key}")
-
-    return workflow_outputs[key]
 
 
 def query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
