@@ -31,6 +31,7 @@ from ..workflows.metadata import workflow_set
 DATASET_DNE = "dataset does not exist"
 
 
+@sync_to_async
 def call_ingest_function_and_handle(
     fn: Callable[[Any, str, BoundLogger], Any], data, dataset_id: str, lg: BoundLogger
 ) -> Response:
@@ -83,7 +84,7 @@ async def ingest_derived_experiment_results(request: DrfRequest, dataset_id: str
     ):
         return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
-    return await sync_to_async(call_ingest_function_and_handle)(
+    return await call_ingest_function_and_handle(
         experiments.ingest_derived_experiment_results, request.data, dataset_id, lg
     )
 
@@ -125,6 +126,6 @@ async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id:
     ):
         return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
-    return await sync_to_async(call_ingest_function_and_handle)(
+    return await call_ingest_function_and_handle(
         WORKFLOW_INGEST_FUNCTION_MAP[workflow_id], request.data, dataset_id, lg
     )
