@@ -174,6 +174,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         except Http404:
             return not_found(request)  # side effect: sets authz done flag
 
+        dataset_id = str(dataset.identifier)
+
         if not (
             await authz.async_evaluate_one(request, build_resource(project=str(dataset.project_id)), P_DELETE_DATASET)
         ):
@@ -181,11 +183,9 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         await dataset.adelete()
 
-        n_removed = await run_all_cleanup()
-        logger.info(
-            "ran cleanup after deleting dataset via DRF API",
-            dataset_id=str(dataset.identifier), n_removed=n_removed
-        )
+        lg = logger.bind(dataset_id=dataset_id)
+        n_removed = await run_all_cleanup(lg)
+        await lg.ainfo("ran cleanup after deleting dataset via DRF API", n_removed=n_removed)
 
         authz.mark_authz_done(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,7 +1,6 @@
-# TODO
+from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
-from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import build_id_set_from_model
 from .models import Experiment, ExperimentResult, Instrument
 
@@ -12,7 +11,7 @@ __all__ = [
 
 
 # TODO: Remove this when we have one-to-many ?
-async def clean_experiment_results() -> int:
+async def clean_experiment_results(logger: BoundLogger) -> int:
     results_referenced = set()
 
     # Collect references to results from experiments
@@ -22,7 +21,7 @@ async def clean_experiment_results() -> int:
     return await remove_not_referenced(ExperimentResult, results_referenced, "experiment results", logger)
 
 
-async def clean_instruments() -> int:
+async def clean_instruments(logger: BoundLogger) -> int:
     instruments_referenced = set()
 
     # Collect references to instruments from experiments

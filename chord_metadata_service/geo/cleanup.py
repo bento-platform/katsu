@@ -1,7 +1,8 @@
 import chord_metadata_service.phenopackets.models as pm
 
+from structlog.stdlib import BoundLogger
+
 from chord_metadata_service.cleanup.remove import remove_not_referenced
-from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import build_id_set_from_model
 from .models import GeoLocation
 
@@ -10,7 +11,7 @@ __all__ = [
 ]
 
 
-async def clean_geolocations() -> int:
+async def clean_geolocations(logger: BoundLogger) -> int:
     """
     Deletes all locations which aren't referenced anywhere in the application.
     Phenopackets/biosamples should be cleaned BEFORE running this.

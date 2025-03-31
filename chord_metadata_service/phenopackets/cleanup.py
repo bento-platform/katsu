@@ -1,8 +1,9 @@
 import chord_metadata_service.experiments.models as em
 import chord_metadata_service.phenopackets.models as pm
 
+from structlog.stdlib import BoundLogger
+
 from chord_metadata_service.cleanup.remove import remove_items, remove_not_referenced
-from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import build_id_set, build_id_set_from_model
 
 __all__ = [
@@ -12,7 +13,7 @@ __all__ = [
 ]
 
 
-async def clean_meta_data() -> int:
+async def clean_meta_data(logger: BoundLogger) -> int:
     """
     Deletes orphan MetaData objects where the parent phenopacket has been deleted.
     TODO: This should be handled by a OneToOne relationship rather than this hack.
@@ -25,7 +26,7 @@ async def clean_meta_data() -> int:
     return await remove_not_referenced(pm.MetaData, meta_data_referenced, "metadata objects", logger)
 
 
-async def clean_biosamples() -> int:
+async def clean_biosamples(logger: BoundLogger) -> int:
     """
     Deletes all biosamples which aren't referenced anywhere in the application.
     Phenopackets and Experiments model tables should be deleted in the database
@@ -43,7 +44,7 @@ async def clean_biosamples() -> int:
     return await remove_not_referenced(pm.Biosample, biosamples_referenced, "biosamples", logger)
 
 
-async def clean_phenotypic_features() -> int:
+async def clean_phenotypic_features(logger: BoundLogger) -> int:
     """
     Deletes all phenotypic features without a biosample or phenopacket. This could
     happen especially in versions prior to 2.17.0, where on_delete was SET_NULL for both.
@@ -63,19 +64,19 @@ async def clean_phenotypic_features() -> int:
     return await remove_items(pm.PhenotypicFeature, pf_to_remove, "phenotypic features", logger)
 
 
-async def clean_interpretations() -> int:
+async def clean_interpretations(logger: BoundLogger) -> int:
     interpretations_referenced = await build_id_set_from_model(pm.Phenopacket, "interpretations__id")
     return await remove_not_referenced(
         pm.Interpretation, interpretations_referenced, "interpretations", logger
     )
 
 
-async def clean_diagnoses() -> int:
+async def clean_diagnoses(logger: BoundLogger) -> int:
     diagnoses_referenced = await build_id_set_from_model(pm.Interpretation, "diagnosis__id")
     return await remove_not_referenced(pm.Diagnosis, diagnoses_referenced, "diagnosis", logger)
 
 
-async def clean_genomic_interpretations() -> int:
+async def clean_genomic_interpretations(logger: BoundLogger) -> int:
     gi_referenced = await build_id_set_from_model(pm.Diagnosis, "genomic_interpretations__id")
     return await remove_not_referenced(
         pm.GenomicInterpretation, gi_referenced, "genomic interpretations", logger
