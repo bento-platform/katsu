@@ -32,14 +32,11 @@ class ExportFileContext:
         project_id: name that will be used to namespace the export directory.
             This is also used for the archive filename by the writeTar() method
     """
-    path = ""
-    should_del = False
-    base_path = ""
-    project_id = ''
 
-    def __init__(self, tmp_dir: str, project_id: str):
+    def __init__(self, tmp_dir: str | None, project_id: str):
         tmp_dir = tmp_dir or settings.SERVICE_TEMP
 
+        self.should_del: bool = False
         if tmp_dir is None:
             tmp_dir = tempfile.mkdtemp()
             self.should_del = True
@@ -47,9 +44,10 @@ class ExportFileContext:
         if not os.access(tmp_dir, os.W_OK):
             raise ExportError(f"Directory does not exist or is not writable: {tmp_dir}")
 
-        self.base_path = tmp_dir
-        self.project_id = project_id
+        self.base_path: str = tmp_dir
+        self.project_id: str = project_id
 
+        self.path: str = ""
         try:
             self.path = os.path.join(tmp_dir, EXPORT_DIR, project_id)
 
