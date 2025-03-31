@@ -22,9 +22,10 @@ class ExportTest(AuthzAPITestCase):
     def setUp(self) -> None:
         # Creates a test database and populate with a phenopacket test file
 
-        p = Project.objects.create(title="Project 1", description="")
+        self.p = Project.objects.create(title="Project 1", description="")
         self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=p)
+                                        project=self.p)
+        self.project_id = str(self.p.identifier)
         self.study_id = str(self.d.identifier)
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
@@ -55,8 +56,10 @@ class ExportTest(AuthzAPITestCase):
         r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "format": "does-not-exist"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_export_cbio_type_dne(self):
-        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "object_type": "does-not-exist"})
+    def test_export_cbio_dne_for_project(self):
+        r = self.one_authz_post(
+            reverse("export"), json={**self.base_export_payload, "object_type": "project", "object_id": self.project_id}
+        )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_export_cbio_with_path(self):
