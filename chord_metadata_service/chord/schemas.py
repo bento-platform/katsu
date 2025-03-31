@@ -1,4 +1,6 @@
 from pathlib import Path
+
+from .export.metadata import EXPORT_FORMATS
 from chord_metadata_service.restapi.schema_utils import get_schema_app_id, sub_schema_uri
 
 # e.g. PATCH
@@ -45,12 +47,12 @@ EXPORT_SCHEMA = {
     "properties": {
         "object_type": {
             "type": "string",
-            "enum": ["project", "dataset", "table"]
+            "enum": ["project", "dataset"]
         },
         "object_id": {"type": "string"},
         "format": {
             "type": "string",
-            "enum": ["cbioportal"]
+            "enum": list(EXPORT_FORMATS),
         },
         "output_path": {"type": "string"}
     },
