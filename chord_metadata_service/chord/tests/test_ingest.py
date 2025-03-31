@@ -238,7 +238,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
             ingest_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET, "dummy", logger, validate=True)
 
         # valid phenopacket passes validation & doesn't raise
-        validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA)
+        validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA, obj_idx=0)
         self.assertEqual(validation_2, True)
         validate_phenopacket(EXAMPLE_INGEST_PHENOPACKET, logger)
 

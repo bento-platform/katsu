@@ -56,7 +56,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
 
 def validate_experiment(experiment_data, lg: BoundLogger, idx: int | None = None) -> None:
     # Validate experiment data against experiments schema.
-    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA, logger=lg)
+    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA, obj_idx=idx, logger=lg)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(
@@ -168,7 +168,7 @@ def ingest_derived_experiment_results(
     # First, validate all experiment results with the schema before creating anything in the database.
 
     for idx, exp_result in enumerate(json_data):
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA, logger=lg)
+        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA, obj_idx=idx, logger=lg)
         if not validation:
             # TODO: Report more precise errors
             raise IngestError(

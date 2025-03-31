@@ -83,8 +83,7 @@ def validate_phenopacket(
     idx: int | None = None
 ) -> None:
     # Validate phenopacket data against phenopackets schema.
-    # validation = schema_validation(phenopacket_data, PHENOPACKET_SCHEMA)
-    validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY, logger=lg)
+    validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY, obj_idx=idx, logger=lg)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(

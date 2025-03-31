@@ -17,9 +17,11 @@ def schema_validation(
     An object index may be passed for logging/debugging purposes.
     """
 
+    schema_id: str | None = schema.get("$id")
+
     lg: BoundLogger = logger or logger_
-    if schema_id := schema.get("$id"):
-        lg = lg.bind(schema_id=schema_id)
+    lg = lg.bind(schema_id=schema_id)
+
     if obj_idx is not None:
         lg = lg.bind(obj_idx=obj_idx)
 
