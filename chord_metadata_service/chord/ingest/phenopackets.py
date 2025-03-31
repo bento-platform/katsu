@@ -464,7 +464,7 @@ def ingest_phenopacket_workflow(json_data, dataset_id, lg: BoundLogger) -> list[
         proj_schema["schema_type"].lower(): proj_schema
         for proj_schema in project_schemas
     }
-    json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas)
+    json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas, lg)
 
     # Converts camelCase keys to snake_case for workflow ingests.
     # Ingests made with HTTP through /pivate/ingest are converted to snake_case by a django middleware

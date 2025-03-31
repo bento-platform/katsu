@@ -10,11 +10,9 @@ import tempfile
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 from django.conf import settings
 from structlog.stdlib import BoundLogger
+from typing import Any, Callable
 from urllib.parse import urlparse
 
-from typing import Any, Callable
-
-from chord_metadata_service.logger import logger
 from .exceptions import IngestError
 
 __all__ = [
@@ -67,10 +65,10 @@ def workflow_http_download(tmp_dir: str, http_uri: str, lg: BoundLogger) -> str:
 
 
 @contextlib.contextmanager
-def workflow_file_output_to_path(file_uri_or_path: str):
+def workflow_file_output_to_path(file_uri_or_path: str, lg: BoundLogger):
     # TODO: Should be able to download from DRS instead of using file URIs directly
 
-    lg = logger.bind(file_uri_or_path=file_uri_or_path)
+    lg = lg.bind(file_uri_or_path=file_uri_or_path)
     parsed_file_uri = urlparse(file_uri_or_path)
 
     if WINDOWS_DRIVE_SCHEME.match(parsed_file_uri.scheme):

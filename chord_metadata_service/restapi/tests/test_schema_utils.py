@@ -1,5 +1,6 @@
 from django.test import SimpleTestCase, TestCase
 
+from chord_metadata_service.logger import logger
 from ..schema_utils import merge_schema_dictionaries, tag_schema_with_nested_ids, patch_project_schemas
 from ..types import ExtensionSchemaDict
 from . import constants as c
@@ -71,14 +72,14 @@ class TestPatchSchema(SimpleTestCase):
                 "schema_type": "phenopacket",
             }
         }
-        patched = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas)
+        patched = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas, logger=logger)
         self.assertDictEqual(patched, base_schema)
 
     def test_patched_object(self):
         base_schema = c.VALID_PHENOPACKET_SCHEMA
         ext_schemas = c.VALID_EXTRA_PROPERTIES_EXTENSIONS
         base_schema = tag_schema_with_nested_ids(base_schema)
-        patched_schema = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas)
+        patched_schema = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas, logger=logger)
         self.assertDictEqual(
             patched_schema["properties"]["phenopacket"]["properties"]["extra_properties"],
             ext_schemas["phenopacket"]["json_schema"]

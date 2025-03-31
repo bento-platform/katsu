@@ -1,6 +1,7 @@
 # TODO
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
+from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import build_id_set_from_model
 from .models import Experiment, ExperimentResult, Instrument
 
@@ -18,7 +19,7 @@ async def clean_experiment_results() -> int:
     results_referenced |= await build_id_set_from_model(Experiment, "experiment_results__id")
 
     # Remove experiment results NOT in set
-    return await remove_not_referenced(ExperimentResult, results_referenced, "experiment results")
+    return await remove_not_referenced(ExperimentResult, results_referenced, "experiment results", logger)
 
 
 async def clean_instruments() -> int:
@@ -28,4 +29,4 @@ async def clean_instruments() -> int:
     instruments_referenced |= await build_id_set_from_model(Experiment, "instrument_id")
 
     # Remove instruments NOT in set
-    return await remove_not_referenced(Instrument, instruments_referenced, "instruments")
+    return await remove_not_referenced(Instrument, instruments_referenced, "instruments", logger)

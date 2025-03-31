@@ -1,6 +1,7 @@
 import chord_metadata_service.phenopackets.models as pm
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
+from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import build_id_set_from_model
 from .models import GeoLocation
 
@@ -21,4 +22,4 @@ async def clean_geolocations() -> int:
     locations_referenced |= await build_id_set_from_model(pm.Biosample, "location_collected_id")
 
     # Remove individuals not collected above
-    return await remove_not_referenced(GeoLocation, locations_referenced, "geolocations")
+    return await remove_not_referenced(GeoLocation, locations_referenced, "geolocations", logger)

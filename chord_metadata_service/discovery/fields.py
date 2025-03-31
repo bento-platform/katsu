@@ -4,10 +4,10 @@ from calendar import month_abbr
 from collections import Counter, defaultdict
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
 from django.db.models.functions import Cast
+from structlog.stdlib import BoundLogger
 from typing import Any, Mapping
 
 from chord_metadata_service.authz.types import DataPermissionsDict
-from chord_metadata_service.logger import logger
 
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
@@ -350,7 +350,7 @@ async def get_date_stats(
     return bins
 
 
-def filter_queryset_field_value(qs: QuerySet, field_props, value: str):
+def filter_queryset_field_value(qs: QuerySet, field_props, value: str, logger: BoundLogger):
     """
     Further filter a queryset using the field defined by field_props and the
     given value.

@@ -4,6 +4,7 @@ import chord_metadata_service.phenopackets.models as pm
 from .models import Resource
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
+from chord_metadata_service.logger import logger
 from chord_metadata_service.utils import build_id_set_from_model
 
 __all__ = [
@@ -21,4 +22,4 @@ async def clean_resources() -> int:
     resources_referenced |= await build_id_set_from_model(cm.Dataset, "additional_resources__id")
     resources_referenced |= await build_id_set_from_model(pm.MetaData, "resources__id")
 
-    return await remove_not_referenced(Resource, resources_referenced, "resources")
+    return await remove_not_referenced(Resource, resources_referenced, "resources", logger)
