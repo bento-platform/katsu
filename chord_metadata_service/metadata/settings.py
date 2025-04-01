@@ -61,9 +61,9 @@ BENTO_AUTHZ_SERVICE_URL: str = (
 )
 
 # Users querying /projects must have P_VIEW_PROJECTS at the node level
-KATSU_PROJECTS_LIST_AUTHZ: bool = os.environ.get("KATSU_PROJECTS_LIST_AUTHZ", "true").strip().lower() == "true"
+KATSU_PROJECTS_LIST_AUTHZ: bool = os.environ.get("KATSU_PROJECTS_LIST_AUTHZ", "false").strip().lower() == "true"
 # Users querying /datasets must have P_VIEW_DATASETS at the node level
-KATSU_DATASETS_LIST_AUTHZ: bool = os.environ.get("KATSU_DATASETS_LIST_AUTHZ", "true").strip().lower() == "true"
+KATSU_DATASETS_LIST_AUTHZ: bool = os.environ.get("KATSU_DATASETS_LIST_AUTHZ", "false").strip().lower() == "true"
 
 if len(sys.argv) > 1 and sys.argv[1] == "test":
     # Override BENTO_AUTHZ_SERVICE_URL for testing purposes inside container - this is a bit hacky

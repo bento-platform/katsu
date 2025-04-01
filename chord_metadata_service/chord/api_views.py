@@ -119,7 +119,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
 
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
-    
+
     @async_to_sync
     async def list(self, request, *args, **kwargs):
         if KATSU_PROJECTS_LIST_AUTHZ and not (
