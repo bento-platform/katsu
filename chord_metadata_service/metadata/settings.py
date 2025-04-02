@@ -15,7 +15,7 @@ import sys
 import logging
 import json
 
-from bento_lib.logging.structured import configure_structlog
+from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
@@ -154,6 +154,7 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'chord_metadata_service.logger.access_middleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -161,7 +162,6 @@ MIDDLEWARE = [
     'chord_metadata_service.authz.middleware.AuthzMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'django_structlog.middlewares.RequestMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
@@ -207,11 +207,13 @@ LOGGING = {
         'daphne.server': LOGGING_PROPOGATE_TO_ROOT,
         'django': LOGGING_PROPOGATE_TO_ROOT,
         'django.request': LOGGING_PROPOGATE_TO_ROOT,
+        'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
         'katsu': LOGGING_PROPOGATE_TO_ROOT
     },
 }
 
 configure_structlog(False, LOG_LEVEL.lower())
+configure_structlog_uvicorn()  # in production, if Katsu is served with Uvicorn, suppress its default access logging
 
 # if we are running the test suite, only log CRITICAL messages
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
