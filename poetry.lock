@@ -335,7 +335,7 @@ flask = ["flask (>=2.2.5,<4)"]
 type = "git"
 url = "https://github.com/bento-platform/bento_lib.git"
 reference = "feat/logging/django-access-middleware"
-resolved_reference = "47ba4296f9342722b2d038564ea6d23d3035c040"
+resolved_reference = "9c441aed33b3f73dcc9f7e24bb0ecd9c67fae1bb"
 
 [[package]]
 name = "cachetools"
