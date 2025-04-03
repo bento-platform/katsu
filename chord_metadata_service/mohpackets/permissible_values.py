@@ -211,6 +211,7 @@ M_CATEGORY = [
     "M1d(1)",
     "M1e",
     "MX",
+    "Not applicable"
 ]
 
 STAGE_GROUP = [
@@ -611,7 +612,7 @@ DOSAGE_UNITS = [
     "ug/m2",
     "g/m2",
     "mg/kg",
-    "cells/kg",
+    "mg",
     "Not available",
 ]
 

@@ -6,6 +6,7 @@ on:
       - develop
     paths:
       - "chord_metadata_service/mohpackets/schemas/**"
+      - "chord_metadata_service/mohpackets/apis/**"
       - "chord_metadata_service/mohpackets/models.py"
       - "chord_metadata_service/mohpackets/permissible_values.py"
 

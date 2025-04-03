@@ -542,19 +542,6 @@ components:
       - age_count
       title: DiagnosisAgeCountSchema
       type: object
-    DiscoveryDonorSchema:
-      properties:
-        donors_count:
-          title: Donors Count
-          type: string
-        program_id:
-          title: Program Id
-          type: string
-      required:
-      - program_id
-      - donors_count
-      title: DiscoveryDonorSchema
-      type: object
     DiseaseStatusFollowupEnum:
       enum:
       - Complete remission
@@ -897,7 +884,7 @@ components:
       - ug/m2
       - g/m2
       - mg/kg
-      - cells/kg
+      - mg
       - Not available
       title: DosageUnitsEnum
       type: string
@@ -1298,6 +1285,7 @@ components:
       - M1d(1)
       - M1e
       - MX
+      - Not applicable
       title: MCategoryEnum
       type: string
     MalignancyLateralityEnum:
@@ -5090,10 +5078,6 @@ components:
     IngestAuth:
       scheme: bearer
       type: http
-    IngestTokenAuth:
-      in: header
-      name: X-Service-Token
-      type: apiKey
     ServiceTokenAuth:
       in: header
       name: X-Service-Token
@@ -5101,12 +5085,12 @@ components:
 info:
   description: This is the RESTful API for the MoH Service.
   title: MoH Service API
-  version: 5.1.0
+  version: 5.2.0
 openapi: 3.1.0
 paths:
   /v3/authorized/biomarkers/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_biomarkers
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_biomarkers
       parameters:
       - in: query
         name: program_id
@@ -5281,7 +5265,7 @@ paths:
       - authorized
   /v3/authorized/comorbidities/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_comorbidities
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_comorbidities
       parameters:
       - in: query
         name: program_id
@@ -5377,7 +5361,7 @@ paths:
     get:
       description: Retrieves a single donor along with all related clinical data,
         organized in a nested JSON format.
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_get_donor_with_clinical_data
+      operationId: chord_metadata_service_mohpackets_apis_authorized_get_donor_with_clinical_data
       parameters:
       - in: path
         name: program_id
@@ -5414,7 +5398,7 @@ paths:
       - authorized
   /v3/authorized/donors/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_donors
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_donors
       parameters:
       - in: query
         name: submitter_donor_id
@@ -5509,7 +5493,7 @@ paths:
       - authorized
   /v3/authorized/exposures/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_exposures
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_exposures
       parameters:
       - in: query
         name: program_id
@@ -5580,7 +5564,7 @@ paths:
       - authorized
   /v3/authorized/follow_ups/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_follow_ups
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_follow_ups
       parameters:
       - in: query
         name: submitter_follow_up_id
@@ -5684,7 +5668,7 @@ paths:
       - authorized
   /v3/authorized/primary_diagnoses/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_primary_diagnoses
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_primary_diagnoses
       parameters:
       - in: query
         name: submitter_primary_diagnosis_id
@@ -5850,7 +5834,7 @@ paths:
       - authorized
   /v3/authorized/programs/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_programs
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_programs
       parameters:
       - in: query
         name: program_id
@@ -5890,7 +5874,7 @@ paths:
     get:
       description: Used by the query service to return donors along with their sample
         IDs, treatment types, and primary sites.
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_query_donors
+      operationId: chord_metadata_service_mohpackets_apis_authorized_query_donors
       parameters:
       - in: query
         name: treatment_type
@@ -5953,7 +5937,7 @@ paths:
       - authorized
   /v3/authorized/radiations/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_radiations
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_radiations
       parameters:
       - in: query
         name: program_id
@@ -6063,7 +6047,7 @@ paths:
       - authorized
   /v3/authorized/sample_registrations/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_sample_registrations
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_sample_registrations
       parameters:
       - in: query
         name: submitter_sample_id
@@ -6157,7 +6141,7 @@ paths:
       - authorized
   /v3/authorized/specimens/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_specimens
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_specimens
       parameters:
       - in: query
         name: submitter_specimen_id
@@ -6315,7 +6299,7 @@ paths:
       - authorized
   /v3/authorized/surgeries/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_surgeries
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_surgeries
       parameters:
       - in: query
         name: program_id
@@ -6492,7 +6476,7 @@ paths:
       - authorized
   /v3/authorized/systemic_therapies/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_systemic_therapies
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_systemic_therapies
       parameters:
       - in: query
         name: program_id
@@ -6618,7 +6602,7 @@ paths:
       - authorized
   /v3/authorized/treatments/:
     get:
-      operationId: chord_metadata_service_mohpackets_apis_clinical_data_list_treatments
+      operationId: chord_metadata_service_mohpackets_apis_authorized_list_treatments
       parameters:
       - in: query
         name: submitter_treatment_id
@@ -6727,30 +6711,6 @@ paths:
       summary: List Treatments
       tags:
       - authorized
-  /v3/discovery/donors/:
-    get:
-      description: 'Return the number of donors per program in the database.
-
-        Note: This function is identical to `discover_patients_per_program`
-
-        and is here because the frontend ingest uses it. It''s probably best
-
-        to clean up later.'
-      operationId: chord_metadata_service_mohpackets_apis_discovery_discover_donors
-      parameters: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/DiscoveryDonorSchema'
-                title: Response
-                type: array
-          description: OK
-      summary: Discover Donors
-      tags:
-      - discovery
   /v3/discovery/overview/diagnosis_age_count/:
     get:
       description: Return the count for age of diagnosis by calculating the date of
@@ -6767,6 +6727,8 @@ paths:
                 title: Response
                 type: array
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Diagnosis Age Count
       tags:
       - overview
@@ -6785,6 +6747,8 @@ paths:
                 title: Response
                 type: array
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Gender Count
       tags:
       - overview
@@ -6803,6 +6767,8 @@ paths:
                 title: Response
                 type: object
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Individual Count
       tags:
       - overview
@@ -6821,6 +6787,8 @@ paths:
                 title: Response
                 type: array
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Patients Per Program
       tags:
       - overview
@@ -6839,6 +6807,8 @@ paths:
                 title: Response
                 type: array
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Primary Site Count
       tags:
       - overview
@@ -6857,6 +6827,8 @@ paths:
                 title: Response
                 type: object
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Program Count
       tags:
       - overview
@@ -6875,6 +6847,8 @@ paths:
                 title: Response
                 type: array
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Treatment Type Count
       tags:
       - overview
@@ -6893,6 +6867,8 @@ paths:
                 title: Response
                 type: array
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Programs
       tags:
       - discovery
@@ -6909,6 +6885,8 @@ paths:
                 title: Response
                 type: object
           description: OK
+      security:
+      - ServiceTokenAuth: []
       summary: Discover Sidebar List
       tags:
       - discovery
@@ -6918,7 +6896,7 @@ paths:
         age, and primary site.
 
         This endpoint is called by the query service and bypasses user authorization.'
-      operationId: chord_metadata_service_mohpackets_apis_explorer_explorer_donor
+      operationId: chord_metadata_service_mohpackets_apis_discovery_explorer_donor
       parameters:
       - in: query
         name: treatment_type
@@ -6986,7 +6964,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Biomarkers
       tags:
       - ingest
@@ -7008,7 +6986,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Comorbidities
       tags:
       - ingest
@@ -7030,7 +7008,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Donors
       tags:
       - ingest
@@ -7052,7 +7030,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Exposures
       tags:
       - ingest
@@ -7074,7 +7052,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Followups
       tags:
       - ingest
@@ -7096,7 +7074,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Primary Diagnoses
       tags:
       - ingest
@@ -7145,7 +7123,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Programs
       tags:
       - ingest
@@ -7167,7 +7145,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Radiations
       tags:
       - ingest
@@ -7189,7 +7167,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Sample Registrations
       tags:
       - ingest
@@ -7211,7 +7189,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Specimens
       tags:
       - ingest
@@ -7233,7 +7211,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Surgeries
       tags:
       - ingest
@@ -7255,7 +7233,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Systemic Therapies
       tags:
       - ingest
@@ -7277,7 +7255,7 @@ paths:
           description: OK
       security:
       - IngestAuth: []
-      - IngestTokenAuth: []
+      - ServiceTokenAuth: []
       summary: Create Treatments
       tags:
       - ingest

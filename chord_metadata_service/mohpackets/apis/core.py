@@ -1,32 +1,33 @@
-import os
 import json
+import os
 import sys
+
 import orjson
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.cache import cache_page
 from ninja import NinjaAPI, Swagger
+from ninja.decorators import decorate_view
 from ninja.parser import Parser
 from ninja.renderers import BaseRenderer
 from ninja.security import APIKeyHeader, HttpBearer
 
-from chord_metadata_service.mohpackets.apis.clinical_data import (
+from chord_metadata_service.mohpackets.apis.authorized import (
     router as authorzied_router,
 )
 from chord_metadata_service.mohpackets.apis.discovery import (
     discovery_router as discovery_router,
 )
-from chord_metadata_service.mohpackets.apis.explorer import (
+from chord_metadata_service.mohpackets.apis.discovery import (
     explorer_router as explorer_router,
 )
 from chord_metadata_service.mohpackets.apis.ingestion import (
-    router as ingest_router,
     delete_router,
 )
-
+from chord_metadata_service.mohpackets.apis.ingestion import (
+    router as ingest_router,
+)
 from chord_metadata_service.mohpackets.utils import get_schema_version
-
-from django.views.decorators.cache import cache_page
-from ninja.decorators import decorate_view
 
 """
 Module with configurations for APIs
@@ -128,25 +129,6 @@ class NetworkAuth:
                 logger.error(f"An error occurred in OPA: {e}")
                 raise Exception("Error with OPA authentication.")
 
-    class IngestTokenAuth(APIKeyHeader):
-        param_name = "X-Service-Token"
-
-        def authenticate(self, request, service_token):
-            if service_token:
-                is_valid_token = verify_service_token(
-                    service="candig-ingest", token=service_token
-                )
-                logger.debug(
-                    f"verify_service_token: {is_valid_token}. X-Service-Token is: {service_token}",
-                    request,
-                )
-                return is_valid_token
-
-            logger.warning(
-                "No X-Service-Token in headers. Not an ingest service request."
-            )
-            return False
-
     class GetAuth(HttpBearer):
         def authenticate(self, request, bearer_token):
             """
@@ -185,10 +167,14 @@ class NetworkAuth:
     class ServiceTokenAuth(APIKeyHeader):
         param_name = "X-Service-Token"
 
+        def __init__(self, service_name):
+            super().__init__()
+            self.service_name = service_name
+
         def authenticate(self, request, service_token):
             if service_token:
                 is_valid_token = verify_service_token(
-                    service="query", token=service_token
+                    service=self.service_name, token=service_token
                 )
                 logger.debug(
                     f"verify_service_token: {is_valid_token}. X-Service-Token is: {service_token}",
@@ -196,8 +182,8 @@ class NetworkAuth:
                 )
                 return is_valid_token
 
-            logger.warning(
-                "No X-Service-Token in headers. Not a query service request."
+            logger.error(
+                f"No X-Service-Token in headers. Not a {self.service_name} service request."
             )
             return False
 
@@ -234,14 +220,6 @@ class LocalAuth:
 
             return False
 
-    class IngestTokenAuth(APIKeyHeader):
-        param_name = "X-Service-Token"
-
-        def authenticate(self, request, service_token):
-            if service_token:
-                return service_token == settings.INGEST_SERVICE_TOKEN
-            return False
-
     class GetAuth(HttpBearer):
         def authenticate(self, request, bearer_token):
             if bearer_token in settings.LOCAL_OPA_DATASET:
@@ -252,10 +230,17 @@ class LocalAuth:
     class ServiceTokenAuth(APIKeyHeader):
         param_name = "X-Service-Token"
 
+        def __init__(self, service_name):
+            super().__init__()
+            self.service_name = service_name
+
         def authenticate(self, request, service_token):
-            if service_token:
+            if self.service_name == "candig-ingest":
+                return service_token == settings.INGEST_SERVICE_TOKEN
+            elif self.service_name == "query":
                 return service_token == settings.QUERY_SERVICE_TOKEN
-            return False
+            else:
+                return False
 
 
 ##########################################
@@ -269,8 +254,8 @@ settings_module = os.environ.get("DJANGO_SETTINGS_MODULE")
 if "dev" in settings_module or "prod" in settings_module:
     from authx.auth import (  # type: ignore
         get_opa_datasets,
-        verify_service_token,
         is_action_allowed_for_program,
+        verify_service_token,
     )
     from candigv2_logging.logging import CanDIGLogger, initialize  # type: ignore
 
@@ -297,14 +282,27 @@ api = NinjaAPI(
     version=settings.KATSU_VERSION,
     description="This is the RESTful API for the MoH Service.",
 )
-api.add_router("/discovery/", discovery_router, tags=["discovery"])
-api.add_router("/ingest/", ingest_router, auth=[auth.IngestAuth(), auth.IngestTokenAuth()], tags=["ingest"])
+api.add_router(
+    "/discovery/",
+    discovery_router,
+    auth=auth.ServiceTokenAuth(service_name="query"),
+    tags=["discovery"],
+)
+api.add_router(
+    "/ingest/",
+    ingest_router,
+    auth=[auth.IngestAuth(), auth.ServiceTokenAuth(service_name="candig-ingest")],
+    tags=["ingest"],
+)
 api.add_router("/ingest/", delete_router, auth=auth.DeleteAuth(), tags=["delete"])
 api.add_router(
     "/authorized/", authorzied_router, auth=auth.GetAuth(), tags=["authorized"]
 )
 api.add_router(
-    "/explorer", explorer_router, auth=auth.ServiceTokenAuth(), tags=["explorer"]
+    "/explorer",
+    explorer_router,
+    auth=auth.ServiceTokenAuth(service_name="query"),
+    tags=["explorer"],
 )
 
 

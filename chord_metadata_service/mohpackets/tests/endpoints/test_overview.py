@@ -8,6 +8,7 @@ from chord_metadata_service.mohpackets.tests.factories import (
     PrimaryDiagnosisFactory,
     TreatmentFactory,
 )
+from django.conf import settings
 
 """
     This module contains API tests related to overview endpoints.
@@ -29,7 +30,6 @@ class OverviewTestCase(BaseTestCase):
         self.primary_site_count_url = "/v3/discovery/overview/primary_site_count/"
         self.treatment_type_count_url = "/v3/discovery/overview/treatment_type_count/"
         self.diagnosis_age_count_url = "/v3/discovery/overview/diagnosis_age_count/"
-        self.discover_donors_url = "/v3/discovery/donors/"
         # The default dataset contains fewer than 5 entries.
         # To test the censor requirement, we need to add:
         # - 5 more donors
@@ -71,7 +71,10 @@ class OverviewTestCase(BaseTestCase):
         - Send a request to individual_count endpoint
         - Ensure that the response show the full number
         """
-        response = self.client.get(self.individual_count_url)
+        response = self.client.get(
+            self.individual_count_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         individual_count_value = response.json()["individual_count"]
         self.assertGreaterEqual(len(self.donors), 5)
@@ -88,7 +91,10 @@ class OverviewTestCase(BaseTestCase):
         """
         Donor.objects.filter(program_id=self.programs[0]).delete()
         donors = Donor.objects.all()
-        response = self.client.get(self.individual_count_url)
+        response = self.client.get(
+            self.individual_count_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         individual_count_value = response.json()["individual_count"]
         self.assertLess(len(donors), 5)
@@ -103,7 +109,10 @@ class OverviewTestCase(BaseTestCase):
         - Send a request to patients_per_program endpoint.
         - Ensure that the response does not reveal the number when it is less than 5 donors.
         """
-        response = self.client.get(self.patients_per_program_url)
+        response = self.client.get(
+            self.patients_per_program_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         for item in response.json():
             patients_count_value = item["patients_count"]
@@ -124,7 +133,10 @@ class OverviewTestCase(BaseTestCase):
         - Ensure that the response does not reveal the count when it is less than 5.
         """
 
-        response = self.client.get(self.gender_count_url)
+        response = self.client.get(
+            self.gender_count_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         for item in response.json():
             gender_count_value = item["gender_count"]
@@ -144,7 +156,10 @@ class OverviewTestCase(BaseTestCase):
         - Send a request to primary_site_count endpoint.
         - Ensure that the response does not reveal the count when it is less than 5.
         """
-        response = self.client.get(self.primary_site_count_url)
+        response = self.client.get(
+            self.primary_site_count_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         for item in response.json():
             primary_site_count_value = item["primary_site_count"]
@@ -166,7 +181,10 @@ class OverviewTestCase(BaseTestCase):
         - Send a request to treatment_type_count endpoint.
         - Ensure that the response does not reveal the count when it is less than 5.
         """
-        response = self.client.get(self.treatment_type_count_url)
+        response = self.client.get(
+            self.treatment_type_count_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         for item in response.json():
             treatment_type_count_value = item["treatment_type_count"]
@@ -188,27 +206,11 @@ class OverviewTestCase(BaseTestCase):
         - Send a request to diagnosis_age_count endpoint.
         - Ensure that the response does not reveal the count when it is less than 5.
         """
-        response = self.client.get(self.diagnosis_age_count_url)
+        response = self.client.get(
+            self.diagnosis_age_count_url,
+            HTTP_X_SERVICE_TOKEN=settings.QUERY_SERVICE_TOKEN,
+        )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         for item in response.json():
             if item["age_at_diagnosis"] != "70-79":
                 self.assertEqual(item["age_count"], "<5")
-
-    def test_discover_donors_api_censoring(self):
-        """
-        Test discovery donor API censoring for small datasets.
-
-        Testing Strategy:
-        - Program 0 has 7, Program 1 has 2 donors
-        - Send a request to discovery donors endpoint.
-        - Ensure that the response does not reveal the count when it is less than 5.
-        """
-        response = self.client.get(self.discover_donors_url)
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        for item in response.json():
-            donors_count_value = item["donors_count"]
-            donors_count = Donor.objects.filter(program_id=item["program_id"]).count()
-            if donors_count < 5:
-                self.assertEqual(donors_count_value, "<5")
-            else:
-                self.assertEqual(donors_count_value, str(donors_count))

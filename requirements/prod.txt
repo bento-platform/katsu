@@ -1,8 +1,8 @@
 -r base.txt # inherit from base.txt
-whitenoise==6.7.0 # serve static files
-redis[hiredis]==5.0.8 # cache server
+whitenoise==6.9.0 # serve static files
+redis[hiredis]==5.2.1 # cache server
 gunicorn==23.0.0 #  web server
-uvicorn[standard]==0.30.6 #  web server
-candigv2-logging@git+https://github.com/CanDIG/candigv2-logging.git@v1.0.0 # CANDIG logging wrapper
-candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.5.0 # CANDIG authorization wrapper
+uvicorn[standard]==0.34.0 #  web server
+candigv2-logging@git+https://github.com/CanDIG/candigv2-logging.git@v1.0.1 # CANDIG logging wrapper
+candigv2-authx@git+https://github.com/CanDIG/candigv2-authx.git@v2.7.3 # CANDIG authorization wrapper
 

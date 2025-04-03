@@ -1,12 +1,11 @@
 from http import HTTPStatus
-from typing import Type, List, Dict
+from typing import Dict, List, Type
 
 from django.http import HttpResponse, JsonResponse
 from ninja import Router
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
-    SystemicTherapy,
     Comorbidity,
     Donor,
     Exposure,
@@ -17,11 +16,11 @@ from chord_metadata_service.mohpackets.models import (
     SampleRegistration,
     Specimen,
     Surgery,
+    SystemicTherapy,
     Treatment,
 )
 from chord_metadata_service.mohpackets.schemas.ingestion import (
     BiomarkerIngestSchema,
-    SystemicTherapyIngestSchema,
     ComorbidityIngestSchema,
     DonorIngestSchema,
     ExposureIngestSchema,
@@ -32,6 +31,7 @@ from chord_metadata_service.mohpackets.schemas.ingestion import (
     SampleRegistrationIngestSchema,
     SpecimenIngestSchema,
     SurgeryIngestSchema,
+    SystemicTherapyIngestSchema,
     TreatmentIngestSchema,
 )
 
