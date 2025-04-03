@@ -56,7 +56,7 @@ DISCOVERY_OVERVIEW_CHART_SCHEMA = {
     "type": "object",
     "properties": {
         "field": base_type(SchemaTypes.STRING),
-        "chart_type": enum_of(["bar", "pie"])
+        "chart_type": enum_of(["bar", "pie", "histogram"])
     },
     "additionalProperties": False
 }
