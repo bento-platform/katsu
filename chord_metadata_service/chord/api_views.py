@@ -79,7 +79,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.all().order_by("identifier")
+    queryset = Project.objects.all().order_by("title")
     serializer_class = ProjectSerializer
 
     @async_to_sync
