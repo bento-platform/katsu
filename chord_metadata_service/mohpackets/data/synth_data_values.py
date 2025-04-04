@@ -1,39 +1,60 @@
 import math
 import chord_metadata_service.mohpackets.permissible_values as PERM_VAL
+import copy
 
 
 def add_nulls(complete_list: list, prop=0.2):
     """ Returns a list with 20% of the list as 'None' """
+    list_copy = copy.deepcopy(complete_list)
     num_nulls = math.ceil(len(complete_list) * prop)
-    complete_list.extend([None] * num_nulls)
-    return complete_list
+    list_copy.extend([None] * num_nulls)
+    return list_copy
 
 
-# add 20% nulls to all enums
+# add 20% nulls to all enums, remove not available from ALL enums
 GENDER = PERM_VAL.GENDER + [None]
+ALL_GENDER = [x for x in PERM_VAL.GENDER if x != "Not available"]
 SEX_AT_BIRTH = add_nulls(PERM_VAL.SEX_AT_BIRTH)
+ALL_SEX_AT_BIRTH = [x for x in PERM_VAL.SEX_AT_BIRTH if x not in ["Not available", None]]
+ALL_CAUSE_OF_DEATH = [x for x in PERM_VAL.CAUSE_OF_DEATH if x != "Not available"]
 
 BASIS_OF_DIAGNOSIS = add_nulls(PERM_VAL.BASIS_OF_DIAGNOSIS)
+ALL_BASIS_OF_DIAGNOSIS = [x for x in PERM_VAL.BASIS_OF_DIAGNOSIS if x != "Not available"]
 PRIMARY_DIAGNOSIS_LATERALITY = add_nulls(PERM_VAL.PRIMARY_DIAGNOSIS_LATERALITY)
+ALL_PRIMARY_DIAGNOSIS_LATERALITY = [x for x in PERM_VAL.PRIMARY_DIAGNOSIS_LATERALITY if x != "Not available"]
 TUMOUR_STAGING_SYSTEM = add_nulls(PERM_VAL.TUMOUR_STAGING_SYSTEM)
+ALL_TUMOUR_STAGING_SYSTEM = [x for x in PERM_VAL.TUMOUR_STAGING_SYSTEM if x != "Not available"]
 T_CATEGORY = add_nulls(PERM_VAL.T_CATEGORY)
 N_CATEGORY = add_nulls(PERM_VAL.N_CATEGORY)
 M_CATEGORY = add_nulls(PERM_VAL.M_CATEGORY)
 STAGE_GROUP = add_nulls(PERM_VAL.STAGE_GROUP)
+ALL_STAGE_GROUP = [x for x in PERM_VAL.STAGE_GROUP if x != "Not available"]
 
 STORAGE = add_nulls(PERM_VAL.STORAGE)
+ALL_STORAGE = [x for x in PERM_VAL.STORAGE if x != "Not available"]
 SPECIMEN_PROCESSING = add_nulls(PERM_VAL.SPECIMEN_PROCESSING)
+ALL_SPECIMEN_PROCESSING = [x for x in PERM_VAL.SPECIMEN_PROCESSING if x != "Not available"]
 SPECIMEN_LATERALITY = add_nulls(PERM_VAL.SPECIMEN_LATERALITY)
+ALL_SPECIMEN_LATERALITY = [x for x in PERM_VAL.SPECIMEN_LATERALITY if x != "Not available"]
 CONFIRMED_DIAGNOSIS_TUMOUR = add_nulls(PERM_VAL.CONFIRMED_DIAGNOSIS_TUMOUR)
+ALL_CONFIRMED_DIAGNOSIS_TUMOUR = [x for x in PERM_VAL.CONFIRMED_DIAGNOSIS_TUMOUR if x != "Not available"]
 TUMOUR_GRADE = add_nulls(PERM_VAL.TUMOUR_GRADE)
+ALL_TUMOUR_GRADE = [x for x in PERM_VAL.TUMOUR_GRADE if x != "Not available"]
 TUMOUR_GRADING_SYSTEM = add_nulls(PERM_VAL.TUMOUR_GRADING_SYSTEM)
+ALL_TUMOUR_GRADING_SYSTEM = [x for x in PERM_VAL.TUMOUR_GRADING_SYSTEM if x != "Not available"]
 PERCENT_CELLS_RANGE = add_nulls(PERM_VAL.PERCENT_CELLS_RANGE)
+ALL_PERCENT_CELLS_RANGE = [x for x in PERM_VAL.PERCENT_CELLS_RANGE if x != "Not available"]
 CELLS_MEASURE_METHOD = add_nulls(PERM_VAL.CELLS_MEASURE_METHOD)
+ALL_CELLS_MEASURE_METHOD = [x for x in PERM_VAL.CELLS_MEASURE_METHOD if x != "Not available"]
 
 SPECIMEN_TISSUE_SOURCE = add_nulls(PERM_VAL.SPECIMEN_TISSUE_SOURCE)
+ALL_SPECIMEN_TISSUE_SOURCE = [x for x in PERM_VAL.SPECIMEN_TISSUE_SOURCE if x != "Not available"]
 SPECIMEN_TYPE = add_nulls(PERM_VAL.SPECIMEN_TYPE)
+ALL_SPECIMEN_TYPE = [x for x in PERM_VAL.SPECIMEN_TYPE if x != "Not available"]
 SAMPLE_TYPE = add_nulls(PERM_VAL.SAMPLE_TYPE)
+ALL_SAMPLE_TYPE = [x for x in PERM_VAL.SAMPLE_TYPE if x != "Not available"]
 TUMOUR_DESIGNATION = add_nulls(PERM_VAL.TUMOUR_DESIGNATION)
+ALL_TUMOUR_DESIGNATION = [x for x in PERM_VAL.TUMOUR_DESIGNATION if x != "Not available"]
 
 TREATMENT_TYPE = add_nulls(PERM_VAL.TREATMENT_TYPE)
 
@@ -46,32 +67,56 @@ TREATMENT_TYPE_FOR_ALL = [
     "Stem cell transplant",
 ]
 TREATMENT_INTENT = add_nulls(PERM_VAL.TREATMENT_INTENT)
+ALL_TREATMENT_INTENT = [x for x in PERM_VAL.TREATMENT_INTENT if x != "Not available"]
 TREATMENT_RESPONSE_METHOD = add_nulls(PERM_VAL.TREATMENT_RESPONSE_METHOD)
+ALL_TREATMENT_RESPONSE_METHOD = [x for x in PERM_VAL.TREATMENT_RESPONSE_METHOD if x != "Not available"]
 TREATMENT_RESPONSE = add_nulls(PERM_VAL.TREATMENT_RESPONSE)
+ALL_TREATMENT_RESPONSE = [x for x in PERM_VAL.TREATMENT_RESPONSE if x != "Not available"]
 TREATMENT_STATUS = add_nulls(PERM_VAL.TREATMENT_STATUS)
+ALL_TREATMENT_STATUS = [x for x in PERM_VAL.TREATMENT_STATUS if x != "Not available"]
 
 DOSAGE_UNITS = add_nulls(PERM_VAL.DOSAGE_UNITS)
+ALL_DOSAGE_UNITS = [x for x in PERM_VAL.DOSAGE_UNITS if x != "Not available"]
 
 RADIATION_THERAPY_MODALITY = add_nulls(PERM_VAL.RADIATION_THERAPY_MODALITY)
+ALL_RADIATION_THERAPY_MODALITY = [x for x in PERM_VAL.RADIATION_THERAPY_MODALITY if x != "Not available"]
 RADIATION_ANATOMICAL_SITE = add_nulls(PERM_VAL.RADIATION_ANATOMICAL_SITE)
+ALL_RADIATION_ANATOMICAL_SITE = [x for x in PERM_VAL.RADIATION_ANATOMICAL_SITE if x != "Not available"]
 THERAPY_TYPE = add_nulls(PERM_VAL.THERAPY_TYPE)
+ALL_THERAPY_TYPE = [x for x in PERM_VAL.THERAPY_TYPE if x != "Not available"]
 
 SURGERY_LOCATION = add_nulls(PERM_VAL.SURGERY_LOCATION)
+ALL_SURGERY_LOCATION = [x for x in PERM_VAL.SURGERY_LOCATION if x != "Not available"]
 SURGERY_REFERENCE_DATABASE = add_nulls(PERM_VAL.SURGERY_REFERENCE_DATABASE)
+ALL_SURGERY_REFERENCE_DATABASE = [x for x in PERM_VAL.SURGERY_REFERENCE_DATABASE if x != "Not availabe"]
 TUMOUR_FOCALITY = add_nulls(PERM_VAL.TUMOUR_FOCALITY)
+ALL_TUMOUR_FOCALITY = [x for x in PERM_VAL.TUMOUR_FOCALITY if x != "Not available"]
 TUMOUR_CLASSIFICATION = add_nulls(PERM_VAL.TUMOUR_CLASSIFICATION)
+ALL_TUMOUR_CLASSIFICATION = [x for x in PERM_VAL.TUMOUR_CLASSIFICATION if x != "Not available"]
 LYMPHOVACULAR_INVASION = add_nulls(PERM_VAL.LYMPHOVACULAR_INVASION)
+ALL_LYMPHOVACULAR_INVASION = [x for x in PERM_VAL.LYMPHOVACULAR_INVASION if x != "Not available"]
 PERINEURAL_INVASION = add_nulls(PERM_VAL.PERINEURAL_INVASION)
+ALL_PERINEURAL_INVASION = [x for x in PERM_VAL.PERINEURAL_INVASION]
 MARGIN_TYPES = add_nulls(PERM_VAL.MARGIN_TYPES)
+ALL_MARGIN_TYPES = [x for x in PERM_VAL.MARGIN_TYPES if x != "Not available"]
 
 ER_PR_HPV_STATUS = add_nulls(PERM_VAL.ER_PR_HPV_STATUS)
+ALL_ER_PR_HPV_STATUS = [x for x in PERM_VAL.ER_PR_HPV_STATUS if x != "Not available"]
 HER2_STATUS = add_nulls(PERM_VAL.HER2_STATUS)
+ALL_HER2_STATUS = [x for x in PERM_VAL.HER2_STATUS if x != "Not available"]
 
 UBOOLEAN = add_nulls(PERM_VAL.UBOOLEAN)
+ALL_UBOOLEAN = [x for x in PERM_VAL.UBOOLEAN if x != "Not available"]
+
 MALIGNANCY_LATERALITY = add_nulls(PERM_VAL.MALIGNANCY_LATERALITY)
+ALL_MALIGNANCY_LATERALITY = [x for x in PERM_VAL.MALIGNANCY_LATERALITY if x != "Not available"]
 
 DISEASE_STATUS_FOLLOWUP = add_nulls(PERM_VAL.DISEASE_STATUS_FOLLOWUP)
+ALL_DISEASE_STATUS_FOLLOWUP = [x for x in PERM_VAL.DISEASE_STATUS_FOLLOWUP if x != "Not available"]
 PROGRESSION_STATUS_METHOD = add_nulls(PERM_VAL.PROGRESSION_STATUS_METHOD)
+ALL_PROGRESSION_STATUS_METHOD = [x for x in PERM_VAL.PROGRESSION_STATUS_METHOD if x != "Not available"]
+
+ALL_SMOKING_STATUS = [x for x in PERM_VAL.SMOKING_STATUS if x != "Not available"]
 
 # Restricted values for synthetic data generation
 
@@ -85,11 +130,11 @@ PRIMARY_SITE = ["Breast",
 c_codes = ['C' + str(x).rjust(2, '0') for x in list(range(0, 97))]
 d_codes = ['D' + str(x).rjust(2, '0') for x in list(range(0, 9)) + list(range(37, 48))]
 CANCER_CODES = c_codes + d_codes + [None]
-CANCER_CODES.extend([None] * math.floor(len(CANCER_CODES)*.2))
+CANCER_CODES.extend([None] * math.floor(len(CANCER_CODES) * .2))
 # some codes from diseases of the circulatory system, diseases of the blood
 NON_CANCER_CODES = ['D' + str(x) for x in list(range(50, 89)) + list(range(37, 48))] + \
                    ['I' + str(x).rjust(2, '0') for x in list(range(0, 99))]
-CANCER_CODES.extend([None] * math.floor(len(NON_CANCER_CODES)*.2))
+CANCER_CODES.extend([None] * math.floor(len(NON_CANCER_CODES) * .2))
 
 ALL_CODES = CANCER_CODES + NON_CANCER_CODES
 
@@ -590,3 +635,5 @@ TOPOGRAPHY_CODES = [
     "C80.9",
     None
 ]
+
+ALL_TOPOGRAPHY_CODES = [x for x in TOPOGRAPHY_CODES if x is not None]
