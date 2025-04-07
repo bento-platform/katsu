@@ -171,18 +171,24 @@ task write_drs_responses_to_file {
     command <<<
     python3 -c "
 import json
-# this is a temporary file to store the responses (str) from DRS
+
 temporary_file_drs_responses = '~{write_json(drs_responses)}'
-with open(temporary_file_drs_responses, 'r') as file:
-    drs_responses = json.load(file)
+with open(temporary_file_drs_responses, 'r') as f:
+    lines = json.load(f)
 
-responses = []
-for response in drs_responses:
-    response_corrected = json.loads(response)
-    responses.append(response_corrected)
+valid_json_responses = []
+for line in lines:
+    line = line.strip()
+    if not line:
+        continue
+    try:
+        parsed = json.loads(line)
+        valid_json_responses.append(parsed)
+    except json.JSONDecodeError:
+        pass
 
-with open('results_post_drs.json', 'w') as output_file:
-    json.dump(responses, output_file, indent=2)
+with open('results_post_drs.json', 'w') as outfile:
+    json.dump(valid_json_responses, outfile, indent=2)
     "
     >>>
 
