@@ -37,7 +37,7 @@ workflow experiments_json_with_files {
 
     call write_drs_responses_to_file {
         input:
-            drs_responses = post_to_drs.response_message
+            drs_responses = flatten(post_to_drs.response_message)
     }
 
     call parse_json {
@@ -63,7 +63,7 @@ workflow experiments_json_with_files {
     output {
         File download_list = prepare_files_list.path_list
         Array[String] consolidated_paths_for_drs = prepare_for_drs.consolidated_paths_for_drs
-        Array[String] drs_responses = post_to_drs.response_message
+        Array[String] drs_responses = flatten(post_to_drs.response_message)
         File results_post_drs = write_drs_responses_to_file.results_post_drs
         File processed_drs_responses = parse_json.processed_drs_responses
         File final_updated_json = update_experiment_json.final_updated_json
@@ -74,7 +74,7 @@ task prepare_files_list {
     input {
         File json_document
         String directory
-        String filter_out_vcf_files
+        Boolean filter_out_vcf_files
     }
     command <<<
     python3 -c "
@@ -146,20 +146,46 @@ task post_to_drs {
         String token
         Boolean validate_ssl
     }
+
     command <<<
+        # Extract project_id and dataset_id
         project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
         dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
-        curl ~{true="" false="-k" validate_ssl} \
+
+        resp_main=$(curl ~{true="" false="-k" validate_ssl} \
             -X POST \
             -F "file=@~{file_path}" \
             -F "project_id=$project_id" \
             -F "dataset_id=$dataset_id" \
             -H "Authorization: Bearer ~{token}" \
             --fail-with-body \
-            "~{drs_url}/ingest"
+            "~{drs_url}/ingest")
+        echo "$resp_main"
+
+        if [[ "~{file_path}" =~ \.(bam|cram)$ ]]; then
+
+            if [[ "~{file_path}" =~ \.bam$ ]]; then
+                index_ext=".bai"
+            else
+                index_ext=".crai"
+            fi
+
+            samtools index "~{file_path}" 1>/dev/null 2>&1
+
+            resp_index=$(curl ~{true="" false="-k" validate_ssl} \
+                -X POST \
+                -F "file=@~{file_path}${index_ext}" \
+                -F "project_id=$project_id" \
+                -F "dataset_id=$dataset_id" \
+                -H "Authorization: Bearer ~{token}" \
+                --fail-with-body \
+                "~{drs_url}/ingest")
+            echo "$resp_index"
+        fi
     >>>
+
     output {
-        String response_message = read_string(stdout())
+        Array[String] response_message = read_lines(stdout())
     }
 }
 
