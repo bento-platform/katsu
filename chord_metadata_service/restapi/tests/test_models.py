@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.chord.models import ProjectJsonSchema
+from chord_metadata_service.logger import logger
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket, MetaData
 from chord_metadata_service.phenopackets.tests import constants as pheno_consts
@@ -50,11 +51,11 @@ class TestBaseExtraProperties(ProjectTestCase):
         )
 
     def test_base_extra_properties(self):
-        self.assertIsNotNone(self.individual.get_json_schema())
-        self.assertIsNotNone(self.biosample.get_json_schema())
-        self.assertIsNotNone(self.phenopacket.get_json_schema())
+        self.assertIsNotNone(self.individual.get_json_schema(logger))
+        self.assertIsNotNone(self.biosample.get_json_schema(logger))
+        self.assertIsNotNone(self.phenopacket.get_json_schema(logger))
 
-        self.assertIsNone(self.no_proj_phenopacket.get_json_schema())
+        self.assertIsNone(self.no_proj_phenopacket.get_json_schema(logger))
         self.assertIsNone(self.no_proj_phenopacket.get_project_id())
 
     def test_validate_json_schema(self):
