@@ -42,7 +42,7 @@ jobs:
     - name: Install Python dependencies
       run: poetry install
     - name: Install GeoDjango Apt dependencies
-      run: sudo apt-get install -y binutils gdal-bin libproj-dev gdal-bin
+      run: sudo apt-get update -y && sudo apt-get install -y binutils gdal-bin libproj-dev gdal-bin
     - name: Test
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
