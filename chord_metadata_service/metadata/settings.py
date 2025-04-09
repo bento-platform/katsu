@@ -213,7 +213,8 @@ LOGGING = {
     },
 }
 
-configure_structlog(False, LOG_LEVEL.lower())
+USE_JSON_LOGS: bool = str_to_bool(os.environ.get("BENTO_JSON_LOGS", str(not BENTO_CONTAINER_LOCAL)))
+configure_structlog(USE_JSON_LOGS, LOG_LEVEL.lower())
 configure_structlog_uvicorn()  # in production, if Katsu is served with Uvicorn, suppress its default access logging
 
 # if we are running the test suite, only log CRITICAL messages
