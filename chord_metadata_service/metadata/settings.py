@@ -193,23 +193,23 @@ WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "debug" if DEBUG else "info").lower()
 USE_JSON_LOGS: bool = str_to_bool(os.environ.get("BENTO_JSON_LOGS", str(not BENTO_CONTAINER_LOCAL)))
 
-_logging_propogate_to_root = {'handlers': [], 'propogate': True}
+_logging_propagate_to_root = {'handlers': [], 'propogate': True}
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     # formatter + handler configured by configure_structlog(...) function below
     'loggers': {
-        'asyncio': _logging_propogate_to_root,
+        'asyncio': _logging_propagate_to_root,
         'daphne': {
             # suppress daphne's DEBUG log spam
             'level': 'INFO',
-            **_logging_propogate_to_root,
+            **_logging_propagate_to_root,
         },
-        'daphne.server': _logging_propogate_to_root,
-        'django': _logging_propogate_to_root,
-        'django.request': _logging_propogate_to_root,
+        'daphne.server': _logging_propagate_to_root,
+        'django': _logging_propagate_to_root,
+        'django.request': _logging_propagate_to_root,
         'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
-        'katsu': _logging_propogate_to_root
+        'katsu': _logging_propagate_to_root
     },
 }
 

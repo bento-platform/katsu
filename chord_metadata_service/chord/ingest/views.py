@@ -48,7 +48,7 @@ def call_ingest_function_and_handle(
     except ValidationError as e:
         validation_errors = tuple(e.error_list if hasattr(e, "error_list") else e.error_dict.items())
         err = "encountered validation errors during ingestion"
-        lg.error(err, validation_errors=validation_errors)
+        lg.exception(err, exc_info=e)
         return Response(errors.bad_request_error(err, *validation_errors))
 
     except Exception as e:

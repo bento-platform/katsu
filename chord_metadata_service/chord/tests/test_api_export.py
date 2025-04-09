@@ -22,14 +22,15 @@ class ExportTest(AuthzAPITestCase):
     def setUp(self) -> None:
         # Creates a test database and populate with a phenopacket test file
 
-        self.p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=self.p)
-        self.project_id = str(self.p.identifier)
-        self.study_id = str(self.d.identifier)
+        project = Project.objects.create(title="Project 1", description="")
+        dataset = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
+                                         project=project)
+        self.project_id = str(project.identifier)
+        self.study_id = str(dataset.identifier)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET, self.d.identifier, logger
+        # Ingest test phenopackets
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET, dataset.identifier, logger
         )
 
         self.base_export_payload = {
