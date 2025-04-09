@@ -45,8 +45,6 @@ DEBUG = str_to_bool(
     os.environ.get("KATSU_DEBUG", os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true")))
 )
 
-LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
-
 
 # CHORD-specific settings
 
@@ -192,29 +190,31 @@ WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
 # Logging --------------------------------------------------------------------------------------------------------------
 
-LOGGING_PROPOGATE_TO_ROOT = {'handlers': [], 'propogate': True}
+LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "debug" if DEBUG else "info").lower()
+USE_JSON_LOGS: bool = str_to_bool(os.environ.get("BENTO_JSON_LOGS", str(not BENTO_CONTAINER_LOCAL)))
 
+_logging_propogate_to_root = {'handlers': [], 'propogate': True}
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     # formatter + handler configured by configure_structlog(...) function below
     'loggers': {
-        'asyncio': LOGGING_PROPOGATE_TO_ROOT,
+        'asyncio': _logging_propogate_to_root,
         'daphne': {
             # suppress daphne's DEBUG log spam
             'level': 'INFO',
-            **LOGGING_PROPOGATE_TO_ROOT,
+            **_logging_propogate_to_root,
         },
-        'daphne.server': LOGGING_PROPOGATE_TO_ROOT,
-        'django': LOGGING_PROPOGATE_TO_ROOT,
-        'django.request': LOGGING_PROPOGATE_TO_ROOT,
+        'daphne.server': _logging_propogate_to_root,
+        'django': _logging_propogate_to_root,
+        'django.request': _logging_propogate_to_root,
         'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
-        'katsu': LOGGING_PROPOGATE_TO_ROOT
+        'katsu': _logging_propogate_to_root
     },
 }
 
-USE_JSON_LOGS: bool = str_to_bool(os.environ.get("BENTO_JSON_LOGS", str(not BENTO_CONTAINER_LOCAL)))
-configure_structlog(USE_JSON_LOGS, LOG_LEVEL.lower())
+# noinspection PyTypeChecker
+configure_structlog(USE_JSON_LOGS, LOG_LEVEL)
 configure_structlog_uvicorn()  # in production, if Katsu is served with Uvicorn, suppress its default access logging
 
 # if we are running the test suite, only log CRITICAL messages
