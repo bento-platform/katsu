@@ -9,6 +9,8 @@ from bento_lib.auth.permissions import (
     P_CREATE_DATASET,
     P_EDIT_DATASET,
     P_DELETE_DATASET,
+    P_VIEW_PROJECTS,
+    P_VIEW_DATASETS,
 )
 from bento_lib.auth.resources import RESOURCE_EVERYTHING, build_resource
 from bento_lib.responses import errors
@@ -25,6 +27,7 @@ from rest_framework.viewsets import ModelViewSet
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
+from chord_metadata_service.metadata.settings import KATSU_DATASETS_LIST_AUTHZ, KATSU_PROJECTS_LIST_AUTHZ
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
@@ -76,7 +79,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.all().order_by("identifier")
+    queryset = Project.objects.all().order_by("title")
     serializer_class = ProjectSerializer
 
     @async_to_sync
@@ -116,6 +119,15 @@ class ProjectViewSet(CHORDPublicModelViewSet):
 
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
+
+    @async_to_sync
+    async def list(self, request, *args, **kwargs):
+        if KATSU_PROJECTS_LIST_AUTHZ and not (
+            await authz.async_evaluate_one(request, RESOURCE_EVERYTHING, P_VIEW_PROJECTS)
+        ):
+            return forbidden(request)
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().list)(request, *args, **kwargs)
 
 
 class DatasetViewSet(CHORDPublicModelViewSet):
@@ -164,10 +176,15 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         authz.mark_authz_done(request)
         return Response(ResourceSerializer(dataset.resources.all(), many=True).data)
 
-    def list(self, request, *args, **kwargs):
-        # For now, we don't have a view:dataset type permission - we can always view
+    @async_to_sync
+    async def list(self, request, *args, **kwargs):
+
+        if KATSU_DATASETS_LIST_AUTHZ and not (
+            await authz.async_evaluate_one(request, RESOURCE_EVERYTHING, P_VIEW_DATASETS, require_token=True)
+        ):
+            return forbidden(request)
         authz.mark_authz_done(request)
-        return super().list(request, *args, **kwargs)
+        return await sync_to_async(super().list)(request, *args, **kwargs)
 
     @async_to_sync
     async def destroy(self, request, *args, **kwargs):

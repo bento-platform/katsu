@@ -2,6 +2,8 @@ import asyncio
 
 from adrf.decorators import api_view
 from bento_lib.responses import errors
+from bento_lib.auth.permissions import P_VIEW_PROJECTS
+from django.conf import settings
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
 from operator import is_not
@@ -11,8 +13,10 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from typing import Type
 
-from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.middleware import authz_middleware as authz
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.chord import data_types as dts
+from chord_metadata_service.chord.api_views import forbidden
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
@@ -112,7 +116,7 @@ async def public_search_fields(request: DrfRequest):
     }
 )
 @api_view(["GET"])
-@permission_classes([BentoAllowAny])
+@permission_classes([BentoDeferToHandler])
 async def public_overview(request: DrfRequest):
     """
     get:
@@ -125,6 +129,12 @@ async def public_overview(request: DrfRequest):
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
     discovery = discovery_scope.discovery
+
+    if settings.KATSU_PROJECTS_LIST_AUTHZ and not (
+        await authz.async_evaluate_one(request, discovery_scope.as_authz_resource(), P_VIEW_PROJECTS)
+    ):
+        return forbidden(request)
+    authz.mark_authz_done(request)
 
     if not discovery:
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
