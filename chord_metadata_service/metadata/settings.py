@@ -24,6 +24,11 @@ from dotenv import load_dotenv
 from .. import __version__
 from ..discovery.types import DiscoveryOrEmptyConfig
 
+
+def str_to_bool(value: str | None) -> bool:
+    return value and value.strip().lower() in ("true", "1", "t", "yes")
+
+
 load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -36,25 +41,23 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get(
-    "KATSU_DEBUG",
-    os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true"))
-).lower() == "true"
-logging.info(f"DEBUG: {DEBUG}")
+DEBUG = str_to_bool(
+    os.environ.get("KATSU_DEBUG", os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true")))
+)
 
 LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
 
 
 # CHORD-specific settings
 
-BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
+BENTO_CONTAINER_LOCAL = str_to_bool(os.environ.get("BENTO_CONTAINER_LOCAL"))
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 
 # SECURITY WARNING: Don't run with AUTHZ_ENABLED turned off in production,
 # unless an alternative permissions system is in place.
 #  - This needs to be here to avoid a circular import with settings.py
-BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
+BENTO_AUTHZ_ENABLED: bool = str_to_bool(os.environ.get("BENTO_AUTHZ_ENABLED", "true"))
 
 BENTO_AUTHZ_SERVICE_URL: str = (
     os.environ.get("BENTO_AUTHZ_SERVICE_URL", "http://authz.local").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
