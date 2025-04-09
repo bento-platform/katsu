@@ -17,6 +17,7 @@ import json
 
 from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
+from structlog.stdlib import get_logger
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
@@ -98,7 +99,6 @@ if container_name := os.environ.get("HOST_CONTAINER_NAME", "").strip():
     ADDITIONAL_ALLOWED_HOSTS.append(container_name)
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
-logging.info(f"CHORD_HOST: {CHORD_HOST}")
 
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
@@ -107,8 +107,6 @@ if ADDITIONAL_ALLOWED_HOSTS:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ADDITIONAL_ALLOWED_HOSTS))
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
-
-logging.info(f"Allowed hosts: {ALLOWED_HOSTS}")
 
 APPEND_SLASH = False
 
@@ -219,6 +217,8 @@ configure_structlog_uvicorn()  # in production, if Katsu is served with Uvicorn,
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     logging.disable(logging.CRITICAL)
 
+settings_logger = get_logger("katsu.settings")
+
 # ----------------------------------------------------------------------------------------------------------------------
 
 
@@ -228,7 +228,7 @@ def get_secret(path):
         with open(path) as sf:
             return sf.readline().strip()
     except BaseException as err:
-        logging.error(f"Unexpected {err}, {type(err)}")
+        settings_logger.exception("get_secret exception", exc_info=err)
         raise
 
 
@@ -372,3 +372,8 @@ SPECTACULAR_SETTINGS = {
 # testing a request within the swagger UI
 if CHORD_URL:
     SPECTACULAR_SETTINGS['SERVERS'] = [{'url': CHORD_URL + FORCE_SCRIPT_NAME}]
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+# now we can output settings load-time log events
+settings_logger.info("settings initialized", debug=DEBUG, chord_host=CHORD_HOST, allowed_hosts=ALLOWED_HOSTS)
