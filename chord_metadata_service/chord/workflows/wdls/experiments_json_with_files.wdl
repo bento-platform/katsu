@@ -160,8 +160,9 @@ task post_to_drs {
             -H "Authorization: Bearer ~{token}" \
             --fail-with-body \
             "~{drs_url}/ingest")
-        echo "$resp_main"
+        echo "$resp_main" | jq -c
 
+        # If it's BAM or CRAM, ingest the index as well
         if [[ "~{file_path}" =~ \.(bam|cram)$ ]]; then
 
             if [[ "~{file_path}" =~ \.bam$ ]]; then
@@ -180,7 +181,7 @@ task post_to_drs {
                 -H "Authorization: Bearer ~{token}" \
                 --fail-with-body \
                 "~{drs_url}/ingest")
-            echo "$resp_index"
+            echo "$resp_index" | jq -c
         fi
     >>>
 
@@ -262,36 +263,58 @@ task update_experiment_json {
     }
     command <<<
     python3 -c "
-import json
+import json, os
 
-with open('~{json_document}', 'r') as file:
-    data = json.load(file)
+with open('~{json_document}', 'r') as f:
+    data = json.load(f)
 
-with open('~{processed_drs_responses}', 'r') as file:
-    drs_data = json.load(file)
+with open('~{processed_drs_responses}', 'r') as f:
+    drs_data = json.load(f)
 
-def construct_drs_name_for_index(filename, format):
-    return filename + '.' + format.lower()
+def construct_index_basename(filename, fmt):
+    return f'{filename}.{fmt.lower()}'
 
-# Update the original JSON document with DRS URIs for both files and their indices
 for experiment in data.get('experiments', []):
     for result in experiment.get('experiment_results', []):
-        # Update primary file URL
-        for drs_response in drs_data:
-            if result['filename'] == drs_response['name']:
-                result['url'] = drs_response['self_uri']
+        filename = result.get('filename', '')
+
+        if 'indices' not in result or not isinstance(result['indices'], list):
+            result['indices'] = []
+
+        for drs_resp in drs_data:
+            if os.path.basename(drs_resp.get('name', '')) == filename:
+                result['url'] = drs_resp.get('self_uri')
                 break
-        # Update indices URLs if present
-        for index in result.get('indices', []):
-            expected_drs_name = construct_drs_name_for_index(result['filename'], index['format'])
-            for drs_response in drs_data:
-                if expected_drs_name == drs_response['name']:
-                    index['url'] = drs_response['self_uri']
+
+        new_index_format = None
+        if filename.endswith('.bam'):
+            new_index_format = 'BAI'
+        elif filename.endswith('.cram'):
+            new_index_format = 'CRAI'
+
+        if new_index_format:
+            index_basename = construct_index_basename(filename, new_index_format)
+
+            for drs_resp in drs_data:
+                if os.path.basename(drs_resp.get('name', '')) == index_basename:
+                    existing_idx = None
+                    for idx in result['indices']:
+                        if idx.get('format') == new_index_format:
+                            existing_idx = idx
+                            break
+
+                    if existing_idx:
+                        existing_idx['url'] = drs_resp.get('self_uri')
+                    else:
+                        result['indices'].append({
+                            'format': new_index_format,
+                            'url': drs_resp.get('self_uri')
+                        })
                     break
 
-with open('final_updated_json.json', 'w') as file:
-    json.dump(data, file, indent=4)
-    "
+with open('final_updated_json.json', 'w') as f:
+    json.dump(data, f, indent=4)
+"
     >>>
     output {
         File final_updated_json = "final_updated_json.json"
