@@ -21,6 +21,9 @@ from chord_metadata_service.mohpackets.apis.discovery import (
 from chord_metadata_service.mohpackets.apis.discovery import (
     explorer_router as explorer_router,
 )
+from chord_metadata_service.mohpackets.apis.download import (
+    router as download_router,
+)
 from chord_metadata_service.mohpackets.apis.ingestion import (
     delete_router,
 )
@@ -164,6 +167,25 @@ class NetworkAuth:
                 logger.error(f"An error occurred in OPA: {e}")
                 raise Exception("Error with OPA authentication.")
 
+    class DownloadAuth(HttpBearer):
+        def authenticate(self, request, bearer_token):
+            if not bearer_token:
+                return None
+            try:
+                result = is_user_candig_authorized(request)
+                if result:
+                    download_datasets = get_opa_datasets(request)
+                    request.download_datasets = download_datasets
+                logger.debug(
+                    f"Authorized DOWNLOAD programs: {download_datasets}. Result: {result}",
+                    request,
+                )
+                return result
+
+            except Exception as e:
+                logger.error(f"An error occurred in OPA: {e}")
+                raise Exception("Error with OPA authentication.")
+
     class ServiceTokenAuth(APIKeyHeader):
         param_name = "X-Service-Token"
 
@@ -227,6 +249,13 @@ class LocalAuth:
                 request.read_datasets = opa_data["read_datasets"]
                 return True
 
+    class DownloadAuth(HttpBearer):
+        def authenticate(self, request, bearer_token):
+            if bearer_token in settings.LOCAL_OPA_DATASET:
+                opa_data = settings.LOCAL_OPA_DATASET[bearer_token]
+                request.download_datasets = opa_data["read_datasets"]
+                return True
+
     class ServiceTokenAuth(APIKeyHeader):
         param_name = "X-Service-Token"
 
@@ -255,6 +284,7 @@ if "dev" in settings_module or "prod" in settings_module:
     from authx.auth import (  # type: ignore
         get_opa_datasets,
         is_action_allowed_for_program,
+        is_user_candig_authorized,
         verify_service_token,
     )
     from candigv2_logging.logging import CanDIGLogger, initialize  # type: ignore
@@ -297,6 +327,9 @@ api.add_router(
 api.add_router("/ingest/", delete_router, auth=auth.DeleteAuth(), tags=["delete"])
 api.add_router(
     "/authorized/", authorzied_router, auth=auth.GetAuth(), tags=["authorized"]
+)
+api.add_router(
+    "/download/", download_router, auth=auth.DownloadAuth(), tags=["download"]
 )
 api.add_router(
     "/explorer",
