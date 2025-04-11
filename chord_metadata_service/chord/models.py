@@ -1,5 +1,6 @@
 import collections
 import uuid
+from bento_lib.discovery.models.config import DiscoveryConfig
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -24,7 +25,15 @@ def version_default():
 #                                                           #
 #############################################################
 
-class Project(models.Model):
+
+# noinspection PyUnresolvedReferences
+class DiscoveryAccessMixin:
+    @property
+    def discovery_obj(self) -> DiscoveryConfig | None:
+        return DiscoveryConfig.model_validate(self.discovery) if self.discovery else None
+
+
+class Project(models.Model, DiscoveryAccessMixin):
     """
     Class to represent a Project, which contains multiple
     Datasets which are each a group of Phenopackets.
@@ -43,7 +52,7 @@ class Project(models.Model):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class Dataset(models.Model):
+class Dataset(models.Model, DiscoveryAccessMixin):
     """
     Class to represent a Dataset, which contains multiple Phenopackets.
     """
@@ -150,13 +159,15 @@ class Dataset(models.Model):
     dats_file = models.JSONField(blank=True, null=True,
                                  help_text="Content of a valid DATS file, in JSON format, "
                                            "that specifies the dataset provenance.")
-    extra_properties = models.JSONField(blank=True, null=True,
-                                        help_text="Extra properties that do not fit in the previous "
-                                        "specified attributes.")
+
+    # -------------------------------------------------------------------------
+
     discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
                                  validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
 
-    # -------------------------------------------------------------------------
+    extra_properties = models.JSONField(blank=True, null=True,
+                                        help_text="Extra properties that do not fit in the previous "
+                                        "specified attributes.")
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

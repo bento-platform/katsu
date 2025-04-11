@@ -1,3 +1,5 @@
+from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery.models.fields import FieldDefinition
 from django.core.exceptions import ValidationError
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable
@@ -10,22 +12,20 @@ from chord_metadata_service.authz.types import (
 from .fields_utils import get_public_model_name_and_field_path
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
-from .types import DiscoveryFieldProps, DiscoveryOrEmptyConfig
 
 __all__ = [
     "get_discovery_queryable_fields",
     "get_discovery_data_type_permissions",
     "get_discovery_field_set_permissions",
+    "empty_discovery",
 ]
 
 
-def get_discovery_queryable_fields(discovery: DiscoveryOrEmptyConfig) -> dict[str, DiscoveryFieldProps]:
-    if not discovery:
-        return {}
-    field_conf = discovery["fields"]
-    return {
-        f"{f}": field_conf[f] for section in discovery["search"] for f in section["fields"]
-    }
+def get_discovery_queryable_fields(discovery: DiscoveryConfig) -> dict[str, FieldDefinition]:
+    """
+    Return only field definitions which are used in the search portion of the discovery configuration.
+    """
+    return {f: discovery.fields[f] for section in discovery.search for f in section.fields}
 
 
 async def get_discovery_data_type_permissions(
@@ -51,14 +51,14 @@ async def get_discovery_data_type_permissions(
 
 
 def get_discovery_field_set_permissions(
-    discovery: DiscoveryOrEmptyConfig,
+    discovery: DiscoveryConfig,
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissionsDict, FieldDiscoveryPermissions]:
     dts_accessed: set[str] = set()
     field_dts: dict[str, str] = {}
 
-    discovery_fields = discovery.get("fields", {})
+    discovery_fields = discovery.fields
 
     if not discovery_fields:
         # If no fields configured, default safe: fall back to no permissions
@@ -70,7 +70,7 @@ def get_discovery_field_set_permissions(
         if field not in discovery_fields:
             raise ValidationError(f"Unsupported field used in query: {field}")
 
-        mn, _ = get_public_model_name_and_field_path(discovery_fields[field]["mapping"])
+        mn, _ = get_public_model_name_and_field_path(discovery_fields[field].mapping)
         f_dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[mn]
         dts_accessed.add(f_dt)
         field_dts[field] = f_dt
@@ -82,3 +82,7 @@ def get_discovery_field_set_permissions(
         "counts": all(dt_permissions[dt]["counts"] for dt in dts_accessed),
         "data": all(dt_permissions[dt]["data"] for dt in dts_accessed),
     }, field_permissions
+
+
+def empty_discovery(discovery: DiscoveryConfig | None) -> bool:
+    return discovery is None or not discovery.fields or not (discovery.overview or discovery.search)

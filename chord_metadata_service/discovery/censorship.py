@@ -1,7 +1,12 @@
 import sys
 
+from bento_lib.discovery.models.config import (
+    DiscoveryConfig,
+    DiscoveryConfigRules,
+    RULES_NO_PERMISSIONS,
+    RULES_FULL_PERMISSIONS,
+)
 from ..authz.types import DataPermissionsDict
-from .types import DiscoveryRules, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
     "RULES_NO_PERMISSIONS",
@@ -12,45 +17,34 @@ __all__ = [
 ]
 
 
-RULES_NO_PERMISSIONS: DiscoveryRules = {
-    "max_query_parameters": 0,  # default to no query parameters allowed
-    "count_threshold": sys.maxsize,  # default to MAXINT count threshold (i.e., no counts can be seen)
-}
-
-RULES_FULL_PERMISSIONS: DiscoveryRules = {
-    "max_query_parameters": sys.maxsize,
-    "count_threshold": 0,
-}
-
-
-def get_rules(discovery: OptionalDiscoveryOrEmptyConfig, data_permissions: DataPermissionsDict) -> DiscoveryRules:
+def get_rules(discovery: DiscoveryConfig, data_permissions: DataPermissionsDict) -> DiscoveryConfigRules:
     if data_permissions["data"]:
         return RULES_FULL_PERMISSIONS
-    elif not data_permissions["counts"] or not (discovery or {}).get("rules"):
+    elif not data_permissions["counts"]:
         return RULES_NO_PERMISSIONS
-    return discovery["rules"]
+    return discovery.rules  # If discovery is "empty", this will most likely be equivalent to RULES_NO_PERMISSIONS.
 
 
-def get_threshold(discovery: OptionalDiscoveryOrEmptyConfig, field_set_permissions: DataPermissionsDict) -> int:
+def get_threshold(discovery: DiscoveryConfig, field_set_permissions: DataPermissionsDict) -> int:
     """
     Gets the maximum count threshold for censoring counts data (i.e., rounding to 0).
     """
-    return get_rules(discovery, field_set_permissions)["count_threshold"]
+    return get_rules(discovery, field_set_permissions).count_threshold
 
 
 def thresholded_count(
     c: int,
-    discovery: OptionalDiscoveryOrEmptyConfig,
+    discovery: DiscoveryConfig,
     field_set_permissions: DataPermissionsDict,
 ) -> int:
     return 0 if c <= get_threshold(discovery, field_set_permissions) else c
 
 
 def get_max_query_parameters(
-    discovery: OptionalDiscoveryOrEmptyConfig,
+    discovery: DiscoveryConfig,
     field_set_permissions: DataPermissionsDict,
 ) -> int:
     """
     Gets the maximum number of query parameters allowed for discovery.
     """
-    return get_rules(discovery, field_set_permissions)["max_query_parameters"]
+    return get_rules(discovery, field_set_permissions).max_query_parameters

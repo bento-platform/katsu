@@ -1,8 +1,7 @@
+from bento_lib.discovery.models.config import DiscoveryConfig
 from copy import deepcopy
 
-from ..types import DiscoveryConfig
-
-DISCOVERY_CONFIG_TEST: DiscoveryConfig = {
+DISCOVERY_CONFIG_TEST_DICT = {
     "overview": [
         {
             "section_title": "First Section",
@@ -104,8 +103,10 @@ DISCOVERY_CONFIG_TEST: DiscoveryConfig = {
     }
 }
 
-DISCOVERY_CONFIG_EXTRA_PROPERTIES: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
-DISCOVERY_CONFIG_EXTRA_PROPERTIES["fields"].update({
+DISCOVERY_CONFIG_TEST: DiscoveryConfig = DiscoveryConfig.model_validate(DISCOVERY_CONFIG_TEST_DICT)
+
+DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT: dict = deepcopy(DISCOVERY_CONFIG_TEST_DICT)
+DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT["fields"].update({
     "smoking": {
         "mapping": "individual/extra_properties/smoking",
         "title": "Smoking",
@@ -181,10 +182,10 @@ DISCOVERY_CONFIG_EXTRA_PROPERTIES["fields"].update({
         }
     },
 })
-DISCOVERY_CONFIG_EXTRA_PROPERTIES["search"][0]["fields"].extend(
+DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT["search"][0]["fields"].extend(
     ["smoking", "covidstatus", "death_dc", "lab_test_result_value", "baseline_creatinine", "date_of_consent"]
 )
-DISCOVERY_CONFIG_EXTRA_PROPERTIES["overview"].extend([
+DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT["overview"].extend([
     {
         "section_title": "Dataset individual exta properties specific Section",
         "charts": [
@@ -201,11 +202,18 @@ DISCOVERY_CONFIG_EXTRA_PROPERTIES["overview"].extend([
     },
 ])
 
-CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
-CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY["search"][0]["fields"] = ["sex"]
+DISCOVERY_CONFIG_EXTRA_PROPERTIES: DiscoveryConfig = DiscoveryConfig.model_validate(
+    DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT
+)
 
-CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
-CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS["fields"].update([
+CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY_DICT: dict = deepcopy(DISCOVERY_CONFIG_TEST_DICT)
+CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY_DICT["search"][0]["fields"] = ["sex"]
+CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY: DiscoveryConfig = DiscoveryConfig.model_validate(
+    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY_DICT
+)
+
+CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT: dict = deepcopy(DISCOVERY_CONFIG_TEST_DICT)
+CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT["fields"].update([
     ("unset_date",
      {
          "mapping": "individual/extra_properties/unset_date",
@@ -242,3 +250,6 @@ CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS["fields"].update([
          }
      })
 ])
+CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS: DiscoveryConfig = DiscoveryConfig.model_validate(
+    CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT
+)

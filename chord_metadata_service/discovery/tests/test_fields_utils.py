@@ -1,3 +1,4 @@
+from bento_lib.discovery.models.fields import NumberFieldDefinition
 from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
 from django.db.models.base import ModelBase
@@ -43,7 +44,11 @@ class TestModelField(TransactionTestCase):
 
 class TestLabelledRangeGenerator(TestCase):
     def setUp(self):
-        self.fp = {
+        self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
+            "mapping": "test",
+            "data_type": "number",
+            "title": "Test",
+            "description": "A test field",
             "config": {
                 "bin_size": 50,
                 "taper_left": 50,
@@ -51,60 +56,39 @@ class TestLabelledRangeGenerator(TestCase):
                 "minimum": 0,
                 "maximum": 1000
             }
-        }
+        })
 
     def test_config_with_tapers(self):
         rg = list(labelled_range_generator(self.fp))
-        c = self.fp["config"]
-        self.assertEqual(rg[0], (c["minimum"], c["taper_left"], f"< {c['taper_left']}"))
-        self.assertEqual(rg[-1], (c["taper_right"], c["maximum"], f"≥ {c['taper_right']}"))
-        self.assertEqual(rg[1], (c["taper_left"], c["taper_left"] + c["bin_size"],
-                         f"[{c['taper_left']}, {c['taper_left'] + c['bin_size']})"))
+        c = self.fp.config
+        self.assertEqual(rg[0], (c.minimum, c.taper_left, f"< {c.taper_left}"))
+        self.assertEqual(rg[-1], (c.taper_right, c.maximum, f"≥ {c.taper_right}"))
+        self.assertEqual(
+            rg[1],
+            (c.taper_left, c.taper_left + c.bin_size, f"[{c.taper_left}, {c.taper_left + c.bin_size})"),
+        )
 
-    def test_config_without_tappers(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "taper_left": 0,
-            "taper_right": 1000
-        }
+    def test_config_without_tapers(self):
+        self.fp.config.taper_left = 0
+        self.fp.config.taper_right = 1000
         rg = list(labelled_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
 
-    def test_wrong_config_min_max(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "minimum": 6000
-        }
-        rg = labelled_range_generator(self.fp)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_wrong_config_min_tapper_left(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "minimum": 60
-        }
-        rg = labelled_range_generator(self.fp)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_wrong_config_bin_size(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "bin_size": 251
-        }
-        rg = labelled_range_generator(self.fp)
-        self.assertRaises(ValueError, list, rg)
-
 
 class TestLabelledRangeGeneratorCustomBins(TestCase):
     def setUp(self):
-        self.fp = {
+        self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
+            "mapping": "test",
+            "data_type": "number",
+            "title": "Test",
+            "description": "A test field",
             "config": {
                 "bins": [200, 300, 500, 1000, 1500, 2000],
                 "minimum": 0,
                 "units": "mg/L"
             }
-        }
+        })
 
     def test_custom_bins_config(self):
         rg = list(labelled_range_generator(self.fp))
@@ -113,56 +97,11 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         self.assertEqual(rg[1], (200, 300, "[200, 300)"))
 
     def test_custom_bins_config_no_open_ended(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "minimum": 200,
-                "maximum": 2000
-            }
-        }
-        rg = list(labelled_range_generator(c))
+        self.fp.config.minimum = 200
+        self.fp.config.maximum = 2000
+        rg = list(labelled_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
-
-    def test_custom_bins_wrong_min(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "minimum": 300
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_custom_bins_wrong_max(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "maximum": 300
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_custom_bins_wrong_max_2(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "maximum": -10
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_custom_bins_wrong_bins(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "bins": [200]
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
 
 
 class TestJsonFieldUtils(TestCase):
@@ -211,7 +150,7 @@ class TestJsonFieldUtils(TestCase):
         })
 
     def test_get_json_range_condition(self):
-        field_props = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
+        field_props = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
 
         # GTE 0 an LT 20
         json_range_condition_0_20 = get_json_range_condition(field_props, min=0, max=20)

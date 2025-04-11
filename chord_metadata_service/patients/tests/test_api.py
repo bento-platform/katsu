@@ -3,6 +3,7 @@ import io
 import random
 import uuid
 
+from bento_lib.discovery.models.config import DiscoveryConfig
 from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings
@@ -17,7 +18,6 @@ from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_TEST,
     CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 )
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.experiments import models as ex_m
 from chord_metadata_service.experiments.tests import constants as ex_c
 from chord_metadata_service.patients.models import Individual
@@ -29,7 +29,7 @@ from chord_metadata_service.restapi.api_renderers import render_age
 from . import constants as c
 
 CONFIG_PUBLIC_TEST_NO_THRESHOLD: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
-CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
+CONFIG_PUBLIC_TEST_NO_THRESHOLD.rules.count_threshold = 0
 
 
 class CreateIndividualTest(AuthzAPITestCase):
@@ -421,7 +421,7 @@ class PublicListIndividualsTest(AuthzAPITestCase):
                     self.assertEqual(response_obj['experiments']['count'], 0)
                     self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_get_no_config(self):
         # no filters GET request to /api/public when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.dt_authz_counts_get('/api/public')
@@ -454,7 +454,7 @@ class PublicListIndividualsTest(AuthzAPITestCase):
 class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     """ Test for api/public GET filtering """
 
-    response_threshold = DISCOVERY_CONFIG_TEST["rules"]["count_threshold"]
+    response_threshold = DISCOVERY_CONFIG_TEST.rules.count_threshold
     num_individuals = 137
     random_seed = 341  # do not change this please :))
 
@@ -564,7 +564,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.assertEqual(db_count, response_obj['count'])
 
     # test the same as above but with an empty CONFIG_PUBLIC
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_2_fields_config_empty(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
@@ -590,7 +590,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.assertEqual(db_count, response_obj['count'])
 
     # test the same as above but with an empty CONFIG_PUBLIC
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_extra_properties_1_config_empty(self):
         # extra_properties string search
         # test GET query string search for extra_properties field
@@ -911,7 +911,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_age_range_min_and_max_no_config(self):
         # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.dt_authz_counts_get('/api/public?age=[20, 30)')
@@ -940,7 +940,7 @@ class PublicFilteringBeaconSearchTest(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(len(response_obj["matches"]), male_count)
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_beacon_search_response_no_config(self):
         # test when config is not provided, returns NOT FOUND
         response = self.dt_authz_full_get('/api/public?sex=MALE')
