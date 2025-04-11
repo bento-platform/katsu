@@ -1,5 +1,3 @@
-import sys
-
 from bento_lib.discovery.models.config import (
     DiscoveryConfig,
     DiscoveryConfigRules,

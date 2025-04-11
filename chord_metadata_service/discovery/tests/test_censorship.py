@@ -5,6 +5,11 @@ from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.discovery.censorship import get_threshold, thresholded_count, get_max_query_parameters
 from .constants import DISCOVERY_CONFIG_TEST
 
+# TODO: redo tests in this file
+# TODO: redo tests in this file
+# TODO: redo tests in this file
+# TODO: redo tests in this file
+# TODO: redo tests in this file
 
 class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
 

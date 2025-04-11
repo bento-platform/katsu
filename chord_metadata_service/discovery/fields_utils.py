@@ -1,4 +1,9 @@
-from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig, NumberFieldDefinition, FieldDefinition
+from bento_lib.discovery.models.fields import (
+    ManualBinsNumberFieldConfig,
+    AutoBinsNumberFieldConfig,
+    NumberFieldDefinition,
+    FieldDefinition,
+)
 from typing import Any, Iterator, Type
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
