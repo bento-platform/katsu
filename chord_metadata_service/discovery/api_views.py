@@ -195,7 +195,9 @@ async def public_overview(request: DrfRequest):
             stats = await get_range_stats(discovery_scope, field, field_perms)
         elif field_props.data_type == "date":
             stats = await get_date_stats(discovery_scope, field, field_perms)
-        else:
+        else:  # pragma: no cover
+            # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
+            # validate the data_type value.
             raise NotImplementedError()
 
         return {
