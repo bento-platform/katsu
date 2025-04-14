@@ -59,7 +59,9 @@ async def get_field_options(
         options = [
             f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
         ] if start else []
-    else:
+    else:  # pragma: no cover
+        # Can't actually occur with Pydantic implementation of the discovery configuration model, which will validate
+        # the data_type value.
         raise NotImplementedError()
 
     return options
@@ -149,8 +151,8 @@ async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | 
     TODO: for now only dates binned by month are handled.
     """
 
-    if (bin_by := field_props.config.bin_by) != "month":
-        raise NotImplementedError(f"Binning dates by `{bin_by}` method not implemented")
+    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
+    # need to check for it here.
 
     model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
@@ -296,9 +298,8 @@ async def get_date_stats(
         msg = f"Field {field} is not in the provided discovery config."
         raise NotImplementedError(msg)
 
-    if (bin_by := field_props.config.bin_by) != "month":
-        msg = f"Binning dates by `{bin_by}` method not implemented"
-        raise NotImplementedError(msg)
+    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
+    # need to check for it here.
 
     model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
