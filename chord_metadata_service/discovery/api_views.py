@@ -23,6 +23,7 @@ from .censorship import get_rules
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
+from .pydantic_models import DiscoveryFieldResponse, OverviewResponseCounts, OverviewResponse
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .scopeable_model import BaseScopeableModel
@@ -205,12 +206,20 @@ async def public_overview(request: DrfRequest):
         }
 
     # Parallel async collection of field responses for public overview
-    field_responses = await asyncio.gather(*(_get_field_response(field) for field in fields))
+    field_responses: dict[str, DiscoveryFieldResponse] = {
+        field: field_res
+        for field, field_res in zip(fields, await asyncio.gather(*(_get_field_response(field) for field in fields)))
+    }
 
-    for field, field_res in zip(fields, field_responses):
-        response["fields"][field] = field_res
+    return Response(
+        OverviewResponse(
+            layout=discovery.overview,
+            fields=field_responses,
+            counts=OverviewResponseCounts(
 
-    return Response(response)
+            ),
+        ).model_dump(mode="json", exclude_none=)
+    )
 
 
 @api_view(["GET"])
