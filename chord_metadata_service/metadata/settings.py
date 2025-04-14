@@ -15,16 +15,21 @@ import sys
 import logging
 import json
 
+from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
+from structlog.stdlib import get_logger
 from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
 from ..discovery.types import DiscoveryOrEmptyConfig
 
-load_dotenv()
 
-logging.getLogger().setLevel(logging.INFO)
+def str_to_bool(value: str | None) -> bool:
+    return value and value.strip().lower() in ("true", "1", "t", "yes")
+
+
+load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -36,25 +41,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get(
-    "KATSU_DEBUG",
-    os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true"))
-).lower() == "true"
-logging.info(f"DEBUG: {DEBUG}")
-
-LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "DEBUG" if DEBUG else "INFO").upper()
+DEBUG = str_to_bool(
+    os.environ.get("KATSU_DEBUG", os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true")))
+)
 
 
 # CHORD-specific settings
 
-BENTO_CONTAINER_LOCAL = os.environ.get("BENTO_CONTAINER_LOCAL", "false").lower() == "true"
+BENTO_CONTAINER_LOCAL = str_to_bool(os.environ.get("BENTO_CONTAINER_LOCAL"))
 
 CHORD_URL = os.environ.get("CHORD_URL")  # Leave None if not specified, for running in other contexts
 
 # SECURITY WARNING: Don't run with AUTHZ_ENABLED turned off in production,
 # unless an alternative permissions system is in place.
 #  - This needs to be here to avoid a circular import with settings.py
-BENTO_AUTHZ_ENABLED: bool = os.environ.get("BENTO_AUTHZ_ENABLED", "true").strip().lower() == "true"
+BENTO_AUTHZ_ENABLED: bool = str_to_bool(os.environ.get("BENTO_AUTHZ_ENABLED", "true"))
 
 BENTO_AUTHZ_SERVICE_URL: str = (
     os.environ.get("BENTO_AUTHZ_SERVICE_URL", "http://authz.local").strip().rstrip("/") if BENTO_AUTHZ_ENABLED else ""
@@ -99,7 +100,6 @@ if container_name := os.environ.get("HOST_CONTAINER_NAME", "").strip():
     ADDITIONAL_ALLOWED_HOSTS.append(container_name)
 
 CHORD_HOST = urlparse(CHORD_URL or "").netloc
-logging.info(f"CHORD_HOST: {CHORD_HOST}")
 
 ALLOWED_HOSTS = [CHORD_HOST or "localhost"]
 if DEBUG:
@@ -108,8 +108,6 @@ if ADDITIONAL_ALLOWED_HOSTS:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ADDITIONAL_ALLOWED_HOSTS))
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
-
-logging.info(f"Allowed hosts: {ALLOWED_HOSTS}")
 
 APPEND_SLASH = False
 
@@ -146,6 +144,7 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
 
     'corsheaders',
     'django_filters',
+    'django_structlog',
     'rest_framework',
     'adrf',
     'drf_spectacular',
@@ -154,6 +153,7 @@ INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else [])
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'chord_metadata_service.logger.access_middleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -188,31 +188,42 @@ TEMPLATES = [
 ASGI_APPLICATION = 'chord_metadata_service.metadata.asgi.application'
 WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
 
+# Logging --------------------------------------------------------------------------------------------------------------
+
+LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "debug" if DEBUG else "info").lower()
+USE_JSON_LOGS: bool = str_to_bool(os.environ.get("BENTO_JSON_LOGS", str(not BENTO_CONTAINER_LOCAL)))
+
+_logging_propagate_to_root = {'handlers': [], 'propagate': True}
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'formatters': {
-        'console': {
-            'format': '%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-        },
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'console',
-        },
-    },
+    # formatter + handler configured by configure_structlog(...) function below
     'loggers': {
-        '': {
-            'level': LOG_LEVEL,
-            'handlers': ['console'],
+        'asyncio': _logging_propagate_to_root,
+        'daphne': {
+            # suppress daphne's DEBUG log spam
+            'level': 'INFO',
+            **_logging_propagate_to_root,
         },
+        'daphne.server': _logging_propagate_to_root,
+        'django': _logging_propagate_to_root,
+        'django.request': _logging_propagate_to_root,
+        'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
+        'katsu': _logging_propagate_to_root
     },
 }
+
+# noinspection PyTypeChecker
+configure_structlog(USE_JSON_LOGS, LOG_LEVEL)
+configure_structlog_uvicorn()  # in production, if Katsu is served with Uvicorn, suppress its default access logging
 
 # if we are running the test suite, only log CRITICAL messages
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     logging.disable(logging.CRITICAL)
+
+settings_logger = get_logger("katsu.settings")
+
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 # function to read postgres password file
@@ -221,7 +232,7 @@ def get_secret(path):
         with open(path) as sf:
             return sf.readline().strip()
     except BaseException as err:
-        logging.error(f"Unexpected {err}, {type(err)}")
+        settings_logger.exception("get_secret exception", exc_info=err)
         raise
 
 
@@ -365,3 +376,8 @@ SPECTACULAR_SETTINGS = {
 # testing a request within the swagger UI
 if CHORD_URL:
     SPECTACULAR_SETTINGS['SERVERS'] = [{'url': CHORD_URL + FORCE_SCRIPT_NAME}]
+
+# ----------------------------------------------------------------------------------------------------------------------
+
+# now we can output settings load-time log events
+settings_logger.info("settings initialized", debug=DEBUG, chord_host=CHORD_HOST, allowed_hosts=ALLOWED_HOSTS)

@@ -13,6 +13,7 @@ from typing import Type
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord import data_types as dts
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
@@ -52,7 +53,7 @@ async def public_search_fields(request: DrfRequest):
     """
 
     try:
-        discovery_scope = await get_request_discovery_scope(request)
+        discovery_scope: ValidatedDiscoveryScope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
@@ -150,9 +151,11 @@ async def public_overview(request: DrfRequest):
 
         # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
         if 0 < counts[public_model_name] <= count_threshold and count_threshold > 0:
-            logger.info(
-                f"Public overview: {public_model_name} count is below count threshold of {count_threshold} "
-                f"({repr(discovery_scope)})"
+            await logger.ainfo(
+                "public overview: model count is below threshold",
+                model=public_model_name,
+                threshold=count_threshold,
+                scope_repr=repr(discovery_scope),
             )
             counts[public_model_name] = 0
 

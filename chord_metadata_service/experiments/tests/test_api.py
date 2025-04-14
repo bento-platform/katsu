@@ -14,6 +14,7 @@ from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
@@ -38,8 +39,12 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset 2", data_use=VALID_DATA_USE_1,
                                          project=self.p)
         self.d2_id = self.d2.identifier
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1_id)
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.d1_id)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1_id, logger
+        )
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.d1_id, logger
+        )
 
         self.p2 = Project.objects.create(**VALID_PROJECT_2)
 

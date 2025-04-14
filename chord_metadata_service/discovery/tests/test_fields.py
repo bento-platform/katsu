@@ -5,6 +5,7 @@ from copy import deepcopy
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.logger import logger
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
@@ -168,7 +169,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         for params in subtest_params:
             with self.subTest(params=params):
                 q_val, expected_count = params
-                qs = filter_queryset_field_value(base_qs, self.dm_fp, q_val)
+                qs = filter_queryset_field_value(base_qs, self.dm_fp, q_val, logger)
                 self.assertEqual(qs.count(), expected_count)
 
     def test_filter_queryset_field_value_number(self):
@@ -186,7 +187,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         for params in subtest_params:
             with self.subTest(params=params):
                 q_val, expected_count = params
-                qs = filter_queryset_field_value(base_qs, self.mtl_fp, q_val)
+                qs = filter_queryset_field_value(base_qs, self.mtl_fp, q_val, logger)
                 self.assertEqual(qs.count(), expected_count)
 
     async def test_get_distinct_values(self):

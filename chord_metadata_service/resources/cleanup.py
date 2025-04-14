@@ -1,6 +1,8 @@
 import chord_metadata_service.chord.models as cm
 import chord_metadata_service.phenopackets.models as pm
 
+from structlog.stdlib import BoundLogger
+
 from .models import Resource
 
 from chord_metadata_service.cleanup.remove import remove_not_referenced
@@ -11,7 +13,7 @@ __all__ = [
 ]
 
 
-async def clean_resources() -> int:
+async def clean_resources(logger: BoundLogger) -> int:
     """
     Removes any resources not referenced by any datasets/phenopackets.
     """
@@ -21,4 +23,4 @@ async def clean_resources() -> int:
     resources_referenced |= await build_id_set_from_model(cm.Dataset, "additional_resources__id")
     resources_referenced |= await build_id_set_from_model(pm.MetaData, "resources__id")
 
-    return await remove_not_referenced(Resource, resources_referenced, "resources")
+    return await remove_not_referenced(Resource, resources_referenced, "resources", logger)

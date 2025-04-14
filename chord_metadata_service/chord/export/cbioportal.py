@@ -1,4 +1,3 @@
-import logging
 import csv
 from typing import Callable, TextIO
 import re
@@ -32,8 +31,6 @@ __all__ = [
     "study_export",
 ]
 
-logger = logging.getLogger(__name__)
-
 # predefined filenames recognized by cBioPortal
 STUDY_FILENAME = "meta_study.txt"
 SAMPLE_DATA_FILENAME = "data_clinical_sample.txt"
@@ -66,10 +63,10 @@ SAMPLE_DATATYPE = "SAMPLE"
 #   A-Z uppercase
 #   0-9 digit
 #   _   underscore
-#   \.  dot
+#   .  dot
 #   \-  hyphen
 # ]     Closing list
-REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_\.\-]")
+REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_.\-]")
 
 
 async def study_export(get_path: Callable[[str], str], dataset_id: str):
