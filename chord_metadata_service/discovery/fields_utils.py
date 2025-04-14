@@ -86,7 +86,9 @@ def parse_individual_age(age_obj: dict) -> int:
     raise ValueError(f"Error: {age_obj} format not supported")
 
 
-def labelled_range_generator(field_props: NumberFieldDefinition) -> Iterator[tuple[int, int, str]]:
+def labelled_range_generator(
+    field_props: NumberFieldDefinition
+) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
     Returns a generator yielding floor, ceil and label value for each bin from
     a numeric field configuration
@@ -100,7 +102,9 @@ def labelled_range_generator(field_props: NumberFieldDefinition) -> Iterator[tup
     return auto_binning_generator(cfg)
 
 
-def custom_binning_generator(c: ManualBinsNumberFieldConfig) -> Iterator[tuple[int, int, str]]:
+def custom_binning_generator(
+    c: ManualBinsNumberFieldConfig
+) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
     `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
@@ -118,19 +122,7 @@ def custom_binning_generator(c: ManualBinsNumberFieldConfig) -> Iterator[tuple[i
     or equal to 8.
     """
 
-    # check prerequisites
-    # Note: it raises an error as it reflects an error in the config file
-    if c.maximum is not None and c.minimum is not None and c.maximum < c.minimum:
-        raise ValueError(f"Wrong min/max values in config: {c}")
-
-    if len(c.bins) < 2:
-        raise ValueError(f"Error in bins value. At least 2 values required for defining a single bin: {c}")
-
-    if c.minimum is not None and c.minimum > c.bins[0]:
-        raise ValueError(f"Min value in config is greater than first bin: {c}")
-
-    if c.maximum is not None and c.maximum < c.bins[-1]:
-        raise ValueError(f"Max value in config is lower than last bin: {c}")
+    # Minimum/maximum/bins are validated with a function in the definition for ManualBinsNumberFieldConfig
 
     # Start of generator: bin of [minimum, bins[0]) or [-infinity, bins[0])
     if c.minimum is None or c.minimum != c.bins[0]:
