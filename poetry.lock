@@ -303,7 +303,7 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "12.5.0"
+version = "13.0.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
 python-versions = "^3.10"
@@ -315,25 +315,25 @@ aiofiles = ">=24.1.0,<25"
 aiohttp = ">=3.10.10,<4"
 jsonschema = ">=4.23.0,<5"
 psycopg2-binary = ">=2.9.9,<3.0"
-pydantic = ">=2.8.2,<3"
-pydantic-settings = ">=2.6.1"
-redis = ">=5.0.8,<6"
+pydantic = ">=2.11.3,<3"
+pydantic-settings = ">=2.8.1"
+redis = ">=5.2.1,<6"
 requests = ">=2.32.3,<3"
-rich = ">=13.9.4,<15"
-structlog = ">=24.4.0,<26"
-werkzeug = ">=2.2.3,<4"
+rich = ">=14.0.0,<15"
+structlog = ">=25.2.0,<26"
+werkzeug = ">=3.0.6,<4"
 
 [package.extras]
 asyncpg = ["asyncpg (>=0.29.0,<0.31.0)"]
-django = ["django (>=5.0.8,<5.2)", "djangorestframework (>=3.14.0,<3.17)"]
-fastapi = ["fastapi (>=0.112.1,<0.116)", "uvicorn"]
-flask = ["flask (>=2.2.5,<4)"]
+django = ["django (>=5.1.8,<5.3)", "djangorestframework (>=3.16.0,<3.17)"]
+fastapi = ["fastapi (>=0.115.12,<0.116)", "uvicorn"]
+flask = ["flask (>=3.0.3,<4)"]
 
 [package.source]
 type = "git"
 url = "https://github.com/bento-platform/bento_lib.git"
 reference = "feat/discovery/addl-validation"
-resolved_reference = "7b05e0c9d4055b9aeca6eb8f3c763c11202bf412"
+resolved_reference = "432c56b7a0edd15e53ede0faae7a4297de37bf60"
 
 [[package]]
 name = "cachetools"
