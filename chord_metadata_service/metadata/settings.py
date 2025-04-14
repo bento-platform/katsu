@@ -14,8 +14,7 @@ import os
 import sys
 import logging
 
-from bento_lib.discovery.helpers import load_discovery_config
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig, load_discovery_config
 from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
 from structlog.stdlib import get_logger

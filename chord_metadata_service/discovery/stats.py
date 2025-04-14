@@ -1,4 +1,4 @@
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig
 from django.db.models import Count, F, QuerySet
 from typing import Mapping, Type
 

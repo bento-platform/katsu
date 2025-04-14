@@ -1,5 +1,4 @@
-from bento_lib.discovery.models.config import DiscoveryConfig
-from bento_lib.discovery.models.fields import FieldDefinition
+from bento_lib.discovery import DiscoveryConfig, FieldDefinition
 from django.core.exceptions import ValidationError
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable

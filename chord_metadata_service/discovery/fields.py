@@ -1,7 +1,6 @@
 import datetime
 
-from bento_lib.discovery.models.config import DiscoveryConfig
-from bento_lib.discovery.models.fields import DateFieldDefinition, FieldDefinition
+from bento_lib.discovery import DiscoveryConfig, DateFieldDefinition, FieldDefinition
 from calendar import month_abbr
 from collections import Counter, defaultdict
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q

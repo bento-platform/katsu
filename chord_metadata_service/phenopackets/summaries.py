@@ -1,6 +1,6 @@
 import asyncio
 
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig
 from django.db.models import QuerySet
 
 from chord_metadata_service.authz.types import DataPermissionsDict

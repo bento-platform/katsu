@@ -3,7 +3,7 @@ import io
 import random
 import uuid
 
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings

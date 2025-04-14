@@ -1,5 +1,4 @@
-from bento_lib.discovery.models import DiscoveryConfig
-from bento_lib.discovery.models.fields import DateFieldDefinition
+from bento_lib.discovery import DiscoveryConfig, DateFieldDefinition
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 from copy import deepcopy

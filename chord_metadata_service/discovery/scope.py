@@ -1,7 +1,7 @@
 import uuid
 
 from bento_lib.auth.resources import build_resource
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.request import Request as DrfRequest

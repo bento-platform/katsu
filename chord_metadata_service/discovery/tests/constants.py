@@ -1,4 +1,4 @@
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
 
 DISCOVERY_CONFIG_TEST_DICT = {

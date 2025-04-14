@@ -1,6 +1,6 @@
 import collections
 import uuid
-from bento_lib.discovery.models.config import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
