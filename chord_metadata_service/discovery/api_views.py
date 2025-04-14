@@ -1,7 +1,7 @@
 import asyncio
 
 from adrf.decorators import api_view
-from bento_lib.discovery.models.search import SearchSection
+from bento_lib.discovery import SearchSection
 from bento_lib.responses import errors
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial

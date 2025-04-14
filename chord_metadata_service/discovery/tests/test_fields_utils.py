@@ -1,4 +1,4 @@
-from bento_lib.discovery.models.fields import NumberFieldDefinition
+from bento_lib.discovery import NumberFieldDefinition
 from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
 from django.db.models.base import ModelBase
