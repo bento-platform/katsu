@@ -1,5 +1,82 @@
 components:
   schemas:
+    AllClinicalDataSchema:
+      properties:
+        biomarkers:
+          items:
+            $ref: '#/components/schemas/BiomarkerModelSchema'
+          title: Biomarkers
+          type: array
+        comorbidities:
+          items:
+            $ref: '#/components/schemas/ComorbidityModelSchema'
+          title: Comorbidities
+          type: array
+        donors:
+          items:
+            $ref: '#/components/schemas/DonorModelSchema'
+          title: Donors
+          type: array
+        exposures:
+          items:
+            $ref: '#/components/schemas/ExposureModelSchema'
+          title: Exposures
+          type: array
+        follow_ups:
+          items:
+            $ref: '#/components/schemas/FollowUpModelSchema'
+          title: Follow Ups
+          type: array
+        primary_diagnoses:
+          items:
+            $ref: '#/components/schemas/PrimaryDiagnosisModelSchema'
+          title: Primary Diagnoses
+          type: array
+        radiations:
+          items:
+            $ref: '#/components/schemas/RadiationModelSchema'
+          title: Radiations
+          type: array
+        sample_registrations:
+          items:
+            $ref: '#/components/schemas/SampleRegistrationModelSchema'
+          title: Sample Registrations
+          type: array
+        specimens:
+          items:
+            $ref: '#/components/schemas/SpecimenModelSchema'
+          title: Specimens
+          type: array
+        surgeries:
+          items:
+            $ref: '#/components/schemas/SurgeryModelSchema'
+          title: Surgeries
+          type: array
+        systemic_therapies:
+          items:
+            $ref: '#/components/schemas/SystemicTherapyModelSchema'
+          title: Systemic Therapies
+          type: array
+        treatments:
+          items:
+            $ref: '#/components/schemas/TreatmentModelSchema'
+          title: Treatments
+          type: array
+      required:
+      - donors
+      - primary_diagnoses
+      - specimens
+      - sample_registrations
+      - treatments
+      - systemic_therapies
+      - radiations
+      - surgeries
+      - follow_ups
+      - biomarkers
+      - comorbidities
+      - exposures
+      title: AllClinicalDataSchema
+      type: object
     BasisOfDiagnosisEnum:
       enum:
       - Clinical investigation
@@ -888,6 +965,36 @@ components:
       - Not available
       title: DosageUnitsEnum
       type: string
+    DownloadFilterSchema:
+      properties:
+        biosample_id:
+          items:
+            type: string
+          title: Biosample Id
+          type: array
+        primary_site:
+          items:
+            type: string
+          title: Primary Site
+          type: array
+        program_id:
+          items:
+            type: string
+          title: Program Id
+          type: array
+        systemic_therapy_drug_name:
+          items:
+            type: string
+          title: Systemic Therapy Drug Name
+          type: array
+        treatment_type:
+          items:
+            type: string
+          q: treatment_type__overlap
+          title: Treatment Type
+          type: array
+      title: DownloadFilterSchema
+      type: object
     DrugReferenceDbEnum:
       enum:
       - RxNorm
@@ -5072,6 +5179,9 @@ components:
     DeleteAuth:
       scheme: bearer
       type: http
+    DownloadAuth:
+      scheme: bearer
+      type: http
     GetAuth:
       scheme: bearer
       type: http
@@ -6882,6 +6992,7 @@ paths:
           content:
             application/json:
               schema:
+                additionalProperties: true
                 title: Response
                 type: object
           description: OK
@@ -6890,6 +7001,33 @@ paths:
       summary: Discover Sidebar List
       tags:
       - discovery
+  /v3/download/clinical_data/:
+    post:
+      description: 'Filters clinical data based on criteria provided in the POST request
+
+        body and returns multiple related tables (Donors, PrimaryDiagnoses,
+
+        Specimens, etc.) as a single JSON object'
+      operationId: chord_metadata_service_mohpackets_apis_download_search_clinical_data
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DownloadFilterSchema'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllClinicalDataSchema'
+          description: OK
+      security:
+      - DownloadAuth: []
+      summary: Search Clinical Data
+      tags:
+      - download
   /v3/explorer/donors/:
     get:
       description: 'Returns a list of donors with their sample IDs, treatment types,
