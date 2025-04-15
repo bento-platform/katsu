@@ -178,6 +178,7 @@ class NetworkAuth:
                 logger.debug(
                     f"Permission DOWNLOAD: {result}. "
                     f"OPA datasets: {download_datasets}. ",
+                    f"Request body: {request.body.decode('utf-8')}",
                     request,
                 )
                 
