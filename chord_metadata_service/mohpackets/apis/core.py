@@ -177,7 +177,7 @@ class NetworkAuth:
                     request.download_datasets = download_datasets
                 logger.debug(
                     f"Permission DOWNLOAD: {result}. "
-                    f"OPA datasets: {download_datasets}. ",
+                    f"OPA datasets: {download_datasets}. "
                     f"Request body: {request.body.decode('utf-8')}",
                     request,
                 )
