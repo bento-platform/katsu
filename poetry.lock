@@ -333,7 +333,7 @@ flask = ["flask (>=3.0.3,<4)"]
 type = "git"
 url = "https://github.com/bento-platform/bento_lib.git"
 reference = "feat/discovery/addl-validation"
-resolved_reference = "432c56b7a0edd15e53ede0faae7a4297de37bf60"
+resolved_reference = "b6a8fa2ad7a0621115a4e99d9dbbeec11e2d4888"
 
 [[package]]
 name = "cachetools"
