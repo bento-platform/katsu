@@ -50,8 +50,6 @@ class DownloadClinicalDataTestCase(BaseTestCase):
     def test_download_unauthorized(self):
         """
         Test that an unauthorized user receives a 401 response.
-        Note: Actual status might be 403 depending on auth middleware implementation.
-        Assuming 401 for now based on typical token auth.
         """
         response = self._post_request(token=self.unauthorized_token)
         self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
@@ -166,7 +164,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         """Test filtering by treatment_type."""
         type_to_filter = self.treatments[0].treatment_type[
             0
-        ]  # Assuming treatment_type is a list
+        ]
         filters = {"treatment_type": [type_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -281,7 +279,6 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         """
         Verify the overall response structure and that related data matches filtered donors.
         """
-        # Use a filter that returns a subset of data
         program_to_filter = self.programs[0].program_id
         filters = {"program_id": [program_to_filter]}
         response = self._post_request(data=filters)
@@ -305,7 +302,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         }
         self.assertEqual(set(data.keys()), expected_keys)
 
-        # Get the UUIDs of the donors returned
+        # Get the ID of the donors returned
         filtered_donor_ids = {donor["submitter_donor_id"] for donor in data["donors"]}
 
         # Verify that all items in related lists belong to the filtered donors
