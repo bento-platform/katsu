@@ -46,7 +46,7 @@ class TestLabelledRangeGenerator(TestCase):
     def setUp(self):
         self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
             "mapping": "test",
-            "data_type": "number",
+            "datatype": "number",
             "title": "Test",
             "description": "A test field",
             "config": {
@@ -80,7 +80,7 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
     def setUp(self):
         self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
             "mapping": "test",
-            "data_type": "number",
+            "datatype": "number",
             "title": "Test",
             "description": "A test field",
             "config": {

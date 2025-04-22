@@ -42,7 +42,7 @@ async def get_field_options(
     querying this field.
     """
     field_props = discovery.fields[field]
-    if field_props.data_type == "string":
+    if field_props.datatype == "string":
         options = getattr(field_props.config, "enum", None)
         # Special case: no list of values specified
         if options is None:
@@ -50,9 +50,9 @@ async def get_field_options(
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
             options = await get_distinct_field_values(field, discovery, field_permissions)
-    elif field_props.data_type == "number":
+    elif field_props.datatype == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
-    elif field_props.data_type == "date":
+    elif field_props.datatype == "date":
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
         start, end = await get_month_date_range(field_props)
@@ -366,14 +366,14 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
 
     model, field = f_utils.get_model_and_field(field_props.mapping_for_search_filter or field_props.mapping)
 
-    if field_props.data_type == "string":
+    if field_props.datatype == "string":
         if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
             condition = Q(**{f"{field}__iexact": value})
-    elif field_props.data_type == "number":
+    elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
         if value.startswith("["):
@@ -400,7 +400,7 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
                     condition = Q(**{f"{field}__lt": int(val)})
             else:
                 raise NotImplementedError()
-    elif field_props.data_type == "date":
+    elif field_props.datatype == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"

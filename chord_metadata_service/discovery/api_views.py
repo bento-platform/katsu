@@ -189,11 +189,11 @@ async def public_overview(request: DrfRequest):
         field_perms = field_permissions[field]
 
         stats: list[BinWithValue] | None
-        if field_props.data_type == "string":
+        if field_props.datatype == "string":
             stats = await get_categorical_stats(discovery_scope, field, field_perms)
-        elif field_props.data_type == "number":
+        elif field_props.datatype == "number":
             stats = await get_range_stats(discovery_scope, field, field_perms)
-        elif field_props.data_type == "date":
+        elif field_props.datatype == "date":
             stats = await get_date_stats(discovery_scope, field, field_perms)
         else:  # pragma: no cover
             # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
