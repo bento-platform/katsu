@@ -13,8 +13,8 @@ from chord_metadata_service.authz.types import DataPermissionsDict
 from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
 from .scope import ValidatedDiscoveryScope
+from .pydantic_models import BinWithValue
 from .stats import stats_for_field
-from .types import BinWithValue
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
@@ -225,12 +225,12 @@ async def get_range_stats(
 
     # All the bins between start and end must be represented and ordered
     bins: list[BinWithValue] = [
-        {"label": label, "value": stats.get(label, 0)}
+        BinWithValue(label=label, value=stats.get("label", 0))
         for floor, ceil, label in f_utils.labelled_range_generator(field_props)
     ]
 
     if "missing" in stats:
-        bins.append({"label": "missing", "value": stats["missing"]})
+        bins.append(BinWithValue(label="missing", value=stats["missing"]))
 
     return bins
 
@@ -275,8 +275,8 @@ async def get_categorical_stats(
     # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
     return [
         # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
-        *({"label": category, "value": stats.get(category, 0)} for category in labels),
-        {"label": "missing", "value": stats["missing"]},
+        *(BinWithValue(label=category, value=stats.get(category, 0)) for category in labels),
+        BinWithValue(label="missing", value=stats["missing"]),
     ]
 
 
@@ -338,17 +338,17 @@ async def get_date_stats(
         for year, month in f_utils.monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
-            bins.append({
-                "label": label,
-                "value": thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
-            })
+            bins.append(BinWithValue(
+                label=label,
+                value=thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
+            ))
 
     # Append missing items at the end if any
     if "missing" in stats:
-        bins.append({
-            "label": "missing",
-            "value": thresholded_count(stats["missing"], scope.discovery, field_permissions),
-        })
+        bins.append(BinWithValue(
+            label="missing",
+            value=thresholded_count(stats["missing"], scope.discovery, field_permissions),
+        ))
 
     return bins
 

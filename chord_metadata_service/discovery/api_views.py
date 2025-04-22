@@ -23,11 +23,10 @@ from .censorship import get_rules
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
-from .pydantic_models import DiscoveryFieldResponse, OverviewResponseCounts, OverviewResponse
+from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .scopeable_model import BaseScopeableModel
-from .types import BinWithValue
 from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
 
 
@@ -185,11 +184,17 @@ async def public_overview(request: DrfRequest):
 
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
-    async def _get_field_response(field: str) -> dict:
+    # TODO: exclude field when no permissions or something, right now this isn't handled well
+    #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #  !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    async def _get_field_response(field: str) -> DiscoveryFieldResponse:
         field_props = field_conf[field]
         field_perms = field_permissions[field]
 
-        stats: list[BinWithValue] | None
+        stats: list[BinWithValue]
         if field_props.datatype == "string":
             stats = await get_categorical_stats(discovery_scope, field, field_perms)
         elif field_props.datatype == "number":
@@ -201,27 +206,27 @@ async def public_overview(request: DrfRequest):
             # validate the data_type value.
             raise NotImplementedError()
 
-        return {
-            **field_props.model_dump(mode="json"),
-            "id": field,
-            **({"data": stats} if stats is not None else {}),
-        }
+        return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
-    # Parallel async collection of field responses for public overview
-    field_responses: dict[str, DiscoveryFieldResponse] = {
+    field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
         field: field_res
         for field, field_res in zip(fields, await asyncio.gather(*(_get_field_response(field) for field in fields)))
-    }
+        # Parallel async collection of field responses for public overview
+    })
 
-    return Response(
-        OverviewResponse(
-            layout=discovery.overview,
-            fields=field_responses,
-            counts=OverviewResponseCounts(
-
-            ),
-        ).model_dump(mode="json", exclude_none=)
-    )
+    return Response({
+        "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
+        "fields": field_responses,
+        "counts": {
+            **({
+                "individuals": counts["individual"],
+                "biosamples": counts["biosample"],
+            } if dt_permissions[dts.DATA_TYPE_PHENOPACKET]["counts"] else {}),
+            **({
+                "experiments": counts["experiment"],
+            } if dt_permissions[dts.DATA_TYPE_EXPERIMENT]["counts"] else {}),
+        },
+    })
 
 
 @api_view(["GET"])

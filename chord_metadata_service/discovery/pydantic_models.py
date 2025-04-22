@@ -1,16 +1,15 @@
-from bento_lib.discovery import FieldDefinition, OverviewSection
-from pydantic import BaseModel
+from bento_lib.discovery import FieldDefinition
+from pydantic import BaseModel, RootModel
 
 
 __all__ = [
-    "BinWithData",
+    "BinWithValue",
     "DiscoveryFieldResponse",
-    "OverviewResponseCounts",
-    "OverviewResponse",
+    "DiscoveryFieldResponses",
 ]
 
 
-class BinWithData(BaseModel):
+class BinWithValue(BaseModel):
     label: str
     value: int
 
@@ -18,16 +17,8 @@ class BinWithData(BaseModel):
 class DiscoveryFieldResponse(BaseModel):
     id: str
     definition: FieldDefinition
-    data: list[BinWithData] | None
+    data: list[BinWithValue]
 
 
-class OverviewResponseCounts(BaseModel):
-    individuals: int | None = None
-    biosamples: int | None = None
-    experiments: int | None = None
-
-
-class OverviewResponse(BaseModel):
-    layout: list[OverviewSection]
-    fields:  dict[str, DiscoveryFieldResponse]
-    counts: OverviewResponseCounts
+class DiscoveryFieldResponses(RootModel):
+    root: dict[str, DiscoveryFieldResponse]

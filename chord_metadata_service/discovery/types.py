@@ -1,14 +1,8 @@
 from typing import TypedDict
 
 __all__ = [
-    "BinWithValue",
     "ModelScopeFilters",
 ]
-
-
-class BinWithValue(TypedDict):
-    label: str
-    value: int
 
 
 class ScopeLevelFilters(TypedDict):

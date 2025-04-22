@@ -7,8 +7,8 @@ from chord_metadata_service.authz.types import DataPermissionsDict
 from .censorship import thresholded_count
 from .fields_utils import get_jsonb_path_query
 from .scope import ValidatedDiscoveryScope
+from .pydantic_models import BinWithValue
 from .scopeable_model import BaseScopeableModel
-from .types import BinWithValue
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -79,7 +79,7 @@ async def bento_public_format_count_and_stats_list(
 
         # Be careful not to leak values if they're in the database but below threshold
         if label is not None and thresholded_value > 0:
-            stats_list.append({"label": label, "value": thresholded_value})
+            stats_list.append(BinWithValue(label=label, value=thresholded_value))
 
     return thresholded_count(total, discovery, field_permissions), stats_list
 
