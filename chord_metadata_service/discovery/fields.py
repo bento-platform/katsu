@@ -405,7 +405,9 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
         condition = Q(**{f"{field}__startswith": val})
-    else:
+    else:  # pragma: no cover
+        # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
+        # values of `datatype` to the cases above.
         raise NotImplementedError()
 
     logger.debug("filtering model field with condition", model=model, field=field, condition=condition)
