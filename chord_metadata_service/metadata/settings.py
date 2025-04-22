@@ -337,7 +337,7 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 #  - By default, set to an empty discovery configuration with no fields and maximally restrictive count rules:
 CONFIG_PUBLIC: DiscoveryConfig = DiscoveryConfig()
 if os.path.isfile(config_path := os.path.join(BASE_DIR, 'config.json')):
-    CONFIG_PUBLIC = load_discovery_config(config_path, settings_logger)
+    CONFIG_PUBLIC, _ = load_discovery_config(config_path, settings_logger)
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Metadata Service API',

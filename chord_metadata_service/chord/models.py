@@ -9,7 +9,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
-from chord_metadata_service.restapi.models import SchemaType
+from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 
 
 __all__ = ["Project", "Dataset", "ProjectJsonSchema"]
@@ -26,40 +26,42 @@ def version_default():
 #############################################################
 
 
-# noinspection PyUnresolvedReferences
-class DiscoveryAccessMixin:
+class BaseProjectOrDataset(BaseTimeStamp):
+    """
+    Abstract base Django model representing the common underlying shared fields/methods for both projects and datasets,
+    including common metadata (ID, title, description), timestamps, and discovery configuration storage/access.
+    """
+
+    class Meta:
+        abstract = True
+
+    identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200, unique=True)
+    description = models.TextField(blank=True)
+
+    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
+                                 validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
+
     @property
     def discovery_obj(self) -> DiscoveryConfig | None:
         return DiscoveryConfig.model_validate(self.discovery) if self.discovery else None
 
 
-class Project(models.Model, DiscoveryAccessMixin):
+class Project(BaseProjectOrDataset):
     """
     Class to represent a Project, which contains multiple
     Datasets which are each a group of Phenopackets.
     """
 
-    identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
-                                 validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
-
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class Dataset(models.Model, DiscoveryAccessMixin):
+class Dataset(BaseProjectOrDataset):
     """
     Class to represent a Dataset, which contains multiple Phenopackets.
     """
 
-    identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
     contact_info = models.TextField(blank=True)
     project = models.ForeignKey(
         Project,
@@ -162,15 +164,9 @@ class Dataset(models.Model, DiscoveryAccessMixin):
 
     # -------------------------------------------------------------------------
 
-    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
-                                 validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
-
     extra_properties = models.JSONField(blank=True, null=True,
                                         help_text="Extra properties that do not fit in the previous "
                                         "specified attributes.")
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
 
     def clean(self):
         # Check that all namespace prefices are unique within a dataset

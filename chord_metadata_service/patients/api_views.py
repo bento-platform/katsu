@@ -266,12 +266,12 @@ async def public_discovery_filter_queryset(
             value not in options
             and not (
                 # case-insensitive search on categories
-                field_props.data_type == "string"
+                field_props.datatype == "string"
                 and value.lower() in [o.lower() for o in options]
             )
             and not (
                 # no restriction when enum is not set for categories
-                field_props.data_type == "string"
+                field_props.datatype == "string"
                 and getattr(field_props.config, "enum") is None
             )
         ):

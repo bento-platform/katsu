@@ -1,13 +1,7 @@
-from bento_lib.discovery.models.config import (
-    DiscoveryConfig,
-    DiscoveryConfigRules,
-    RULES_NO_PERMISSIONS,
-    RULES_FULL_PERMISSIONS,
-)
+from bento_lib.discovery import DiscoveryConfig, DiscoveryConfigRules, RULES_NO_PERMISSIONS, RULES_FULL_PERMISSIONS
 from ..authz.types import DataPermissionsDict
 
 __all__ = [
-    "RULES_NO_PERMISSIONS",
     "get_threshold",
     "thresholded_count",
     "get_max_query_parameters",

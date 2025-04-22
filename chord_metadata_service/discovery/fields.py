@@ -42,7 +42,7 @@ async def get_field_options(
     querying this field.
     """
     field_props = discovery.fields[field]
-    if field_props.data_type == "string":
+    if field_props.datatype == "string":
         options = getattr(field_props.config, "enum", None)
         # Special case: no list of values specified
         if options is None:
@@ -50,16 +50,18 @@ async def get_field_options(
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
             options = await get_distinct_field_values(field, discovery, field_permissions)
-    elif field_props.data_type == "number":
+    elif field_props.datatype == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
-    elif field_props.data_type == "date":
+    elif field_props.datatype == "date":
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
         start, end = await get_month_date_range(field_props)
         options = [
             f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
         ] if start else []
-    else:
+    else:  # pragma: no cover
+        # Can't actually occur with Pydantic implementation of the discovery configuration model, which will validate
+        # the data_type value.
         raise NotImplementedError()
 
     return options
@@ -149,8 +151,8 @@ async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | 
     TODO: for now only dates binned by month are handled.
     """
 
-    if (bin_by := field_props.config.bin_by) != "month":
-        raise NotImplementedError(f"Binning dates by `{bin_by}` method not implemented")
+    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
+    # need to check for it here.
 
     model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
@@ -296,9 +298,8 @@ async def get_date_stats(
         msg = f"Field {field} is not in the provided discovery config."
         raise NotImplementedError(msg)
 
-    if (bin_by := field_props.config.bin_by) != "month":
-        msg = f"Binning dates by `{bin_by}` method not implemented"
-        raise NotImplementedError(msg)
+    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
+    # need to check for it here.
 
     model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
@@ -365,14 +366,14 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
 
     model, field = f_utils.get_model_and_field(field_props.mapping_for_search_filter or field_props.mapping)
 
-    if field_props.data_type == "string":
+    if field_props.datatype == "string":
         if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
             condition = Q(**{f"{field}__iexact": value})
-    elif field_props.data_type == "number":
+    elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
         if value.startswith("["):
@@ -399,12 +400,14 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
                     condition = Q(**{f"{field}__lt": int(val)})
             else:
                 raise NotImplementedError()
-    elif field_props.data_type == "date":
+    elif field_props.datatype == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
         condition = Q(**{f"{field}__startswith": val})
-    else:
+    else:  # pragma: no cover
+        # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
+        # values of `datatype` to the cases above.
         raise NotImplementedError()
 
     logger.debug("filtering model field with condition", model=model, field=field, condition=condition)

@@ -1,7 +1,7 @@
 from copy import deepcopy
 import uuid
 
-from bento_lib.discovery import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig, RULES_NO_PERMISSIONS
 from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase, override_settings
@@ -12,7 +12,6 @@ from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITe
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
-from chord_metadata_service.discovery.censorship import RULES_NO_PERMISSIONS
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c

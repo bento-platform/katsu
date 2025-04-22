@@ -43,7 +43,7 @@ class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
     async def test_get_field_options_not_impl(self):
         # {**self.field_some_prop, "datatype": "made_up"}
         invalid_discovery = deepcopy(self.discovery)
-        invalid_discovery.fields["some_prop"].data_type = "made_up"
+        invalid_discovery.fields["some_prop"].datatype = "made_up"
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
             await get_field_options("some_prop", invalid_discovery, self.permissions_full)

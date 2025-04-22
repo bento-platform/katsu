@@ -1,7 +1,6 @@
 import asyncio
 import itertools
 import json
-import logging
 
 from adrf.decorators import api_view as async_api_view
 from asgiref.sync import sync_to_async
@@ -19,8 +18,9 @@ from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework import status
+from structlog.stdlib import BoundLogger
 
-from typing import Callable
+from typing import Awaitable, Callable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
@@ -33,7 +33,7 @@ from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
-from chord_metadata_service.logger import logger
+from chord_metadata_service.logger import logger as katsu_logger
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
@@ -50,11 +50,6 @@ OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 def bad_request_response(message: str) -> Response:
     return Response(errors.bad_request_error(message), status=status.HTTP_400_BAD_REQUEST)
-
-
-# TODO: CHORD-standardized logging
-def debug_log(message):  # pragma: no cover
-    logging.debug(f"[CHORD Metadata {datetime.now()}] [DEBUG] {message}")
 
 
 def get_field_lookup(field: list[str]) -> str:
@@ -83,18 +78,20 @@ def get_values_list(queryset: QuerySet, options):
     return queryset.values_list(field_lookup, flat=True)
 
 
-def data_type_results(query: sql.SQL, params, key="id"):
+def data_type_results(query: sql.Composable, params, key: str, logger: BoundLogger):
     with connection.cursor() as cursor:
-        debug_log(f"Executing SQL:\n    {query.as_string(cursor.connection)}")
+        logger.debug("data_type_results: executing SQL", sql_query=query.as_string(cursor.connection))
         cursor.execute(query.as_string(cursor.connection), params)
         return set(dict(zip([col[0] for col in cursor.description], row))[key] for row in cursor.fetchall())
 
 
-async def experiment_query_results(scope: ValidatedDiscoveryScope, query, params, options=None):
+async def experiment_query_results(
+    scope: ValidatedDiscoveryScope, query: sql.Composable, params, logger: BoundLogger, options: dict | None = None
+):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
     queryset = Experiment.get_model_scoped_queryset(scope).filter(
-        id__in=await sync_to_async(data_type_results)(query, params, "id"))
+        id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -103,9 +100,11 @@ async def experiment_query_results(scope: ValidatedDiscoveryScope, query, params
     return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH)
 
 
-async def phenopacket_query_results(scope: ValidatedDiscoveryScope, query, params, options=None):
+async def phenopacket_query_results(
+    scope: ValidatedDiscoveryScope, query: sql.Composable, params, logger: BoundLogger, options: dict | None = None
+):
     queryset = Phenopacket.get_model_scoped_queryset(scope).filter(
-        id__in=await sync_to_async(data_type_results)(query, params, "id"))
+        id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -140,7 +139,13 @@ async def phenopacket_query_results(scope: ValidatedDiscoveryScope, query, param
         return queryset.select_related(*PHENOPACKET_SELECT_REL).prefetch_related(*PHENOPACKET_PREFETCH)
 
 
-QUERY_RESULTS_FN: dict[str, Callable] = {
+QUERY_RESULTS_FN: dict[
+    str,
+    Callable[
+        [ValidatedDiscoveryScope, sql.Composed, tuple[str | int | float, ...], BoundLogger, dict | None],
+        Awaitable[QuerySet],
+    ]
+] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
     DATA_TYPE_PHENOPACKET: phenopacket_query_results,
 }
@@ -174,7 +179,7 @@ async def _async_group_by_dataset_id(queryset: QuerySet) -> itertools.groupby:
     )
 
 
-async def search(request: DrfRequest):
+async def search(request: DrfRequest, logger: BoundLogger):
     """
     Generic function that takes a request object containing the following parameters:
     - query: a Bento specific string representation of a query. e.g.
@@ -186,7 +191,7 @@ async def search(request: DrfRequest):
 
     scope = await get_request_discovery_scope(request)
 
-    search_params, err = get_chord_search_parameters(request)
+    search_params, err = get_chord_search_parameters(request, logger)
     if err:
         authz_middleware.mark_authz_done(request)
         return bad_request_response(err)
@@ -208,7 +213,7 @@ async def search(request: DrfRequest):
 
     serializer_class = QUERY_RESULT_SERIALIZERS[data_type]
     query_function = QUERY_RESULTS_FN[data_type]
-    queryset = await query_function(scope, compiled_query, query_params, search_params)
+    queryset = await query_function(scope, compiled_query, query_params, logger, search_params)
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         result = {
@@ -266,10 +271,10 @@ async def chord_private_search(request: DrfRequest):
         response.
     """
     # Private search endpoints are protected by URL namespace, not by Django permissions.
-    return await search(request)
+    return await search(request, logger=katsu_logger)
 
 
-def get_chord_search_parameters(request, data_type=None):
+def get_chord_search_parameters(request, logger: BoundLogger, data_type=None):
     """
     Extracts, either from the request body (POST) or the request query parameters,
     the information to make the search.
@@ -339,7 +344,7 @@ def _serialize_many(serializer_class, queryset):
 
 
 async def chord_dataset_search(
-    scope: ValidatedDiscoveryScope, search_params, start
+    scope: ValidatedDiscoveryScope, search_params, start, logger: BoundLogger,
 ) -> tuple[bool | list | None, str | None]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
@@ -351,9 +356,10 @@ async def chord_dataset_search(
 
     queryset = await query_function(
         scope,
-        query=sql.SQL("{} AND dataset_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
-        params=search_params["params"] + (scope.dataset_id,),
-        options=search_params
+        sql.SQL("{} AND dataset_id = {}").format(search_params["compiled_query"], sql.Placeholder()),
+        search_params["params"] + (scope.dataset_id,),
+        logger,
+        search_params,
     )
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
@@ -361,9 +367,12 @@ async def chord_dataset_search(
     if search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
         return [v async for v in queryset], None
 
-    debug_log(f"Started fetching from queryset and serializing data at {datetime.now() - start}")
+    await logger.adebug(
+        "chord_dataset_search started fetching from queryset and serializing data",
+        delta=datetime.now() - start,
+    )
     serialized_data = await sync_to_async(_serialize_many)(serializer_class, queryset)
-    debug_log(f"Finished running query and serializing in {datetime.now() - start}")
+    await logger.adebug("chord_dataset_search finished query and serializing", delta=datetime.now() - start)
 
     return serialized_data, None
 
@@ -392,12 +401,13 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     # perform search: --------------------------------------------------------------------------------------------------
 
     start = datetime.now()
+    logger = katsu_logger.bind(project_id=str(project.identifier), dataset_id=dataset_id, start=start)
 
-    search_params, err = get_chord_search_parameters(request=request)
+    search_params, err = get_chord_search_parameters(request, logger)
     if err:
         return bad_request_response(err)
 
-    data, err = await chord_dataset_search(scope, search_params, start)
+    data, err = await chord_dataset_search(scope, search_params, start, logger)
     if err:
         return bad_request_response(err)
 
