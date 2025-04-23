@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.01.21
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.04.01
 
 LABEL org.opencontainers.image.description="Local development image for Katsu."
 LABEL devcontainer.metadata='[{ \
