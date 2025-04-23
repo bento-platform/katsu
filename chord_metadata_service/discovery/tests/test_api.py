@@ -259,7 +259,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def assert_scoped_fields(self, overview_response: dict, discovery: DiscoveryConfig):
         self.assertSetEqual(
             set(field for field in overview_response["fields"].keys()),
-            set(chart.field for section in discovery.overview for chart in section.charts)
+            set(discovery.get_chart_field_ids()),
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
