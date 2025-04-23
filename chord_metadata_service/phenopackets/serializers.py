@@ -14,8 +14,10 @@ from .models import (
     VariationDescriptor,
     GeneDescriptor,
 )
-from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.geo.ingest import get_or_create_geo_location
+from chord_metadata_service.geo.serializers import GeoLocationSerializer
+from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
 
@@ -82,12 +84,18 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(
         read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
+    location_collected = GeoLocationSerializer(required=False)
 
     class Meta:
         model = Biosample
         fields = '__all__'
 
     def create(self, validated_data):
+        if (
+            "location_collected" in validated_data
+            and isinstance(location_collected := validated_data["location_collected"], dict)
+        ):
+            validated_data["location_collected"] = get_or_create_geo_location(location_collected)
         biosample = Biosample.objects.create(**validated_data)
         return biosample
 
@@ -100,6 +108,10 @@ class BiosampleSerializer(GenericSerializer):
         instance.tumor_grade = validated_data.get('tumor_grade', instance.tumor_grade)
         instance.diagnostic_markers = validated_data.get('diagnostic_markers', instance.diagnostic_markers)
         instance.procedure = validated_data.get('procedure', instance.procedure)
+
+        if location_collected := validated_data.get("location_collected"):
+            instance.location_collected = get_or_create_geo_location(location_collected)
+
         instance.save()
         return instance
 

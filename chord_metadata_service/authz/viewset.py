@@ -40,12 +40,12 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
     def permission_from_request(self, request: DrfRequest) -> Permission | None:
         if self.action in ("list", "retrieve"):
             return P_QUERY_DATA
-        elif self.action in ("create", "update"):
+        elif self.action in ("create", "update", "partial_update"):
             return P_INGEST_DATA
         elif self.action == "destroy":
             return P_DELETE_DATA
         else:
-            logger.error("viewset permission_from_request(...) is not implemented for action: %s", self.action)
+            logger.error("viewset permission_from_request(...) is not implemented for action", action=self.action)
             return None
 
     async def request_has_data_type_permissions(

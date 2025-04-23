@@ -1,5 +1,4 @@
 import json
-import logging
 
 from asgiref.sync import async_to_sync, sync_to_async
 from bento_lib.auth.permissions import (
@@ -25,6 +24,7 @@ from rest_framework.viewsets import ModelViewSet
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
+from chord_metadata_service.logger import logger
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
@@ -36,8 +36,6 @@ from .serializers import (
     ProjectSerializer,
     DatasetSerializer,
 )
-
-logger = logging.getLogger(__name__)
 
 
 __all__ = ["ProjectViewSet", "DatasetViewSet"]
@@ -176,6 +174,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         except Http404:
             return not_found(request)  # side effect: sets authz done flag
 
+        dataset_id = str(dataset.identifier)
+
         if not (
             await authz.async_evaluate_one(request, build_resource(project=str(dataset.project_id)), P_DELETE_DATASET)
         ):
@@ -183,9 +183,9 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         await dataset.adelete()
 
-        logger.info(f"Running cleanup after deleting dataset {dataset.identifier} via DRF API")
-        n_removed = await run_all_cleanup()
-        logger.info(f"Cleanup: removed {n_removed} objects in total")
+        lg = logger.bind(dataset_id=dataset_id)
+        n_removed = await run_all_cleanup(lg)
+        await lg.ainfo("ran cleanup after deleting dataset via DRF API", n_removed=n_removed)
 
         authz.mark_authz_done(request)
         return Response(status=status.HTTP_204_NO_CONTENT)

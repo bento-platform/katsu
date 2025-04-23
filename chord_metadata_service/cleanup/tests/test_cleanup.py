@@ -4,6 +4,7 @@ from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments import cleanup as ec
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
+from chord_metadata_service.logger import logger
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import cleanup as pc
@@ -117,13 +118,13 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         # Check we can run clean_biosamples and clean_individuals with nothing lost (in order),
         # except the unlinked phenotypic feature,
         # since the individual is referenced by the phenopacket and the biosample is in use.
-        self.assertEqual(await pc.clean_biosamples(), 0)
-        self.assertEqual(await pc.clean_phenotypic_features(), 1)
-        self.assertEqual(await pc.clean_interpretations(), 0)
-        self.assertEqual(await pc.clean_diagnoses(), 0)
-        self.assertEqual(await pc.clean_genomic_interpretations(), 0)
-        self.assertEqual(await clean_individuals(), 0)
-        self.assertEqual(await clean_resources(), 0)
+        self.assertEqual(await pc.clean_biosamples(logger), 0)
+        self.assertEqual(await pc.clean_phenotypic_features(logger), 1)
+        self.assertEqual(await pc.clean_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_diagnoses(logger), 0)
+        self.assertEqual(await pc.clean_genomic_interpretations(logger), 0)
+        self.assertEqual(await clean_individuals(logger), 0)
+        self.assertEqual(await clean_resources(logger), 0)
 
         r = await self.async_one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == 204
@@ -134,13 +135,13 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         with self.assertRaises(PhenotypicFeature.DoesNotExist):  # PhenotypicFeature successfully deleted
             await self.unlinked_phenotypic_feature.arefresh_from_db()
 
-        self.assertEqual(await pc.clean_biosamples(), 0)
-        self.assertEqual(await pc.clean_phenotypic_features(), 0)
-        self.assertEqual(await pc.clean_interpretations(), 0)
-        self.assertEqual(await pc.clean_diagnoses(), 0)
-        self.assertEqual(await pc.clean_genomic_interpretations(), 0)
-        self.assertEqual(await clean_individuals(), 0)
-        self.assertEqual(await clean_resources(), 0)
+        self.assertEqual(await pc.clean_biosamples(logger), 0)
+        self.assertEqual(await pc.clean_phenotypic_features(logger), 0)
+        self.assertEqual(await pc.clean_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_diagnoses(logger), 0)
+        self.assertEqual(await pc.clean_genomic_interpretations(logger), 0)
+        self.assertEqual(await clean_individuals(logger), 0)
+        self.assertEqual(await clean_resources(logger), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             await Individual.objects.aget(id="patient:1")
@@ -155,13 +156,13 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
             await self.genomic_interpretation.arefresh_from_db()
 
         # Check we can run all cleaning again with no change...
-        self.assertEqual(await run_all_cleanup(), 0)
+        self.assertEqual(await run_all_cleanup(logger), 0)
 
     async def test_no_cleanup(self):
         await self.unlinked_phenotypic_feature.arefresh_from_db()
 
         # No cleanup except the unlinked phenotypic feature should occur without removing the dataset/phenopacket first
-        self.assertEqual(await run_all_cleanup(), 1)
+        self.assertEqual(await run_all_cleanup(logger), 1)
 
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
             await self.unlinked_phenotypic_feature.arefresh_from_db()
@@ -189,7 +190,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         # Resources
         # 1 resource +
         # = 9 objects total
-        self.assertEqual(await run_all_cleanup(), 9)
+        self.assertEqual(await run_all_cleanup(logger), 9)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
@@ -226,13 +227,13 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
     async def test_experiment_deletion(self):
         # Check we can run clean_biosamples, and clean_individuals with nothing lost (in order),
         # since the biosample is referenced by the experiment, references the individual, and uses the procedure.
-        self.assertEqual(await pc.clean_biosamples(), 0)
-        self.assertEqual(await clean_individuals(), 0)
+        self.assertEqual(await pc.clean_biosamples(logger), 0)
+        self.assertEqual(await clean_individuals(logger), 0)
 
         # Check we can run clean_experiment_results and clean_instruments safely with nothing lost, since they are
         # used by / reference the experiment.
-        self.assertEqual(await ec.clean_experiment_results(), 0)
-        self.assertEqual(await ec.clean_instruments(), 0)
+        self.assertEqual(await ec.clean_experiment_results(logger), 0)
+        self.assertEqual(await ec.clean_instruments(logger), 0)
 
         r = await self.async_one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         assert r.status_code == status.HTTP_204_NO_CONTENT
@@ -249,16 +250,16 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
         with self.assertRaises(Biosample.DoesNotExist):  # Biosample successfully deleted
             await self.biosample_1.arefresh_from_db()
 
-        self.assertEqual(await pc.clean_biosamples(), 0)
-        self.assertEqual(await ec.clean_experiment_results(), 0)
-        self.assertEqual(await ec.clean_instruments(), 0)
-        self.assertEqual(await clean_individuals(), 0)
+        self.assertEqual(await pc.clean_biosamples(logger), 0)
+        self.assertEqual(await ec.clean_experiment_results(logger), 0)
+        self.assertEqual(await ec.clean_instruments(logger), 0)
+        self.assertEqual(await clean_individuals(logger), 0)
 
         with self.assertRaises(Individual.DoesNotExist):
             await Individual.objects.aget(id="patient:1")
 
         # Check we can run all cleaning again with no change...
-        self.assertEqual(await run_all_cleanup(), 0)
+        self.assertEqual(await run_all_cleanup(logger), 0)
 
     async def test_cleanup_basic(self):
         # Delete dataset to remove the parent phenopacket
@@ -269,4 +270,4 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
         # 1 experiment result +
         # 1 instrument +
         # = 4 objects total
-        self.assertEqual(await run_all_cleanup(), 4)
+        self.assertEqual(await run_all_cleanup(logger), 4)

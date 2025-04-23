@@ -19,6 +19,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericListViewSet
@@ -208,6 +209,7 @@ async def public_discovery_filter_queryset(
     request: DrfRequest,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset: QuerySet,
+    lg: BoundLogger,
 ) -> tuple[QuerySet, list[str]]:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
@@ -215,6 +217,7 @@ async def public_discovery_filter_queryset(
     :param request: The request to extract the query parameters from.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
     :param queryset: The queryset to filter using the request query parameters.
+    :param lg: BoundLogger object.
     """
 
     discovery = discovery_scope.discovery
@@ -272,7 +275,7 @@ async def public_discovery_filter_queryset(
             raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
 
         # recursion
-        queryset = filter_queryset_field_value(queryset, field_props, value)
+        queryset = filter_queryset_field_value(queryset, field_props, value, lg)
 
     return queryset, queried_fields
 
@@ -319,31 +322,37 @@ class PublicListIndividuals(APIView):
 
         try:
             filtered_qs, queried_fields = await public_discovery_filter_queryset(
-                discovery_scope, request, dt_permissions, base_qs
+                discovery_scope, request, dt_permissions, base_qs, logger
             )
         except EmptyDiscoveryException:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
-            logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
+            await logger.ainfo(
+                "public individuals endpoint recieved validation error", exc=e, scope_repr=repr(discovery_scope)
+            )
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ), status=status.HTTP_400_BAD_REQUEST)
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
+        threshold = get_threshold(discovery, dt_perms_pheno)
+
+        # structured event logging for public search: embed search details
+        await logger.ainfo(
+            "public individuals search",
+            queried_fields=queried_fields,
+            individual_count=ind_qct,
+            threshold=threshold,
+            sub_threshold=ind_qct <= threshold,
+        )
 
         if ind_qct == 0 and not perm_pheno_query_data:
             # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
             # data permissions.
-            logger.info(
-                f"Public individuals endpoint queried fields {queried_fields} which resulted in "
-                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
-                f"({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
-
-        logger.info(f"Public individuals search queried fields {queried_fields}, resulting in {ind_qct} individuals")
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),

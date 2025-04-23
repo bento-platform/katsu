@@ -9,6 +9,7 @@ from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.chord.tests.constants import valid_dataset_1, VALID_PROJECT_2, valid_dataset_2
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
+from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests.constants import VALID_PHENOPACKET_1
 from ..models import Resource
 from ..serializers import ResourceSerializer
@@ -119,7 +120,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         }
 
         # create phenopacket associated with the dataset (+ a new resource in the phenopacket metadata)
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](pd, ds.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](pd, ds.identifier, logger)
 
         # first, check we get all the resources back successfully with no scoping
         res = self.one_authz_get(self.url)
