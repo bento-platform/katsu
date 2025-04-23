@@ -179,13 +179,11 @@ async def public_overview(request: DrfRequest):
 
     # Parse the public config to gather data for each field defined in the overview
 
-    fields = [chart.field for section in discovery.overview for chart in section.charts]
-    field_conf = discovery.fields
-
+    fields = discovery.get_chart_field_ids()
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
     async def _get_field_response(field: str) -> dict:
-        field_props = field_conf[field]
+        field_props = discovery.fields[field]
         field_perms = field_permissions[field]
 
         stats: list[BinWithValue] | None
