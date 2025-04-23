@@ -103,6 +103,41 @@ async def public_search_fields(request: DrfRequest):
     })
 
 
+@api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def discover_endpoint(request: DrfRequest):
+    """
+    get:
+    Overview, optionally filtered by fields, of phenopackets+experiments data.
+    """
+
+    # Get the request discovery scope, which we'll use to narrow down the project/dataset for discovery
+    # charts/filtering.
+    try:
+        discovery_scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+
+    discovery = discovery_scope.discovery
+
+    # If the discovery object is "empty", i.e., no fields/charts/filters specified, this endpoint becomes a 404, here
+    # meaning no data could be found for discovery purposes.
+    if empty_discovery(discovery):
+        return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+    if not any(d["counts"] for d in dt_permissions.values()):
+        return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
+
+    # TODO
+    # TODO
+    # TODO
+    # TODO
+    # TODO
+    # TODO
+    # TODO
+
+
 @extend_schema(
     description="Overview of all public data in the database",
     responses={
