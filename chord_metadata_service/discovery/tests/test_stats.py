@@ -7,6 +7,7 @@ from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 
+from ..pydantic_models import BinWithValue
 from ..stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 
 
@@ -33,10 +34,10 @@ class IndividualPublicStatsTest(TransactionTestCase, PermissionsTestCaseMixin):
         count, res = await individual_biosample_tissue_stats(
             pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
-        self.assertListEqual(res, [{"label": "wall of urinary bladder", "value": 1}])
+        self.assertListEqual(res, [BinWithValue(label="wall of urinary bladder", value=1)])
 
     async def individual_experiment_type_stats(self):
         count, res = await individual_experiment_type_stats(
             pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
-        self.assertListEqual(res, [{"label": "DNA Methylation", "value": 1}])
+        self.assertListEqual(res, [BinWithValue(label="DNA Methylation", value=1)])

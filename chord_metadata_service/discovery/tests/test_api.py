@@ -356,7 +356,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.assertEqual(
             # 1 more bin than intervals expected: e.g. for config.bins = [2, 3, 4],
             # we expect data entries for ≤2, [2 3), [3 4), ≥4
-            len(response_obj["fields"]["lab_test_result_value"]["config"]["bins"]) + 1,
+            len(response_obj["fields"]["lab_test_result_value"]["definition"]["config"]["bins"]) + 1,
             len(response_obj["fields"]["lab_test_result_value"]["data"]),
         )
 

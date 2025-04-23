@@ -19,7 +19,7 @@ from ..fields import (
     get_month_date_range,
     filter_queryset_field_value,
 )
-# from ..utils import ValidatedDiscoveryScope
+from ..pydantic_models import BinWithValue
 
 
 class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
@@ -64,12 +64,12 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lcf(self):
         res = await get_categorical_stats(self.scope, "sex", field_permissions=self.permissions_full)
-        self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
+        self.assertListEqual(res, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
         res = await get_categorical_stats(self.scope, "sex", field_permissions=self.permissions_counts)
-        self.assertListEqual(res, [{"label": "missing", "value": 0}])
+        self.assertListEqual(res, [BinWithValue(label="missing", value=0)])
 
 
 class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin):
@@ -121,9 +121,9 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             field_permissions=self.permissions_full,
         )
         ground_truth = [
-            {"label": "Genetic Testing", "value": 1},
-            {"label": "Hematology Test", "value": 1},
-            {"label": "missing", "value": 0},
+            BinWithValue(label="Genetic Testing", value=1),
+            BinWithValue(label="Hematology Test", value=1),
+            BinWithValue(label="missing", value=0),
         ]
         self.assertListEqual(res, ground_truth)
 
@@ -135,7 +135,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             field_permissions=self.permissions_counts,
         )
         ground_truth = [
-            {"label": "missing", "value": 0},
+            BinWithValue(label="missing", value=0),
         ]
         self.assertListEqual(res, ground_truth)
 
