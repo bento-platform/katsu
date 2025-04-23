@@ -163,20 +163,6 @@ async def public_overview(request: DrfRequest):
             )
             counts[public_model_name] = 0
 
-    response = {
-        "layout": discovery.overview,
-        "fields": {},
-        "counts": {
-            **({
-                "individuals": counts["individual"],
-                "biosamples": counts["biosample"],
-            } if dt_permissions[dts.DATA_TYPE_PHENOPACKET]["counts"] else {}),
-            **({
-                "experiments": counts["experiment"],
-            } if dt_permissions[dts.DATA_TYPE_EXPERIMENT]["counts"] else {}),
-        },
-    }
-
     # Parse the public config to gather data for each field defined in the overview
 
     fields = [chart.field for section in discovery.overview for chart in section.charts]
