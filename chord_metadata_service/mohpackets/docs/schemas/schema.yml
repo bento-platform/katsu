@@ -1,6 +1,6 @@
 components:
   schemas:
-    AllClinicalDataSchema:
+    AllModelsSchema:
       properties:
         biomarkers:
           items:
@@ -75,7 +75,7 @@ components:
       - biomarkers
       - comorbidities
       - exposures
-      title: AllClinicalDataSchema
+      title: AllModelsSchema
       type: object
     BasisOfDiagnosisEnum:
       enum:
@@ -982,6 +982,12 @@ components:
             type: string
           title: Program Id
           type: array
+        summary_only:
+          default: false
+          description: If true, only summary data will be returned. If false, detailed
+            data will be returned.
+          title: Summary Only
+          type: boolean
         systemic_therapy_drug_name:
           items:
             type: string
@@ -994,6 +1000,18 @@ components:
           title: Treatment Type
           type: array
       title: DownloadFilterSchema
+      type: object
+    DownloadResponseSchema:
+      properties:
+        data:
+          anyOf:
+          - $ref: '#/components/schemas/AllModelsSchema'
+          - type: 'null'
+        summary:
+          $ref: '#/components/schemas/SummaryMessageSchema'
+      required:
+      - summary
+      title: DownloadResponseSchema
       type: object
     DrugReferenceDbEnum:
       enum:
@@ -4155,6 +4173,21 @@ components:
       - Not available
       title: StorageEnum
       type: string
+    SummaryMessageSchema:
+      properties:
+        message:
+          title: Message
+          type: string
+        record_counts:
+          additionalProperties:
+            type: integer
+          title: Record Counts
+          type: object
+      required:
+      - message
+      - record_counts
+      title: SummaryMessageSchema
+      type: object
     SurgeryFilterSchema:
       properties:
         greatest_dimension_tumour:
@@ -7005,9 +7038,9 @@ paths:
     post:
       description: 'Filters clinical data based on criteria provided in the POST request
 
-        body and returns multiple related tables (Donors, PrimaryDiagnoses,
+        body. Returns record counts and optionally the detailed data based
 
-        Specimens, etc.) as a single JSON object'
+        on the ''summary_only'' flag.'
       operationId: chord_metadata_service_mohpackets_apis_download_search_clinical_data
       parameters: []
       requestBody:
@@ -7021,7 +7054,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AllClinicalDataSchema'
+                $ref: '#/components/schemas/DownloadResponseSchema'
           description: OK
       security:
       - DownloadAuth: []

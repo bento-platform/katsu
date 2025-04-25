@@ -3840,13 +3840,13 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/AllClinicalDataSchema"
+                                    "$ref": "#/components/schemas/DownloadResponseSchema"
                                 }
                             }
                         }
                     }
                 },
-                "description": "Filters clinical data based on criteria provided in the POST request\nbody and returns multiple related tables (Donors, PrimaryDiagnoses,\nSpecimens, etc.) as a single JSON object",
+                "description": "Filters clinical data based on criteria provided in the POST request\nbody. Returns record counts and optionally the detailed data based\non the 'summary_only' flag.",
                 "tags": [
                     "download"
                 ],
@@ -12851,7 +12851,7 @@
                 "title": "TreatmentModelSchema",
                 "type": "object"
             },
-            "AllClinicalDataSchema": {
+            "AllModelsSchema": {
                 "properties": {
                     "donors": {
                         "items": {
@@ -12952,7 +12952,50 @@
                     "comorbidities",
                     "exposures"
                 ],
-                "title": "AllClinicalDataSchema",
+                "title": "AllModelsSchema",
+                "type": "object"
+            },
+            "DownloadResponseSchema": {
+                "properties": {
+                    "summary": {
+                        "$ref": "#/components/schemas/SummaryMessageSchema"
+                    },
+                    "data": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AllModelsSchema"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "summary"
+                ],
+                "title": "DownloadResponseSchema",
+                "type": "object"
+            },
+            "SummaryMessageSchema": {
+                "properties": {
+                    "message": {
+                        "title": "Message",
+                        "type": "string"
+                    },
+                    "record_counts": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "title": "Record Counts",
+                        "type": "object"
+                    }
+                },
+                "required": [
+                    "message",
+                    "record_counts"
+                ],
+                "title": "SummaryMessageSchema",
                 "type": "object"
             },
             "DownloadFilterSchema": {
@@ -12992,6 +13035,12 @@
                         },
                         "title": "Biosample Id",
                         "type": "array"
+                    },
+                    "summary_only": {
+                        "default": false,
+                        "description": "If true, only summary data will be returned. If false, detailed data will be returned.",
+                        "title": "Summary Only",
+                        "type": "boolean"
                     }
                 },
                 "title": "DownloadFilterSchema",
