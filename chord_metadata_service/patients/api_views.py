@@ -123,9 +123,13 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
             qs = (
                 Phenopacket
                 .get_model_scoped_queryset(scope)
+                .prefetch_related("dataset__project")
                 .filter(subject__id__in=individual_ids)
                 .values(
                     "subject_id",
+                    "dataset_id",
+                    phenopacket_id=F("id"),
+                    project_id=F("dataset__project_id"),
                     alternate_ids=Coalesce(F("subject__alternate_ids"), [])
                 )
                 .annotate(
