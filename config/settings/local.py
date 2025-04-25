@@ -56,7 +56,7 @@ LOCAL_OPA_DATASET = {
     "user_1": {
         "is_admin": False,
         "write_datasets": [],
-        "read_datasets": ["SYNTH_01", "SYNTH_02"],
+        "read_datasets": ["SYNTH_01"],
     },
     "user_2": {
         "is_admin": False,
