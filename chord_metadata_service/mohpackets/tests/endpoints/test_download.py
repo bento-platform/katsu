@@ -69,7 +69,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
 
         response = self._post_request(token=user_0_token)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         # Check that all returned donors belong to the authorized program
         donor_program_ids = {donor["program_id"] for donor in data["donors"]}
@@ -99,7 +99,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         """
         response = self._post_request()
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         # Check counts against expected total data for user_2 (all data)
         self.assertEqual(len(data["donors"]), Donor.objects.count())
@@ -127,7 +127,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"program_id": [program_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         expected_donor_count = Donor.objects.filter(
             program_id=program_to_filter
@@ -143,7 +143,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"primary_site": [site_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         expected_donor_ids = set(
             PrimaryDiagnosis.objects.filter(primary_site=site_to_filter).values_list(
@@ -168,7 +168,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"treatment_type": [type_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         expected_donor_ids = set(
             Treatment.objects.filter(
@@ -189,7 +189,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"systemic_therapy_drug_name": [drug_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         expected_donor_ids = set(
             SystemicTherapy.objects.filter(drug_name=drug_to_filter).values_list(
@@ -214,7 +214,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"biosample_id": [biosample_id_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         # Expect only the donor associated with this specific sample registration
         self.assertEqual(len(data["donors"]), 1)
@@ -255,7 +255,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"program_id": [program_to_filter], "primary_site": [site_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
 
         response_donor_uuids = {d["submitter_donor_id"] for d in data["donors"]}
         self.assertEqual(response_donor_uuids, expected_donor_uuids)
@@ -273,7 +273,9 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"program_id": ["NON_EXISTENT_PROGRAM"]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertIn("No matching records found", response.json()["message"])
+        self.assertIn(
+            "No matching records found", response.json()["summary"]["message"]
+        )
 
     def test_response_structure_and_content(self):
         """
@@ -283,7 +285,8 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         filters = {"program_id": [program_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        data = response.json()
+        data = response.json()["data"]
+
 
         # Check top-level keys
         expected_keys = {
