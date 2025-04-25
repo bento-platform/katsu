@@ -1,22 +1,8 @@
 from http import HTTPStatus
-from typing import List
 
 from django.db.models import Q
-from ninja import Field, FilterSchema, Router, Schema
-from chord_metadata_service.mohpackets.schemas.model import (
-    BiomarkerModelSchema,
-    ComorbidityModelSchema,
-    DonorModelSchema,
-    ExposureModelSchema,
-    FollowUpModelSchema,
-    PrimaryDiagnosisModelSchema,
-    RadiationModelSchema,
-    SampleRegistrationModelSchema,
-    SpecimenModelSchema,
-    SurgeryModelSchema,
-    SystemicTherapyModelSchema,
-    TreatmentModelSchema,
-)
+from ninja import Router
+
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
     Comorbidity,
@@ -31,39 +17,19 @@ from chord_metadata_service.mohpackets.models import (
     SystemicTherapy,
     Treatment,
 )
+from chord_metadata_service.mohpackets.schemas.download import DownloadResponseSchema, SummaryMessageSchema
+from chord_metadata_service.mohpackets.schemas.filter import DownloadFilterSchema
 
 router = Router()
 
 
-class AllClinicalDataSchema(Schema):
-    donors: List[DonorModelSchema]
-    primary_diagnoses: List[PrimaryDiagnosisModelSchema]
-    specimens: List[SpecimenModelSchema]
-    sample_registrations: List[SampleRegistrationModelSchema]
-    treatments: List[TreatmentModelSchema]
-    systemic_therapies: List[SystemicTherapyModelSchema]
-    radiations: List[RadiationModelSchema]
-    surgeries: List[SurgeryModelSchema]
-    follow_ups: List[FollowUpModelSchema]
-    biomarkers: List[BiomarkerModelSchema]
-    comorbidities: List[ComorbidityModelSchema]
-    exposures: List[ExposureModelSchema]
 
-
-class DownloadFilterSchema(FilterSchema):
-    treatment_type: List[str] = Field(None, q="treatment_type__overlap")
-    primary_site: List[str] = Field(None)
-    systemic_therapy_drug_name: List[str] = Field(None)
-    program_id: List[str] = Field(None)
-    biosample_id: List[str] = Field(None)
-
-
-@router.post("/clinical_data/", response=AllClinicalDataSchema)
+@router.post("/clinical_data/", response=DownloadResponseSchema)
 def search_clinical_data(request, filters: DownloadFilterSchema):
     """
     Filters clinical data based on criteria provided in the POST request
-    body and returns multiple related tables (Donors, PrimaryDiagnoses,
-    Specimens, etc.) as a single JSON object
+    body. Returns record counts and optionally the detailed data based
+    on the 'summary_only' flag.
     """
     filter_dict = filters.dict(exclude_none=True)
 
@@ -120,36 +86,55 @@ def search_clinical_data(request, filters: DownloadFilterSchema):
             filtered_donors_qs = filtered_donors_qs.none()
 
     filtered_donor_uuids = list(filtered_donors_qs.values_list("uuid", flat=True))
+    donor_count = len(filtered_donor_uuids)
 
-    if not filtered_donor_uuids:
-        return router.api.create_response(
-            request,
-            {"message": "No matching records found."},
-            status=HTTPStatus.OK,
-        )
-
-    # 2. --- Get QuerySets for Related Models using the filtered donor UUIDs ---
-    querysets_to_download = {
-        "donors": Donor.objects.filter(uuid__in=filtered_donor_uuids),
-        "primary_diagnoses": PrimaryDiagnosis.objects.filter(
-            donor_uuid__in=filtered_donor_uuids
-        ),
-        "specimens": Specimen.objects.filter(donor_uuid__in=filtered_donor_uuids),
-        "sample_registrations": SampleRegistration.objects.filter(
-            donor_uuid__in=filtered_donor_uuids
-        ),
-        "treatments": Treatment.objects.filter(donor_uuid__in=filtered_donor_uuids),
-        "systemic_therapies": SystemicTherapy.objects.filter(
-            donor_uuid__in=filtered_donor_uuids
-        ),
-        "radiations": Radiation.objects.filter(donor_uuid__in=filtered_donor_uuids),
-        "surgeries": Surgery.objects.filter(donor_uuid__in=filtered_donor_uuids),
-        "follow_ups": FollowUp.objects.filter(donor_uuid__in=filtered_donor_uuids),
-        "biomarkers": Biomarker.objects.filter(donor_uuid__in=filtered_donor_uuids),
-        "comorbidities": Comorbidity.objects.filter(
-            donor_uuid__in=filtered_donor_uuids
-        ),
-        "exposures": Exposure.objects.filter(donor_uuid__in=filtered_donor_uuids),
+    # 2. --- Get QuerySets and Counts for Related Models ---
+    models_to_query = {
+        "donors": Donor,
+        "primary_diagnoses": PrimaryDiagnosis,
+        "specimens": Specimen,
+        "sample_registrations": SampleRegistration,
+        "treatments": Treatment,
+        "systemic_therapies": SystemicTherapy,
+        "radiations": Radiation,
+        "surgeries": Surgery,
+        "follow_ups": FollowUp,
+        "biomarkers": Biomarker,
+        "comorbidities": Comorbidity,
+        "exposures": Exposure,
     }
 
-    return querysets_to_download
+    querysets_to_download = {}
+    record_counts = {}
+
+    if not filtered_donor_uuids:
+        # If no donors match, all counts are 0
+        for name in models_to_query:
+            record_counts[name] = 0
+        message = "No matching records found for the given criteria."
+    else:
+        for name, model in models_to_query.items():
+            filter_kwargs = {}
+            if name == "donors":
+                filter_kwargs["uuid__in"] = filtered_donor_uuids
+            else:
+                filter_kwargs["donor_uuid__in"] = filtered_donor_uuids
+
+            qs = model.objects.filter(**filter_kwargs)
+            record_counts[name] = qs.count()
+            # Only store the full queryset if detailed data is requested
+            if not filters.summary_only:
+                querysets_to_download[name] = qs
+        message = f"Found {donor_count} matching donors."
+
+    # 3. --- Construct Response ---
+    summary_payload = SummaryMessageSchema(message=message, record_counts=record_counts)
+
+    response_payload = {"summary": summary_payload}
+
+    if not filters.summary_only and donor_count > 0:
+        response_payload["data"] = querysets_to_download
+    elif not filters.summary_only and donor_count == 0:
+        response_payload["data"] = None
+
+    return response_payload
