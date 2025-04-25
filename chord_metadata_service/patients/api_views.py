@@ -354,6 +354,13 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
+        # filtered_qs: filtered Individual queryset
+        filtered_qs = filtered_qs.annotate(
+            phenopacket_id=F("phenopackets__id"),
+            dataset_id=F("phenopackets__dataset__identifier"),
+            project_id=F("phenopackets__dataset__project__identifier"),
+        )
+
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
             individual_experiment_type_stats(filtered_qs, discovery, dt_perms_exp),
@@ -363,7 +370,28 @@ class PublicListIndividuals(APIView):
         return Response({
             "count": ind_qct,
             # Only if we have "query:data" - this field is for Beacon, which should have an access token:
-            **({"matches": filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
+            **(
+                {
+                    "matches": filtered_qs.values_list("id", flat=True),
+                    # Below is a temporary detailed match list so we can start building a better search UI.
+                    "matches_detail": [
+                        {
+                            "id": i.id,
+                            **({
+                                "phenopacket_id": i.phenopacket_id,
+                                "project_id": i.project_id,
+                                "dataset_id": i.dataset_id,
+                            } if i.phenopacket_id else {
+                                "phenopacket_id": None,
+                                "project_id": None,
+                                "dataset_id": None,
+                            })
+                        } async for i in filtered_qs
+                    ],
+                }
+                if perm_pheno_query_data
+                else {}
+            ),
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues,
