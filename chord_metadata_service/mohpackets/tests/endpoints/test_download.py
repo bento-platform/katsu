@@ -66,7 +66,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         )
         self.assertEqual(
             authorized_datasets, [self.programs[0].program_id]
-        )  # Ensure setup is correct
+        )
 
         response = self._post_request(token=user_0_token)
         self.assertEqual(response.status_code, HTTPStatus.OK)
