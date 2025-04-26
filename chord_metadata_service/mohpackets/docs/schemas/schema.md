@@ -1572,8 +1572,8 @@ Used by the query service to return donors along with their sample IDs, treatmen
 *Search Clinical Data*
 
 Filters clinical data based on criteria provided in the POST request
-body and returns multiple related tables (Donors, PrimaryDiagnoses,
-Specimens, etc.) as a single JSON object
+body. Returns record counts and optionally the detailed data based
+on the 'summary_only' flag.
 
 <h3 id="chord_metadata_service_mohpackets_apis_download_search_clinical_data-parameters">Parameters</h3>
 
@@ -1587,265 +1587,274 @@ Specimens, etc.) as a single JSON object
 
 ```json
 {
-  "donors": [
-    {
-      "submitter_donor_id": "string",
-      "gender": "Man",
-      "sex_at_birth": "Male",
-      "is_deceased": "Yes",
-      "lost_to_followup_after_clinical_event_identifier": "string",
-      "lost_to_followup_reason": "Completed study",
-      "date_alive_after_lost_to_followup": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "cause_of_death": "Died of cancer",
-      "date_of_birth": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "date_of_death": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "date_resolution": "string",
-      "program_id": "string"
+  "summary": {
+    "message": "string",
+    "record_counts": {
+      "property1": 0,
+      "property2": 0
     }
-  ],
-  "primary_diagnoses": [
-    {
-      "submitter_primary_diagnosis_id": "string",
-      "primary_site": "Accessory sinuses",
-      "date_of_diagnosis": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "cancer_type_code": "string",
-      "basis_of_diagnosis": "Clinical investigation",
-      "laterality": "Bilateral",
-      "clinical_tumour_staging_system": "AJCC cancer staging system",
-      "clinical_t_category": "T0",
-      "clinical_n_category": "N0",
-      "clinical_m_category": "M0",
-      "clinical_stage_group": "Stage 0",
-      "pathological_tumour_staging_system": "AJCC cancer staging system",
-      "pathological_t_category": "T0",
-      "pathological_n_category": "N0",
-      "pathological_m_category": "M0",
-      "pathological_stage_group": "Stage 0",
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ],
-  "specimens": [
-    {
-      "submitter_specimen_id": "string",
-      "submitter_treatment_id": "string",
-      "specimen_collection_date": {},
-      "specimen_storage": "Cut slide",
-      "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
-      "tumour_histological_type": "string",
-      "specimen_anatomic_location": "string",
-      "specimen_laterality": "Left",
-      "reference_pathology_confirmed_diagnosis": "Yes",
-      "reference_pathology_confirmed_tumour_presence": "Yes",
-      "tumour_grading_system": "FNCLCC grading system",
-      "tumour_grade": "Low grade",
-      "percent_tumour_cells_range": "0-19%",
-      "percent_tumour_cells_measurement_method": "Genomics",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ],
-  "sample_registrations": [
-    {
-      "submitter_sample_id": "string",
-      "specimen_tissue_source": "Abdominal fluid",
-      "tumour_normal_designation": "Normal",
-      "specimen_type": "Cell line - derived from normal",
-      "sample_type": "Amplified DNA",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_specimen_id": "string"
-    }
-  ],
-  "treatments": [
-    {
-      "submitter_treatment_id": "string",
-      "treatment_type": [
-        "Bone marrow transplant"
-      ],
-      "is_primary_treatment": "Yes",
-      "treatment_start_date": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "treatment_end_date": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "treatment_intent": "Curative",
-      "response_to_treatment_criteria_method": "RECIST 1.1",
-      "response_to_treatment": "Complete response",
-      "status_of_treatment": "Treatment completed as prescribed",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string"
-    }
-  ],
-  "systemic_therapies": [
-    {
-      "systemic_therapy_type": "string",
-      "days_per_cycle": 0,
-      "days_per_cycle_not_available": false,
-      "number_of_cycles": 0,
-      "number_of_cycles_not_available": false,
-      "start_date": {},
-      "end_date": {},
-      "drug_reference_database": "RxNorm",
-      "drug_name": "string",
-      "drug_reference_identifier": "string",
-      "drug_dose_units": "mg/m2",
-      "prescribed_cumulative_drug_dose": 0,
-      "prescribed_cumulative_drug_dose_not_available": false,
-      "actual_cumulative_drug_dose": 0,
-      "actual_cumulative_drug_dose_not_available": false,
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ],
-  "radiations": [
-    {
-      "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
-      "radiation_therapy_type": "External",
-      "radiation_therapy_fractions": 0,
-      "radiation_therapy_fractions_not_available": false,
-      "radiation_therapy_dosage": 0,
-      "radiation_therapy_dosage_not_available": false,
-      "anatomical_site_irradiated": "LEFT ABDOMEN",
-      "radiation_boost": "Yes",
-      "reference_radiation_treatment_id": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ],
-  "surgeries": [
-    {
-      "surgery_type": "string",
-      "surgery_site": "string",
-      "surgery_location": "Local recurrence",
-      "tumour_length": 0,
-      "tumour_length_not_available": false,
-      "tumour_width": 0,
-      "tumour_width_not_available": false,
-      "greatest_dimension_tumour": 0,
-      "greatest_dimension_tumour_not_available": false,
-      "tumour_focality": "Cannot be assessed",
-      "residual_tumour_classification": "Not applicable",
-      "margin_types_involved": [
-        "Circumferential resection margin"
-      ],
-      "margin_types_not_involved": [
-        "Circumferential resection margin"
-      ],
-      "margin_types_not_assessed": [
-        "Circumferential resection margin"
-      ],
-      "lymphovascular_invasion": "Absent",
-      "perineural_invasion": "Absent",
-      "surgery_reference_database": "SNOMED",
-      "surgery_reference_identifier": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ],
-  "follow_ups": [
-    {
-      "submitter_follow_up_id": "string",
-      "date_of_followup": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "disease_status_at_followup": "Complete remission",
-      "relapse_type": "Distant recurrence/metastasis",
-      "date_of_relapse": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "method_of_progression_status": [
-        "Imaging (procedure)"
-      ],
-      "anatomic_site_progression_or_recurrence": [
-        "string"
-      ],
-      "program_id": "string",
-      "submitter_donor_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string"
-    }
-  ],
-  "biomarkers": [
-    {
-      "submitter_specimen_id": "string",
-      "submitter_primary_diagnosis_id": "string",
-      "submitter_treatment_id": "string",
-      "submitter_follow_up_id": "string",
-      "test_date": {
-        "day_interval": 0,
-        "month_interval": 0
-      },
-      "psa_level": 0,
-      "psa_level_not_available": false,
-      "ca125": 0,
-      "ca125_not_available": false,
-      "cea": 0,
-      "cea_not_available": false,
-      "er_status": "Cannot be determined",
-      "er_percent_positive": 0,
-      "er_percent_positive_not_available": false,
-      "pr_status": "Cannot be determined",
-      "pr_percent_positive": 0,
-      "pr_percent_positive_not_available": false,
-      "her2_ihc_status": "Cannot be determined",
-      "her2_ish_status": "Cannot be determined",
-      "hpv_ihc_status": "Cannot be determined",
-      "hpv_pcr_status": "Cannot be determined",
-      "hpv_strain": [
-        "HPV16"
-      ],
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ],
-  "comorbidities": [
-    {
-      "prior_malignancy": "Yes",
-      "laterality_of_prior_malignancy": "Bilateral",
-      "age_at_comorbidity_diagnosis": 0,
-      "age_at_comorbidity_diagnosis_not_available": false,
-      "comorbidity_type_code": "string",
-      "comorbidity_treatment_status": "Yes",
-      "comorbidity_treatment": "string",
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ],
-  "exposures": [
-    {
-      "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
-      "tobacco_type": [
-        "Chewing Tobacco"
-      ],
-      "pack_years_smoked": 0,
-      "pack_years_smoked_not_available": false,
-      "program_id": "string",
-      "submitter_donor_id": "string"
-    }
-  ]
+  },
+  "data": {
+    "donors": [
+      {
+        "submitter_donor_id": "string",
+        "gender": "Man",
+        "sex_at_birth": "Male",
+        "is_deceased": "Yes",
+        "lost_to_followup_after_clinical_event_identifier": "string",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "date_of_death": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "date_resolution": "string",
+        "program_id": "string"
+      }
+    ],
+    "primary_diagnoses": [
+      {
+        "submitter_primary_diagnosis_id": "string",
+        "primary_site": "Accessory sinuses",
+        "date_of_diagnosis": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "cancer_type_code": "string",
+        "basis_of_diagnosis": "Clinical investigation",
+        "laterality": "Bilateral",
+        "clinical_tumour_staging_system": "AJCC cancer staging system",
+        "clinical_t_category": "T0",
+        "clinical_n_category": "N0",
+        "clinical_m_category": "M0",
+        "clinical_stage_group": "Stage 0",
+        "pathological_tumour_staging_system": "AJCC cancer staging system",
+        "pathological_t_category": "T0",
+        "pathological_n_category": "N0",
+        "pathological_m_category": "M0",
+        "pathological_stage_group": "Stage 0",
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ],
+    "specimens": [
+      {
+        "submitter_specimen_id": "string",
+        "submitter_treatment_id": "string",
+        "specimen_collection_date": {},
+        "specimen_storage": "Cut slide",
+        "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+        "tumour_histological_type": "string",
+        "specimen_anatomic_location": "string",
+        "specimen_laterality": "Left",
+        "reference_pathology_confirmed_diagnosis": "Yes",
+        "reference_pathology_confirmed_tumour_presence": "Yes",
+        "tumour_grading_system": "FNCLCC grading system",
+        "tumour_grade": "Low grade",
+        "percent_tumour_cells_range": "0-19%",
+        "percent_tumour_cells_measurement_method": "Genomics",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_primary_diagnosis_id": "string"
+      }
+    ],
+    "sample_registrations": [
+      {
+        "submitter_sample_id": "string",
+        "specimen_tissue_source": "Abdominal fluid",
+        "tumour_normal_designation": "Normal",
+        "specimen_type": "Cell line - derived from normal",
+        "sample_type": "Amplified DNA",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_specimen_id": "string"
+      }
+    ],
+    "treatments": [
+      {
+        "submitter_treatment_id": "string",
+        "treatment_type": [
+          "Bone marrow transplant"
+        ],
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "treatment_end_date": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "treatment_intent": "Curative",
+        "response_to_treatment_criteria_method": "RECIST 1.1",
+        "response_to_treatment": "Complete response",
+        "status_of_treatment": "Treatment completed as prescribed",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_primary_diagnosis_id": "string"
+      }
+    ],
+    "systemic_therapies": [
+      {
+        "systemic_therapy_type": "string",
+        "days_per_cycle": 0,
+        "days_per_cycle_not_available": false,
+        "number_of_cycles": 0,
+        "number_of_cycles_not_available": false,
+        "start_date": {},
+        "end_date": {},
+        "drug_reference_database": "RxNorm",
+        "drug_name": "string",
+        "drug_reference_identifier": "string",
+        "drug_dose_units": "mg/m2",
+        "prescribed_cumulative_drug_dose": 0,
+        "prescribed_cumulative_drug_dose_not_available": false,
+        "actual_cumulative_drug_dose": 0,
+        "actual_cumulative_drug_dose_not_available": false,
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "radiations": [
+      {
+        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+        "radiation_therapy_type": "External",
+        "radiation_therapy_fractions": 0,
+        "radiation_therapy_fractions_not_available": false,
+        "radiation_therapy_dosage": 0,
+        "radiation_therapy_dosage_not_available": false,
+        "anatomical_site_irradiated": "LEFT ABDOMEN",
+        "radiation_boost": "Yes",
+        "reference_radiation_treatment_id": "string",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "surgeries": [
+      {
+        "surgery_type": "string",
+        "surgery_site": "string",
+        "surgery_location": "Local recurrence",
+        "tumour_length": 0,
+        "tumour_length_not_available": false,
+        "tumour_width": 0,
+        "tumour_width_not_available": false,
+        "greatest_dimension_tumour": 0,
+        "greatest_dimension_tumour_not_available": false,
+        "tumour_focality": "Cannot be assessed",
+        "residual_tumour_classification": "Not applicable",
+        "margin_types_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_assessed": [
+          "Circumferential resection margin"
+        ],
+        "lymphovascular_invasion": "Absent",
+        "perineural_invasion": "Absent",
+        "surgery_reference_database": "SNOMED",
+        "surgery_reference_identifier": "string",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "follow_ups": [
+      {
+        "submitter_follow_up_id": "string",
+        "date_of_followup": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "disease_status_at_followup": "Complete remission",
+        "relapse_type": "Distant recurrence/metastasis",
+        "date_of_relapse": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "method_of_progression_status": [
+          "Imaging (procedure)"
+        ],
+        "anatomic_site_progression_or_recurrence": [
+          "string"
+        ],
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_primary_diagnosis_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "biomarkers": [
+      {
+        "submitter_specimen_id": "string",
+        "submitter_primary_diagnosis_id": "string",
+        "submitter_treatment_id": "string",
+        "submitter_follow_up_id": "string",
+        "test_date": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "psa_level": 0,
+        "psa_level_not_available": false,
+        "ca125": 0,
+        "ca125_not_available": false,
+        "cea": 0,
+        "cea_not_available": false,
+        "er_status": "Cannot be determined",
+        "er_percent_positive": 0,
+        "er_percent_positive_not_available": false,
+        "pr_status": "Cannot be determined",
+        "pr_percent_positive": 0,
+        "pr_percent_positive_not_available": false,
+        "her2_ihc_status": "Cannot be determined",
+        "her2_ish_status": "Cannot be determined",
+        "hpv_ihc_status": "Cannot be determined",
+        "hpv_pcr_status": "Cannot be determined",
+        "hpv_strain": [
+          "HPV16"
+        ],
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ],
+    "comorbidities": [
+      {
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Bilateral",
+        "age_at_comorbidity_diagnosis": 0,
+        "age_at_comorbidity_diagnosis_not_available": false,
+        "comorbidity_type_code": "string",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "string",
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ],
+    "exposures": [
+      {
+        "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
+        "tobacco_type": [
+          "Chewing Tobacco"
+        ],
+        "pack_years_smoked": 0,
+        "pack_years_smoked_not_available": false,
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ]
+  }
 }
 ```
 
@@ -17152,12 +17161,12 @@ continued
 |submitter_donor_id|string|true|none|none|
 |submitter_primary_diagnosis_id|string|true|none|none|
 
-<h2 id="tocS_AllClinicalDataSchema">AllClinicalDataSchema</h2>
+<h2 id="tocS_AllModelsSchema">AllModelsSchema</h2>
 
-<a id="schemaallclinicaldataschema"></a>
-<a id="schema_AllClinicalDataSchema"></a>
-<a id="tocSallclinicaldataschema"></a>
-<a id="tocsallclinicaldataschema"></a>
+<a id="schemaallmodelsschema"></a>
+<a id="schema_AllModelsSchema"></a>
+<a id="tocSallmodelsschema"></a>
+<a id="tocsallmodelsschema"></a>
 
 ```json
 {
@@ -17424,7 +17433,7 @@ continued
 
 ```
 
-AllClinicalDataSchema
+AllModelsSchema
 
 ### Properties
 
@@ -17442,6 +17451,336 @@ AllClinicalDataSchema
 |biomarkers|[[BiomarkerModelSchema](#schemabiomarkermodelschema)]|true|none|none|
 |comorbidities|[[ComorbidityModelSchema](#schemacomorbiditymodelschema)]|true|none|none|
 |exposures|[[ExposureModelSchema](#schemaexposuremodelschema)]|true|none|none|
+
+<h2 id="tocS_DownloadResponseSchema">DownloadResponseSchema</h2>
+
+<a id="schemadownloadresponseschema"></a>
+<a id="schema_DownloadResponseSchema"></a>
+<a id="tocSdownloadresponseschema"></a>
+<a id="tocsdownloadresponseschema"></a>
+
+```json
+{
+  "summary": {
+    "message": "string",
+    "record_counts": {
+      "property1": 0,
+      "property2": 0
+    }
+  },
+  "data": {
+    "donors": [
+      {
+        "submitter_donor_id": "string",
+        "gender": "Man",
+        "sex_at_birth": "Male",
+        "is_deceased": "Yes",
+        "lost_to_followup_after_clinical_event_identifier": "string",
+        "lost_to_followup_reason": "Completed study",
+        "date_alive_after_lost_to_followup": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "cause_of_death": "Died of cancer",
+        "date_of_birth": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "date_of_death": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "date_resolution": "string",
+        "program_id": "string"
+      }
+    ],
+    "primary_diagnoses": [
+      {
+        "submitter_primary_diagnosis_id": "string",
+        "primary_site": "Accessory sinuses",
+        "date_of_diagnosis": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "cancer_type_code": "string",
+        "basis_of_diagnosis": "Clinical investigation",
+        "laterality": "Bilateral",
+        "clinical_tumour_staging_system": "AJCC cancer staging system",
+        "clinical_t_category": "T0",
+        "clinical_n_category": "N0",
+        "clinical_m_category": "M0",
+        "clinical_stage_group": "Stage 0",
+        "pathological_tumour_staging_system": "AJCC cancer staging system",
+        "pathological_t_category": "T0",
+        "pathological_n_category": "N0",
+        "pathological_m_category": "M0",
+        "pathological_stage_group": "Stage 0",
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ],
+    "specimens": [
+      {
+        "submitter_specimen_id": "string",
+        "submitter_treatment_id": "string",
+        "specimen_collection_date": {},
+        "specimen_storage": "Cut slide",
+        "specimen_processing": "Cryopreservation in liquid nitrogen (dead tissue)",
+        "tumour_histological_type": "string",
+        "specimen_anatomic_location": "string",
+        "specimen_laterality": "Left",
+        "reference_pathology_confirmed_diagnosis": "Yes",
+        "reference_pathology_confirmed_tumour_presence": "Yes",
+        "tumour_grading_system": "FNCLCC grading system",
+        "tumour_grade": "Low grade",
+        "percent_tumour_cells_range": "0-19%",
+        "percent_tumour_cells_measurement_method": "Genomics",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_primary_diagnosis_id": "string"
+      }
+    ],
+    "sample_registrations": [
+      {
+        "submitter_sample_id": "string",
+        "specimen_tissue_source": "Abdominal fluid",
+        "tumour_normal_designation": "Normal",
+        "specimen_type": "Cell line - derived from normal",
+        "sample_type": "Amplified DNA",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_specimen_id": "string"
+      }
+    ],
+    "treatments": [
+      {
+        "submitter_treatment_id": "string",
+        "treatment_type": [
+          "Bone marrow transplant"
+        ],
+        "is_primary_treatment": "Yes",
+        "treatment_start_date": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "treatment_end_date": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "treatment_intent": "Curative",
+        "response_to_treatment_criteria_method": "RECIST 1.1",
+        "response_to_treatment": "Complete response",
+        "status_of_treatment": "Treatment completed as prescribed",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_primary_diagnosis_id": "string"
+      }
+    ],
+    "systemic_therapies": [
+      {
+        "systemic_therapy_type": "string",
+        "days_per_cycle": 0,
+        "days_per_cycle_not_available": false,
+        "number_of_cycles": 0,
+        "number_of_cycles_not_available": false,
+        "start_date": {},
+        "end_date": {},
+        "drug_reference_database": "RxNorm",
+        "drug_name": "string",
+        "drug_reference_identifier": "string",
+        "drug_dose_units": "mg/m2",
+        "prescribed_cumulative_drug_dose": 0,
+        "prescribed_cumulative_drug_dose_not_available": false,
+        "actual_cumulative_drug_dose": 0,
+        "actual_cumulative_drug_dose_not_available": false,
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "radiations": [
+      {
+        "radiation_therapy_modality": "Megavoltage radiation therapy using photons (procedure)",
+        "radiation_therapy_type": "External",
+        "radiation_therapy_fractions": 0,
+        "radiation_therapy_fractions_not_available": false,
+        "radiation_therapy_dosage": 0,
+        "radiation_therapy_dosage_not_available": false,
+        "anatomical_site_irradiated": "LEFT ABDOMEN",
+        "radiation_boost": "Yes",
+        "reference_radiation_treatment_id": "string",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "surgeries": [
+      {
+        "surgery_type": "string",
+        "surgery_site": "string",
+        "surgery_location": "Local recurrence",
+        "tumour_length": 0,
+        "tumour_length_not_available": false,
+        "tumour_width": 0,
+        "tumour_width_not_available": false,
+        "greatest_dimension_tumour": 0,
+        "greatest_dimension_tumour_not_available": false,
+        "tumour_focality": "Cannot be assessed",
+        "residual_tumour_classification": "Not applicable",
+        "margin_types_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_involved": [
+          "Circumferential resection margin"
+        ],
+        "margin_types_not_assessed": [
+          "Circumferential resection margin"
+        ],
+        "lymphovascular_invasion": "Absent",
+        "perineural_invasion": "Absent",
+        "surgery_reference_database": "SNOMED",
+        "surgery_reference_identifier": "string",
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "follow_ups": [
+      {
+        "submitter_follow_up_id": "string",
+        "date_of_followup": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "disease_status_at_followup": "Complete remission",
+        "relapse_type": "Distant recurrence/metastasis",
+        "date_of_relapse": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "method_of_progression_status": [
+          "Imaging (procedure)"
+        ],
+        "anatomic_site_progression_or_recurrence": [
+          "string"
+        ],
+        "program_id": "string",
+        "submitter_donor_id": "string",
+        "submitter_primary_diagnosis_id": "string",
+        "submitter_treatment_id": "string"
+      }
+    ],
+    "biomarkers": [
+      {
+        "submitter_specimen_id": "string",
+        "submitter_primary_diagnosis_id": "string",
+        "submitter_treatment_id": "string",
+        "submitter_follow_up_id": "string",
+        "test_date": {
+          "day_interval": 0,
+          "month_interval": 0
+        },
+        "psa_level": 0,
+        "psa_level_not_available": false,
+        "ca125": 0,
+        "ca125_not_available": false,
+        "cea": 0,
+        "cea_not_available": false,
+        "er_status": "Cannot be determined",
+        "er_percent_positive": 0,
+        "er_percent_positive_not_available": false,
+        "pr_status": "Cannot be determined",
+        "pr_percent_positive": 0,
+        "pr_percent_positive_not_available": false,
+        "her2_ihc_status": "Cannot be determined",
+        "her2_ish_status": "Cannot be determined",
+        "hpv_ihc_status": "Cannot be determined",
+        "hpv_pcr_status": "Cannot be determined",
+        "hpv_strain": [
+          "HPV16"
+        ],
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ],
+    "comorbidities": [
+      {
+        "prior_malignancy": "Yes",
+        "laterality_of_prior_malignancy": "Bilateral",
+        "age_at_comorbidity_diagnosis": 0,
+        "age_at_comorbidity_diagnosis_not_available": false,
+        "comorbidity_type_code": "string",
+        "comorbidity_treatment_status": "Yes",
+        "comorbidity_treatment": "string",
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ],
+    "exposures": [
+      {
+        "tobacco_smoking_status": "Current reformed smoker for <= 15 years",
+        "tobacco_type": [
+          "Chewing Tobacco"
+        ],
+        "pack_years_smoked": 0,
+        "pack_years_smoked_not_available": false,
+        "program_id": "string",
+        "submitter_donor_id": "string"
+      }
+    ]
+  }
+}
+
+```
+
+DownloadResponseSchema
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|summary|[SummaryMessageSchema](#schemasummarymessageschema)|true|none|none|
+|data|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|[AllModelsSchema](#schemaallmodelsschema)|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+<h2 id="tocS_SummaryMessageSchema">SummaryMessageSchema</h2>
+
+<a id="schemasummarymessageschema"></a>
+<a id="schema_SummaryMessageSchema"></a>
+<a id="tocSsummarymessageschema"></a>
+<a id="tocssummarymessageschema"></a>
+
+```json
+{
+  "message": "string",
+  "record_counts": {
+    "property1": 0,
+    "property2": 0
+  }
+}
+
+```
+
+SummaryMessageSchema
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|message|string|true|none|none|
+|record_counts|object|true|none|none|
+|» **additionalProperties**|integer|false|none|none|
 
 <h2 id="tocS_DownloadFilterSchema">DownloadFilterSchema</h2>
 
@@ -17466,7 +17805,8 @@ AllClinicalDataSchema
   ],
   "biosample_id": [
     "string"
-  ]
+  ],
+  "summary_only": false
 }
 
 ```
@@ -17482,6 +17822,7 @@ DownloadFilterSchema
 |systemic_therapy_drug_name|[string]|false|none|none|
 |program_id|[string]|false|none|none|
 |biosample_id|[string]|false|none|none|
+|summary_only|boolean|false|none|If true, only summary data will be returned. If false, detailed data will be returned.|
 
 <h2 id="tocS_DonorExplorerSchema">DonorExplorerSchema</h2>
 
