@@ -19,6 +19,7 @@ from chord_metadata_service.mohpackets.models import (
 )
 from chord_metadata_service.mohpackets.tests.endpoints.base import BaseTestCase
 
+
 class DownloadClinicalDataTestCase(BaseTestCase):
     def setUp(self):
         super().setUp()
@@ -162,9 +163,7 @@ class DownloadClinicalDataTestCase(BaseTestCase):
 
     def test_filter_treatment_type(self):
         """Test filtering by treatment_type."""
-        type_to_filter = self.treatments[0].treatment_type[
-            0
-        ]
+        type_to_filter = self.treatments[0].treatment_type[0]
         filters = {"treatment_type": [type_to_filter]}
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -286,7 +285,6 @@ class DownloadClinicalDataTestCase(BaseTestCase):
         response = self._post_request(data=filters)
         self.assertEqual(response.status_code, HTTPStatus.OK)
         data = response.json()["data"]
-
 
         # Check top-level keys
         expected_keys = {

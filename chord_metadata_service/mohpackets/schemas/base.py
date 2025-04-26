@@ -58,6 +58,7 @@ from chord_metadata_service.mohpackets.permissible_values import (
     StageGroupEnum,
     StorageEnum,
     SurgeryLocationEnum,
+    SurgeryReferenceDatabaseEnum,
     TCategoryEnum,
     TherapyTypeEnum,
     TobaccoTypeEnum,
@@ -73,7 +74,6 @@ from chord_metadata_service.mohpackets.permissible_values import (
     TumourGradingSystemEnum,
     TumourStagingSystemEnum,
     uBooleanEnum,
-    SurgeryReferenceDatabaseEnum,
 )
 
 """
@@ -285,7 +285,7 @@ BaseRadiationSchema = create_schema(
         ("radiation_therapy_modality", Optional[RadiationTherapyModalityEnum], None),
         ("radiation_therapy_type", Optional[TherapyTypeEnum], None),
         ("anatomical_site_irradiated", Optional[RadiationAnatomicalSiteEnum], None),
-        ("radiation_boost", Optional[uBooleanEnum], None)
+        ("radiation_boost", Optional[uBooleanEnum], None),
     ],
 )
 

@@ -1,5 +1,7 @@
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
+
 from ninja import Schema
+
 from chord_metadata_service.mohpackets.schemas.model import (
     BiomarkerModelSchema,
     ComorbidityModelSchema,
@@ -14,6 +16,7 @@ from chord_metadata_service.mohpackets.schemas.model import (
     SystemicTherapyModelSchema,
     TreatmentModelSchema,
 )
+
 
 class AllModelsSchema(Schema):
     donors: List[DonorModelSchema]

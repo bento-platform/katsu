@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+
 import orjson
 from django.conf import settings
 from django.http import JsonResponse
@@ -181,7 +182,7 @@ class NetworkAuth:
                     f"Request body: {request.body.decode('utf-8')}",
                     request,
                 )
-                
+
                 return result
 
             except Exception as e:
@@ -288,7 +289,6 @@ if "dev" in settings_module or "prod" in settings_module:
         is_action_allowed_for_program,
         is_user_candig_authorized,
         verify_service_token,
-        get_user_id,
     )
     from candigv2_logging.logging import CanDIGLogger, initialize  # type: ignore
 

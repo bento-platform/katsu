@@ -212,6 +212,7 @@ class DonorExplorerFilterSchema(FilterSchema):
     systemic_therapy_drug_name: List[str] = Field(None)
     exclude_programs: List[str] = Field(None)
 
+
 class DownloadFilterSchema(FilterSchema):
     treatment_type: List[str] = Field(None, q="treatment_type__overlap")
     primary_site: List[str] = Field(None)
