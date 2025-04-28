@@ -46,6 +46,8 @@ __all__ = [
 
 
 class MetaDataSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     resources = ResourceSerializer(read_only=True, many=True)
 
     class Meta:
@@ -86,6 +88,8 @@ class DiseaseSerializer(GenericSerializer):
 
 
 class SimpleBiosampleSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     location_collected = GeoLocationSerializer(required=False)
 
@@ -135,6 +139,7 @@ class BiosampleSerializer(GenericSerializer):
 #                                                           #
 #############################################################
 class GeneDescriptorSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = GeneDescriptor
@@ -142,6 +147,8 @@ class GeneDescriptorSerializer(GenericSerializer):
 
 
 class VariationDescriptorSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     gene_context = GeneDescriptorSerializer(many=False, required=False)
 
     class Meta:
@@ -150,6 +157,7 @@ class VariationDescriptorSerializer(GenericSerializer):
 
 
 class VariantInterpretationSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = VariantInterpretation
@@ -163,6 +171,7 @@ class VariantInterpretationSerializer(GenericSerializer):
 
 
 class GenomicInterpretationSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = GenomicInterpretation
@@ -196,6 +205,7 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
 
 class DiagnosisSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     genomic_interpretations = GenomicInterpretationSerializer(many=True, required=False)
 
@@ -205,6 +215,7 @@ class DiagnosisSerializer(GenericSerializer):
 
 
 class InterpretationSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = Interpretation
@@ -224,6 +235,8 @@ class InterpretationSerializer(GenericSerializer):
 
 
 class SimplePhenopacketSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     biosamples = SimpleBiosampleSerializer(read_only=True, many=True, required=False)
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     interpretations = InterpretationSerializer(read_only=True, many=True, required=False)
