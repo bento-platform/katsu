@@ -58,7 +58,7 @@ from chord_metadata_service.restapi.utils import (
 
 from .filters import IndividualFilter
 from .models import Individual
-from .serializers import IndividualSerializer, IndividualSerializerForCSV
+from .serializers import IndividualSerializer
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -172,7 +172,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
 
 class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
-    serializer_class = IndividualSerializerForCSV
+    serializer_class = IndividualSerializer
     pagination_class = BatchResultsSetPagination
     renderer_classes = (
         *api_settings.DEFAULT_RENDERER_CLASSES,
