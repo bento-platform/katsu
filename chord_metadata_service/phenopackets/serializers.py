@@ -25,6 +25,7 @@ __all__ = [
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
     "DiseaseSerializer",
+    "SimpleBiosampleSerializer",
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
     "PhenopacketSerializer",
@@ -59,6 +60,8 @@ class MetaDataSerializer(GenericSerializer):
 #############################################################
 
 class PhenotypicFeatureSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     always_include = (
         "excluded",
     )
@@ -67,10 +70,12 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 
     class Meta:
         model = PhenotypicFeature
-        exclude = ['pftype']
+        exclude = ('id', 'biosample', 'phenopacket', 'pftype')
 
 
 class DiseaseSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     always_include = (
         "excluded",
     )
@@ -80,9 +85,17 @@ class DiseaseSerializer(GenericSerializer):
         fields = '__all__'
 
 
+class SimpleBiosampleSerializer(GenericSerializer):
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
+    location_collected = GeoLocationSerializer(required=False)
+
+    class Meta:
+        model = Biosample
+        exclude = ("individual",)
+
+
 class BiosampleSerializer(GenericSerializer):
-    phenotypic_features = PhenotypicFeatureSerializer(
-        read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
     location_collected = GeoLocationSerializer(required=False)
 
@@ -211,29 +224,21 @@ class InterpretationSerializer(GenericSerializer):
 
 
 class SimplePhenopacketSerializer(GenericSerializer):
-    phenotypic_features = PhenotypicFeatureSerializer(
-        read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
-    interpretations = InterpretationSerializer(many=True, required=False)
-    diseases = DiseaseSerializer(many=True, required=False)
+    biosamples = SimpleBiosampleSerializer(read_only=True, many=True, required=False)
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
+    interpretations = InterpretationSerializer(read_only=True, many=True, required=False)
+    diseases = DiseaseSerializer(read_only=True, many=True, required=False)
+
+    class Meta:
+        model = Phenopacket
+        exclude = ("subject",)
+
+
+class PhenopacketSerializer(SimplePhenopacketSerializer):
 
     class Meta:
         model = Phenopacket
         fields = '__all__'
-
-    def to_representation(self, instance):
-        """"
-        Overriding this method to allow post Primary Key for FK and M2M
-        objects and return their nested serialization.
-
-        """
-        response = super().to_representation(instance)
-        response['biosamples'] = BiosampleSerializer(instance.biosamples, many=True, required=False,
-                                                     exclude_when_nested=["individual"]).data
-        response['meta_data'] = MetaDataSerializer(instance.meta_data, exclude_when_nested=['id']).data
-        return response
-
-
-class PhenopacketSerializer(SimplePhenopacketSerializer):
 
     def to_representation(self, instance):
         # Phenopacket serializer for nested individuals - need to import here to

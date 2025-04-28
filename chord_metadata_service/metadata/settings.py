@@ -207,6 +207,7 @@ LOGGING = {
         },
         'daphne.server': _logging_propagate_to_root,
         'django': _logging_propagate_to_root,
+        **({'django.db.backends': {'level': 'DEBUG'}} if DEBUG else {}),
         'django.request': _logging_propagate_to_root,
         'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
         'katsu': _logging_propagate_to_root

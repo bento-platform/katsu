@@ -37,7 +37,9 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_field_set_permissions,
 )
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.api_views import (
+    BIOSAMPLE_PREFETCH, BIOSAMPLE_SELECT_REL, PHENOPACKET_PREFETCH, PHENOPACKET_SELECT_REL
+)
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
@@ -56,7 +58,7 @@ from chord_metadata_service.restapi.utils import (
 
 from .filters import IndividualFilter
 from .models import Individual
-from .serializers import IndividualSerializer
+from .serializers import IndividualSerializer, IndividualSerializerForCSV
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
@@ -170,7 +172,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
 
 class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
-    serializer_class = IndividualSerializer
+    serializer_class = IndividualSerializerForCSV
     pagination_class = BatchResultsSetPagination
     renderer_classes = (
         *api_settings.DEFAULT_RENDERER_CLASSES,
@@ -192,8 +194,14 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         queryset = (
             Individual
             .get_model_scoped_queryset(scope)
+            .prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_SELECT_REL),
+            )
+            .select_related("vital_status")
             .filter(**filter_by_id)
-            .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
             .order_by("id")
         )
 
