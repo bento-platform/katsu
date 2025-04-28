@@ -241,6 +241,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     interpretations = InterpretationSerializer(read_only=True, many=True, required=False)
     diseases = DiseaseSerializer(read_only=True, many=True, required=False)
+    meta_data = MetaDataSerializer(required=True)
 
     class Meta:
         model = Phenopacket
