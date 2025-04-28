@@ -207,6 +207,7 @@ LOGGING = {
         },
         'daphne.server': _logging_propagate_to_root,
         'django': _logging_propagate_to_root,
+        # Log SQL queries to diagnose N+1 / other inefficient query issues when we're in debug mode:
         **({'django.db.backends': {'level': 'DEBUG'}} if DEBUG else {}),
         'django.request': _logging_propagate_to_root,
         'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
