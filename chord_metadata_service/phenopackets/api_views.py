@@ -139,6 +139,8 @@ PHENOPACKET_PREFETCH = (
 PHENOPACKET_SELECT_REL = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
     "interpretations__diagnosis",
+    "interpretations__diagnosis__genomic_interpretations__biosample",
+    "interpretations__diagnosis__genomic_interpretations__subject",
     "interpretations__diagnosis__genomic_interpretations__gene_descriptor",
     "interpretations__diagnosis__genomic_interpretations__variant_interpretation__variation_descriptor",
     "subject",
