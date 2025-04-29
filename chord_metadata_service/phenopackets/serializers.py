@@ -231,7 +231,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
 
     class Meta:
         model = Phenopacket
-        exclude = ("subject",)
+        fields = '__all__'
 
     def to_representation(self, instance):
         """"
@@ -246,10 +246,6 @@ class SimplePhenopacketSerializer(GenericSerializer):
 
 
 class PhenopacketSerializer(SimplePhenopacketSerializer):
-
-    class Meta:
-        model = Phenopacket
-        fields = '__all__'
 
     def to_representation(self, instance):
         # Phenopacket serializer for nested individuals - need to import here to
