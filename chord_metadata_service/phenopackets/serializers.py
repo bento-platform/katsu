@@ -238,8 +238,8 @@ class SimplePhenopacketSerializer(GenericSerializer):
     # Note: this serializer is always nested
 
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
-    interpretations = InterpretationSerializer(read_only=True, many=True, required=False)
-    diseases = DiseaseSerializer(read_only=True, many=True, required=False)
+    interpretations = InterpretationSerializer(many=True, required=False)
+    diseases = DiseaseSerializer(many=True, required=False)
 
     class Meta:
         model = Phenopacket
@@ -247,9 +247,9 @@ class SimplePhenopacketSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         """"
-                Overriding this method to allow post Primary Key for FK and M2M
-                objects and return their nested serialization.
-                """
+        Overriding this method to allow post Primary Key for FK and M2M
+        objects and return their nested serialization.
+        """
         response = super().to_representation(instance)
         response['biosamples'] = BiosampleSerializer(instance.biosamples, many=True, required=False,
                                                      exclude_when_nested=["individual"]).data
