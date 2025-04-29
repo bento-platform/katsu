@@ -98,10 +98,8 @@ class SimpleBiosampleSerializer(GenericSerializer):
         exclude = ("individual",)
 
 
-class BiosampleSerializer(GenericSerializer):
-    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
+class BiosampleSerializer(SimpleBiosampleSerializer):
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
-    location_collected = GeoLocationSerializer(required=False)
 
     class Meta:
         model = Biosample
