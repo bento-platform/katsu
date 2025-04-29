@@ -25,7 +25,6 @@ __all__ = [
     "MetaDataSerializer",
     "PhenotypicFeatureSerializer",
     "DiseaseSerializer",
-    "SimpleBiosampleSerializer",
     "BiosampleSerializer",
     "SimplePhenopacketSerializer",
     "PhenopacketSerializer",
@@ -87,19 +86,10 @@ class DiseaseSerializer(GenericSerializer):
         fields = '__all__'
 
 
-class SimpleBiosampleSerializer(GenericSerializer):
-    # Note: this serializer is always nested
-
+class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
-    location_collected = GeoLocationSerializer(required=False)
-
-    class Meta:
-        model = Biosample
-        exclude = ("individual",)
-
-
-class BiosampleSerializer(SimpleBiosampleSerializer):
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
+    location_collected = GeoLocationSerializer(required=False)
 
     class Meta:
         model = Biosample
