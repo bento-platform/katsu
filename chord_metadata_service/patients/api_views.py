@@ -109,6 +109,9 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+            # TODO: this whole thing is badly-placed: it really should be an alternate view of phenopackets, not
+            #  individuals. As such, it can return >1 record for the same individual if they have >1 phenopacket.
+
             scope = async_to_sync(get_request_discovery_scope)(self.request)
 
             start = datetime.now()

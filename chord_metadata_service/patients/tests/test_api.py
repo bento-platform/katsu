@@ -253,8 +253,9 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         #  - num_experiments
         #  - biosamples
         #  - experiments_with_biosamples
-        ("search=P49Y&format=bento_search_result", 1, 8),
-        ("search=NCBITaxon:9606&format=bento_search_result", 1, 8),  # only 1 of the individuals has a phenopacket
+        # only 1 of the individuals has any phenopackets (2):
+        ("search=P49Y&format=bento_search_result", 2, 8),
+        ("search=NCBITaxon:9606&format=bento_search_result", 2, 8),
     )
 
     def setUp(self):
@@ -263,6 +264,9 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
             **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
+        )
+        self.phenopacket_2 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1, id="phenopacket:2")
         )
 
     def test_search(self):  # test full-text search (standard + bento search format)
@@ -285,7 +289,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         get_resp = self.one_authz_get(f"/api/individuals/{self.individual_one.id}/phenopackets")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         response_obj_1 = get_resp.json()
-        self.assertEqual(len(response_obj_1), 1)  # 1 phenopacket for individual
+        self.assertEqual(len(response_obj_1), 2)  # 2 phenopackets for individual
 
     def test_individual_phenopackets_forbidden(self):
         get_resp = self.one_no_authz_get(f"/api/individuals/{self.individual_one.id}/phenopackets")
@@ -296,7 +300,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         self.assertEqual(post_resp.status_code, status.HTTP_200_OK)
         self.assertIn("attachment; filename=", post_resp.headers.get("Content-Disposition", ""))
         response_obj_2 = post_resp.json()
-        self.assertEqual(len(response_obj_2), 1)  # 1 phenopacket for individual, still
+        self.assertEqual(len(response_obj_2), 2)  # 2 phenopackets for individual, still
 
     def test_individual_phenopackets_attachment_forbidden(self):
         post_resp = self.one_no_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
@@ -487,19 +491,29 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         ]
 
         individual_objs = [Individual.objects.create(**individual) for individual in self.individuals]
-        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
+        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(individual_objs[0]))
 
         for idx, individual in enumerate(individual_objs, 1):
-            self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-            self.phenopacket = ph_m.Phenopacket.objects.create(
+            meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            phenopacket = ph_m.Phenopacket.objects.create(
                 id=f"phenopacket_id:{idx}",
                 subject=individual,
-                meta_data=self.meta_data,
+                meta_data=meta_data,
                 dataset=self.dataset,
             )
             if idx == 1:
-                self.phenopacket.biosamples.add(biosample)
-                self.phenopacket.save()
+                phenopacket.biosamples.add(biosample)
+                phenopacket.save()
+
+                phenopacket_2 = ph_m.Phenopacket.objects.create(
+                    id=f"phenopacket_id:{idx}-2",
+                    subject=individual,
+                    meta_data=meta_data,
+                    dataset=self.dataset,
+                )
+                biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(individual))
+                phenopacket_2.biosamples.add(biosample_2)
+                phenopacket_2.save()
 
         instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
         ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
