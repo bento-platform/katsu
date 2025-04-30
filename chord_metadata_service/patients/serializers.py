@@ -8,8 +8,8 @@ __all__ = [
 
 
 class IndividualSerializer(GenericSerializer):
-    biosamples = BiosampleSerializer(read_only=True, many=True, exclude_when_nested=['individual'])
-    phenopackets = SimplePhenopacketSerializer(read_only=True, many=True, exclude_when_nested=['subject'])
+    biosamples = BiosampleSerializer(read_only=True, many=True)
+    phenopackets = SimplePhenopacketSerializer(read_only=True, many=True)
 
     class Meta:
         model = Individual
