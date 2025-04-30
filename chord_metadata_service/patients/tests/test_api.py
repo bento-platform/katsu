@@ -239,12 +239,22 @@ class IndividualCSVRendererTest(AuthzAPITestCase):
 class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
     """ Test for api/individuals?search= """
 
+    # params, expected # results, expected result object # keys
     search_test_params = (
         ("search=P49Y", 1, None),
         ("search=NCBITaxon:9606", 2, None),
-        # 5 fields in the bento search response:
-        ("search=P49Y&format=bento_search_result", 1, 5),
-        ("search=NCBITaxon:9606&format=bento_search_result", 1, 5),  # only 1 of the individuals has a phenopacket
+        # 8 fields in the individuals Bento search response
+        # (original Bento search response + dataset/project/phenopacket IDs):
+        #  - subject_id
+        #  - dataset_id
+        #  - project_id
+        #  - phenopacket_id
+        #  - alternate_ids
+        #  - num_experiments
+        #  - biosamples
+        #  - experiments_with_biosamples
+        ("search=P49Y&format=bento_search_result", 1, 8),
+        ("search=NCBITaxon:9606&format=bento_search_result", 1, 8),  # only 1 of the individuals has a phenopacket
     )
 
     def setUp(self):
@@ -532,6 +542,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertDictEqual(response.json(), {
             "count": 0,
             "matches": [],
+            "matches_detail": [],
             "biosamples": {"count": 0, "sampled_tissue": []},
             "experiments": {"count": 0, "experiment_type": []},
         })
@@ -543,6 +554,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertDictEqual(response.json(), {
             "count": 0,
             "matches": [],
+            "matches_detail": [],
             "biosamples": {"count": 0, "sampled_tissue": []},
             "experiments": {"count": 0, "experiment_type": []},
         })
