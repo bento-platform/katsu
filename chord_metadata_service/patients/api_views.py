@@ -37,7 +37,9 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_field_set_permissions,
 )
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.api_views import (
+    BIOSAMPLE_PREFETCH, BIOSAMPLE_SELECT_REL, PHENOPACKET_PREFETCH, PHENOPACKET_SELECT_REL
+)
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
@@ -196,8 +198,14 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         queryset = (
             Individual
             .get_model_scoped_queryset(scope)
+            .prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_SELECT_REL),
+            )
+            .select_related("vital_status")
             .filter(**filter_by_id)
-            .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
             .order_by("id")
         )
 
