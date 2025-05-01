@@ -164,7 +164,7 @@ async def public_overview(request: DrfRequest):
             counts[public_model_name] = 0
 
     response = {
-        "layout": discovery.overview,
+        "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
         "fields": {},
         "counts": {
             **({
