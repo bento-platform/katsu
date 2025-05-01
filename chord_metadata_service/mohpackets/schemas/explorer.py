@@ -1,6 +1,6 @@
-from typing import List
-from typing import Optional
-from ninja import Schema, Field
+from typing import List, Optional
+
+from ninja import Field, Schema
 
 from chord_metadata_service.mohpackets.permissible_values import ID_REGEX
 

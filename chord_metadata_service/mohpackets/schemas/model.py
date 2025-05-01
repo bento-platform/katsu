@@ -1,10 +1,9 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from ninja import Field
 
 from chord_metadata_service.mohpackets.schemas.base import (
     BaseBiomarkerSchema,
-    BaseSystemicTherapySchema,
     BaseComorbiditySchema,
     BaseDonorSchema,
     BaseExposureSchema,
@@ -15,9 +14,9 @@ from chord_metadata_service.mohpackets.schemas.base import (
     BaseSampleRegistrationSchema,
     BaseSpecimenSchema,
     BaseSurgerySchema,
+    BaseSystemicTherapySchema,
     BaseTreatmentSchema,
 )
-
 
 """
 Schemas for clinical models, inherted from base schemas.

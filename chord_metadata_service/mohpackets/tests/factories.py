@@ -754,7 +754,7 @@ class ComorbidityFactory(factory.django.DjangoModelFactory):
         "random_element", elements=PERM_VAL.MALIGNANCY_LATERALITY
     )
     age_at_comorbidity_diagnosis = factory.Faker("pyint", min_value=20, max_value=80)
-    comorbidity_type_code = factory.Faker("word")
+    comorbidity_type_code = "Not available"
     comorbidity_treatment_status = factory.Faker(
         "random_element", elements=PERM_VAL.UBOOLEAN
     )

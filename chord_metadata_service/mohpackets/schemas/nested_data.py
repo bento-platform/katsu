@@ -13,8 +13,8 @@ from chord_metadata_service.mohpackets.schemas.base import (
     BaseSampleRegistrationSchema,
     BaseSpecimenSchema,
     BaseSurgerySchema,
-    BaseTreatmentSchema,
     BaseSystemicTherapySchema,
+    BaseTreatmentSchema,
 )
 
 """

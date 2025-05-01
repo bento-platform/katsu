@@ -211,3 +211,16 @@ class DonorExplorerFilterSchema(FilterSchema):
     primary_site: List[str] = Field(None)
     systemic_therapy_drug_name: List[str] = Field(None)
     exclude_programs: List[str] = Field(None)
+
+
+class DownloadFilterSchema(FilterSchema):
+    treatment_type: List[str] = Field(None, q="treatment_type__overlap")
+    primary_site: List[str] = Field(None)
+    systemic_therapy_drug_name: List[str] = Field(None)
+    program_id: List[str] = Field(None)
+    biosample_id: List[str] = Field(None)
+    summary_only: bool = Field(
+        False,
+        description="If true, only summary data will be returned. "
+        "If false, detailed data will be returned.",
+    )
