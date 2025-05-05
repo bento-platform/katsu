@@ -39,7 +39,7 @@ class ScopedDiscoveryTestCase(TestCase):
         cls.project_a = ch_m.Project.objects.create(
             title="Test project A",
             description="test description",
-            discovery={},
+            discovery=None,
         )
         cls.id_proj_a = cls.project_a.identifier
         # use provided dataset discovery config
@@ -48,7 +48,7 @@ class ScopedDiscoveryTestCase(TestCase):
             description="Test dataset",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_a,
-            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES.model_dump(mode="json"),
+            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
         )
         cls.id_ds_a = cls.dataset_a.identifier
 
@@ -56,7 +56,7 @@ class ScopedDiscoveryTestCase(TestCase):
         cls.project_b = ch_m.Project.objects.create(
             title="Test project B",
             description="test description",
-            discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY.model_dump(mode="json"),
+            discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
         )
         cls.id_proj_b = cls.project_b.identifier
         # Should fallback on project's discovery config
@@ -65,7 +65,7 @@ class ScopedDiscoveryTestCase(TestCase):
             description="Test dataset 2",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_b,
-            discovery={},
+            discovery=None,
         )
         cls.id_ds_b = cls.dataset_b.identifier
 
@@ -276,21 +276,21 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             (
                 f"?dataset={self.id_ds_a}",
                 status.HTTP_200_OK,
-                self.dataset_a.discovery_obj,
+                self.dataset_a.discovery,
                 self.data_type_counts_ds_a,
             ),
             # SCOPE: project_b
             (
                 f"?project={self.id_proj_b}",
                 status.HTTP_200_OK,
-                self.project_b.discovery_obj,
+                self.project_b.discovery,
                 self.data_type_counts_ds_b,
             ),
             # SCOPE: dataset_b (project_b fallback)
             (
                 f"?dataset={self.id_ds_b}",
                 status.HTTP_200_OK,
-                self.project_b.discovery_obj,
+                self.project_b.discovery,
                 self.data_type_counts_ds_b,
             ),
             # --- INVALID ---
@@ -339,7 +339,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         # SCOPE: project_a + dataset_a
         response = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_a}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_scoped_fields(response.json(), self.dataset_a.discovery_obj)
+        self.assert_scoped_fields(response.json(), self.dataset_a.discovery)
 
         # SCOPE: project_a + dataset_b (invalid)
         response_invalid = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
@@ -468,16 +468,16 @@ class DiscoveryRulesTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
         response_p_b = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_b}")
         self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_p_b.json(), self.project_b.discovery_obj.rules.model_dump(mode="json"))
+        self.assertEqual(response_p_b.json(), self.project_b.discovery.rules.model_dump(mode="json"))
 
         # Dataset scope
         response_d_a = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_a}")
         self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_d_a.json(), self.dataset_a.discovery_obj.rules.model_dump(mode="json"))
+        self.assertEqual(response_d_a.json(), self.dataset_a.discovery.rules.model_dump(mode="json"))
 
         response_d_b = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_b}")
         self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_d_b.json(), self.project_b.discovery_obj.rules.model_dump(mode="json"))
+        self.assertEqual(response_d_b.json(), self.project_b.discovery.rules.model_dump(mode="json"))
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_discovery_exp_1(self):
