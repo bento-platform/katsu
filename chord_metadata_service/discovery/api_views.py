@@ -147,7 +147,7 @@ async def public_overview(request: DrfRequest):
     counts: dict[PublicModelName, int] = dict(
         await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
 
-    counts_res: dict[str, int | bool] = {}
+    counts_res: dict[PublicModelName, int | bool] = {}
 
     # Set counts to 0 if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
@@ -171,8 +171,9 @@ async def public_overview(request: DrfRequest):
         if any(model_permissions.values()):  # if we have any permissions, then add a response for the overview
             # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
             # didn't get censored down to 0 above.
-            # - hacky pluralize - works for current public model names
-            counts_res[f"{public_model_name}s"] = model_count if model_permissions["counts"] else (model_count > 0)
+            # This key used to be a plural version of the public model name, but is now singular so we have a consistent
+            # key to use across all discovery endpoints:
+            counts_res[public_model_name] = model_count if model_permissions["counts"] else (model_count > 0)
 
     response = {
         "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
