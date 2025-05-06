@@ -1,6 +1,7 @@
 import uuid
 
 from bento_lib.auth.resources import build_resource
+from bento_lib.discovery import DiscoveryConfig
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.request import Request as DrfRequest
@@ -8,7 +9,6 @@ from rest_framework.request import Request as DrfRequest
 from chord_metadata_service.chord import models as cm
 
 from .exceptions import DiscoveryScopeException
-from .types import DiscoveryOrEmptyConfig, OptionalDiscoveryOrEmptyConfig
 
 __all__ = [
     "ValidatedDiscoveryScope",
@@ -49,7 +49,7 @@ class ValidatedDiscoveryScope:
 
         # We can cache the discovery property after the first call to the getter defined below, since instances of this
         # class MUST NOT be mutated.
-        self._discovery: OptionalDiscoveryOrEmptyConfig = None
+        self._discovery: DiscoveryConfig | None = None  # If None, not cached yet
 
     @property
     def project_id(self) -> str | None:
@@ -68,24 +68,23 @@ class ValidatedDiscoveryScope:
     def __repr__(self):
         return f"<ValidatedDiscoveryScope project={self.project_id} dataset={self.dataset_id}>"
 
-    def _get_project_discovery_or_fallback(self) -> DiscoveryOrEmptyConfig:
+    def _get_project_discovery_or_fallback(self) -> DiscoveryConfig:
         if self._project and (d := self._project.discovery):
             return d
-        else:
-            # fallback on global discovery config if project is not set or has None as discovery
-            return settings.CONFIG_PUBLIC
+        # fallback on global discovery config if project is not set or has None as discovery
+        return settings.CONFIG_PUBLIC
 
-    def _get_dataset_discovery_or_fallback(self) -> DiscoveryOrEmptyConfig:
+    def _get_dataset_discovery_or_fallback(self) -> DiscoveryConfig:
         """
         Gets the dataset discovery configuration dictionary, or falls back to the project (and eventually instance) one.
         """
         if self._dataset and (d := self._dataset.discovery):
             return d
-        else:
-            return self._get_project_discovery_or_fallback()
+        # fallback on project discovery config (which in turn may fall back on instance / global discovery config)
+        return self._get_project_discovery_or_fallback()
 
     @property
-    def discovery(self) -> DiscoveryOrEmptyConfig:
+    def discovery(self) -> DiscoveryConfig:
         """
         Get the discovery configuration dictionary for this scope, properly handling falling back
         (dataset -> project -> instance) as required.

@@ -1,5 +1,6 @@
 import datetime
 
+from bento_lib.discovery import DiscoveryConfig, DateFieldDefinition, FieldDefinition
 from calendar import month_abbr
 from collections import Counter, defaultdict
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
@@ -13,7 +14,7 @@ from . import fields_utils as f_utils
 from .censorship import get_threshold, thresholded_count
 from .scope import ValidatedDiscoveryScope
 from .stats import stats_for_field
-from .types import BinWithValue, DiscoveryConfig, DiscoveryFieldProps
+from .types import BinWithValue
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
@@ -40,25 +41,27 @@ async def get_field_options(
     Given properties for a public field, return the list of authorized options for
     querying this field.
     """
-    field_props = discovery.get("fields", {}).get(field)
-    if field_props["datatype"] == "string":
-        options = field_props["config"].get("enum")
+    field_props = discovery.fields[field]
+    if field_props.datatype == "string":
+        options = getattr(field_props.config, "enum", None)
         # Special case: no list of values specified
         if options is None:
             # We must be careful here not to leak 'small cell' values as options
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
             options = await get_distinct_field_values(field, discovery, field_permissions)
-    elif field_props["datatype"] == "number":
+    elif field_props.datatype == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
-    elif field_props["datatype"] == "date":
+    elif field_props.datatype == "date":
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
         start, end = await get_month_date_range(field_props)
         options = [
             f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
         ] if start else []
-    else:
+    else:  # pragma: no cover
+        # Can't actually occur with Pydantic implementation of the discovery configuration model, which will validate
+        # the data_type value.
         raise NotImplementedError()
 
     return options
@@ -70,15 +73,15 @@ async def get_distinct_field_values(
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
-    field_props = discovery.get("fields", {}).get(field)
-    model, mapping_field = f_utils.get_model_and_field(field_props["mapping"])
+    field_props = discovery.fields[field]
+    model, mapping_field = f_utils.get_model_and_field(field_props.mapping)
     threshold = get_threshold(discovery, field_permissions)
 
     field_query = mapping_field
-    if group_by := field_props.get("group_by"):
+    if gb := field_props.group_by:
         # JSONField containing an array
         # use jsonb_path_query field expression
-        field_query = f_utils.get_jsonb_path_query(mapping_field, group_by)
+        field_query = f_utils.get_jsonb_path_query(mapping_field, gb)
     values_with_counts = model.objects.values_list(field_query).annotate(count=Count(mapping_field))
 
     return [
@@ -138,7 +141,7 @@ async def get_age_numeric_binned(
     }
 
 
-async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | None, str | None]:
+async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
@@ -148,10 +151,10 @@ async def get_month_date_range(field_props: DiscoveryFieldProps) -> tuple[str | 
     TODO: for now only dates binned by month are handled.
     """
 
-    if (bin_by := field_props["config"]["bin_by"]) != "month":
-        raise NotImplementedError(f"Binning dates by `{bin_by}` method not implemented")
+    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
+    # need to check for it here.
 
-    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
     if "extra_properties" not in field_name:
         raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
@@ -181,13 +184,13 @@ async def get_range_stats(
     field: str,
     field_permissions: DataPermissionsDict,
 ) -> list[BinWithValue]:
-    field_props = scope.discovery.get("fields", {}).get(field)
-    model, field_mapping = f_utils.get_model_and_field(field_props["mapping"])
+    field_props = scope.discovery.fields[field]
+    model, field_mapping = f_utils.get_model_and_field(field_props.mapping)
 
     # JSONField array specific field props
-    group_by = field_props.get("group_by")
-    group_by_value = field_props.get("group_by_value")
-    value_mapping = field_props.get("value_mapping")
+    group_by = getattr(field_props, "group_by", None)
+    group_by_value = getattr(field_props, "group_by_value", None)
+    value_mapping = getattr(field_props, "value_mapping", None)
 
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
@@ -240,19 +243,20 @@ async def get_categorical_stats(
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    field_props = scope.discovery.get("fields", {}).get(field)
-    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
+    field_props = scope.discovery.fields[field]
+    model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: Mapping[str, int] = await stats_for_field(model, scope, field_name, field_permissions,
-                                                     add_missing=True, group_by=field_props.get("group_by"))
+    stats: Mapping[str, int] = await stats_for_field(
+        model, scope, field_name, field_permissions, add_missing=True, group_by=field_props.group_by
+    )
 
     # Enforce values order from config and apply policies
-    labels: list[str] | None = field_props["config"].get("enum")
+    labels: list[str] | None = getattr(field_props.config, "enum")
     derived_labels: bool = labels is None
 
     # Special case: for some fields, values are based on what's present in the
@@ -289,16 +293,15 @@ async def get_date_stats(
      regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
-    field_props = scope.discovery.get("fields", {}).get(field)
+    field_props = scope.discovery.fields.get(field)
     if not field_props:
         msg = f"Field {field} is not in the provided discovery config."
         raise NotImplementedError(msg)
 
-    if (bin_by := field_props["config"]["bin_by"]) != "month":
-        msg = f"Binning dates by `{bin_by}` method not implemented"
-        raise NotImplementedError(msg)
+    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
+    # need to check for it here.
 
-    model, field_name = f_utils.get_model_and_field(field_props["mapping"])
+    model, field_name = f_utils.get_model_and_field(field_props.mapping)
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
@@ -350,7 +353,7 @@ async def get_date_stats(
     return bins
 
 
-def filter_queryset_field_value(qs: QuerySet, field_props, value: str, logger: BoundLogger):
+def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger):
     """
     Further filter a queryset using the field defined by field_props and the
     given value.
@@ -361,21 +364,16 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str, logger: B
     the `mapping` value is based on the same model as the queryset.
     """
 
-    model, field = f_utils.get_model_and_field(
-        field_props["mapping_for_search_filter"] if "mapping_for_search_filter" in field_props
-        else field_props["mapping"]
-    )
+    model, field = f_utils.get_model_and_field(field_props.mapping_for_search_filter or field_props.mapping)
 
-    group_by = field_props.get("group_by")
-
-    if field_props["datatype"] == "string":
-        if group_by:
+    if field_props.datatype == "string":
+        if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
-            nested_condition = f_utils.get_nested_json_condition(group_by, value)
+            nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
             condition = Q(**{f"{field}__iexact": value})
-    elif field_props["datatype"] == "number":
+    elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
         if value.startswith("["):
@@ -402,12 +400,14 @@ def filter_queryset_field_value(qs: QuerySet, field_props, value: str, logger: B
                     condition = Q(**{f"{field}__lt": int(val)})
             else:
                 raise NotImplementedError()
-    elif field_props["datatype"] == "date":
+    elif field_props.datatype == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
         condition = Q(**{f"{field}__startswith": val})
-    else:
+    else:  # pragma: no cover
+        # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
+        # values of `datatype` to the cases above.
         raise NotImplementedError()
 
     logger.debug("filtering model field with condition", model=model, field=field, condition=condition)

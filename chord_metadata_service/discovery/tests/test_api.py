@@ -1,6 +1,7 @@
 from copy import deepcopy
 import uuid
 
+from bento_lib.discovery import DiscoveryConfig, RULES_NO_PERMISSIONS
 from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase, override_settings
@@ -11,9 +12,7 @@ from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITe
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
-from chord_metadata_service.discovery.censorship import RULES_NO_PERMISSIONS
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -40,7 +39,7 @@ class ScopedDiscoveryTestCase(TestCase):
         cls.project_a = ch_m.Project.objects.create(
             title="Test project A",
             description="test description",
-            discovery={},
+            discovery=None,
         )
         cls.id_proj_a = cls.project_a.identifier
         # use provided dataset discovery config
@@ -66,7 +65,7 @@ class ScopedDiscoveryTestCase(TestCase):
             description="Test dataset 2",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_b,
-            discovery={},
+            discovery=None,
         )
         cls.id_ds_b = cls.dataset_b.identifier
 
@@ -173,9 +172,9 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                 else:
                     expected_body_config: DiscoveryConfig | None = dtc[config_key_or_res]
                     if expected_body_config is not None:
-                        self.assert_response_section_fields(res.json(), expected_body_config)
+                        self.assert_response_section_fields(res.json(), expected_body_config.model_dump(mode="json"))
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_search_fields_not_configured(self):
         response = self.dt_authz_counts_get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -187,7 +186,7 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def test_public_search_fields_missing_extra_properties(self):
         response = self.dt_authz_counts_get(reverse("public-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC)
+        self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC.model_dump(mode="json"))
 
 
 class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
@@ -244,7 +243,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         }
 
     def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
-        count_threshold = discovery["rules"]["count_threshold"]
+        count_threshold = discovery.rules.count_threshold
         for data_type in dts.keys():
             response_count = overview_response["counts"][data_type]
             if dts[data_type] <= count_threshold:
@@ -269,25 +268,40 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def assert_scoped_fields(self, overview_response: dict, discovery: DiscoveryConfig):
         self.assertSetEqual(
             set(field for field in overview_response["fields"].keys()),
-            set(chart["field"] for section in discovery["overview"] for chart in section["charts"])
+            set(discovery.get_chart_field_ids()),
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview(self):
         node_discovery = settings.CONFIG_PUBLIC
 
-        subtest_params: list[tuple[str, int, dict | None, dict[str, int] | None]] = [
+        subtest_params: list[tuple[str, int, DiscoveryConfig | None, dict[str, int] | None]] = [
             # --- VALID ---
             # SCOPE: whole node
             ("", status.HTTP_200_OK, node_discovery, self.data_type_counts_ds_a),  # everything is in dataset a
             # SCOPE: project_a (whole node fallback)
             (f"?project={self.id_proj_a}", status.HTTP_200_OK, node_discovery, self.data_type_counts_ds_a),
             # SCOPE: dataset_a
-            (f"?dataset={self.id_ds_a}", status.HTTP_200_OK, self.dataset_a.discovery, self.data_type_counts_ds_a),
+            (
+                f"?dataset={self.id_ds_a}",
+                status.HTTP_200_OK,
+                self.dataset_a.discovery,
+                self.data_type_counts_ds_a,
+            ),
             # SCOPE: project_b
-            (f"?project={self.id_proj_b}", status.HTTP_200_OK, self.project_b.discovery, self.data_type_counts_ds_b),
+            (
+                f"?project={self.id_proj_b}",
+                status.HTTP_200_OK,
+                self.project_b.discovery,
+                self.data_type_counts_ds_b,
+            ),
             # SCOPE: dataset_b (project_b fallback)
-            (f"?dataset={self.id_ds_b}", status.HTTP_200_OK, self.project_b.discovery, self.data_type_counts_ds_b),
+            (
+                f"?dataset={self.id_ds_b}",
+                status.HTTP_200_OK,
+                self.project_b.discovery,
+                self.data_type_counts_ds_b,
+            ),
             # --- INVALID ---
             # invalid UUID for project (not found; IDs are not of this format)
             ("?project=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
@@ -365,7 +379,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             len(response_obj["fields"]["lab_test_result_value"]["data"]),
         )
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_overview_no_config(self):
         response = self.dt_authz_counts_get(self.url)
         response_obj = response.json()
@@ -390,7 +404,7 @@ class PublicOverviewTest2(AuthzAPITestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj["counts"]["individuals"], 0)  # below count threshold
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_overview_response_no_config(self):
         # test overview response when individuals count < threshold
         response = self.dt_authz_counts_get(self.url)
@@ -463,39 +477,42 @@ class DiscoveryRulesTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         # SCOPE: whole node
         response = self.dt_authz_counts_get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), DISCOVERY_CONFIG_TEST["rules"])
+        self.assertEqual(response.json(), DISCOVERY_CONFIG_TEST.rules.model_dump(mode="json"))
 
         # PROJECTS
         response_p_a = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}")
         self.assertEqual(response_p_a.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_p_a.json(), DISCOVERY_CONFIG_TEST["rules"])   # node discovery fallback
+        # node discovery fallback:
+        self.assertEqual(response_p_a.json(), DISCOVERY_CONFIG_TEST.rules.model_dump(mode="json"))
 
         response_p_b = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_b}")
         self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_p_b.json(), self.project_b.discovery["rules"])
+        self.assertEqual(response_p_b.json(), self.project_b.discovery.rules.model_dump(mode="json"))
 
         # Dataset scope
         response_d_a = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_a}")
         self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_d_a.json(), self.dataset_a.discovery["rules"])
+        self.assertEqual(response_d_a.json(), self.dataset_a.discovery.rules.model_dump(mode="json"))
 
         response_d_b = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_b}")
         self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_d_b.json(), self.project_b.discovery["rules"])
+        self.assertEqual(response_d_b.json(), self.project_b.discovery.rules.model_dump(mode="json"))
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_discovery_exp_1(self):
         # Node scope not configured
         response = self.dt_authz_none_get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), RULES_NO_PERMISSIONS)  # no permissions -> rules for no permissions
+        # no permissions -> rules for no permissions
+        self.assertEqual(response.json(), RULES_NO_PERMISSIONS.model_dump(mode="json"))
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_discovery_exp_2(self):
         # Node scope not configured
         response = self.dt_authz_counts_get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), RULES_NO_PERMISSIONS)  # no config -> rules for no permissions
+        # no config -> rules for no permissions
+        self.assertEqual(response.json(), RULES_NO_PERMISSIONS.model_dump(mode="json"))
 
         response_exp = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
         self.assertEqual(response_exp.status_code, status.HTTP_404_NOT_FOUND)

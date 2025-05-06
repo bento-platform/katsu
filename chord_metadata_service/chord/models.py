@@ -1,5 +1,6 @@
 import collections
 import uuid
+from bento_lib.discovery import DiscoveryConfig
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -8,7 +9,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
-from chord_metadata_service.restapi.models import SchemaType
+from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 
 
 __all__ = ["Project", "Dataset", "ProjectJsonSchema"]
@@ -24,33 +25,59 @@ def version_default():
 #                                                           #
 #############################################################
 
-class Project(models.Model):
+
+class DiscoveryJSONField(models.JSONField):
+    """
+    Custom JSON field which uses a DiscoveryConfig object as values' Python representation, and JSON as the stored
+    representation.
+    """
+
+    def from_db_value(self, value, expression, connection):
+        """
+        Returns a DiscoveryConfig Pydantic model instance, or None if no discovery configuration has been set.
+        """
+        if value is None:
+            return value
+        return DiscoveryConfig.model_validate_json(value)
+
+    def get_prep_value(self, value):
+        return super().get_prep_value(value.model_dump(mode="json") if isinstance(value, DiscoveryConfig) else value)
+
+
+class BaseProjectOrDataset(BaseTimeStamp):
+    """
+    Abstract base Django model representing the common underlying shared fields/methods for both projects and datasets,
+    including common metadata (ID, title, description), timestamps, and discovery configuration storage/access.
+    """
+
+    class Meta:
+        abstract = True
+
+    identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200, unique=True)
+    description = models.TextField(blank=True)
+
+    discovery = DiscoveryJSONField(
+        blank=True, null=True, help_text="Discovery configuration",
+        validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)]
+    )
+
+
+class Project(BaseProjectOrDataset):
     """
     Class to represent a Project, which contains multiple
     Datasets which are each a group of Phenopackets.
     """
 
-    identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
-
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
-                                 validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
-
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class Dataset(models.Model):
+class Dataset(BaseProjectOrDataset):
     """
     Class to represent a Dataset, which contains multiple Phenopackets.
     """
 
-    identifier = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200, unique=True)
-    description = models.TextField(blank=True)
     contact_info = models.TextField(blank=True)
     project = models.ForeignKey(
         Project,
@@ -150,16 +177,12 @@ class Dataset(models.Model):
     dats_file = models.JSONField(blank=True, null=True,
                                  help_text="Content of a valid DATS file, in JSON format, "
                                            "that specifies the dataset provenance.")
-    extra_properties = models.JSONField(blank=True, null=True,
-                                        help_text="Extra properties that do not fit in the previous "
-                                        "specified attributes.")
-    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
-                                 validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
 
     # -------------------------------------------------------------------------
 
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
+    extra_properties = models.JSONField(blank=True, null=True,
+                                        help_text="Extra properties that do not fit in the previous "
+                                        "specified attributes.")
 
     def clean(self):
         # Check that all namespace prefices are unique within a dataset
