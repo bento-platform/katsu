@@ -252,7 +252,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                 self.assertEqual(response_count, dts[data_type])
 
     def assert_bools_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
-        count_threshold = discovery["rules"]["count_threshold"]
+        count_threshold = discovery.rules.count_threshold
         for data_type in dts.keys():
             response_val = overview_response["counts"][data_type]
             if dts[data_type] <= count_threshold:
@@ -265,10 +265,12 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             response_count = overview_response["counts"][data_type]
             self.assertEqual(response_count, dts[data_type])
 
-    def assert_scoped_fields(self, overview_response: dict, discovery: DiscoveryConfig):
+    def assert_scoped_fields(
+        self, overview_response: dict, discovery: DiscoveryConfig, expected_fields: set[str] | None = None
+    ):
         self.assertSetEqual(
             set(field for field in overview_response["fields"].keys()),
-            set(discovery.get_chart_field_ids()),
+            set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields,
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -329,7 +331,8 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     self.assertIsInstance(res_json, dict)
                     self.assert_bools_censored(res_json, discovery, dts)
                     # scoped fields but without any data right now for bools:
-                    self.assert_scoped_fields(res_json, discovery)
+                    #   no fields have counts permissions, so we don't get any fields back
+                    self.assert_scoped_fields(res_json, discovery, expected_fields=set())
 
                 # with counts permissions, we should get the expected status code + (if success) censored counts
 
