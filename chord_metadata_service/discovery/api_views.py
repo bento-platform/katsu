@@ -204,7 +204,11 @@ async def public_overview(request: DrfRequest):
             # validate the data_type value.
             raise NotImplementedError()
 
-        return {**field_props.model_dump(mode="json"), "id": field, "data": stats}
+        return {
+            **field_props.model_dump(mode="json"),
+            "id": field,
+            "data": stats,
+        }
 
     # Parallel async collection of field responses for public overview
     field_responses = await asyncio.gather(*(_get_field_response(field) for field in fields))
