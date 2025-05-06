@@ -27,6 +27,11 @@ def version_default():
 
 
 class DiscoveryJSONField(models.JSONField):
+    """
+    Custom JSON field which uses a DiscoveryConfig object as values' Python representation, and JSON as the stored
+    representation.
+    """
+
     def from_db_value(self, value, expression, connection):
         """
         Returns a DiscoveryConfig Pydantic model instance, or None if no discovery configuration has been set.
