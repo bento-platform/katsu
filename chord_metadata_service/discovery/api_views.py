@@ -177,7 +177,7 @@ async def public_overview(request: DrfRequest):
     response = {
         "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
         "fields": {},
-        "counts": counts_res,
+        "counts": counts_res,  # permissions-dependent: dictionary of {entity plural: counts or bool if above threshold}
     }
 
     # Parse the public config to gather data for each field defined in the overview
