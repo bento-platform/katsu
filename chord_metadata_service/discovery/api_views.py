@@ -147,9 +147,10 @@ async def public_overview(request: DrfRequest):
     counts: dict[PublicModelName, int] = dict(
         await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
 
-    counts_res: dict[PublicModelName, int | bool] = {}
+    # for each 'public model', we generate either a count (0/count-if-above-threshold) or a boolean (count > threshold)
+    count_or_bools_res: dict[PublicModelName, int | bool] = {}
 
-    # Set counts to 0 if they're under the count threshold and the threshold is positive.
+    # Set counts to 0 (or bool to False) if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
         dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
         model_permissions = dt_permissions[dt]
@@ -173,17 +174,12 @@ async def public_overview(request: DrfRequest):
             # didn't get censored down to 0 above.
             # This key used to be a plural version of the public model name, but is now singular so we have a consistent
             # key to use across all discovery endpoints:
-            counts_res[public_model_name] = model_count if model_permissions["counts"] else (model_count > 0)
-
-    response = {
-        "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
-        "fields": {},
-        "counts": counts_res,  # permissions-dependent: dictionary of {entity plural: counts or bool if above threshold}
-    }
+            count_or_bools_res[public_model_name] = model_count if model_permissions["counts"] else (model_count > 0)
 
     # Parse the public config to gather data for each field defined in the overview
 
     fields = discovery.get_chart_field_ids()
+    fields_res: dict[str, dict] = {}
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
     async def _get_field_response(field: str) -> dict | None:
@@ -216,9 +212,14 @@ async def public_overview(request: DrfRequest):
 
     for field, field_res in zip(fields, field_responses):
         if field_res is not None:
-            response["fields"][field] = field_res
+            fields_res[field] = field_res
 
-    return Response(response)
+    return Response({
+        "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
+        "fields": fields_res,
+        # permissions-dependent: dictionary of {entity plural: counts or True if above threshold, 0/False otherwise}:
+        "counts": count_or_bools_res,
+    })
 
 
 @api_view(["GET"])
