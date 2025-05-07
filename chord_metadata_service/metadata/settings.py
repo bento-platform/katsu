@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 import os
 import sys
 import logging
-import json
 
+from bento_lib.discovery import DiscoveryConfig, load_discovery_config
 from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
 from structlog.stdlib import get_logger
@@ -22,7 +22,6 @@ from urllib.parse import quote, urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
-from ..discovery.types import DiscoveryOrEmptyConfig
 
 
 def str_to_bool(value: str | None) -> bool:
@@ -336,13 +335,11 @@ CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
 
 # Settings related to the Public APIs
 
-# Read project specific config.json that contains custom search fields
-CONFIG_PUBLIC: DiscoveryOrEmptyConfig
-if os.path.isfile(os.path.join(BASE_DIR, 'config.json')):
-    with open(os.path.join(BASE_DIR, 'config.json')) as config_file:
-        CONFIG_PUBLIC = json.load(config_file)
-else:
-    CONFIG_PUBLIC = {}
+# Read instance-specific config.json that contains chart and search field definitions:
+#  - By default, set to an empty discovery configuration with no fields and maximally restrictive count rules:
+CONFIG_PUBLIC: DiscoveryConfig = DiscoveryConfig()
+if os.path.isfile(config_path := os.path.join(BASE_DIR, 'config.json')):
+    CONFIG_PUBLIC, _ = load_discovery_config(config_path, settings_logger)
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Metadata Service API',

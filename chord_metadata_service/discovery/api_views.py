@@ -1,6 +1,7 @@
 import asyncio
 
 from adrf.decorators import api_view
+from bento_lib.discovery import SearchSection
 from bento_lib.responses import errors
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
@@ -14,6 +15,7 @@ from typing import Type
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
@@ -59,7 +61,7 @@ async def public_search_fields(request: DrfRequest):
 
     discovery = discovery_scope.discovery
 
-    if not discovery:
+    if empty_discovery(discovery):
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
@@ -68,34 +70,36 @@ async def public_search_fields(request: DrfRequest):
     # Note: the array is wrapped in a dictionary structure to help with JSON
     # processing by some services.
 
-    async def _get_field_response(field) -> dict | None:
-        field_props = discovery.get("fields", {}).get(field, {})
+    async def _get_field_response(field: str) -> dict | None:
+        field_props = discovery.fields.get(field, {})
         field_perms = field_permissions[field]
 
         if not field_perms["counts"]:  # Cannot even see counts, skip this field  TODO: incorporate booleans
             return None
 
+        # TODO: convert to pydantic model extending field definition
         return {
-            **field_props,
+            **field_props.model_dump(mode="json"),
             "id": field,
             "options": await get_field_options(field, discovery, field_permissions[field]),
         }
 
-    async def _get_section_response(section) -> dict | None:
-        section_fields = list(filter(is_not_none, await asyncio.gather(*map(_get_field_response, section["fields"]))))
+    async def _get_section_response(section: SearchSection) -> dict | None:
+        section_fields = list(filter(is_not_none, await asyncio.gather(*map(_get_field_response, section.fields))))
 
         if not section_fields:
             # No access to any field in the section (they were all None -> they all got filtered out), so we want to
             # filter the section itself out - return a None which will get filtered out below.
             return None
 
+        # TODO: convert to pydantic model extending SearchSection
         return {
-            **section,
+            **section.model_dump(mode="json"),
             "fields": section_fields,
         }
 
     return Response({
-        "sections": list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery["search"])))),
+        "sections": list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery.search)))),
     })
 
 
@@ -127,7 +131,7 @@ async def public_overview(request: DrfRequest):
 
     discovery = discovery_scope.discovery
 
-    if not discovery:
+    if empty_discovery(discovery):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
@@ -147,7 +151,7 @@ async def public_overview(request: DrfRequest):
     for public_model_name in counts:
         dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
         rules = get_rules(discovery, dt_permissions[dt])
-        count_threshold = rules["count_threshold"]
+        count_threshold = rules.count_threshold
 
         # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
         if 0 < counts[public_model_name] <= count_threshold and count_threshold > 0:
@@ -160,7 +164,7 @@ async def public_overview(request: DrfRequest):
             counts[public_model_name] = 0
 
     response = {
-        "layout": discovery["overview"],
+        "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
         "fields": {},
         "counts": {
             **({
@@ -175,27 +179,27 @@ async def public_overview(request: DrfRequest):
 
     # Parse the public config to gather data for each field defined in the overview
 
-    fields = [chart["field"] for section in discovery["overview"] for chart in section["charts"]]
-    field_conf = discovery["fields"]
-
+    fields = discovery.get_chart_field_ids()
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
     async def _get_field_response(field: str) -> dict:
-        field_props = field_conf.get(field, {"datatype": None})
+        field_props = discovery.fields[field]
         field_perms = field_permissions[field]
 
         stats: list[BinWithValue] | None
-        if field_props["datatype"] == "string":
+        if field_props.datatype == "string":
             stats = await get_categorical_stats(discovery_scope, field, field_perms)
-        elif field_props["datatype"] == "number":
+        elif field_props.datatype == "number":
             stats = await get_range_stats(discovery_scope, field, field_perms)
-        elif field_props["datatype"] == "date":
+        elif field_props.datatype == "date":
             stats = await get_date_stats(discovery_scope, field, field_perms)
-        else:
+        else:  # pragma: no cover
+            # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
+            # validate the data_type value.
             raise NotImplementedError()
 
         return {
-            **field_props,
+            **field_props.model_dump(mode="json"),
             "id": field,
             **({"data": stats} if stats is not None else {}),
         }
@@ -230,4 +234,4 @@ async def public_rules(request: DrfRequest):
     fs_permissions, _ = get_discovery_field_set_permissions(discovery, None, dt_permissions)
 
     rules = get_rules(discovery, data_permissions=fs_permissions)
-    return Response(rules, status=status.HTTP_200_OK)
+    return Response(rules.model_dump(mode="json"), status=status.HTTP_200_OK)

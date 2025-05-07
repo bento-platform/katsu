@@ -1,3 +1,4 @@
+from bento_lib.discovery import DiscoveryConfig
 from django.db.models import Count, F, QuerySet
 from typing import Mapping, Type
 
@@ -7,7 +8,7 @@ from .censorship import thresholded_count
 from .fields_utils import get_jsonb_path_query
 from .scope import ValidatedDiscoveryScope
 from .scopeable_model import BaseScopeableModel
-from .types import BinWithValue, OptionalDiscoveryOrEmptyConfig
+from .types import BinWithValue
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -19,7 +20,7 @@ __all__ = [
 
 
 async def individual_experiment_type_stats(
-    queryset: QuerySet, discovery: OptionalDiscoveryOrEmptyConfig, field_permissions: DataPermissionsDict,
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict,
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -40,7 +41,7 @@ async def individual_experiment_type_stats(
 
 
 async def individual_biosample_tissue_stats(
-    queryset: QuerySet, discovery: OptionalDiscoveryOrEmptyConfig, field_permissions: DataPermissionsDict
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -61,7 +62,7 @@ async def individual_biosample_tissue_stats(
 
 async def bento_public_format_count_and_stats_list(
     annotated_queryset: QuerySet,
-    discovery: OptionalDiscoveryOrEmptyConfig,
+    discovery: DiscoveryConfig,
     field_permissions: DataPermissionsDict,
 ) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
@@ -103,7 +104,7 @@ async def stats_for_field(
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
-    discovery: OptionalDiscoveryOrEmptyConfig,
+    discovery: DiscoveryConfig,
     field_permissions: DataPermissionsDict,
     add_missing: bool = False,
     group_by: str | None = None

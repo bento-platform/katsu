@@ -35,6 +35,7 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_queryable_fields,
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
+    empty_discovery,
 )
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import (
@@ -237,7 +238,9 @@ async def public_discovery_filter_queryset(
 
     discovery = discovery_scope.discovery
 
-    if not discovery:
+    if empty_discovery(discovery):
+        # If there are no fields defined, it means implicitly that we also have no search filters or charts defined.
+        # If neither overview nor search have entries, it means no discovery is allowed.
         raise EmptyDiscoveryException()
 
     # Process query parameters and check validity
@@ -278,13 +281,13 @@ async def public_discovery_filter_queryset(
             value not in options
             and not (
                 # case-insensitive search on categories
-                field_props["datatype"] == "string"
+                field_props.datatype == "string"
                 and value.lower() in [o.lower() for o in options]
             )
             and not (
                 # no restriction when enum is not set for categories
-                field_props["datatype"] == "string"
-                and field_props["config"]["enum"] is None
+                field_props.datatype == "string"
+                and getattr(field_props.config, "enum") is None
             )
         ):
             raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")

@@ -1,10 +1,10 @@
+from bento_lib.discovery import DiscoveryConfig, DateFieldDefinition
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 from copy import deepcopy
 
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.logger import logger
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
@@ -23,7 +23,7 @@ from ..fields import (
 
 
 class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
-    discovery: DiscoveryConfig = {
+    discovery: DiscoveryConfig = DiscoveryConfig.model_validate({
         "fields": {
             "some_prop": {
                 "datatype": "string",
@@ -35,7 +35,7 @@ class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
                 },
             }
         }
-    }
+    })
 
     async def test_get_string_options(self):
         self.assertListEqual(await get_field_options("some_prop", self.discovery, self.permissions_full), ["a", "b"])
@@ -43,7 +43,7 @@ class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
     async def test_get_field_options_not_impl(self):
         # {**self.field_some_prop, "datatype": "made_up"}
         invalid_discovery = deepcopy(self.discovery)
-        invalid_discovery["fields"]["some_prop"]["datatype"] = "made_up"
+        invalid_discovery.fields["some_prop"].datatype = "made_up"
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
             await get_field_options("some_prop", invalid_discovery, self.permissions_full)
@@ -75,26 +75,8 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
 class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    async def test_wrong_bin_config(self):
-        fp = {
-            "title": "Date of Consent",
-            "description": "Date of consent for study",
-            "mapping": "individual/extra_properties/date_of_consent",
-            "datatype": "date",
-            "config": {
-                "bin_by": "year"
-            }
-        }
-
-        with self.assertRaises(NotImplementedError):
-            await get_date_stats(self.scope, "date_of_consent", self.permissions_full)
-
-        with self.assertRaises(NotImplementedError):
-            await get_month_date_range(fp)
-
-    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_wrong_field_config(self):
-        fp = {
+        fp = DateFieldDefinition.model_validate({
             "title": "Date of Consent",
             "description": "Date of consent for study",
             "mapping": "individual/date_of_consent",
@@ -102,7 +84,7 @@ class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin
             "config": {
                 "bin_by": "month"
             }
-        }
+        })
 
         with self.assertRaises(NotImplementedError):
             await get_date_stats(self.scope, "date_of_consent", self.permissions_full)
@@ -114,8 +96,8 @@ class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin
 class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     tumor_lengths = range(1, 50, 5)
-    dm_fp = DISCOVERY_CONFIG_TEST["fields"]["diagnostic_markers"]
-    mtl_fp = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
+    dm_fp = DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"]
+    mtl_fp = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
 
     def setUp(self) -> None:
         self.tumors = [ph_c.valid_measurement_tumor_length(length) for length in self.tumor_lengths]
