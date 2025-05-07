@@ -173,7 +173,9 @@ async def public_overview(request: DrfRequest):
             # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
             # didn't get censored down to 0 above.
             # - hacky pluralize - works for current public model names
-            count_or_bools_res[f"{public_model_name}s"] = model_count if model_permissions["counts"] else (model_count > 0)
+            count_or_bools_res[f"{public_model_name}s"] = (
+                model_count if model_permissions["counts"] else (model_count > 0)
+            )
 
     response = {
         "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
