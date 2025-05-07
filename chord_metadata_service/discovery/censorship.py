@@ -12,7 +12,7 @@ __all__ = [
 def get_rules(discovery: DiscoveryConfig, data_permissions: DataPermissionsDict) -> DiscoveryConfigRules:
     if data_permissions["data"]:
         return RULES_FULL_PERMISSIONS
-    elif not data_permissions["counts"]:
+    elif not (data_permissions["counts"] or data_permissions["bool_"]):
         return RULES_NO_PERMISSIONS
     return discovery.rules  # If discovery is "empty", this will most likely be equivalent to RULES_NO_PERMISSIONS.
 

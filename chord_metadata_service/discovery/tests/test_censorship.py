@@ -16,7 +16,7 @@ class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
 
     def test_get_threshold_bool_only_perms(self):
         self.assertEqual(get_threshold(DiscoveryConfig(), self.permissions_bool), sys.maxsize)
-        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_bool), sys.maxsize)
+        self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_bool), 5)  # True threshold
 
     def test_get_threshold_empty_config(self):  # "empty" discovery config configured
         self.assertEqual(get_threshold(DiscoveryConfig(), self.permissions_counts), sys.maxsize)

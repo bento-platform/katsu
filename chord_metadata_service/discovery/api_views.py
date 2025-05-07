@@ -13,7 +13,6 @@ from rest_framework.response import Response
 from typing import Type
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
@@ -135,7 +134,7 @@ async def public_overview(request: DrfRequest):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    if not any(d["counts"] for d in dt_permissions.values()):
+    if not any(d["bool_"] for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
     async def _counts_for_scoped_model_name(
@@ -145,13 +144,20 @@ async def public_overview(request: DrfRequest):
         return mn, await model.get_model_scoped_queryset(discovery_scope).acount()
 
     # Predefined counts
-    counts = dict(await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
+    counts: dict[PublicModelName, int] = dict(
+        await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
 
-    # Set counts to 0 if they're under the count threshold and the threshold is positive.
+    # for each 'public model', we generate either a count (0/count-if-above-threshold) or a boolean (count > threshold)
+    count_or_bools_res: dict[str, int | bool] = {}
+
+    # Set counts to 0 (or bool to False) if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
         dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
-        rules = get_rules(discovery, dt_permissions[dt])
+        model_permissions = dt_permissions[dt]
+        rules = get_rules(discovery, model_permissions)
         count_threshold = rules.count_threshold
+
+        model_count = counts[public_model_name]
 
         # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
         if 0 < counts[public_model_name] <= count_threshold and count_threshold > 0:
@@ -161,20 +167,21 @@ async def public_overview(request: DrfRequest):
                 threshold=count_threshold,
                 scope_repr=repr(discovery_scope),
             )
-            counts[public_model_name] = 0
+            model_count = 0
+
+        if any(model_permissions.values()):  # if we have any permissions, then add a response for the overview
+            # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
+            # didn't get censored down to 0 above.
+            # - hacky pluralize - works for current public model names
+            count_or_bools_res[f"{public_model_name}s"] = (
+                model_count if model_permissions["counts"] else (model_count > 0)
+            )
 
     response = {
         "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
         "fields": {},
-        "counts": {
-            **({
-                "individuals": counts["individual"],
-                "biosamples": counts["biosample"],
-            } if dt_permissions[dts.DATA_TYPE_PHENOPACKET]["counts"] else {}),
-            **({
-                "experiments": counts["experiment"],
-            } if dt_permissions[dts.DATA_TYPE_EXPERIMENT]["counts"] else {}),
-        },
+        # permissions-dependent: dictionary of {entity plural: counts or True if above threshold, 0/False otherwise}:
+        "counts": count_or_bools_res,
     }
 
     # Parse the public config to gather data for each field defined in the overview
@@ -182,11 +189,14 @@ async def public_overview(request: DrfRequest):
     fields = discovery.get_chart_field_ids()
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
-    async def _get_field_response(field: str) -> dict:
+    async def _get_field_response(field: str) -> dict | None:
         field_props = discovery.fields[field]
         field_perms = field_permissions[field]
 
-        stats: list[BinWithValue] | None
+        stats: list[BinWithValue]
+
+        if not field_perms["counts"]:
+            return None  # cannot compute stats right now for boolean-level responses
         if field_props.datatype == "string":
             stats = await get_categorical_stats(discovery_scope, field, field_perms)
         elif field_props.datatype == "number":
@@ -201,14 +211,15 @@ async def public_overview(request: DrfRequest):
         return {
             **field_props.model_dump(mode="json"),
             "id": field,
-            **({"data": stats} if stats is not None else {}),
+            "data": stats,
         }
 
     # Parallel async collection of field responses for public overview
     field_responses = await asyncio.gather(*(_get_field_response(field) for field in fields))
 
     for field, field_res in zip(fields, field_responses):
-        response["fields"][field] = field_res
+        if field_res is not None:
+            response["fields"][field] = field_res
 
     return Response(response)
 
