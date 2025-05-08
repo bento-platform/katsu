@@ -304,21 +304,20 @@ for experiment in data.get('experiments', []):
             index_basename = construct_index_basename(filename, new_index_format)
 
             for drs_resp in drs_data:
-                if os.path.basename(drs_resp.get('name', '')) == index_basename:
-                    existing_idx = None
-                    for idx in result['indices']:
-                        if idx.get('format') == new_index_format:
-                            existing_idx = idx
-                            break
+                existing_idx = None
+                for idx in result['indices']:
+                    if idx.get('format') == new_index_format:
+                        existing_idx = idx
+                        break
 
-                    if existing_idx:
-                        existing_idx['url'] = drs_resp.get('self_uri')
-                    else:
-                        result['indices'].append({
-                            'format': new_index_format,
-                            'url': drs_resp.get('self_uri')
-                        })
-                    break
+                if existing_idx:
+                    existing_idx['url'] = drs_resp.get('self_uri')
+                else:
+                    result['indices'].append({
+                        'format': new_index_format,
+                        'url': drs_resp.get('self_uri')
+                    })
+                break
 
 with open('final_updated_json.json', 'w') as f:
     json.dump(data, f, indent=4)
