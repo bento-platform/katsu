@@ -231,15 +231,15 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
         self.data_type_counts_ds_a: dict[str, int] = {
-            "individuals": ph_m.Individual.objects.all().count(),
-            "biosamples": ph_m.Biosample.objects.all().count(),
-            "experiments": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
+            "individual": ph_m.Individual.objects.all().count(),
+            "biosample": ph_m.Biosample.objects.all().count(),
+            "experiment": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
         }
 
         self.data_type_counts_ds_b: dict[str, int] = {
-            "individuals": 0,
-            "biosamples": 0,
-            "experiments": 0,
+            "individual": 0,
+            "biosample": 0,
+            "experiment": 0,
         }
 
     def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
@@ -255,10 +255,8 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         count_threshold = discovery.rules.count_threshold
         for data_type in dts.keys():
             response_val = overview_response["counts"][data_type]
-            if dts[data_type] <= count_threshold:
-                self.assertEqual(response_val, False)  # sub-threshold --> false response
-            else:
-                self.assertEqual(response_val, True)  # above-threshold --> true response
+            # sub-threshold --> false response, above-threshold --> true response
+            self.assertEqual(response_val, dts[data_type] > count_threshold)
 
     def assert_counts_not_censored(self, overview_response: dict, dts: dict[str, int]):
         for data_type in dts.keys():
@@ -405,7 +403,7 @@ class PublicOverviewTest2(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj["counts"]["individuals"], 0)  # below count threshold
+        self.assertEqual(response_obj["counts"]["individual"], 0)  # below count threshold
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_overview_response_no_config(self):
