@@ -69,7 +69,7 @@ class ValidatedDiscoveryScope:
         return f"<ValidatedDiscoveryScope project={self.project_id} dataset={self.dataset_id}>"
 
     def _get_project_discovery_or_fallback(self) -> DiscoveryConfig:
-        if self._project and (d := self._project.discovery_obj):
+        if self._project and (d := self._project.discovery):
             return d
         # fallback on global discovery config if project is not set or has None as discovery
         return settings.CONFIG_PUBLIC
@@ -78,7 +78,7 @@ class ValidatedDiscoveryScope:
         """
         Gets the dataset discovery configuration dictionary, or falls back to the project (and eventually instance) one.
         """
-        if self._dataset and (d := self._dataset.discovery_obj):
+        if self._dataset and (d := self._dataset.discovery):
             return d
         # fallback on project discovery config (which in turn may fall back on instance / global discovery config)
         return self._get_project_discovery_or_fallback()

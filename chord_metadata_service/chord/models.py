@@ -26,6 +26,24 @@ def version_default():
 #############################################################
 
 
+class DiscoveryJSONField(models.JSONField):
+    """
+    Custom JSON field which uses a DiscoveryConfig object as values' Python representation, and JSON as the stored
+    representation.
+    """
+
+    def from_db_value(self, value, expression, connection):
+        """
+        Returns a DiscoveryConfig Pydantic model instance, or None if no discovery configuration has been set.
+        """
+        if value is None:
+            return value
+        return DiscoveryConfig.model_validate_json(value)
+
+    def get_prep_value(self, value):
+        return super().get_prep_value(value.model_dump(mode="json") if isinstance(value, DiscoveryConfig) else value)
+
+
 class BaseProjectOrDataset(BaseTimeStamp):
     """
     Abstract base Django model representing the common underlying shared fields/methods for both projects and datasets,
@@ -39,12 +57,10 @@ class BaseProjectOrDataset(BaseTimeStamp):
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
 
-    discovery = models.JSONField(blank=True, null=True, help_text="Discovery configuration",
-                                 validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)])
-
-    @property
-    def discovery_obj(self) -> DiscoveryConfig | None:
-        return DiscoveryConfig.model_validate(self.discovery) if self.discovery else None
+    discovery = DiscoveryJSONField(
+        blank=True, null=True, help_text="Discovery configuration",
+        validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)]
+    )
 
 
 class Project(BaseProjectOrDataset):

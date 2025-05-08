@@ -84,4 +84,10 @@ def get_discovery_field_set_permissions(
 
 
 def empty_discovery(discovery: DiscoveryConfig | None) -> bool:
+    """
+    Examines a discovery configuration object and determines if it's "empty-ish", i.e., doesn't have anything
+    configured that would allow for discovery to actually happen.
+    :param discovery: A DiscoveryConfig Pydantic model instance, or None.
+    :return: True if discovery is "empty-ish", otherwise False.
+    """
     return discovery is None or not discovery.fields or not (discovery.overview or discovery.search)

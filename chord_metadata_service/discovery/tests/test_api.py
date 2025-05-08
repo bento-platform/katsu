@@ -39,7 +39,7 @@ class ScopedDiscoveryTestCase(TestCase):
         cls.project_a = ch_m.Project.objects.create(
             title="Test project A",
             description="test description",
-            discovery={},
+            discovery=None,
         )
         cls.id_proj_a = cls.project_a.identifier
         # use provided dataset discovery config
@@ -48,7 +48,7 @@ class ScopedDiscoveryTestCase(TestCase):
             description="Test dataset",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_a,
-            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES.model_dump(mode="json"),
+            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
         )
         cls.id_ds_a = cls.dataset_a.identifier
 
@@ -56,7 +56,7 @@ class ScopedDiscoveryTestCase(TestCase):
         cls.project_b = ch_m.Project.objects.create(
             title="Test project B",
             description="test description",
-            discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY.model_dump(mode="json"),
+            discovery=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
         )
         cls.id_proj_b = cls.project_b.identifier
         # Should fallback on project's discovery config
@@ -65,7 +65,7 @@ class ScopedDiscoveryTestCase(TestCase):
             description="Test dataset 2",
             data_use=ch_c.VALID_DATA_USE_1,
             project=cls.project_b,
-            discovery={},
+            discovery=None,
         )
         cls.id_ds_b = cls.dataset_b.identifier
 
@@ -231,35 +231,44 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
         self.data_type_counts_ds_a: dict[str, int] = {
-            "individuals": ph_m.Individual.objects.all().count(),
-            "biosamples": ph_m.Biosample.objects.all().count(),
-            "experiments": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
+            "individual": ph_m.Individual.objects.all().count(),
+            "biosample": ph_m.Biosample.objects.all().count(),
+            "experiment": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
         }
 
         self.data_type_counts_ds_b: dict[str, int] = {
-            "individuals": 0,
-            "biosamples": 0,
-            "experiments": 0,
+            "individual": 0,
+            "biosample": 0,
+            "experiment": 0,
         }
 
     def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
         count_threshold = discovery.rules.count_threshold
         for data_type in dts.keys():
             response_count = overview_response["counts"][data_type]
-            if response_count <= count_threshold:
+            if dts[data_type] <= count_threshold:
                 self.assertEqual(response_count, 0)
             else:
                 self.assertEqual(response_count, dts[data_type])
+
+    def assert_bools_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
+        count_threshold = discovery.rules.count_threshold
+        for data_type in dts.keys():
+            response_val = overview_response["counts"][data_type]
+            # sub-threshold --> false response, above-threshold --> true response
+            self.assertEqual(response_val, dts[data_type] > count_threshold)
 
     def assert_counts_not_censored(self, overview_response: dict, dts: dict[str, int]):
         for data_type in dts.keys():
             response_count = overview_response["counts"][data_type]
             self.assertEqual(response_count, dts[data_type])
 
-    def assert_scoped_fields(self, overview_response: dict, discovery: DiscoveryConfig):
+    def assert_scoped_fields(
+        self, overview_response: dict, discovery: DiscoveryConfig, expected_fields: set[str] | None = None
+    ):
         self.assertSetEqual(
             set(field for field in overview_response["fields"].keys()),
-            set(discovery.get_chart_field_ids()),
+            set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields,
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -276,21 +285,21 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             (
                 f"?dataset={self.id_ds_a}",
                 status.HTTP_200_OK,
-                self.dataset_a.discovery_obj,
+                self.dataset_a.discovery,
                 self.data_type_counts_ds_a,
             ),
             # SCOPE: project_b
             (
                 f"?project={self.id_proj_b}",
                 status.HTTP_200_OK,
-                self.project_b.discovery_obj,
+                self.project_b.discovery,
                 self.data_type_counts_ds_b,
             ),
             # SCOPE: dataset_b (project_b fallback)
             (
                 f"?dataset={self.id_ds_b}",
                 status.HTTP_200_OK,
-                self.project_b.discovery_obj,
+                self.project_b.discovery,
                 self.data_type_counts_ds_b,
             ),
             # --- INVALID ---
@@ -309,8 +318,19 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     # none and bool-level permissions should get forbidden errors for overview, currently
                     res = self.dt_get("none", url)
                     self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
-                    res = self.dt_get("bool", url)
-                    self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+                # with bool permissions, we should get the expected status code + (if success) True/False
+                #  based on censored count
+                res = self.dt_get("bool", url)
+                self.assertEqual(res.status_code, expected_status_code)
+
+                if discovery:
+                    res_json = res.json()
+                    self.assertIsInstance(res_json, dict)
+                    self.assert_bools_censored(res_json, discovery, dts)
+                    # scoped fields but without any data right now for bools:
+                    #   no fields have counts permissions, so we don't get any fields back
+                    self.assert_scoped_fields(res_json, discovery, expected_fields=set())
 
                 # with counts permissions, we should get the expected status code + (if success) censored counts
 
@@ -339,7 +359,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         # SCOPE: project_a + dataset_a
         response = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_a}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_scoped_fields(response.json(), self.dataset_a.discovery_obj)
+        self.assert_scoped_fields(response.json(), self.dataset_a.discovery)
 
         # SCOPE: project_a + dataset_b (invalid)
         response_invalid = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
@@ -383,7 +403,7 @@ class PublicOverviewTest2(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(response_obj["counts"]["individuals"], 0)  # below count threshold
+        self.assertEqual(response_obj["counts"]["individual"], 0)  # below count threshold
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_overview_response_no_config(self):
@@ -468,16 +488,16 @@ class DiscoveryRulesTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
         response_p_b = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_b}")
         self.assertEqual(response_p_b.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_p_b.json(), self.project_b.discovery_obj.rules.model_dump(mode="json"))
+        self.assertEqual(response_p_b.json(), self.project_b.discovery.rules.model_dump(mode="json"))
 
         # Dataset scope
         response_d_a = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_a}")
         self.assertEqual(response_d_a.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_d_a.json(), self.dataset_a.discovery_obj.rules.model_dump(mode="json"))
+        self.assertEqual(response_d_a.json(), self.dataset_a.discovery.rules.model_dump(mode="json"))
 
         response_d_b = self.dt_authz_counts_get(f"{self.url}?dataset={self.id_ds_b}")
         self.assertEqual(response_d_b.status_code, status.HTTP_200_OK)
-        self.assertEqual(response_d_b.json(), self.project_b.discovery_obj.rules.model_dump(mode="json"))
+        self.assertEqual(response_d_b.json(), self.project_b.discovery.rules.model_dump(mode="json"))
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_discovery_exp_1(self):

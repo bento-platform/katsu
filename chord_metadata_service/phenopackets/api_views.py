@@ -35,6 +35,14 @@ class PhenopacketsModelViewSet(BentoAuthzScopedModelViewSet):
 BIOSAMPLE_PREFETCH = (
     "phenotypic_features",
     "experiment_set",
+    "experiment_set__experiment_results",
+    "experiment_set__instrument",
+)
+
+BIOSAMPLE_SELECT_REL = (
+    "individual",
+    "derived_from_id",
+    "location_collected",
 )
 
 
@@ -58,6 +66,7 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
         return (
             m.Biosample.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             .prefetch_related(*BIOSAMPLE_PREFETCH)
+            .select_related(*BIOSAMPLE_SELECT_REL)
             .order_by("id")
         )
 
@@ -94,7 +103,7 @@ class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        return queryset.prefetch_related(*BIOSAMPLE_PREFETCH).order_by("id")
+        return queryset.prefetch_related(*BIOSAMPLE_PREFETCH).select_related(*BIOSAMPLE_SELECT_REL).order_by("id")
 
     def get_queryset(self):
         return self._get_filtered_queryset(ids_list=self.request.data.get("id", None))
@@ -120,10 +129,17 @@ class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
 PHENOPACKET_PREFETCH = (
     *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+    *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
     "meta_data__resources",
+    "diseases",
     "phenotypic_features",
-    "subject",
     "interpretations",
+    "interpretations__diagnosis",
+    "interpretations__diagnosis__genomic_interpretations",
+    "interpretations__diagnosis__genomic_interpretations__biosample",
+    "interpretations__diagnosis__genomic_interpretations__subject",
+    "interpretations__diagnosis__genomic_interpretations__gene_descriptor",
+    "interpretations__diagnosis__genomic_interpretations__variant_interpretation__variation_descriptor",
 )
 
 PHENOPACKET_SELECT_REL = (
@@ -152,6 +168,7 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
         return (
             m.Phenopacket.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             .prefetch_related(*PHENOPACKET_PREFETCH)
+            .select_related(*PHENOPACKET_SELECT_REL)
             .order_by("id")
         )
 
