@@ -13,15 +13,17 @@ __all__ = [
     "PublicModelName",
 ]
 
-PublicModelName = Literal["individual", "biosample", "experiment"]
+PublicModelName = Literal["phenopacket", "individual", "biosample", "experiment"]
 
 PUBLIC_MODEL_NAMES_TO_MODEL: dict[PublicModelName, Type[BaseScopeableModel]] = {
+    "phenopacket": pheno_models.Phenopacket,
     "individual": patient_models.Individual,
     "biosample": pheno_models.Biosample,
     "experiment": exp_models.Experiment,
 }
 
 PUBLIC_MODEL_NAMES_TO_DATA_TYPE: dict[PublicModelName, str] = {
+    "phenopacket": DATA_TYPE_PHENOPACKET,
     "individual": DATA_TYPE_PHENOPACKET,
     "biosample": DATA_TYPE_PHENOPACKET,
     "experiment": DATA_TYPE_EXPERIMENT,

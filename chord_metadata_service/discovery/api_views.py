@@ -15,6 +15,7 @@ from typing import Type
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import empty_discovery
+from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
@@ -22,7 +23,7 @@ from .censorship import get_rules
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
-from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses
+from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryOverviewResponse
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .scopeable_model import BaseScopeableModel
@@ -127,6 +128,11 @@ async def discover_endpoint(request: DrfRequest):
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     if not any(d["counts"] for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # Get phenopackets filtered to the requested scope
+    base_qs = Phenopacket.get_model_scoped_queryset(discovery_scope)
 
     # TODO
     # TODO
@@ -255,12 +261,14 @@ async def public_overview(request: DrfRequest):
         # Parallel async collection of field responses for public overview
     })
 
-    return Response({
-        "layout": [cd.model_dump(mode="json") for cd in discovery.overview],
-        "fields": field_responses.model_dump(mode="json"),
-        # permissions-dependent: dictionary of {entity plural: counts or True if above threshold, 0/False otherwise}:
-        "counts": count_or_bools_res,
-    })
+    return Response(
+        DiscoveryOverviewResponse(
+            layout=discovery.overview,
+            fields=field_responses,
+            # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
+            counts=count_or_bools_res,
+        )
+    )
 
 
 @api_view(["GET"])
@@ -283,5 +291,4 @@ async def public_rules(request: DrfRequest):
     # TODO: allow filtering by fields accessed?
     fs_permissions, _ = get_discovery_field_set_permissions(discovery, None, dt_permissions)
 
-    rules = get_rules(discovery, data_permissions=fs_permissions)
-    return Response(rules.model_dump(mode="json"), status=status.HTTP_200_OK)
+    return Response(get_rules(discovery, data_permissions=fs_permissions), status=status.HTTP_200_OK)

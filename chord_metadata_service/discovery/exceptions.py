@@ -1,5 +1,6 @@
 __all__ = [
     "DiscoveryScopeException",
+    "DiscoveryEmptyException",
 ]
 
 from rest_framework import status
@@ -25,3 +26,7 @@ class DiscoveryScopeException(APIException):
         self.message = {"message": message}
 
         super().__init__(*args, detail=message)
+
+
+class DiscoveryEmptyException(Exception):
+    pass
