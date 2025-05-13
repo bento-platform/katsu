@@ -1,4 +1,6 @@
 from copy import deepcopy
+
+from bento_lib.discovery import DiscoveryEntity
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from django.http.request import QueryDict
@@ -21,16 +23,18 @@ __all__ = [
 async def discovery_filter_queryset(
     discovery_scope: ValidatedDiscoveryScope,
     request: DrfRequest,
-    dt_permissions: DataTypeDiscoveryPermissions,
+    queryset_model_name: DiscoveryEntity,
     queryset: QuerySet,
+    dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
 ) -> tuple[QuerySet, list[str]]:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
     :param discovery_scope: Discovery scope for the queryset we're filtering.
     :param request: The request to extract the query parameters from.
+    :param queryset_model_name: TODO
+    :param queryset: TODO
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
-    :param queryset: The queryset to filter using the request query parameters.
     :param lg: BoundLogger object.
     """
 
@@ -56,6 +60,8 @@ async def discovery_filter_queryset(
     query = DiscoveryQuery.model_validate({k: v[0] if isinstance(v, list) else v for k, v in qp.items()})
     del qp
 
+    # Now we have the DiscoveryQuery object, and we need to run this query on our Phenopackets: ------------------------
+
     queryable_fields = get_discovery_queryable_fields(discovery)
 
     queried_fields = query.queried_fields()  # fields for determining field permissions
@@ -69,7 +75,7 @@ async def discovery_filter_queryset(
     if (n_queried := len(query)) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
-    if not overall_permissions["counts"]:
+    if not overall_permissions.counts:
         raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
     for field, value in query.items():
@@ -77,7 +83,9 @@ async def discovery_filter_queryset(
             raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
         field_props = queryable_fields[field]
-        options = await get_field_options(field, discovery, qf_permissions[field])
+
+        # Ensure the passed value is in our pre-determined array of options:
+        options = await get_field_options(field, discovery_scope, qf_permissions[field])
         if (
             value not in options
             and not (
@@ -94,6 +102,6 @@ async def discovery_filter_queryset(
             raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
 
         # recursion
-        queryset = filter_queryset_field_value(queryset, field_props, value, lg)
+        queryset = filter_queryset_field_value(queryset_model_name, queryset, field_props, value, lg)
 
     return queryset, queried_fields

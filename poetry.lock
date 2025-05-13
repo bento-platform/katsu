@@ -303,21 +303,19 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "13.0.0"
+version = "13.2.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
-python-versions = "<4.0,>=3.10"
-files = [
-    {file = "bento_lib-13.0.0-py3-none-any.whl", hash = "sha256:3298005ac102e498b914ff3c069b39a81c02d05c5f25b1a2334ffdb1201c11ad"},
-    {file = "bento_lib-13.0.0.tar.gz", hash = "sha256:af54c8a388dd063f02a0392b81a8f8e603274631d0aefcfeb48a3f3d58f8b0a1"},
-]
+python-versions = "^3.10"
+files = []
+develop = false
 
 [package.dependencies]
 aiofiles = ">=24.1.0,<25"
 aiohttp = ">=3.10.10,<4"
-django = {version = ">=5.1.8,<5.3", optional = true, markers = "extra == \"django\""}
-djangorestframework = {version = ">=3.16.0,<3.17", optional = true, markers = "extra == \"django\""}
-geojson-pydantic = ">=1.2.0,<2.0.0"
+django = {version = ">=5.1.8,<5.3", optional = true}
+djangorestframework = {version = ">=3.16.0,<3.17", optional = true}
+geojson-pydantic = "^1.2.0"
 jsonschema = ">=4.23.0,<5"
 psycopg2-binary = ">=2.9.9,<3.0"
 pydantic = ">=2.11.3,<3"
@@ -326,7 +324,7 @@ redis = ">=5.2.1,<6"
 requests = ">=2.32.3,<3"
 rich = ">=14.0.0,<15"
 structlog = ">=25.2.0,<26"
-typing-extensions = ">=4.13.2,<5.0.0"
+typing-extensions = "^4.13.2"
 werkzeug = ">=3.0.6,<4"
 
 [package.extras]
@@ -334,6 +332,12 @@ asyncpg = ["asyncpg (>=0.29.0,<0.31.0)"]
 django = ["django (>=5.1.8,<5.3)", "djangorestframework (>=3.16.0,<3.17)"]
 fastapi = ["fastapi (>=0.115.12,<0.116)", "uvicorn"]
 flask = ["flask (>=3.0.3,<4)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/bento-platform/bento_lib.git"
+reference = "feat/discovery/entity-type-and-method"
+resolved_reference = "58d0f352ff8ee46444cbba7276241b2f87ebd8a3"
 
 [[package]]
 name = "cachetools"
@@ -1995,22 +1999,22 @@ diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
 name = "pyproject-api"
-version = "1.9.0"
+version = "1.9.1"
 description = "API to interact with the python pyproject.toml based projects"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "pyproject_api-1.9.0-py3-none-any.whl", hash = "sha256:326df9d68dea22d9d98b5243c46e3ca3161b07a1b9b18e213d1e24fd0e605766"},
-    {file = "pyproject_api-1.9.0.tar.gz", hash = "sha256:7e8a9854b2dfb49454fae421cb86af43efbb2b2454e5646ffb7623540321ae6e"},
+    {file = "pyproject_api-1.9.1-py3-none-any.whl", hash = "sha256:7d6238d92f8962773dd75b5f0c4a6a27cce092a14b623b811dba656f3b628948"},
+    {file = "pyproject_api-1.9.1.tar.gz", hash = "sha256:43c9918f49daab37e302038fc1aed54a8c7a91a9fa935d00b9a485f37e0f5335"},
 ]
 
 [package.dependencies]
-packaging = ">=24.2"
+packaging = ">=25"
 tomli = {version = ">=2.2.1", markers = "python_version < \"3.11\""}
 
 [package.extras]
-docs = ["furo (>=2024.8.6)", "sphinx-autodoc-typehints (>=3)"]
-testing = ["covdefaults (>=2.3)", "pytest (>=8.3.4)", "pytest-cov (>=6)", "pytest-mock (>=3.14)", "setuptools (>=75.8)"]
+docs = ["furo (>=2024.8.6)", "sphinx-autodoc-typehints (>=3.2)"]
+testing = ["covdefaults (>=2.3)", "pytest (>=8.3.5)", "pytest-cov (>=6.1.1)", "pytest-mock (>=3.14)", "setuptools (>=80.3.1)"]
 
 [[package]]
 name = "python-dateutil"
@@ -2384,13 +2388,13 @@ tests = ["coverage[toml] (>=5.0.2)", "pytest"]
 
 [[package]]
 name = "setuptools"
-version = "80.3.1"
+version = "80.4.0"
 description = "Easily download, build, install, upgrade, and uninstall Python packages"
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "setuptools-80.3.1-py3-none-any.whl", hash = "sha256:ea8e00d7992054c4c592aeb892f6ad51fe1b4d90cc6947cc45c45717c40ec537"},
-    {file = "setuptools-80.3.1.tar.gz", hash = "sha256:31e2c58dbb67c99c289f51c16d899afedae292b978f8051efaf6262d8212f927"},
+    {file = "setuptools-80.4.0-py3-none-any.whl", hash = "sha256:6cdc8cb9a7d590b237dbe4493614a9b75d0559b888047c1f67d49ba50fc3edb2"},
+    {file = "setuptools-80.4.0.tar.gz", hash = "sha256:5a78f61820bc088c8e4add52932ae6b8cf423da2aff268c23f813cfbb13b4006"},
 ]
 
 [package.extras]
@@ -2896,4 +2900,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10.0"
-content-hash = "d257bcf483d154af6669c2a4a532bcd9cdefae603da769b935b3aa25cf15c14c"
+content-hash = "904c749deae6eb0ece936a2595323381c6606ae940fdf27ab6e5c55db56e6f51"

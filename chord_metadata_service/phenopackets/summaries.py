@@ -3,7 +3,7 @@ import asyncio
 from bento_lib.discovery import DiscoveryConfig
 from django.db.models import QuerySet
 
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.stats import queryset_stats_for_field
@@ -20,7 +20,7 @@ __all__ = [
 
 
 async def biosample_summary(
-    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissionsDict
+    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions
 ):
     biosamples = models.Biosample.objects.filter(phenopacket__in=phenopackets)
 
@@ -48,7 +48,7 @@ async def biosample_summary(
 
 
 async def disease_summary(
-    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissionsDict
+    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions
 ):
     disease_stats = await queryset_stats_for_field(
         queryset=phenopackets,
@@ -64,7 +64,7 @@ async def disease_summary(
 
 
 async def phenotypic_feature_summary(
-    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissionsDict
+    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions
 ):
     # we don't need to re-filter by scope with stats_for_field for PhenotypicFeature, since the phenopackets have
     # already been filtered to the discovery scope.
@@ -81,7 +81,7 @@ async def phenotypic_feature_summary(
 
 
 async def dt_phenopacket_summary(
-    scope: ValidatedDiscoveryScope, phenopacket_permissions: DataPermissionsDict, queryset: QuerySet | None = None
+    scope: ValidatedDiscoveryScope, phenopacket_permissions: DataPermissions, queryset: QuerySet | None = None
 ) -> dict:
     discovery = scope.discovery
 

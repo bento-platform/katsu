@@ -51,7 +51,6 @@ DISCOVERY_CONFIG_TEST_DICT = {
         },
         "tissues": {
             "mapping": "biosample/sampled_tissue/label",
-            "mapping_for_search_filter": "individual/biosamples/sampled_tissue/label",
             "title": "Tissue",
             "description": "Tissue from which the biosample was extracted",
             "datatype": "string",
@@ -88,7 +87,6 @@ DISCOVERY_CONFIG_TEST_DICT = {
         },
         "extraction_protocol": {
             "mapping": "experiment/extraction_protocol",
-            "mapping_for_search_filter": "individual/biosamples/experiment/extraction_protocol",
             "title": "Experiment Extraction Protocol",
             "description": "experiment extraction protocol",
             "datatype": "string",

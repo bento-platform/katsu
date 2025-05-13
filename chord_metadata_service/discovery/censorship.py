@@ -1,5 +1,5 @@
 from bento_lib.discovery import DiscoveryConfig, DiscoveryConfigRules, RULES_NO_PERMISSIONS, RULES_FULL_PERMISSIONS
-from ..authz.types import DataPermissionsDict
+from ..authz.types import DataPermissions
 
 __all__ = [
     "get_threshold",
@@ -9,15 +9,15 @@ __all__ = [
 ]
 
 
-def get_rules(discovery: DiscoveryConfig, data_permissions: DataPermissionsDict) -> DiscoveryConfigRules:
-    if data_permissions["data"]:
+def get_rules(discovery: DiscoveryConfig, data_permissions: DataPermissions) -> DiscoveryConfigRules:
+    if data_permissions.data:
         return RULES_FULL_PERMISSIONS
-    elif not (data_permissions["counts"] or data_permissions["bool_"]):
+    elif not (data_permissions.counts or data_permissions.bool_):
         return RULES_NO_PERMISSIONS
     return discovery.rules  # If discovery is "empty", this will most likely be equivalent to RULES_NO_PERMISSIONS.
 
 
-def get_threshold(discovery: DiscoveryConfig, field_set_permissions: DataPermissionsDict) -> int:
+def get_threshold(discovery: DiscoveryConfig, field_set_permissions: DataPermissions) -> int:
     """
     Gets the maximum count threshold for censoring counts data (i.e., rounding to 0).
     """
@@ -27,14 +27,14 @@ def get_threshold(discovery: DiscoveryConfig, field_set_permissions: DataPermiss
 def thresholded_count(
     c: int,
     discovery: DiscoveryConfig,
-    field_set_permissions: DataPermissionsDict,
+    field_set_permissions: DataPermissions,
 ) -> int:
     return 0 if c <= get_threshold(discovery, field_set_permissions) else c
 
 
 def get_max_query_parameters(
     discovery: DiscoveryConfig,
-    field_set_permissions: DataPermissionsDict,
+    field_set_permissions: DataPermissions,
 ) -> int:
     """
     Gets the maximum number of query parameters allowed for discovery.

@@ -1,17 +1,22 @@
-from typing import TypedDict
+from dataclasses import dataclass
+from typing import TypeAlias
 
 __all__ = [
-    "DataPermissionsDict",
+    "DataPermissions",
     "DataTypeDiscoveryPermissions",
     "FieldDiscoveryPermissions",
 ]
 
 
-class DataPermissionsDict(TypedDict):
+@dataclass
+class DataPermissions:
     bool_: bool
     counts: bool
     data: bool
 
+    def any_permissions(self):
+        return self.bool_ or self.counts or self.data
 
-DataTypeDiscoveryPermissions = dict[str, DataPermissionsDict]  # str <=> data type
-FieldDiscoveryPermissions = dict[str, DataPermissionsDict]  # str <=> field ID
+
+DataTypeDiscoveryPermissions: TypeAlias = dict[str, DataPermissions]  # str <=> data type
+FieldDiscoveryPermissions: TypeAlias = dict[str, DataPermissions]  # str <=> field ID

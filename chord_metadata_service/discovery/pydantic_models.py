@@ -1,12 +1,13 @@
-from bento_lib.discovery import FieldDefinition, OverviewSection
+from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity
 from pydantic import BaseModel, RootModel
-from .model_lookups import PublicModelName
+
+from .types import ModelCountOrBoolResponse
 
 __all__ = [
     "BinWithValue",
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
-    "DiscoveryOverviewResponse",
+    "DiscoveryResponse",
     "DiscoveryQuery",
 ]
 
@@ -26,10 +27,21 @@ class DiscoveryFieldResponses(RootModel):
     root: dict[str, DiscoveryFieldResponse]
 
 
-class DiscoveryOverviewResponse(BaseModel):
+class DiscoveryMatches(RootModel):
+    root: dict[DiscoveryEntity, list[str]]  # dictionary of {model name: [list of IDs]}
+
+
+class DiscoveryResponse(BaseModel):
     layout: list[OverviewSection]
     fields: DiscoveryFieldResponses
-    counts: dict[PublicModelName, int | bool]
+    # results section:
+    #  - "counts" can be either booleans or counts, depending on permissions level.
+    #  - these counts can be aggregated at the level of dataset (nested in project), project, or just whatever scope was
+    #    queried (flat).
+    counts: (
+        ModelCountOrBoolResponse | dict[str, ModelCountOrBoolResponse] | dict[str, dict[str, ModelCountOrBoolResponse]]
+    )
+    matches: DiscoveryMatches | dict[str, DiscoveryMatches] | dict[str, dict[str, DiscoveryMatches]] | None = None
 
 
 class DiscoveryQuery(RootModel):

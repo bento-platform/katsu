@@ -1,9 +1,10 @@
 from bento_lib.discovery import NumberFieldDefinition
+from chord_metadata_service.phenopackets.models import Biosample
 from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
 from django.db.models.base import ModelBase
 
-from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
+from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_EXTRA_PROPERTIES
 from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from ..fields_utils import (
     get_jsonb_path_query,
@@ -18,20 +19,30 @@ from ..fields_utils import (
 class TestModelField(TransactionTestCase):
 
     def test_get_model_field_basic(self):
-        model, field = get_model_and_field("individual/age_numeric")
+        model, field = get_model_and_field("individual", DISCOVERY_CONFIG_TEST.fields["age"])
         self.assertIsInstance(model, ModelBase)
         self.assertEqual(field, "age_numeric")
 
-        model, field = get_model_and_field("experiment/experiment_type")
+        model, field = get_model_and_field("experiment", DISCOVERY_CONFIG_TEST.fields["extraction_protocol"])
         self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "experiment_type")
+        self.assertEqual(field, "extraction_protocol")
 
     def test_get_model_nested_field(self):
-        model, field = get_model_and_field("individual/extra_properties/lab_test_result")
-        self.assertEqual(field, "extra_properties__lab_test_result")
+        model, field = get_model_and_field(
+            "individual", DISCOVERY_CONFIG_EXTRA_PROPERTIES.fields["lab_test_result_value"]
+        )
+        self.assertEqual(field, "extra_properties__lab_test_result_value")
+
+    def test_get_model_field_rewrite(self):
+        model, field = get_model_and_field("phenopacket", DISCOVERY_CONFIG_TEST.fields["age"])
+        self.assertIsInstance(model, ModelBase)
+        self.assertEqual(field, "subject__age_numeric")
+
+        # TODO
 
     def test_get_wrong_model(self):
-        self.assertRaises(NotImplementedError, get_model_and_field, "junk/age_numeric")
+        with self.assertRaises(NotImplementedError):
+            get_model_and_field("junk", DISCOVERY_CONFIG_TEST.fields["age"])
 
     def test_get_public_model_name(self):
         for name, model in PUBLIC_MODEL_NAMES_TO_MODEL.items():
@@ -45,7 +56,7 @@ class TestModelField(TransactionTestCase):
 class TestLabelledRangeGenerator(TestCase):
     def setUp(self):
         self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
-            "mapping": "test",
+            "mapping": "individual/extra_properties/test",
             "datatype": "number",
             "title": "Test",
             "description": "A test field",
@@ -79,7 +90,7 @@ class TestLabelledRangeGenerator(TestCase):
 class TestLabelledRangeGeneratorCustomBins(TestCase):
     def setUp(self):
         self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
-            "mapping": "test",
+            "mapping": "individual/extra_properties/test",
             "datatype": "number",
             "title": "Test",
             "description": "A test field",
@@ -153,15 +164,15 @@ class TestJsonFieldUtils(TestCase):
         field_props = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
 
         # GTE 0 an LT 20
-        json_range_condition_0_20 = get_json_range_condition(field_props, min=0, max=20)
+        json_range_condition_0_20 = get_json_range_condition("phenopacket", field_props, min=0, max=20)
         self.assertTrue(len(json_range_condition_0_20), 2)  # expect 2 conditions (GTE and LT)
 
         # GTE 0
-        json_range_condition_gte_0 = get_json_range_condition(field_props, min=0)
+        json_range_condition_gte_0 = get_json_range_condition("phenopacket", field_props, min=0)
         self.assertTrue(len(json_range_condition_gte_0), 1)
 
         # LT 20
-        json_range_condition_lt_20 = get_json_range_condition(field_props, max=20)
+        json_range_condition_lt_20 = get_json_range_condition("phenopacket", field_props, max=20)
         self.assertTrue(len(json_range_condition_lt_20), 1)
 
         # Combined Q object
@@ -171,30 +182,29 @@ class TestJsonFieldUtils(TestCase):
         self.assertEqual(json_range_condition_0_20, combined)
 
     def test_jsonb_path_query_empty(self):
-        model, field = get_model_and_field("biosample/measurements")
-        assay_ids_query = get_jsonb_path_query(field, "assay/id")
+        assay_ids_query = get_jsonb_path_query("measurements", "assay/id")
 
         # no values
-        assay_ids = model.objects.values_list(assay_ids_query)
+        assay_ids = Biosample.objects.values_list(assay_ids_query)
         self.assertEqual(assay_ids.count(), 0)
 
     def test_jsonb_path_query_data(self):
-        model, field = get_model_and_field("biosample/measurements")
+        field = "measurements"
         assay_ids_query = get_jsonb_path_query(field, "assay/id")
 
         # create a biosample with 2 types of measurements
-        model.objects.create(
+        Biosample.objects.create(
             id="0",
             measurements=[self.measurement_tumour, self.measurement_bmi]
         )
 
         # Get all measurement assay IDs
-        assay_ids = model.objects.values_list(assay_ids_query)
+        assay_ids = Biosample.objects.values_list(assay_ids_query)
         self.assertEqual(len(assay_ids), 2)
 
         # Get measurements values
         bmi_values_query = get_jsonb_path_query(field, "value/quantity/value")
-        bmi_values = model.objects.values_list(bmi_values_query, flat=True)
+        bmi_values = Biosample.objects.values_list(bmi_values_query, flat=True)
         self.assertEqual(len(bmi_values), 2)
         self.assertEqual(bmi_values[0], self.measurement_tumour["value"]["quantity"]["value"])
         self.assertEqual(bmi_values[1], self.measurement_bmi["value"]["quantity"]["value"])

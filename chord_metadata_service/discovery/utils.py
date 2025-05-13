@@ -5,10 +5,9 @@ from typing import Iterable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.types import (
-    DataPermissionsDict, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
+    DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
 
-from .fields_utils import get_public_model_name_and_field_path
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
 
@@ -53,7 +52,7 @@ def get_discovery_field_set_permissions(
     discovery: DiscoveryConfig,
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
-) -> tuple[DataPermissionsDict, FieldDiscoveryPermissions]:
+) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
     dts_accessed: set[str] = set()
     field_dts: dict[str, str] = {}
 
@@ -61,7 +60,7 @@ def get_discovery_field_set_permissions(
 
     if not discovery_fields:
         # If no fields configured, default safe: fall back to no permissions
-        return {"bool_": False, "counts": False, "data": False}, {}
+        return DataPermissions(bool_=False, counts=False, data=False), {}
 
     field_set = set(fields_accessed) if fields_accessed else set(discovery_fields.keys())
 
@@ -69,18 +68,21 @@ def get_discovery_field_set_permissions(
         if field not in discovery_fields:
             raise ValidationError(f"Unsupported field used in query: {field}")
 
-        mn, _ = get_public_model_name_and_field_path(discovery_fields[field].mapping)
+        mn, _ = discovery_fields[field].get_entity_and_field_path()
         f_dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[mn]
+
+        # TODO: handle nested accesses...
+
         dts_accessed.add(f_dt)
         field_dts[field] = f_dt
 
     field_permissions: FieldDiscoveryPermissions = {f: dt_permissions[field_dts[f]] for f in field_set}
 
-    return {
-        "bool_": all(dt_permissions[dt]["bool_"] for dt in dts_accessed),
-        "counts": all(dt_permissions[dt]["counts"] for dt in dts_accessed),
-        "data": all(dt_permissions[dt]["data"] for dt in dts_accessed),
-    }, field_permissions
+    return DataPermissions(
+        bool_=all(dt_permissions[dt].bool_ for dt in dts_accessed),
+        counts=all(dt_permissions[dt].counts for dt in dts_accessed),
+        data=all(dt_permissions[dt].data for dt in dts_accessed)
+    ), field_permissions
 
 
 def empty_discovery(discovery: DiscoveryConfig | None) -> bool:

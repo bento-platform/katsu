@@ -1,8 +1,12 @@
 import asyncio
 
 from adrf.decorators import api_view
-from bento_lib.discovery import SearchSection
+from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets.models import Phenopacket
+from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
 from operator import is_not
@@ -12,23 +16,24 @@ from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from typing import Type
 
+from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny
+from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import empty_discovery
-from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
 from .censorship import get_rules
-from .exceptions import DiscoveryScopeException
+from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
-from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryOverviewResponse
+from .filtering import discovery_filter_queryset
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL
+from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryResponse
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .scopeable_model import BaseScopeableModel
 from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
-
 
 is_not_none = partial(is_not, None)
 
@@ -74,14 +79,14 @@ async def public_search_fields(request: DrfRequest):
         field_props = discovery.fields.get(field, {})
         field_perms = field_permissions[field]
 
-        if not field_perms["counts"]:  # Cannot even see counts, skip this field  TODO: incorporate booleans
+        if not field_perms.counts:  # Cannot even see counts, skip this field  TODO: incorporate booleans
             return None
 
         # TODO: convert to pydantic model extending field definition
         return {
             **field_props.model_dump(mode="json"),
             "id": field,
-            "options": await get_field_options(field, discovery, field_permissions[field]),
+            "options": await get_field_options(field, discovery_scope, field_permissions[field]),
         }
 
     async def _get_section_response(section: SearchSection) -> dict | None:
@@ -103,9 +108,38 @@ async def public_search_fields(request: DrfRequest):
     })
 
 
+async def discovery_field_response(
+        discovery_scope: ValidatedDiscoveryScope,
+        queryset_model_name: DiscoveryEntity,
+        queryset: QuerySet,
+        field: str,
+        field_perms: DataPermissions,
+) -> DiscoveryFieldResponse | None:
+    field_props = discovery_scope.discovery.fields[field]
+
+    stats: list[BinWithValue]
+
+    if not field_perms.counts:
+        return None  # cannot compute stats right now for boolean-level responses
+    if field_props.datatype == "string":
+        stats = await get_categorical_stats(
+            discovery_scope, queryset_model_name, queryset, field_props.root, field_perms
+        )
+    elif field_props.datatype == "number":
+        stats = await get_range_stats(discovery_scope, queryset_model_name, queryset, field_props.root, field_perms)
+    elif field_props.datatype == "date":
+        stats = await get_date_stats(discovery_scope, queryset_model_name, queryset, field_props.root, field_perms)
+    else:  # pragma: no cover
+        # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
+        # validate the data_type value.
+        raise NotImplementedError()
+
+    return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
+
+
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def discover_endpoint(request: DrfRequest):
+async def discovery_endpoint(request: DrfRequest):
     """
     get:
     Overview, optionally filtered by fields, of phenopackets+experiments data.
@@ -126,21 +160,64 @@ async def discover_endpoint(request: DrfRequest):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    if not any(d["counts"] for d in dt_permissions.values()):
+    if not any(d.counts for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    # Get phenopackets filtered to the requested scope
-    base_qs = Phenopacket.get_model_scoped_queryset(discovery_scope)
+    try:
+        queryset, queried_fields = await discovery_filter_queryset(
+            discovery_scope,
+            request,
+            "phenopacket", Phenopacket.get_model_scoped_queryset(discovery_scope),
+            dt_permissions,
+            logger,
+        )
+    except DiscoveryEmptyException:
+        authz_middleware.mark_authz_done(request)
+        return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
+    except ValidationError as e:
+        await logger.ainfo(
+            "discovery endpoint recieved validation error", exc=e, scope_repr=repr(discovery_scope)
+        )
+        authz_middleware.mark_authz_done(request)
+        return Response(errors.bad_request_error(
+            *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+        ), status=status.HTTP_400_BAD_REQUEST)
 
-    # TODO
-    # TODO
-    # TODO
-    # TODO
-    # TODO
-    # TODO
-    # TODO
+    # ------------------------------------------------------------------------------------------------------------------
+
+    fields: tuple[str, ...] = discovery.get_chart_field_ids()
+    _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
+
+    field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
+        field: field_res
+        for field, field_res in zip(
+            fields,
+            await asyncio.gather(
+                *(
+                    discovery_field_response(discovery_scope, "phenopacket", queryset, field, field_permissions[field])
+                    for field in fields
+                )
+            )
+        )
+        if field_res is not None
+        # Parallel async collection of field responses for public overview
+    })
+
+    # TODO: need to filter down biosamples/experiments and use for pre-selection
+    # TODO: count_or_bools_res !!!!!!!!!!!!!
+
+    return Response(
+        DiscoveryResponse(
+            layout=discovery.overview,
+            fields=field_responses,
+            # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
+            counts={},  # TODO !!!!!!!!!!!!
+            # if we have full data access, we have matches as well:
+            matches=None,
+        )
+    )
 
 
 @extend_schema(
@@ -175,21 +252,21 @@ async def public_overview(request: DrfRequest):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    if not any(d["bool_"] for d in dt_permissions.values()):
+    if not any(d.bool_ for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
     async def _counts_for_scoped_model_name(
-        m: tuple[PublicModelName, Type[BaseScopeableModel]]
-    ) -> tuple[PublicModelName, int]:
+            m: tuple[DiscoveryEntity, Type[BaseScopeableModel]]
+    ) -> tuple[DiscoveryEntity, int]:
         mn, model = m
         return mn, await model.get_model_scoped_queryset(discovery_scope).acount()
 
     # Predefined counts
-    counts: dict[PublicModelName, int] = dict(
+    counts: dict[DiscoveryEntity, int] = dict(
         await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
 
     # for each 'public model', we generate either a count (0/count-if-above-threshold) or a boolean (count > threshold)
-    count_or_bools_res: dict[PublicModelName, int | bool] = {}
+    count_or_bools_res: dict[DiscoveryEntity, int | bool] = {}
 
     # Set counts to 0 (or bool to False) if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
@@ -210,12 +287,12 @@ async def public_overview(request: DrfRequest):
             )
             model_count = 0
 
-        if any(model_permissions.values()):  # if we have any permissions, then add a response for the overview
+        if model_permissions.any_permissions():  # if we have any permissions, then add a response for the overview
             # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
             # didn't get censored down to 0 above.
             # This key used to be a plural version of the public model name, but is now singular so we have a consistent
             # key to use across all discovery endpoints:
-            count_or_bools_res[public_model_name] = model_count if model_permissions["counts"] else (model_count > 0)
+            count_or_bools_res[public_model_name] = model_count if model_permissions.counts else (model_count > 0)
 
     # Parse the public config to gather data for each field defined in the overview
 
@@ -233,36 +310,25 @@ async def public_overview(request: DrfRequest):
     fields = discovery.get_chart_field_ids()
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
-    async def _get_field_response(field: str) -> DiscoveryFieldResponse | None:
-        field_props = discovery.fields[field]
-        field_perms = field_permissions[field]
-
-        stats: list[BinWithValue]
-
-        if not field_perms["counts"]:
-            return None  # cannot compute stats right now for boolean-level responses
-        if field_props.datatype == "string":
-            stats = await get_categorical_stats(discovery_scope, field, field_perms)
-        elif field_props.datatype == "number":
-            stats = await get_range_stats(discovery_scope, field, field_perms)
-        elif field_props.datatype == "date":
-            stats = await get_date_stats(discovery_scope, field, field_perms)
-        else:  # pragma: no cover
-            # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
-            # validate the data_type value.
-            raise NotImplementedError()
-
-        return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
+    queryset = Individual.get_model_scoped_queryset(discovery_scope)
 
     field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
         field: field_res
-        for field, field_res in zip(fields, await asyncio.gather(*(_get_field_response(field) for field in fields)))
+        for field, field_res in zip(
+            fields,
+            await asyncio.gather(
+                *(
+                    discovery_field_response(discovery_scope, "individual", queryset, field, field_permissions[field])
+                    for field in fields
+                )
+            )
+        )
         if field_res is not None
         # Parallel async collection of field responses for public overview
     })
 
     return Response(
-        DiscoveryOverviewResponse(
+        DiscoveryResponse(
             layout=discovery.overview,
             fields=field_responses,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:

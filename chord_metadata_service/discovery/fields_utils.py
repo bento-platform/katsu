@@ -1,17 +1,17 @@
-from bento_lib.discovery.models.fields import (
-    ManualBinsNumberFieldConfig,
-    AutoBinsNumberFieldConfig,
-    NumberFieldDefinition,
-    FieldDefinition,
+from bento_lib.discovery import (
+    StringFieldDefinition, NumberFieldDefinition, DateFieldDefinition, FieldDefinition, DiscoveryEntity
 )
-from typing import Any, Iterator, Type
+from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig
+from typing import Any, Iterator, Type, TypeAlias
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
-from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL, PublicModelName
+from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
+
+AnyFieldDefinition: TypeAlias = FieldDefinition | NumberFieldDefinition | StringFieldDefinition | DateFieldDefinition
 
 
 class JSONBPathFilter(Func):
@@ -30,12 +30,45 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
     return JSONBPathQuery(F(field), Value(f"{field_operator}.{query_path}"))
 
 
-def get_public_model_name_and_field_path(field_id: str) -> tuple[str, tuple[str, ...]]:
-    model_name, *field_path = field_id.split("/")
-    return model_name, tuple(field_path)
+def resolve_filter_mapping_to_queryset_model(
+    filtering_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
+) -> tuple[str, ...]:
+    """
+    TODO: THIS ENCODES RELATIONSHIPS.
+    "Hard-coded" data model equivalent of the old "linked field set" concept, which was over-generalized.
+    """
+
+    if filtering_model_name == field_model_name:
+        return field_path
+
+    match (filtering_model_name, field_model_name):
+        case ("individual", "phenopacket"):
+            if field_path[0] == "subject":
+                return field_path[1:]
+            return "phenopackets", *field_path
+        case ("phenopacket", "individual"):
+            if field_path[0] == "phenopackets":
+                return field_path[1:]
+            return "subject", *field_path
+        case ("phenopacket", "biosample"):
+            return "biosamples", *field_path
+        case ("individual", "biosample"):
+            return "phenopackets", "biosamples", *field_path
+        case ("individual", "experiment"):
+            return "phenopackets", "biosamples", "experiment", *field_path
+        case ("phenopacket", "experiment"):
+            return "biosamples", "experiment", *field_path
+        case ("biosample", "experiment"):
+            return "experiment", *field_path
+        case _:
+            raise NotImplementedError(
+                f"cannot map field model {field_model_name} to filtering model {filtering_model_name}"
+            )
 
 
-def get_model_and_field(field_id: str) -> tuple[Type[BaseScopeableModel], str]:
+def get_model_and_field(
+    filtering_model_name: DiscoveryEntity, field_props: AnyFieldDefinition
+) -> tuple[Type[BaseScopeableModel], str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
@@ -44,18 +77,20 @@ def get_model_and_field(field_id: str) -> tuple[Type[BaseScopeableModel], str]:
     field for this object.
     """
 
-    model_name, field_path = get_public_model_name_and_field_path(field_id)
+    entity_name, field_path = field_props.get_entity_and_field_path()
 
-    model: Type[BaseScopeableModel] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(model_name)
+    model: Type[BaseScopeableModel] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(entity_name)
     if model is None:
-        msg = f"Accessing field on model {model_name} not implemented"
+        msg = f"Accessing field on model {entity_name} not implemented"
         raise NotImplementedError(msg)
+
+    field_path = resolve_filter_mapping_to_queryset_model(filtering_model_name, entity_name, field_path)
 
     field_name = "__".join(field_path)
     return model, field_name
 
 
-def get_public_model_name(model: Type[Model]) -> PublicModelName:
+def get_public_model_name(model: Type[Model]) -> DiscoveryEntity:
     model_name = [key for key, m in PUBLIC_MODEL_NAMES_TO_MODEL.items() if m == model]
     if len(model_name) != 1:
         raise NotImplementedError(f"Provided model {model} is not available for public.")
@@ -202,7 +237,9 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
     return condition
 
 
-def get_json_range_condition(field_props: FieldDefinition, min: int = None, max: int = None) -> Q:
+def get_json_range_condition(
+    filtering_model_name: DiscoveryEntity, field_props: AnyFieldDefinition, min: int = None, max: int = None
+) -> Q:
     """
     Takes field props for a 'number' data type contained in a JSONField array,
     and returns a query expression for the provided 'min' and 'max' values.
@@ -223,7 +260,7 @@ def get_json_range_condition(field_props: FieldDefinition, min: int = None, max:
     range_condition = Q()
 
     if group_by and group_by_value and value_mapping:
-        _, field = get_model_and_field(field_props.mapping)
+        _, field = get_model_and_field(filtering_model_name, field_props)
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
         if min is not None:

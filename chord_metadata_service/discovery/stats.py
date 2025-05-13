@@ -1,14 +1,12 @@
 from bento_lib.discovery import DiscoveryConfig
 from django.db.models import Count, F, QuerySet
-from typing import Mapping, Type
+from typing import Mapping
 
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 
 from .censorship import thresholded_count
 from .fields_utils import get_jsonb_path_query
-from .scope import ValidatedDiscoveryScope
 from .pydantic_models import BinWithValue
-from .scopeable_model import BaseScopeableModel
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -20,7 +18,7 @@ __all__ = [
 
 
 async def individual_experiment_type_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict,
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions,
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -41,7 +39,7 @@ async def individual_experiment_type_stats(
 
 
 async def individual_biosample_tissue_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions
 ) -> tuple[int, list[BinWithValue]]:
     """
     Used for a fixed-response public API and beacon.
@@ -63,7 +61,7 @@ async def individual_biosample_tissue_stats(
 async def bento_public_format_count_and_stats_list(
     annotated_queryset: QuerySet,
     discovery: DiscoveryConfig,
-    field_permissions: DataPermissionsDict,
+    field_permissions: DataPermissions,
 ) -> tuple[int, list[BinWithValue]]:
     stats_list: list[BinWithValue] = []
     total: int = 0
@@ -85,10 +83,10 @@ async def bento_public_format_count_and_stats_list(
 
 
 async def stats_for_field(
-    model: Type[BaseScopeableModel],
-    scope: ValidatedDiscoveryScope,
+    qs: QuerySet,
+    discovery: DiscoveryConfig,
     field: str,
-    field_permissions: DataPermissionsDict,
+    field_permissions: DataPermissions,
     add_missing: bool = False,
     group_by: str | None = None,
 ) -> Mapping[str, int]:
@@ -96,16 +94,15 @@ async def stats_for_field(
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
-    qs = model.get_model_scoped_queryset(scope)
     return await queryset_stats_for_field(
-        qs, field, scope.discovery, field_permissions, add_missing=add_missing, group_by=group_by)
+        qs, field, discovery, field_permissions, add_missing=add_missing, group_by=group_by)
 
 
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
     discovery: DiscoveryConfig,
-    field_permissions: DataPermissionsDict,
+    field_permissions: DataPermissions,
     add_missing: bool = False,
     group_by: str | None = None
 ) -> Mapping[str, int]:

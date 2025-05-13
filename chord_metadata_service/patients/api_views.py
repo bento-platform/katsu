@@ -238,18 +238,18 @@ class PublicListIndividuals(APIView):
         dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
 
         # We can't respond if we don't have at least phenopackets counts permission
-        if not dt_perms_pheno["counts"]:
+        if not dt_perms_pheno.counts:
             authz_middleware.mark_authz_done(request)
             return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
-        perm_pheno_query_data = dt_perms_pheno["data"]
+        perm_pheno_query_data = dt_perms_pheno.data
 
         # Get individuals filtered to the requested scope
         base_qs = Individual.get_model_scoped_queryset(discovery_scope)
 
         try:
             filtered_qs, queried_fields = await discovery_filter_queryset(
-                discovery_scope, request, dt_permissions, base_qs, logger
+                discovery_scope, request, "individual", base_qs, dt_permissions, logger
             )
         except DiscoveryEmptyException:
             authz_middleware.mark_authz_done(request)
@@ -328,5 +328,5 @@ class PublicListIndividuals(APIView):
                     "count": experiments_count,
                     "experiment_type": experiment_types,
                 }
-            } if any(dt_perms_exp.values()) else {}),
+            } if dt_perms_exp.any_permissions() else {}),
         })

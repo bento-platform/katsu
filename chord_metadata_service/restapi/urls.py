@@ -3,6 +3,7 @@ from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.discovery.api_views import (
+    discovery_endpoint,
     public_rules,
     public_search_fields,
     public_overview,
@@ -64,6 +65,7 @@ urlpatterns = [
     path('search_overview', search_overview, name="search-overview"),
 
     # public endpoints (no confidential information leak)
+    path('discovery', discovery_endpoint, name='discovery'),
     path('public', individual_views.PublicListIndividuals.as_view(),
          name='public',),
     path('public_search_fields', public_search_fields, name='public-search-fields'),
