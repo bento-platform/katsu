@@ -1,4 +1,4 @@
-from bento_lib.discovery import DiscoveryConfig, FieldDefinition
+from bento_lib.discovery import DiscoveryConfig
 from django.core.exceptions import ValidationError
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable
@@ -12,18 +12,11 @@ from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
-    "get_discovery_queryable_fields",
     "get_discovery_data_type_permissions",
     "get_discovery_field_set_permissions",
+    "extract_discovery",
     "empty_discovery",
 ]
-
-
-def get_discovery_queryable_fields(discovery: DiscoveryConfig) -> dict[str, FieldDefinition]:
-    """
-    Return only field definitions which are used in the search portion of the discovery configuration.
-    """
-    return {f: discovery.fields[f] for section in discovery.search for f in section.fields}
 
 
 async def get_discovery_data_type_permissions(
@@ -49,14 +42,14 @@ async def get_discovery_data_type_permissions(
 
 
 def get_discovery_field_set_permissions(
-    discovery: DiscoveryConfig,
+    discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScope,
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
     dts_accessed: set[str] = set()
     field_dts: dict[str, str] = {}
 
-    discovery_fields = discovery.fields
+    discovery_fields = extract_discovery(discovery_or_scope).fields
 
     if not discovery_fields:
         # If no fields configured, default safe: fall back to no permissions
@@ -85,11 +78,24 @@ def get_discovery_field_set_permissions(
     ), field_permissions
 
 
-def empty_discovery(discovery: DiscoveryConfig | None) -> bool:
+def extract_discovery(discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScope) -> DiscoveryConfig:
+    """
+    Hacky version of a trait, essentially - extract DiscoveryConfig from an object which is either already a
+    DiscoveryConfig, or is a ValidatedDiscoveryScope.
+    """
+    return (
+        discovery_or_scope.discovery if isinstance(discovery_or_scope, ValidatedDiscoveryScope) else discovery_or_scope
+    )
+
+
+def empty_discovery(discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScope | None) -> bool:
     """
     Examines a discovery configuration object and determines if it's "empty-ish", i.e., doesn't have anything
     configured that would allow for discovery to actually happen.
-    :param discovery: A DiscoveryConfig Pydantic model instance, or None.
+    :param discovery_or_scope: A DiscoveryConfig Pydantic model instance, or None.
     :return: True if discovery is "empty-ish", otherwise False.
     """
-    return discovery is None or not discovery.fields or not (discovery.overview or discovery.search)
+    if discovery_or_scope is None:
+        return True
+    discovery = extract_discovery(discovery_or_scope)
+    return not discovery.fields or not (discovery.overview or discovery.search)

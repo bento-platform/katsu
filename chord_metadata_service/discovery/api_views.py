@@ -64,12 +64,12 @@ async def public_search_fields(request: DrfRequest):
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
-    discovery = discovery_scope.discovery
-
-    if empty_discovery(discovery):
+    if empty_discovery(discovery_scope):
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+
+    discovery = discovery_scope.discovery
     _, field_permissions = get_discovery_field_set_permissions(discovery, None, dt_permissions)
 
     # Note: the array is wrapped in a dictionary structure to help with JSON
@@ -109,11 +109,11 @@ async def public_search_fields(request: DrfRequest):
 
 
 async def discovery_field_response(
-        discovery_scope: ValidatedDiscoveryScope,
-        queryset_model_name: DiscoveryEntity,
-        queryset: QuerySet,
-        field: str,
-        field_perms: DataPermissions,
+    discovery_scope: ValidatedDiscoveryScope,
+    queryset_model_name: DiscoveryEntity,
+    queryset: QuerySet,
+    field: str,
+    field_perms: DataPermissions,
 ) -> DiscoveryFieldResponse | None:
     field_props = discovery_scope.discovery.fields[field]
 
@@ -152,11 +152,9 @@ async def discovery_endpoint(request: DrfRequest):
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
-    discovery = discovery_scope.discovery
-
     # If the discovery object is "empty", i.e., no fields/charts/filters specified, this endpoint becomes a 404, here
     # meaning no data could be found for discovery purposes.
-    if empty_discovery(discovery):
+    if empty_discovery(discovery_scope):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
@@ -187,6 +185,7 @@ async def discovery_endpoint(request: DrfRequest):
 
     # ------------------------------------------------------------------------------------------------------------------
 
+    discovery = discovery_scope.discovery
     fields: tuple[str, ...] = discovery.get_chart_field_ids()
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
@@ -205,7 +204,7 @@ async def discovery_endpoint(request: DrfRequest):
         # Parallel async collection of field responses for public overview
     })
 
-    # TODO: need to filter down biosamples/experiments and use for pre-selection
+    # TODO: need to filter down biosamples/experiments and use for pre-selection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # TODO: count_or_bools_res !!!!!!!!!!!!!
 
     return Response(
@@ -246,17 +245,17 @@ async def public_overview(request: DrfRequest):
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
-    discovery = discovery_scope.discovery
-
-    if empty_discovery(discovery):
+    if empty_discovery(discovery_scope):
         return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     if not any(d.bool_ for d in dt_permissions.values()):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
+    discovery = discovery_scope.discovery
+
     async def _counts_for_scoped_model_name(
-            m: tuple[DiscoveryEntity, Type[BaseScopeableModel]]
+        m: tuple[DiscoveryEntity, Type[BaseScopeableModel]]
     ) -> tuple[DiscoveryEntity, int]:
         mn, model = m
         return mn, await model.get_model_scoped_queryset(discovery_scope).acount()
@@ -352,9 +351,8 @@ async def public_rules(request: DrfRequest):
         return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    discovery = discovery_scope.discovery
 
     # TODO: allow filtering by fields accessed?
-    fs_permissions, _ = get_discovery_field_set_permissions(discovery, None, dt_permissions)
+    fs_permissions, _ = get_discovery_field_set_permissions(discovery_scope, None, dt_permissions)
 
-    return Response(get_rules(discovery, data_permissions=fs_permissions), status=status.HTTP_200_OK)
+    return Response(get_rules(discovery_scope, data_permissions=fs_permissions), status=status.HTTP_200_OK)

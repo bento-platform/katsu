@@ -31,17 +31,17 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
 
 
 def resolve_filter_mapping_to_queryset_model(
-    filtering_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
+    queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> tuple[str, ...]:
     """
     TODO: THIS ENCODES RELATIONSHIPS.
     "Hard-coded" data model equivalent of the old "linked field set" concept, which was over-generalized.
     """
 
-    if filtering_model_name == field_model_name:
+    if queryset_model_name == field_model_name:
         return field_path
 
-    match (filtering_model_name, field_model_name):
+    match (queryset_model_name, field_model_name):
         case ("individual", "phenopacket"):
             if field_path[0] == "subject":
                 return field_path[1:]
@@ -62,12 +62,35 @@ def resolve_filter_mapping_to_queryset_model(
             return "experiment", *field_path
         case _:
             raise NotImplementedError(
-                f"cannot map field model {field_model_name} to filtering model {filtering_model_name}"
+                f"cannot map field model {field_model_name} to filtering model {queryset_model_name}"
             )
 
 
+def normalize_field_path_true_model(
+    entity_name: DiscoveryEntity, field_path: tuple[str, ...]
+) -> tuple[DiscoveryEntity, tuple[str, ...]]:
+    """
+    Normalizes a discovery entity/field access to its simplest form, letting us know which discovery entity is truly
+    being filtered. This also lets us correctly check any permissions for data types later...
+    (which itself is quite a janky system).
+    """
+
+    match (entity_name, field_path):
+        # We employ some recursion to progressively further normalize to a simpler form until we cannot anymore.
+        case ("individual", ("phenopackets", *rest)):
+            return normalize_field_path_true_model("phenopacket", tuple(rest))
+        case ("phenopacket", ("subject", *rest)):
+            return normalize_field_path_true_model("individual", tuple(rest))
+        case ("phenopacket", ("biosamples", *rest)):
+            return normalize_field_path_true_model("biosample", tuple(rest))
+        case ("biosample", ("experiment", *rest)):
+            return normalize_field_path_true_model("experiment", tuple(rest))
+        case _:  # base case; nothing to do
+            return entity_name, field_path
+
+
 def get_model_and_field(
-    filtering_model_name: DiscoveryEntity, field_props: AnyFieldDefinition
+    queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition
 ) -> tuple[Type[BaseScopeableModel], str]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
@@ -77,14 +100,14 @@ def get_model_and_field(
     field for this object.
     """
 
-    entity_name, field_path = field_props.get_entity_and_field_path()
+    entity_name, field_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
 
     model: Type[BaseScopeableModel] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(entity_name)
     if model is None:
         msg = f"Accessing field on model {entity_name} not implemented"
         raise NotImplementedError(msg)
 
-    field_path = resolve_filter_mapping_to_queryset_model(filtering_model_name, entity_name, field_path)
+    field_path = resolve_filter_mapping_to_queryset_model(queryset_model_name, entity_name, field_path)
 
     field_name = "__".join(field_path)
     return model, field_name

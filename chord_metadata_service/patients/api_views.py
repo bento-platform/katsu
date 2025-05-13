@@ -231,8 +231,6 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
-        discovery = discovery_scope.discovery
-
         dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
         dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
         dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
@@ -241,6 +239,8 @@ class PublicListIndividuals(APIView):
         if not dt_perms_pheno.counts:
             authz_middleware.mark_authz_done(request)
             return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+
+        discovery = discovery_scope.discovery
 
         perm_pheno_query_data = dt_perms_pheno.data
 

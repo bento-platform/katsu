@@ -5,6 +5,8 @@ from bento_lib.discovery import (
 )
 from calendar import month_abbr
 from collections import Counter, defaultdict
+
+from chord_metadata_service.discovery.censorship import get_threshold
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
@@ -13,7 +15,7 @@ from typing import Any, Mapping
 from chord_metadata_service.authz.types import DataPermissions
 
 from . import fields_utils as f_utils
-from .censorship import get_threshold, thresholded_count
+from .censorship import censor_count, thresholded_count
 from .scope import ValidatedDiscoveryScope
 from .pydantic_models import BinWithValue
 from .stats import stats_for_field
@@ -47,6 +49,8 @@ async def get_field_options(
     # TODO: this needs to take in a queryset instead!
 
     field_props = scope.discovery.fields[field]
+    threshold = get_threshold(scope, field_permissions)
+
     if field_props.datatype == "string":
         options = getattr(field_props.config, "enum", None)
         # Special case: no list of values specified
@@ -54,7 +58,7 @@ async def get_field_options(
             # We must be careful here not to leak 'small cell' values as options
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
-            options = await get_distinct_field_values(field, scope, field_permissions)
+            options = await get_distinct_field_values(queryset_model_name, queryset, field_props, threshold)
     elif field_props.datatype == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     elif field_props.datatype == "date":
@@ -62,6 +66,7 @@ async def get_field_options(
         # using SQL MIN/MAX functions
         start, end = await get_month_date_range(scope, field_props)
         options = [
+            # TODO: need to pass a threshold to monthly range generator
             f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
         ] if start else []
     else:  # pragma: no cover
@@ -73,29 +78,26 @@ async def get_field_options(
 
 
 async def get_distinct_field_values(
-    field: str, scope: ValidatedDiscoveryScope, field_permissions: DataPermissions
+    queryset_model_name: DiscoveryEntity, queryset: QuerySet, field_props: FieldDefinition, threshold: int
 ) -> list[Any]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
-    field_props = scope.discovery.fields[field]
-    # TODO: this shouldn't be an auto-query?
-    model, mapping_field = f_utils.get_model_and_field(field_props.root.get_entity(), field_props)
-    threshold = get_threshold(scope.discovery, field_permissions)
+
+    _, mapping_field = f_utils.get_model_and_field(queryset_model_name, field_props)
 
     field_query = mapping_field
     if gb := field_props.group_by:
         # JSONField containing an array
         # use jsonb_path_query field expression
         field_query = f_utils.get_jsonb_path_query(mapping_field, gb)
-    values_with_counts = (
-        model.get_model_scoped_queryset(scope).values_list(field_query).annotate(count=Count(mapping_field))
-    )
+
+    values_with_counts = queryset.values_list(field_query).annotate(count=Count(mapping_field))
 
     return [
         val
         async for val, count in values_with_counts
-        if count > threshold
+        if censor_count(count, threshold)
     ]
 
 
@@ -235,7 +237,7 @@ async def get_range_stats(
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
     async for item in queryset:
-        stats[item["label"]] = thresholded_count(item["total"], scope.discovery, field_permissions)
+        stats[item["label"]] = thresholded_count(item["total"], scope, field_permissions)
 
     # All the bins between start and end must be represented and ordered
     bins: list[BinWithValue] = [

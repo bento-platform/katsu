@@ -1,23 +1,56 @@
-from copy import deepcopy
+from collections.abc import Iterable
 
 from bento_lib.discovery import DiscoveryEntity
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
-from django.http.request import QueryDict
 from rest_framework.request import Request as DrfRequest
 from structlog.stdlib import BoundLogger
 
-from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
+from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
 from .fields import get_field_options, filter_queryset_field_value
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
-from .utils import get_discovery_queryable_fields, get_discovery_field_set_permissions, empty_discovery
+from .utils import get_discovery_field_set_permissions, empty_discovery
 
 __all__ = [
     "discovery_filter_queryset",
 ]
+
+
+def _in_case_insensitive(val: str, i: Iterable[str]) -> bool:
+    """
+    Case-insensitive version of `in` operator for strings.
+    """
+    val_lower = val.lower()
+    return any(val_lower == o.lower() for o in i)
+
+
+async def validate_field_query_value(
+    scope: ValidatedDiscoveryScope, field_id: str, value: str, field_permissions: DataPermissions
+):
+    """
+    Validate a query value for a particular field against the discovery configuration and raise a ValidationError if the
+    value is not a valid query for the field.
+    """
+
+    field_props = scope.discovery.fields[field_id]
+
+    # Ensure the passed value is in our pre-determined array of options:
+    options = await get_field_options(field_id, scope, field_permissions)
+    if (
+        value not in options
+        and not (
+            # case-insensitive search on categories
+            field_props.datatype == "string" and _in_case_insensitive(value, options)
+        )
+        and not (
+            # no restriction when enum is not set for categories
+            field_props.datatype == "string" and field_props.config.enum is None  # narrowed type via datatype ==
+        )
+    ):
+        raise ValidationError(f"Invalid value used in query: {value} ({repr(scope)})")
 
 
 async def discovery_filter_queryset(
@@ -32,8 +65,8 @@ async def discovery_filter_queryset(
     Process query parameters, check validity, and filter the queryset by the passed parameters.
     :param discovery_scope: Discovery scope for the queryset we're filtering.
     :param request: The request to extract the query parameters from.
-    :param queryset_model_name: TODO
-    :param queryset: TODO
+    :param queryset_model_name: The discovery entity being queried.
+    :param queryset: The starting queryset for the discovery entity being queried.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
     :param lg: BoundLogger object.
     """
@@ -46,23 +79,17 @@ async def discovery_filter_queryset(
         raise DiscoveryEmptyException()
 
     # Process query parameters and check validity
-
-    qp: QueryDict = deepcopy(request.query_params)
-
-    # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
-    #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
-    # - store project and dataset before we remove them for logging purposes.
-    if "project" in qp:
-        del qp["project"]
-    if "dataset" in qp:
-        del qp["dataset"]
-
-    query = DiscoveryQuery.model_validate({k: v[0] if isinstance(v, list) else v for k, v in qp.items()})
-    del qp
+    query = DiscoveryQuery.model_validate({
+        k: v[0] if isinstance(v, list) else v
+        for k, v in request.query_params.items()
+        if k not in ("project", "dataset")
+        # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
+        #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
+    })
 
     # Now we have the DiscoveryQuery object, and we need to run this query on our Phenopackets: ------------------------
 
-    queryable_fields = get_discovery_queryable_fields(discovery)
+    searchable_fields = set(discovery.get_searchable_field_ids())
 
     queried_fields = query.queried_fields()  # fields for determining field permissions
     overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
@@ -79,29 +106,13 @@ async def discovery_filter_queryset(
         raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
     for field, value in query.items():
-        if field not in queryable_fields:
+        if field not in searchable_fields:
             raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
-        field_props = queryable_fields[field]
+        # Ensure the passed value is in our allowed options:
+        await validate_field_query_value(discovery_scope, field, value, qf_permissions[field])
 
-        # Ensure the passed value is in our pre-determined array of options:
-        options = await get_field_options(field, discovery_scope, qf_permissions[field])
-        if (
-            value not in options
-            and not (
-                # case-insensitive search on categories
-                field_props.datatype == "string"
-                and value.lower() in [o.lower() for o in options]
-            )
-            and not (
-                # no restriction when enum is not set for categories
-                field_props.datatype == "string"
-                and getattr(field_props.config, "enum") is None
-            )
-        ):
-            raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
-
-        # recursion
-        queryset = filter_queryset_field_value(queryset_model_name, queryset, field_props, value, lg)
+        # Update queryset to include the Django ORM filter for this query field/value
+        queryset = filter_queryset_field_value(queryset_model_name, queryset, discovery.fields[field], value, lg)
 
     return queryset, queried_fields

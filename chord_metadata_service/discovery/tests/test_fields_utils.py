@@ -1,4 +1,4 @@
-from bento_lib.discovery import NumberFieldDefinition
+from bento_lib.discovery import NumberFieldDefinition, DiscoveryEntity
 from chord_metadata_service.phenopackets.models import Biosample
 from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
@@ -12,7 +12,9 @@ from ..fields_utils import (
     get_model_and_field,
     get_public_model_name,
     labelled_range_generator,
-    get_nested_json_condition
+    get_nested_json_condition,
+    resolve_filter_mapping_to_queryset_model,
+    normalize_field_path_true_model,
 )
 
 
@@ -208,3 +210,19 @@ class TestJsonFieldUtils(TestCase):
         self.assertEqual(len(bmi_values), 2)
         self.assertEqual(bmi_values[0], self.measurement_tumour["value"]["quantity"]["value"])
         self.assertEqual(bmi_values[1], self.measurement_bmi["value"]["quantity"]["value"])
+
+
+class TestResolveFilterMapping(TestCase):
+    def test_resolve_filter_mapping(self):
+        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], tuple[str, ...]]] = [
+            ("phenopacket", "individual", ("sex",), ("subject", "sex")),
+            ("individual", "phenopacket", ("subject", "sex"), ("sex",)),
+            # TODO: more
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                self.assertTupleEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
+
+    def test_normalize_field_path(self):
+        pass
