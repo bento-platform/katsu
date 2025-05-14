@@ -9,7 +9,8 @@ from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
-    get_model_and_field,
+    get_field_django_mapping_and_queried_entity,
+    get_field_django_mapping,
     get_public_model_name,
     labelled_range_generator,
     get_nested_json_condition,
@@ -21,30 +22,31 @@ from ..fields_utils import (
 class TestModelField(TransactionTestCase):
 
     def test_get_model_field_basic(self):
-        model, field = get_model_and_field("individual", DISCOVERY_CONFIG_TEST.fields["age"])
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "age_numeric")
+        field, queried_entity = get_field_django_mapping_and_queried_entity(
+            "phenopacket", DISCOVERY_CONFIG_TEST.fields["age"]
+        )
+        self.assertEqual(field, "subject__age_numeric")
+        self.assertEqual(field, get_field_django_mapping("individual", DISCOVERY_CONFIG_TEST.fields["age"]))
+        self.assertEqual(queried_entity, "individual")
 
-        model, field = get_model_and_field("experiment", DISCOVERY_CONFIG_TEST.fields["extraction_protocol"])
-        self.assertIsInstance(model, ModelBase)
+        field = get_field_django_mapping("experiment", DISCOVERY_CONFIG_TEST.fields["extraction_protocol"])
         self.assertEqual(field, "extraction_protocol")
 
     def test_get_model_nested_field(self):
-        model, field = get_model_and_field(
+        field = get_field_django_mapping(
             "individual", DISCOVERY_CONFIG_EXTRA_PROPERTIES.fields["lab_test_result_value"]
         )
         self.assertEqual(field, "extra_properties__lab_test_result_value")
 
     def test_get_model_field_rewrite(self):
-        model, field = get_model_and_field("phenopacket", DISCOVERY_CONFIG_TEST.fields["age"])
-        self.assertIsInstance(model, ModelBase)
+        field = get_field_django_mapping("phenopacket", DISCOVERY_CONFIG_TEST.fields["age"])
         self.assertEqual(field, "subject__age_numeric")
 
         # TODO
 
     def test_get_wrong_model(self):
         with self.assertRaises(NotImplementedError):
-            get_model_and_field("junk", DISCOVERY_CONFIG_TEST.fields["age"])
+            get_field_django_mapping("junk", DISCOVERY_CONFIG_TEST.fields["age"])
 
     def test_get_public_model_name(self):
         for name, model in PUBLIC_MODEL_NAMES_TO_MODEL.items():

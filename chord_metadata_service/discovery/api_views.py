@@ -4,7 +4,6 @@ from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import Phenopacket
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -27,7 +26,7 @@ from . import responses as dres
 from .censorship import get_rules
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .filtering import discovery_filter_queryset
+from .filtering import build_discovery_query_from_request, discovery_filter_queryset
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL
 from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryResponse
 from .schemas import DISCOVERY_SCHEMA
@@ -86,7 +85,13 @@ async def public_search_fields(request: DrfRequest):
         return {
             **field_props.model_dump(mode="json"),
             "id": field,
-            "options": await get_field_options(field, discovery_scope, field_permissions[field]),
+            "options": await get_field_options(
+                "individual",
+                Individual.get_model_scoped_queryset(discovery_scope),
+                field,
+                discovery_scope,
+                field_permissions[field],
+            ),
         }
 
     async def _get_section_response(section: SearchSection) -> dict | None:
@@ -163,13 +168,15 @@ async def discovery_endpoint(request: DrfRequest):
 
     # ------------------------------------------------------------------------------------------------------------------
 
+    query = build_discovery_query_from_request(request)
+    queryset_model_name: DiscoveryEntity = "phenopacket"
+    queryset = PUBLIC_MODEL_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
+
+    # ------------------------------------------------------------------------------------------------------------------
+
     try:
-        queryset, queried_fields = await discovery_filter_queryset(
-            discovery_scope,
-            request,
-            "phenopacket", Phenopacket.get_model_scoped_queryset(discovery_scope),
-            dt_permissions,
-            logger,
+        queryset = await discovery_filter_queryset(
+            discovery_scope, query, queryset_model_name, queryset, dt_permissions, logger
         )
     except DiscoveryEmptyException:
         authz_middleware.mark_authz_done(request)
@@ -195,7 +202,9 @@ async def discovery_endpoint(request: DrfRequest):
             fields,
             await asyncio.gather(
                 *(
-                    discovery_field_response(discovery_scope, "phenopacket", queryset, field, field_permissions[field])
+                    discovery_field_response(
+                        discovery_scope, queryset_model_name, queryset, field, field_permissions[field]
+                    )
                     for field in fields
                 )
             )
@@ -204,7 +213,11 @@ async def discovery_endpoint(request: DrfRequest):
         # Parallel async collection of field responses for public overview
     })
 
+    # TODO: log
+
     # TODO: need to filter down biosamples/experiments and use for pre-selection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    #  - but the preselect biosamples cannot be used for counts, since they may be eliminated by filtering out their
+    #    containing structure (phenopackets).
     # TODO: count_or_bools_res !!!!!!!!!!!!!
 
     return Response(

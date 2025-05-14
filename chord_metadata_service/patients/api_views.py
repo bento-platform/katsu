@@ -24,7 +24,7 @@ from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_threshold, thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
-from chord_metadata_service.discovery.filtering import discovery_filter_queryset
+from chord_metadata_service.discovery.filtering import build_discovery_query_from_request, discovery_filter_queryset
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
@@ -247,9 +247,12 @@ class PublicListIndividuals(APIView):
         # Get individuals filtered to the requested scope
         base_qs = Individual.get_model_scoped_queryset(discovery_scope)
 
+        query = build_discovery_query_from_request(request)
+        queried_fields = query.queried_fields()
+
         try:
-            filtered_qs, queried_fields = await discovery_filter_queryset(
-                discovery_scope, request, "individual", base_qs, dt_permissions, logger
+            filtered_qs = await discovery_filter_queryset(
+                discovery_scope, query, "individual", base_qs, dt_permissions, logger
             )
         except DiscoveryEmptyException:
             authz_middleware.mark_authz_done(request)

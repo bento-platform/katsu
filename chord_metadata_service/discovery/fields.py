@@ -39,16 +39,18 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
 
 
 async def get_field_options(
-    field: str, scope: ValidatedDiscoveryScope, field_permissions: DataPermissions
+    queryset_model_name: DiscoveryEntity,
+    queryset: QuerySet,
+    field_id: str,
+    scope: ValidatedDiscoveryScope,
+    field_permissions: DataPermissions,
 ) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
     """
 
-    # TODO: this needs to take in a queryset instead!
-
-    field_props = scope.discovery.fields[field]
+    field_props = scope.discovery.fields[field_id]
     threshold = get_threshold(scope, field_permissions)
 
     if field_props.datatype == "string":
@@ -64,7 +66,7 @@ async def get_field_options(
     elif field_props.datatype == "date":
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
-        start, end = await get_month_date_range(scope, field_props)
+        start, end = await get_month_date_range(queryset_model_name, queryset, field_props, threshold)
         options = [
             # TODO: need to pass a threshold to monthly range generator
             f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
@@ -84,7 +86,7 @@ async def get_distinct_field_values(
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
 
-    _, mapping_field = f_utils.get_model_and_field(queryset_model_name, field_props)
+    mapping_field = f_utils.get_field_django_mapping(queryset_model_name, field_props)
 
     field_query = mapping_field
     if gb := field_props.group_by:
@@ -152,13 +154,13 @@ async def get_age_numeric_binned(
 
 
 async def get_month_date_range(
-    scope: ValidatedDiscoveryScope, field_props: DateFieldDefinition
+    queryset_model_name: DiscoveryEntity, queryset: QuerySet, field_props: DateFieldDefinition, threshold: int
 ) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
     TODO: for now, only dates in extra_properties are handled. Aggregate functions
-    are not available for data in JSON fields.
+     are not available for data in JSON fields.
     Implement handling dates as regular fields when needed.
     TODO: for now only dates binned by month are handled.
     """
@@ -166,8 +168,7 @@ async def get_month_date_range(
     # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
     # need to check for it here.
 
-    # TODO: this shouldn't be an auto-query?
-    model, field_name = f_utils.get_model_and_field(field_props.get_entity(), field_props)
+    field_name = f_utils.get_field_django_mapping(queryset_model_name, field_props)
 
     if "extra_properties" not in field_name:
         raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
@@ -178,7 +179,7 @@ async def get_month_date_range(
     # TODO: this can leak months that have below threshold count!
     # TODO: should this be passed a queryset?
     query_set = (
-        model.get_model_scoped_queryset(scope)
+        queryset
         .filter(**is_not_null_filter)
         .values(field_name)
         .distinct()
@@ -201,7 +202,7 @@ async def get_range_stats(
     field_props: NumberFieldDefinition,
     field_permissions: DataPermissions,
 ) -> list[BinWithValue]:
-    model, field_mapping = f_utils.get_model_and_field(queryset_model_name, field_props)
+    field_mapping = f_utils.get_field_django_mapping(queryset_model_name, field_props)
 
     # JSONField array specific field props
     group_by = getattr(field_props, "group_by", None)
@@ -261,7 +262,7 @@ async def get_categorical_stats(
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    model, field_name = f_utils.get_model_and_field(queryset_model_name, field_props)
+    field_name = f_utils.get_field_django_mapping(queryset_model_name, field_props)
 
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
@@ -316,7 +317,7 @@ async def get_date_stats(
     # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
     # need to check for it here.
 
-    model, field_name = f_utils.get_model_and_field(queryset_model_name, field_props)
+    field_name = f_utils.get_field_django_mapping(queryset_model_name, field_props)
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
@@ -370,7 +371,7 @@ async def get_date_stats(
 
 def filter_queryset_field_value(
     queryset_model_name: DiscoveryEntity, qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger
-):
+) -> tuple[QuerySet, DiscoveryEntity]:
     """
     Further filter a queryset using the field defined by field_props and the
     given value.
@@ -381,7 +382,8 @@ def filter_queryset_field_value(
     the `mapping` value is based on the same model as the queryset.
     """
 
-    model, field = f_utils.get_model_and_field(queryset_model_name, field_props)
+    # - can throw NotImplementedError if we cannot rewrite the field mapping as a subpath of the queryset model
+    field, queried_entity = f_utils.get_field_django_mapping_and_queried_entity(queryset_model_name, field_props)
 
     # TODO: resolve schema including extra properties
 
@@ -433,6 +435,6 @@ def filter_queryset_field_value(
         # values of `datatype` to the cases above.
         raise NotImplementedError()
 
-    logger.debug("filtering model field with condition", model=model, field=field, condition=condition)
+    logger.debug("filtering entity field with condition", entity=queried_entity, field=field, condition=condition)
 
-    return qs.filter(condition)
+    return qs.filter(condition), queried_entity

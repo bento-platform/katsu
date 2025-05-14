@@ -15,6 +15,7 @@ from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
 
 __all__ = [
+    "build_discovery_query_from_request",
     "discovery_filter_queryset",
 ]
 
@@ -28,7 +29,12 @@ def _in_case_insensitive(val: str, i: Iterable[str]) -> bool:
 
 
 async def validate_field_query_value(
-    scope: ValidatedDiscoveryScope, field_id: str, value: str, field_permissions: DataPermissions
+    queryset_model_name: DiscoveryEntity,
+    queryset: QuerySet,
+    scope: ValidatedDiscoveryScope,
+    field_id: str,
+    value: str,
+    field_permissions: DataPermissions
 ):
     """
     Validate a query value for a particular field against the discovery configuration and raise a ValidationError if the
@@ -37,8 +43,9 @@ async def validate_field_query_value(
 
     field_props = scope.discovery.fields[field_id]
 
-    # Ensure the passed value is in our pre-determined array of options:
-    options = await get_field_options(field_id, scope, field_permissions)
+    # Ensure the passed value is in our pre-determined array of options (or, if an {enum: null} string field, check that
+    # the passed value is in the database [above the censorship threshold as needed]):
+    options = await get_field_options(queryset_model_name, queryset, field_id, scope, field_permissions)
     if (
         value not in options
         and not (
@@ -53,18 +60,29 @@ async def validate_field_query_value(
         raise ValidationError(f"Invalid value used in query: {value} ({repr(scope)})")
 
 
+def build_discovery_query_from_request(request: DrfRequest) -> DiscoveryQuery:
+    # Process query parameters and check validity
+    return DiscoveryQuery.model_validate({
+        k: v[0] if isinstance(v, list) else v
+        for k, v in request.query_params.items()
+        if k not in ("project", "dataset")
+        # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
+        #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
+    })
+
+
 async def discovery_filter_queryset(
     discovery_scope: ValidatedDiscoveryScope,
-    request: DrfRequest,
+    query: DiscoveryQuery,
     queryset_model_name: DiscoveryEntity,
     queryset: QuerySet,
     dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
-) -> tuple[QuerySet, list[str]]:
+) -> QuerySet:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
     :param discovery_scope: Discovery scope for the queryset we're filtering.
-    :param request: The request to extract the query parameters from.
+    :param query: The query to execute.
     :param queryset_model_name: The discovery entity being queried.
     :param queryset: The starting queryset for the discovery entity being queried.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
@@ -78,16 +96,7 @@ async def discovery_filter_queryset(
         # If neither overview nor search have entries, it means no discovery is allowed.
         raise DiscoveryEmptyException()
 
-    # Process query parameters and check validity
-    query = DiscoveryQuery.model_validate({
-        k: v[0] if isinstance(v, list) else v
-        for k, v in request.query_params.items()
-        if k not in ("project", "dataset")
-        # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
-        #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
-    })
-
-    # Now we have the DiscoveryQuery object, and we need to run this query on our Phenopackets: ------------------------
+    # We need to run the provided query on our Phenopackets: -----------------------------------------------------------
 
     searchable_fields = set(discovery.get_searchable_field_ids())
 
@@ -97,22 +106,35 @@ async def discovery_filter_queryset(
     # TODO: in the future, scope repr passing to exceptions should be structured data:
     scope_repr = repr(discovery_scope)
 
-    # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
-    # than one value for the same field (not that this works most of the time, at the moment.)
+    f_queryset = queryset
+
+    # right now, a user cannot be filtering based on more than one value for the same field
     if (n_queried := len(query)) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
     if not overall_permissions.counts:
         raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
+    queried_entities: set[DiscoveryEntity] = set()
+
     for field, value in query.items():
         if field not in searchable_fields:
             raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
         # Ensure the passed value is in our allowed options:
-        await validate_field_query_value(discovery_scope, field, value, qf_permissions[field])
+        #  - pass original queryset in for determining valid filter values
+        await validate_field_query_value(
+            queryset_model_name, queryset, discovery_scope, field, value, qf_permissions[field]
+        )
 
         # Update queryset to include the Django ORM filter for this query field/value
-        queryset = filter_queryset_field_value(queryset_model_name, queryset, discovery.fields[field], value, lg)
+        #  - can throw NotImplementedError if we cannot rewrite the field mapping as a subpath of the queryset model
+        f_queryset, queried_entity = filter_queryset_field_value(
+            queryset_model_name, f_queryset, discovery.fields[field], value, lg
+        )
 
-    return queryset, queried_fields
+        queried_entities.add(queried_entity)
+
+    # TODO: do prefiltering with queried_entities and only the parts of the query that apply to them
+
+    return f_queryset

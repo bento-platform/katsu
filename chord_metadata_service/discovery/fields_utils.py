@@ -89,15 +89,17 @@ def normalize_field_path_true_model(
             return entity_name, field_path
 
 
-def get_model_and_field(
+def get_field_django_mapping_and_queried_entity(
     queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition
-) -> tuple[Type[BaseScopeableModel], str]:
+) -> tuple[str, DiscoveryEntity]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
     are the field with their possible joins through tables relations.
-    Returns a tuple of the model object and the Django string representation of the
-    field for this object.
+    Returns a tuple of (
+        the Django string representation of the field for this object relative to the queryset entity,
+        the queried entity name,
+    )
     """
 
     entity_name, field_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
@@ -108,9 +110,17 @@ def get_model_and_field(
         raise NotImplementedError(msg)
 
     field_path = resolve_filter_mapping_to_queryset_model(queryset_model_name, entity_name, field_path)
+    return "__".join(field_path), entity_name
 
-    field_name = "__".join(field_path)
-    return model, field_name
+
+def get_field_django_mapping(queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition) -> str:
+    """
+    Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
+    where the first crumb represents the object in the DB model, and the next ones
+    are the field with their possible joins through tables relations.
+    Returns the Django string representation of the field for this object.
+    """
+    return get_field_django_mapping_and_queried_entity(queryset_model_name, field_props)[0]
 
 
 def get_public_model_name(model: Type[Model]) -> DiscoveryEntity:
@@ -283,7 +293,7 @@ def get_json_range_condition(
     range_condition = Q()
 
     if group_by and group_by_value and value_mapping:
-        _, field = get_model_and_field(filtering_model_name, field_props)
+        field = get_field_django_mapping(filtering_model_name, field_props)
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
         if min is not None:
