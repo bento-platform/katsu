@@ -26,7 +26,9 @@ class TestModelField(TransactionTestCase):
             "phenopacket", DISCOVERY_CONFIG_TEST.fields["age"]
         )
         self.assertEqual(field, "subject__age_numeric")
-        self.assertEqual(field, get_field_django_mapping("individual", DISCOVERY_CONFIG_TEST.fields["age"]))
+        self.assertEqual(
+            field, "subject__" + get_field_django_mapping("individual", DISCOVERY_CONFIG_TEST.fields["age"])
+        )
         self.assertEqual(queried_entity, "individual")
 
         field = get_field_django_mapping("experiment", DISCOVERY_CONFIG_TEST.fields["extraction_protocol"])
@@ -227,4 +229,22 @@ class TestResolveFilterMapping(TestCase):
                 self.assertTupleEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
 
     def test_normalize_field_path(self):
-        pass
+        subtests: list[tuple[tuple[DiscoveryEntity, tuple[str, ...]], tuple[DiscoveryEntity, tuple[str, ...]]]] = [
+            (
+                ("individual", ("phenopackets", "biosamples", "extra_properties", "some_prop")),
+                ("biosample", ("extra_properties", "some_prop")),
+            ),
+            (
+                ("phenopacket", ("subject", "sex")),
+                ("individual", ("sex",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "experiment", "extra_properties", "some_prop")),
+                ("experiment", ("extra_properties", "some_prop")),
+            ),
+            # TODO: more
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                self.assertTupleEqual(normalize_field_path_true_model(*params[0]), params[1])
