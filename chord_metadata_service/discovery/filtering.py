@@ -1,3 +1,4 @@
+import json
 from collections.abc import Iterable
 
 from bento_lib.discovery import DiscoveryEntity
@@ -61,6 +62,9 @@ async def validate_field_query_value(
 
 
 def build_discovery_query_from_request(request: DrfRequest) -> DiscoveryQuery:
+    if request.method == "POST":
+        return DiscoveryQuery.model_validate(request.data)
+
     # Process query parameters and check validity
     return DiscoveryQuery.model_validate({
         k: v[0] if isinstance(v, list) else v

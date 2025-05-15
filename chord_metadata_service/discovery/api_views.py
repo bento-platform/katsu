@@ -142,7 +142,7 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
-@api_view(["GET"])
+@api_view(["GET", "POST"])
 @permission_classes([BentoAllowAny])
 async def discovery_endpoint(request: DrfRequest):
     """
