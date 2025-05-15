@@ -5,8 +5,9 @@ from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoB
 from typing import Any, Iterator, Type, TypeAlias
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
-from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
-from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from .exceptions import DiscoveryFilterRewriteException
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .scopeable_model import BaseScopeableModel
 
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
@@ -41,6 +42,10 @@ def resolve_filter_mapping_to_queryset_model(
     if queryset_model_name == field_model_name:
         return field_path
 
+    exc = DiscoveryFilterRewriteException(
+        f"cannot map field model {field_model_name} to filtering model {queryset_model_name}"
+    )
+
     match (queryset_model_name, field_model_name):
         case ("individual", "phenopacket"):
             if field_path[0] == "subject":
@@ -60,10 +65,18 @@ def resolve_filter_mapping_to_queryset_model(
             return "biosamples", "experiment", *field_path
         case ("biosample", "experiment"):
             return "experiment", *field_path
+        case ("biosample", "phenopacket"):
+            # If we are accessing a biosample field through a phenopacket path, we can remap it to a biosample queryset
+            # model. Otherwise, we cannot and we raise the exception.
+            if field_path[:2] == ("phenopacket", "biosamples"):
+                return field_path[2:]
+            raise exc
+        case ("experiment", "biosample"):
+            if field_path[0] == "experiment":
+                return field_path[1:]
+            raise exc
         case _:
-            raise NotImplementedError(
-                f"cannot map field model {field_model_name} to filtering model {queryset_model_name}"
-            )
+            raise exc
 
 
 def normalize_field_path_true_model(

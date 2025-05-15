@@ -4,8 +4,9 @@ from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
 from django.db.models.base import ModelBase
 
-from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_EXTRA_PROPERTIES
-from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_EXTRA_PROPERTIES
+from ..exceptions import DiscoveryFilterRewriteException
+from ..model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
@@ -47,7 +48,7 @@ class TestModelField(TransactionTestCase):
         # TODO
 
     def test_get_wrong_model(self):
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(DiscoveryFilterRewriteException):
             get_field_django_mapping("junk", DISCOVERY_CONFIG_TEST.fields["age"])
 
     def test_get_public_model_name(self):
@@ -221,12 +222,31 @@ class TestResolveFilterMapping(TestCase):
         subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], tuple[str, ...]]] = [
             ("phenopacket", "individual", ("sex",), ("subject", "sex")),
             ("individual", "phenopacket", ("subject", "sex"), ("sex",)),
+            (
+                "experiment",
+                "phenopacket",
+                ("biosamples", "experiment", "extra_properties", "prop"),
+                ("extra_properties", "prop"),
+            ),
             # TODO: more
         ]
 
         for params in subtests:
             with self.subTest(params=params):
                 self.assertTupleEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
+
+    def test_resolve_filter_mapping_exc(self):
+        # we cannot rewrite these as
+        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...]]] = [
+            ("biosample", "individual", ("sex",)),
+            ("experiment", "phenopacket", ("subject", "sex")),
+            # TODO: more
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                with self.assertRaises(DiscoveryFilterRewriteException):
+                    resolve_filter_mapping_to_queryset_model(*params)
 
     def test_normalize_field_path(self):
         subtests: list[tuple[tuple[DiscoveryEntity, tuple[str, ...]], tuple[DiscoveryEntity, tuple[str, ...]]]] = [
