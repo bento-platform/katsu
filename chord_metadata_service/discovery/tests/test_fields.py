@@ -12,7 +12,6 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
 
 from .constants import DISCOVERY_CONFIG_TEST
-from ..censorship import get_threshold
 from ..fields import (
     get_field_options,
     get_categorical_stats,
