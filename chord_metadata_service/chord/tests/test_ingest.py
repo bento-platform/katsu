@@ -312,7 +312,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         # check that it has been linked to the same experiment as the file it
         # has been derived from.
         related_results = ExperimentResult.objects.filter(
-            experiment__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
+            experiments__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
         self.assertIn(
             EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
             [v["identifier"] for v in related_results.values("identifier")]

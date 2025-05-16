@@ -228,6 +228,12 @@ class TestResolveFilterMapping(TestCase):
                 ("biosamples", "experiment", "extra_properties", "prop"),
                 "extra_properties__prop",
             ),
+            (
+                "experiment",
+                "phenopacket",
+                ("biosamples", "experiments", "extra_properties", "prop"),
+                "extra_properties__prop",
+            ),
             # TODO: more
         ]
 

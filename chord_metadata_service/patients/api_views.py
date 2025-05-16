@@ -130,7 +130,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
                     alternate_ids=Coalesce(F("subject__alternate_ids"), [])
                 )
                 .annotate(
-                    num_experiments=Count("biosamples__experiment"),
+                    num_experiments=Count("biosamples__experiments"),
                     biosamples=Coalesce(
                         ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
                         []
@@ -295,6 +295,11 @@ class PublicListIndividuals(APIView):
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
             individual_experiment_type_stats(filtered_qs, discovery, dt_perms_exp),
         )
+
+        import sys
+        async for i in filtered_qs:
+            print("individual", i, file=sys.stderr)
+            print("biosample", i.biosamples, file=sys.stderr)
 
         authz_middleware.mark_authz_done(request)
         return Response({

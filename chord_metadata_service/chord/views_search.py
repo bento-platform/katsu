@@ -119,7 +119,7 @@ async def phenopacket_query_results(
             *fields,
             alternate_ids=Coalesce(F("subject__alternate_ids"), []),
         ).annotate(
-            num_experiments=Count("biosamples__experiment"),
+            num_experiments=Count("biosamples__experiments"),
             biosamples=Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
         )
 

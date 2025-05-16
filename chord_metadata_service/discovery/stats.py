@@ -31,8 +31,8 @@ async def individual_experiment_type_stats(
 
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("biosamples__experiment__experiment_type"))
-        .annotate(value=Count("biosamples__experiment", distinct=True)),
+        .values(label=F("biosamples__experiments__experiment_type"))
+        .annotate(value=Count("biosamples__experiments", distinct=True)),
         discovery,
         field_permissions,
     )

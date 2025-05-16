@@ -60,9 +60,9 @@ def _resolve_filter_mapping_to_queryset_model_inner(
         case ("individual", "biosample"):
             return "phenopackets", "biosamples", *field_path
         case ("individual", "experiment"):
-            return "phenopackets", "biosamples", "experiment", *field_path
+            return "phenopackets", "biosamples", "experiments", *field_path
         case ("phenopacket", "experiment"):
-            return "biosamples", "experiment", *field_path
+            return "biosamples", "experiments", *field_path
         case ("biosample", "experiment"):
             return "experiment", *field_path
         case ("biosample", "phenopacket"):
@@ -72,11 +72,13 @@ def _resolve_filter_mapping_to_queryset_model_inner(
                 return field_path[2:]
             raise exc
         case ("experiment", "biosample"):  # also handles (experiment, phenopacket) via recursion below
-            if field_path[0] == "experiment":
+            # experiment: old path, prior to related_name; experiments: after
+            if field_path[0] in ("experiment", "experiments"):
                 return field_path[1:]
             raise exc
         case ("experiment", "phenopacket"):
-            if field_path[:2] == ("biosamples", "experiment"):
+            # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
+            if field_path[:2] == ("biosamples", "experiment") or field_path[:2] == ("biosamples", "experiments"):
                 return field_path[2:]
             raise exc
         case ("experiment", "individual"):

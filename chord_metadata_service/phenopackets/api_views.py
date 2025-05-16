@@ -34,9 +34,9 @@ class PhenopacketsModelViewSet(BentoAuthzScopedModelViewSet):
 
 BIOSAMPLE_PREFETCH = (
     "phenotypic_features",
-    "experiment_set",
-    "experiment_set__experiment_results",
-    "experiment_set__instrument",
+    "experiments",
+    "experiments__experiment_results",
+    "experiments__instrument",
 )
 
 BIOSAMPLE_SELECT_REL = (

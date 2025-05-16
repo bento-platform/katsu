@@ -108,9 +108,9 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
          open(get_path(CASE_LIST_SEQUENCED), "w", newline="\n") as file_case_list:
         exp_res = (
             ExperimentResult.objects
-            .prefetch_related("experiment_set")
-            .filter(experiment__dataset_id=dataset.identifier, file_format="MAF")
-            .annotate(biosample_id=F("experiment__biosample"))
+            .prefetch_related("experiments")
+            .filter(experiments__dataset_id=dataset.identifier, file_format="MAF")
+            .annotate(biosample_id=F("experiments__biosample"))
         )
 
         exp_res_list = [r async for r in exp_res]

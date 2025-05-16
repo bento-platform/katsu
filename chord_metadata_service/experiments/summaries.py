@@ -62,7 +62,7 @@ async def experiment_result_summary(
     discovery: DiscoveryConfig,
     experiment_permissions: DataPermissions,
 ) -> dict:
-    experiment_results = models.ExperimentResult.objects.filter(experiment__in=experiments)
+    experiment_results = models.ExperimentResult.objects.filter(experiments__in=experiments)
 
     (
         count,
@@ -87,7 +87,7 @@ async def experiment_result_summary(
 async def instrument_summary(
     experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissions
 ) -> dict:
-    instruments = models.Instrument.objects.filter(experiment__in=experiments).distinct()
+    instruments = models.Instrument.objects.filter(experiments__in=experiments).distinct()
 
     count, platform, model = await asyncio.gather(
         instruments.acount(),
