@@ -91,7 +91,9 @@ async def discovery_filter_queryset(
     :param queryset_model_name: The discovery entity being queried.
     :param queryset: The starting queryset for the discovery entity being queried.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
-    :param nested_prefetch: TODO
+    :param nested_prefetch: If true, it means we're filtering in a "prefetch" context, meaning we skip out-of-bounds
+                            fields (e.g., querying individual.sex from biosample) instead of erroring out, and we don't
+                            further recursively do more prefetching.
     :param lg: BoundLogger object.
     """
 
@@ -155,17 +157,24 @@ async def discovery_filter_queryset(
 
     # TODO: explain this:
 
-    # TODO: maybe need to prefetch all the way up (experiments, biosample__experiments, ...)
-
+    # TODO: determine if we need to do this
     if queryset_model_name in ("individual", "phenopacket") and "experiment" in queried_entities:
         queried_entities.add("biosample")
     if queryset_model_name == "individual" and "biosample" in queried_entities:
         queried_entities.add("phenopacket")
 
-    filtered_prefetches: list[Prefetch] = []
+    if not nested_prefetch and (
+        nested_queried_entities := tuple(filter(lambda ee: ee != queryset_model_name, queried_entities))
+    ):
+        # If we're not in a "nested prefetch" context already, we may have nested discovery entities we're querying.
+        # We want to limit the Django ORM "join" with these nested entities to only include nested objects which also
+        # match the subset of our query applying to the nested entity type, otherwise we may end up in situations where
+        # we get "all experiments of all phenopackets containing WGS experiments", rather than our (potentially) desired
+        # "all phenopackets with at least one WGS experiment, and only those WGS experiments included in the result-set"
 
-    if not nested_prefetch:
-        for e in filter(lambda ee: ee != queryset_model_name, queried_entities):
+        filtered_prefetches: list[Prefetch] = []
+
+        for e in nested_queried_entities:
             filtered_prefetches.append(
                 Prefetch(
                     resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
@@ -176,9 +185,11 @@ async def discovery_filter_queryset(
                         DISCOVERY_ENTITY_NAMES_TO_MODEL[e].get_model_scoped_queryset(discovery_scope),
                         dt_permissions,
                         lg,
-                        nested_prefetch=True,  # TODO: explain
+                        nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
                     )
                 )
             )
 
-    return f_queryset.prefetch_related(*filtered_prefetches)
+        f_queryset = f_queryset.prefetch_related(*filtered_prefetches)
+
+    return f_queryset
