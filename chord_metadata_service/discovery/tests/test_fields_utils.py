@@ -219,21 +219,21 @@ class TestJsonFieldUtils(TestCase):
 
 class TestResolveFilterMapping(TestCase):
     def test_resolve_filter_mapping(self):
-        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], tuple[str, ...]]] = [
-            ("phenopacket", "individual", ("sex",), ("subject", "sex")),
-            ("individual", "phenopacket", ("subject", "sex"), ("sex",)),
+        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], str]] = [
+            ("phenopacket", "individual", ("sex",), "subject__sex"),
+            ("individual", "phenopacket", ("subject", "sex"), "sex"),
             (
                 "experiment",
                 "phenopacket",
                 ("biosamples", "experiment", "extra_properties", "prop"),
-                ("extra_properties", "prop"),
+                "extra_properties__prop",
             ),
             # TODO: more
         ]
 
         for params in subtests:
             with self.subTest(params=params):
-                self.assertTupleEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
+                self.assertEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
 
     def test_resolve_filter_mapping_exc(self):
         # we cannot rewrite these as

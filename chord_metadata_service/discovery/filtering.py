@@ -1,9 +1,7 @@
-import json
-from collections.abc import Iterable
-
 from bento_lib.discovery import DiscoveryEntity
+from collections.abc import Iterable
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from rest_framework.request import Request as DrfRequest
 from structlog.stdlib import BoundLogger
 
@@ -11,6 +9,8 @@ from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, Dat
 from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
 from .fields import get_field_options, filter_queryset_field_value
+from .fields_utils import resolve_filter_mapping_to_queryset_model
+from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
@@ -120,6 +120,7 @@ async def discovery_filter_queryset(
         raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
     queried_entities: set[DiscoveryEntity] = set()
+    field_queried_entities: dict[str, DiscoveryEntity] = {}
 
     for field, value in query.items():
         if field not in searchable_fields:
@@ -138,7 +139,30 @@ async def discovery_filter_queryset(
         )
 
         queried_entities.add(queried_entity)
+        field_queried_entities[field] = queried_entity
 
-    # TODO: do prefiltering with queried_entities and only the parts of the query that apply to them
+    # Build filtered "join" prefetches to limit *queried* nested entities to those which match filters: ----------------
 
-    return f_queryset
+    # TODO: explain this:
+
+    filtered_prefetches: list[Prefetch] = []
+
+    for e in filter(lambda ee: ee != queryset_model_name, queried_entities):
+        filtered_prefetches.append(
+            Prefetch(
+                resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
+                queryset=await discovery_filter_queryset(
+                    discovery_scope,
+                    DiscoveryQuery.model_validate(
+                        # build a query subset with only filters that apply to this entity
+                        {k: v for k, v in query.items() if field_queried_entities[k] == e}
+                    ),
+                    e,
+                    PUBLIC_MODEL_NAMES_TO_MODEL[e].get_model_scoped_queryset(discovery_scope),
+                    dt_permissions,
+                    lg,
+                )
+            )
+        )
+
+    return f_queryset.prefetch_related(*filtered_prefetches)

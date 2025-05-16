@@ -31,7 +31,7 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
     return JSONBPathQuery(F(field), Value(f"{field_operator}.{query_path}"))
 
 
-def resolve_filter_mapping_to_queryset_model(
+def _resolve_filter_mapping_to_queryset_model_inner(
     queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> tuple[str, ...]:
     """
@@ -71,12 +71,26 @@ def resolve_filter_mapping_to_queryset_model(
             if field_path[:2] == ("phenopacket", "biosamples"):
                 return field_path[2:]
             raise exc
-        case ("experiment", "biosample"):
+        case ("experiment", "biosample"):  # also handles (experiment, phenopacket) via recursion below
             if field_path[0] == "experiment":
                 return field_path[1:]
             raise exc
+        case ("experiment", "phenopacket"):
+            if field_path[:2] == ("biosamples", "experiment"):
+                return field_path[2:]
+            raise exc
+        case ("experiment", "individual"):
+            if field_path[:3] == ("phenopackets", "biosamples", "experiment"):
+                return field_path[3:]
+            raise exc
         case _:
             raise exc
+
+
+def resolve_filter_mapping_to_queryset_model(
+    queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
+) -> str:
+    return "__".join(_resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, field_model_name, field_path))
 
 
 def normalize_field_path_true_model(
@@ -122,8 +136,7 @@ def get_field_django_mapping_and_queried_entity(
         msg = f"Accessing field on model {entity_name} not implemented"
         raise NotImplementedError(msg)
 
-    field_path = resolve_filter_mapping_to_queryset_model(queryset_model_name, entity_name, field_path)
-    return "__".join(field_path), entity_name
+    return resolve_filter_mapping_to_queryset_model(queryset_model_name, entity_name, field_path), entity_name
 
 
 def get_field_django_mapping(queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition) -> str:
