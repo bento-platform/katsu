@@ -1,7 +1,7 @@
 from bento_lib.discovery import DiscoveryEntity
 from collections.abc import Iterable
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Count, Prefetch, QuerySet
 from rest_framework.request import Request as DrfRequest
 from structlog.stdlib import BoundLogger
 
@@ -191,5 +191,13 @@ async def discovery_filter_queryset(
             )
 
         f_queryset = f_queryset.prefetch_related(*filtered_prefetches)
+
+    if not nested_prefetch:
+        # annotate with counts
+        # TODO: only sub-fields...
+        for e in ("biosample", "experiment"):
+            f_queryset = f_queryset.annotate(
+                **{f"count_{e}": Count(resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()))}
+            )
 
     return f_queryset

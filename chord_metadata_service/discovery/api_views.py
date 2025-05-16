@@ -23,7 +23,7 @@ from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
-from .censorship import get_rules
+from .censorship import get_rules, get_threshold
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
@@ -215,17 +215,63 @@ async def discovery_endpoint(request: DrfRequest):
 
     # TODO: log
 
-    # TODO: need to filter down biosamples/experiments and use for pre-selection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #  - but the preselect biosamples cannot be used for counts, since they may be eliminated by filtering out their
-    #    containing structure (phenopackets).
-    # TODO: count_or_bools_res !!!!!!!!!!!!!
+    # ------------------------------------------------------------------------------------------------------------------
+
+    # for each 'discovery entity', we generate either:
+    #  - a count (0/count-if-above-threshold), or
+    #  - a boolean (count > threshold)
+
+    # TODO: permissions non-hard-coded
+    # TODO: do this in sql instead
+    counts: dict[DiscoveryEntity, int] = {
+        "phenopacket": await queryset.acount(),
+        "individual": 0,
+        "biosample": 0,
+        "experiment": 0,
+    }
+
+    async for p in queryset:
+        counts["individual"] += (1 if p.subject_id is not None else 0)
+        counts["biosample"] += p.count_biosample
+        counts["experiment"] += p.count_experiment
+
+    # for each 'discovery entity', we generate either:
+    #  - a count (0/count-if-above-threshold), or
+    #  - a boolean (count > threshold)
+    count_or_bools_res: dict[DiscoveryEntity, int | bool] = {}
+
+    for e in counts:
+        dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]
+        entity_permissions = dt_permissions[dt]
+        count_threshold = get_threshold(discovery, entity_permissions)
+
+        entity_count = counts[e]
+
+        # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
+        if 0 < counts[e] <= count_threshold and count_threshold > 0:
+            await logger.ainfo(
+                "discovery: entity count is below threshold",
+                entity=e,
+                threshold=count_threshold,
+                scope_repr=repr(discovery_scope),
+            )
+            entity_count = 0  # censor sub-threshold counts to 0
+
+        if entity_permissions.any_permissions():  # if we have any permissions, then add a response for the overview
+            # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
+            # didn't get censored down to 0 above.
+            # This key used to be a plural version of the public model name, but is now singular so we have a consistent
+            # key to use across all discovery endpoints:
+            count_or_bools_res[e] = entity_count if entity_permissions.counts else (entity_count > 0)
+
+    # ------------------------------------------------------------------------------------------------------------------
 
     return Response(
         DiscoveryResponse(
             layout=discovery.overview,
             fields=field_responses,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
-            counts={},  # TODO !!!!!!!!!!!!
+            counts=count_or_bools_res,
             # if we have full data access, we have matches as well:
             matches=None,
         )
@@ -277,15 +323,16 @@ async def public_overview(request: DrfRequest):
     counts: dict[DiscoveryEntity, int] = dict(
         await asyncio.gather(*map(_counts_for_scoped_model_name, DISCOVERY_ENTITY_NAMES_TO_MODEL.items())))
 
-    # for each 'public model', we generate either a count (0/count-if-above-threshold) or a boolean (count > threshold)
+    # for each 'discovery entity', we generate either:
+    #  - a count (0/count-if-above-threshold), or
+    #  - a boolean (count > threshold)
     count_or_bools_res: dict[DiscoveryEntity, int | bool] = {}
 
     # Set counts to 0 (or bool to False) if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
         dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[public_model_name]
         model_permissions = dt_permissions[dt]
-        rules = get_rules(discovery, model_permissions)
-        count_threshold = rules.count_threshold
+        count_threshold = get_threshold(discovery, model_permissions)
 
         model_count = counts[public_model_name]
 
