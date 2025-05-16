@@ -296,11 +296,6 @@ class PublicListIndividuals(APIView):
             individual_experiment_type_stats(filtered_qs, discovery, dt_perms_exp),
         )
 
-        import sys
-        async for i in filtered_qs:
-            print("individual", i, file=sys.stderr)
-            print("biosample", i.biosamples, file=sys.stderr)
-
         authz_middleware.mark_authz_done(request)
         return Response({
             "count": ind_qct,

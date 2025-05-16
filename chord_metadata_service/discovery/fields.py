@@ -382,7 +382,8 @@ def filter_queryset_field_value(
     the `mapping` value is based on the same model as the queryset.
     """
 
-    # - can throw NotImplementedError if we cannot rewrite the field mapping as a subpath of the queryset model
+    # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
+    #   model
     field, queried_entity = f_utils.get_field_django_mapping_and_queried_entity(queryset_model_name, field_props)
 
     # TODO: resolve schema including extra properties

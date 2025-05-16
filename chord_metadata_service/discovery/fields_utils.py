@@ -48,11 +48,11 @@ def _resolve_filter_mapping_to_queryset_model_inner(
 
     match (queryset_model_name, field_model_name):
         case ("individual", "phenopacket"):
-            if field_path[0] == "subject":
+            if field_path[:1] == ("subject",):  # also conveniently handles the falsey case of field_path == ()
                 return field_path[1:]
             return "phenopackets", *field_path
         case ("phenopacket", "individual"):
-            if field_path[0] == "phenopackets":
+            if field_path[:1] == ("phenopackets",):  # also conveniently handles the falsey case of field_path == ()
                 return field_path[1:]
             return "subject", *field_path
         case ("phenopacket", "biosample"):
@@ -64,7 +64,7 @@ def _resolve_filter_mapping_to_queryset_model_inner(
         case ("phenopacket", "experiment"):
             return "biosamples", "experiments", *field_path
         case ("biosample", "experiment"):
-            return "experiment", *field_path
+            return "experiments", *field_path
         case ("biosample", "phenopacket"):
             # If we are accessing a biosample field through a phenopacket path, we can remap it to a biosample queryset
             # model. Otherwise, we cannot and we raise the exception.
@@ -73,7 +73,7 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             raise exc
         case ("experiment", "biosample"):  # also handles (experiment, phenopacket) via recursion below
             # experiment: old path, prior to related_name; experiments: after
-            if field_path[0] in ("experiment", "experiments"):
+            if field_path[:1] in (("experiment",), ("experiments",)):  # use slice to handle field_path == ()
                 return field_path[1:]
             raise exc
         case ("experiment", "phenopacket"):
@@ -82,7 +82,11 @@ def _resolve_filter_mapping_to_queryset_model_inner(
                 return field_path[2:]
             raise exc
         case ("experiment", "individual"):
-            if field_path[:3] == ("phenopackets", "biosamples", "experiment"):
+            # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
+            if (
+                field_path[:3] == ("phenopackets", "biosamples", "experiment") or
+                field_path[:3] == ("phenopackets", "biosamples", "experiments")
+            ):
                 return field_path[3:]
             raise exc
         case _:
@@ -112,7 +116,7 @@ def normalize_field_path_true_model(
             return normalize_field_path_true_model("individual", tuple(rest))
         case ("phenopacket", ("biosamples", *rest)):
             return normalize_field_path_true_model("biosample", tuple(rest))
-        case ("biosample", ("experiment", *rest)):
+        case ("biosample", ("experiments", *rest)):
             return normalize_field_path_true_model("experiment", tuple(rest))
         case _:  # base case; nothing to do
             return entity_name, field_path

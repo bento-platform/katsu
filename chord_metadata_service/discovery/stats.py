@@ -31,8 +31,8 @@ async def individual_experiment_type_stats(
 
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("biosamples__experiments__experiment_type"))
-        .annotate(value=Count("biosamples__experiments", distinct=True)),
+        .values(label=F("phenopackets__biosamples__experiments__experiment_type"))
+        .annotate(value=Count("phenopackets__biosamples__experiments", distinct=True)),
         discovery,
         field_permissions,
     )
@@ -51,8 +51,8 @@ async def individual_biosample_tissue_stats(
 
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("biosamples__sampled_tissue__label"))
-        .annotate(value=Count("biosamples", distinct=True)),
+        .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
+        .annotate(value=Count("phenopackets__biosamples", distinct=True)),
         discovery,
         field_permissions,
     )

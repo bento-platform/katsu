@@ -7,7 +7,7 @@ from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
-from .exceptions import DiscoveryEmptyException
+from .exceptions import DiscoveryEmptyException, DiscoveryFilterRewriteException
 from .fields import get_field_options, filter_queryset_field_value
 from .fields_utils import resolve_filter_mapping_to_queryset_model
 from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
@@ -82,6 +82,7 @@ async def discovery_filter_queryset(
     queryset: QuerySet,
     dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
+    nested_prefetch: bool = False,
 ) -> QuerySet:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
@@ -90,6 +91,7 @@ async def discovery_filter_queryset(
     :param queryset_model_name: The discovery entity being queried.
     :param queryset: The starting queryset for the discovery entity being queried.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
+    :param nested_prefetch: TODO
     :param lg: BoundLogger object.
     """
 
@@ -126,43 +128,57 @@ async def discovery_filter_queryset(
         if field not in searchable_fields:
             raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
-        # Ensure the passed value is in our allowed options:
-        #  - pass original queryset in for determining valid filter values
-        await validate_field_query_value(
-            queryset_model_name, queryset, discovery_scope, field, value, qf_permissions[field]
-        )
+        try:
+            # Ensure the passed value is in our allowed options:
+            #  - pass original queryset in for determining valid filter values
+            #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
+            #    queryset model
+            await validate_field_query_value(
+                queryset_model_name, queryset, discovery_scope, field, value, qf_permissions[field]
+            )
 
-        # Update queryset to include the Django ORM filter for this query field/value
-        #  - can throw NotImplementedError if we cannot rewrite the field mapping as a subpath of the queryset model
-        f_queryset, queried_entity = filter_queryset_field_value(
-            queryset_model_name, f_queryset, discovery.fields[field], value, lg
-        )
+            # Update queryset to include the Django ORM filter for this query field/value
+            #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
+            #    queryset model
+            f_queryset, queried_entity = filter_queryset_field_value(
+                queryset_model_name, f_queryset, discovery.fields[field], value, lg
+            )
 
-        queried_entities.add(queried_entity)
-        field_queried_entities[field] = queried_entity
+            queried_entities.add(queried_entity)
+            field_queried_entities[field] = queried_entity
+
+        except DiscoveryFilterRewriteException as e:
+            if not nested_prefetch:
+                raise e
 
     # Build filtered "join" prefetches to limit *queried* nested entities to those which match filters: ----------------
 
     # TODO: explain this:
 
+    # TODO: maybe need to prefetch all the way up (experiments, biosample__experiments, ...)
+
+    if queryset_model_name in ("individual", "phenopacket") and "experiment" in queried_entities:
+        queried_entities.add("biosample")
+    if queryset_model_name == "individual" and "biosample" in queried_entities:
+        queried_entities.add("phenopacket")
+
     filtered_prefetches: list[Prefetch] = []
 
-    for e in filter(lambda ee: ee != queryset_model_name, queried_entities):
-        filtered_prefetches.append(
-            Prefetch(
-                resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
-                queryset=await discovery_filter_queryset(
-                    discovery_scope,
-                    DiscoveryQuery.model_validate(
-                        # build a query subset with only filters that apply to this entity
-                        {k: v for k, v in query.items() if field_queried_entities[k] == e}
-                    ),
-                    e,
-                    PUBLIC_MODEL_NAMES_TO_MODEL[e].get_model_scoped_queryset(discovery_scope),
-                    dt_permissions,
-                    lg,
+    if not nested_prefetch:
+        for e in filter(lambda ee: ee != queryset_model_name, queried_entities):
+            filtered_prefetches.append(
+                Prefetch(
+                    resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
+                    queryset=await discovery_filter_queryset(
+                        discovery_scope,
+                        query,
+                        e,
+                        PUBLIC_MODEL_NAMES_TO_MODEL[e].get_model_scoped_queryset(discovery_scope),
+                        dt_permissions,
+                        lg,
+                        nested_prefetch=True,  # TODO: explain
+                    )
                 )
             )
-        )
 
     return f_queryset.prefetch_related(*filtered_prefetches)

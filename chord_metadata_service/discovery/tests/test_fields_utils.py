@@ -265,7 +265,7 @@ class TestResolveFilterMapping(TestCase):
                 ("individual", ("sex",)),
             ),
             (
-                ("phenopacket", ("biosamples", "experiment", "extra_properties", "some_prop")),
+                ("phenopacket", ("biosamples", "experiments", "extra_properties", "some_prop")),
                 ("experiment", ("extra_properties", "some_prop")),
             ),
             # TODO: more
