@@ -8,7 +8,7 @@ from chord_metadata_service.authz.types import (
     DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
 
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
@@ -33,7 +33,7 @@ async def get_discovery_data_type_permissions(
         # Collect all data types that we need permissions for to give various parts of the public overview response.
         #  - individuals & biosamples are in the 'phenopacket' data type, experiments are in the 'experiment' data type
         #  - TODO: filter to just data types which are ingested?
-        data_types=list(set(PUBLIC_MODEL_NAMES_TO_DATA_TYPE.values())),
+        data_types=list(set(DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE.values())),
 
         # Pass scope for permissions as resource
         resource=resource,
@@ -62,7 +62,7 @@ def get_discovery_field_set_permissions(
             raise ValidationError(f"Unsupported field used in query: {field}")
 
         mn, _ = discovery_fields[field].get_entity_and_field_path()
-        f_dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[mn]
+        f_dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[mn]
 
         # TODO: handle nested accesses...
 

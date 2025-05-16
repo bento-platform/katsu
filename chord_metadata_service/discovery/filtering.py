@@ -10,7 +10,7 @@ from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException, DiscoveryFilterRewriteException
 from .fields import get_field_options, filter_queryset_field_value
 from .fields_utils import resolve_filter_mapping_to_queryset_model
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
@@ -173,7 +173,7 @@ async def discovery_filter_queryset(
                         discovery_scope,
                         query,
                         e,
-                        PUBLIC_MODEL_NAMES_TO_MODEL[e].get_model_scoped_queryset(discovery_scope),
+                        DISCOVERY_ENTITY_NAMES_TO_MODEL[e].get_model_scoped_queryset(discovery_scope),
                         dt_permissions,
                         lg,
                         nested_prefetch=True,  # TODO: explain

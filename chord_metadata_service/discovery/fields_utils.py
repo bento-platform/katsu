@@ -6,7 +6,7 @@ from typing import Any, Iterator, Type, TypeAlias
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
 from .exceptions import DiscoveryFilterRewriteException
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scopeable_model import BaseScopeableModel
 
 MAPPING_SEPARATOR = "/"
@@ -137,7 +137,7 @@ def get_field_django_mapping_and_queried_entity(
 
     entity_name, field_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
 
-    model: Type[BaseScopeableModel] | None = PUBLIC_MODEL_NAMES_TO_MODEL.get(entity_name)
+    model: Type[BaseScopeableModel] | None = DISCOVERY_ENTITY_NAMES_TO_MODEL.get(entity_name)
     if model is None:
         msg = f"Accessing field on model {entity_name} not implemented"
         raise NotImplementedError(msg)
@@ -156,7 +156,7 @@ def get_field_django_mapping(queryset_model_name: DiscoveryEntity, field_props: 
 
 
 def get_public_model_name(model: Type[Model]) -> DiscoveryEntity:
-    model_name = [key for key, m in PUBLIC_MODEL_NAMES_TO_MODEL.items() if m == model]
+    model_name = [key for key, m in DISCOVERY_ENTITY_NAMES_TO_MODEL.items() if m == model]
     if len(model_name) != 1:
         raise NotImplementedError(f"Provided model {model} is not available for public.")
     return model_name[0]

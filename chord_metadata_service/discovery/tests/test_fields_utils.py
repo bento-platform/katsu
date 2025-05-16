@@ -6,7 +6,7 @@ from django.db.models.base import ModelBase
 
 from .constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_EXTRA_PROPERTIES
 from ..exceptions import DiscoveryFilterRewriteException
-from ..model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from ..model_lookups import DISCOVERY_ENTITY_NAMES_TO_MODEL
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
@@ -52,7 +52,7 @@ class TestModelField(TransactionTestCase):
             get_field_django_mapping("junk", DISCOVERY_CONFIG_TEST.fields["age"])
 
     def test_get_public_model_name(self):
-        for name, model in PUBLIC_MODEL_NAMES_TO_MODEL.items():
+        for name, model in DISCOVERY_ENTITY_NAMES_TO_MODEL.items():
             model_name = get_public_model_name(model)
             self.assertEqual(name, model_name)
 

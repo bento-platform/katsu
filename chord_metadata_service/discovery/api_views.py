@@ -27,7 +27,7 @@ from .censorship import get_rules
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
-from .model_lookups import PUBLIC_MODEL_NAMES_TO_DATA_TYPE, PUBLIC_MODEL_NAMES_TO_MODEL
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryResponse
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
@@ -170,7 +170,7 @@ async def discovery_endpoint(request: DrfRequest):
 
     query = build_discovery_query_from_request(request)
     queryset_model_name: DiscoveryEntity = "phenopacket"
-    queryset = PUBLIC_MODEL_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
+    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -275,14 +275,14 @@ async def public_overview(request: DrfRequest):
 
     # Predefined counts
     counts: dict[DiscoveryEntity, int] = dict(
-        await asyncio.gather(*map(_counts_for_scoped_model_name, PUBLIC_MODEL_NAMES_TO_MODEL.items())))
+        await asyncio.gather(*map(_counts_for_scoped_model_name, DISCOVERY_ENTITY_NAMES_TO_MODEL.items())))
 
     # for each 'public model', we generate either a count (0/count-if-above-threshold) or a boolean (count > threshold)
     count_or_bools_res: dict[DiscoveryEntity, int | bool] = {}
 
     # Set counts to 0 (or bool to False) if they're under the count threshold and the threshold is positive.
     for public_model_name in counts:
-        dt = PUBLIC_MODEL_NAMES_TO_DATA_TYPE[public_model_name]
+        dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[public_model_name]
         model_permissions = dt_permissions[dt]
         rules = get_rules(discovery, model_permissions)
         count_threshold = rules.count_threshold
