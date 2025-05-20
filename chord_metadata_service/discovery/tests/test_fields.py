@@ -88,7 +88,9 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             DISCOVERY_CONFIG_TEST.fields["sex"],
             field_permissions=self.permissions_full,
         )
-        self.assertListEqual(res, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)])
+        self.assertListEqual(
+            res.root, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)]
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
@@ -99,7 +101,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             DISCOVERY_CONFIG_TEST.fields["sex"],
             field_permissions=self.permissions_counts,
         )
-        self.assertListEqual(res, [BinWithValue(label="missing", value=0)])
+        self.assertListEqual(res.root, [BinWithValue(label="missing", value=0)])
 
 
 class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin):
@@ -159,7 +161,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             BinWithValue(label="Hematology Test", value=1),
             BinWithValue(label="missing", value=0),
         ]
-        self.assertListEqual(res, ground_truth)
+        self.assertListEqual(res.root, ground_truth)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
@@ -173,7 +175,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         ground_truth = [
             BinWithValue(label="missing", value=0),
         ]
-        self.assertListEqual(res, ground_truth)
+        self.assertListEqual(res.root, ground_truth)
 
     def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()

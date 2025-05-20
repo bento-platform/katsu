@@ -17,7 +17,7 @@ from chord_metadata_service.authz.types import DataPermissions
 from . import fields_utils as f_utils
 from .censorship import censor_count, thresholded_count
 from .scope import ValidatedDiscoveryScope
-from .pydantic_models import BinWithValue
+from .pydantic_models import BinWithValue, BinList
 from .stats import stats_for_field
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -201,7 +201,7 @@ async def get_range_stats(
     queryset: QuerySet,
     field_props: NumberFieldDefinition,
     field_permissions: DataPermissions,
-) -> list[BinWithValue]:
+) -> BinList:
     field_mapping = f_utils.get_field_django_mapping(queryset_model_name, field_props)
 
     # JSONField array specific field props
@@ -241,10 +241,10 @@ async def get_range_stats(
         stats[item["label"]] = thresholded_count(item["total"], scope, field_permissions)
 
     # All the bins between start and end must be represented and ordered
-    bins: list[BinWithValue] = [
+    bins: BinList = BinList(root=[
         BinWithValue(label=label, value=stats.get("label", 0))
         for floor, ceil, label in f_utils.labelled_range_generator(field_props)
-    ]
+    ])
 
     if "missing" in stats:
         bins.append(BinWithValue(label="missing", value=stats["missing"]))
@@ -258,7 +258,7 @@ async def get_categorical_stats(
     queryset: QuerySet,
     field_props: StringFieldDefinition,
     field_permissions: DataPermissions,
-) -> list[BinWithValue]:
+) -> BinList:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
@@ -291,11 +291,11 @@ async def get_categorical_stats(
         )
 
     # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
-    return [
+    return BinList(root=[
         # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
         *(BinWithValue(label=category, value=stats.get(category, 0)) for category in labels),
         BinWithValue(label="missing", value=stats["missing"]),
-    ]
+    ])
 
 
 async def get_date_stats(
@@ -304,7 +304,7 @@ async def get_date_stats(
     queryset: QuerySet,
     field_props: DateFieldDefinition,
     field_permissions: DataPermissions,
-) -> list[BinWithValue]:
+) -> BinList:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -349,7 +349,7 @@ async def get_date_stats(
             start = key
 
     # All the bins between start and end date must be represented
-    bins: list[BinWithValue] = []
+    bins: BinList = BinList(root=[])
     if start:   # at least one month
         for year, month in f_utils.monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"

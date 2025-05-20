@@ -324,12 +324,12 @@ class PublicListIndividuals(APIView):
             ),
             "biosamples": {
                 "count": tissues_count,
-                "sampled_tissue": sampled_tissues,
+                "sampled_tissue": sampled_tissues.model_dump(mode="json"),
             },
             **({
                 "experiments": {
                     "count": experiments_count,
-                    "experiment_type": experiment_types,
+                    "experiment_type": experiment_types.model_dump(mode="json"),
                 }
             } if dt_perms_exp.any_permissions() else {}),
         })

@@ -34,10 +34,10 @@ class IndividualPublicStatsTest(TransactionTestCase, PermissionsTestCaseMixin):
         count, res = await individual_biosample_tissue_stats(
             pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
-        self.assertListEqual(res, [BinWithValue(label="wall of urinary bladder", value=1)])
+        self.assertListEqual(res.root, [BinWithValue(label="wall of urinary bladder", value=1)])
 
     async def individual_experiment_type_stats(self):
         count, res = await individual_experiment_type_stats(
             pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
-        self.assertListEqual(res, [BinWithValue(label="DNA Methylation", value=1)])
+        self.assertListEqual(res.root, [BinWithValue(label="DNA Methylation", value=1)])

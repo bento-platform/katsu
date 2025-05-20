@@ -28,7 +28,7 @@ from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
-from .pydantic_models import BinWithValue, DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryResponse
+from .pydantic_models import DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryResponse, BinList
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .scopeable_model import BaseScopeableModel
@@ -122,7 +122,7 @@ async def discovery_field_response(
 ) -> DiscoveryFieldResponse | None:
     field_props = discovery_scope.discovery.fields[field]
 
-    stats: list[BinWithValue]
+    stats: BinList
 
     if not field_perms.counts:
         return None  # cannot compute stats right now for boolean-level responses

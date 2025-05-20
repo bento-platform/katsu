@@ -6,7 +6,7 @@ from chord_metadata_service.authz.types import DataPermissions
 
 from .censorship import thresholded_count
 from .fields_utils import get_jsonb_path_query
-from .pydantic_models import BinWithValue
+from .pydantic_models import BinWithValue, BinList
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -19,7 +19,7 @@ __all__ = [
 
 async def individual_experiment_type_stats(
     queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions,
-) -> tuple[int, list[BinWithValue]]:
+) -> tuple[int, BinList]:
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for experiment type
@@ -40,7 +40,7 @@ async def individual_experiment_type_stats(
 
 async def individual_biosample_tissue_stats(
     queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions
-) -> tuple[int, list[BinWithValue]]:
+) -> tuple[int, BinList]:
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for biosample sampled_tissue
@@ -62,8 +62,8 @@ async def bento_public_format_count_and_stats_list(
     annotated_queryset: QuerySet,
     discovery: DiscoveryConfig,
     field_permissions: DataPermissions,
-) -> tuple[int, list[BinWithValue]]:
-    stats_list: list[BinWithValue] = []
+) -> tuple[int, BinList]:
+    stats_list: BinList = BinList(root=[])
     total: int = 0
 
     # TODO: improve censorship tests for search/beacon counts/stats

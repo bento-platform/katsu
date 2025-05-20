@@ -5,6 +5,7 @@ from .types import ModelCountOrBoolResponse
 
 __all__ = [
     "BinWithValue",
+    "BinList",
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
     "DiscoveryResponse",
@@ -17,10 +18,17 @@ class BinWithValue(BaseModel):
     value: int
 
 
+class BinList(RootModel):
+    root: list[BinWithValue]
+
+    def append(self, b: BinWithValue):
+        self.root.append(b)
+
+
 class DiscoveryFieldResponse(BaseModel):
     id: str
     definition: FieldDefinition
-    data: list[BinWithValue]
+    data: BinList
 
 
 class DiscoveryFieldResponses(RootModel):
