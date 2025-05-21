@@ -155,6 +155,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
             self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
+            self.assertEqual(Dataset.objects.get(title=d["title"]).conditionsOfAccess, None)
 
         self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
