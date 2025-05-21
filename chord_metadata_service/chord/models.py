@@ -177,7 +177,9 @@ class Dataset(BaseProjectOrDataset):
     dats_file = models.JSONField(blank=True, null=True,
                                  help_text="Content of a valid DATS file, in JSON format, "
                                            "that specifies the dataset provenance.")
-
+    conditionsOfAccess = models.JSONField(blank=True, null=True,
+                              help_text="The data access requests link(s), in JSON format")
+    
     # -------------------------------------------------------------------------
 
     extra_properties = models.JSONField(blank=True, null=True,
