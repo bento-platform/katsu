@@ -160,7 +160,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
 
         self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
-    
+
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
             r = self.one_authz_post("/api/datasets", json=d)
@@ -169,7 +169,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
     def test_create_dataset_forbidden(self):
         r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
-    
+
     def test_conditions_of_access(self):
         for i, d in enumerate(self.valid_payloads):
             r = self.one_authz_post("/api/datasets", json=d)
