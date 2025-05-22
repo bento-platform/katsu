@@ -113,13 +113,14 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 2",
                 "dats_file": {},  # Valid dats_file JSON object
-                #"conditions_of_access": {},
+                "conditions_of_access": {},
 
             },
             {
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 3",
                 "dats_file": "{}",  # Valid dats_file JSON string
+                "conditions_of_access": ["mcgill.ca", "concordia.ca", "wikipedia.ca"],
             }
         ]
 
@@ -157,7 +158,6 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
             self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
-            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, None)
 
         self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
     
@@ -171,16 +171,12 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
     
     def test_conditions_of_access(self):
-        d = self.valid_payloads[1]
-        r = self.one_authz_post("/api/datasets", json=d)
+        for i, d in enumerate(self.valid_payloads):
+            r = self.one_authz_post("/api/datasets", json=d)
+            expected = d["conditions_of_access"] if i > 0 else None
 
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-        #self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, d["conditions_of_access"])
-        #raise Exception(d)
-
-
-        
-
+            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, expected)
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
