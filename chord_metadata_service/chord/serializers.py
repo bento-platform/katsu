@@ -35,6 +35,7 @@ class DatasetSerializer(GenericSerializer):
         "dats_file",
         "project",
         "discovery",
+        "conditions_of_access",
     )
 
     # noinspection PyMethodMayBeStatic
@@ -65,7 +66,7 @@ class DatasetSerializer(GenericSerializer):
             raise serializers.ValidationError([
                 str(error.message) for error in LINKED_FIELD_SETS_SCHEMA_VALIDATOR.iter_errors(value)])
         return value
-
+    
     def validate(self, data):
         """ Validate all fields against DATS schemas. """
 
