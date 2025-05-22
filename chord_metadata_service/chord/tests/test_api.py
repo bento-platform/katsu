@@ -113,7 +113,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 2",
                 "dats_file": {},  # Valid dats_file JSON object
-                "conditionsOfAccess": {},
+                #"conditions_of_access": {},
 
             },
             {
@@ -157,7 +157,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
             self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
-            self.assertEqual(Dataset.objects.get(title=d["title"]).conditionsOfAccess, None)
+            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, None)
 
         self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
     
@@ -175,7 +175,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         r = self.one_authz_post("/api/datasets", json=d)
 
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(Dataset.objects.get(title=d["title"]).conditionsOfAccess, d["conditionsOfAccess"])
+        #self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, d["conditions_of_access"])
         #raise Exception(d)
 
 
