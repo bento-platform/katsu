@@ -113,6 +113,8 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 2",
                 "dats_file": {},  # Valid dats_file JSON object
+                "conditionsOfAccess": {},
+
             },
             {
                 **valid_dataset_1(self.project["identifier"]),
@@ -158,7 +160,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             self.assertEqual(Dataset.objects.get(title=d["title"]).conditionsOfAccess, None)
 
         self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
-
+    
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
             r = self.one_authz_post("/api/datasets", json=d)
@@ -167,6 +169,18 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
     def test_create_dataset_forbidden(self):
         r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_conditions_of_access(self):
+        d = self.valid_payloads[1]
+        r = self.one_authz_post("/api/datasets", json=d)
+
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Dataset.objects.get(title=d["title"]).conditionsOfAccess, d["conditionsOfAccess"])
+        #raise Exception(d)
+
+
+        
+
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
