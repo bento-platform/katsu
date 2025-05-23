@@ -130,7 +130,8 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             {
                 "title": "aa",
                 "description": "Test Dataset",
-                "project": self.project["identifier"]
+                "project": self.project["identifier"],
+                "conditions_of_access": {},
             },
             {
                 "title": "Dataset 1",
@@ -175,6 +176,11 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, d.get("conditions_of_access"))
+
+    def test_invalid_conditions_of_access(self):
+        d = self.invalid_payloads[0]
+        r = self.one_authz_post("/api/datasets", json=d)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
