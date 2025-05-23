@@ -170,7 +170,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_conditions_of_access(self):
-        for i, d in enumerate(self.valid_payloads):
+        for d in self.valid_payloads:
             r = self.one_authz_post("/api/datasets", json=d)
 
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
