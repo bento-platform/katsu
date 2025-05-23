@@ -89,7 +89,7 @@ class Dataset(BaseProjectOrDataset):
     linked_field_sets = models.JSONField(blank=True, default=list,
                                          help_text="Data type fields which are linked together.")
 
-    conditions_of_access = models.JSONField(blank=True, null=True,
+    conditions_of_access = models.TextField(blank=True, null=True,
                                             help_text="The data access requests link(s), in JSON format")
 
     additional_resources = models.ManyToManyField(Resource, blank=True, help_text="Any resource objects linked to this "
