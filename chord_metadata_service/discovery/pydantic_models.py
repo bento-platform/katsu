@@ -55,9 +55,11 @@ class DiscoveryResponse(BaseModel):
     layout: list[OverviewSection]
     fields: DiscoveryFieldResponses
     # results section:
+    #  - root_entity is the "entity name" of the queryset model used to generate this response.
     #  - "counts" can be either booleans or counts, depending on permissions level.
     #  - these counts can be aggregated at the level of dataset (nested in project), project, or just whatever scope was
     #    queried (flat).
+    root_entity: DiscoveryEntity
     counts: (
         ModelCountOrBoolResponse | dict[str, ModelCountOrBoolResponse] | dict[str, dict[str, ModelCountOrBoolResponse]]
     )

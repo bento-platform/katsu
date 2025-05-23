@@ -273,10 +273,11 @@ async def discovery_endpoint(request: DrfRequest):
         DiscoveryResponse(
             layout=discovery.overview,
             fields=field_responses,
+            root_entity=queryset_model_name,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
             counts=count_or_bools_res,
             # if we have full data access, we have matches as well:
-            matches=None,
+            matches=None,  # TODO !!!!
         )
     )
 
@@ -372,6 +373,7 @@ async def public_overview(request: DrfRequest):
     fields = discovery.get_chart_field_ids()
     _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
+    queryset_model_name: DiscoveryEntity = "individual"
     queryset = Individual.get_model_scoped_queryset(discovery_scope)
 
     field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
@@ -380,7 +382,9 @@ async def public_overview(request: DrfRequest):
             fields,
             await asyncio.gather(
                 *(
-                    discovery_field_response(discovery_scope, "individual", queryset, field, field_permissions[field])
+                    discovery_field_response(
+                        discovery_scope, queryset_model_name, queryset, field, field_permissions[field]
+                    )
                     for field in fields
                 )
             )
@@ -394,6 +398,7 @@ async def public_overview(request: DrfRequest):
             layout=discovery.overview,
             fields=field_responses,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
+            root_entity=queryset_model_name,
             counts=count_or_bools_res,
         )
     )
