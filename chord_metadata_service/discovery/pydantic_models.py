@@ -1,4 +1,4 @@
-from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity
+from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
 from pydantic import BaseModel, RootModel
 
 from .types import ModelCountOrBoolResponse
@@ -6,9 +6,12 @@ from .types import ModelCountOrBoolResponse
 __all__ = [
     "BinWithValue",
     "BinList",
+    "DiscoveryFieldAndOptions",
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
     "DiscoveryResponse",
+    "DiscoverySearchSectionWithOptions",
+    "DiscoverySearchFieldsResponse",
     "DiscoveryQuery",
 ]
 
@@ -25,9 +28,18 @@ class BinList(RootModel):
         self.root.append(b)
 
 
-class DiscoveryFieldResponse(BaseModel):
+class BaseDiscoveryResolvedField(BaseModel):
     id: str
     definition: FieldDefinition
+
+
+class DiscoveryFieldAndOptions(BaseDiscoveryResolvedField):
+    # field ID + field definition + field filter options
+    options: list[str]
+
+
+class DiscoveryFieldResponse(BaseDiscoveryResolvedField):
+    # field ID + field definition + field data
     data: BinList
 
 
@@ -50,6 +62,14 @@ class DiscoveryResponse(BaseModel):
         ModelCountOrBoolResponse | dict[str, ModelCountOrBoolResponse] | dict[str, dict[str, ModelCountOrBoolResponse]]
     )
     matches: DiscoveryMatches | dict[str, DiscoveryMatches] | dict[str, dict[str, DiscoveryMatches]] | None = None
+
+
+class DiscoverySearchSectionWithOptions(SearchSection):
+    fields: list[DiscoveryFieldAndOptions]
+
+
+class DiscoverySearchFieldsResponse(BaseModel):
+    sections: list[DiscoverySearchSectionWithOptions]
 
 
 class DiscoveryQuery(RootModel):

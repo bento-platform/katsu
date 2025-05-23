@@ -28,7 +28,15 @@ from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
-from .pydantic_models import DiscoveryFieldResponse, DiscoveryFieldResponses, DiscoveryResponse, BinList
+from .pydantic_models import (
+    DiscoveryFieldResponse,
+    DiscoveryFieldResponses,
+    DiscoveryResponse,
+    BinList,
+    DiscoveryFieldAndOptions,
+    DiscoverySearchSectionWithOptions,
+    DiscoverySearchFieldsResponse,
+)
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .scopeable_model import BaseScopeableModel
@@ -74,27 +82,26 @@ async def public_search_fields(request: DrfRequest):
     # Note: the array is wrapped in a dictionary structure to help with JSON
     # processing by some services.
 
-    async def _get_field_response(field: str) -> dict | None:
+    async def _get_field_response(field: str) -> DiscoveryFieldAndOptions | None:
         field_props = discovery.fields.get(field, {})
         field_perms = field_permissions[field]
 
         if not field_perms.counts:  # Cannot even see counts, skip this field  TODO: incorporate booleans
             return None
 
-        # TODO: convert to pydantic model extending field definition
-        return {
-            **field_props.model_dump(mode="json"),
-            "id": field,
-            "options": await get_field_options(
+        return DiscoveryFieldAndOptions(
+            id=field,
+            definition=field_props,
+            options=await get_field_options(
                 "individual",
                 Individual.get_model_scoped_queryset(discovery_scope),
                 field,
                 discovery_scope,
                 field_permissions[field],
-            ),
-        }
+            )
+        )
 
-    async def _get_section_response(section: SearchSection) -> dict | None:
+    async def _get_section_response(section: SearchSection) -> DiscoverySearchSectionWithOptions | None:
         section_fields = list(filter(is_not_none, await asyncio.gather(*map(_get_field_response, section.fields))))
 
         if not section_fields:
@@ -102,15 +109,11 @@ async def public_search_fields(request: DrfRequest):
             # filter the section itself out - return a None which will get filtered out below.
             return None
 
-        # TODO: convert to pydantic model extending SearchSection
-        return {
-            **section.model_dump(mode="json"),
-            "fields": section_fields,
-        }
+        return DiscoverySearchSectionWithOptions(section_title=section.section_title, fields=section_fields)
 
-    return Response({
-        "sections": list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery.search)))),
-    })
+    return Response(DiscoverySearchFieldsResponse(
+        sections=list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery.search))))
+    ))
 
 
 async def discovery_field_response(
