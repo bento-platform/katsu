@@ -90,7 +90,7 @@ class Dataset(BaseProjectOrDataset):
                                          help_text="Data type fields which are linked together.")
 
     conditions_of_access = models.TextField(blank=True, null=True,
-                                            help_text="The data access requests link(s), in JSON format")
+                                            help_text="The data access requests link(s), as defined in https://schema.org/conditionsOfAccess")
 
     additional_resources = models.ManyToManyField(Resource, blank=True, help_text="Any resource objects linked to this "
                                                                                   "dataset that aren't specified by a "
