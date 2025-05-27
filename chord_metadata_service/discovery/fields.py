@@ -242,7 +242,7 @@ async def get_range_stats(
 
     # All the bins between start and end must be represented and ordered
     bins: BinList = BinList(root=[
-        BinWithValue(label=label, value=stats.get("label", 0))
+        BinWithValue(label=label, value=stats.get(label, 0))
         for floor, ceil, label in f_utils.labelled_range_generator(field_props)
     ])
 
