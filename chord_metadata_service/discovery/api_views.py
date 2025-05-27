@@ -46,24 +46,24 @@ is_not_none = partial(is_not, None)
 
 
 @extend_schema(
-    description="Public search fields with their configuration",
+    description="Discovery search fields with their configuration",
     responses={
         status.HTTP_200_OK: inline_serializer(
-            name='public_search_fields_response',
+            name='discovery_search_fields_response',
             fields={'sections': serializers.JSONField()}
         ),
         status.HTTP_404_NOT_FOUND: inline_serializer(
-            name='public_search_fields_not_configured',
+            name='discovery_search_fields_not_configured',
             fields={'message': serializers.CharField()},
         ),
     }
 )
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def public_search_fields(request: DrfRequest):
+async def discovery_search_fields(request: DrfRequest):
     """
     get:
-    Return public search fields with their configuration
+    Return discovery search fields with their configuration
     """
 
     try:
@@ -79,6 +79,13 @@ async def public_search_fields(request: DrfRequest):
     discovery = discovery_scope.discovery
     _, field_permissions = get_discovery_field_set_permissions(discovery, None, dt_permissions)
 
+    # ------------------------------------------------------------------------------------------------------------------
+
+    queryset_model_name: DiscoveryEntity = "phenopacket"
+    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
+
+    # ------------------------------------------------------------------------------------------------------------------
+
     # Note: the array is wrapped in a dictionary structure to help with JSON
     # processing by some services.
 
@@ -93,8 +100,8 @@ async def public_search_fields(request: DrfRequest):
             id=field,
             definition=field_props,
             options=await get_field_options(
-                "individual",
-                Individual.get_model_scoped_queryset(discovery_scope),
+                queryset_model_name,
+                queryset,
                 field,
                 discovery_scope,
                 field_permissions[field],
@@ -170,6 +177,8 @@ async def discovery_endpoint(request: DrfRequest):
         return Response(dres.INSUFFICIENT_PRIVILEGES, status=status.HTTP_403_FORBIDDEN)
 
     # ------------------------------------------------------------------------------------------------------------------
+
+    # TODO: support free text search as well as filters query
 
     query = build_discovery_query_from_request(request)
     queryset_model_name: DiscoveryEntity = "phenopacket"

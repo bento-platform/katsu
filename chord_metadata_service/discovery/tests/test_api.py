@@ -80,7 +80,7 @@ class TestDiscoveryConfigsDict(TypedDict):
     none: None
 
 
-class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
+class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
@@ -124,7 +124,7 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_search_fields_configured(self):
-        search_fields_url = reverse("public-search-fields")
+        search_fields_url = reverse("discovery-search-fields")
 
         subtest_params: list[tuple[DTAccessLevel, str, int, TestDiscoveryConfigKey | dict]] = [
             # SCOPE: whole node
@@ -176,7 +176,7 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_search_fields_not_configured(self):
-        response = self.dt_authz_counts_get(reverse("public-search-fields"), content_type="application/json")
+        response = self.dt_authz_counts_get(reverse("discovery-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
@@ -184,7 +184,7 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS)
     def test_public_search_fields_missing_extra_properties(self):
-        response = self.dt_authz_counts_get(reverse("public-search-fields"), content_type="application/json")
+        response = self.dt_authz_counts_get(reverse("discovery-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC.model_dump(mode="json"))
 
