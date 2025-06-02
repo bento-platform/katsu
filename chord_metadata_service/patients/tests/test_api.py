@@ -465,7 +465,7 @@ class PublicListIndividualsTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
+class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     """ Test for api/public GET filtering """
 
     response_threshold = DISCOVERY_CONFIG_TEST.rules.count_threshold
@@ -524,7 +524,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_sex(self):
         # sex field search
-        response = self.dt_authz_counts_get('/api/public?sex=female')
+        response = self.dt_authz_counts_get('/api/discovery?sex=female')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         nb_female = Individual.objects.filter(sex__iexact='female').count()
@@ -539,7 +539,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_sex_none_in_project_counts(self):
-        response = self.dt_authz_counts_get(f"/api/public?project={self.project_2.identifier}&sex=female")
+        response = self.dt_authz_counts_get(f"/api/discovery?project={self.project_2.identifier}&sex=female")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), dres.INSUFFICIENT_DATA_AVAILABLE)
 
@@ -551,7 +551,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_sex_none_in_project_full(self):
-        response = self.dt_authz_full_get(f"/api/public?project={self.project_2.identifier}&sex=female")
+        response = self.dt_authz_full_get(f"/api/discovery?project={self.project_2.identifier}&sex=female")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), {
             "count": 0,
@@ -562,7 +562,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         })
 
         response = self.dt_authz_full_get(
-            f"/api/public?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
+            f"/api/discovery?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.json(), {
@@ -577,7 +577,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_2_fields(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
-        response = self.dt_authz_counts_get('/api/public?sex=female&smoking=Smoker')
+        response = self.dt_authz_counts_get('/api/discovery?sex=female&smoking=Smoker')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(
@@ -594,7 +594,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_2_fields_config_empty(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
-        response = self.dt_authz_counts_get('/api/public?sex=female&smoking=Non-smoker')
+        response = self.dt_authz_counts_get('/api/discovery?sex=female&smoking=Non-smoker')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
@@ -603,7 +603,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_1(self):
         # extra_properties string search (multiple values)
-        response = self.dt_authz_counts_get('/api/public?smoking=Non-smoker&death_dc=Deceased')
+        response = self.dt_authz_counts_get('/api/discovery?smoking=Non-smoker&death_dc=Deceased')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(
@@ -620,7 +620,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_1_config_empty(self):
         # extra_properties string search
         # test GET query string search for extra_properties field
-        response = self.dt_authz_counts_get('/api/public?smoking=Non-smoker&death_dc=Deceased')
+        response = self.dt_authz_counts_get('/api/discovery?smoking=Non-smoker&death_dc=Deceased')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
@@ -630,7 +630,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_2(self):
         # extra_properties string search (multiple values)
         response = self.dt_authz_counts_get(
-            '/api/public?smoking=Non-smoker&death_dc=deceased&covidstatus=positive'
+            '/api/discovery?smoking=Non-smoker&death_dc=deceased&covidstatus=positive'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
@@ -639,7 +639,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_invalid_3(self):
         # if GET query string list has various data types Error
-        response = self.dt_authz_counts_get('/api/public?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
+        response = self.dt_authz_counts_get('/api/discovery?extra_properties=[{"smoking": "Non-smoker"}, 5, "Test"]')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
@@ -648,7 +648,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_range_1(self):
         # extra_properties range search (both min and max ranges, single value)
         response = self.dt_authz_counts_get(
-            '/api/public?lab_test_result_value=[200, 300)'
+            '/api/discovery?lab_test_result_value=[200, 300)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -667,7 +667,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_range_2(self):
         # extra_properties range search (above taper, single value)
         response = self.dt_authz_counts_get(
-            '/api/public?baseline_creatinine=≥ 200'
+            '/api/discovery?baseline_creatinine=≥ 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -685,7 +685,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_range_3(self):
         # extra_properties range search (below taper, single value)
         response = self.dt_authz_counts_get(
-            '/api/public?baseline_creatinine=< 50'
+            '/api/discovery?baseline_creatinine=< 50'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -703,7 +703,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_wrong_range(self):
         # extra_properties range search, unauthorized range
         response = self.dt_authz_counts_get(
-            '/api/public?lab_test_result_value=[100, 200)'
+            '/api/discovery?lab_test_result_value=[100, 200)'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
@@ -713,7 +713,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_range_string_1(self):
         # sex string search and extra_properties range search
         response = self.dt_authz_counts_get(
-            '/api/public?sex=female&lab_test_result_value=< 200'
+            '/api/discovery?sex=female&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -733,7 +733,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_range_string_2(self):
         # extra_properties range search and extra_properties string search (single value)
         response = self.dt_authz_counts_get(
-            '/api/public?lab_test_result_value=< 200&covidstatus=positive'
+            '/api/discovery?lab_test_result_value=< 200&covidstatus=positive'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -753,7 +753,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.dt_authz_counts_get(
-            '/api/public?lab_test_result_value=< 200&baseline_creatinine=[100, 150)'
+            '/api/discovery?lab_test_result_value=< 200&baseline_creatinine=[100, 150)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -775,7 +775,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         # extra_properties date range search (only after or before, single value)
         # Testing with a date of consent from 1 year ago
         response = self.dt_authz_counts_get(
-            '/api/public?date_of_consent=Mar 2021'
+            '/api/discovery?date_of_consent=Mar 2021'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -794,7 +794,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
         response = self.dt_authz_counts_get(
-            '/api/public?date_of_consent=Mar 2021&lab_test_result_value=< 200'
+            '/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 200'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -813,14 +813,14 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
     def test_public_filtering_mapping_for_search_filter(self):
         # biosample tissue field search
-        response = self.dt_authz_counts_get('/api/public?tissues=wall of urinary bladder')
+        response = self.dt_authz_counts_get('/api/discovery?tissues=wall of urinary bladder')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(1, response_obj["count"])
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
     def test_public_filtering_two_experiments(self):
-        response = self.dt_authz_counts_get(f"/api/public?sex={self.individuals[0]['sex']}&extraction_protocol=NGS")
+        response = self.dt_authz_counts_get(f"/api/discovery?sex={self.individuals[0]['sex']}&extraction_protocol=NGS")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(response_obj["count"], 1)
@@ -828,8 +828,8 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(response_obj["experiments"]["count"], 2)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_public_overview_sex(self):
-        response = self.dt_authz_counts_get('/api/public_search_fields')
+    def test_discovery_sex(self):
+        response = self.dt_authz_counts_get(reverse("discovery-search-fields"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -838,13 +838,13 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(len(response_obj["sections"][0]["fields"][0]["options"]), 4)  # path to sex field
 
 
-class PublicFilteringIndividualsTestSmallCellCount(PublicFilteringIndividualsTest):
+class DiscoveryFilteringIndividualsTestSmallCellCount(DiscoveryFilteringIndividualsTest):
     num_individuals = 3  # below configured test threshold
     # rest of the methods are inherited
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_overview_sex(self):
-        response = self.dt_authz_counts_get('/api/public_search_fields')
+        response = self.dt_authz_counts_get(reverse("discovery-search-fields"))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -911,7 +911,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_age_range(self):
         # age valid range search
-        response = self.dt_authz_counts_get('/api/public?age=[20, 30)')
+        response = self.dt_authz_counts_get('/api/discovery?age=[20, 30)')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
@@ -924,7 +924,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_age_invalid_range(self):
         # age invalid range max search
-        response = self.dt_authz_counts_get('/api/public?age=[10, 50)')
+        response = self.dt_authz_counts_get('/api/discovery?age=[10, 50)')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
@@ -932,7 +932,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY)
     def test_public_filtering_age_range_min_and_max_no_age_in_config(self):
         # test with config without age field, returns error
-        response = self.dt_authz_counts_get('/api/public?age=[20, 30)')
+        response = self.dt_authz_counts_get('/api/discovery?age=[20, 30)')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
@@ -940,7 +940,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_age_range_min_and_max_no_config(self):
         # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
-        response = self.dt_authz_counts_get('/api/public?age=[20, 30)')
+        response = self.dt_authz_counts_get('/api/discovery?age=[20, 30)')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
@@ -948,7 +948,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class PublicFilteringBeaconSearchTest(AuthzAPITestCase):
+class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
 
     random_range = 20
 
@@ -959,30 +959,32 @@ class PublicFilteringBeaconSearchTest(AuthzAPITestCase):
 
     # test beacon formatted response
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_beacon_search_response(self):
-        response = self.dt_authz_full_get('/api/public?sex=MALE')
+    def test_discovery_matches_response(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
         male_count = Individual.objects.filter(sex="MALE").count()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        self.assertEqual(len(response_obj["matches"]), male_count)
+        self.assertEqual(len(response_obj["results"]), male_count)
+
+    # TODO: more
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
-    def test_beacon_search_response_no_config(self):
+    def test_discovery_matches_response_no_config(self):
         # test when config is not provided, returns NOT FOUND
-        response = self.dt_authz_full_get('/api/public?sex=MALE')
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_beacon_search_response_invalid_search_key(self):
-        response = self.dt_authz_full_get('/api/public?birdwatcher=yes')
+    def test_discovery_matches_response_invalid_search_key(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?birdwatcher=yes')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-    def test_beacon_search_response_invalid_search_value(self):
-        response = self.dt_authz_full_get('/api/public?smoking=on_Sundays')
+    def test_discovery_matches_response_invalid_search_value(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?smoking=on_Sundays')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-    def test_beacon_search_more_params_than_censorship_limit(self):
-        response = self.dt_authz_full_get('/api/public?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
+    def test_discovery_matches_more_params_than_censorship_limit(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&smoking=Non-smoker&death_dc=Deceased')
         self.assertEqual(response.status_code, status.HTTP_200_OK)

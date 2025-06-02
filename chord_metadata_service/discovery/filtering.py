@@ -163,7 +163,7 @@ async def discovery_filter_queryset(
     if queryset_model_name == "individual" and "biosample" in queried_entities:
         queried_entities.add("phenopacket")
 
-    if not nested_prefetch and (
+    if (  # not nested_prefetch and
         nested_queried_entities := tuple(filter(lambda ee: ee != queryset_model_name, queried_entities))
     ):
         # If we're not in a "nested prefetch" context already, we may have nested discovery entities we're querying.
@@ -186,7 +186,8 @@ async def discovery_filter_queryset(
                         dt_permissions,
                         lg,
                         nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
-                    )
+                    ),
+                    to_attr=f"{e}_matches",
                 )
             )
 

@@ -1,5 +1,5 @@
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
-from pydantic import BaseModel, RootModel
+from pydantic import BaseModel, Field, RootModel
 
 from .types import ModelCountOrBoolResponse
 
@@ -9,7 +9,14 @@ __all__ = [
     "DiscoveryFieldAndOptions",
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
+    "MatchExperimentResult",
+    "MatchExperiment",
+    "MatchBiosample",
+    "MatchPhenopacket",
+    "DiscoveryMatches",
+    "DiscoveryPagination",
     "DiscoveryResponse",
+    "DiscoveryMatchesPaginatedResponse",
     "DiscoverySearchSectionWithOptions",
     "DiscoverySearchFieldsResponse",
     "DiscoveryQuery",
@@ -47,8 +54,49 @@ class DiscoveryFieldResponses(RootModel):
     root: dict[str, DiscoveryFieldResponse]
 
 
+class MatchExperimentResult(BaseModel):
+    id: int = Field(..., title="Experiment result ID")
+    f: str | None = Field(..., title="File name")
+    url: str | None = Field(..., title="URL")
+    # list of experiment_result_file_index objects (see experiments/schemas.py)
+    idx: list[dict] = Field(..., title="Indices")
+    ff: str | None = Field(..., title="File format")
+    g: str | None = Field(..., title="Genome assembly ID")
+
+
+class MatchExperiment(BaseModel):
+    """
+    Compact representation of an experiment for returning/rendering search responses.
+    """
+    id: str = Field(..., title="Experiment ID")
+    r: list[MatchExperimentResult]
+
+
+class MatchBiosample(BaseModel):
+    """
+    Compact representation of a biosample for returning/rendering search responses.
+    """
+    id: str = Field(..., title="Biosample ID")
+    e: list[MatchExperiment] | None
+
+
+class MatchPhenopacket(BaseModel):
+    """
+    Compact representation of a phenopacket for returning/rendering search responses.
+    """
+    id: str = Field(..., title="Phenopacket ID")
+    s: str = Field(..., title="Subject ID")
+    b: list[MatchBiosample]
+
+
 class DiscoveryMatches(RootModel):
-    root: dict[DiscoveryEntity, list[str]]  # dictionary of {model name: [list of IDs]}
+    root: list[MatchPhenopacket] | list[MatchBiosample] | list[MatchExperiment] | list[MatchExperimentResult]
+
+
+class DiscoveryPagination(BaseModel):
+    page: int
+    page_size: int
+    total: int  # total count of matches, whichever output format is chosen
 
 
 class DiscoveryResponse(BaseModel):
@@ -63,7 +111,11 @@ class DiscoveryResponse(BaseModel):
     counts: (
         ModelCountOrBoolResponse | dict[str, ModelCountOrBoolResponse] | dict[str, dict[str, ModelCountOrBoolResponse]]
     )
-    matches: DiscoveryMatches | dict[str, DiscoveryMatches] | dict[str, dict[str, DiscoveryMatches]] | None = None
+
+
+class DiscoveryMatchesPaginatedResponse(BaseModel):
+    results: DiscoveryMatches | dict[str, DiscoveryMatches] | dict[str, dict[str, DiscoveryMatches]]
+    pagination: DiscoveryPagination
 
 
 class DiscoverySearchSectionWithOptions(SearchSection):

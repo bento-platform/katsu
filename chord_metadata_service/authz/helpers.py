@@ -10,6 +10,7 @@ from bento_lib.auth.resources import RESOURCE_EVERYTHING
 from django.http import HttpRequest
 from rest_framework.request import Request
 
+from chord_metadata_service.chord.data_types import KatsuDataType
 from .middleware import authz_middleware
 from .types import DataPermissions, DataTypeDiscoveryPermissions
 
@@ -31,7 +32,7 @@ def get_counts_permission(dataset_level: bool) -> Permission:
 
 async def get_data_type_query_permissions(
     request: Request | HttpRequest,
-    data_types: list[str],
+    data_types: list[KatsuDataType],
     resource: dict | None = None,
     dataset_level: bool = False,
 ) -> DataTypeDiscoveryPermissions:

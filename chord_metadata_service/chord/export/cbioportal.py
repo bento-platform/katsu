@@ -96,7 +96,7 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
     # Export samples
     with open(get_path(SAMPLE_DATA_FILENAME), "w", newline="\n") as file_sample:
         biosamples = (
-            pm.Biosample.objects.filter(phenopackets__dataset_id=dataset.identifier).prefetch_related("phenopacket_set")
+            pm.Biosample.objects.filter(phenopackets__dataset_id=dataset.identifier).prefetch_related("phenopackets")
         )
         await sample_export(biosamples, file_sample)
 

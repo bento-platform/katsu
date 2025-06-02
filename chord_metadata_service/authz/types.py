@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import TypeAlias
 
+from chord_metadata_service.chord.data_types import KatsuDataType
+
 __all__ = [
     "DataPermissions",
     "DataTypeDiscoveryPermissions",
@@ -18,5 +20,5 @@ class DataPermissions:
         return self.bool_ or self.counts or self.data
 
 
-DataTypeDiscoveryPermissions: TypeAlias = dict[str, DataPermissions]  # str <=> data type
+DataTypeDiscoveryPermissions: TypeAlias = dict[KatsuDataType, DataPermissions]
 FieldDiscoveryPermissions: TypeAlias = dict[str, DataPermissions]  # str <=> field ID

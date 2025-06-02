@@ -4,10 +4,10 @@ from rest_framework import routers
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.discovery.api_views import (
     discovery_endpoint,
+    discovery_matches,
     public_rules,
     discovery_search_fields,
-    public_overview,
-    discovery_schema
+    discovery_schema,
 )
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
@@ -67,8 +67,8 @@ urlpatterns = [
 
     # discovery endpoints
     path('discovery', discovery_endpoint, name='discovery'),
+    path('discovery_matches', discovery_matches, name='discovery-matches'),
     path('discovery_search_fields', discovery_search_fields, name='discovery-search-fields'),
     path('public', individual_views.PublicListIndividuals.as_view(), name='public',),
-    path('public_overview', public_overview, name='public-overview',),
     path('public_rules', public_rules, name='public-rules'),
 ]

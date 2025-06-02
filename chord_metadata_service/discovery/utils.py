@@ -7,6 +7,7 @@ from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.types import (
     DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
+from chord_metadata_service.chord.data_types import KatsuDataType
 
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
@@ -46,8 +47,8 @@ def get_discovery_field_set_permissions(
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
-    dts_accessed: set[str] = set()
-    field_dts: dict[str, str] = {}
+    dts_accessed: set[KatsuDataType] = set()
+    field_dts: dict[str, KatsuDataType] = {}
 
     discovery_fields = extract_discovery(discovery_or_scope).fields
 
@@ -64,7 +65,7 @@ def get_discovery_field_set_permissions(
         mn, _ = discovery_fields[field].get_entity_and_field_path()
         f_dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[mn]
 
-        # TODO: handle nested accesses...
+        # TODO: handle nested accesses... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         dts_accessed.add(f_dt)
         field_dts[field] = f_dt

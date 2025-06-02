@@ -123,7 +123,7 @@ class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         }
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_public_search_fields_configured(self):
+    def test_discovery_search_fields_configured(self):
         search_fields_url = reverse("discovery-search-fields")
 
         subtest_params: list[tuple[DTAccessLevel, str, int, TestDiscoveryConfigKey | dict]] = [
@@ -175,7 +175,7 @@ class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                         self.assert_response_section_fields(res.json(), expected_body_config.model_dump(mode="json"))
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
-    def test_public_search_fields_not_configured(self):
+    def test_discovery_search_fields_not_configured(self):
         response = self.dt_authz_counts_get(reverse("discovery-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
@@ -183,16 +183,16 @@ class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_FIELDS_CONFIGURED)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS)
-    def test_public_search_fields_missing_extra_properties(self):
+    def test_discovery_search_fields_missing_extra_properties(self):
         response = self.dt_authz_counts_get(reverse("discovery-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC.model_dump(mode="json"))
 
 
-class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
+class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
-        self.url = '/api/public_overview'
+        self.url = '/api/discovery'
 
         # individuals (count 8)
         individuals = {
@@ -388,11 +388,12 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class PublicOverviewTest2(AuthzAPITestCase):
+class DiscoveryOverviewTest2(AuthzAPITestCase):
 
     def setUp(self) -> None:
-        self.url = '/api/public_overview'
+        self.url = '/api/discovery'
         # create only 2 individuals
+        # TODO: create phenopackets
         for ind in VALID_INDIVIDUALS[:2]:
             ph_m.Individual.objects.create(**ind)
 
@@ -414,7 +415,7 @@ class PublicOverviewTest2(AuthzAPITestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class PublicOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
+class DiscoveryOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
     # individuals (count 8)
     def setUp(self) -> None:
         # create individuals including those who have not accepted data types
@@ -425,7 +426,7 @@ class PublicOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
     def test_overview_response(self):
         # test overview response with passing TypeError exception
 
-        response = self.dt_authz_counts_get('/api/public_overview')
+        response = self.dt_authz_counts_get('/api/discovery')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
@@ -433,14 +434,14 @@ class PublicOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
         self.assertIn("baseline_creatinine", response_obj["fields"])
         self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
-        # if we add support for an array values for the public_overview
+        # if we add support for an array values for the discovery fields response
         # then this assertion will fail, so far there is no support for it
         self.assertNotIn(
             100,
             [data["value"] for data in response_obj["fields"]["baseline_creatinine"]["data"]])
 
 
-class PublicOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
+class DiscoveryOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
     # individuals (count 8)
     def setUp(self) -> None:
         # create individuals including those who have not accepted data types
@@ -450,7 +451,7 @@ class PublicOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
-        response = self.dt_authz_counts_get('/api/public_overview')
+        response = self.dt_authz_counts_get('/api/discovery')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
