@@ -22,7 +22,7 @@ __all__ = [
 async def biosample_summary(
     phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions
 ):
-    biosamples = models.Biosample.objects.filter(phenopacket__in=phenopackets)
+    biosamples = models.Biosample.objects.filter(phenopackets__in=phenopackets)
 
     (
         biosamples_count,

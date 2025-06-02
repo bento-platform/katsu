@@ -77,9 +77,11 @@ def get_biosamples_with_experiment_details(subject_ids):
     details of any associated experiment. If a biosample does not have an associated experiment, the experiment
     details are returned as None.
     """
-    biosamples_exp_tissue_details = Biosample.objects.filter(phenopacket__subject_id__in=subject_ids)\
+    biosamples_exp_tissue_details = (
+        Biosample.objects
+        .filter(phenopackets__subject_id__in=subject_ids)
         .values(
-            subject_id=F("phenopacket__subject_id"),
+            subject_id=F("phenopackets__subject_id"),
             biosample_id=F("id"),
             experiment_id=F("experiments__id"),
             experiment_type=F("experiments__experiment_type"),
@@ -87,6 +89,7 @@ def get_biosamples_with_experiment_details(subject_ids):
             tissue_id=F("sampled_tissue__id"),
             tissue_label=F("sampled_tissue__label")
         )
+    )
     return biosamples_exp_tissue_details
 
 

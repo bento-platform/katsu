@@ -71,7 +71,7 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__dataset__title",
+        field_name="phenopackets__dataset__title",
         label="Datasets"
     )
     procedure = django_filters.CharFilter(
