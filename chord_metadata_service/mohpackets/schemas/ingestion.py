@@ -1,9 +1,9 @@
 from typing import Optional
 
 from ninja import Field
+
 from chord_metadata_service.mohpackets.schemas.base import (
     BaseBiomarkerSchema,
-    BaseSystemicTherapySchema,
     BaseComorbiditySchema,
     BaseDonorSchema,
     BaseExposureSchema,
@@ -14,9 +14,9 @@ from chord_metadata_service.mohpackets.schemas.base import (
     BaseSampleRegistrationSchema,
     BaseSpecimenSchema,
     BaseSurgerySchema,
+    BaseSystemicTherapySchema,
     BaseTreatmentSchema,
 )
-
 
 """
 Module with schema used for ingesting
