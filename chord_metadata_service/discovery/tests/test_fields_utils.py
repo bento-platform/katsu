@@ -45,7 +45,7 @@ class TestModelField(TransactionTestCase):
 class TestLabelledRangeGenerator(TestCase):
     def setUp(self):
         self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
-            "mapping": "test",
+            "mapping": "individual/extra_properties",
             "datatype": "number",
             "title": "Test",
             "description": "A test field",
@@ -79,7 +79,7 @@ class TestLabelledRangeGenerator(TestCase):
 class TestLabelledRangeGeneratorCustomBins(TestCase):
     def setUp(self):
         self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
-            "mapping": "test",
+            "mapping": "individual/extra_properties",
             "datatype": "number",
             "title": "Test",
             "description": "A test field",
