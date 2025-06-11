@@ -85,7 +85,7 @@ class MatchPhenopacket(BaseModel):
     Compact representation of a phenopacket for returning/rendering search responses.
     """
     id: str = Field(..., title="Phenopacket ID")
-    s: str = Field(..., title="Subject ID")
+    s: str | None = Field(..., title="Subject ID")
     b: list[MatchBiosample]
 
 

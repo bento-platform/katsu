@@ -47,6 +47,7 @@ def _resolve_filter_mapping_to_queryset_model_inner(
     )
 
     match (queryset_model_name, field_model_name):
+        #  - Phenopackets <-> Individuals
         case ("individual", "phenopacket"):
             if field_path[:1] == ("subject",):  # also conveniently handles the falsey case of field_path == ()
                 return field_path[1:]
@@ -55,16 +56,32 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             if field_path[:1] == ("phenopackets",):  # also conveniently handles the falsey case of field_path == ()
                 return field_path[1:]
             return "subject", *field_path
+        #  - Phenopackets -> nested
         case ("phenopacket", "biosample"):
             return "biosamples", *field_path
+        case ("phenopacket", "experiment"):
+            return "biosamples", "experiments", *field_path
+        case ("phenopacket", "experiment_result"):
+            return "biosamples", "experiments", "experiment_results", *field_path
+        #  - Individuals -> nested
         case ("individual", "biosample"):
             return "phenopackets", "biosamples", *field_path
         case ("individual", "experiment"):
             return "phenopackets", "biosamples", "experiments", *field_path
-        case ("phenopacket", "experiment"):
-            return "biosamples", "experiments", *field_path
+        case ("individual", "experiment_result"):
+            return "phenopackets", "biosamples", "experiments", "experiment_results", *field_path
+        #  - Biosamples -> nested
         case ("biosample", "experiment"):
             return "experiments", *field_path
+        case ("biosample", "experiment_result"):
+            return "experiments", "experiment_results", *field_path
+        #  - Experiments -> nested
+        case ("experiment", "experiment_result"):
+            return "experiment_results", *field_path
+        # --------------------------------------------------------------------------------------------------------------
+        case ("biosample", "phenopacket"):
+            # TODO: biosample individual
+            raise exc
         case ("biosample", "phenopacket"):
             # If we are accessing a biosample field through a phenopacket path, we can remap it to a biosample queryset
             # model. Otherwise, we cannot and we raise the exception.
@@ -89,6 +106,14 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             ):
                 return field_path[3:]
             raise exc
+        # TODO: experiment results
+        case ("experiment_result", "phenopacket"):
+            raise exc
+        case ("experiment_result", "biosample"):
+            raise exc
+        case ("experiment_result", "experiment"):
+            raise exc
+        # --------------------------------------------------------------------------------------------------------------
         case _:
             raise exc
 
@@ -118,6 +143,8 @@ def normalize_field_path_true_model(
             return normalize_field_path_true_model("biosample", tuple(rest))
         case ("biosample", ("experiments", *rest)):
             return normalize_field_path_true_model("experiment", tuple(rest))
+        case ("experiment", ("experiment_results", *rest)):
+            return normalize_field_path_true_model("experiment_result", tuple(rest))
         case _:  # base case; nothing to do
             return entity_name, field_path
 

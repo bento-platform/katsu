@@ -23,7 +23,7 @@ async def list_or_manager_to_list(x: list[T] | Manager) -> list[T]:
     Given an object which is either a list of T or an instance of a T manager in an async Django DB context,
     return a list[T].
     """
-    return x if isinstance(x, list) else [y async for y in x.all(0)]
+    return x if isinstance(x, list) else [y async for y in x.all()]
 
 
 async def experiment_result_matches(mrm) -> list[MatchExperimentResult]:
@@ -75,7 +75,7 @@ async def phenopacket_matches_obj(page_list, dt_permissions: DataTypeDiscoveryPe
         MatchPhenopacket(
             # TODO: prefetch all the time, even when not filtering.
             id=str(phe.id),
-            s=str(phe.subject_id),
+            s=str(phe.subject_id) if phe.subject_id else None,
             b=await biosample_matches(getattr(phe, "biosample_matches", phe.biosamples), dt_permissions),
         )
         async for phe in page_list

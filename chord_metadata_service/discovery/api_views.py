@@ -22,7 +22,7 @@ from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
-from .censorship import get_rules, get_threshold
+from .censorship import get_rules, get_threshold, thresholded_count
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
@@ -169,6 +169,26 @@ async def build_and_execute_discovery_query(
     )
 
 
+async def discovery_queryset_entity_counts(queryset: QuerySet) -> dict[DiscoveryEntity, int]:
+    # TODO: do this in sql instead
+    # TODO: do this for different base entity types
+
+    counts: dict[DiscoveryEntity, int] = {
+        "phenopacket": await queryset.acount(),
+        "individual": 0,
+        "biosample": 0,
+        "experiment": 0,
+        "experiment_result": 0,
+    }
+
+    async for p in queryset:
+        counts["individual"] += (1 if p.subject_id is not None else 0)
+        counts["biosample"] += p.count_biosample
+        counts["experiment"] += p.count_experiment
+
+    return counts
+
+
 @api_view(["GET", "POST"])
 @permission_classes([BentoAllowAny])
 async def discovery_endpoint(request: DrfRequest):
@@ -237,17 +257,7 @@ async def discovery_endpoint(request: DrfRequest):
 
     # TODO: permissions non-hard-coded
     # TODO: do this in sql instead
-    counts: dict[DiscoveryEntity, int] = {
-        "phenopacket": await queryset.acount(),
-        "individual": 0,
-        "biosample": 0,
-        "experiment": 0,
-    }
-
-    async for p in queryset:
-        counts["individual"] += (1 if p.subject_id is not None else 0)
-        counts["biosample"] += p.count_biosample
-        counts["experiment"] += p.count_experiment
+    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(queryset)
 
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
@@ -272,6 +282,10 @@ async def discovery_endpoint(request: DrfRequest):
             # This key used to be a plural version of the public model name, but is now singular so we have a consistent
             # key to use across all discovery endpoints:
             count_or_bools_res[e] = entity_count if entity_permissions.counts else (entity_count > 0)
+
+    # If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
+    # one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
+    # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
@@ -333,8 +347,8 @@ async def discovery_matches(request: DrfRequest):
 
     # -- Pagination ----------------------------------------------------------------------------------------------------
 
-    page: int = int(request.query_params.get("page", "0"))
-    page_size = int(request.query_params.get("page_size", "10"))
+    page: int = int(request.query_params.get("_page", "0"))
+    page_size = int(request.query_params.get("_page_size", "10"))
     total_count = await queryset.acount()
     matches_page = queryset[page * page_size:(page + 1) * page_size]
 
@@ -354,6 +368,32 @@ async def discovery_matches(request: DrfRequest):
             results=await phenopacket_matches_obj(matches_page, dt_permissions), pagination=pagination
         )
     )
+
+
+@api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def discovery_ui_hints(request: DrfRequest):
+    try:
+        scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+
+    queryset_model_name: DiscoveryEntity = "phenopacket" # TODO
+    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
+
+    counts = await discovery_queryset_entity_counts(queryset=queryset)
+
+    dt_permissions = await get_discovery_data_type_permissions(request, scope)
+
+    # TODO: permissions and thresholding thresholded_count()
+
+    return {
+        "entities_with_data": [
+            e for e, v in counts.items()
+            if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
+        ],
+        "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
+    }
 
 
 @api_view(["GET"])

@@ -18,6 +18,7 @@ DISCOVERY_ENTITY_NAMES_TO_MODEL: dict[DiscoveryEntity, Type[BaseScopeableModel]]
     "individual": patient_models.Individual,
     "biosample": pheno_models.Biosample,
     "experiment": exp_models.Experiment,
+    "experiment_result": exp_models.ExperimentResult,
 }
 
 DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE: dict[DiscoveryEntity, KatsuDataType] = {
@@ -25,4 +26,5 @@ DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE: dict[DiscoveryEntity, KatsuDataType] = {
     "individual": DATA_TYPE_PHENOPACKET,
     "biosample": DATA_TYPE_PHENOPACKET,
     "experiment": DATA_TYPE_EXPERIMENT,
+    "experiment_result": DATA_TYPE_EXPERIMENT,
 }

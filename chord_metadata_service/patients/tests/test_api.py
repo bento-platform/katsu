@@ -532,46 +532,41 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.response_threshold_check(response_obj),
             [nb_female, dres.INSUFFICIENT_DATA_AVAILABLE]
         )
-        if nb_female <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(nb_female, response_obj['count'])
+        self.assertEqual(response_obj["counts"]["individual"], 0 if nb_female <= self.response_threshold else nb_female)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_sex_none_in_project_counts(self):
         response = self.dt_authz_counts_get(f"/api/discovery?project={self.project_2.identifier}&sex=female")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json(), dres.INSUFFICIENT_DATA_AVAILABLE)
+        self.assertEqual(response.json()["counts"]["individual"], 0)  # TODO: assert full empty response
 
         response = self.dt_authz_counts_get(
             f"/api/public?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json(), dres.INSUFFICIENT_DATA_AVAILABLE)
+        self.assertEqual(response.json()["counts"]["individual"], 0)  # TODO: assert full empty response
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_public_filtering_sex_none_in_project_full(self):
         response = self.dt_authz_full_get(f"/api/discovery?project={self.project_2.identifier}&sex=female")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json(), {
-            "count": 0,
-            "matches": [],
-            "matches_detail": [],
-            "biosamples": {"count": 0, "sampled_tissue": []},
-            "experiments": {"count": 0, "experiment_type": []},
-        })
+        self.assertDictEqual(response.json()["counts"], {  # TODO: full empty fields assertion
+            "phenopacket": 0,
+            "individual": 0,
+            "biosample": 0,
+            "experiment": 0,
+        })  # TODO: assert full empty response
 
         response = self.dt_authz_full_get(
             f"/api/discovery?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json(), {
-            "count": 0,
-            "matches": [],
-            "matches_detail": [],
-            "biosamples": {"count": 0, "sampled_tissue": []},
-            "experiments": {"count": 0, "experiment_type": []},
-        })
+        self.assertDictEqual(response.json()["counts"], {  # TODO: full empty fields assertion
+            "phenopacket": 0,
+            "individual": 0,
+            "biosample": 0,
+            "experiment": 0,
+        })  # TODO: assert full empty response
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_2_fields(self):

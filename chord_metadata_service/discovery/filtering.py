@@ -69,9 +69,10 @@ def build_discovery_query_from_request(request: DrfRequest) -> DiscoveryQuery:
     return DiscoveryQuery.model_validate({
         k: v[0] if isinstance(v, list) else v
         for k, v in request.query_params.items()
-        if k not in ("project", "dataset")
+        if k and k not in ("project", "dataset") and k[0] != "_"
         # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
         #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
+        # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
     })
 
 
@@ -196,7 +197,8 @@ async def discovery_filter_queryset(
     if not nested_prefetch:
         # annotate with counts
         # TODO: only sub-fields...
-        for e in ("biosample", "experiment"):
+        es: tuple[DiscoveryEntity, ...] = ("biosample", "experiment", "experiment_result")
+        for e in es:
             f_queryset = f_queryset.annotate(
                 **{f"count_{e}": Count(resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()))}
             )
