@@ -1,6 +1,8 @@
+from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
+from pydantic import ValidationError as PydValidationError
 from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
@@ -20,6 +22,17 @@ BENTO_DATA_USE_SCHEMA_VALIDATOR = Draft7Validator(BENTO_DATA_USE_SCHEMA)
 LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 
 
+class DiscoveryConfigField(serializers.Field):
+    def to_representation(self, value):
+        return value.model_dump(mode="json")
+
+    def to_internal_value(self, data):
+        try:
+            return DiscoveryConfig.model_validate(data)
+        except PydValidationError as e:
+            raise serializers.ValidationError(detail=str(e))
+
+
 #############################################################
 #                                                           #
 #              Project Management  Serializers              #
@@ -28,6 +41,8 @@ LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 
 
 class DatasetSerializer(GenericSerializer):
+    discovery = DiscoveryConfigField(required=False, allow_null=True)
+
     always_include = (
         "description",
         "contact_info",
@@ -130,8 +145,6 @@ class DatasetSerializer(GenericSerializer):
 
         return validation
 
-    n_of_tables = serializers.IntegerField(read_only=True)
-
     class Meta:
         model = Dataset
         fields = '__all__'
@@ -147,12 +160,14 @@ class ProjectJsonSchemaSerializer(GenericSerializer):
 
 class ProjectSerializer(serializers.ModelSerializer):
     # Don't inherit GenericSerializer to not pop empty fields
+
     always_include = (
         "title",
         "description",
         "discovery",
     )
 
+    discovery = DiscoveryConfigField(required=False, allow_null=True)
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
