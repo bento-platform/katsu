@@ -23,6 +23,11 @@ LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 
 
 class DiscoveryConfigField(serializers.Field):
+    """
+    Custom field serializer/deserializer for the DiscoveryConfig Pydantic model, used as the value for discovery fields
+    on the Project/Dataset models.
+    """
+
     def to_representation(self, value):
         return value.model_dump(mode="json")
 
