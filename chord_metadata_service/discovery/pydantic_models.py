@@ -77,6 +77,7 @@ class MatchBiosample(BaseModel):
     Compact representation of a biosample for returning/rendering search responses.
     """
     id: str = Field(..., title="Biosample ID")
+    p: str | None = Field(..., title="Phenopacket ID")
     e: list[MatchExperiment] | None
 
 
@@ -114,6 +115,7 @@ class DiscoveryResponse(BaseModel):
 
 
 class DiscoveryMatchesPaginatedResponse(BaseModel):
+    results_entity: DiscoveryEntity
     results: DiscoveryMatches | dict[str, DiscoveryMatches] | dict[str, dict[str, DiscoveryMatches]]
     pagination: DiscoveryPagination
 

@@ -26,7 +26,7 @@ from .censorship import get_rules, get_threshold, thresholded_count
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
-from .matches import phenopacket_matches_obj
+from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import (
     DiscoveryFieldResponse,
@@ -38,6 +38,7 @@ from .pydantic_models import (
     DiscoverySearchFieldsResponse,
     DiscoveryPagination,
     DiscoveryQuery,
+    DiscoveryMatches,
     DiscoveryMatchesPaginatedResponse,
 )
 from .schemas import DISCOVERY_SCHEMA
@@ -363,9 +364,16 @@ async def discovery_matches(request: DrfRequest):
 
     # -- Build and return response -------------------------------------------------------------------------------------
 
+    results_entity: DiscoveryEntity = "phenopacket"
+    # TODO: select queryset of entities that aren't necessarily phenopackets
+
     return Response(
         DiscoveryMatchesPaginatedResponse(
-            results=await phenopacket_matches_obj(matches_page, dt_permissions), pagination=pagination
+            results_entity=results_entity,
+            results=DiscoveryMatches(
+                root=await DISCOVERY_ENTITY_TO_MATCH_FN[results_entity](matches_page, dt_permissions)
+            ),
+            pagination=pagination,
         )
     )
 
@@ -385,13 +393,13 @@ async def discovery_ui_hints(request: DrfRequest):
 
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
 
-    # TODO: permissions and thresholding thresholded_count()
-
     return {
         "entities_with_data": [
             e for e, v in counts.items()
             if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
         ],
+        # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
+        #  should present a consolidated map view?
         "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
     }
 
