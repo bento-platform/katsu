@@ -14,6 +14,7 @@ from .constants import (
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
 from ..models import Project, Dataset, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
+from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST_DICT
 
 
 class CreateProjectAPITest(AuthzAPITestCase):
@@ -23,6 +24,11 @@ class CreateProjectAPITest(AuthzAPITestCase):
             {
                 "title": "Project 2",
                 "description": "",
+            },
+            {
+                "title": "Project 3",
+                "description": "Lorem",
+                "discovery": DISCOVERY_CONFIG_TEST_DICT,
             }
         ]
 
@@ -35,6 +41,11 @@ class CreateProjectAPITest(AuthzAPITestCase):
             {
                 "title": "aa",  # name must be at least 3 characters
                 "description": "",
+            },
+            {
+                "title": "Project 3",
+                "description": "Lorem",
+                "discovery": [DISCOVERY_CONFIG_TEST_DICT],  # wrapped in list
             }
         ]
 
@@ -88,6 +99,18 @@ class UpdateProjectTest(AuthzAPITestCaseWithProjectJSON):
         r = self.one_no_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_project_discovery_put_get(self):
+        # starting from VALID_PROJECT_1, which is a very basic project without a discovery configuration.
+
+        r = self.one_authz_put(
+            f"/api/projects/{self.project['identifier']}",
+            json={**self.without_times(self.project), "discovery": DISCOVERY_CONFIG_TEST_DICT},
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        r = self.one_authz_get(f"/api/projects/{self.project['identifier']}")
+        self.assertDictEqual(r.json()["discovery"], DISCOVERY_CONFIG_TEST.model_dump(mode="json"))
+
 
 class DeleteProjectTest(AuthzAPITestCaseWithProjectJSON):
     def test_delete_project(self):
@@ -118,6 +141,12 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 3",
                 "dats_file": "{}",  # Valid dats_file JSON string
+            },
+            {
+                **valid_dataset_1(self.project["identifier"]),
+                "title": "Dataset 4",
+                "dats_file": "{}",  # Valid dats_file JSON string
+                "discovery": DISCOVERY_CONFIG_TEST_DICT,
             }
         ]
 
@@ -166,6 +195,17 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
     def test_create_dataset_forbidden(self):
         r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_dataset_discovery_put_get(self):
+        r = self.one_authz_post("/api/datasets", json=valid_dataset_1(self.project["identifier"]))
+        d = r.json()
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        r = self.one_authz_put(f"/api/datasets/{d['identifier']}", json={**d, "discovery": DISCOVERY_CONFIG_TEST_DICT})
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        r = self.one_authz_get(f"/api/datasets/{d['identifier']}")
+        self.assertDictEqual(r.json()["discovery"], DISCOVERY_CONFIG_TEST.model_dump(mode="json"))
 
     def test_dats(self):
         payload = {**self.dats_valid_payload, 'dats_file': {}}
