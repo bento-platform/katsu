@@ -378,7 +378,7 @@ async def discovery_ui_hints(request: DrfRequest):
     except DiscoveryScopeException as e:
         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
 
-    queryset_model_name: DiscoveryEntity = "phenopacket" # TODO
+    queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO
     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
 
     counts = await discovery_queryset_entity_counts(queryset=queryset)
