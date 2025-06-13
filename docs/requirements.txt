@@ -3,7 +3,7 @@ asgiref==3.6.0
 Babel==2.12.1
 certifi==2024.7.4
 charset-normalizer==3.1.0
-Django==4.2.18
+Django==4.2.22
 docutils==0.16
 idna==3.7
 imagesize==1.4.1
@@ -11,7 +11,7 @@ Jinja2==3.1.6
 MarkupSafe==2.1.2
 packaging==23.0
 Pygments==2.15.0
-requests==2.32.2
+requests==2.32.4
 snowballstemmer==2.2.0
 Sphinx==2.4.4
 sphinx-rtd-theme==1.2.0
