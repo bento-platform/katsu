@@ -207,11 +207,11 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
     def test_conditions_of_access(self):
         for d in self.valid_payloads:
-            #d = self.valid_dataset_coa
             r = self.one_authz_post("/api/datasets", json=d)
 
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access, d.get("conditions_of_access", ""))
+            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access,
+                             d.get("conditions_of_access", ""))
 
     def test_invalid_conditions_of_access(self):
         d = self.invalid_dataset_coa
