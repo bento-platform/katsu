@@ -68,6 +68,11 @@ LOCAL_OPA_DATASET = {
         "write_datasets": ["SYNTH_01", "SYNTH_02"],
         "read_datasets": ["SYNTH_01", "SYNTH_02"],
     },
+    "user_3": {
+        "is_admin": False,
+        "write_datasets": [],
+        "read_datasets": [],
+    },
 }
 
 QUERY_SERVICE_TOKEN = "query"
