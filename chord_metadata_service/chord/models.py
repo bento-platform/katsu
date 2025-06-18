@@ -89,7 +89,7 @@ class Dataset(BaseProjectOrDataset):
     linked_field_sets = models.JSONField(blank=True, default=list,
                                          help_text="Data type fields which are linked together.")
 
-    conditions_of_access = models.TextField(blank=True, null=True,
+    conditions_of_access = models.TextField(blank=True, default="",
                                             help_text="The data access requests link(s), "
                                             "as defined in https://schema.org/conditionsOfAccess")
 
