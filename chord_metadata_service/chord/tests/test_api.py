@@ -136,28 +136,37 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 2",
                 "dats_file": {},  # Valid dats_file JSON object
+                "conditions_of_access": "",
             },
             {
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 3",
                 "dats_file": "{}",  # Valid dats_file JSON string
+                "conditions_of_access": "somewebsite.ca",
             },
             {
                 **valid_dataset_1(self.project["identifier"]),
                 "title": "Dataset 4",
                 "dats_file": "{}",  # Valid dats_file JSON string
                 "discovery": DISCOVERY_CONFIG_TEST_DICT,
-            }
+            },
         ]
 
         self.dats_valid_payload = dats_dataset(self.project["identifier"], VALID_DATS_CREATORS)
         self.dats_invalid_payload = dats_dataset(self.project["identifier"], INVALID_DATS_CREATORS)
 
+        self.invalid_dataset_coa = {
+            **valid_dataset_1(self.project["identifier"]),
+            "title": "Dataset 5",
+            "conditions_of_access": None,  # Invalid condition of access; must be a string
+        }
+
         self.invalid_payloads = [
+            self.invalid_dataset_coa,
             {
                 "title": "aa",
                 "description": "Test Dataset",
-                "project": self.project["identifier"]
+                "project": self.project["identifier"],
             },
             {
                 "title": "Dataset 1",
@@ -195,6 +204,19 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
     def test_create_dataset_forbidden(self):
         r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_conditions_of_access(self):
+        for d in self.valid_payloads:
+            r = self.one_authz_post("/api/datasets", json=d)
+
+            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access,
+                             d.get("conditions_of_access", ""))
+
+    def test_invalid_conditions_of_access(self):
+        d = self.invalid_dataset_coa
+        r = self.one_authz_post("/api/datasets", json=d)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_dataset_discovery_put_get(self):
         r = self.one_authz_post("/api/datasets", json=valid_dataset_1(self.project["identifier"]))
