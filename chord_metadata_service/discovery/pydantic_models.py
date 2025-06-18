@@ -1,5 +1,8 @@
+import abc
+
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
 from pydantic import BaseModel, Field, RootModel
+from typing import TypeAlias
 
 from .types import ModelCountOrBoolResponse
 
@@ -9,10 +12,12 @@ __all__ = [
     "DiscoveryFieldAndOptions",
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
+    "BaseMatchModel",
     "MatchExperimentResult",
     "MatchExperiment",
     "MatchBiosample",
     "MatchPhenopacket",
+    "MatchObject",
     "DiscoveryMatches",
     "DiscoveryPagination",
     "DiscoveryResponse",
@@ -54,7 +59,12 @@ class DiscoveryFieldResponses(RootModel):
     root: dict[str, DiscoveryFieldResponse]
 
 
-class MatchExperimentResult(BaseModel):
+class BaseMatchModel(BaseModel, abc.ABC):
+    pr: str | None = Field(default=None, title="Project ID")
+    ds: str | None = Field(default=None, title="Dataset ID")
+
+
+class MatchExperimentResult(BaseMatchModel):
     id: int = Field(..., title="Experiment result ID")
     f: str | None = Field(..., title="File name")
     url: str | None = Field(..., title="URL")
@@ -64,7 +74,7 @@ class MatchExperimentResult(BaseModel):
     g: str | None = Field(..., title="Genome assembly ID")
 
 
-class MatchExperiment(BaseModel):
+class MatchExperiment(BaseMatchModel):
     """
     Compact representation of an experiment for returning/rendering search responses.
     """
@@ -72,7 +82,7 @@ class MatchExperiment(BaseModel):
     r: list[MatchExperimentResult]
 
 
-class MatchBiosample(BaseModel):
+class MatchBiosample(BaseMatchModel):
     """
     Compact representation of a biosample for returning/rendering search responses.
     """
@@ -81,7 +91,7 @@ class MatchBiosample(BaseModel):
     e: list[MatchExperiment] | None
 
 
-class MatchPhenopacket(BaseModel):
+class MatchPhenopacket(BaseMatchModel):
     """
     Compact representation of a phenopacket for returning/rendering search responses.
     """
@@ -90,8 +100,13 @@ class MatchPhenopacket(BaseModel):
     b: list[MatchBiosample]
 
 
+MatchObject: TypeAlias = (
+    list[MatchPhenopacket] | list[MatchBiosample] | list[MatchExperiment] | list[MatchExperimentResult]
+)
+
+
 class DiscoveryMatches(RootModel):
-    root: list[MatchPhenopacket] | list[MatchBiosample] | list[MatchExperiment] | list[MatchExperimentResult]
+    root: MatchObject
 
 
 class DiscoveryPagination(BaseModel):

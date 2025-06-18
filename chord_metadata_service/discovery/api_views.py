@@ -371,10 +371,10 @@ async def discovery_matches(request: DrfRequest):
         DiscoveryMatchesPaginatedResponse(
             results_entity=results_entity,
             results=DiscoveryMatches(
-                root=await DISCOVERY_ENTITY_TO_MATCH_FN[results_entity](matches_page, dt_permissions)
+                root=await DISCOVERY_ENTITY_TO_MATCH_FN[results_entity](matches_page, scope, dt_permissions, True, {})
             ),
             pagination=pagination,
-        )
+        ).model_dump(mode="json", exclude_unset=True)
     )
 
 
