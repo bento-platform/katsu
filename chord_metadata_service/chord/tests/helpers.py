@@ -1,6 +1,7 @@
 from django.db.models import Model
 from django.test import TestCase
 from django.urls import reverse
+from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Dataset, Project
@@ -78,4 +79,5 @@ class AuthzAPITestCaseWithProjectJSON(AuthzAPITestCase):
     def setUp(self) -> None:
         super().setUp()
         r = self.one_authz_post(reverse("project-list"), json=VALID_PROJECT_1)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.project = r.json()
