@@ -16,6 +16,7 @@ class Command(BaseCommand):
         parser.add_argument("contact_info", action="store", type=str, help="Contact information for the new dataset")
         parser.add_argument("project", action="store", type=str, help="Parent project identifier for the new dataset")
         parser.add_argument("data_use", action="store", type=str, help="Path to a data use JSON file for the dataset")
+        parser.add_argument("conditions_of_access", action="store", type=str, help="Links for data access requests")
 
     def handle(self, *args, **options):
         data_use = None
@@ -30,6 +31,7 @@ class Command(BaseCommand):
             contact_info=options["contact_info"],
             project=Project.objects.get(identifier=options["project"].strip()),
             data_use=data_use,
+            conditions_of_access=options["conditions_of_access"]
         )
 
         print("Dataset created:", p)

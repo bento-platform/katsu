@@ -55,6 +55,7 @@ class DatasetSerializer(GenericSerializer):
         "dats_file",
         "project",
         "discovery",
+        "conditions_of_access",
     )
 
     # noinspection PyMethodMayBeStatic
