@@ -4,7 +4,8 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from structlog.stdlib import BoundLogger
-from typing import LiteralString
+# TODO: py3.11:
+#  from typing import LiteralString
 
 from chord_metadata_service.authz.middleware import authz_middleware
 
@@ -43,7 +44,7 @@ NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
 
 
 async def django_validation_error(
-    request: Request, e: ValidationError, logger: BoundLogger, logger_event: LiteralString
+    request: Request, e: ValidationError, logger: BoundLogger, logger_event: str  # TODO: py3.11: LiteralString
 ):
     await logger.ainfo(logger_event, exc=e)
     authz_middleware.mark_authz_done(request)
