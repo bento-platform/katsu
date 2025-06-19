@@ -3,6 +3,7 @@ import io
 import random
 import uuid
 
+from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
 from django.urls import reverse
 from django.test import TestCase, override_settings
@@ -17,7 +18,6 @@ from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_TEST,
     CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
 )
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from chord_metadata_service.experiments import models as ex_m
 from chord_metadata_service.experiments.tests import constants as ex_c
 from chord_metadata_service.patients.models import Individual
@@ -29,7 +29,7 @@ from chord_metadata_service.restapi.api_renderers import render_age
 from . import constants as c
 
 CONFIG_PUBLIC_TEST_NO_THRESHOLD: DiscoveryConfig = deepcopy(DISCOVERY_CONFIG_TEST)
-CONFIG_PUBLIC_TEST_NO_THRESHOLD["rules"]["count_threshold"] = 0
+CONFIG_PUBLIC_TEST_NO_THRESHOLD.rules.count_threshold = 0
 
 
 class CreateIndividualTest(AuthzAPITestCase):
@@ -239,12 +239,23 @@ class IndividualCSVRendererTest(AuthzAPITestCase):
 class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
     """ Test for api/individuals?search= """
 
+    # params, expected # results, expected result object # keys
     search_test_params = (
         ("search=P49Y", 1, None),
         ("search=NCBITaxon:9606", 2, None),
-        # 5 fields in the bento search response:
-        ("search=P49Y&format=bento_search_result", 1, 5),
-        ("search=NCBITaxon:9606&format=bento_search_result", 1, 5),  # only 1 of the individuals has a phenopacket
+        # 8 fields in the individuals Bento search response
+        # (original Bento search response + dataset/project/phenopacket IDs):
+        #  - subject_id
+        #  - dataset_id
+        #  - project_id
+        #  - phenopacket_id
+        #  - alternate_ids
+        #  - num_experiments
+        #  - biosamples
+        #  - experiments_with_biosamples
+        # only 1 of the individuals has any phenopackets (2):
+        ("search=P49Y&format=bento_search_result", 2, 8),
+        ("search=NCBITaxon:9606&format=bento_search_result", 2, 8),
     )
 
     def setUp(self):
@@ -253,6 +264,9 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
             **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
+        )
+        self.phenopacket_2 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1, id="phenopacket:2")
         )
 
     def test_search(self):  # test full-text search (standard + bento search format)
@@ -275,7 +289,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         get_resp = self.one_authz_get(f"/api/individuals/{self.individual_one.id}/phenopackets")
         self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
         response_obj_1 = get_resp.json()
-        self.assertEqual(len(response_obj_1), 1)  # 1 phenopacket for individual
+        self.assertEqual(len(response_obj_1), 2)  # 2 phenopackets for individual
 
     def test_individual_phenopackets_forbidden(self):
         get_resp = self.one_no_authz_get(f"/api/individuals/{self.individual_one.id}/phenopackets")
@@ -286,7 +300,7 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
         self.assertEqual(post_resp.status_code, status.HTTP_200_OK)
         self.assertIn("attachment; filename=", post_resp.headers.get("Content-Disposition", ""))
         response_obj_2 = post_resp.json()
-        self.assertEqual(len(response_obj_2), 1)  # 1 phenopacket for individual, still
+        self.assertEqual(len(response_obj_2), 2)  # 2 phenopackets for individual, still
 
     def test_individual_phenopackets_attachment_forbidden(self):
         post_resp = self.one_no_authz_post(f"/api/individuals/{self.individual_one.id}/phenopackets?attachment=1")
@@ -421,7 +435,7 @@ class PublicListIndividualsTest(AuthzAPITestCase):
                     self.assertEqual(response_obj['experiments']['count'], 0)
                     self.assertIsInstance(response_obj['experiments']['experiment_type'], list)
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_get_no_config(self):
         # no filters GET request to /api/public when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.dt_authz_counts_get('/api/public')
@@ -454,7 +468,7 @@ class PublicListIndividualsTest(AuthzAPITestCase):
 class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     """ Test for api/public GET filtering """
 
-    response_threshold = DISCOVERY_CONFIG_TEST["rules"]["count_threshold"]
+    response_threshold = DISCOVERY_CONFIG_TEST.rules.count_threshold
     num_individuals = 137
     random_seed = 341  # do not change this please :))
 
@@ -477,19 +491,29 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         ]
 
         individual_objs = [Individual.objects.create(**individual) for individual in self.individuals]
-        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(Individual.objects.all()[0]))
+        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(individual_objs[0]))
 
         for idx, individual in enumerate(individual_objs, 1):
-            self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-            self.phenopacket = ph_m.Phenopacket.objects.create(
+            meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            phenopacket = ph_m.Phenopacket.objects.create(
                 id=f"phenopacket_id:{idx}",
                 subject=individual,
-                meta_data=self.meta_data,
+                meta_data=meta_data,
                 dataset=self.dataset,
             )
             if idx == 1:
-                self.phenopacket.biosamples.add(biosample)
-                self.phenopacket.save()
+                phenopacket.biosamples.add(biosample)
+                phenopacket.save()
+
+                phenopacket_2 = ph_m.Phenopacket.objects.create(
+                    id=f"phenopacket_id:{idx}-2",
+                    subject=individual,
+                    meta_data=meta_data,
+                    dataset=self.dataset,
+                )
+                biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(individual))
+                phenopacket_2.biosamples.add(biosample_2)
+                phenopacket_2.save()
 
         instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
         ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
@@ -532,6 +556,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertDictEqual(response.json(), {
             "count": 0,
             "matches": [],
+            "matches_detail": [],
             "biosamples": {"count": 0, "sampled_tissue": []},
             "experiments": {"count": 0, "experiment_type": []},
         })
@@ -543,6 +568,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertDictEqual(response.json(), {
             "count": 0,
             "matches": [],
+            "matches_detail": [],
             "biosamples": {"count": 0, "sampled_tissue": []},
             "experiments": {"count": 0, "experiment_type": []},
         })
@@ -564,7 +590,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.assertEqual(db_count, response_obj['count'])
 
     # test the same as above but with an empty CONFIG_PUBLIC
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_2_fields_config_empty(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
@@ -590,7 +616,7 @@ class PublicFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.assertEqual(db_count, response_obj['count'])
 
     # test the same as above but with an empty CONFIG_PUBLIC
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_extra_properties_1_config_empty(self):
         # extra_properties string search
         # test GET query string search for extra_properties field
@@ -911,7 +937,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_public_filtering_age_range_min_and_max_no_config(self):
         # test when config is not provided, returns NO_PUBLIC_DATA_AVAILABLE
         response = self.dt_authz_counts_get('/api/public?age=[20, 30)')
@@ -940,7 +966,7 @@ class PublicFilteringBeaconSearchTest(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(len(response_obj["matches"]), male_count)
 
-    @override_settings(CONFIG_PUBLIC={})
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_beacon_search_response_no_config(self):
         # test when config is not provided, returns NOT FOUND
         response = self.dt_authz_full_get('/api/public?sex=MALE')

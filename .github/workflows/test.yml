@@ -20,7 +20,7 @@ jobs:
         python-version: ["3.10", "3.11"]
     services:
       postgres:
-        image: postgres:16
+        image: ghcr.io/bento-platform/bento_postgis_dist:2025.01.28
         env:
           POSTGRES_DB: postgres
           POSTGRES_PASSWORD: postgres
@@ -39,8 +39,10 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install Poetry
       run: python -m pip install poetry
-    - name: Install dependencies
+    - name: Install Python dependencies
       run: poetry install
+    - name: Install GeoDjango Apt dependencies
+      run: sudo apt-get update -y && sudo apt-get install -y binutils gdal-bin libproj-dev gdal-bin
     - name: Test
       run: |
         export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432

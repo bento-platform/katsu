@@ -1,3 +1,9 @@
+from bento_lib.discovery.models.fields import (
+    ManualBinsNumberFieldConfig,
+    AutoBinsNumberFieldConfig,
+    NumberFieldDefinition,
+    FieldDefinition,
+)
 from typing import Any, Iterator, Type
 from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
 
@@ -80,19 +86,25 @@ def parse_individual_age(age_obj: dict) -> int:
     raise ValueError(f"Error: {age_obj} format not supported")
 
 
-def labelled_range_generator(field_props: dict) -> Iterator[tuple[int, int, str]]:
+def labelled_range_generator(
+    field_props: NumberFieldDefinition
+) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
     Returns a generator yielding floor, ceil and label value for each bin from
     a numeric field configuration
     """
 
-    if "bins" in field_props["config"]:
-        return custom_binning_generator(field_props)
+    cfg = field_props.config
 
-    return auto_binning_generator(field_props)
+    if isinstance(cfg, ManualBinsNumberFieldConfig):
+        return custom_binning_generator(cfg)
+
+    return auto_binning_generator(cfg)
 
 
-def custom_binning_generator(field_props: dict) -> Iterator[tuple[int, int, str]]:
+def custom_binning_generator(
+    c: ManualBinsNumberFieldConfig
+) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
     `minimum` and `maximum` properties are optional. When absent, there is no lower/upper
@@ -110,82 +122,48 @@ def custom_binning_generator(field_props: dict) -> Iterator[tuple[int, int, str]
     or equal to 8.
     """
 
-    c = field_props["config"]
-    minimum: int | None = int(c["minimum"]) if "minimum" in c else None
-    maximum: int | None = int(c["maximum"]) if "maximum" in c else None
-    bins: list[int] = [int(value) for value in c["bins"]]
-
-    # check prerequisites
-    # Note: it raises an error as it reflects an error in the config file
-    if maximum is not None and minimum is not None and maximum < minimum:
-        raise ValueError(f"Wrong min/max values in config: {field_props}")
-
-    if minimum is not None and minimum > bins[0]:
-        raise ValueError(f"Min value in config is greater than first bin: {field_props}")
-
-    if maximum is not None and maximum < bins[-1]:
-        raise ValueError(f"Max value in config is lower than last bin: {field_props}")
-
-    if len(bins) < 2:
-        raise ValueError(f"Error in bins value. At least 2 values required for defining a single bin: {field_props}")
+    # Minimum/maximum/bins are validated with a function in the definition for ManualBinsNumberFieldConfig
 
     # Start of generator: bin of [minimum, bins[0]) or [-infinity, bins[0])
-    if minimum is None or minimum != bins[0]:
-        yield minimum, bins[0], f"< {bins[0]}"
+    if c.minimum is None or c.minimum != c.bins[0]:
+        yield c.minimum, c.bins[0], f"< {c.bins[0]}"
 
     # Generate interstitial bins for the range.
     # range() is semi-open: [1, len(bins))
     # – so in terms of indices, we skip the first bin (we access it via i-1 for lhs)
     #   and generate [lhs, rhs) pairs for each pair of bins until the end.
     # Values beyond the last bin gets handled separately.
-    for i in range(1, len(bins)):
-        lhs = bins[i - 1]
-        rhs = bins[i]
+    for i in range(1, len(c.bins)):
+        lhs = c.bins[i - 1]
+        rhs = c.bins[i]
         yield lhs, rhs, f"[{lhs}, {rhs})"
 
     # Then, handle values beyond the value of the last bin: [bins[-1], maximum) or [bins[-1], infinity)
-    if maximum is None or maximum != bins[-1]:
-        yield bins[-1], maximum, f"≥ {bins[-1]}"
+    if c.maximum is None or c.maximum != c.bins[-1]:
+        yield c.bins[-1], c.maximum, f"≥ {c.bins[-1]}"
 
 
-def auto_binning_generator(field_props) -> Iterator[tuple[int, int, str]]:
+def auto_binning_generator(c: AutoBinsNumberFieldConfig) -> Iterator[tuple[int, int, str]]:
     """
-    Note: limited to operations on integer values for simplicity
+    Note: limited to operations on integer values for simplicity.
     A word of caution: when implementing handling of floating point values,
-    be aware of string format (might need to add precision to config?) computations
-    of modulo and lack of support for ranges.
+    be aware of lack of support for ranges.
     """
 
-    c = field_props["config"]
+    # Error checking / validation is handled by Pydantic in bento_lib.
+    # We have the following guarantees:
+    #  * c.minimum <= c.maximum
+    #  * none of the following: c.taper_right < c.taper_left or c.minimum > c.taper_left or c.taper_right > c.maximum
+    #  * (c.taper_right - c.taper_left) % c.bin_size == 0
 
-    minimum = int(c["minimum"])
-    maximum = int(c["maximum"])
-    taper_left = int(c["taper_left"])
-    taper_right = int(c["taper_right"])
-    bin_size = int(c["bin_size"])
+    if c.minimum != c.taper_left:
+        yield c.minimum, c.taper_left, f"< {c.taper_left}"
 
-    # check prerequisites
-    # Note: it raises an error as it reflects an error in the config file
-    if maximum < minimum:
-        raise ValueError(f"Wrong min/max values in config: {field_props}")
+    for v in range(c.taper_left, c.taper_right, c.bin_size):
+        yield v, v + c.bin_size, f"[{v}, {v + c.bin_size})"
 
-    if (taper_right < taper_left
-            or minimum > taper_left
-            or taper_right > maximum):
-        raise ValueError(f"Wrong taper values in config: {field_props}")
-
-    if (taper_right - taper_left) % bin_size:
-        raise ValueError(f"Range between taper values is not a multiple of bin_size: {field_props}")
-
-    # start generator
-    if minimum != taper_left:
-        yield minimum, taper_left, f"< {taper_left}"
-
-    for v in range(taper_left, taper_right, bin_size):
-        yield v, v + bin_size, f"[{v}, {v + bin_size})"
-
-    if maximum != taper_right:
-        yield taper_right, maximum, f"≥ {taper_right}"
+    if c.maximum != c.taper_right:
+        yield c.taper_right, c.maximum, f"≥ {c.taper_right}"
 
 
 def monthly_generator(start: str, end: str) -> Iterator[tuple[int, int]]:
@@ -224,7 +202,7 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
     return condition
 
 
-def get_json_range_condition(field_props: dict, min: int = None, max: int = None) -> Q:
+def get_json_range_condition(field_props: FieldDefinition, min: int = None, max: int = None) -> Q:
     """
     Takes field props for a 'number' data type contained in a JSONField array,
     and returns a query expression for the provided 'min' and 'max' values.
@@ -237,12 +215,15 @@ def get_json_range_condition(field_props: dict, min: int = None, max: int = None
     the JSON path with conditions would be:
         '$[*] ? (@.value.quantity.value < 20 && @.assay.id == "NCIT:C16358")'
     """
-    group_by = field_props.get("group_by")
-    group_by_value = field_props.get("group_by_value")
-    value_mapping = field_props.get("value_mapping")
+
+    group_by = field_props.group_by
+    group_by_value = field_props.group_by_value
+    value_mapping = field_props.value_mapping
+
     range_condition = Q()
+
     if group_by and group_by_value and value_mapping:
-        _, field = get_model_and_field(field_props["mapping"])
+        _, field = get_model_and_field(field_props.mapping)
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
         if min is not None:
@@ -261,4 +242,5 @@ def get_json_range_condition(field_props: dict, min: int = None, max: int = None
                 Value(f'$[*] ? (@.{value_json_path} < {max} && @.{group_by_json_path} == "{group_by_value}")')
             ))
             range_condition.add(max_condition, Q.AND)
+
     return range_condition

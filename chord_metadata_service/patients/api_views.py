@@ -19,6 +19,7 @@ from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from rest_framework.settings import api_settings
+from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericListViewSet
@@ -34,9 +35,12 @@ from chord_metadata_service.discovery.utils import (
     get_discovery_queryable_fields,
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
+    empty_discovery,
 )
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.api_views import (
+    BIOSAMPLE_PREFETCH, BIOSAMPLE_SELECT_REL, PHENOPACKET_PREFETCH, PHENOPACKET_SELECT_REL
+)
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
@@ -106,6 +110,9 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+            # TODO: this whole thing is badly-placed: it really should be an alternate view of phenopackets, not
+            #  individuals. As such, it can return >1 record for the same individual if they have >1 phenopacket.
+
             scope = async_to_sync(get_request_discovery_scope)(self.request)
 
             start = datetime.now()
@@ -122,9 +129,13 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
             qs = (
                 Phenopacket
                 .get_model_scoped_queryset(scope)
+                .prefetch_related("dataset__project")
                 .filter(subject__id__in=individual_ids)
                 .values(
                     "subject_id",
+                    "dataset_id",
+                    phenopacket_id=F("id"),
+                    project_id=F("dataset__project_id"),
                     alternate_ids=Coalesce(F("subject__alternate_ids"), [])
                 )
                 .annotate(
@@ -191,8 +202,14 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         queryset = (
             Individual
             .get_model_scoped_queryset(scope)
+            .prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_SELECT_REL),
+            )
+            .select_related("vital_status")
             .filter(**filter_by_id)
-            .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
             .order_by("id")
         )
 
@@ -208,6 +225,7 @@ async def public_discovery_filter_queryset(
     request: DrfRequest,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset: QuerySet,
+    lg: BoundLogger,
 ) -> tuple[QuerySet, list[str]]:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
@@ -215,11 +233,14 @@ async def public_discovery_filter_queryset(
     :param request: The request to extract the query parameters from.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
     :param queryset: The queryset to filter using the request query parameters.
+    :param lg: BoundLogger object.
     """
 
     discovery = discovery_scope.discovery
 
-    if not discovery:
+    if empty_discovery(discovery):
+        # If there are no fields defined, it means implicitly that we also have no search filters or charts defined.
+        # If neither overview nor search have entries, it means no discovery is allowed.
         raise EmptyDiscoveryException()
 
     # Process query parameters and check validity
@@ -260,19 +281,19 @@ async def public_discovery_filter_queryset(
             value not in options
             and not (
                 # case-insensitive search on categories
-                field_props["datatype"] == "string"
+                field_props.datatype == "string"
                 and value.lower() in [o.lower() for o in options]
             )
             and not (
                 # no restriction when enum is not set for categories
-                field_props["datatype"] == "string"
-                and field_props["config"]["enum"] is None
+                field_props.datatype == "string"
+                and getattr(field_props.config, "enum") is None
             )
         ):
             raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
 
         # recursion
-        queryset = filter_queryset_field_value(queryset, field_props, value)
+        queryset = filter_queryset_field_value(queryset, field_props, value, lg)
 
     return queryset, queried_fields
 
@@ -319,31 +340,44 @@ class PublicListIndividuals(APIView):
 
         try:
             filtered_qs, queried_fields = await public_discovery_filter_queryset(
-                discovery_scope, request, dt_permissions, base_qs
+                discovery_scope, request, dt_permissions, base_qs, logger
             )
         except EmptyDiscoveryException:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
-            logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
+            await logger.ainfo(
+                "public individuals endpoint recieved validation error", exc=e, scope_repr=repr(discovery_scope)
+            )
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ), status=status.HTTP_400_BAD_REQUEST)
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
+        threshold = get_threshold(discovery, dt_perms_pheno)
+
+        # structured event logging for public search: embed search details
+        await logger.ainfo(
+            "public individuals search",
+            queried_fields=queried_fields,
+            individual_count=ind_qct,
+            threshold=threshold,
+            sub_threshold=ind_qct <= threshold,
+        )
 
         if ind_qct == 0 and not perm_pheno_query_data:
             # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
             # data permissions.
-            logger.info(
-                f"Public individuals endpoint queried fields {queried_fields} which resulted in "
-                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
-                f"({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
-        logger.info(f"Public individuals search queried fields {queried_fields}, resulting in {ind_qct} individuals")
+        # filtered_qs: filtered Individual queryset
+        filtered_qs = filtered_qs.annotate(
+            phenopacket_id=F("phenopackets__id"),
+            dataset_id=F("phenopackets__dataset__identifier"),
+            project_id=F("phenopackets__dataset__project__identifier"),
+        )
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
@@ -354,7 +388,28 @@ class PublicListIndividuals(APIView):
         return Response({
             "count": ind_qct,
             # Only if we have "query:data" - this field is for Beacon, which should have an access token:
-            **({"matches": filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
+            **(
+                {
+                    "matches": filtered_qs.values_list("id", flat=True),
+                    # Below is a temporary detailed match list so we can start building a better search UI.
+                    "matches_detail": [
+                        {
+                            "id": i.id,
+                            **({
+                                "phenopacket_id": i.phenopacket_id,
+                                "project_id": i.project_id,
+                                "dataset_id": i.dataset_id,
+                            } if i.phenopacket_id else {
+                                "phenopacket_id": None,
+                                "project_id": None,
+                                "dataset_id": None,
+                            })
+                        } async for i in filtered_qs
+                    ],
+                }
+                if perm_pheno_query_data
+                else {}
+            ),
             "biosamples": {
                 "count": tissues_count,
                 "sampled_tissue": sampled_tissues,

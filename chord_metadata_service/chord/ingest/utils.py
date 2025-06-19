@@ -9,16 +9,14 @@ import tempfile
 
 from bento_lib.drs.utils import get_access_method_of_type, fetch_drs_record_by_uri
 from django.conf import settings
+from structlog.stdlib import BoundLogger
+from typing import Any, Callable
 from urllib.parse import urlparse
 
-from typing import Any, Callable
-
-from chord_metadata_service.logger import logger
 from .exceptions import IngestError
 
 __all__ = [
     "map_if_list",
-    "get_output_or_raise",
     "query_and_check_nulls",
     "workflow_file_output_to_path",
 ]
@@ -39,19 +37,12 @@ def map_if_list(fn: Callable, data: Any, *args, **kwargs) -> Any:
     )
 
 
-def get_output_or_raise(workflow_outputs, key):
-    if key not in workflow_outputs:
-        raise IngestError(f"Missing workflow output: {key}")
-
-    return workflow_outputs[key]
-
-
 def query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):
     value = obj.get(key)
     return {f"{key}__isnull": True} if value is None else {key: transform(value)}
 
 
-def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
+def workflow_http_download(tmp_dir: str, http_uri: str, lg: BoundLogger) -> str:
     # TODO: Sanity check: no external insecure HTTP calls
     # TODO: Disable HTTPS cert check in debug mode
     # TODO: Handle response exceptions
@@ -59,8 +50,10 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
     r = requests.get(http_uri)
 
     if not r.ok:
-        err = f"HTTP error encountered while downloading ingestion URI: {http_uri}"
-        logger.error(f"{err} (Status: {r.status_code}; Contents: {r.content.decode('utf-8')})")
+        err = "HTTP error encountered while downloading ingestion URI"
+        lg.error(
+            err, ingestion_uri=http_uri, response_status=r.status_code, response_body=r.content.decode("utf-8")
+        )
         raise IngestError(err)
 
     data_path = f"{tmp_dir}ingest_download_data"
@@ -72,9 +65,10 @@ def workflow_http_download(tmp_dir: str, http_uri: str) -> str:
 
 
 @contextlib.contextmanager
-def workflow_file_output_to_path(file_uri_or_path: str):
+def workflow_file_output_to_path(file_uri_or_path: str, lg: BoundLogger):
     # TODO: Should be able to download from DRS instead of using file URIs directly
 
+    lg = lg.bind(file_uri_or_path=file_uri_or_path)
     parsed_file_uri = urlparse(file_uri_or_path)
 
     if WINDOWS_DRIVE_SCHEME.match(parsed_file_uri.scheme):
@@ -99,13 +93,15 @@ def workflow_file_output_to_path(file_uri_or_path: str):
         should_del = True
 
     if not os.access(tmp_dir, os.W_OK):
-        raise IngestError(f"Directory does not exist or is not writable: {tmp_dir}")
+        err = "directory does not exist or is not writable"
+        lg.error(err, tmp_dir=tmp_dir)
+        raise IngestError(f"{err}: {tmp_dir}")
 
     try:
         tmp_dir = tmp_dir.rstrip("/") + "/"
 
         if parsed_file_uri.scheme == DRS_URI_SCHEME:  # DRS object URI
-            drs_obj = fetch_drs_record_by_uri(file_uri_or_path, settings.DRS_URL)
+            drs_obj = fetch_drs_record_by_uri(file_uri_or_path)
 
             file_access = get_access_method_of_type(drs_obj, "file")
             if file_access:
@@ -117,18 +113,22 @@ def workflow_file_output_to_path(file_uri_or_path: str):
             if http_access:
                 # TODO: Handle DRS headers field if available - how to do this with grace and compatibility with
                 #  Bento's auth system?
-                yield workflow_http_download(tmp_dir, http_access["access_url"]["url"])
+                yield workflow_http_download(tmp_dir, http_access["access_url"]["url"], lg)
                 return
 
             # If we get here, we have a DRS object we cannot handle; raise an error.
-            raise IngestError(f"Cannot handle DRS object {file_uri_or_path}: No file or http access methods")
+            err = "cannot handle DRS object: no file or http access methods"
+            lg.error(err, drs_obj=drs_obj)
+            raise IngestError(f"{err} ({file_uri_or_path})")
 
         elif parsed_file_uri.scheme in (HTTP_URI_SCHEME, HTTPS_URI_SCHEME):
-            yield workflow_http_download(tmp_dir, file_uri_or_path)
+            yield workflow_http_download(tmp_dir, file_uri_or_path, lg)
 
         else:
             # If we get here, we have a scheme we cannot handle; raise an error.
-            raise IngestError(f"Cannot handle workflow output URI scheme: {parsed_file_uri.scheme}")
+            err = "cannot handle workflow output URI scheme"
+            lg.error(err, uri_scheme=parsed_file_uri.scheme)
+            raise IngestError(f"{err}: {parsed_file_uri.scheme}")
 
     finally:
         # Clean up the temporary directory if necessary

@@ -1,5 +1,7 @@
 import chord_metadata_service.phenopackets.models as pm
 
+from structlog.stdlib import BoundLogger
+
 from chord_metadata_service.cleanup.remove import remove_not_referenced
 from chord_metadata_service.utils import build_id_set_from_model
 from .models import Individual
@@ -9,7 +11,7 @@ __all__ = [
 ]
 
 
-async def clean_individuals() -> int:
+async def clean_individuals(logger: BoundLogger) -> int:
     """
     Deletes all individuals which aren't referenced anywhere in the application.
     Phenopackets/biosamples should be cleaned BEFORE running this.
@@ -22,4 +24,4 @@ async def clean_individuals() -> int:
     individuals_referenced |= await build_id_set_from_model(pm.Phenopacket, "subject_id")
 
     # Remove individuals not collected above
-    return await remove_not_referenced(Individual, individuals_referenced, "individuals")
+    return await remove_not_referenced(Individual, individuals_referenced, "individuals", logger)

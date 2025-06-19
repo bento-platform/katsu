@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q, QuerySet
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
+from structlog.stdlib import BoundLogger
 from chord_metadata_service.logger import logger
 
 
@@ -56,7 +57,7 @@ class BaseExtraProperties(models.Model):
         """
         pass
 
-    def get_json_schema(self) -> QuerySet | None:
+    def get_json_schema(self, lg: BoundLogger) -> QuerySet | None:
         """
         Returns a tuple (project_id, QuerySet[ProjectJsonSchema]) containing schemas to validate
         Template method design pattern, uses concrete defs of schema_type
@@ -76,27 +77,33 @@ class BaseExtraProperties(models.Model):
             )
             json_schema = project_json_schema.json_schema
         except ObjectDoesNotExist:
-            logger.debug(f"No ProjectJsonSchema found for project ID {project_id} and schema type {self.schema_type}")
+            lg.debug("no ProjectJsonSchema found for schema type")
         return json_schema
 
-    def validate_json_schema(self) -> list[str]:
-        json_schema = self.get_json_schema()
+    def validate_json_schema(self, lg: BoundLogger) -> list[str]:
         project_id = self.get_project_id()
+        lg = lg.bind(project_id=project_id, schema_type=self.schema_type)
+
+        json_schema = self.get_json_schema(lg)
+
         if not project_id or not json_schema:
             # Skip if no JSON schema exists for this project/schema_type combination
             return []
 
-        errors = []
         validator = Draft7Validator(json_schema)
-        for err in validator.iter_errors(self.extra_properties):
-            errors.append(err)
-            logger.error(("JSON schema vaildation error on extra_properties for type "
-                          f"{self.schema_type}, in project {project_id}: {err.message}"))
+        errors = list(validator.iter_errors(self.extra_properties))
+
+        if errors:
+            lg.error(
+                "JSON schema validation errors on extra_properties",
+                errors=[err.message for err in validator.iter_errors(self.extra_properties)],
+            )
+
         return errors
 
     def clean(self):
         super().clean()
-        if self.extra_properties and len(errors := self.validate_json_schema()) > 0:
+        if self.extra_properties and len(errors := self.validate_json_schema(logger)) > 0:
             raise ValidationError(errors)
 
     def save(self, *args, **kwargs):

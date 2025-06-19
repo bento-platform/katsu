@@ -3,6 +3,7 @@ import json
 from django.conf import settings
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT7
+from chord_metadata_service.geo.schemas import GEO_LOCATION_SCHEMA
 from chord_metadata_service.patients.schemas import INDIVIDUAL_SCHEMA
 from chord_metadata_service.resources.schemas import RESOURCE_SCHEMA
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
@@ -304,6 +305,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema({
         "sample_storage": ONTOLOGY_CLASS,
 
         # Extended fields
+        "location_collected": GEO_LOCATION_SCHEMA,
         "extra_properties": EXTRA_PROPERTIES_SCHEMA
     },
     "required": ["id"],

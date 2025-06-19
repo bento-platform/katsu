@@ -14,8 +14,10 @@ from .models import (
     VariationDescriptor,
     GeneDescriptor,
 )
-from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.geo.ingest import get_or_create_geo_location
+from chord_metadata_service.geo.serializers import GeoLocationSerializer
+from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.serializers import GenericSerializer
 
 
@@ -43,6 +45,8 @@ __all__ = [
 
 
 class MetaDataSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     resources = ResourceSerializer(read_only=True, many=True)
 
     class Meta:
@@ -57,6 +61,8 @@ class MetaDataSerializer(GenericSerializer):
 #############################################################
 
 class PhenotypicFeatureSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     always_include = (
         "excluded",
     )
@@ -65,10 +71,12 @@ class PhenotypicFeatureSerializer(GenericSerializer):
 
     class Meta:
         model = PhenotypicFeature
-        exclude = ['pftype']
+        exclude = ('id', 'biosample', 'phenopacket', 'pftype')
 
 
 class DiseaseSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     always_include = (
         "excluded",
     )
@@ -79,15 +87,20 @@ class DiseaseSerializer(GenericSerializer):
 
 
 class BiosampleSerializer(GenericSerializer):
-    phenotypic_features = PhenotypicFeatureSerializer(
-        read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
+    location_collected = GeoLocationSerializer(required=False)
 
     class Meta:
         model = Biosample
         fields = '__all__'
 
     def create(self, validated_data):
+        if (
+            "location_collected" in validated_data
+            and isinstance(location_collected := validated_data["location_collected"], dict)
+        ):
+            validated_data["location_collected"] = get_or_create_geo_location(location_collected)
         biosample = Biosample.objects.create(**validated_data)
         return biosample
 
@@ -100,6 +113,10 @@ class BiosampleSerializer(GenericSerializer):
         instance.tumor_grade = validated_data.get('tumor_grade', instance.tumor_grade)
         instance.diagnostic_markers = validated_data.get('diagnostic_markers', instance.diagnostic_markers)
         instance.procedure = validated_data.get('procedure', instance.procedure)
+
+        if location_collected := validated_data.get("location_collected"):
+            instance.location_collected = get_or_create_geo_location(location_collected)
+
         instance.save()
         return instance
 
@@ -110,6 +127,7 @@ class BiosampleSerializer(GenericSerializer):
 #                                                           #
 #############################################################
 class GeneDescriptorSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = GeneDescriptor
@@ -117,6 +135,8 @@ class GeneDescriptorSerializer(GenericSerializer):
 
 
 class VariationDescriptorSerializer(GenericSerializer):
+    # Note: this serializer is always nested
+
     gene_context = GeneDescriptorSerializer(many=False, required=False)
 
     class Meta:
@@ -125,6 +145,7 @@ class VariationDescriptorSerializer(GenericSerializer):
 
 
 class VariantInterpretationSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = VariantInterpretation
@@ -138,6 +159,7 @@ class VariantInterpretationSerializer(GenericSerializer):
 
 
 class GenomicInterpretationSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = GenomicInterpretation
@@ -171,6 +193,7 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
 
 class DiagnosisSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     genomic_interpretations = GenomicInterpretationSerializer(many=True, required=False)
 
@@ -180,6 +203,7 @@ class DiagnosisSerializer(GenericSerializer):
 
 
 class InterpretationSerializer(GenericSerializer):
+    # Note: this serializer is always nested
 
     class Meta:
         model = Interpretation
@@ -199,8 +223,9 @@ class InterpretationSerializer(GenericSerializer):
 
 
 class SimplePhenopacketSerializer(GenericSerializer):
-    phenotypic_features = PhenotypicFeatureSerializer(
-        read_only=True, many=True, exclude_when_nested=['id', 'biosample'])
+    # Note: this serializer is always nested
+
+    phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     interpretations = InterpretationSerializer(many=True, required=False)
     diseases = DiseaseSerializer(many=True, required=False)
 
@@ -212,7 +237,6 @@ class SimplePhenopacketSerializer(GenericSerializer):
         """"
         Overriding this method to allow post Primary Key for FK and M2M
         objects and return their nested serialization.
-
         """
         response = super().to_representation(instance)
         response['biosamples'] = BiosampleSerializer(instance.biosamples, many=True, required=False,

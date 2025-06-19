@@ -1,4 +1,5 @@
 import io
+import uuid
 from typing import TextIO
 from os import walk, path
 
@@ -16,7 +17,7 @@ from chord_metadata_service.chord.export.cbioportal import (
     SAMPLE_DATA_FILENAME,
     SAMPLE_DATATYPE,
 )
-from chord_metadata_service.chord.export.utils import ExportFileContext
+from chord_metadata_service.chord.export.utils import ExportError, ExportFileContext
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
@@ -25,6 +26,7 @@ from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
 )
+from chord_metadata_service.logger import logger
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 
@@ -46,13 +48,15 @@ class ExportCBioTest(TestCase):
                                         project=p)
         self.study_id = str(self.d.identifier)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET, self.d.identifier, logger
+        )
         # ingest list of experiments
         self.exp = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.d.identifier, logger
         )
         # append derived MAF files to experiment results
-        ingest_derived_experiment_results(EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier)
+        ingest_derived_experiment_results(EXAMPLE_INGEST_EXPERIMENT_RESULT, self.d.identifier, logger)
         self.exp_res = ExperimentResult.objects.all()
 
     @staticmethod
@@ -85,6 +89,12 @@ class ExportCBioTest(TestCase):
                 files_set.update([path.relpath(path.join(dirpath, fn), export_dir) for fn in filenames])
 
             self.assertTrue(CBIO_FILES_SET.issubset(files_set))
+
+    def test_file_creation_study_dne(self):
+        with ExportFileContext(None, self.study_id) as file_export:
+            # random uuid - does not exist; raised by study_export
+            with self.assertRaises(ExportError):
+                async_to_sync(exp.study_export)(file_export.get_path, str(uuid.uuid4()))
 
     def test_export_cbio_study_meta(self):
         with io.StringIO() as output:
