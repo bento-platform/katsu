@@ -55,6 +55,12 @@
         "identifier": "instrument:01",
         "device": "Illumina",
         "description": "Test description",
+        "device_ontology": [
+          {
+            "id": "SO:0002128",
+            "label": "Illumina Genome Analyzer"
+          }
+        ],
         "extra_properties": {
           "date": "2021-06-21"
         }
