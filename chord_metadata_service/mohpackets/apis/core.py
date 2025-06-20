@@ -152,15 +152,15 @@ class NetworkAuth:
                 return None
 
             try:
-                read_datasets = get_opa_datasets(request)
-                result = True if read_datasets else None
+                result = is_user_candig_authorized(request)
+                read_datasets = None
+                if result:
+                    read_datasets = get_opa_datasets(request)
+                    request.read_datasets = read_datasets
                 logger.debug(
-                    f"Authorized READ programs: {read_datasets}. Result: {result}",
+                    f"OPA datasets: {read_datasets}. Permission READ: {result}",
                     request,
                 )
-
-                if result:
-                    request.read_datasets = read_datasets
                 return result
 
             except Exception as e:
@@ -173,6 +173,7 @@ class NetworkAuth:
                 return None
             try:
                 result = is_user_candig_authorized(request)
+                download_datasets = None
                 if result:
                     download_datasets = get_opa_datasets(request)
                     request.download_datasets = download_datasets
