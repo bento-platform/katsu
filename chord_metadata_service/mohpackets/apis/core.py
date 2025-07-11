@@ -152,15 +152,15 @@ class NetworkAuth:
                 return None
 
             try:
-                result = is_user_candig_authorized(request)
-                read_datasets = None
-                if result:
-                    read_datasets = get_opa_datasets(request)
-                    request.read_datasets = read_datasets
+                read_datasets = get_opa_datasets(request)
+                result = True if read_datasets else None
                 logger.debug(
-                    f"OPA datasets: {read_datasets}. Permission READ: {result}",
+                    f"Authorized READ programs: {read_datasets}. Result: {result}",
                     request,
                 )
+
+                if result:
+                    request.read_datasets = read_datasets
                 return result
 
             except Exception as e:
@@ -172,10 +172,9 @@ class NetworkAuth:
             if not bearer_token:
                 return None
             try:
-                result = is_user_candig_authorized(request)
-                download_datasets = None
+                download_datasets = get_opa_datasets(request)
+                result = True if download_datasets else None
                 if result:
-                    download_datasets = get_opa_datasets(request)
                     request.download_datasets = download_datasets
                 logger.debug(
                     f"Permission DOWNLOAD: {result}. "
