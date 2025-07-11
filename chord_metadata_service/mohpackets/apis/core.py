@@ -287,7 +287,6 @@ if "dev" in settings_module or "prod" in settings_module:
     from authx.auth import (  # type: ignore
         get_opa_datasets,
         is_action_allowed_for_program,
-        is_user_candig_authorized,
         verify_service_token,
     )
     from candigv2_logging.logging import CanDIGLogger, initialize  # type: ignore
