@@ -153,15 +153,16 @@ class NetworkAuth:
 
             try:
                 read_datasets = get_opa_datasets(request)
-                result = True if read_datasets else None
+                # get_opa_datasets always either returns a list of results or []
+                # It will throw an exception if there is an error, so we
+                # don't need to check the return
                 logger.debug(
-                    f"Authorized READ programs: {read_datasets}. Result: {result}",
+                    f"Authorized READ programs: {read_datasets}.",
                     request,
                 )
 
-                if result:
-                    request.read_datasets = read_datasets
-                return result
+                request.read_datasets = read_datasets
+                return True
 
             except Exception as e:
                 logger.error(f"An error occurred in OPA: {e}")
@@ -173,17 +174,17 @@ class NetworkAuth:
                 return None
             try:
                 download_datasets = get_opa_datasets(request)
-                result = True if download_datasets else None
-                if result:
-                    request.download_datasets = download_datasets
+                # get_opa_datasets always either returns a list of results or []
+                # It will throw an exception if there is an error, so we
+                # don't need to check the return
+                request.download_datasets = download_datasets
                 logger.debug(
-                    f"Permission DOWNLOAD: {result}. "
                     f"OPA datasets: {download_datasets}. "
                     f"Request body: {request.body.decode('utf-8')}",
                     request,
                 )
 
-                return result
+                return True
 
             except Exception as e:
                 logger.error(f"An error occurred in OPA: {e}")
