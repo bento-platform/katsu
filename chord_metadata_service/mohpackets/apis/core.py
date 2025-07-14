@@ -163,7 +163,11 @@ class NetworkAuth:
 
                 request.read_datasets = read_datasets
                 return True
-
+            except CandigAuthError as e:
+                logger.error(f"An error occurred in OPA: {str(e)}")
+                if str(e) == "Invalid token":
+                    return None
+                raise e
             except Exception as e:
                 logger.error(f"An error occurred in OPA: {e}")
                 raise Exception("Error with OPA authentication.")
@@ -185,7 +189,11 @@ class NetworkAuth:
                 )
 
                 return True
-
+            except CandigAuthError as e:
+                logger.error(f"An error occurred in OPA: {str(e)}")
+                if str(e) == "Invalid token":
+                    return None
+                raise e
             except Exception as e:
                 logger.error(f"An error occurred in OPA: {e}")
                 raise Exception("Error with OPA authentication.")
@@ -289,6 +297,7 @@ if "dev" in settings_module or "prod" in settings_module:
         get_opa_datasets,
         is_action_allowed_for_program,
         verify_service_token,
+        CandigAuthError
     )
     from candigv2_logging.logging import CanDIGLogger, initialize  # type: ignore
 
