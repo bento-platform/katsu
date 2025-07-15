@@ -152,17 +152,22 @@ class NetworkAuth:
                 return None
 
             try:
-                result = is_user_candig_authorized(request)
-                read_datasets = None
-                if result:
-                    read_datasets = get_opa_datasets(request)
-                    request.read_datasets = read_datasets
+                read_datasets = get_opa_datasets(request)
+                # get_opa_datasets always either returns a list of results or []
+                # It will throw an exception if there is an error, so we
+                # don't need to check the return
                 logger.debug(
-                    f"OPA datasets: {read_datasets}. Permission READ: {result}",
+                    f"Authorized READ programs: {read_datasets}.",
                     request,
                 )
-                return result
 
+                request.read_datasets = read_datasets
+                return True
+            except CandigAuthError as e:
+                logger.error(f"An error occurred in OPA: {str(e)}")
+                if str(e) == "Invalid token":
+                    return None
+                raise e
             except Exception as e:
                 logger.error(f"An error occurred in OPA: {e}")
                 raise Exception("Error with OPA authentication.")
@@ -172,20 +177,23 @@ class NetworkAuth:
             if not bearer_token:
                 return None
             try:
-                result = is_user_candig_authorized(request)
-                download_datasets = None
-                if result:
-                    download_datasets = get_opa_datasets(request)
-                    request.download_datasets = download_datasets
+                download_datasets = get_opa_datasets(request)
+                # get_opa_datasets always either returns a list of results or []
+                # It will throw an exception if there is an error, so we
+                # don't need to check the return
+                request.download_datasets = download_datasets
                 logger.debug(
-                    f"Permission DOWNLOAD: {result}. "
                     f"OPA datasets: {download_datasets}. "
                     f"Request body: {request.body.decode('utf-8')}",
                     request,
                 )
 
-                return result
-
+                return True
+            except CandigAuthError as e:
+                logger.error(f"An error occurred in OPA: {str(e)}")
+                if str(e) == "Invalid token":
+                    return None
+                raise e
             except Exception as e:
                 logger.error(f"An error occurred in OPA: {e}")
                 raise Exception("Error with OPA authentication.")
@@ -288,8 +296,8 @@ if "dev" in settings_module or "prod" in settings_module:
     from authx.auth import (  # type: ignore
         get_opa_datasets,
         is_action_allowed_for_program,
-        is_user_candig_authorized,
         verify_service_token,
+        CandigAuthError
     )
     from candigv2_logging.logging import CanDIGLogger, initialize  # type: ignore
 
