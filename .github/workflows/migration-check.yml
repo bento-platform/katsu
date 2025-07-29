@@ -2,7 +2,8 @@ name: Check if all migrations have been performed
 on:
   push:
     tags:
-      - v[0-9]+.[0-9]+.[0-9]+[-[\w\d]*]?
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-[\w\d]*'
 
 jobs:
   check-migration:
