@@ -124,6 +124,7 @@ class DiscoveryResponse(BaseModel):
     #  - these counts can be aggregated at the level of dataset (nested in project), project, or just whatever scope was
     #    queried (flat).
     root_entity: DiscoveryEntity
+    message: str = ""  # A message related to the response, e.g., insufficient data. If blank, it shouldn't be shown.
     counts: (
         ModelCountOrBoolResponse | dict[str, ModelCountOrBoolResponse] | dict[str, dict[str, ModelCountOrBoolResponse]]
     )

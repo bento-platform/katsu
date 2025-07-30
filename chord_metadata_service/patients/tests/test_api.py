@@ -565,6 +565,13 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         # TODO: assert full empty response
         self.assertDictEqual(response.json()["counts"], DISCOVERY_ZERO_COUNTS)
 
+    def _test_individual_counts(self, response_obj: dict, individual_db_count: int):
+        if individual_db_count <= self.response_threshold:
+            self.assertEqual(response_obj["counts"], DISCOVERY_ZERO_COUNTS)
+            self.assertEqual(response_obj["message"], dres.INSUFFICIENT_DATA_AVAILABLE_MSG)
+        else:
+            self.assertEqual(individual_db_count, response_obj["counts"]["individual"])
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_2_fields(self):
         # sex and extra_properties string search
@@ -576,10 +583,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             sex__iexact='female', extra_properties__contains={"smoking": "Smoker"}
         ).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     # test the same as above but with an empty CONFIG_PUBLIC
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
@@ -602,10 +606,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             extra_properties__contains={"smoking": "Non-smoker", "death_dc": "Deceased"}
         ).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     # test the same as above but with an empty CONFIG_PUBLIC
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
@@ -650,10 +651,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj["count"])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_2(self):
@@ -668,10 +666,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_3(self):
@@ -686,10 +681,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_wrong_range(self):
@@ -716,10 +708,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_range_string_2(self):
@@ -736,10 +725,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_multiple_ranges_1(self):
@@ -757,10 +743,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_date_range_1(self):
@@ -776,10 +759,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_extra_properties_date_range_and_other_range(self):
@@ -797,10 +777,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
-        else:
-            self.assertEqual(db_count, response_obj['count'])
+        self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
     def test_public_filtering_mapping_for_search_filter(self):
@@ -910,6 +887,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
             self.assertEqual(response_obj["counts"], DISCOVERY_ZERO_COUNTS)
+            self.assertEqual(response_obj["message"], dres.INSUFFICIENT_DATA_AVAILABLE_MSG)
         else:
             self.assertEqual(db_count, response_obj['count'])
 

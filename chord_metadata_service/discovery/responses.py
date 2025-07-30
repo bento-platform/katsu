@@ -10,6 +10,7 @@ from structlog.stdlib import BoundLogger
 from chord_metadata_service.authz.middleware import authz_middleware
 
 __all__ = [
+    "INSUFFICIENT_DATA_AVAILABLE_MSG",
     "INSUFFICIENT_DATA_AVAILABLE",
     "INSUFFICIENT_PRIVILEGES",
     "insufficient_privileges",
@@ -19,7 +20,8 @@ __all__ = [
 ]
 
 # Public response when there is no enough data that passes the project-custom threshold
-INSUFFICIENT_DATA_AVAILABLE = {"message": "Insufficient data available."}
+INSUFFICIENT_DATA_AVAILABLE_MSG = "Insufficient data available."
+INSUFFICIENT_DATA_AVAILABLE = {"message": INSUFFICIENT_DATA_AVAILABLE_MSG}
 
 # Public response when there is insufficient permissions to view the overview
 INSUFFICIENT_PRIVILEGES = {"message": "Insufficient privileges to view data."}

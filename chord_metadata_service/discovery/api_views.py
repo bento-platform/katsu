@@ -41,6 +41,7 @@ from .pydantic_models import (
     DiscoveryMatches,
     DiscoveryMatchesPaginatedResponse,
 )
+from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
@@ -253,6 +254,8 @@ async def discovery_endpoint(request: DrfRequest):
 
     # -- Counts processing ---------------------------------------------------------------------------------------------
 
+    message: str = ""
+
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
     #  - a boolean (count > threshold)
@@ -285,6 +288,12 @@ async def discovery_endpoint(request: DrfRequest):
             # key to use across all discovery endpoints:
             count_or_bools_res[e] = entity_count if entity_permissions.counts else (entity_count > 0)
 
+    if (
+        not count_or_bools_res[queryset_model_name]
+        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_model_name]].data
+    ):
+        message = INSUFFICIENT_DATA_AVAILABLE_MSG
+
     # If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
     # one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
     # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -300,6 +309,7 @@ async def discovery_endpoint(request: DrfRequest):
             layout=discovery.overview,
             fields=field_responses,
             root_entity=queryset_model_name,
+            message=message,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
             counts=count_or_bools_res,
         )
