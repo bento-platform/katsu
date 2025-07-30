@@ -186,6 +186,7 @@ async def discovery_queryset_entity_counts(queryset: QuerySet) -> dict[Discovery
         counts["individual"] += (1 if p.subject_id is not None else 0)
         counts["biosample"] += p.count_biosample
         counts["experiment"] += p.count_experiment
+        counts["experiment_result"] += p.count_experiment_result
 
     return counts
 
