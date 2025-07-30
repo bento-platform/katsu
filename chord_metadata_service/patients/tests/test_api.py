@@ -16,7 +16,8 @@ from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_EXTRA_PROPERTIES,
     DISCOVERY_CONFIG_TEST,
-    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY
+    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
+    DISCOVERY_ZERO_COUNTS,
 )
 from chord_metadata_service.experiments import models as ex_m
 from chord_metadata_service.experiments.tests import constants as ex_c
@@ -550,23 +551,19 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_public_filtering_sex_none_in_project_full(self):
         response = self.dt_authz_full_get(f"/api/discovery?project={self.project_2.identifier}&sex=female")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json()["counts"], {  # TODO: full empty fields assertion
-            "phenopacket": 0,
-            "individual": 0,
-            "biosample": 0,
-            "experiment": 0,
-        })  # TODO: assert full empty response
+        # TODO: assert full empty response
+        # TODO: full empty fields assertion
+        self.assertDictEqual(response.json()["counts"], DISCOVERY_ZERO_COUNTS)
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_public_filtering_sex_none_in_project_dataset_full(self):
         response = self.dt_authz_full_get(
             f"/api/discovery?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}&sex=female"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json()["counts"], {  # TODO: full empty fields assertion
-            "phenopacket": 0,
-            "individual": 0,
-            "biosample": 0,
-            "experiment": 0,
-        })  # TODO: assert full empty response
+        # TODO: full empty fields assertion
+        # TODO: assert full empty response
+        self.assertDictEqual(response.json()["counts"], DISCOVERY_ZERO_COUNTS)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_public_filtering_2_fields(self):
@@ -912,7 +909,7 @@ class PublicAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
         db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         if db_count <= self.response_threshold:
-            self.assertEqual(response_obj, dres.INSUFFICIENT_DATA_AVAILABLE)
+            self.assertEqual(response_obj["counts"], DISCOVERY_ZERO_COUNTS)
         else:
             self.assertEqual(db_count, response_obj['count'])
 

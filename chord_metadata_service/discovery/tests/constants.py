@@ -251,3 +251,11 @@ CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT["fields"].update([
 CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS: DiscoveryConfig = DiscoveryConfig.model_validate(
     CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT
 )
+
+DISCOVERY_ZERO_COUNTS = {
+    "phenopacket": 0,
+    "individual": 0,
+    "biosample": 0,
+    "experiment": 0,
+    "experiment_result": 0,
+}
