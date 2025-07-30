@@ -415,12 +415,14 @@ class DiscoveryOverviewTest2(AuthzAPITestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class DiscoveryOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
+class DiscoveryOverviewInvalidExtraPropsDataTypesListTest(AuthzAPITestCase):
     # individuals (count 8)
     def setUp(self) -> None:
         # create individuals including those who have not accepted data types
-        for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST:
-            ph_m.Individual.objects.create(**ind)
+        for i, ind in enumerate(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST):
+            ind_obj = ph_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_response(self):
@@ -430,6 +432,10 @@ class DiscoveryOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
+
+        self.assertEqual(response_obj["counts"]["phenopacket"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+        self.assertEqual(response_obj["counts"]["individual"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+
         # the field name is present, but the keys are not (except 'missing')
         self.assertIn("baseline_creatinine", response_obj["fields"])
         self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
@@ -441,21 +447,28 @@ class DiscoveryOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
             [data["value"] for data in response_obj["fields"]["baseline_creatinine"]["data"]])
 
 
-class DiscoveryOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
-    # individuals (count 8)
+class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
+    # phenopackets+individuals (count 8)
+    # used to be individuals only, but with the new discovery endpoint we switched to being phenopackets-centric
     def setUp(self) -> None:
-        # create individuals including those who have not accepted data types
-        for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT:
-            ph_m.Individual.objects.create(**ind)
+        # create individuals including those who have invalid extra properties types
+        for i, ind in enumerate(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT):
+            ind_obj = ph_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-    def test_overview_response(self):
+    def test_discovery_response(self):
         # test overview response with passing TypeError exception
         response = self.dt_authz_counts_get('/api/discovery')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        # the field name is present, but the keys are not (except 'missing')
+
+        self.assertEqual(response_obj["counts"]["phenopacket"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+        self.assertEqual(response_obj["counts"]["individual"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+
+        # the field name is present, but the keys are not since they're of the wrong type; only 'missing'
         self.assertIn("baseline_creatinine", response_obj["fields"])
         self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
