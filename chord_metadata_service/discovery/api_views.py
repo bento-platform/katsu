@@ -360,9 +360,13 @@ async def discovery_matches(request: DrfRequest):
     # -- Pagination ----------------------------------------------------------------------------------------------------
 
     page: int = int(request.query_params.get("_page", "0"))
-    page_size = int(request.query_params.get("_page_size", "10"))
+    page_size = int(request.query_params.get("_page_size", "10"))  # if page_size is set to 0,
     total_count = await queryset.acount()
-    matches_page = queryset[page * page_size:(page + 1) * page_size]
+
+    if page_size > 0:
+        matches_page = queryset[page * page_size:(page + 1) * page_size]
+    else:
+        matches_page = queryset[:]
 
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
 

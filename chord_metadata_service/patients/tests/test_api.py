@@ -923,11 +923,14 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
     random_range = 20
 
     def setUp(self):
-        individuals = [c.generate_valid_individual() for _ in range(self.random_range)]
-        for individual in individuals:
-            Individual.objects.create(**individual)
+        # equal number of each sex option instead of relying on RNG
+        individuals = [c.generate_valid_individual(sex_idx=i % 4) for i in range(self.random_range)]
 
-    # test beacon formatted response
+        for i, individual in enumerate(individuals):
+            ind_obj = Individual.objects.create(**individual)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe={i}", subject=ind_obj, meta_data=md)
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_matches_response(self):
         response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
@@ -935,6 +938,25 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertEqual(len(response_obj["results"]), male_count)
+        self.assertEqual(response_obj["pagination"]["total"], male_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_page_size(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&_page_size=1')
+        male_count = Individual.objects.filter(sex="MALE").count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(len(response_obj["results"]), 1)
+        self.assertEqual(response_obj["pagination"]["total"], male_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_unlimited_page_size(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?_page_size=0')
+        all_count = Individual.objects.count()
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        self.assertEqual(len(response_obj["results"]), all_count)
+        self.assertEqual(response_obj["pagination"]["total"], all_count)
 
     # TODO: more
 
