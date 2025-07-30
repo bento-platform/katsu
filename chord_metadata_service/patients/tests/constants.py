@@ -96,9 +96,16 @@ CSV_HEADER = "Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,
 INDIVIDUAL_1_CSV = "patient:1,FEMALE,1960-01-01,human,UNKNOWN_KARYOTYPE,P45Y - P49Y,,--IGNORE--,--IGNORE--"
 INDIVIDUAL_2_CSV = "patient:2,MALE,1967-01-01,human,UNKNOWN_KARYOTYPE,P50Y,,--IGNORE--,--IGNORE--"
 
+SEX_OPTIONS = ["MALE", "FEMALE", "UNKNOWN_SEX", "OTHER_SEX"]
 
-def generate_valid_individual(age=None, age_range=None, gen_random_age: tuple[int, int] | None = None,
-                              date_of_consent_range: tuple[int, int] = (2020, 2023)):
+
+def generate_valid_individual(
+    age=None,
+    age_range=None,
+    gen_random_age: tuple[int, int] | None = None,
+    date_of_consent_range: tuple[int, int] = (2020, 2023),
+    sex_idx: int | None = None,
+):
     if age and age_range:
         raise ValueError("Cannot use 'age' and 'age_range' simultaneously for Individual.time_at_last_encounter.")
 
@@ -108,7 +115,7 @@ def generate_valid_individual(age=None, age_range=None, gen_random_age: tuple[in
             "id": "NCBITaxon:9606",
             "label": "human"
         },
-        "sex": random.choice(["MALE", "FEMALE", "UNKNOWN_SEX", "OTHER_SEX"]),
+        "sex": random.choice(SEX_OPTIONS) if sex_idx is None else SEX_OPTIONS[sex_idx],
         "extra_properties": {
             "smoking": random.choice(["Non-smoker", "Smoker", "Former smoker", "Passive smoker", "Not specified"]),
             "death_dc": random.choice(["Alive", "Deceased"]),
