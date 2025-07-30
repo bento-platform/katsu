@@ -1,9 +1,5 @@
-name: Check if all migrations have been performed
+name: Check for missing migrations
 on:
-  workflow_dispatch:
-    inputs:
-      parameter:
-        description: Manual trigger
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
@@ -12,34 +8,21 @@ on:
 jobs:
   check-migration:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: ghcr.io/bento-platform/bento_postgis_dist:2025.01.28
-        env:
-          POSTGRES_DB: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: true
-      - uses: actions/setup-python@v5
-        name: Set up Python
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install Poetry
+
+      - name: Install dependencies
         run: python -m pip install poetry
       - name: Install Python dependencies
         run: poetry install
       - name: Install GeoDjango Apt dependencies
-        run: sudo apt-get update -y && sudo apt-get install -y binutils gdal-bin libproj-dev gdal-bin
+        run: sudo apt-get update -y && sudo apt-get install -y gdal-bin
+
       - name: Check for missed migrations
-        env:
-          DJANGO_SETTINGS_MODULE: chord_metadata_service.metadata.settings
-        run: |
-          export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
-          poetry run ./manage.py makemigrations --check
+        run: poetry run ./manage.py makemigrations --check
