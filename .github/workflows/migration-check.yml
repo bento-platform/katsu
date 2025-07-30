@@ -17,7 +17,7 @@ jobs:
       postgres:
         image: ghcr.io/bento-platform/bento_postgis_dist:2025.01.28
         env:
-          POSTGRES_DB: postgres
+          POSTGRES_DB: metadata
           POSTGRES_PASSWORD: postgres
           POSTGRES_USER: postgres
         ports:
@@ -43,5 +43,6 @@ jobs:
 
       - name: Check for missed migrations
         run: |
-          export POSTGRES_DATABASE="postgres" && export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
+          export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
+          poetry run ./manage.py migrate
           poetry run ./manage.py makemigrations --check
