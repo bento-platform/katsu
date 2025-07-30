@@ -1,9 +1,14 @@
 name: Check for missing migrations
 on:
   push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-[a-zA-Z]*'
+    branches:
+      - develop
+      - master
+  pull_request:
+    branches:
+      - 'features/**'
+      - develop
+      - master
 
 jobs:
   check-migration:
