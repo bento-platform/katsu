@@ -133,7 +133,11 @@ async def discovery_field_response(
     stats: BinList
 
     if not field_perms.counts:
-        return None  # cannot compute stats right now for boolean-level responses
+        # We cannot compute stats right now for boolean-level responses. Thus, if we do not have at least counts
+        # permissions, we return None and this presumably gets filtered out, resulting in this field response not being
+        # present in the discovery response. Then, it's up to the API consumer (e.g., the front end) to handle this with
+        # relative grace (not show a chart/search field, ...).
+        return None
     if field_props.datatype == "string":
         stats = await get_categorical_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
     elif field_props.datatype == "number":
@@ -216,10 +220,20 @@ async def discovery_endpoint(request: DrfRequest):
         return dres.no_public_data(request)
 
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
-    if not any(d.counts for d in dt_permissions.values()):
+    if not any(d.bool_ for d in dt_permissions.values()):
+        # At minimum, we need some bool permissions for data types in order to view True/False for having a specific
+        # entity above the count threshold.
         return dres.insufficient_privileges(request)
 
     # -- Query execution -----------------------------------------------------------------------------------------------
+
+    # Above, we checked for at minimum one boolean permission for data, since we can skip returning any counts data for
+    # fields where we do not have permissions, relying on the front end/API consumer to handle this case.
+    # HOWEVER, if we're doing any querying, we will end up needing at least boolean permissions for ALL FIELDS (i.e.,
+    # their respective DATA TYPES) queried. Thus, if we're querying, the above check IS NOT SUFFICIENT!
+    #  --> this actual second permissions check happens inside the following function stack right now, and raises a
+    #      ValidationError:
+    #        build_and_execute_discovery_query --> discovery_filter_queryset --> the overall_permissions.bool_ check
 
     queryset_model_name: DiscoveryEntity = "phenopacket"
 

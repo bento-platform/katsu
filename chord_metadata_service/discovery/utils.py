@@ -9,6 +9,7 @@ from chord_metadata_service.authz.types import (
 )
 from chord_metadata_service.chord.data_types import KatsuDataType
 
+from .fields_utils import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
 
@@ -47,8 +48,6 @@ def get_discovery_field_set_permissions(
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
-    dts_accessed: set[KatsuDataType] = set()
-    field_dts: dict[str, KatsuDataType] = {}
 
     discovery_fields = extract_discovery(discovery_or_scope).fields
 
@@ -56,16 +55,20 @@ def get_discovery_field_set_permissions(
         # If no fields configured, default safe: fall back to no permissions
         return DataPermissions(bool_=False, counts=False, data=False), {}
 
-    field_set = set(fields_accessed) if fields_accessed else set(discovery_fields.keys())
+    dts_accessed: set[KatsuDataType] = set()
+    field_dts: dict[str, KatsuDataType] = {}
+
+    # field_set here is a set of strings, which are the *discovery field IDs/keys* (rather than mappings another ID.)
+    field_set = set(fields_accessed or discovery_fields.keys())
 
     for field in field_set:
         if field not in discovery_fields:
             raise ValidationError(f"Unsupported field used in query: {field}")
 
-        mn, _ = discovery_fields[field].get_entity_and_field_path()
-        f_dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[mn]
+        # need to normalize the field path before using it, to make sure we get the true data type of the access:
+        f_entity, f_field_path = normalize_field_path_true_model(*discovery_fields[field].get_entity_and_field_path())
 
-        # TODO: handle nested accesses... !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        f_dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[f_entity]
 
         dts_accessed.add(f_dt)
         field_dts[field] = f_dt

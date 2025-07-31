@@ -124,7 +124,7 @@ async def discovery_filter_queryset(
     if (n_queried := len(query)) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
-    if not overall_permissions.counts:
+    if not overall_permissions.bool_:
         raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
 
     queried_entities: set[DiscoveryEntity] = set()
