@@ -84,6 +84,7 @@ async def discovery_filter_queryset(
     dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
     nested_prefetch: bool = False,
+    already_fetched: frozenset[DiscoveryEntity] = frozenset(),
 ) -> QuerySet:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
@@ -95,6 +96,8 @@ async def discovery_filter_queryset(
     :param nested_prefetch: If true, it means we're filtering in a "prefetch" context, meaning we skip out-of-bounds
                             fields (e.g., querying individual.sex from biosample) instead of erroring out, and we don't
                             further recursively do more prefetching.
+    :param already_fetched: If we're in a nested prefetch, we don't want to enter an infinite loop, so this stores
+                            entities which have already been fetched.
     :param lg: BoundLogger object.
     """
 
@@ -165,7 +168,9 @@ async def discovery_filter_queryset(
         queried_entities.add("phenopacket")
 
     if (  # not nested_prefetch and
-        nested_queried_entities := tuple(filter(lambda ee: ee != queryset_model_name, queried_entities))
+        nested_queried_entities := tuple(
+            filter(lambda ee: ee != queryset_model_name and ee not in already_fetched, queried_entities)
+        )
     ):
         # If we're not in a "nested prefetch" context already, we may have nested discovery entities we're querying.
         # We want to limit the Django ORM "join" with these nested entities to only include nested objects which also
@@ -187,6 +192,7 @@ async def discovery_filter_queryset(
                         dt_permissions,
                         lg,
                         nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
+                        already_fetched=already_fetched | {queryset_model_name},  # TODO: check this logic
                     ),
                     to_attr=f"{e}_matches",
                 )
@@ -200,7 +206,12 @@ async def discovery_filter_queryset(
         es: tuple[DiscoveryEntity, ...] = ("biosample", "experiment", "experiment_result")
         for e in es:
             f_queryset = f_queryset.annotate(
-                **{f"count_{e}": Count(resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()))}
+                **{
+                    f"count_{e}": Count(
+                        resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
+                        distinct=True,
+                    )
+                }
             )
 
     return f_queryset

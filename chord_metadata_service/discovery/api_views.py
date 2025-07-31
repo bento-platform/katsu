@@ -177,19 +177,20 @@ async def discovery_queryset_entity_counts(queryset: QuerySet) -> dict[Discovery
 
     counts: dict[DiscoveryEntity, int] = {
         "phenopacket": await queryset.acount(),
-        "individual": 0,
         "biosample": 0,
         "experiment": 0,
         "experiment_result": 0,
     }
 
+    individual_id_set: set[str] = set()
+
     async for p in queryset:
-        counts["individual"] += (1 if p.subject_id is not None else 0)
+        individual_id_set.add(p.subject_id)
         counts["biosample"] += p.count_biosample
         counts["experiment"] += p.count_experiment
         counts["experiment_result"] += p.count_experiment_result
 
-    return counts
+    return {**counts, "individual": len(individual_id_set)}
 
 
 @api_view(["GET", "POST"])
