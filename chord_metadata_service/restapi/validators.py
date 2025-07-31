@@ -1,12 +1,6 @@
 from rest_framework import serializers
 from jsonschema import Draft7Validator, FormatChecker
-from chord_metadata_service.restapi.schemas import (
-    AGE_OR_AGE_RANGE,
-    ONTOLOGY_CLASS,
-    ONTOLOGY_CLASS_LIST,
-    KEY_VALUE_OBJECT,
-    EXTRA_PROPERTIES_SCHEMA,
-)
+from .schema_ref import SCHEMA_REFS
 
 
 __all__ = [
@@ -23,14 +17,13 @@ __all__ = [
 # These migrations include JsonSchemaValidator constructors with the full schema as a param.
 # To get around this, David B had the idea of using a schema resolving mechanism instead, where we only pass a
 # string ref of the schema to the constructor, this is a small POC of the idea.
-SCHEMA_REFS: dict[str, dict] = {
+'''SCHEMA_REFS: dict[str, dict] = {
     "AGE_OR_AGE_RANGE": AGE_OR_AGE_RANGE,
     "ONTOLOGY_CLASS": ONTOLOGY_CLASS,
     "ONTOLOGY_CLASS_LIST": ONTOLOGY_CLASS_LIST,
     "KEY_VALUE_OBJECT": KEY_VALUE_OBJECT,
     "EXTRA_PROPERTIES_SCHEMA": EXTRA_PROPERTIES_SCHEMA,
-}
-
+}'''
 
 class JsonSchemaValidator:
     """ Custom class based validator to validate against Json schema for JSONField """

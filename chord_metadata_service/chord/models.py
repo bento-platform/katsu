@@ -59,7 +59,7 @@ class BaseProjectOrDataset(BaseTimeStamp):
 
     discovery = DiscoveryJSONField(
         blank=True, null=True, help_text="Discovery configuration",
-        validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)]
+        validators=[JsonSchemaValidator(schema_ref="DISCOVERY_SCHEMA")]
     )
 
 

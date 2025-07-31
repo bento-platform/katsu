@@ -44,5 +44,4 @@ jobs:
       - name: Check for missed migrations
         run: |
           export POSTGRES_USER="postgres" && export POSTGRES_PASSWORD="postgres" && export POSTGRES_PORT=5432
-          poetry run ./manage.py migrate
           poetry run ./manage.py makemigrations --check

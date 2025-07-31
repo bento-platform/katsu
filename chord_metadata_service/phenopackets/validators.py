@@ -7,4 +7,4 @@ ALL = [
 
 # VRS Variations are abstract and self referencing, thus cannot be expressed without a json-schema registry
 # Uses the VRS registry to dynamically resolve/validate concrete Variation classes
-vrs_variation_validator = JsonSchemaValidator(VRS_VARIATION_SCHEMA, registry=VRS_REF_REGISTRY)
+vrs_variation_validator = JsonSchemaValidator(schema_ref="VRS_VARIATION_SCHEMA", registry=VRS_REF_REGISTRY)
