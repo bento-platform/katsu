@@ -7,7 +7,7 @@ from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.phenopackets import models as pm
 
-from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket, MatchObject
+from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
