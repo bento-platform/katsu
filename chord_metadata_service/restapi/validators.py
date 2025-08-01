@@ -12,10 +12,11 @@ __all__ = [
     "base_extra_properties_validator",
 ]
 
+
 class JsonSchemaValidator:
     """ Custom class based validator to validate against Json schema for JSONField """
 
-    def __init__(self, schema=None, schema_ref: SchemaRefs|str = None, formats=None, registry=None):
+    def __init__(self, schema=None, schema_ref: SchemaRefs | str = None, formats=None, registry=None):
         """
         Validators should be constructed from a `SchemaRefs` enum value.
         However, for migration purposes, construction from either full `schema` or a `schema_ref` string is possible.
@@ -58,7 +59,8 @@ class JsonSchemaValidator:
                 }
             )
         # deconstruct using schema
-        raise ValueError("JsonSchemaValidator has no schema_ref. Please construct your validator using schema_ref, NOT via JSON schema!")
+        raise ValueError("JsonSchemaValidator has no schema_ref."
+                         + "Please construct your validator using schema_ref, NOT via JSON schema!")
 
 
 age_or_age_range_validator = JsonSchemaValidator(schema_ref=SchemaRefs.AGE_OR_AGE_RANGE)

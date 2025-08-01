@@ -1,12 +1,35 @@
 from enum import Enum
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.experiments.schemas import EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA
-from chord_metadata_service.phenopackets.schemas import *
-from chord_metadata_service.restapi.schemas import *
+from chord_metadata_service.phenopackets.schemas import (
+    PHENOPACKET_EVIDENCE_SCHEMA,
+    PHENOPACKET_MEASUREMENT_SCHEMA,
+    EXPRESSION_SCHEMA,
+    VCF_RECORD_SCHEMA,
+    EXTENSION_SCHEMA,
+    PHENOPACKET_MEDICAL_ACTION_SCHEMA,
+    VRS_VARIATION_SCHEMA,
+    VALIDATION_PHENOPACKET_UPDATE_SCHEMA,
+    VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+)
+from chord_metadata_service.restapi.schemas import (
+    ONTOLOGY_CLASS,
+    ONTOLOGY_CLASS_LIST,
+    KEY_VALUE_OBJECT,
+    AGE_STRING,
+    AGE,
+    AGE_RANGE,
+    AGE_OR_AGE_RANGE,
+    TIME_INTERVAL,
+    EXTRA_PROPERTIES_SCHEMA,
+    GESTATIONAL_AGE,
+    TIME_ELEMENT_SCHEMA
+)
 
 __all__ = [
     "SchemaRefs",
 ]
+
 
 class SchemaRefs(Enum):
     ONTOLOGY_CLASS = ONTOLOGY_CLASS

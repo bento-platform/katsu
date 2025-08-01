@@ -77,14 +77,16 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "severity"))
     modifiers = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                           help_text=rec_help(d.PHENOTYPIC_FEATURE, "modifiers"))
-    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
+    onset = JSONField(blank=True, null=True,
+                      validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
     resolution = JSONField(blank=True, null=True, validators=[
         JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
 
     # evidence can stay here because evidence is given for an observation of PF
     # JSON schema to check evidence_code is present
     # FHIR: Condition.evidence
-    evidence = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_EVIDENCE_SCHEMA)],
+    evidence = JSONField(blank=True, null=True,
+                         validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_EVIDENCE_SCHEMA)],
                          help_text=rec_help(d.PHENOTYPIC_FEATURE, "evidence"))
     biosample = models.ForeignKey(
         "Biosample", on_delete=models.CASCADE, blank=True, null=True, related_name='phenotypic_features')
@@ -107,8 +109,10 @@ class Disease(BaseTimeStamp, IndexableMixin):
 
     term = JSONField(validators=[ontology_validator], help_text=rec_help(d.DISEASE, "term"))
     excluded = models.BooleanField(default=False)
-    onset = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
-    resolution = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
+    onset = JSONField(blank=True, null=True,
+                      validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
+    resolution = JSONField(blank=True, null=True,
+                           validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)])
     disease_stage = JSONField(blank=True, null=True, validators=[ontology_list_validator],
                               help_text=rec_help(d.DISEASE, "disease_stage"))
     clinical_tnm_finding = JSONField(blank=True, null=True, validators=[ontology_list_validator],
@@ -159,11 +163,16 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
     #   help_text='List of phenotypic abnormalities of the sample.')
 
     measurements = models.JSONField(blank=True, null=True,
-                                    validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEASUREMENT_SCHEMA)],
+                                    validators=[
+                                        JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEASUREMENT_SCHEMA)
+                                    ],
                                     help_text=rec_help(d.BIOSAMPLE, "measurements"))
     taxonomy = JSONField(blank=True, null=True, validators=[ontology_validator],
                          help_text=rec_help(d.BIOSAMPLE, "taxonomy"))
-    time_of_collection = JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)],
+    time_of_collection = JSONField(blank=True, null=True,
+                                   validators=[
+                                       JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)
+                                    ],
                                    help_text=rec_help(d.BIOSAMPLE, "time_of_collection"))
 
     histological_diagnosis = JSONField(
@@ -251,14 +260,19 @@ class VariationDescriptor(BaseTimeStamp):
     description = models.CharField(blank=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "description"))
     gene_context = models.ForeignKey(GeneDescriptor, blank=True, null=True, on_delete=models.CASCADE,
                                      help_text=rec_help(d.VARIANT_DESCRIPTOR, "gene_context"))
-    expressions = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.EXPRESSION_SCHEMA)],
+    expressions = models.JSONField(blank=True, null=True,
+                                   validators=[JsonSchemaValidator(schema_ref=SchemaRefs.EXPRESSION_SCHEMA)],
                                    help_text=rec_help(d.VARIANT_DESCRIPTOR, "expressions"))
-    vcf_record = models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VCF_RECORD_SCHEMA)])
+    vcf_record = models.JSONField(blank=True, null=True,
+                                  validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VCF_RECORD_SCHEMA)])
     xrefs = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
                        help_text=rec_help(d.VARIANT_DESCRIPTOR, "xrefs"))
     alternate_labels = ArrayField(models.CharField(max_length=200, blank=True), blank=True, default=list,
                                   help_text=rec_help(d.VARIANT_DESCRIPTOR, "alternate_labels"))
-    extensions = ArrayField(models.JSONField(blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.EXTENSION_SCHEMA)]),
+    extensions = ArrayField(models.JSONField(blank=True, null=True,
+                                             validators=[
+                                                 JsonSchemaValidator(schema_ref=SchemaRefs.EXTENSION_SCHEMA)
+                                                ]),
                             blank=True, default=list, help_text=rec_help(d.VARIANT_DESCRIPTOR, "extensions"))
     molecule_context = models.CharField(max_length=200, blank=True,
                                         help_text=rec_help(d.VARIANT_DESCRIPTOR, "molecule_context"))
@@ -473,7 +487,8 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
     diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
 
     medical_actions = models.JSONField(
-        blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
+        blank=True, null=True,
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEDICAL_ACTION_SCHEMA)])
 
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))

@@ -69,7 +69,9 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexab
     age_unit = models.CharField(max_length=50, blank=True, help_text='The unit for measuring age.')
 
     time_at_last_encounter = models.JSONField(blank=True, null=True,
-                                              validators=[JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)],
+                                              validators=[
+                                                  JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)
+                                                ],
                                               help_text="TimeElement of the patient when last encountered.")
 
     vital_status = models.ForeignKey(VitalStatus, blank=True, null=True, on_delete=models.CASCADE,

@@ -23,7 +23,6 @@ __all__ = [
 ]
 
 
-
 base_uri = settings.SCHEMAS_BASE_URL
 
 # ======================== Phenopackets based schemas =========================
