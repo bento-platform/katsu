@@ -48,7 +48,7 @@ class JsonSchemaValidator:
         return self.schema == other.schema
 
     def deconstruct(self):
-        if self.schema_name:
+        if hasattr(self, 'schema_name'):
             # deconstruct using schema reference
             return (
                 'chord_metadata_service.restapi.validators.JsonSchemaValidator',
