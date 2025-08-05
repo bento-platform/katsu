@@ -1,5 +1,3 @@
-
-
 from django.test import SimpleTestCase
 
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
@@ -9,11 +7,6 @@ from chord_metadata_service.restapi.validators import JsonSchemaValidator
 SCHEMA = AGE_OR_AGE_RANGE
 SCHEMA_REF_ENUM = SchemaRefs.AGE_OR_AGE_RANGE
 SCHEMA_REF_STR = "AGE_OR_AGE_RANGE"
-DECONSTRUCTED_SCHEMA = (
-    'chord_metadata_service.restapi.validators.JsonSchemaValidator',
-    [],
-    {'schema_ref': 'AGE_OR_AGE_RANGE', 'formats': None}
-)
 
 
 class TestJsonSchemaValidator(SimpleTestCase):
@@ -44,12 +37,18 @@ class TestJsonSchemaValidator(SimpleTestCase):
         validator_schema = JsonSchemaValidator(schema=SCHEMA)
         self.assertEqual(validator_enum, validator_schema)
 
-    def test_deconstruct_valid(self):
+    def test_deconstruct_schemared(self):
         validator = JsonSchemaValidator(schema_ref=SCHEMA_REF_ENUM)
         deconstruct = validator.deconstruct()
-        self.assertEqual(deconstruct, DECONSTRUCTED_SCHEMA)
 
-    def test_deconstruct_invalid(self):
+        self.assertEqual(deconstruct[0], 'chord_metadata_service.restapi.validators.JsonSchemaValidator')
+        self.assertFalse(deconstruct[1])
+        self.assertEqual(deconstruct[2], {'schema_ref': 'AGE_OR_AGE_RANGE', 'formats': None})
+
+    def test_deconstruct_schema(self):
         validator = JsonSchemaValidator(schema=SCHEMA)
-        with self.assertRaises(ValueError):
-            validator.deconstruct()
+        deconstruct = validator.deconstruct()
+
+        self.assertEqual(deconstruct[0], 'chord_metadata_service.restapi.validators.JsonSchemaValidator')
+        self.assertTrue(deconstruct[1])
+        self.assertEqual(deconstruct[2], {'formats': None})

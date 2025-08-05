@@ -59,8 +59,11 @@ class JsonSchemaValidator:
                 }
             )
         # deconstruct using schema
-        raise ValueError("JsonSchemaValidator has no schema_ref."
-                         + "Please construct your validator using schema_ref, NOT via JSON schema!")
+        return (
+            'chord_metadata_service.restapi.validators.JsonSchemaValidator',
+            [self.schema],
+            {"formats": self.formats}
+        )
 
 
 age_or_age_range_validator = JsonSchemaValidator(schema_ref=SchemaRefs.AGE_OR_AGE_RANGE)
