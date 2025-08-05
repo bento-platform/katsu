@@ -35,7 +35,8 @@ class SchemaRefs(Enum):
     """
     A compilation of all schema names and their associated schemas; used to create JsonSchema Validator.
     For migration purposes, the name of the schema is stored as it is static between users and devices,
-        as opposed to storing the ever-permutating schemas and requiring the generation of (essentially) duplicative migrations.
+        as opposed to storing the ever-permutating schemas and requiring
+        the generation of (essentially) duplicative migrations.
     """
     AGE = AGE
     AGE_OR_AGE_RANGE = AGE_OR_AGE_RANGE
