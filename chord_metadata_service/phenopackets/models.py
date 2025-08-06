@@ -171,8 +171,8 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
                          help_text=rec_help(d.BIOSAMPLE, "taxonomy"))
     time_of_collection = JSONField(blank=True, null=True,
                                    validators=[
-                                       JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)
-                                    ],
+                                      JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)
+                                   ],
                                    help_text=rec_help(d.BIOSAMPLE, "time_of_collection"))
 
     histological_diagnosis = JSONField(
@@ -271,8 +271,8 @@ class VariationDescriptor(BaseTimeStamp):
                                   help_text=rec_help(d.VARIANT_DESCRIPTOR, "alternate_labels"))
     extensions = ArrayField(models.JSONField(blank=True, null=True,
                                              validators=[
-                                                 JsonSchemaValidator(schema_ref=SchemaRefs.EXTENSION_SCHEMA)
-                                                ]),
+                                                JsonSchemaValidator(schema_ref=SchemaRefs.EXTENSION_SCHEMA)
+                                             ]),
                             blank=True, default=list, help_text=rec_help(d.VARIANT_DESCRIPTOR, "extensions"))
     molecule_context = models.CharField(max_length=200, blank=True,
                                         help_text=rec_help(d.VARIANT_DESCRIPTOR, "molecule_context"))
