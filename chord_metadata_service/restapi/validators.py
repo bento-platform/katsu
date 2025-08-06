@@ -19,7 +19,8 @@ class JsonSchemaValidator:
     def __init__(self, schema=None, schema_ref: SchemaRefs | str = None, formats=None, registry=None):
         """
         Validators should be constructed from a `SchemaRefs` enum value.
-        However, for migration purposes, construction from either full `schema` or a `schema_ref` string is possible.
+        WARNING!: Construction from full `schema` or a `schema_ref` string is supported (but should not be used)
+            to ensure that the method is backwards compatible and allows older migrations to be made.
         """
         if (not schema and not schema_ref) or (schema and schema_ref):
             raise ValueError("Must provide a schema OR a schema_ref argument.")
