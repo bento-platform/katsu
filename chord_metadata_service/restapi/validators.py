@@ -1,3 +1,4 @@
+import warnings
 from rest_framework import serializers
 from jsonschema import Draft7Validator, FormatChecker
 from .schema_ref import SchemaRefs
@@ -16,21 +17,22 @@ __all__ = [
 class JsonSchemaValidator:
     """ Custom class based validator to validate against Json schema for JSONField """
 
-    def __init__(self, schema=None, schema_ref: SchemaRefs | str = None, formats=None, registry=None):
+    def __init__(self, schema: dict = None, schema_ref: SchemaRefs | str = None, formats=None, registry=None):
         """
         Validators should be constructed from a `SchemaRefs` enum value.
-        WARNING!: Construction from full `schema` or a `schema_ref` string is supported (but should not be used)
-            to ensure that the method is backwards compatible and allows older migrations to be made.
+        DeprecationWarning!: Construction from full `schema` is supported to ensure that the method is backwards
+            compatible and allows older migrations to be made.
         """
         if (not schema and not schema_ref) or (schema and schema_ref):
-            raise ValueError("Must provide a schema OR a schema_ref argument.")
-
-        if schema_ref:
+            raise ValueError("Must provide a schema OR a schema_ref argument. Preferably a schema_ref.")
+        elif schema:
+            warnings.warn("Initialization via `schema` kept for backward compatibility for older migrations." +
+                          "Init via `schema_ref` argument instead.", DeprecationWarning)
+            self.schema = schema
+        elif schema_ref:
             schema_ref = SchemaRefs[schema_ref] if isinstance(schema_ref, str) else schema_ref
-            self.schema_name = schema_ref.name
-            schema = schema_ref.value
+            self.schema_name, self.schema = schema_ref.name, schema_ref.value
 
-        self.schema = schema
         self.formats = formats
         self.validator_args = {
             'schema': self.schema,
@@ -59,7 +61,9 @@ class JsonSchemaValidator:
                     "formats": self.formats
                 }
             )
-        # deconstruct using schema
+
+        warnings.warn("Deconstruction via `schema` kept for backward compatibility for older migrations.",
+                      DeprecationWarning)
         return (
             'chord_metadata_service.restapi.validators.JsonSchemaValidator',
             [self.schema],
