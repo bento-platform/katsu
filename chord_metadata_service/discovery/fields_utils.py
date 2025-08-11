@@ -31,12 +31,15 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
     return JSONBPathQuery(F(field), Value(f"{field_operator}.{query_path}"))
 
 
+# noinspection PyUnreachableCode
 def _resolve_filter_mapping_to_queryset_model_inner(
     queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> tuple[str, ...]:
     """
-    TODO: THIS ENCODES RELATIONSHIPS.
-    "Hard-coded" data model equivalent of the old "linked field set" concept, which was over-generalized.
+    Given a goal (queryset) model name and a current (field) model name, rewrite a path to a field from the field model
+    name to the goal queryset model name.
+    Currently, this is used as an inner function for resolve_filter_mapping_to_queryset_model, but may have more broad
+    use for rewriting field paths without converting them to Django form.
     """
 
     if queryset_model_name == field_model_name:
@@ -131,6 +134,13 @@ def _resolve_filter_mapping_to_queryset_model_inner(
 def resolve_filter_mapping_to_queryset_model(
     queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> str:
+    """
+    Given a goal (queryset) model name and a current (field) model name, rewrite a path to a field from the field model
+    name to the goal queryset model name and convert it to a Django-query-form field path.
+    IMPORTANT NOTE: This hard-codes model relationships, e.g., experiments inside biosamples inside phenopackets.
+                    The "hard-coded" data model here is equivalent of the old "linked field set" concept, which was very
+                    over-generalized.
+    """
     return "__".join(_resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, field_model_name, field_path))
 
 

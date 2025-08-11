@@ -48,6 +48,16 @@ def get_discovery_field_set_permissions(
     fields_accessed: Iterable[str] | None,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
+    """
+    Given a particular discovery scope and already-resolved data type permissions for this scope, as well as a list of
+    field IDs that match what is in the discovery config [or, if this is None, all fields in the discovery config], this
+    checks which data type is being accessed after resolving nested access and builds a dictionary of
+    {field id: DataPermissions}.
+    Returns a tuple of (
+        DataPermissions for accessing EVERY field, i.e., field1 AND field2 AND field3 AND ...,
+        {field id: DataPermissions},
+    ).
+    """
 
     discovery_fields = extract_discovery(discovery_or_scope).fields
 
@@ -73,13 +83,14 @@ def get_discovery_field_set_permissions(
         dts_accessed.add(f_dt)
         field_dts[field] = f_dt
 
-    field_permissions: FieldDiscoveryPermissions = {f: dt_permissions[field_dts[f]] for f in field_set}
-
-    return DataPermissions(
+    all_fields_permissions = DataPermissions(
         bool_=all(dt_permissions[dt].bool_ for dt in dts_accessed),
         counts=all(dt_permissions[dt].counts for dt in dts_accessed),
         data=all(dt_permissions[dt].data for dt in dts_accessed)
-    ), field_permissions
+    )  # AND of permissions for every field, so we know if we have, e.g., boolean-level access for every field passed.
+    field_permissions: FieldDiscoveryPermissions = {f: dt_permissions[field_dts[f]] for f in field_set}
+
+    return all_fields_permissions, field_permissions
 
 
 def extract_discovery(discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScope) -> DiscoveryConfig:
