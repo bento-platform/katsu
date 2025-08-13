@@ -4,10 +4,10 @@ from bento_lib.discovery import DiscoveryConfig
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
+from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 
@@ -59,7 +59,7 @@ class BaseProjectOrDataset(BaseTimeStamp):
 
     discovery = DiscoveryJSONField(
         blank=True, null=True, help_text="Discovery configuration",
-        validators=[JsonSchemaValidator(DISCOVERY_SCHEMA)]
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.DISCOVERY_SCHEMA)]
     )
 
 

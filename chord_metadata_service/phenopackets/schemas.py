@@ -27,6 +27,7 @@ from chord_metadata_service.restapi.schema_utils import (
     sub_schema_uri,
     describe_schema,
     tag_ids_and_describe,
+    validation_schema_list,
 )
 
 from . import descriptions
@@ -61,6 +62,8 @@ __all__ = [
     "VRS_REF_REGISTRY",
     "VRS_VARIATION_SCHEMA",
     "phenopacket_resolver",
+    "VALIDATION_PHENOPACKET_UPDATE_SCHEMA",
+    "VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
 ]
 
 phenopacket_base_uri = f"{settings.SCHEMAS_BASE_URL}/phenopacket"
@@ -679,3 +682,7 @@ VRS_REF_REGISTRY = VRS_REF_RESOURCE @ Registry()
 
 resolver = VRS_REF_REGISTRY.resolver()
 VRS_VARIATION_SCHEMA = resolver.lookup(sub_schema_uri(phenopacket_base_uri, "vrs#/definitions/Variation")).contents
+
+
+VALIDATION_PHENOPACKET_UPDATE_SCHEMA = validation_schema_list(PHENOPACKET_UPDATE_SCHEMA)
+VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA)
