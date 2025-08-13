@@ -1,4 +1,3 @@
-import warnings
 from rest_framework import serializers
 from jsonschema import Draft7Validator, FormatChecker
 from .schema_ref import SchemaRefs
@@ -26,8 +25,8 @@ class JsonSchemaValidator:
         if (not schema and not schema_ref) or (schema and schema_ref):
             raise ValueError("Must provide a schema OR a schema_ref argument. Preferably a schema_ref.")
         elif schema:
-            warnings.warn("Initialization via `schema` kept for backward compatibility for older migrations." +
-                          "Init via `schema_ref` argument instead.", DeprecationWarning)
+            # Initialization via `schema` kept for backward compatibility for older migrations!
+            # Instead, init via `schema_ref` argument.
             self.schema = schema
         elif schema_ref:
             schema_ref = SchemaRefs[schema_ref] if isinstance(schema_ref, str) else schema_ref
@@ -62,8 +61,7 @@ class JsonSchemaValidator:
                 }
             )
 
-        warnings.warn("Deconstruction via `schema` kept for backward compatibility for older migrations.",
-                      DeprecationWarning)
+        # Deconstruct via `schema` kept for backward compatibility for older migrations ONLY.
         return (
             'chord_metadata_service.restapi.validators.JsonSchemaValidator',
             [self.schema],
