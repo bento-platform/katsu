@@ -37,6 +37,9 @@ class SchemaRefs(Enum):
     For migration purposes, the name of the schema is stored as it is static between users and devices,
         as opposed to storing the ever-permutating schemas and requiring
         the generation of (essentially) duplicative migrations.
+
+    The format of this enum is `schema_name:str = schema:dict`.
+    The enum is used in an atypical manner as the elements have no defined order to them.
     """
     AGE = AGE
     AGE_OR_AGE_RANGE = AGE_OR_AGE_RANGE
