@@ -7,6 +7,7 @@ from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
+from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryFilterRewriteException
 from .fields import get_field_options, filter_queryset_field_value
 from .fields_utils import resolve_filter_mapping_to_queryset_model
@@ -178,6 +179,12 @@ async def discovery_filter_queryset(
         # we get "all experiments of all phenopackets containing WGS experiments", rather than our (potentially) desired
         # "all phenopackets with at least one WGS experiment, and only those WGS experiments included in the result-set"
 
+        await lg.adebug(
+            "adding filtered prefetches",
+            nested_queried_entities=nested_queried_entities,
+            already_fetched=already_fetched,
+        )
+
         filtered_prefetches: list[Prefetch] = []
 
         for e in nested_queried_entities:
@@ -202,9 +209,8 @@ async def discovery_filter_queryset(
 
     if not nested_prefetch:
         # annotate with counts
-        # TODO: only sub-fields...
-        es: tuple[DiscoveryEntity, ...] = ("biosample", "experiment", "experiment_result")
-        for e in es:
+        # TODO: only sub-fields...?
+        for e in filter(lambda ee: ee != queryset_model_name, DISCOVERY_ENTITIES):
             f_queryset = f_queryset.annotate(
                 **{
                     f"count_{e}": Count(

@@ -85,23 +85,23 @@ def _resolve_filter_mapping_to_queryset_model_inner(
         case ("biosample", "phenopacket"):
             # If we are accessing a biosample field through a phenopacket path, we can remap it to a biosample queryset
             # model. Otherwise, we cannot and we raise the exception.
-            if field_path[0] == "biosamples":
+            if field_path[:1] == ("biosamples",):
                 return field_path[1:]
-            raise exc
+            return "phenopackets", *field_path
         case ("biosample", "individual"):
             if field_path[:2] == ("phenopackets", "biosamples"):
                 return field_path[2:]
-            raise exc
+            return "phenopackets", "subject", *field_path
         case ("experiment", "biosample"):  # also handles (experiment, phenopacket) via recursion below
             # experiment: old path, prior to related_name; experiments: after
             if field_path[:1] in (("experiment",), ("experiments",)):  # use slice to handle field_path == ()
                 return field_path[1:]
-            raise exc
+            return "biosample", *field_path
         case ("experiment", "phenopacket"):
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
             if field_path[:2] in {("biosamples", "experiment"), ("biosamples", "experiments")}:
                 return field_path[2:]
-            raise exc
+            return "biosample", "phenopackets", *field_path
         case ("experiment", "individual"):
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
             if field_path[:3] in {
@@ -109,23 +109,23 @@ def _resolve_filter_mapping_to_queryset_model_inner(
                 ("phenopackets", "biosamples", "experiments"),
             }:
                 return field_path[3:]
-            raise exc
+            return "biosample", "phenopackets", "subject", *field_path
         case ("experiment_result", "phenopacket"):
             if field_path[:3] == ("biosamples", "experiments", "experiment_results"):
                 return field_path[3:]
-            raise exc
+            return "experiments", "biosample", "phenopackets", *field_path
         case ("experiment_result", "individual"):
             if field_path[:4] == ("phenopackets", "biosamples", "experiments", "experiment_results"):
                 return field_path[4:]
-            raise exc
+            return "experiments", "biosample", "phenopackets", "subject", *field_path
         case ("experiment_result", "biosample"):
             if field_path[:2] == ("experiments", "experiment_result"):
                 return field_path[2:]
-            raise exc
+            return "experiments", "biosample", *field_path
         case ("experiment_result", "experiment"):
-            if field_path[0] == "experiment_result":
+            if field_path[:1] == ("experiment_result",):
                 return field_path[1:]
-            raise exc
+            return "experiments", *field_path
         # --------------------------------------------------------------------------------------------------------------
         case _:
             raise exc

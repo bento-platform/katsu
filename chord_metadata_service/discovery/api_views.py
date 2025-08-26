@@ -23,6 +23,7 @@ from chord_metadata_service.logger import logger
 
 from . import responses as dres
 from .censorship import get_rules, get_threshold, thresholded_count
+from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
@@ -359,10 +360,12 @@ async def discovery_matches(request: DrfRequest):
 
     # -- Query execution -----------------------------------------------------------------------------------------------
 
-    queryset_model_name: DiscoveryEntity = "phenopacket"
+    queried_entity: DiscoveryEntity = request.query_params.get("_entity", "phenopacket")
+    if queried_entity not in DISCOVERY_ENTITIES:
+        return Response(errors.bad_request_error("invalid entity"), status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        query, queryset = await build_and_execute_discovery_query(request, scope, dt_permissions, queryset_model_name)
+        query, queryset = await build_and_execute_discovery_query(request, scope, dt_permissions, queried_entity)
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
@@ -394,14 +397,11 @@ async def discovery_matches(request: DrfRequest):
 
     # -- Build and return response -------------------------------------------------------------------------------------
 
-    results_entity: DiscoveryEntity = "phenopacket"
-    # TODO: select queryset of entities that aren't necessarily phenopackets
-
     return Response(
         DiscoveryMatchesPaginatedResponse(
-            results_entity=results_entity,
+            results_entity=queried_entity,
             results=DiscoveryMatches(
-                root=await DISCOVERY_ENTITY_TO_MATCH_FN[results_entity](matches_page, scope, dt_permissions, True, {})
+                root=await DISCOVERY_ENTITY_TO_MATCH_FN[queried_entity](matches_page, scope, dt_permissions, True, {})
             ),
             pagination=pagination,
         ).model_dump(mode="json", exclude_unset=True)

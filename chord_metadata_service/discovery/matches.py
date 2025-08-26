@@ -91,10 +91,14 @@ async def biosample_matches(
 ) -> list[MatchBiosample]:
     res: list[MatchBiosample] = []
     for b in await list_or_manager_to_list(mrm):
+        p = (ctx or {}).get("phenopacket")
+        if not p and (p_obj := await b.phenopackets.afirst()):
+            p = str(p_obj.id)
+
         res.append(
             MatchBiosample(
                 id=str(b.id),
-                p=(ctx or {}).get("phenopacket"),
+                p=p,
                 e=(
                     # TODO: prefetch all the time, even when not filtering?
                     (
