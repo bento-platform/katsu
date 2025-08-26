@@ -84,7 +84,7 @@ def _resolve_filter_mapping_to_queryset_model_inner(
         # --------------------------------------------------------------------------------------------------------------
         case ("biosample", "phenopacket"):
             # If we are accessing a biosample field through a phenopacket path, we can remap it to a biosample queryset
-            # model. Otherwise, we cannot and we raise the exception.
+            # model. Otherwise, we go "backwards" out to phenopackets.
             if field_path[:1] == ("biosamples",):
                 return field_path[1:]
             return "phenopackets", *field_path
