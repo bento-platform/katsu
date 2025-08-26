@@ -92,8 +92,10 @@ async def biosample_matches(
     res: list[MatchBiosample] = []
     for b in await list_or_manager_to_list(mrm):
         p = (ctx or {}).get("phenopacket")
+        ds = scope.dataset_id
         if not p and (p_obj := await b.phenopackets.afirst()):
             p = str(p_obj.id)
+            ds = str(p_obj.dataset_id)
 
         res.append(
             MatchBiosample(
@@ -112,7 +114,7 @@ async def biosample_matches(
                     )
                     if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
                 ),
-                **(dict(pr=scope.project_id, ds=scope.dataset_id) if root else dict()),
+                **(dict(pr=scope.project_id, ds=ds) if root else dict()),
             )
         )
     return res
