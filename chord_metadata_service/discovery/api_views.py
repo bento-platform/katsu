@@ -22,7 +22,7 @@ from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
 
 from . import responses as dres
-from .censorship import get_rules, get_threshold, thresholded_count
+from .censorship import get_rules, get_threshold
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
