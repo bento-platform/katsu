@@ -198,7 +198,7 @@ async def discovery_queryset_entity_counts(queryset: QuerySet) -> dict[Discovery
     return {**counts, "individual": len(individual_id_set)}
 
 
-@api_view(["GET", "POST"])
+@api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def discovery_endpoint(request: DrfRequest):
     """
@@ -332,7 +332,7 @@ async def discovery_endpoint(request: DrfRequest):
     )
 
 
-@api_view(["GET", "POST"])
+@api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
 async def discovery_matches(request: DrfRequest):
     # TODO: DEDUPLICATE
