@@ -408,30 +408,31 @@ async def discovery_matches(request: DrfRequest):
     )
 
 
-@api_view(["GET"])
-@permission_classes([BentoAllowAny])
-async def discovery_ui_hints(request: DrfRequest):
-    try:
-        scope = await get_request_discovery_scope(request)
-    except DiscoveryScopeException as e:
-        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
-
-    queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO
-    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
-
-    counts = await discovery_queryset_entity_counts(queryset=queryset)
-
-    dt_permissions = await get_discovery_data_type_permissions(request, scope)
-
-    return {
-        "entities_with_data": [
-            e for e, v in counts.items()
-            if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
-        ],
-        # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
-        #  should present a consolidated map view?
-        "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
-    }
+# TODO: finish this implementation for Bento v20+
+# @api_view(["GET"])
+# @permission_classes([BentoAllowAny])
+# async def discovery_ui_hints(request: DrfRequest):
+#     try:
+#         scope = await get_request_discovery_scope(request)
+#     except DiscoveryScopeException as e:
+#         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+#
+#     queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity
+#     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
+#
+#     counts = await discovery_queryset_entity_counts(queryset=queryset)
+#
+#     dt_permissions = await get_discovery_data_type_permissions(request, scope)
+#
+#     return {
+#         "entities_with_data": [
+#             e for e, v in counts.items()
+#             if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
+#         ],
+#         # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
+#         #  should present a consolidated map view?
+#         "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
+#     }
 
 
 @api_view(["GET"])
