@@ -292,6 +292,7 @@ for experiment in data.get('experiments', []):
             index_basename = construct_index_basename(filename, new_index_format)
 
             for drs_resp in drs_data:
+                if os.path.basename(drs_resp.get('name', '')) == index_basename:
                 existing_idx = None
                 for idx in result['indices']:
                     if idx.get('format') == new_index_format:
