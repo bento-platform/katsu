@@ -176,21 +176,9 @@ task post_to_drs {
       index_ext=".bai"
       idx_fmt="BAI"
       [[ "~{file_path}" =~ \.cram$ ]] && { index_ext=".crai"; idx_fmt="CRAI"; }
-
-      # Check non-empty URL for the index format
-      if ! jq -e --arg fn "$filename" --arg fmt "$idx_fmt" '
-           .experiments[]?.experiment_results[]?
-           | select(.filename == $fn)
-           | (.indices // [])
-           | any(.format == $fmt and (.url | length > 0))
-         ' "~{json_document}" >/dev/null; then
-        # No URL found; create the index and ingest it
         samtools index "~{file_path}" 1>/dev/null 2>&1
         resp_index=$(ingest_to_drs "~{file_path}${index_ext}")
         echo "$resp_index" | jq -c
-      else
-        echo "Skipping index for $filename (already declared with URL)" >&2
-      fi
     fi
   >>>
   output {
