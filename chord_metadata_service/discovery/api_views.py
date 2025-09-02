@@ -502,7 +502,7 @@ async def discovery_schema(_request: DrfRequest):
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def public_rules(request: DrfRequest):
+async def discovery_rules(request: DrfRequest):
     """
     Endpoint for censorship / display rules (count threshold, maximum query parameters).
     Returns a serialization of the DiscoveryConfigRules object from bento_lib.discovery.models.config

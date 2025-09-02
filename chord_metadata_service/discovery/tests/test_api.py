@@ -484,7 +484,7 @@ class DiscoverySchemaTest(AuthzAPITestCase):
 
 class DiscoveryRulesTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def setUp(self):
-        self.url = reverse("public-rules")
+        self.url = reverse("discovery-rules")
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_rules(self):
