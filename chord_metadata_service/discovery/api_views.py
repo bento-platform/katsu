@@ -20,7 +20,7 @@ from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE
+from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE
 from chord_metadata_service.restapi.responses import bad_request, not_found
 
 from . import responses as dres
@@ -413,8 +413,10 @@ async def discovery_matches(request: DrfRequest):
         return bad_request(request, "bad page")
 
     try:
-        # if page_size is set to 0, all records will be returned:
-        page_size = max(int(request.query_params.get("_page_size", str(page_size))), 0)
+        # if page_size is set to 0, all records will be returned.
+        # if page_size is less than 0, it will be set to 0; if it is greater than DEFAULT_MAX_PAGE_SIZE, it'll be set
+        #  to that value.
+        page_size = min(max(int(request.query_params.get("_page_size", str(page_size))), 0), DEFAULT_MAX_PAGE_SIZE)
     except ValueError:
         return bad_request(request, "bad page size")
 

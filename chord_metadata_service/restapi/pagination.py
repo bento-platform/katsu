@@ -11,12 +11,13 @@ __all__ = [
 
 
 DEFAULT_PAGE_SIZE: int = 25
+DEFAULT_MAX_PAGE_SIZE: int = 10000
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
     page_size = DEFAULT_PAGE_SIZE
     page_size_query_param = 'page_size'
-    max_page_size = 10000
+    max_page_size = DEFAULT_MAX_PAGE_SIZE
 
     # Fix next/previous links inside sub-path-mounted reverse proxies in the CHORD context:
 
