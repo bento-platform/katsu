@@ -159,7 +159,7 @@ async def build_and_execute_discovery_query(
     discovery_scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset_model_name: DiscoveryEntity,
-) -> tuple[DiscoveryQuery, QuerySet]:
+) -> tuple[DiscoveryQuery, QuerySet, frozenset[DiscoveryEntity]]:
     # TODO: support free text search as well as filters query
 
     query = build_discovery_query_from_request(request)
@@ -167,7 +167,7 @@ async def build_and_execute_discovery_query(
     # May raise:
     #  - DiscoveryEmptyException
     #  - ValidationError
-    return query, await discovery_filter_queryset(
+    filtered_queryset, queried_entities = await discovery_filter_queryset(
         discovery_scope,
         query,
         queryset_model_name,
@@ -175,6 +175,8 @@ async def build_and_execute_discovery_query(
         dt_permissions,
         logger,
     )
+
+    return query, filtered_queryset, queried_entities
 
 
 async def discovery_queryset_entity_counts(queryset: QuerySet) -> dict[DiscoveryEntity, int]:
@@ -328,6 +330,7 @@ async def discovery_endpoint(request: DrfRequest):
             layout=discovery.overview,
             fields=field_responses,
             root_entity=queryset_model_name,
+            queried_entities=queried_entities,
             message=message,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
             counts=count_or_bools_res,
@@ -367,7 +370,9 @@ async def discovery_matches(request: DrfRequest):
         return bad_request(request, "invalid entity")
 
     try:
-        query, queryset = await build_and_execute_discovery_query(request, scope, dt_permissions, queried_entity)
+        query, queryset, _queried_entities = await build_and_execute_discovery_query(
+            request, scope, dt_permissions, queried_entity
+        )
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:

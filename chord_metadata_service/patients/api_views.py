@@ -251,9 +251,11 @@ class PublicListIndividuals(APIView):
         queried_fields = query.queried_fields()
 
         try:
-            filtered_qs = await discovery_filter_queryset(
-                discovery_scope, query, "individual", base_qs, dt_permissions, logger
-            )
+            filtered_qs = (
+                await discovery_filter_queryset(
+                    discovery_scope, query, "individual", base_qs, dt_permissions, logger
+                )
+            )[0]
         except DiscoveryEmptyException:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)

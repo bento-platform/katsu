@@ -86,7 +86,7 @@ async def discovery_filter_queryset(
     lg: BoundLogger,
     nested_prefetch: bool = False,
     already_fetched: frozenset[DiscoveryEntity] = frozenset(),
-) -> QuerySet:
+) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
     :param discovery_scope: Discovery scope for the queryset we're filtering.
@@ -163,10 +163,17 @@ async def discovery_filter_queryset(
     # TODO: explain this:
 
     # TODO: determine if we need to do this
+    # TODO: refactor to get this from the field normalizing code (so it can give us the "path" of queried entities...)
+    if queryset_model_name in ("individual", "phenopacket") and "experiment_result" in queried_entities:
+        queried_entities.add("experiment")
+        # may trigger the next if-statement right below
     if queryset_model_name in ("individual", "phenopacket") and "experiment" in queried_entities:
         queried_entities.add("biosample")
+        # may trigger the next if-statement right below
     if queryset_model_name == "individual" and "biosample" in queried_entities:
         queried_entities.add("phenopacket")
+    if queryset_model_name == "biosample" and "experiment_result" in queried_entities:
+        queried_entities.add("experiment")
 
     if (  # not nested_prefetch and
         nested_queried_entities := tuple(
@@ -191,7 +198,7 @@ async def discovery_filter_queryset(
             filtered_prefetches.append(
                 Prefetch(
                     resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
-                    queryset=await discovery_filter_queryset(
+                    queryset=(await discovery_filter_queryset(
                         discovery_scope,
                         query,
                         e,
@@ -200,7 +207,7 @@ async def discovery_filter_queryset(
                         lg,
                         nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
                         already_fetched=already_fetched | {queryset_model_name},  # TODO: check this logic
-                    ),
+                    ))[0],
                     to_attr=f"{e}_matches",
                 )
             )
@@ -220,4 +227,4 @@ async def discovery_filter_queryset(
                 }
             )
 
-    return f_queryset
+    return f_queryset, frozenset(queried_entities)
