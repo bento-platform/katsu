@@ -1,4 +1,5 @@
 import asyncio
+import math
 
 from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
@@ -378,18 +379,32 @@ async def discovery_matches(request: DrfRequest):
 
     # -- Pagination ----------------------------------------------------------------------------------------------------
 
-    page: int = int(request.query_params.get("_page", "0"))
-    page_size = int(request.query_params.get("_page_size", "10"))  # if page_size is set to 0,
+    page: int = 0
+    page_size: int = 10
+
+    try:
+        page: int = int(request.query_params.get("_page", str(page)))
+    except ValueError:
+        return bad_request(request, "bad page")
+
+    try:
+        # if page_size is set to 0, all records will be returned:
+        page_size = max(int(request.query_params.get("_page_size", str(page_size))), 0)
+    except ValueError:
+        return bad_request(request, "bad page size")
+
     total_count = await queryset.acount()
 
-    if page_size > 0:
-        matches_page = queryset[page * page_size:(page + 1) * page_size]
-    else:
-        matches_page = queryset[:]
+    if page < 0 or page >= math.ceil(total_count / page_size):
+        return bad_request(request, "bad page")
 
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
-
     lg = lg.bind(pagination=pagination.model_dump(mode="json"))
+
+    if page_size > 0:
+        matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
+    else:
+        matches_page = queryset[:]
 
     # -- Log discovery match page fetch event --------------------------------------------------------------------------
 
