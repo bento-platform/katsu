@@ -342,6 +342,25 @@ async def discovery_endpoint(request: DrfRequest):
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
 async def discovery_matches(request: DrfRequest):
+    """
+    Returns a paginated result-set of entity matches for a discovery query. For a given query, this endpoint can return
+    different entities at the top-level using the _entity parameter.
+
+    Query parameters:
+      /^[^_].*$/: Discovery field filters, like discovery_endpoint above
+      _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
+      _page:      Page number, 0-indexed integer; defaults to 0
+      _page_size: Page size; defaults to 25
+      project:    Discovery scope - project ID (if not set, the global scope is used)
+      dataset:    Discovery scope - dataset ID (if not set, the project or global scope is used)
+
+    Note on query parameter names:
+      - build_and_execute_discovery_query calls build_discovery_query_from_request, which grabs every query parameter
+        except "project", "dataset", and those starting with "_" and tries to find fields to query. By separating the
+        namespace for discovery filter query parameters from "other" query parameters by prefixing other query
+        parameters with _, we eliminate possible ambiguities between discovery fields and these query parameters.
+    """
+
     # TODO: DEDUPLICATE
 
     # Get the request discovery scope, which we'll use to narrow down the project/dataset for discovery
