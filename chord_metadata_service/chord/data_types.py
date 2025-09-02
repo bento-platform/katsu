@@ -12,6 +12,8 @@ __all__ = [
 ]
 
 
+# Define a new type wrapper used only for Katsu "data types" (phenopacket/experiment). The goal here is to make
+# functions which take in these values as a parameter more explicit in their type signatures.
 KatsuDataType = NewType("KatsuDataType", str)
 
 DATA_TYPE_EXPERIMENT = KatsuDataType("experiment")
