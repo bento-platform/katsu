@@ -4,13 +4,17 @@ from urllib.parse import urljoin
 
 
 __all__ = [
+    "DEFAULT_PAGE_SIZE",
     "LargeResultsSetPagination",
     "BatchResultsSetPagination",
 ]
 
 
+DEFAULT_PAGE_SIZE: int = 25
+
+
 class LargeResultsSetPagination(pagination.PageNumberPagination):
-    page_size = 25
+    page_size = DEFAULT_PAGE_SIZE
     page_size_query_param = 'page_size'
     max_page_size = 10000
 

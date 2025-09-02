@@ -20,6 +20,7 @@ from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
+from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE
 from chord_metadata_service.restapi.responses import bad_request, not_found
 
 from . import responses as dres
@@ -385,7 +386,7 @@ async def discovery_matches(request: DrfRequest):
     # -- Pagination ----------------------------------------------------------------------------------------------------
 
     page: int = 0
-    page_size: int = 10
+    page_size: int = DEFAULT_PAGE_SIZE
 
     try:
         page: int = int(request.query_params.get("_page", str(page)))
