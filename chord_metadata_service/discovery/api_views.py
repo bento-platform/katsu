@@ -2,7 +2,6 @@ import asyncio
 
 from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
-from bento_lib.responses import errors
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -75,7 +74,7 @@ async def discovery_search_fields(request: DrfRequest):
     try:
         scope: ValidatedDiscoveryScope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+        return not_found(request, e.message)
 
     if empty_discovery(scope):
         return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
@@ -212,7 +211,7 @@ async def discovery_endpoint(request: DrfRequest):
     try:
         scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+        return not_found(request, e.message)
 
     lg = logger.bind(scope_repr=repr(scope))
 
@@ -240,7 +239,9 @@ async def discovery_endpoint(request: DrfRequest):
     queryset_model_name: DiscoveryEntity = "phenopacket"
 
     try:
-        query, queryset = await build_and_execute_discovery_query(request, scope, dt_permissions, queryset_model_name)
+        query, queryset, queried_entities = await build_and_execute_discovery_query(
+            request, scope, dt_permissions, queryset_model_name
+        )
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
@@ -343,8 +344,7 @@ async def discovery_matches(request: DrfRequest):
     try:
         scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        authz_middleware.mark_authz_done(request)
-        return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
+        return not_found(e.message)
 
     lg = logger.bind(scope_repr=repr(scope))
 
@@ -363,7 +363,7 @@ async def discovery_matches(request: DrfRequest):
 
     queried_entity: DiscoveryEntity = request.query_params.get("_entity", "phenopacket")
     if queried_entity not in DISCOVERY_ENTITIES:
-        return Response(errors.bad_request_error("invalid entity"), status=status.HTTP_400_BAD_REQUEST)
+        return bad_request(request, "invalid entity")
 
     try:
         query, queryset = await build_and_execute_discovery_query(request, scope, dt_permissions, queried_entity)
@@ -453,7 +453,7 @@ async def public_rules(request: DrfRequest):
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return Response(e.message, status=status.HTTP_404_NOT_FOUND)
+        return not_found(e.message)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 

@@ -1,4 +1,3 @@
-from bento_lib.responses import errors
 from django.core.exceptions import ValidationError
 from rest_framework import status
 from rest_framework.request import Request
@@ -8,6 +7,7 @@ from structlog.stdlib import BoundLogger
 #  from typing import LiteralString
 
 from chord_metadata_service.authz.middleware import authz_middleware
+from chord_metadata_service.restapi.responses import bad_request
 
 __all__ = [
     "INSUFFICIENT_DATA_AVAILABLE_MSG",
@@ -17,6 +17,7 @@ __all__ = [
     "NO_PUBLIC_DATA_AVAILABLE",
     "no_public_data",
     "NO_PUBLIC_FIELDS_CONFIGURED",
+    "django_validation_error",
 ]
 
 # Public response when there is no enough data that passes the project-custom threshold
@@ -49,7 +50,4 @@ async def django_validation_error(
     request: Request, e: ValidationError, logger: BoundLogger, logger_event: str  # TODO: py3.11: LiteralString
 ):
     await logger.ainfo(logger_event, exc=e)
-    authz_middleware.mark_authz_done(request)
-    return Response(errors.bad_request_error(
-        *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-    ), status=status.HTTP_400_BAD_REQUEST)
+    return bad_request(request, *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()))
