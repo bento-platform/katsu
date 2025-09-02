@@ -20,9 +20,10 @@ from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
+from chord_metadata_service.restapi.responses import bad_request, not_found
 
 from . import responses as dres
-from .censorship import get_rules, get_threshold
+from .censorship import get_rules, get_threshold, thresholded_count
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
@@ -408,31 +409,36 @@ async def discovery_matches(request: DrfRequest):
     )
 
 
-# TODO: finish this implementation for Bento v20+
-# @api_view(["GET"])
-# @permission_classes([BentoAllowAny])
-# async def discovery_ui_hints(request: DrfRequest):
-#     try:
-#         scope = await get_request_discovery_scope(request)
-#     except DiscoveryScopeException as e:
-#         return Response(errors.not_found_error(e.message), status=status.HTTP_404_NOT_FOUND)
-#
-#     queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity
-#     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
-#
-#     counts = await discovery_queryset_entity_counts(queryset=queryset)
-#
-#     dt_permissions = await get_discovery_data_type_permissions(request, scope)
-#
-#     return {
-#         "entities_with_data": [
-#             e for e, v in counts.items()
-#             if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
-#         ],
-#         # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
-#         #  should present a consolidated map view?
-#         "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
-#     }
+# TODO: extend this implementation for Bento v20+
+@api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def discovery_ui_hints(request: DrfRequest):
+    try:
+        scope = await get_request_discovery_scope(request)
+    except DiscoveryScopeException as e:
+        return not_found(e.message)
+
+    queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity
+    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
+
+    counts = await discovery_queryset_entity_counts(queryset=queryset)
+
+    dt_permissions = await get_discovery_data_type_permissions(request, scope)
+
+    return {
+        # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
+        # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
+        # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
+        # search, but we don't want them
+        "entities_with_data": [
+            e for e, v in counts.items()
+            if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
+        ],
+        # TODO: implement something like this for hinting towards maps
+        # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
+        #  should present a consolidated map view?
+        # "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
+    }
 
 
 @api_view(["GET"])
