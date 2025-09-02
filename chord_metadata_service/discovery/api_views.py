@@ -453,12 +453,21 @@ async def discovery_matches(request: DrfRequest):
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def discovery_ui_hints(request: DrfRequest):
+    """
+    Endpoint for returning miscellaneous UI hints for any front-end which consumes the various discovery endpoints.
+    For example:
+     - indications of which elements should be hidden in the front end, to avoid a bunch of ugly disabled elements for
+       projects/datasets which don't have any intention of ingesting, e.g., experiment data or geographical data.
+     - indications of the presence of certain types of data, e.g1., geographical data, to encourage API consumers to
+       render a certain element (e.g., a map).
+    """
+
     try:
         scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
         return not_found(e.message)
 
-    queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity
+    queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity?
     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
 
     counts = await discovery_queryset_entity_counts(queryset=queryset)
@@ -484,12 +493,21 @@ async def discovery_ui_hints(request: DrfRequest):
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def discovery_schema(_request: DrfRequest):
+    """
+    Endpoint for the discovery configuration schema, derived from the DiscoveryConfig Pydantic model with an ID injected
+    into it (see schemas.py).
+    """
     return Response(DISCOVERY_SCHEMA)
 
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
 async def public_rules(request: DrfRequest):
+    """
+    Endpoint for censorship / display rules (count threshold, maximum query parameters).
+    Returns a serialization of the DiscoveryConfigRules object from bento_lib.discovery.models.config
+    """
+
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
