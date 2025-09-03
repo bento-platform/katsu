@@ -5,7 +5,7 @@ from typing import Mapping
 from chord_metadata_service.authz.types import DataPermissions
 
 from .censorship import thresholded_count
-from .fields_utils import get_jsonb_path_query
+from .fields_utils import get_jsonb_path_query, MAPPING_SEPARATOR
 from .pydantic_models import BinWithValue, BinList
 
 __all__ = [
@@ -110,12 +110,20 @@ async def queryset_stats_for_field(
     Computes counts of distinct values for a queryset.
     """
 
+    # to prevent a JSONB path query from conflicting with a potentially real key on the queryset, we cannot use just the
+    # field access path as a unique ID - we can include the group_by clause as well (and add a prefix) to prevent a
+    # collision, e.g.:
+    #  with mapping=individual/phenopackets/medical_actions, group_by=procedure/code/label, just using mapping (field)
+    #  as the unique key would collide with the real medical_actions field on phenopackets after we normalize mapping.
+    #  By instead using _jsonb_medical_actions_procedure_code_label as the annotation key, we have something unique.
+    queryset_key = f"_jsonb_{field}_{group_by.replace(MAPPING_SEPARATOR, '_')}" if group_by is not None else field
+
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
     if group_by is not None:
         queryset_values = queryset.values(
-            **{field: get_jsonb_path_query(field, group_by)},
+            **{queryset_key: get_jsonb_path_query(field, group_by)},
         )
     else:
         queryset_values = queryset.values(field)
@@ -126,7 +134,7 @@ async def queryset_stats_for_field(
     stats: dict[str, int] = {}
 
     async for item in annotated_queryset:
-        key = item[field]
+        key = item[queryset_key]
         if key is None:
             num_missing = item["total"]
             continue
