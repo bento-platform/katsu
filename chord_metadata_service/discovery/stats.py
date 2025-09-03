@@ -119,6 +119,7 @@ async def queryset_stats_for_field(
         )
     else:
         queryset_values = queryset.values(field)
+
     annotated_queryset = queryset_values.annotate(total=Count("*"))
     num_missing = 0
 
