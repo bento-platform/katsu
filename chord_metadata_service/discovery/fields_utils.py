@@ -94,32 +94,50 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             return "phenopackets", "subject", *field_path
         case ("experiment", "biosample"):  # also handles (experiment, phenopacket) via recursion below
             # experiment: old path, prior to related_name; experiments: after
-            if field_path[:1] in (("experiment",), ("experiments",)):  # use slice to handle field_path == ()
+            if field_path[:1] in (
+                ("experiment",),  # TODO: remove in future version
+                ("experiments",),
+            ):  # use slice to handle field_path == ()
                 return field_path[1:]
             return "biosample", *field_path
         case ("experiment", "phenopacket"):
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
-            if field_path[:2] in {("biosamples", "experiment"), ("biosamples", "experiments")}:
+            if field_path[:2] in {
+                ("biosamples", "experiment"),  # TODO: remove in future version
+                ("biosamples", "experiments"),
+            }:
                 return field_path[2:]
             return "biosample", "phenopackets", *field_path
         case ("experiment", "individual"):
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
             if field_path[:3] in {
-                ("phenopackets", "biosamples", "experiment"),
+                ("phenopackets", "biosamples", "experiment"),  # TODO: remove in future version
                 ("phenopackets", "biosamples", "experiments"),
             }:
                 return field_path[3:]
             return "biosample", "phenopackets", "subject", *field_path
         case ("experiment_result", "phenopacket"):
-            if field_path[:3] == ("biosamples", "experiments", "experiment_results"):
+            # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
+            if field_path[:3] in {
+                ("biosamples", "experiment", "experiment_results"),  # TODO: remove in future version
+                ("biosamples", "experiments", "experiment_results"),
+            }:
                 return field_path[3:]
             return "experiments", "biosample", "phenopackets", *field_path
         case ("experiment_result", "individual"):
-            if field_path[:4] == ("phenopackets", "biosamples", "experiments", "experiment_results"):
+            # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
+            if field_path[:4] in {
+                ("phenopackets", "biosamples", "experiment", "experiment_results"),  # TODO: remove in future version
+                ("phenopackets", "biosamples", "experiments", "experiment_results"),
+            }:
                 return field_path[4:]
             return "experiments", "biosample", "phenopackets", "subject", *field_path
         case ("experiment_result", "biosample"):
-            if field_path[:2] == ("experiments", "experiment_result"):
+            # experiment: old path, prior to related_name; experiments: after
+            if field_path[:2] in {
+                ("experiment", "experiment_result"),  # TODO: remove in future version
+                ("experiments", "experiment_result"),
+            }:
                 return field_path[2:]
             return "experiments", "biosample", *field_path
         case ("experiment_result", "experiment"):
@@ -161,7 +179,7 @@ def normalize_field_path_true_model(
             return normalize_field_path_true_model("individual", tuple(rest))
         case ("phenopacket", ("biosamples", *rest)):
             return normalize_field_path_true_model("biosample", tuple(rest))
-        case ("biosample", ("experiments", *rest)):
+        case ("biosample", ("experiment" | "experiments", *rest)):  # "experiment" is old name, "experiments" is new
             return normalize_field_path_true_model("experiment", tuple(rest))
         case ("experiment", ("experiment_results", *rest)):
             return normalize_field_path_true_model("experiment_result", tuple(rest))
