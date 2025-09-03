@@ -29,6 +29,7 @@ from .censorship import get_rules, get_threshold, thresholded_count
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
+from .fields_utils import resolve_filter_mapping_to_queryset_model
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
@@ -192,26 +193,23 @@ async def build_and_execute_discovery_query(
     return query, filtered_queryset, queried_entities
 
 
-async def discovery_queryset_entity_counts(queryset: QuerySet) -> dict[DiscoveryEntity, int]:
-    # TODO: do this in sql instead
-    # TODO: do this for different base entity types
-
+async def discovery_queryset_entity_counts(
+    queryset_model_name: DiscoveryEntity,
+    queryset: QuerySet,
+) -> dict[DiscoveryEntity, int]:
     counts: dict[DiscoveryEntity, int] = {
-        "phenopacket": await queryset.acount(),
-        "biosample": 0,
-        "experiment": 0,
-        "experiment_result": 0,
+        queryset_model_name: await queryset.acount(),
     }
 
-    individual_id_set: set[str] = set()
+    count_entities = set(filter(lambda ee: ee != queryset_model_name, DISCOVERY_ENTITIES))
 
-    async for p in queryset:
-        individual_id_set.add(p.subject_id)
-        counts["biosample"] += p.count_biosample
-        counts["experiment"] += p.count_experiment
-        counts["experiment_result"] += p.count_experiment_result
+    # for each entity "e" that isn't the root queryset entity, resolve the corresponding Django path from the queryset
+    # entity to "e" and count distinct non-null values, getting the count for all post-filter/prefetch "e".
+    for e in count_entities:
+        m = resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ())
+        counts[e] = await queryset.filter(**{f"{m}__isnull": False}).values(m).distinct().acount()
 
-    return {**counts, "individual": len(individual_id_set)}
+    return counts
 
 
 @api_view(["GET"])
@@ -296,7 +294,7 @@ async def discovery_endpoint(request: DrfRequest):
 
     # TODO: permissions non-hard-coded
     # TODO: do this in sql instead
-    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(queryset)
+    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(queryset_model_name, queryset)
 
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
@@ -486,7 +484,7 @@ async def discovery_ui_hints(request: DrfRequest):
     queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity?
     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
 
-    counts = await discovery_queryset_entity_counts(queryset=queryset)
+    counts = await discovery_queryset_entity_counts(queryset_model_name, queryset)
 
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
 

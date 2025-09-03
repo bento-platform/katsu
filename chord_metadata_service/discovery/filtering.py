@@ -7,7 +7,6 @@ from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
-from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryFilterRewriteException
 from .fields import get_field_options, filter_queryset_field_value
 from .fields_utils import resolve_filter_mapping_to_queryset_model
@@ -213,18 +212,5 @@ async def discovery_filter_queryset(
             )
 
         f_queryset = f_queryset.prefetch_related(*filtered_prefetches)
-
-    if not nested_prefetch:
-        # annotate with counts
-        # TODO: only sub-fields...?
-        for e in filter(lambda ee: ee != queryset_model_name, DISCOVERY_ENTITIES):
-            f_queryset = f_queryset.annotate(
-                **{
-                    f"count_{e}": Count(
-                        resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ()),
-                        distinct=True,
-                    )
-                }
-            )
 
     return f_queryset, frozenset(queried_entities)
