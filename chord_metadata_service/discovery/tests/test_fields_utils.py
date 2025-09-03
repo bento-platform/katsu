@@ -2,17 +2,14 @@ from bento_lib.discovery import NumberFieldDefinition, DiscoveryEntity
 from chord_metadata_service.phenopackets.models import Biosample
 from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
-from django.db.models.base import ModelBase
 
 from .constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_EXTRA_PROPERTIES
 from ..exceptions import DiscoveryFilterRewriteException
-from ..model_lookups import DISCOVERY_ENTITY_NAMES_TO_MODEL
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
     get_field_django_mapping_and_queried_entity,
     get_field_django_mapping,
-    get_public_model_name,
     labelled_range_generator,
     get_nested_json_condition,
     resolve_filter_mapping_to_queryset_model,
@@ -50,14 +47,6 @@ class TestModelField(TransactionTestCase):
     def test_get_wrong_model(self):
         with self.assertRaises(DiscoveryFilterRewriteException):
             get_field_django_mapping("junk", DISCOVERY_CONFIG_TEST.fields["age"])
-
-    def test_get_public_model_name(self):
-        for name, model in DISCOVERY_ENTITY_NAMES_TO_MODEL.items():
-            model_name = get_public_model_name(model)
-            self.assertEqual(name, model_name)
-
-    def test_get_public_model_name_wrong(self):
-        self.assertRaises(NotImplementedError, get_public_model_name, ModelBase)
 
 
 class TestLabelledRangeGenerator(TestCase):

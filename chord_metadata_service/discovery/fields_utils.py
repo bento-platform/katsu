@@ -3,11 +3,26 @@ from bento_lib.discovery import (
 )
 from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig
 from typing import Any, Iterator, Type, TypeAlias
-from django.db.models import Q, Func, BooleanField, F, Value, Model, JSONField
+from django.db.models import Q, Func, BooleanField, F, Value, JSONField
 
 from .exceptions import DiscoveryFilterRewriteException
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scopeable_model import BaseScopeableModel
+
+__all__ = [
+    "MAPPING_SEPARATOR",
+    "JSON_PATH_ACCESSOR",
+    "get_jsonb_path_query",
+    "resolve_filter_mapping_to_queryset_model",
+    "normalize_field_path_true_model",
+    "get_field_django_mapping_and_queried_entity",
+    "get_field_django_mapping",
+    "parse_individual_age",
+    "labelled_range_generator",
+    "monthly_generator",
+    "get_nested_json_condition",
+    "get_json_range_condition",
+]
 
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
@@ -222,13 +237,6 @@ def get_field_django_mapping(queryset_model_name: DiscoveryEntity, field_props: 
     Returns the Django string representation of the field for this object.
     """
     return get_field_django_mapping_and_queried_entity(queryset_model_name, field_props)[0]
-
-
-def get_public_model_name(model: Type[Model]) -> DiscoveryEntity:
-    model_name = [key for key, m in DISCOVERY_ENTITY_NAMES_TO_MODEL.items() if m == model]
-    if len(model_name) != 1:
-        raise NotImplementedError(f"Provided model {model} is not available for public.")
-    return model_name[0]
 
 
 def parse_duration(duration: str | dict):
