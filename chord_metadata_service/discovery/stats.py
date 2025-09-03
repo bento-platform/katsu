@@ -128,7 +128,9 @@ async def queryset_stats_for_field(
     else:
         queryset_values = queryset.values(field)
 
-    annotated_queryset = queryset_values.annotate(total=Count("*"))
+    # this empty order_by() clears any previous ordering set, which can interfere with annotations
+    #  - see https://docs.djangoproject.com/en/5.2/topics/db/aggregation/#interaction-with-order-by
+    annotated_queryset = queryset_values.annotate(total=Count(queryset_key)).order_by()
     num_missing = 0
 
     stats: dict[str, int] = {}
