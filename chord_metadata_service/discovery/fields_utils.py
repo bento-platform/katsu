@@ -175,6 +175,10 @@ def normalize_field_path_true_model(
         # We employ some recursion to progressively further normalize to a simpler form until we cannot anymore.
         case ("individual", ("phenopackets", *rest)):
             return normalize_field_path_true_model("phenopacket", tuple(rest))
+        case ("individual", ("biosamples", *rest)):
+            # NOTE: this is a non-standard access pattern, but still works as of the time of writing (2025-09-03)
+            # because of the way the Django relationships are set up.
+            return normalize_field_path_true_model("biosample", tuple(rest))
         case ("phenopacket", ("subject", *rest)):
             return normalize_field_path_true_model("individual", tuple(rest))
         case ("phenopacket", ("biosamples", *rest)):
