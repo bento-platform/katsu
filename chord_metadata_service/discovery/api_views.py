@@ -3,7 +3,7 @@ import math
 
 from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
-from django.core.exceptions import ValidationError
+from django.core.exceptions import FieldError, ValidationError
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
@@ -12,6 +12,7 @@ from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
+from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
@@ -130,27 +131,37 @@ async def discovery_field_response(
     queryset: QuerySet,
     field: str,
     field_perms: DataPermissions,
+    lg: BoundLogger,
 ) -> DiscoveryFieldResponse | None:
+    if not field_perms.counts:
+        # We cannot compute stats right now for boolean-level responses. Thus, if we do not have at least counts
+        # permissions, we return None and this presumably gets filtered out, resulting in this field response not
+        # being present in the discovery response. Then, it's up to the API consumer (e.g., the front end) to handle
+        # this with relative grace (not show a chart/search field, ...).
+        return None
+
+    lg = lg.bind(field=field)
+
     field_props = scope.discovery.fields[field]
 
     stats: BinList
 
-    if not field_perms.counts:
-        # We cannot compute stats right now for boolean-level responses. Thus, if we do not have at least counts
-        # permissions, we return None and this presumably gets filtered out, resulting in this field response not being
-        # present in the discovery response. Then, it's up to the API consumer (e.g., the front end) to handle this with
-        # relative grace (not show a chart/search field, ...).
+    try:
+        if field_props.datatype == "string":
+            stats = await get_categorical_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
+        elif field_props.datatype == "number":
+            stats = await get_range_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
+        elif field_props.datatype == "date":
+            stats = await get_date_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
+        else:  # pragma: no cover
+            # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
+            # validate the data_type value.
+            raise NotImplementedError()
+    except FieldError as e:
+        await lg.aexception("discovery_field_response field error", exc_info=e)
+        # We return None and this field presumably gets filtered out, with logs on the backend
+        # TODO: some type of field response error we can return to the front-end - a DiscoveryFieldResponse error prop?
         return None
-    if field_props.datatype == "string":
-        stats = await get_categorical_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
-    elif field_props.datatype == "number":
-        stats = await get_range_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
-    elif field_props.datatype == "date":
-        stats = await get_date_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
-    else:  # pragma: no cover
-        # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
-        # validate the data_type value.
-        raise NotImplementedError()
 
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
@@ -160,6 +171,7 @@ async def build_and_execute_discovery_query(
     discovery_scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset_model_name: DiscoveryEntity,
+    lg: BoundLogger,
 ) -> tuple[DiscoveryQuery, QuerySet, frozenset[DiscoveryEntity]]:
     # TODO: support free text search as well as filters query
 
@@ -174,7 +186,7 @@ async def build_and_execute_discovery_query(
         queryset_model_name,
         DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope),
         dt_permissions,
-        logger,
+        lg,
     )
 
     return query, filtered_queryset, queried_entities
@@ -244,7 +256,7 @@ async def discovery_endpoint(request: DrfRequest):
 
     try:
         query, queryset, queried_entities = await build_and_execute_discovery_query(
-            request, scope, dt_permissions, queryset_model_name
+            request, scope, dt_permissions, queryset_model_name, lg
         )
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
@@ -265,7 +277,7 @@ async def discovery_endpoint(request: DrfRequest):
             fields,
             await asyncio.gather(
                 *(
-                    discovery_field_response(scope, queryset_model_name, queryset, field, field_permissions[field])
+                    discovery_field_response(scope, queryset_model_name, queryset, field, field_permissions[field], lg)
                     for field in fields
                 )
             )
@@ -389,9 +401,11 @@ async def discovery_matches(request: DrfRequest):
     if queried_entity not in DISCOVERY_ENTITIES:
         return bad_request(request, "invalid entity")
 
+    lg = lg.bind(queried_entity=queried_entity)
+
     try:
         query, queryset, _queried_entities = await build_and_execute_discovery_query(
-            request, scope, dt_permissions, queried_entity
+            request, scope, dt_permissions, queried_entity, lg
         )
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
