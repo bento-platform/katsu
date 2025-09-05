@@ -4,7 +4,7 @@ import math
 from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Subquery
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
 from operator import is_not
@@ -31,6 +31,7 @@ from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .fields_utils import resolve_filter_mapping_to_queryset_model
 from .filtering import build_discovery_query_from_request, discovery_filter_queryset
+from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import (
@@ -174,9 +175,13 @@ async def build_and_execute_discovery_query(
     queryset_model_name: DiscoveryEntity,
     lg: BoundLogger,
 ) -> tuple[DiscoveryQuery, QuerySet, frozenset[DiscoveryEntity]]:
-    # TODO: support free text search as well as filters query
-
+    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
     query = build_discovery_query_from_request(request)
+
+    if fts := request.query_params.get("_fts"):
+        queryset = queryset.filter(
+            id__in=Subquery(queryset.annotate(search=full_text_search_vector(queryset_model_name)).filter(search=fts).values("id"))
+        )
 
     # May raise:
     #  - DiscoveryEmptyException
@@ -185,7 +190,7 @@ async def build_and_execute_discovery_query(
         discovery_scope,
         query,
         queryset_model_name,
-        DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope),
+        queryset,
         dt_permissions,
         lg,
     )
