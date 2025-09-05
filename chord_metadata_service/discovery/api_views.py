@@ -179,9 +179,19 @@ async def build_and_execute_discovery_query(
     query = build_discovery_query_from_request(request)
 
     if fts := request.query_params.get("_fts"):
-        queryset = queryset.filter(
-            id__in=Subquery(queryset.annotate(search=full_text_search_vector(queryset_model_name)).filter(search=fts).values("id"))
+        ids = (
+            queryset
+            .annotate(search=full_text_search_vector(queryset_model_name))
+            .filter(search=fts)
+            .values_list("id")
         )
+        ids_list = []
+        async for rec in ids:
+            ids_list.append(rec)
+        # When this is done as a subquery, it destroys performance (perhaps fixable with a newer PG version than 13?)
+        #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or join?
+        #    it's unclear, but for now we just do this ugly thing instead.
+        queryset = queryset.filter(id__in=ids_list)
 
     # May raise:
     #  - DiscoveryEmptyException
