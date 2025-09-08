@@ -1,7 +1,7 @@
 from bento_lib.discovery import DiscoveryEntity
 from collections.abc import Iterable
 from django.core.exceptions import ValidationError
-from django.db.models import Count, Prefetch, QuerySet
+from django.db.models import Prefetch, QuerySet
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
