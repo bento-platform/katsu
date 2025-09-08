@@ -4,7 +4,7 @@ import math
 from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet, Subquery
+from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial
 from operator import is_not
