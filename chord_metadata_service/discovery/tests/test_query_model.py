@@ -14,14 +14,23 @@ class TestDiscoveryQueryModel(SimpleTestCase):
 
     def test_construction_from_request(self):
         dr = HttpRequest()
+        dr.method = "GET"
         dr.GET["_fts"] = "text"
         fts_q = DiscoveryQuery.from_drf_request(DrfRequest(dr))
         self.assertEqual(fts_q.fts, "text")
         self.assertDictEqual(fts_q.filters, {})
 
         dr = HttpRequest()
+        dr.method = "GET"
         dr.GET["sex"] = "MALE"
         dr.GET["age"] = "< 10"
         filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr))
         self.assertIsNone(filter_q.fts)
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
+
+    def test_construction_bad_method_raise(self):
+        with self.assertRaises(NotImplementedError):
+            dr = HttpRequest()
+            dr.GET["_fts"] = "text"
+            DiscoveryQuery.from_drf_request(DrfRequest(dr))
+            # Not implemented - method is not GET|POST

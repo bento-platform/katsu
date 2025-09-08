@@ -178,6 +178,9 @@ class DiscoveryQuery(BaseModel):
         DiscoveryQuery object.
         """
 
+        if request.method not in ("GET", "POST"):
+            raise NotImplementedError("from_drf_request implemented for GET|POST only")
+
         params = request.query_params if request.method == "GET" else request.data
 
         # Process query parameters and check validity
