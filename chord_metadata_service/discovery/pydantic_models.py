@@ -18,6 +18,7 @@ __all__ = [
     "MatchExperiment",
     "MatchBiosample",
     "MatchPhenopacket",
+    "MatchIndividual",
     "MatchObject",
     "DiscoveryMatches",
     "DiscoveryPagination",
@@ -101,8 +102,20 @@ class MatchPhenopacket(BaseMatchModel):
     b: list[MatchBiosample]
 
 
+class MatchIndividual(BaseMatchModel):
+    """
+    Compact representation of a subject for returning/rendering search responses.
+    """
+    id: str = Field(..., title="Subject ID")
+    p: list[MatchPhenopacket]
+
+
 MatchObject: TypeAlias = (
-    list[MatchPhenopacket] | list[MatchBiosample] | list[MatchExperiment] | list[MatchExperimentResult]
+    list[MatchPhenopacket] |
+    list[MatchIndividual] |
+    list[MatchBiosample] |
+    list[MatchExperiment] |
+    list[MatchExperimentResult]
 )
 
 

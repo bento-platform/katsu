@@ -5,9 +5,10 @@ from typing import Callable, TypeVar, TypedDict, Awaitable
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as em
+from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 
-from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket
+from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket, MatchIndividual
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
@@ -15,6 +16,7 @@ __all__ = [
     "experiment_matches",
     "biosample_matches",
     "phenopacket_matches",
+    "individual_matches",
     "DISCOVERY_ENTITY_TO_MATCH_FN",
 ]
 
@@ -30,6 +32,7 @@ async def list_or_manager_to_list(x: list[T] | Manager) -> list[T]:
 
 
 class MatchContext(TypedDict, total=False):
+    individual: str | None
     phenopacket: str | None
     biosample: str | None
     experiment: str | None
@@ -146,7 +149,52 @@ async def phenopacket_matches(
                 id=phe_id,
                 s=s_id or None,
                 b=biosamples,
-                **(dict(pr=scope.project_id, ds=scope.dataset_id or str(phe.dataset_id)) if root else dict()),
+                **(
+                    dict(
+                        pr=scope.project_id or phe.dataset.project_id,
+                        ds=scope.dataset_id or str(phe.dataset_id),
+                    ) if root else dict()
+                ),
+            )
+        )
+
+    return res
+
+
+async def individual_matches(
+    mrm: list[Individual] | Manager,
+    scope: ValidatedDiscoveryScope,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    root: bool,
+    ctx: MatchContext,
+) -> list[MatchIndividual]:
+    res: list[MatchIndividual] = []
+
+    for ind in await list_or_manager_to_list(mrm):
+        ind_id = str(ind.id)
+        # TODO: prefetch all the time, even when not filtering.
+        # TODO: return both all phenopackets and matching phenopackets?
+        phenopackets = await phenopacket_matches(
+            getattr(ind, "phenopacket_matches", ind.phenopackets),
+            scope,
+            dt_permissions,
+            False,
+            {**ctx, "individual": ind_id},
+        )
+
+        first_phenopacket = await ind.phenopackets.prefetch_related("dataset").afirst()
+
+        res.append(
+            MatchIndividual(
+                id=ind_id,
+                p=phenopackets,
+                **(
+                    dict(
+                        # TODO: put this on Individual itself, i.e., link individual with project/dataset?
+                        pr=scope.project_id or str(first_phenopacket.dataset.project_id),
+                        ds=scope.dataset_id or str(first_phenopacket.dataset_id),
+                    ) if root else dict()
+                ),
             )
         )
 
@@ -161,7 +209,7 @@ DISCOVERY_ENTITY_TO_MATCH_FN: dict[
     ]
 ] = {
     "phenopacket": phenopacket_matches,
-    "individual": phenopacket_matches,  # TODO
+    "individual": individual_matches,
     "biosample": biosample_matches,
     "experiment": experiment_matches,
     "experiment_result": experiment_result_matches,
