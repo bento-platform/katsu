@@ -2,7 +2,6 @@ from bento_lib.discovery import DiscoveryEntity
 from collections.abc import Iterable
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Prefetch, QuerySet
-from rest_framework.request import Request as DrfRequest
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
@@ -16,7 +15,6 @@ from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
 
 __all__ = [
-    "build_discovery_query_from_request",
     "discovery_filter_queryset",
 ]
 
@@ -61,21 +59,6 @@ async def validate_field_query_value(
         raise ValidationError(f"Invalid value used in query: {value} ({repr(scope)})")
 
 
-def build_discovery_query_from_request(request: DrfRequest) -> DiscoveryQuery:
-    if request.method == "POST":
-        return DiscoveryQuery.model_validate(request.data)
-
-    # Process query parameters and check validity
-    return DiscoveryQuery.model_validate({
-        k: v[0] if isinstance(v, list) else v
-        for k, v in request.query_params.items()
-        if k and k not in ("project", "dataset") and k[0] != "_"
-        # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
-        #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
-        # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
-    })
-
-
 async def discovery_filter_queryset(
     discovery_scope: ValidatedDiscoveryScope,
     query: DiscoveryQuery,
@@ -112,7 +95,7 @@ async def discovery_filter_queryset(
 
     searchable_fields = set(discovery.get_searchable_field_ids())
 
-    queried_fields = query.queried_fields()  # fields for determining field permissions
+    queried_fields = query.queried_filter_fields()  # fields for determining field permissions
     overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
 
     # TODO: in the future, scope repr passing to exceptions should be structured data:
@@ -121,7 +104,7 @@ async def discovery_filter_queryset(
     f_queryset = queryset
 
     # right now, a user cannot be filtering based on more than one value for the same field
-    if (n_queried := len(query)) > get_max_query_parameters(discovery, overall_permissions):
+    if (n_queried := len(query.filters)) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
     if not overall_permissions.bool_:
@@ -130,7 +113,7 @@ async def discovery_filter_queryset(
     queried_entities: set[DiscoveryEntity] = set()
     field_queried_entities: dict[str, DiscoveryEntity] = {}
 
-    for field, value in query.items():
+    for field, value in query.filters.items():
         if field not in searchable_fields:
             raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 

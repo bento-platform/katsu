@@ -2,6 +2,7 @@ import abc
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
 from pydantic import BaseModel, Field, RootModel
+from rest_framework.request import Request as DrfRequest
 from typing import TypeAlias
 
 from .types import ModelCountOrBoolResponse
@@ -145,22 +146,35 @@ class DiscoverySearchFieldsResponse(BaseModel):
     sections: list[DiscoverySearchSectionWithOptions]
 
 
-class DiscoveryQuery(RootModel):
+class DiscoveryQuery(BaseModel):
     """
     Model for discovery filtering queries. Right now, this is just a dictionary of {discovery field ID: value} extracted
     from query parameters minus project/dataset, but this could be extended in the future.
     """
 
-    root: dict[str, str]
+    fts: str | None
+    filters: dict[str, str]
 
-    def __iter__(self):
-        return iter(self.root)
+    def queried_filter_fields(self) -> list[str]:
+        return list(self.filters.keys())
 
-    def __len__(self) -> int:
-        return len(self.root)
+    @classmethod
+    def from_drf_request(cls, request: DrfRequest) -> "DiscoveryQuery":
+        """
+        Given a Django REST Framework request object from a discovery/discovery-matches request, return a validated
+        DiscoveryQuery object.
+        """
 
-    def items(self):
-        return self.root.items()
+        params = request.query_params if request.method == "GET" else request.data
 
-    def queried_fields(self) -> list[str]:
-        return list(self.root.keys())
+        # Process query parameters and check validity
+        filters: dict[str, str] = {
+            k: v[0] if isinstance(v, list) else v
+            for k, v in params.items()
+            if k and k not in ("project", "dataset") and k[0] != "_"
+            # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and
+            #   the response yields an error, as they are (presumably) not queryable fields in the discovery config.
+            # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
+        }
+
+        return cls(fts=params.get("_fts") or None, filters=filters)
