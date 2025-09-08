@@ -30,7 +30,7 @@ from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .fields_utils import resolve_filter_mapping_to_queryset_model
-from .filtering import build_discovery_query_from_request, discovery_filter_queryset
+from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
@@ -176,18 +176,18 @@ async def build_and_execute_discovery_query(
     lg: BoundLogger,
 ) -> tuple[DiscoveryQuery, QuerySet, frozenset[DiscoveryEntity]]:
     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
-    query = build_discovery_query_from_request(request)
+    query = DiscoveryQuery.from_drf_request(request)
 
-    if fts := request.query_params.get("_fts"):
+    if fts := query.fts:
         ids = (
             queryset
             .annotate(search=full_text_search_vector(queryset_model_name))
             .filter(search=fts)
-            .values_list("id")
+            .values_list("id", flat=True)
         )
         ids_list = []
-        async for rec in ids:
-            ids_list.append(rec)
+        async for id_ in ids:
+            ids_list.append(id_)
         # When this is done as a subquery, it destroys performance (perhaps fixable with a newer PG version than 13?)
         #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or join?
         #    it's unclear, but for now we just do this ugly thing instead.
