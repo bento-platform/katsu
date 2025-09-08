@@ -208,9 +208,19 @@ async def build_and_execute_discovery_query(
     return query, filtered_queryset, queried_entities
 
 
+async def non_null_set_length(qs: QuerySet) -> int:
+    # Count distinct using a set which excludes null values
+    e_set = set()
+    async for val in qs:
+        if val is not None:
+            e_set.add(val)
+    return len(e_set)
+
+
 async def discovery_queryset_entity_counts(
     queryset_model_name: DiscoveryEntity,
     queryset: QuerySet,
+    lg: BoundLogger,
 ) -> dict[DiscoveryEntity, int]:
     counts: dict[DiscoveryEntity, int] = {
         queryset_model_name: await queryset.acount(),
@@ -221,8 +231,19 @@ async def discovery_queryset_entity_counts(
     # for each entity "e" that isn't the root queryset entity, resolve the corresponding Django path from the queryset
     # entity to "e" and count distinct non-null values, getting the count for all post-filter/prefetch "e".
     for e in count_entities:
-        m = resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ())
-        counts[e] = await queryset.filter(**{f"{m}__isnull": False}).values(m).distinct().acount()
+        try:
+            m = f"{e}_matches"
+            qs = queryset.values_list(m, flat=True)
+            e_count = await non_null_set_length(qs)
+        except FieldError:  # no {e}_matches annotation, use whole related manager/foreign key
+            m = resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ())
+            # tried to figure out how to filter out null related manager/foreign key values reliably, but I couldn't
+            # figure it out, so we instead get all values and count them (without None) in Python - David L 2025-09-08
+            qs = queryset.values_list(m, flat=True)
+            e_count = await non_null_set_length(qs)
+
+        await lg.adebug("counted entity from queried entity mapping", entity=e, mapping=m, count=e_count)
+        counts[e] = e_count
 
     return counts
 
@@ -309,7 +330,7 @@ async def discovery_endpoint(request: DrfRequest):
 
     # TODO: permissions non-hard-coded
     # TODO: do this in sql instead
-    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(queryset_model_name, queryset)
+    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(queryset_model_name, queryset, lg)
 
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
