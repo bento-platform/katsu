@@ -449,7 +449,7 @@ async def discovery_matches(request: DrfRequest):
 
     total_count = await queryset.acount()
 
-    if page < 0 or page >= math.ceil(total_count / page_size):
+    if page < 0 or (page_size and page >= math.ceil(total_count / page_size)):
         return bad_request(request, "bad page")
 
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
@@ -494,7 +494,7 @@ async def discovery_ui_hints(request: DrfRequest):
     try:
         scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return not_found(e.message)
+        return not_found(request, e.message)
 
     queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity?
     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
@@ -540,7 +540,7 @@ async def discovery_rules(request: DrfRequest):
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return not_found(e.message)
+        return not_found(request, e.message)
 
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
