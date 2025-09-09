@@ -470,7 +470,7 @@ async def discovery_matches(request: DrfRequest):
 
     total_count = await queryset.acount()
 
-    if page < 0 or (page_size and page >= math.ceil(total_count / page_size)):
+    if page < 0 or (page_size and total_count and page >= math.ceil(total_count / page_size)):
         return bad_request(request, "bad page")
 
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
