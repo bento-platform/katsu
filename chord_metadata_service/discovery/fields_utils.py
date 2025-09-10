@@ -3,7 +3,7 @@ from bento_lib.discovery import (
 )
 from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig
 from typing import Any, Iterator, Type, TypeAlias
-from django.db.models import Q, Func, BooleanField, F, Value, JSONField
+from django.db.models import Q, Func, BooleanField, F, Value, JSONField, QuerySet, ForeignKey, ManyToManyField
 
 from .exceptions import DiscoveryFilterRewriteException
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_MODEL
@@ -164,6 +164,9 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             raise exc
 
 
+field_path_to_django_mapping = "__".join
+
+
 def resolve_filter_mapping_to_queryset_model(
     queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> str:
@@ -174,7 +177,9 @@ def resolve_filter_mapping_to_queryset_model(
                     The "hard-coded" data model here is equivalent of the old "linked field set" concept, which was very
                     over-generalized.
     """
-    return "__".join(_resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, field_model_name, field_path))
+    return field_path_to_django_mapping(
+        _resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, field_model_name, field_path)
+    )
 
 
 def normalize_field_path_true_model(
@@ -208,13 +213,14 @@ def normalize_field_path_true_model(
 
 def get_field_django_mapping_and_queried_entity(
     queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition
-) -> tuple[str, DiscoveryEntity]:
+) -> tuple[str, tuple[QuerySet, str, str, str] | None, DiscoveryEntity]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
     are the field with their possible joins through tables relations.
     Returns a tuple of (
         the Django string representation of the field for this object relative to the queryset entity,
+        TODO,
         the queried entity name,
     )
     """
@@ -226,7 +232,27 @@ def get_field_django_mapping_and_queried_entity(
         msg = f"Accessing field on model {entity_name} not implemented"
         raise NotImplementedError(msg)
 
-    return resolve_filter_mapping_to_queryset_model(queryset_model_name, entity_name, field_path), entity_name
+    resolved_field_path = _resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, entity_name, field_path)
+
+    subquery: tuple[QuerySet, str, str, str] | None = None
+
+    if field_path:
+        queryset_model = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name]
+        field_obj = queryset_model._meta.get_field(resolved_field_path[0])
+        # TODO: explain subquery magic
+        if not isinstance(field_obj, ForeignKey) and not isinstance(field_obj, JSONField):
+            if isinstance(field_obj, ManyToManyField):
+                rel = field_obj.remote_field.accessor_name
+            else:
+                rel = field_obj.field.name
+            subquery = (
+                field_obj.related_model.objects.all(),
+                field_path_to_django_mapping(resolved_field_path[:1]),
+                field_path_to_django_mapping(resolved_field_path[1:]),
+                rel,
+            )
+
+    return field_path_to_django_mapping(resolved_field_path), subquery, entity_name
 
 
 def get_field_django_mapping(queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition) -> str:

@@ -129,7 +129,7 @@ async def discovery_filter_queryset(
             # Update queryset to include the Django ORM filter for this query field/value
             #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
             #    queryset model
-            f_queryset, queried_entity = filter_queryset_field_value(
+            f_queryset, queried_entity = await filter_queryset_field_value(
                 queryset_model_name, f_queryset, discovery.fields[field], value, lg
             )
 

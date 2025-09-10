@@ -7,7 +7,7 @@ from calendar import month_abbr
 from collections import Counter, defaultdict
 
 from chord_metadata_service.discovery.censorship import get_threshold
-from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
+from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q, Exists, OuterRef
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
 from typing import Any, Mapping
@@ -369,7 +369,7 @@ async def get_date_stats(
     return bins
 
 
-def filter_queryset_field_value(
+async def filter_queryset_field_value(
     queryset_model_name: DiscoveryEntity, qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger
 ) -> tuple[QuerySet, DiscoveryEntity]:
     """
@@ -384,7 +384,9 @@ def filter_queryset_field_value(
 
     # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
     #   model
-    field, queried_entity = f_utils.get_field_django_mapping_and_queried_entity(queryset_model_name, field_props)
+    field, subquery, queried_entity = f_utils.get_field_django_mapping_and_queried_entity(
+        queryset_model_name, field_props
+    )
 
     # TODO: resolve schema including extra properties
 
@@ -394,7 +396,12 @@ def filter_queryset_field_value(
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
-            condition = Q(**{f"{field}__iexact": value})
+            if subquery:
+                # TODO: explain subquery magic
+                condition = Q(Exists(subquery[0].filter(**{subquery[3]: OuterRef("pk"), f"{subquery[2]}__iexact": value})))
+            else:
+                condition = Q(**{f"{field}__iexact": value})
+
     elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
@@ -408,6 +415,7 @@ def filter_queryset_field_value(
                     f"{field}__gte": start,
                     f"{field}__lt": end
                 })
+                # TODO: subquery
         else:
             [sym, val] = value.split(" ")
             if sym == "≥":
@@ -417,6 +425,7 @@ def filter_queryset_field_value(
                     condition = json_range_condition
                 else:
                     condition = Q(**{f"{field}__gte": int(val)})
+                    # TODO: subquery
             elif sym == "<":
                 if json_range_condition := f_utils.get_json_range_condition(
                     queryset_model_name, field_props, max=int(val)
@@ -424,6 +433,7 @@ def filter_queryset_field_value(
                     condition = json_range_condition
                 else:
                     condition = Q(**{f"{field}__lt": int(val)})
+                    # TODO: subquery
             else:
                 raise NotImplementedError()
     elif field_props.datatype == "date":
@@ -436,6 +446,8 @@ def filter_queryset_field_value(
         # values of `datatype` to the cases above.
         raise NotImplementedError()
 
-    logger.debug("filtering entity field with condition", entity=queried_entity, field=field, condition=condition)
+    await logger.adebug(
+        "filtering entity field with condition", entity=queried_entity, field=field, subquery=subquery, condition=condition
+    )
 
     return qs.filter(condition), queried_entity

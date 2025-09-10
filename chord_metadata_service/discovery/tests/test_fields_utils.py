@@ -20,7 +20,7 @@ from ..fields_utils import (
 class TestModelField(TransactionTestCase):
 
     def test_get_model_field_basic(self):
-        field, queried_entity = get_field_django_mapping_and_queried_entity(
+        field, _, queried_entity = get_field_django_mapping_and_queried_entity(
             "phenopacket", DISCOVERY_CONFIG_TEST.fields["age"]
         )
         self.assertEqual(field, "subject__age_numeric")
