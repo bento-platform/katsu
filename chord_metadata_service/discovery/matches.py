@@ -52,12 +52,12 @@ async def experiment_result_matches(
         res.append(
             MatchExperimentResult(
                 id=er.id,
-                f=er.filename,
+                filename=er.filename,
                 url=er.url,
-                idx=er.indices,
-                ff=er.file_format,
-                g=er.genome_assembly_id,
-                **(dict(pr=scope.project_id, ds=scope.dataset_id) if root else dict()),
+                indices=er.indices,
+                file_format=er.file_format,
+                assembly_id=er.genome_assembly_id,
+                **(dict(project=scope.project_id, dataset=scope.dataset_id) if root else dict()),
             )
         )
     return res
@@ -76,10 +76,10 @@ async def experiment_matches(
         res.append(
             MatchExperiment(
                 id=str(exp.id),
-                r=await experiment_result_matches(
+                results=await experiment_result_matches(
                     exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
                 ),
-                **(dict(pr=scope.project_id, ds=scope.dataset_id) if root else dict()),
+                **(dict(project=scope.project_id, dataset=scope.dataset_id) if root else dict()),
             )
         )
     return res
@@ -103,8 +103,8 @@ async def biosample_matches(
         res.append(
             MatchBiosample(
                 id=str(b.id),
-                p=p,
-                e=(
+                phenopacket=p,
+                experiments=(
                     # TODO: prefetch all the time, even when not filtering?
                     (
                         await experiment_matches(
@@ -117,7 +117,7 @@ async def biosample_matches(
                     )
                     if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
                 ),
-                **(dict(pr=scope.project_id, ds=ds) if root else dict()),
+                **(dict(project=scope.project_id, dataset=ds) if root else dict()),
             )
         )
     return res
@@ -147,12 +147,12 @@ async def phenopacket_matches(
         res.append(
             MatchPhenopacket(
                 id=phe_id,
-                s=s_id or None,
-                b=biosamples,
+                subject=s_id or None,
+                biosamples=biosamples,
                 **(
                     dict(
-                        pr=scope.project_id or phe.dataset.project_id,
-                        ds=scope.dataset_id or str(phe.dataset_id),
+                        project=scope.project_id or phe.dataset.project_id,
+                        dataset=scope.dataset_id or str(phe.dataset_id),
                     ) if root else dict()
                 ),
             )
@@ -187,12 +187,12 @@ async def individual_matches(
         res.append(
             MatchIndividual(
                 id=ind_id,
-                p=phenopackets,
+                phenopackets=phenopackets,
                 **(
                     dict(
                         # TODO: put this on Individual itself, i.e., link individual with project/dataset?
-                        pr=scope.project_id or str(first_phenopacket.dataset.project_id),
-                        ds=scope.dataset_id or str(first_phenopacket.dataset_id),
+                        project=scope.project_id or str(first_phenopacket.dataset.project_id),
+                        dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
                     ) if root else dict()
                 ),
             )

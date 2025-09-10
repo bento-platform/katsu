@@ -62,18 +62,19 @@ class DiscoveryFieldResponses(RootModel):
 
 
 class BaseMatchModel(BaseModel, abc.ABC):
-    pr: str | None = Field(default=None, title="Project ID")
-    ds: str | None = Field(default=None, title="Dataset ID")
+    project: str | None = Field(default=None, title="Project ID")
+    dataset: str | None = Field(default=None, title="Dataset ID")
 
 
 class MatchExperimentResult(BaseMatchModel):
     id: int = Field(..., title="Experiment result ID")
-    f: str | None = Field(..., title="File name")
+    # TODO: experiments backlink
+    filename: str | None = Field(..., title="File name")
     url: str | None = Field(..., title="URL")
     # list of experiment_result_file_index objects (see experiments/schemas.py)
-    idx: list[dict] = Field(..., title="Indices")
-    ff: str | None = Field(..., title="File format")
-    g: str | None = Field(..., title="Genome assembly ID")
+    indices: list[dict] = Field(..., title="Indices")
+    file_format: str | None = Field(..., title="File format")
+    assembly_id: str | None = Field(..., title="Genome assembly ID")
 
 
 class MatchExperiment(BaseMatchModel):
@@ -81,7 +82,7 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
-    r: list[MatchExperimentResult]
+    results: list[MatchExperimentResult]
 
 
 class MatchBiosample(BaseMatchModel):
@@ -89,8 +90,8 @@ class MatchBiosample(BaseMatchModel):
     Compact representation of a biosample for returning/rendering search responses.
     """
     id: str = Field(..., title="Biosample ID")
-    p: str | None = Field(..., title="Phenopacket ID")
-    e: list[MatchExperiment] | None
+    phenopacket: str | None = Field(..., title="Phenopacket ID")
+    experiments: list[MatchExperiment] | None
 
 
 class MatchPhenopacket(BaseMatchModel):
@@ -98,8 +99,8 @@ class MatchPhenopacket(BaseMatchModel):
     Compact representation of a phenopacket for returning/rendering search responses.
     """
     id: str = Field(..., title="Phenopacket ID")
-    s: str | None = Field(..., title="Subject ID")
-    b: list[MatchBiosample]
+    subject: str | None = Field(..., title="Subject ID")
+    biosamples: list[MatchBiosample]
 
 
 class MatchIndividual(BaseMatchModel):
@@ -107,7 +108,7 @@ class MatchIndividual(BaseMatchModel):
     Compact representation of a subject for returning/rendering search responses.
     """
     id: str = Field(..., title="Subject ID")
-    p: list[MatchPhenopacket]
+    phenopackets: list[MatchPhenopacket]
 
 
 MatchObject: TypeAlias = (
