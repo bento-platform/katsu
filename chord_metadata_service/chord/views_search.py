@@ -407,6 +407,9 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     if err:
         return bad_request_response(err)
 
+    logger = logger.bind(search_params=search_params)
+    await logger.adebug("executing chord_dataset_search")
+
     data, err = await chord_dataset_search(scope, search_params, start, logger)
     if err:
         return bad_request_response(err)
