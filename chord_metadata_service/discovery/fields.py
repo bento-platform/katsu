@@ -428,7 +428,7 @@ async def filter_queryset_field_value(
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 condition = json_range_condition
             else:
-                condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lte", end)), subquery)
+                condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lt", end)), subquery)
         else:
             [sym, val] = value.split(" ")
             if sym == "≥":
