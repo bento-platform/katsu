@@ -29,7 +29,7 @@ from .censorship import get_rules, get_threshold, thresholded_count
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .fields_utils import resolve_filter_mapping_to_queryset_model
+from .fields_utils import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
@@ -129,12 +129,17 @@ async def discovery_search_fields(request: DrfRequest):
 
 async def discovery_field_response(
     scope: ValidatedDiscoveryScope,
-    queryset_model_name: DiscoveryEntity,
-    queryset: QuerySet,
+    query: DiscoveryQuery,
     field: str,
-    field_perms: DataPermissions,
+    dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
 ) -> DiscoveryFieldResponse | None:
+    lg = lg.bind(field=field)
+
+    field_props = scope.discovery.fields[field]
+    field_entity, field_entity_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
+    field_perms: DataPermissions = dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[field_entity]]
+
     if not field_perms.counts:
         # We cannot compute stats right now for boolean-level responses. Thus, if we do not have at least counts
         # permissions, we return None and this presumably gets filtered out, resulting in this field response not
@@ -142,19 +147,17 @@ async def discovery_field_response(
         # this with relative grace (not show a chart/search field, ...).
         return None
 
-    lg = lg.bind(field=field)
-
-    field_props = scope.discovery.fields[field]
+    queryset, _ = await execute_discovery_query(query, scope, dt_permissions, field_entity, lg)
 
     stats: BinList
 
     try:
         if field_props.datatype == "string":
-            stats = await get_categorical_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
+            stats = await get_categorical_stats(scope, field_entity, queryset, field_props.root, field_perms)
         elif field_props.datatype == "number":
-            stats = await get_range_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
+            stats = await get_range_stats(scope, field_entity, queryset, field_props.root, field_perms)
         elif field_props.datatype == "date":
-            stats = await get_date_stats(scope, queryset_model_name, queryset, field_props.root, field_perms)
+            stats = await get_date_stats(scope, field_entity, queryset, field_props.root, field_perms)
         else:  # pragma: no cover
             # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
             # validate the data_type value.
@@ -168,15 +171,14 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
-async def build_and_execute_discovery_query(
-    request: DrfRequest,
+async def execute_discovery_query(
+    query: DiscoveryQuery,
     discovery_scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     queryset_model_name: DiscoveryEntity,
     lg: BoundLogger,
-) -> tuple[DiscoveryQuery, QuerySet, frozenset[DiscoveryEntity]]:
+) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
     queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
-    query = DiscoveryQuery.from_drf_request(request)
 
     if fts := query.fts:
         ids = (
@@ -205,7 +207,7 @@ async def build_and_execute_discovery_query(
         lg,
     )
 
-    return query, filtered_queryset, queried_entities
+    return filtered_queryset, queried_entities
 
 
 async def non_null_set_length(qs: QuerySet) -> int:
@@ -218,34 +220,15 @@ async def non_null_set_length(qs: QuerySet) -> int:
 
 
 async def discovery_queryset_entity_counts(
-    queryset_model_name: DiscoveryEntity,
-    queryset: QuerySet,
+    query: DiscoveryQuery,
+    scope: ValidatedDiscoveryScope,
+    dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
 ) -> dict[DiscoveryEntity, int]:
-    counts: dict[DiscoveryEntity, int] = {
-        queryset_model_name: await queryset.acount(),
+    return {
+        e: await (await execute_discovery_query(query, scope, dt_permissions, e, lg))[0].acount()
+        for e in DISCOVERY_ENTITIES
     }
-
-    count_entities = set(filter(lambda ee: ee != queryset_model_name, DISCOVERY_ENTITIES))
-
-    # for each entity "e" that isn't the root queryset entity, resolve the corresponding Django path from the queryset
-    # entity to "e" and count distinct non-null values, getting the count for all post-filter/prefetch "e".
-    for e in count_entities:
-        try:
-            m = f"{e}_matches"
-            qs = queryset.values_list(m, flat=True)
-            e_count = await non_null_set_length(qs)
-        except FieldError:  # no {e}_matches annotation, use whole related manager/foreign key
-            m = resolve_filter_mapping_to_queryset_model(queryset_model_name, e, ())
-            # tried to figure out how to filter out null related manager/foreign key values reliably, but I couldn't
-            # figure it out, so we instead get all values and count them (without None) in Python - David L 2025-09-08
-            qs = queryset.values_list(m, flat=True)
-            e_count = await non_null_set_length(qs)
-
-        await lg.adebug("counted entity from queried entity mapping", entity=e, mapping=m, count=e_count)
-        counts[e] = e_count
-
-    return counts
 
 
 @api_view(["GET"])
@@ -284,13 +267,15 @@ async def discovery_endpoint(request: DrfRequest):
     # their respective DATA TYPES) queried. Thus, if we're querying, the above check IS NOT SUFFICIENT!
     #  --> this actual second permissions check happens inside the following function stack right now, and raises a
     #      ValidationError:
-    #        build_and_execute_discovery_query --> discovery_filter_queryset --> the overall_permissions.bool_ check
+    #        execute_discovery_query --> discovery_filter_queryset --> the overall_permissions.bool_ check
 
     queryset_model_name: DiscoveryEntity = "phenopacket"
+    # TODO: execute on all discovery entity types depending on field/counts/etc...
 
     try:
-        query, queryset, queried_entities = await build_and_execute_discovery_query(
-            request, scope, dt_permissions, queryset_model_name, lg
+        query = DiscoveryQuery.from_drf_request(request)
+        queryset, queried_entities = await execute_discovery_query(
+            query, scope, dt_permissions, queryset_model_name, lg
         )
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
@@ -303,7 +288,6 @@ async def discovery_endpoint(request: DrfRequest):
 
     discovery = scope.discovery
     fields: tuple[str, ...] = discovery.get_chart_field_ids()
-    _, field_permissions = get_discovery_field_set_permissions(discovery, fields, dt_permissions)
 
     field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
         field: field_res
@@ -311,7 +295,7 @@ async def discovery_endpoint(request: DrfRequest):
             fields,
             await asyncio.gather(
                 *(
-                    discovery_field_response(scope, queryset_model_name, queryset, field, field_permissions[field], lg)
+                    discovery_field_response(scope, query, field, dt_permissions, lg)
                     for field in fields
                 )
             )
@@ -329,8 +313,7 @@ async def discovery_endpoint(request: DrfRequest):
     #  - a boolean (count > threshold)
 
     # TODO: permissions non-hard-coded
-    # TODO: do this in sql instead
-    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(queryset_model_name, queryset, lg)
+    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(query, scope, dt_permissions, lg)
 
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
@@ -438,9 +421,8 @@ async def discovery_matches(request: DrfRequest):
     lg = lg.bind(queried_entity=queried_entity)
 
     try:
-        query, queryset, _queried_entities = await build_and_execute_discovery_query(
-            request, scope, dt_permissions, queried_entity, lg
-        )
+        query = DiscoveryQuery.from_drf_request(request)
+        queryset, _ = await execute_discovery_query(query, scope, dt_permissions, queried_entity, lg)
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
@@ -517,12 +499,14 @@ async def discovery_ui_hints(request: DrfRequest):
     except DiscoveryScopeException as e:
         return not_found(request, e.message)
 
-    queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity?
-    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
-
-    counts = await discovery_queryset_entity_counts(queryset_model_name, queryset)
+    # queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity?
+    # queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
 
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
+
+    # counts = await discovery_queryset_entity_counts(queryset_model_name, queryset, logger)
+    # TODO: support querying?
+    counts = await discovery_queryset_entity_counts(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, logger)
 
     return {
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with

@@ -397,8 +397,18 @@ async def filter_queryset_field_value(
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
             if subquery:
-                # TODO: explain subquery magic
-                condition = Q(Exists(subquery[0].filter(**{subquery[3]: OuterRef("pk"), f"{subquery[2]}__iexact": value})))
+                # If we do a simple filter on `field` in the case of crossing a many-to-many or many-to-one
+                # relationship boundary, we end up with an inner join that prevents us from getting correct stats of
+                # values for the matching queryset entity.
+                # Instead, we do an Exists subquery to check if we have at least one matching object from the other side
+                # of the m2m/many-to-one relation which matches the field query (which as been rewritten to be valid for
+                # the model referred to in the relation rather than the queryset model.)
+                condition = Q(Exists(
+                    subquery.queryset.filter(**{
+                        subquery.related_field: OuterRef("pk"),
+                        f"{subquery.inner_field}__iexact": value,
+                    })
+                ))
             else:
                 condition = Q(**{f"{field}__iexact": value})
 
