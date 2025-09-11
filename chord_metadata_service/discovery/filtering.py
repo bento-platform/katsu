@@ -146,54 +146,56 @@ async def discovery_filter_queryset(
 
     # TODO: determine if we need to do this
     # TODO: refactor to get this from the field normalizing code (so it can give us the "path" of queried entities...)
-    if queryset_entity in ("individual", "phenopacket") and "experiment_result" in queried_entities:
-        queried_entities.add("experiment")
-        # may trigger the next if-statement right below
-    if queryset_entity in ("individual", "phenopacket") and "experiment" in queried_entities:
-        queried_entities.add("biosample")
-        # may trigger the next if-statement right below
-    if queryset_entity == "individual" and "biosample" in queried_entities:
-        queried_entities.add("phenopacket")
-    if queryset_entity == "biosample" and "experiment_result" in queried_entities:
-        queried_entities.add("experiment")
+    # if queryset_entity in ("individual", "phenopacket") and "experiment_result" in queried_entities:
+    #     queried_entities.add("experiment")
+    #     # may trigger the next if-statement right below
+    # if queryset_entity in ("individual", "phenopacket") and "experiment" in queried_entities:
+    #     queried_entities.add("biosample")
+    #     # may trigger the next if-statement right below
+    # if queryset_entity == "individual" and "biosample" in queried_entities:
+    #     queried_entities.add("phenopacket")
+    # if queryset_entity == "biosample" and "experiment_result" in queried_entities:
+    #     queried_entities.add("experiment")
 
-    if (  # not nested_prefetch and
-        nested_queried_entities := tuple(
-            filter(lambda ee: ee != queryset_entity and ee not in already_fetched, queried_entities)
-        )
-    ):
-        # If we're not in a "nested prefetch" context already, we may have nested discovery entities we're querying.
-        # We want to limit the Django ORM "join" with these nested entities to only include nested objects which also
-        # match the subset of our query applying to the nested entity type, otherwise we may end up in situations where
-        # we get "all experiments of all phenopackets containing WGS experiments", rather than our (potentially) desired
-        # "all phenopackets with at least one WGS experiment, and only those WGS experiments included in the result-set"
-
-        await lg.adebug(
-            "adding filtered prefetches",
-            nested_queried_entities=nested_queried_entities,
-            already_fetched=already_fetched,
-        )
-
-        filtered_prefetches: list[Prefetch] = []
-
-        for e in nested_queried_entities:
-            filtered_prefetches.append(
-                Prefetch(
-                    resolve_filter_mapping_to_queryset_model(queryset_entity, e, ()),
-                    queryset=(await discovery_filter_queryset(
-                        discovery_scope,
-                        query,
-                        e,
-                        get_discovery_entity_model_scoped_queryset(e, discovery_scope),
-                        dt_permissions,
-                        lg,
-                        nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
-                        already_fetched=already_fetched | {queryset_entity},  # TODO: check this logic
-                    ))[0],
-                    to_attr=f"{e}_matches",
-                )
-            )
-
-        f_queryset = f_queryset.prefetch_related(*filtered_prefetches)
+    # if (  # not nested_prefetch and
+    #     nested_queried_entities := tuple(
+    #         filter(lambda ee: ee != queryset_entity and ee not in already_fetched, queried_entities)
+    #     )
+    # ):
+    #     # If we're not in a "nested prefetch" context already, we may have nested discovery entities we're querying.
+    #     # We want to limit the Django ORM "join" with these nested entities to only include nested objects which also
+    #     # match the subset of our query applying to the nested entity type, otherwise we may end up in situations where
+    #     # we get "all experiments of all phenopackets containing WGS experiments", rather than our (potentially) desired
+    #     # "all phenopackets with at least one WGS experiment, and only those WGS experiments included in the result-set"
+    #
+    #     await lg.adebug(
+    #         "adding filtered prefetches",
+    #         nested_queried_entities=nested_queried_entities,
+    #         already_fetched=already_fetched,
+    #     )
+    #
+    #     nqe_set = set(nested_queried_entities)
+    #
+    #     filtered_prefetches: list[Prefetch] = []
+    #
+    #     for e in nested_queried_entities:
+    #         filtered_prefetches.append(
+    #             Prefetch(
+    #                 resolve_filter_mapping_to_queryset_model(queryset_entity, e, ()),
+    #                 queryset=(await discovery_filter_queryset(
+    #                     discovery_scope,
+    #                     query,
+    #                     e,
+    #                     get_discovery_entity_model_scoped_queryset(e, discovery_scope),
+    #                     dt_permissions,
+    #                     lg,
+    #                     nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
+    #                     already_fetched=already_fetched | nqe_set,  # TODO: check this logic
+    #                 ))[0],
+    #                 to_attr=f"{e}_matches",
+    #             )
+    #         )
+    #
+    #     f_queryset = f_queryset.prefetch_related(*filtered_prefetches)
 
     return f_queryset, frozenset(queried_entities)

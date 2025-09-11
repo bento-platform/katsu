@@ -3,6 +3,7 @@ import math
 
 from adrf.decorators import api_view
 from bento_lib.discovery import SearchSection, DiscoveryEntity
+from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -58,6 +59,71 @@ from .utils import (
 )
 
 is_not_none = partial(is_not, None)
+
+
+QueryExecutionResult = tuple[QuerySet, frozenset[DiscoveryEntity]]
+
+
+class QueryQuerysetsCache:
+    def __init__(
+        self,
+        query: DiscoveryQuery,
+        scope: ValidatedDiscoveryScope,
+        dt_permissions: DataTypeDiscoveryPermissions,
+        lg: BoundLogger,
+    ):
+        self._query: DiscoveryQuery = query
+        self._scope: ValidatedDiscoveryScope = scope
+        self._dt_permissions: DataTypeDiscoveryPermissions = dt_permissions
+        self._queryset_cache: dict[DiscoveryEntity, QueryExecutionResult] = {}
+        self._queryset_locks = defaultdict(asyncio.Lock)
+
+        self._logger: BoundLogger = lg
+
+    async def _execute_discovery_query(
+        self, queryset_entity: DiscoveryEntity, lg: BoundLogger | None
+    ) -> QueryExecutionResult:
+        queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
+
+        if fts := self._query.fts:
+            ids_set = await build_id_set(
+                queryset.annotate(search=full_text_search_vector(queryset_entity)).filter(search=fts),
+                field="id",
+            )
+            # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
+            #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
+            #    join? it's unclear, but for now we just do this ugly thing instead.
+            queryset = queryset.filter(id__in=ids_set)
+
+        # May raise:
+        #  - DiscoveryEmptyException
+        #  - ValidationError
+        filtered_queryset, queried_entities = await discovery_filter_queryset(
+            self._scope,
+            self._query,
+            queryset_entity,
+            queryset,
+            self._dt_permissions,
+            lg or self._logger,
+        )
+
+        return filtered_queryset, queried_entities
+
+    async def get_query_queryset_and_queried_entities(
+        self,
+        entity: DiscoveryEntity,
+        lg: BoundLogger | None = None,
+    ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
+        async with self._queryset_locks[entity]:
+            if entity not in self._queryset_cache:
+                await (lg or self._logger).adebug(
+                    "QQC cache miss", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
+                )
+                res = await self._execute_discovery_query(entity, lg)
+                self._queryset_cache[entity] = res
+                return res
+
+            return self._queryset_cache[entity]
 
 
 @extend_schema(
@@ -133,8 +199,8 @@ async def discovery_search_fields(request: DrfRequest):
 
 
 async def discovery_field_response(
+    qqs: QueryQuerysetsCache,
     scope: ValidatedDiscoveryScope,
-    query: DiscoveryQuery,
     field: str,
     dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
@@ -152,7 +218,7 @@ async def discovery_field_response(
         # this with relative grace (not show a chart/search field, ...).
         return None
 
-    queryset, _ = await execute_discovery_query(query, scope, dt_permissions, field_entity, lg)
+    queryset, _ = await qqs.get_query_queryset_and_queried_entities(field_entity, lg)
 
     stats: BinList
 
@@ -176,48 +242,9 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
-async def execute_discovery_query(
-    query: DiscoveryQuery,
-    discovery_scope: ValidatedDiscoveryScope,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    queryset_entity: DiscoveryEntity,
-    lg: BoundLogger,
-) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
-    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, discovery_scope)
-
-    if fts := query.fts:
-        ids_set = await build_id_set(
-            queryset.annotate(search=full_text_search_vector(queryset_entity)).filter(search=fts),
-            field="id",
-        )
-        # When this is done as a subquery, it destroys performance (perhaps fixable with a newer PG version than 13?)
-        #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or join?
-        #    it's unclear, but for now we just do this ugly thing instead.
-        queryset = queryset.filter(id__in=ids_set)
-
-    # May raise:
-    #  - DiscoveryEmptyException
-    #  - ValidationError
-    filtered_queryset, queried_entities = await discovery_filter_queryset(
-        discovery_scope,
-        query,
-        queryset_entity,
-        queryset,
-        dt_permissions,
-        lg,
-    )
-
-    return filtered_queryset, queried_entities
-
-
-async def discovery_queryset_entity_counts(
-    query: DiscoveryQuery,
-    scope: ValidatedDiscoveryScope,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    lg: BoundLogger,
-) -> dict[DiscoveryEntity, int]:
+async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> dict[DiscoveryEntity, int]:
     return {
-        e: await (await execute_discovery_query(query, scope, dt_permissions, e, lg))[0].acount()
+        e: await (await qqs.get_query_queryset_and_queried_entities(e))[0].acount()
         for e in DISCOVERY_ENTITIES
     }
 
@@ -258,19 +285,22 @@ async def discovery_endpoint(request: DrfRequest):
     # their respective DATA TYPES) queried. Thus, if we're querying, the above check IS NOT SUFFICIENT!
     #  --> this actual second permissions check happens inside the following function stack right now, and raises a
     #      ValidationError:
-    #        execute_discovery_query --> discovery_filter_queryset --> the overall_permissions.bool_ check
+    #        QueryQuerysetsCache
+    #         --> _execute_discovery_query
+    #         --> discovery_filter_queryset
+    #         --> the overall_permissions.bool_ check
 
     queryset_entity: DiscoveryEntity = "phenopacket"
 
     try:
         query = DiscoveryQuery.from_drf_request(request)
-        queryset, queried_entities = await execute_discovery_query(query, scope, dt_permissions, queryset_entity, lg)
+        lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
+        qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
+        queryset, queried_entities = await qqs.get_query_queryset_and_queried_entities(queryset_entity)
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
         return await dres.django_validation_error(request, e, lg, "discovery endpoint recieved validation error")
-
-    lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
 
     # -- Field responses -----------------------------------------------------------------------------------------------
 
@@ -283,7 +313,7 @@ async def discovery_endpoint(request: DrfRequest):
             fields,
             await asyncio.gather(
                 *(
-                    discovery_field_response(scope, query, field, dt_permissions, lg)
+                    discovery_field_response(qqs, scope, field, dt_permissions, lg)
                     for field in fields
                 )
             )
@@ -295,19 +325,14 @@ async def discovery_endpoint(request: DrfRequest):
     # -- Counts processing ---------------------------------------------------------------------------------------------
 
     message: str = ""
-
-    # for each 'discovery entity', we generate either:
-    #  - a count (0/count-if-above-threshold), or
-    #  - a boolean (count > threshold)
-
-    # TODO: permissions non-hard-coded
-    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(query, scope, dt_permissions, lg)
+    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(qqs)
 
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
     #  - a boolean (count > threshold)
     count_or_bools_res: dict[DiscoveryEntity, int | bool] = {}
 
+    # TODO: permissions non-hard-coded
     for e in counts:
         dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]
         entity_permissions = dt_permissions[dt]
@@ -372,10 +397,10 @@ async def discovery_matches(request: DrfRequest):
       dataset:    Discovery scope - dataset ID (if not set, the project or global scope is used)
 
     Note on query parameter names:
-      - build_and_execute_discovery_query calls build_discovery_query_from_request, which grabs every query parameter
-        except "project", "dataset", and those starting with "_" and tries to find fields to query. By separating the
-        namespace for discovery filter query parameters from "other" query parameters by prefixing other query
-        parameters with _, we eliminate possible ambiguities between discovery fields and these query parameters.
+      - QueryQuerysetsCache._execute_discovery_query calls build_discovery_query_from_request, which grabs every query
+        parameter except "project", "dataset", and those starting with "_" and tries to find fields to query.
+        By separating the namespace for discovery filter query parameters from "other" query parameters by prefixing
+        other query parameters with _, we eliminate possible ambiguities between discovery fields.
     """
 
     # TODO: DEDUPLICATE
@@ -410,7 +435,8 @@ async def discovery_matches(request: DrfRequest):
 
     try:
         query = DiscoveryQuery.from_drf_request(request)
-        queryset, _ = await execute_discovery_query(query, scope, dt_permissions, queried_entity, lg)
+        qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
+        queryset, _ = await qqs.get_query_queryset_and_queried_entities(queried_entity)
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
