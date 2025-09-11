@@ -57,7 +57,14 @@ async def experiment_result_matches(
                 indices=er.indices,
                 file_format=er.file_format,
                 assembly_id=er.genome_assembly_id,
-                **(dict(project=scope.project_id, dataset=scope.dataset_id) if root else dict()),
+                **(
+                    dict(
+                        project=scope.project_id,
+                        # TODO: have a foreign key to dataset directly to not have to do so many lookups (n+1 issue...)
+                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),
+                    )
+                    if root else dict()
+                ),
             )
         )
     return res
@@ -79,7 +86,7 @@ async def experiment_matches(
                 results=await experiment_result_matches(
                     exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
                 ),
-                **(dict(project=scope.project_id, dataset=scope.dataset_id) if root else dict()),
+                **(dict(project=scope.project_id, dataset=scope.dataset_id or str(exp.dataset_id)) if root else dict()),
             )
         )
     return res
