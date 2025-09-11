@@ -82,6 +82,7 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
+    study_type: str
     results: list[MatchExperimentResult]
 
 

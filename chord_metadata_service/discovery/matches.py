@@ -83,6 +83,7 @@ async def experiment_matches(
         res.append(
             MatchExperiment(
                 id=str(exp.id),
+                study_type=exp.study_type,
                 results=await experiment_result_matches(
                     exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
                 ),
