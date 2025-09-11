@@ -1,5 +1,6 @@
-from bento_lib.discovery import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig, DiscoveryEntity
 from django.core.exceptions import ValidationError
+from django.db.models import QuerySet
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable
 
@@ -10,7 +11,7 @@ from chord_metadata_service.authz.types import (
 from chord_metadata_service.chord.data_types import KatsuDataType
 
 from .fields_utils import normalize_field_path_true_model
-from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     "get_discovery_field_set_permissions",
     "extract_discovery",
     "empty_discovery",
+    "get_discovery_entity_model_scoped_queryset",
 ]
 
 
@@ -114,3 +116,10 @@ def empty_discovery(discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScop
         return True
     discovery = extract_discovery(discovery_or_scope)
     return not discovery.fields or not (discovery.overview or discovery.search)
+
+
+def get_discovery_entity_model_scoped_queryset(entity: DiscoveryEntity, scope: ValidatedDiscoveryScope) -> QuerySet:
+    """
+    Small utility for the semi-common usage pattern of getting a scoped queryset for a discovery entity's Django model.
+    """
+    return DISCOVERY_ENTITY_NAMES_TO_MODEL[entity].get_model_scoped_queryset(scope)

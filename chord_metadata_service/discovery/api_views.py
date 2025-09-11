@@ -19,10 +19,10 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferTo
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
-from chord_metadata_service.discovery.utils import empty_discovery
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE
 from chord_metadata_service.restapi.responses import bad_request, not_found
+from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
 from .censorship import get_rules, get_threshold, thresholded_count
@@ -33,7 +33,7 @@ from .fields_utils import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
-from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .pydantic_models import (
     DiscoveryFieldResponse,
     DiscoveryFieldResponses,
@@ -50,7 +50,12 @@ from .pydantic_models import (
 from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
-from .utils import get_discovery_data_type_permissions, get_discovery_field_set_permissions
+from .utils import (
+    get_discovery_data_type_permissions,
+    get_discovery_field_set_permissions,
+    empty_discovery,
+    get_discovery_entity_model_scoped_queryset,
+)
 
 is_not_none = partial(is_not, None)
 
@@ -91,8 +96,8 @@ async def discovery_search_fields(request: DrfRequest):
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    queryset_model_name: DiscoveryEntity = "phenopacket"
-    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
+    queryset_entity: DiscoveryEntity = "phenopacket"
+    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -109,7 +114,7 @@ async def discovery_search_fields(request: DrfRequest):
         return DiscoveryFieldAndOptions(
             id=field,
             definition=field_props,
-            options=await get_field_options(queryset_model_name, queryset, field, scope, field_permissions[field]),
+            options=await get_field_options(queryset_entity, queryset, field, scope, field_permissions[field]),
         )
 
     async def _get_section_response(section: SearchSection) -> DiscoverySearchSectionWithOptions | None:
@@ -175,25 +180,20 @@ async def execute_discovery_query(
     query: DiscoveryQuery,
     discovery_scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
-    queryset_model_name: DiscoveryEntity,
+    queryset_entity: DiscoveryEntity,
     lg: BoundLogger,
 ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
-    queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(discovery_scope)
+    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, discovery_scope)
 
     if fts := query.fts:
-        ids = (
-            queryset
-            .annotate(search=full_text_search_vector(queryset_model_name))
-            .filter(search=fts)
-            .values_list("id", flat=True)
+        ids_set = await build_id_set(
+            queryset.annotate(search=full_text_search_vector(queryset_entity)).filter(search=fts),
+            field="id",
         )
-        ids_list = []
-        async for id_ in ids:
-            ids_list.append(id_)
         # When this is done as a subquery, it destroys performance (perhaps fixable with a newer PG version than 13?)
         #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or join?
         #    it's unclear, but for now we just do this ugly thing instead.
-        queryset = queryset.filter(id__in=ids_list)
+        queryset = queryset.filter(id__in=ids_set)
 
     # May raise:
     #  - DiscoveryEmptyException
@@ -201,22 +201,13 @@ async def execute_discovery_query(
     filtered_queryset, queried_entities = await discovery_filter_queryset(
         discovery_scope,
         query,
-        queryset_model_name,
+        queryset_entity,
         queryset,
         dt_permissions,
         lg,
     )
 
     return filtered_queryset, queried_entities
-
-
-async def non_null_set_length(qs: QuerySet) -> int:
-    # Count distinct using a set which excludes null values
-    e_set = set()
-    async for val in qs:
-        if val is not None:
-            e_set.add(val)
-    return len(e_set)
 
 
 async def discovery_queryset_entity_counts(
@@ -269,20 +260,17 @@ async def discovery_endpoint(request: DrfRequest):
     #      ValidationError:
     #        execute_discovery_query --> discovery_filter_queryset --> the overall_permissions.bool_ check
 
-    queryset_model_name: DiscoveryEntity = "phenopacket"
-    # TODO: execute on all discovery entity types depending on field/counts/etc...
+    queryset_entity: DiscoveryEntity = "phenopacket"
 
     try:
         query = DiscoveryQuery.from_drf_request(request)
-        queryset, queried_entities = await execute_discovery_query(
-            query, scope, dt_permissions, queryset_model_name, lg
-        )
+        queryset, queried_entities = await execute_discovery_query(query, scope, dt_permissions, queryset_entity, lg)
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
         return await dres.django_validation_error(request, e, lg, "discovery endpoint recieved validation error")
 
-    lg = lg.bind(queried_entity=queryset_model_name, query=query.model_dump(mode="json"))
+    lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
 
     # -- Field responses -----------------------------------------------------------------------------------------------
 
@@ -340,8 +328,8 @@ async def discovery_endpoint(request: DrfRequest):
             count_or_bools_res[e] = entity_count if entity_permissions.counts else (entity_count > 0)
 
     if (
-        not count_or_bools_res[queryset_model_name]
-        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_model_name]].data
+        not count_or_bools_res[queryset_entity]
+        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
     ):
         message = INSUFFICIENT_DATA_AVAILABLE_MSG
 
@@ -359,7 +347,7 @@ async def discovery_endpoint(request: DrfRequest):
         DiscoveryResponse(
             layout=discovery.overview,
             fields=field_responses,
-            root_entity=queryset_model_name,
+            root_entity=queryset_entity,
             queried_entities=queried_entities,
             message=message,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
@@ -499,14 +487,12 @@ async def discovery_ui_hints(request: DrfRequest):
     except DiscoveryScopeException as e:
         return not_found(request, e.message)
 
-    # queryset_model_name: DiscoveryEntity = "phenopacket"  # TODO: support request parameter entity?
-    # queryset = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name].get_model_scoped_queryset(scope)
+    lg = logger.bind(scope_repr=repr(scope))
 
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
 
-    # counts = await discovery_queryset_entity_counts(queryset_model_name, queryset, logger)
     # TODO: support querying?
-    counts = await discovery_queryset_entity_counts(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, logger)
+    counts = await discovery_queryset_entity_counts(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
 
     return {
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with

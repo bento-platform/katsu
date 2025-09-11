@@ -51,7 +51,7 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
 
 # noinspection PyUnreachableCode
 def _resolve_filter_mapping_to_queryset_model_inner(
-    queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
+    queryset_entity: DiscoveryEntity, field_entity: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> tuple[str, ...]:
     """
     Given a goal (queryset) model name and a current (field) model name, rewrite a path to a field from the field model
@@ -60,14 +60,14 @@ def _resolve_filter_mapping_to_queryset_model_inner(
     use for rewriting field paths without converting them to Django form.
     """
 
-    if queryset_model_name == field_model_name:
+    if queryset_entity == field_entity:
         return field_path
 
     exc = DiscoveryFilterRewriteException(
-        f"cannot map field model {field_model_name} to filtering model {queryset_model_name}"
+        f"cannot map field model {field_entity} to filtering model {queryset_entity}"
     )
 
-    match (queryset_model_name, field_model_name):
+    match (queryset_entity, field_entity):
         #  - Phenopackets <-> Individuals
         case ("individual", "phenopacket"):
             if field_path[:1] == ("subject",):  # also conveniently handles the falsey case of field_path == ()
@@ -171,7 +171,7 @@ field_path_to_django_mapping = "__".join
 
 
 def resolve_filter_mapping_to_queryset_model(
-    queryset_model_name: DiscoveryEntity, field_model_name: DiscoveryEntity, field_path: tuple[str, ...]
+    queryset_entity: DiscoveryEntity, field_entity: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> str:
     """
     Given a goal (queryset) model name and a current (field) model name, rewrite a path to a field from the field model
@@ -181,7 +181,7 @@ def resolve_filter_mapping_to_queryset_model(
                     over-generalized.
     """
     return field_path_to_django_mapping(
-        _resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, field_model_name, field_path)
+        _resolve_filter_mapping_to_queryset_model_inner(queryset_entity, field_entity, field_path)
     )
 
 
@@ -226,7 +226,7 @@ class DiscoveryFieldSubquery:
 
 
 def get_field_django_mapping_and_queried_entity(
-    queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition
+    queryset_entity: DiscoveryEntity, field_props: AnyFieldDefinition
 ) -> tuple[str, DiscoveryFieldSubquery | None, DiscoveryEntity]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
@@ -246,13 +246,12 @@ def get_field_django_mapping_and_queried_entity(
         msg = f"Accessing field on model {entity_name} not implemented"
         raise NotImplementedError(msg)
 
-    resolved_field_path = _resolve_filter_mapping_to_queryset_model_inner(queryset_model_name, entity_name, field_path)
+    resolved_field_path = _resolve_filter_mapping_to_queryset_model_inner(queryset_entity, entity_name, field_path)
 
     subquery: DiscoveryFieldSubquery | None = None
 
     if field_path:
-        queryset_model = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_model_name]
-        field_obj = queryset_model._meta.get_field(resolved_field_path[0])
+        field_obj = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_entity]._meta.get_field(resolved_field_path[0])
         # TODO: explain subquery magic
         if isinstance(field_obj, ManyToManyField) or isinstance(field_obj, ManyToOneRel):
             if isinstance(field_obj, ManyToManyField):
@@ -268,14 +267,14 @@ def get_field_django_mapping_and_queried_entity(
     return field_path_to_django_mapping(resolved_field_path), subquery, entity_name
 
 
-def get_field_django_mapping(queryset_model_name: DiscoveryEntity, field_props: AnyFieldDefinition) -> str:
+def get_field_django_mapping(queryset_entity: DiscoveryEntity, field_props: AnyFieldDefinition) -> str:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
     are the field with their possible joins through tables relations.
     Returns the Django string representation of the field for this object.
     """
-    return get_field_django_mapping_and_queried_entity(queryset_model_name, field_props)[0]
+    return get_field_django_mapping_and_queried_entity(queryset_entity, field_props)[0]
 
 
 def parse_duration(duration: str | dict):
@@ -419,7 +418,7 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
 
 
 def get_json_range_condition(
-    filtering_model_name: DiscoveryEntity, field_props: AnyFieldDefinition, min: int = None, max: int = None
+    filtering_entity: DiscoveryEntity, field_props: AnyFieldDefinition, min: int = None, max: int = None
 ) -> Q:
     """
     Takes field props for a 'number' data type contained in a JSONField array,
@@ -441,7 +440,7 @@ def get_json_range_condition(
     range_condition = Q()
 
     if group_by and group_by_value and value_mapping:
-        field = get_field_django_mapping(filtering_model_name, field_props)
+        field = get_field_django_mapping(filtering_entity, field_props)
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
         if min is not None:
