@@ -237,6 +237,7 @@ def get_field_django_mapping_and_queried_entity(
         a specification for executing an Exists(...) subqueyr IF crossing a many-to-many or many-to-one boundary,
         the queried entity name,
     )
+    Can raise django.core.exceptions.FieldDoesNotExist if the field mapping does not correspond to a real model field.
     """
 
     entity_name, field_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())

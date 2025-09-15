@@ -1,5 +1,9 @@
+import json
+from io import BytesIO
+
 from django.http import HttpRequest
 from django.test import SimpleTestCase
+from rest_framework.parsers import JSONParser
 from rest_framework.request import Request as DrfRequest
 
 from ..pydantic_models import DiscoveryQuery
@@ -12,7 +16,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         query = DiscoveryQuery(fts=None, filters={"sex": "MALE", "age": "< 10"})
         self.assertListEqual(query.queried_filter_fields(), ["sex", "age"])
 
-    def test_construction_from_request(self):
+    def test_construction_from_get_request(self):
         dr = HttpRequest()
         dr.method = "GET"
         dr.GET["_fts"] = "text"
@@ -25,6 +29,16 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         dr.GET["sex"] = "MALE"
         dr.GET["age"] = "< 10"
         filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr))
+        self.assertIsNone(filter_q.fts)
+        self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
+
+    def test_construction_from_post_request(self):
+        dr = HttpRequest()
+        dr.method = "POST"
+        dr.content_type = "application/json"
+        dr._body = json.dumps({"sex": "MALE", "age": "< 10"}).encode("utf-8")
+        dr._stream = BytesIO(json.dumps({"sex": "MALE", "age": "< 10"}).encode("utf-8"))
+        filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr, parsers=(JSONParser,)))
         self.assertIsNone(filter_q.fts)
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
 

@@ -111,7 +111,8 @@ class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin
         fp = DateFieldDefinition.model_validate({
             "title": "Date of Consent",
             "description": "Date of consent for study",
-            "mapping": "individual/date_of_consent",
+            # doesn't have extra_properties in path, will raise a NotImplementError for date:
+            "mapping": "individual/sex",
             "datatype": "date",
             "config": {
                 "bin_by": "month"
@@ -177,7 +178,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         ]
         self.assertListEqual(res.root, ground_truth)
 
-    def test_filter_queryset_field_value_string(self):
+    async def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()
 
         subtest_params = [
@@ -189,11 +190,11 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         for params in subtest_params:
             with self.subTest(params=params):
                 q_val, expected_count = params
-                qs, queried_entity = filter_queryset_field_value("individual", base_qs, self.dm_fp, q_val, logger)
-                self.assertEqual(qs.count(), expected_count)
+                qs, queried_entity = await filter_queryset_field_value("individual", base_qs, self.dm_fp, q_val, logger)
+                self.assertEqual(await qs.acount(), expected_count)
                 self.assertEqual(queried_entity, "biosample")
 
-    def test_filter_queryset_field_value_number(self):
+    async def test_filter_queryset_field_value_number(self):
         base_qs = ph_m.Individual.objects.all()
         base_qs_pheno = ph_m.Phenopacket.objects.all()
 
@@ -209,13 +210,15 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         for params in subtest_params:
             with self.subTest(params=params):
                 q_val, expected_count = params
-                qs, queried_entity = filter_queryset_field_value("individual", base_qs, self.mtl_fp, q_val, logger)
-                self.assertEqual(qs.count(), expected_count)
+                qs, queried_entity = await filter_queryset_field_value(
+                    "individual", base_qs, self.mtl_fp, q_val, logger
+                )
+                self.assertEqual(await qs.acount(), expected_count)
                 self.assertEqual(queried_entity, "phenopacket")
-                qs, queried_entity = filter_queryset_field_value(
+                qs, queried_entity = await filter_queryset_field_value(
                     "phenopacket", base_qs_pheno, self.mtl_fp, q_val, logger
                 )
-                self.assertEqual(qs.count(), expected_count)
+                self.assertEqual(await qs.acount(), expected_count)
                 self.assertEqual(queried_entity, "phenopacket")
 
     async def test_get_distinct_values(self):

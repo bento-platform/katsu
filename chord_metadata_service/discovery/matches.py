@@ -159,8 +159,8 @@ async def phenopacket_matches(
                 biosamples=biosamples,
                 **(
                     dict(
-                        project=scope.project_id or phe.dataset.project_id,
-                        dataset=scope.dataset_id or str(phe.dataset_id),
+                        project=scope.project_id or (phe.dataset.project_id if phe.dataset else None),
+                        dataset=scope.dataset_id or (str(phe.dataset_id) if phe.dataset else None),
                     ) if root else dict()
                 ),
             )
@@ -199,7 +199,9 @@ async def individual_matches(
                 **(
                     dict(
                         # TODO: put this on Individual itself, i.e., link individual with project/dataset?
-                        project=scope.project_id or str(first_phenopacket.dataset.project_id),
+                        project=scope.project_id or (
+                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset else None
+                        ),
                         dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
                     ) if root else dict()
                 ),
