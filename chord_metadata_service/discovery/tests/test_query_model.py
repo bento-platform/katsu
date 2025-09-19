@@ -32,15 +32,27 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         self.assertIsNone(filter_q.fts)
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
 
-    def test_construction_from_post_request(self):
+    @staticmethod
+    def _mock_json_post(content: dict | list):
         dr = HttpRequest()
-        dr.method = "POST"
         dr.content_type = "application/json"
-        dr._body = json.dumps({"sex": "MALE", "age": "< 10"}).encode("utf-8")
-        dr._stream = BytesIO(json.dumps({"sex": "MALE", "age": "< 10"}).encode("utf-8"))
-        filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr, parsers=(JSONParser,)))
+        dr.method = "POST"
+        dr.META["CONTENT_TYPE"] = "application/json"
+
+        r = DrfRequest(dr, parsers=(JSONParser(),))
+        r._stream = BytesIO(json.dumps(content).encode("utf-8"))
+        r._load_data_and_files()
+
+        return r
+
+    def test_construction_from_post_request(self):
+        filter_q = DiscoveryQuery.from_drf_request(self._mock_json_post({"sex": "MALE", "age": "< 10"}))
         self.assertIsNone(filter_q.fts)
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
+
+        q = DiscoveryQuery.from_drf_request(self._mock_json_post({"_fts": "abc"}))
+        self.assertEqual(q.fts, "abc")
+        self.assertDictEqual(q.filters, {})
 
     def test_construction_bad_method_raise(self):
         with self.assertRaises(NotImplementedError):

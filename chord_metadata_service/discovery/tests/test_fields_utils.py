@@ -46,6 +46,7 @@ class TestModelField(TransactionTestCase):
 
     def test_get_wrong_model(self):
         with self.assertRaises(DiscoveryFilterRewriteException):
+            # noinspection PyTypeChecker
             get_field_django_mapping("junk", DISCOVERY_CONFIG_TEST.fields["age"])
 
 
@@ -223,6 +224,8 @@ class TestResolveFilterMapping(TestCase):
                 ("biosamples", "experiments", "extra_properties", "prop"),
                 "extra_properties__prop",
             ),
+            ("biosample", "individual", ("sex",), "phenopackets__subject__sex"),
+            ("biosample", "phenopacket", ("biosamples", "sampled_tissue"), "sampled_tissue"),
             # TODO: more
         ]
 
@@ -231,11 +234,10 @@ class TestResolveFilterMapping(TestCase):
                 self.assertEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
 
     def test_resolve_filter_mapping_exc(self):
-        # we cannot rewrite these as
-        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...]]] = [
-            ("biosample", "individual", ("sex",)),
-            ("experiment", "phenopacket", ("subject", "sex")),
-            # TODO: more
+        # we cannot rewrite these as invalid discovery entities
+        subtests: list[tuple[DiscoveryEntity, str, tuple[str, ...]]] = [
+            ("biosample", "junk", ("sex",)),
+            ("experiment", "junk", ("subject", "sex")),
         ]
 
         for params in subtests:
