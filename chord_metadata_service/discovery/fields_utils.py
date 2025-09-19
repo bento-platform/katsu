@@ -43,6 +43,10 @@ class JSONBPathQuery(Func):
     output_field = JSONField()
 
 
+# Function to rewrite a tuple of strings (field path) as a Django mapping string (delimited with "__"):
+field_path_to_django_mapping = "__".join
+
+
 def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=True):
     field_operator = "$[*]" if is_array else "$"
     query_path = mapping_to_json_path(json_path) if is_mapping else json_path
@@ -181,9 +185,6 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             raise exc
 
 
-field_path_to_django_mapping = "__".join
-
-
 def resolve_filter_mapping_to_queryset_model(
     queryset_entity: DiscoveryEntity, field_entity: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> str:
@@ -220,6 +221,7 @@ def normalize_field_path_true_model(
             return normalize_field_path_true_model("individual", tuple(rest))
         case ("phenopacket", ("biosamples", *rest)):
             return normalize_field_path_true_model("biosample", tuple(rest))
+        # TODO: remove old experiment path in a future version:
         case ("biosample", ("experiment" | "experiments", *rest)):  # "experiment" is old name, "experiments" is new
             return normalize_field_path_true_model("experiment", tuple(rest))
         case ("experiment", ("experiment_results", *rest)):

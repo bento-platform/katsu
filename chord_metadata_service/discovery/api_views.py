@@ -65,6 +65,12 @@ QueryExecutionResult = tuple[QuerySet, frozenset[DiscoveryEntity]]
 
 
 class QueryQuerysetsCache:
+    """
+    Cache definition for a specific query, in the context of a specific request (--> scope, permissions).
+    It takes a bit of effort to build the Django queryset from field definitions/a query object, and there are specific
+    cases were we may be doing this many times, so we might as well re-use the work done.
+    """
+
     def __init__(
         self,
         query: DiscoveryQuery,
@@ -116,10 +122,14 @@ class QueryQuerysetsCache:
         lg: BoundLogger | None = None,
         validate_field: bool = True,
     ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
+        # We use an async lock here to prevent executing the same entity query multiple times if we have parallel async
+        # requests happening (liable to happen with field-level data collection in discovery_field_response).
+        # Combining the lock with the caching mechanism means this is roughly equivalent to re-using the same
+        # "promise"/awaitable if one already exists.
         async with self._queryset_locks[entity]:
             if entity not in self._queryset_cache:
                 await (lg or self._logger).adebug(
-                    "QQC cache miss", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
+                    "QueryQuerysetsCache executing query", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
                 )
                 res = await self._execute_discovery_query(entity, lg, validate_field=validate_field)
                 self._queryset_cache[entity] = res
