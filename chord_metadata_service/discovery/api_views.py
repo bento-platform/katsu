@@ -318,7 +318,7 @@ async def discovery_endpoint(request: DrfRequest):
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:
-        return await dres.django_validation_error(request, e, lg, "discovery endpoint recieved validation error")
+        return await dres.django_validation_error(request, e, lg, "discovery endpoint encountered validation error")
 
     # -- Field responses -----------------------------------------------------------------------------------------------
 
@@ -459,7 +459,7 @@ async def discovery_matches(request: DrfRequest):
         return dres.no_public_data(request)
     except ValidationError as e:
         return await dres.django_validation_error(
-            request, e, lg, "discovery matches endpoint recieved validation error"
+            request, e, lg, "discovery matches endpoint encountered validation error"
         )
 
     lg = lg.bind(query=query.model_dump(mode="json"))
