@@ -81,7 +81,7 @@ class QueryQuerysetsCache:
         self._logger: BoundLogger = lg
 
     async def _execute_discovery_query(
-        self, queryset_entity: DiscoveryEntity, lg: BoundLogger | None
+        self, queryset_entity: DiscoveryEntity, lg: BoundLogger | None, validate_field: bool
     ) -> QueryExecutionResult:
         queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
 
@@ -105,6 +105,7 @@ class QueryQuerysetsCache:
             queryset,
             self._dt_permissions,
             lg or self._logger,
+            validate_field=validate_field,
         )
 
         return filtered_queryset, queried_entities
@@ -113,13 +114,14 @@ class QueryQuerysetsCache:
         self,
         entity: DiscoveryEntity,
         lg: BoundLogger | None = None,
+        validate_field: bool = True,
     ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
         async with self._queryset_locks[entity]:
             if entity not in self._queryset_cache:
                 await (lg or self._logger).adebug(
                     "QQC cache miss", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
                 )
-                res = await self._execute_discovery_query(entity, lg)
+                res = await self._execute_discovery_query(entity, lg, validate_field=validate_field)
                 self._queryset_cache[entity] = res
                 return res
 
@@ -218,7 +220,12 @@ async def discovery_field_response(
         # this with relative grace (not show a chart/search field, ...).
         return None
 
-    queryset, _ = await qqs.get_query_queryset_and_queried_entities(field_entity, lg)
+    # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to small cell
+    # counts if we're in a nested entity.
+    #  => For example, if we have 10 individuals with 2 biosamples after querying, and our field entity is a
+    #     biosample but our query is on an individual, we may get a small cell count issue through biosample but not if
+    #     we're going through individual (we may have five FEMALE individuals, but only one with a biosample).
+    queryset, _ = await qqs.get_query_queryset_and_queried_entities(field_entity, lg, validate_field=False)
 
     stats: BinList
 
@@ -243,9 +250,20 @@ async def discovery_field_response(
 
 
 async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> dict[DiscoveryEntity, int]:
+    async def _get_entity_count(ee: DiscoveryEntity) -> int:
+        # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to small
+        # cell counts if we're in a nested entity.
+        #  => For example, if we have 10 individuals with 2 biosamples after querying, and our field entity is a
+        #     biosample but our query is on an individual, we may get a small cell count issue through biosample but not
+        #     if we're going through individual (we may have five FEMALE individuals, but only one with a biosample).
+        return await (await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False))[0].acount()
+
     return {
-        e: await (await qqs.get_query_queryset_and_queried_entities(e))[0].acount()
-        for e in DISCOVERY_ENTITIES
+        e: ec
+        for e, ec in zip(
+            DISCOVERY_ENTITIES,
+            await asyncio.gather(*(_get_entity_count(e) for e in DISCOVERY_ENTITIES)),
+        )
     }
 
 
@@ -518,7 +536,8 @@ async def discovery_ui_hints(request: DrfRequest):
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
 
     # TODO: support querying?
-    counts = await discovery_queryset_entity_counts(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
+    qqs = QueryQuerysetsCache(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
+    counts = await discovery_queryset_entity_counts(qqs)
 
     return {
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with

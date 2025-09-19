@@ -1,17 +1,16 @@
 from bento_lib.discovery import DiscoveryEntity
 from collections.abc import Iterable
 from django.core.exceptions import ValidationError
-from django.db.models import Prefetch, QuerySet
+from django.db.models import QuerySet
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException, DiscoveryFilterRewriteException
 from .fields import get_field_options, filter_queryset_field_value
-from .fields_utils import resolve_filter_mapping_to_queryset_model
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
-from .utils import get_discovery_field_set_permissions, empty_discovery, get_discovery_entity_model_scoped_queryset
+from .utils import get_discovery_field_set_permissions, empty_discovery
 
 __all__ = [
     "discovery_filter_queryset",
@@ -55,7 +54,7 @@ async def validate_field_query_value(
             field_props.datatype == "string" and field_props.config.enum is None  # narrowed type via datatype ==
         )
     ):
-        raise ValidationError(f"Invalid value used in query: {value} ({repr(scope)})")
+        raise ValidationError(f"Invalid value used in field query: {field_id}={value} ({repr(scope)})")
 
 
 async def discovery_filter_queryset(
@@ -65,8 +64,7 @@ async def discovery_filter_queryset(
     queryset: QuerySet,
     dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
-    nested_prefetch: bool = False,
-    already_fetched: frozenset[DiscoveryEntity] = frozenset(),
+    validate_field: bool = True,
 ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
     """
     Process query parameters, check validity, and filter the queryset by the passed parameters.
@@ -75,12 +73,10 @@ async def discovery_filter_queryset(
     :param queryset_entity: The discovery entity being queried.
     :param queryset: The starting queryset for the discovery entity being queried.
     :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
-    :param nested_prefetch: If true, it means we're filtering in a "prefetch" context, meaning we skip out-of-bounds
-                            fields (e.g., querying individual.sex from biosample) instead of erroring out, and we don't
-                            further recursively do more prefetching.
-    :param already_fetched: If we're in a nested prefetch, we don't want to enter an infinite loop, so this stores
-                            entities which have already been fetched.
     :param lg: BoundLogger object.
+    :param validate_field: Whether we should validate the field's query value against options/allowed values. Be VERY
+               DELIBERATE when turning this off! This should only be used if we've already validated the field options,
+               e.g., from a previous call to this function.
     """
 
     discovery = discovery_scope.discovery
@@ -121,9 +117,10 @@ async def discovery_filter_queryset(
             #  - pass original queryset in for determining valid filter values
             #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
             #    queryset model
-            await validate_field_query_value(
-                queryset_entity, queryset, discovery_scope, field, value, qf_permissions[field]
-            )
+            if validate_field:
+                await validate_field_query_value(
+                    queryset_entity, queryset, discovery_scope, field, value, qf_permissions[field]
+                )
 
             # Update queryset to include the Django ORM filter for this query field/value
             #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
@@ -137,65 +134,7 @@ async def discovery_filter_queryset(
 
         except DiscoveryFilterRewriteException as e:
             # TODO: this used to be used to skip fields in nested prefetch, but this no longer works...
-            if not nested_prefetch:
-                raise e
-
-    # Build filtered "join" prefetches to limit *queried* nested entities to those which match filters: ----------------
-
-    # TODO: explain this:
-
-    # TODO: determine if we need to do this
-    # TODO: refactor to get this from the field normalizing code (so it can give us the "path" of queried entities...)
-    # if queryset_entity in ("individual", "phenopacket") and "experiment_result" in queried_entities:
-    #     queried_entities.add("experiment")
-    #     # may trigger the next if-statement right below
-    # if queryset_entity in ("individual", "phenopacket") and "experiment" in queried_entities:
-    #     queried_entities.add("biosample")
-    #     # may trigger the next if-statement right below
-    # if queryset_entity == "individual" and "biosample" in queried_entities:
-    #     queried_entities.add("phenopacket")
-    # if queryset_entity == "biosample" and "experiment_result" in queried_entities:
-    #     queried_entities.add("experiment")
-
-    # if (  # not nested_prefetch and
-    #     nested_queried_entities := tuple(
-    #         filter(lambda ee: ee != queryset_entity and ee not in already_fetched, queried_entities)
-    #     )
-    # ):
-    #     # If we're not in a "nested prefetch" context already, we may have nested discovery entities we're querying.
-    #     # We want to limit the Django ORM "join" with these nested entities to only include nested objects which also
-    #     # match the subset of our query applying to the nested entity type, otherwise we may end up in situations where
-    #     # we get "all experiments of all phenopackets containing WGS experiments", rather than our (potentially) desired
-    #     # "all phenopackets with at least one WGS experiment, and only those WGS experiments included in the result-set"
-    #
-    #     await lg.adebug(
-    #         "adding filtered prefetches",
-    #         nested_queried_entities=nested_queried_entities,
-    #         already_fetched=already_fetched,
-    #     )
-    #
-    #     nqe_set = set(nested_queried_entities)
-    #
-    #     filtered_prefetches: list[Prefetch] = []
-    #
-    #     for e in nested_queried_entities:
-    #         filtered_prefetches.append(
-    #             Prefetch(
-    #                 resolve_filter_mapping_to_queryset_model(queryset_entity, e, ()),
-    #                 queryset=(await discovery_filter_queryset(
-    #                     discovery_scope,
-    #                     query,
-    #                     e,
-    #                     get_discovery_entity_model_scoped_queryset(e, discovery_scope),
-    #                     dt_permissions,
-    #                     lg,
-    #                     nested_prefetch=True,  # For this recursive call, we shouldn't do any more recursive prefetching
-    #                     already_fetched=already_fetched | nqe_set,  # TODO: check this logic
-    #                 ))[0],
-    #                 to_attr=f"{e}_matches",
-    #             )
-    #         )
-    #
-    #     f_queryset = f_queryset.prefetch_related(*filtered_prefetches)
+            # TODO: this is now a pointless raise, but we should maybe put these back in? gotta figure out
+            raise e
 
     return f_queryset, frozenset(queried_entities)

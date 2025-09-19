@@ -69,7 +69,7 @@ def _resolve_filter_mapping_to_queryset_model_inner(
 
     match (queryset_entity, field_entity):
         #  - Phenopackets <-> Individuals
-        case ("individual", "phenopacket"):
+        case ("individual", "phenopacket"):  # re-writing the latter to the former
             if field_path[:1] == ("subject",):  # also conveniently handles the falsey case of field_path == ()
                 return field_path[1:]
             return "phenopackets", *field_path
@@ -78,21 +78,21 @@ def _resolve_filter_mapping_to_queryset_model_inner(
                 return field_path[1:]
             return "subject", *field_path
         #  - Phenopackets -> nested
-        case ("phenopacket", "biosample"):
+        case ("phenopacket", "biosample"):  # re-writing the latter to the former
             return "biosamples", *field_path
         case ("phenopacket", "experiment"):
             return "biosamples", "experiments", *field_path
         case ("phenopacket", "experiment_result"):
             return "biosamples", "experiments", "experiment_results", *field_path
         #  - Individuals -> nested
-        case ("individual", "biosample"):
-            return "phenopackets", "biosamples", *field_path
+        case ("individual", "biosample"):  # re-writing the latter to the former
+            return "biosamples", *field_path
         case ("individual", "experiment"):
-            return "phenopackets", "biosamples", "experiments", *field_path
+            return "biosamples", "experiments", *field_path
         case ("individual", "experiment_result"):
-            return "phenopackets", "biosamples", "experiments", "experiment_results", *field_path
+            return "biosamples", "experiments", "experiment_results", *field_path
         #  - Biosamples -> nested
-        case ("biosample", "experiment"):
+        case ("biosample", "experiment"):  # re-writing the latter to the former
             return "experiments", *field_path
         case ("biosample", "experiment_result"):
             return "experiments", "experiment_results", *field_path
@@ -100,7 +100,7 @@ def _resolve_filter_mapping_to_queryset_model_inner(
         case ("experiment", "experiment_result"):
             return "experiment_results", *field_path
         # --------------------------------------------------------------------------------------------------------------
-        case ("biosample", "phenopacket"):
+        case ("biosample", "phenopacket"):  # re-writing the latter to the former
             # If we are accessing a biosample field through a phenopacket path, we can remap it to a biosample queryset
             # model. Otherwise, we go "backwards" out to phenopackets.
             if field_path[:1] == ("biosamples",):
@@ -126,14 +126,22 @@ def _resolve_filter_mapping_to_queryset_model_inner(
             }:
                 return field_path[2:]
             return "biosample", "phenopackets", *field_path
-        case ("experiment", "individual"):
+        case ("experiment", "individual"):  # re-writing the latter to the former
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
             if field_path[:3] in {
                 ("phenopackets", "biosamples", "experiment"),  # TODO: remove in future version
                 ("phenopackets", "biosamples", "experiments"),
             }:
                 return field_path[3:]
-            return "biosample", "phenopackets", "subject", *field_path
+            # Alternate path which skips phenopackets
+            if field_path[:2] in {
+                ("biosamples", "experiment"),  # TODO: remove in future version
+                ("biosamples", "experiments"),
+            }:
+                return field_path[:2]
+            # Shorter path than going through phenopackets, although this might lead to wacky results if not all
+            # individuals are part of phenopackets.
+            return "biosample", "individual", *field_path
         case ("experiment_result", "phenopacket"):
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
             if field_path[:3] in {
@@ -149,7 +157,13 @@ def _resolve_filter_mapping_to_queryset_model_inner(
                 ("phenopackets", "biosamples", "experiments", "experiment_results"),
             }:
                 return field_path[4:]
-            return "experiments", "biosample", "phenopackets", "subject", *field_path
+            # Alternate path which skips phenopackets
+            if field_path[:3] in {
+                ("biosamples", "experiment", "experiment_results"),  # TODO: remove in future version
+                ("biosamples", "experiments", "experiment_results"),
+            }:
+                return field_path[3:]
+            return "experiments", "biosample", "individual", *field_path
         case ("experiment_result", "biosample"):
             # experiment: old path, prior to related_name; experiments: after
             if field_path[:2] in {
