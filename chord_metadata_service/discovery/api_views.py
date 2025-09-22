@@ -26,8 +26,8 @@ from chord_metadata_service.restapi.responses import bad_request, not_found
 from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
-from .censorship import get_rules, get_threshold, thresholded_count
-from .constants import DISCOVERY_ENTITIES, NESTED_ENTITIES
+from .censorship import get_rules, get_threshold, thresholded_count, censor_nested_entities
+from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .fields_utils import normalize_field_path_true_model
@@ -51,6 +51,7 @@ from .pydantic_models import (
 from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
+from .types import ModelCountOrBoolResponse
 from .utils import (
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
@@ -368,7 +369,7 @@ async def discovery_endpoint(request: DrfRequest):
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
     #  - a boolean (count > threshold)
-    count_or_bools_res: dict[DiscoveryEntity, int | bool] = {}
+    count_or_bools_res: ModelCountOrBoolResponse = {}
 
     # TODO: permissions non-hard-coded
     for e in counts:
@@ -402,10 +403,7 @@ async def discovery_endpoint(request: DrfRequest):
     #     (phenopacket -> biosample -> experiment -> experiment_result...)
     # TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
     #  done in a more dynamic way, starting from the queryset entity.
-    for e in count_or_bools_res:
-        if not count_or_bools_res[e] and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]].data:
-            for ee in NESTED_ENTITIES[e]:
-                count_or_bools_res[ee] = 0 if dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[ee]].counts else False
+    censor_nested_entities(count_or_bools_res, dt_permissions)
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
