@@ -53,7 +53,6 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
     return JSONBPathQuery(F(field), Value(f"{field_operator}.{query_path}"))
 
 
-# noinspection PyUnreachableCode
 def _resolve_filter_mapping_to_queryset_model_inner(
     queryset_entity: DiscoveryEntity, field_entity: DiscoveryEntity, field_path: tuple[str, ...]
 ) -> tuple[str, ...]:

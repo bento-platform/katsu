@@ -260,12 +260,21 @@ async def discovery_field_response(
 
 
 async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> dict[DiscoveryEntity, int]:
+    """
+    Returns a dictionary of discovery entity counts for a given scope/query context (i.e., a given QueryQuerysetsCache
+    instance). In other words, for each discovery entity, we'll get a queryset of the query executed on the entity and
+    count the number of matching entities.
+    """
+
     async def _get_entity_count(ee: DiscoveryEntity) -> int:
         # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to small
         # cell counts if we're in a nested entity.
         #  => For example, if we have 10 individuals with 2 biosamples after querying, and our field entity is a
         #     biosample but our query is on an individual, we may get a small cell count issue through biosample but not
         #     if we're going through individual (we may have five FEMALE individuals, but only one with a biosample).
+        #
+        # We access [0] of the result of get_query_queryset_and_queried_entities because it returns a tuple of
+        # (queryset, frozenset of queried entities), but we only need the former (to get the count).
         return await (await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False))[0].acount()
 
     return {
