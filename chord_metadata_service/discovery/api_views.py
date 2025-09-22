@@ -27,7 +27,7 @@ from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
 from .censorship import get_rules, get_threshold, thresholded_count
-from .constants import DISCOVERY_ENTITIES
+from .constants import DISCOVERY_ENTITIES, NESTED_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .fields_utils import normalize_field_path_true_model
@@ -398,7 +398,14 @@ async def discovery_endpoint(request: DrfRequest):
 
     # If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
     # one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
-    # TODO: !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # ==> do this, plus the same thing for all entities nested inside other entities
+    #     (phenopacket -> biosample -> experiment -> experiment_result...)
+    # TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
+    #  done in a more dynamic way, starting from the queryset entity.
+    for e in count_or_bools_res:
+        if not count_or_bools_res[e] and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]].data:
+            for ee in NESTED_ENTITIES[e]:
+                count_or_bools_res[ee] = 0 if dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[ee]].counts else False
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
