@@ -13,6 +13,7 @@ from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
+from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -85,7 +86,7 @@ class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
-        self.individual_1 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
             **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
@@ -196,7 +197,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
         # individuals (count 8)
         individuals = {
-            f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
+            f"individual_{i}": pa_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
         }
         # all individuals are in phenopackets that belong to dataset_a
         phenopackets = {
@@ -231,7 +232,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
         self.data_type_counts_ds_a: dict[str, int] = {
-            "individual": ph_m.Individual.objects.all().count(),
+            "individual": pa_m.Individual.objects.all().count(),
             "biosample": ph_m.Biosample.objects.all().count(),
             "experiment": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
         }
@@ -393,9 +394,10 @@ class DiscoveryOverviewTest2(AuthzAPITestCase):
     def setUp(self) -> None:
         self.url = '/api/discovery'
         # create only 2 individuals
-        # TODO: create phenopackets
-        for ind in VALID_INDIVIDUALS[:2]:
-            ph_m.Individual.objects.create(**ind)
+        for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
+            ind_obj = pa_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_response(self):
