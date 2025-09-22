@@ -123,7 +123,8 @@ class QueryQuerysetsCache:
         validate_field: bool = True,
     ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
         # We use an async lock here to prevent executing the same entity query multiple times if we have parallel async
-        # requests happening (liable to happen with field-level data collection in discovery_field_response).
+        # requests happening (liable to happen with field-level data collection in discovery_field_response, where we do
+        # an asyncio.gather across all the fields).
         # Combining the lock with the caching mechanism means this is roughly equivalent to re-using the same
         # "promise"/awaitable if one already exists.
         async with self._queryset_locks[entity]:
