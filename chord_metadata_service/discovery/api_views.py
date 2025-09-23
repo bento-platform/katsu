@@ -26,7 +26,7 @@ from chord_metadata_service.restapi.responses import bad_request, not_found
 from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
-from .censorship import get_rules, get_threshold, thresholded_count, censor_nested_entities
+from .censorship import get_rules, thresholded_count, censor_entity_counts
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
@@ -51,7 +51,7 @@ from .pydantic_models import (
 from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
-from .types import ModelCountOrBoolResponse
+from .types import ModelCountOrBoolResponse, EntityCounts
 from .utils import (
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
@@ -261,7 +261,7 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
-async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> dict[DiscoveryEntity, int]:
+async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCounts:
     """
     Returns a dictionary of discovery entity counts for a given scope/query context (i.e., a given QueryQuerysetsCache
     instance). In other words, for each discovery entity, we'll get a queryset of the query executed on the entity and
@@ -369,41 +369,19 @@ async def discovery_endpoint(request: DrfRequest):
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
     #  - a boolean (count > threshold)
-    count_or_bools_res: ModelCountOrBoolResponse = {}
-
-    # TODO: permissions non-hard-coded
-    for e in counts:
-        dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]
-        entity_permissions = dt_permissions[dt]
-        count_threshold = get_threshold(discovery, entity_permissions)
-
-        entity_count = counts[e]
-
-        # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
-        if 0 < counts[e] <= count_threshold and count_threshold > 0:
-            await lg.ainfo("discovery: entity count is below threshold", entity=e, threshold=count_threshold)
-            entity_count = 0  # censor sub-threshold counts to 0
-
-        if entity_permissions.any_permissions():  # if we have any permissions, then add a response for the overview
-            # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we
-            # didn't get censored down to 0 above.
-            # This key used to be a plural version of the public model name, but is now singular so we have a consistent
-            # key to use across all discovery endpoints:
-            count_or_bools_res[e] = entity_count if entity_permissions.counts else (entity_count > 0)
-
-    if (
-        not count_or_bools_res[queryset_entity]
-        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
-    ):
-        message = INSUFFICIENT_DATA_AVAILABLE_MSG
-
     # If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
     # one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
     # ==> do this, plus the same thing for all entities nested inside other entities
     #     (phenopacket -> biosample -> experiment -> experiment_result...)
     # TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
     #  done in a more dynamic way, starting from the queryset entity.
-    censor_nested_entities(count_or_bools_res, dt_permissions)
+    count_or_bools_res: ModelCountOrBoolResponse = await censor_entity_counts(discovery, counts, dt_permissions, lg)
+
+    if (
+        not count_or_bools_res[queryset_entity]
+        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
+    ):
+        message = INSUFFICIENT_DATA_AVAILABLE_MSG
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 

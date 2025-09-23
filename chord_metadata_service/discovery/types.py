@@ -3,6 +3,7 @@ from typing import TypeAlias, TypedDict
 
 __all__ = [
     "ModelScopeFilters",
+    "EntityCounts",
     "ModelCountOrBoolResponse",
 ]
 
@@ -19,4 +20,5 @@ class ModelScopeFilters(TypedDict):
     dataset: ScopeLevelFilters
 
 
+EntityCounts: TypeAlias = dict[DiscoveryEntity, int]
 ModelCountOrBoolResponse: TypeAlias = dict[DiscoveryEntity, int | bool]
