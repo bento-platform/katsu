@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import TypeAlias
 
-from .types import ModelCountOrBoolResponse
+from .types import EntityCountOrBoolResponse
 
 __all__ = [
     "BinWithValue",
@@ -143,7 +143,9 @@ class DiscoveryResponse(BaseModel):
     queried_entities: frozenset[DiscoveryEntity]
     message: str = ""  # A message related to the response, e.g., insufficient data. If blank, it shouldn't be shown.
     counts: (
-        ModelCountOrBoolResponse | dict[str, ModelCountOrBoolResponse] | dict[str, dict[str, ModelCountOrBoolResponse]]
+        EntityCountOrBoolResponse |
+        dict[str, EntityCountOrBoolResponse] |
+        dict[str, dict[str, EntityCountOrBoolResponse]]
     )
 
 
