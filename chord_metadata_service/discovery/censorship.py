@@ -11,7 +11,7 @@ from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscover
 from .constants import NESTED_ENTITIES
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .scope import ValidatedDiscoveryScope
-from .types import ModelCountOrBoolResponse, EntityCounts
+from .types import EntityCountOrBoolResponse, EntityCounts
 from .utils import extract_discovery
 
 __all__ = [
@@ -78,7 +78,7 @@ async def censor_entity_counts(
     counts: EntityCounts,
     dt_permissions: DataTypeDiscoveryPermissions,
     lg: BoundLogger,
-) -> ModelCountOrBoolResponse:
+) -> EntityCountOrBoolResponse:
     """
     Given a set of counts for discovery entities (presumably matching a particular query/discovery scope)
     Note on nested censorship:
@@ -90,7 +90,7 @@ async def censor_entity_counts(
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
     #  - a boolean (count > threshold)
-    count_or_bools_res: ModelCountOrBoolResponse = {}
+    count_or_bools_res: EntityCountOrBoolResponse = {}
 
     # TODO: permissions non-hard-coded
     for e in counts:

@@ -51,7 +51,7 @@ from .pydantic_models import (
 from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
-from .types import ModelCountOrBoolResponse, EntityCounts
+from .types import EntityCountOrBoolResponse, EntityCounts
 from .utils import (
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
@@ -375,7 +375,7 @@ async def discovery_endpoint(request: DrfRequest):
     #     (phenopacket -> biosample -> experiment -> experiment_result...)
     # TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
     #  done in a more dynamic way, starting from the queryset entity.
-    count_or_bools_res: ModelCountOrBoolResponse = await censor_entity_counts(discovery, counts, dt_permissions, lg)
+    count_or_bools_res: EntityCountOrBoolResponse = await censor_entity_counts(discovery, counts, dt_permissions, lg)
 
     if (
         not count_or_bools_res[queryset_entity]

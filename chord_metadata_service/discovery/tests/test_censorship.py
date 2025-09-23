@@ -12,7 +12,7 @@ from chord_metadata_service.discovery.censorship import (
     get_max_query_parameters,
     censor_entity_counts,
 )
-from chord_metadata_service.discovery.types import ModelCountOrBoolResponse, EntityCounts
+from chord_metadata_service.discovery.types import EntityCountOrBoolResponse, EntityCounts
 from .constants import DISCOVERY_CONFIG_TEST
 
 
@@ -106,14 +106,14 @@ class CensorshipCensorEntityCountsTest(TestCase):
 
     async def test_experiments_experiment_results(self):
         d: EntityCounts = {**self.LARGE_COUNTS, "experiment": 0}
-        r: ModelCountOrBoolResponse = await censor_entity_counts(
+        r: EntityCountOrBoolResponse = await censor_entity_counts(
             DISCOVERY_CONFIG_TEST, d, self.DT_PERMISSIONS_COUNTS, test_logger
         )
         self.assertDictEqual(r, {**self.LARGE_COUNTS, "experiment": 0, "experiment_result": 0})
 
     async def test_experiments_experiment_results_bool(self):
         d: EntityCounts = {**self.LARGE_COUNTS, "experiment": 0}
-        r: ModelCountOrBoolResponse = await censor_entity_counts(
+        r: EntityCountOrBoolResponse = await censor_entity_counts(
             DISCOVERY_CONFIG_TEST, d, self.DT_PERMISSIONS_PHE_COUNTS_EXP_BOOL, test_logger
         )
         self.assertDictEqual(r, {**self.LARGE_COUNTS, "experiment": False, "experiment_result": False})
