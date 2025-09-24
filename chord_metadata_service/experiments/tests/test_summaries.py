@@ -27,25 +27,6 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
         },
     }
 
-    nonempty_response = {
-        "count": 1,
-        "data_type_specific": {
-            "experiments": {
-                "count": 1,
-                "experiment_type": {"DNA Methylation": 1},
-                "extraction_protocol": {"NGS": 1},
-                "library_layout": {"Single": 1},
-                "library_selection": {"PCR": 1},
-                "library_source": {"Genomic": 1},
-                "library_strategy": {"Bisulfite-Seq": 1},
-                "study_type": {"Whole genome Sequencing": 1},
-                "molecule": {"total RNA": 1},
-            },
-            "experiment_results": {"count": 0, "file_format": {}, "data_output_type": {}, "usage": {}},
-            "instruments": {"count": 0, "model": {}, "platform": {}},
-        },
-    }
-
     def setUp(self):
         super().setUp()
 
@@ -57,10 +38,8 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
     async def test_summary_1_exp_no_perms_whole_instance(self):
         self.maxDiff = None
 
-        subtest_params = [
-            (self.permissions_none, self.empty_response),
-            (self.permissions_bool, self.nonempty_response),
-        ]
+        subtest_params = [(self.permissions_none, self.empty_response), (self.permissions_bool, self.empty_response)]
+
         for params in subtest_params:
             with self.subTest(params=params):
                 r = await dt_experiment_summary(INSTANCE_SCOPE, params[0])
@@ -70,7 +49,24 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
         self.maxDiff = None
 
         r = await dt_experiment_summary(INSTANCE_SCOPE, self.permissions_full)
-        self.assertDictEqual(r, self.nonempty_response)
+        self.assertDictEqual(r, {
+            "count": 1,
+            "data_type_specific": {
+                "experiments": {
+                    "count": 1,
+                    "experiment_type": {"DNA Methylation": 1},
+                    "extraction_protocol": {"NGS": 1},
+                    "library_layout": {"Single": 1},
+                    "library_selection": {"PCR": 1},
+                    "library_source": {"Genomic": 1},
+                    "library_strategy": {"Bisulfite-Seq": 1},
+                    "study_type": {"Whole genome Sequencing": 1},
+                    "molecule": {"total RNA": 1},
+                },
+                "experiment_results": {"count": 0, "file_format": {}, "data_output_type": {}, "usage": {}},
+                "instruments": {"count": 0, "model": {}, "platform": {}},
+            }
+        })
 
     async def test_summary_empty_project(self):
         r = await dt_experiment_summary(ValidatedDiscoveryScope(self.empty_project, None), self.permissions_full)
