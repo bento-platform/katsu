@@ -50,7 +50,8 @@ class SchemaRefs(Enum):
     EXTENSION_SCHEMA = EXTENSION_SCHEMA
     EXTRA_PROPERTIES_SCHEMA = EXTRA_PROPERTIES_SCHEMA
     GESTATIONAL_AGE = GESTATIONAL_AGE
-    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA # Alias for experiments/migrations/0012_alter_experiment_experiment_ontology_and_more.py to be functional
+    # Alias for experiments/migrations/0012_alter_experiment_experiment_ontology_and_more.py to be functional
+    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA
     ONTOLOGY_CLASS = ONTOLOGY_CLASS
     ONTOLOGY_CLASS_LIST = ONTOLOGY_CLASS_LIST
     PHENOPACKET_EVIDENCE_SCHEMA = PHENOPACKET_EVIDENCE_SCHEMA
