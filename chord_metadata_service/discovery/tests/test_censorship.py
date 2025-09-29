@@ -99,6 +99,11 @@ class CensorshipCensorEntityCountsTest(TestCase):
         DATA_TYPE_EXPERIMENT: DataPermissions(bool_=True, counts=False, data=False),
     }
 
+    DT_PERMISSIONS_FULL = {
+        DATA_TYPE_PHENOPACKET: DataPermissions(bool_=True, counts=True, data=True),
+        DATA_TYPE_EXPERIMENT: DataPermissions(bool_=True, counts=True, data=True),
+    }
+
     async def test_none(self):
         d = {**self.LARGE_COUNTS}
         await censor_entity_counts(DISCOVERY_CONFIG_TEST, d, self.DT_PERMISSIONS_COUNTS, test_logger)
@@ -117,3 +122,11 @@ class CensorshipCensorEntityCountsTest(TestCase):
             DISCOVERY_CONFIG_TEST, d, self.DT_PERMISSIONS_PHE_COUNTS_EXP_BOOL, test_logger
         )
         self.assertDictEqual(r, {**self.LARGE_COUNTS, "experiment": False, "experiment_result": False})
+
+    async def test_experiments_experiment_results_full(self):
+        d: EntityCounts = {**self.LARGE_COUNTS, "experiment": 0}
+        # Full permissions, so no censorship should happen!
+        r: EntityCountOrBoolResponse = await censor_entity_counts(
+            DISCOVERY_CONFIG_TEST, d, self.DT_PERMISSIONS_FULL, test_logger
+        )
+        self.assertDictEqual(r, d)

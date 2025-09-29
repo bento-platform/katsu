@@ -975,6 +975,16 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
         # _page_size=0 means we get all records:
         self._assert_ok_page_length_and_total(response, all_count, all_count)
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_page_invalid_too_small(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&page=-1')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)  # page number cannot be negative
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_page_invalid_too_big(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&page_size=100&page=2')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)  # page number too high
+
     # TODO: more
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
