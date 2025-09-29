@@ -705,6 +705,12 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(response_obj["code"], status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_bad_range_format(self):
+        # extra_properties range search (above taper, single value)
+        response = self.dt_authz_counts_get("/api/discovery?baseline_creatinine=+ 200")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_range_string_1(self):
         # sex string search and extra_properties range search
         response = self.dt_authz_counts_get(
