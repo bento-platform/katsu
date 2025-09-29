@@ -269,7 +269,7 @@ def _json_dump_if_pyd(data):
 class PydanticJSONRenderer(JSONRenderer):
     """
     An extended version of the default DRF JSONRenderer class, which handles Pydantic model instances if passed. If the
-    data passed is not a Pydantic model instance, this simply falls back to
+    data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
     """
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
@@ -277,7 +277,8 @@ class PydanticJSONRenderer(JSONRenderer):
 
 class PydanticBrowsableAPIRenderer(BrowsableAPIRenderer):
     """
-    TODO
+    An extended version of the default DRF BrowsableAPIRenderer class, which handles Pydantic model instances if passed.
+    If the data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
     """
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
