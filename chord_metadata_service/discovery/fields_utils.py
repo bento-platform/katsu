@@ -268,11 +268,20 @@ def get_field_django_mapping_and_queried_entity(
 
     if field_path:
         field_obj = DISCOVERY_ENTITY_NAMES_TO_MODEL[queryset_entity]._meta.get_field(resolved_field_path[0])
-        # TODO: explain subquery magic
-        if isinstance(field_obj, ManyToManyField) or isinstance(field_obj, ManyToOneRel):
+        # If we have a many-to-many field or a many-to-one (from a foreign key) relationship, we need to do filtering
+        # based on an Exists subquery rather than an inner join, since the latter prevents us from getting correct
+        # counts/stats (Django executes an inner join even when we don't want one, basically).
+        # For example, instead of getting the counts for ALL diseases with phenopackets that have "breast cancer" as a
+        # disease (i.e., a distribution with the *other* diseases breast cancer patients may have as well), we ONLY get
+        # inner-joined records for matching Disease models if we do this naively, when instead we want what was
+        # described: all disease counts for phenopackets with breast cancer.
+        # To solve this, we do an Exists subquery to check if we have at least one matching object from the other side
+        # of the m2m/many-to-one relation which matches the field query (which as been rewritten to be valid for
+        # the model referred to in the relation rather than the queryset model.)
+        if isinstance(field_obj, ManyToManyField | ManyToOneRel):
             if isinstance(field_obj, ManyToManyField):
                 rel = field_obj.remote_field.accessor_name
-            elif isinstance(field_obj, ManyToOneRel):
+            else:  # isinstance(field_obj, ManyToOneRel)
                 rel = field_obj.field.name
             subquery = DiscoveryFieldSubquery(
                 queryset=field_obj.related_model.objects.all(),
