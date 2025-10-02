@@ -476,6 +476,70 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
+class DiscoveryUIHintsTest(AuthzAPITestCase):
+    def setUp(self):
+        self.url = reverse("discovery-ui-hints")
+
+    def test_empty_discovery(self):
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_empty_entities_with_data(self):
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertListEqual(res.json()["entities_with_data"], [])
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_few_entities(self):
+        # create only 2 individuals
+        for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
+            ind_obj = pa_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
+
+        # -------------------------------------------------------------------------------
+
+        # With bool/counts, this is below the censorship threshold, so we get no entities with data.
+        # With full data access, we can learn we have phenopackets/individuals.
+
+        res = self.dt_authz_bool_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertListEqual(res.json()["entities_with_data"], [])
+
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertListEqual(res.json()["entities_with_data"], [])
+
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_many_entities(self):
+        for i, ind in enumerate(VALID_INDIVIDUALS):
+            ind_obj = pa_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
+
+        # -------------------------------------------------------------------------------
+
+        # Since we have many entities (and are now above the censorship threshold), we should now get entities_with_data
+        # being "complete" in all authorization cases:
+
+        res = self.dt_authz_bool_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+
 class DiscoverySchemaTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discover_schema(self):

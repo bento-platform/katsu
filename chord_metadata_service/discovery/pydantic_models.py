@@ -27,6 +27,7 @@ __all__ = [
     "DiscoverySearchSectionWithOptions",
     "DiscoverySearchFieldsResponse",
     "DiscoveryQuery",
+    "DiscoveryUIHintsResponse",
 ]
 
 
@@ -91,6 +92,8 @@ class MatchBiosample(BaseMatchModel):
     Compact representation of a biosample for returning/rendering search responses.
     """
     id: str = Field(..., title="Biosample ID")
+    # sampled_tissue: OntologyTerm | None
+    # sample_type: OntologyTerm | None
     phenopacket: str | None = Field(..., title="Phenopacket ID")
     experiments: list[MatchExperiment] | None
 
@@ -198,3 +201,13 @@ class DiscoveryQuery(BaseModel):
         }
 
         return cls(fts=params.get("_fts") or None, filters=filters)
+
+
+class DiscoveryUIHintsResponse(BaseModel):
+    """
+    Model representing the UI hints discovery response, which gives any API consumer some hints/suggestions on how to
+    make the UI nicer by, e.g., selectively hiding parts.
+    """
+
+    entities_with_data: list[DiscoveryEntity]
+    # biosample_location_present: bool  TODO

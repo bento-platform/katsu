@@ -47,6 +47,7 @@ from .pydantic_models import (
     DiscoveryQuery,
     DiscoveryMatches,
     DiscoveryMatchesPaginatedResponse,
+    DiscoveryUIHintsResponse,
 )
 from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
@@ -364,7 +365,7 @@ async def discovery_endpoint(request: DrfRequest):
     # -- Counts processing ---------------------------------------------------------------------------------------------
 
     message: str = ""
-    counts: dict[DiscoveryEntity, int] = await discovery_queryset_entity_counts(qqs)
+    counts: EntityCounts = await discovery_queryset_entity_counts(qqs)
 
     # for each 'discovery entity', we generate either:
     #  - a count (0/count-if-above-threshold), or
@@ -539,10 +540,13 @@ async def discovery_ui_hints(request: DrfRequest):
     dt_permissions = await get_discovery_data_type_permissions(request, scope)
 
     # TODO: support querying?
-    qqs = QueryQuerysetsCache(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
-    counts = await discovery_queryset_entity_counts(qqs)
+    try:
+        qqs = QueryQuerysetsCache(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
+        counts = await discovery_queryset_entity_counts(qqs)
+    except DiscoveryEmptyException:
+        return dres.no_public_data(request)
 
-    return {
+    return Response(DiscoveryUIHintsResponse.model_validate({
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
         # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
         # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
@@ -555,7 +559,7 @@ async def discovery_ui_hints(request: DrfRequest):
         # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
         #  should present a consolidated map view?
         # "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
-    }
+    }))
 
 
 @api_view(["GET"])
