@@ -995,10 +995,26 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_matches_response(self):
+        # We have phenopackets for each individual, so the count should be the same as the # of individuals
         response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
+        male_count = Individual.objects.filter(sex="MALE").count()  # proxy for phenopackets since we have 1:1
+        # male_count=5 males, all of which can fit in the default page size of 10:
+        self._assert_ok_page_length_and_total(response, male_count, male_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_individuals(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&_entity=individual')
         male_count = Individual.objects.filter(sex="MALE").count()
         # male_count=5 males, all of which can fit in the default page size of 10:
         self._assert_ok_page_length_and_total(response, male_count, male_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_empty_entities(self):
+        # no biosamples, experiments, or experiment results in this test right now
+        for entity in ("biosample", "experiment", "experiment_result"):
+            with self.subTest(params=(entity,)):
+                response = self.dt_authz_full_get(f"/api/discovery_matches?sex=MALE&_entity={entity}")
+                self._assert_ok_page_length_and_total(response, 0, 0)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_matches_response_page_size(self):
