@@ -989,7 +989,7 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_matches_bad_scope(self):
-        res = self.dt_authz_full_get(f"/api/discovery_matches?project=does-not-exist")
+        res = self.dt_authz_full_get("/api/discovery_matches?project=does-not-exist")
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(res.json()["message"], "Not Found")
 
