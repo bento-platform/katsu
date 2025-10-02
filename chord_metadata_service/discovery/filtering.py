@@ -6,7 +6,7 @@ from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
-from .exceptions import DiscoveryEmptyException, DiscoveryFilterRewriteException
+from .exceptions import DiscoveryEmptyException
 from .fields import get_field_options, filter_queryset_field_value
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
@@ -112,29 +112,23 @@ async def discovery_filter_queryset(
         if field not in searchable_fields:
             raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
 
-        try:
-            # Ensure the passed value is in our allowed options:
-            #  - pass original queryset in for determining valid filter values
-            #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
-            #    queryset model
-            if validate_field:
-                await validate_field_query_value(
-                    queryset_entity, queryset, discovery_scope, field, value, qf_permissions[field]
-                )
-
-            # Update queryset to include the Django ORM filter for this query field/value
-            #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
-            #    queryset model
-            f_queryset, queried_entity = await filter_queryset_field_value(
-                queryset_entity, f_queryset, discovery.fields[field], value, lg
+        # Ensure the passed value is in our allowed options:
+        #  - pass original queryset in for determining valid filter values
+        #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
+        #    queryset model
+        if validate_field:
+            await validate_field_query_value(
+                queryset_entity, queryset, discovery_scope, field, value, qf_permissions[field]
             )
 
-            queried_entities.add(queried_entity)
-            field_queried_entities[field] = queried_entity
+        # Update queryset to include the Django ORM filter for this query field/value
+        #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
+        #    queryset model, but every case SHOULD be covered here.
+        f_queryset, queried_entity = await filter_queryset_field_value(
+            queryset_entity, f_queryset, discovery.fields[field], value, lg
+        )
 
-        except DiscoveryFilterRewriteException as e:
-            # TODO: this used to be used to skip fields in nested prefetch, but this no longer works...
-            # TODO: this is now a pointless raise, but we should maybe put these back in? gotta figure out
-            raise e
+        queried_entities.add(queried_entity)
+        field_queried_entities[field] = queried_entity
 
     return f_queryset, frozenset(queried_entities)
