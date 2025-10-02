@@ -584,6 +584,16 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             self.assertEqual(individual_db_count, response_obj["counts"]["individual"])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_sex_via_fts(self):
+        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field:
+        response = self.dt_authz_counts_get('/api/discovery?_fts=FEMALE')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.filter(sex__iexact='female').count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+        self._test_individual_counts(response_obj, db_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_2_fields(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
@@ -960,6 +970,29 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
         self.assertEqual(len(response_obj["results"]), results_length)
         self.assertEqual(response_obj["pagination"]["total"], total)
 
+    def test_discovery_matches_response_no_discovery_config(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.json()["message"], "No public data available.")
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_insufficient_perms(self):
+        response = self.dt_authz_counts_get('/api/discovery_matches?sex=MALE')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.json()["message"], "Insufficient privileges to view data.")
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_invalid_entity(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&_entity=does-not-exist')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json()["message"], "Bad Request")
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_bad_scope(self):
+        res = self.dt_authz_full_get(f"/api/discovery_matches?project=does-not-exist")
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.json()["message"], "Not Found")
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_matches_response(self):
         response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
@@ -990,6 +1023,11 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
     def test_discovery_matches_response_page_invalid_too_big(self):
         response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&page_size=100&page=2')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)  # page number too high
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_response_page_invalid_string(self):
+        response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE&page=one')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)  # page number cannot be a string
 
     # TODO: more
 

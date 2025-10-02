@@ -432,7 +432,7 @@ async def discovery_matches(request: DrfRequest):
     try:
         scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        return not_found(e.message)
+        return not_found(request, e.message)
 
     lg = logger.bind(scope_repr=repr(scope))
 

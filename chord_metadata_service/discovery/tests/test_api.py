@@ -485,6 +485,12 @@ class DiscoveryUIHintsTest(AuthzAPITestCase):
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_bad_scope(self):
+        res = self.dt_authz_counts_get(f"{self.url}?project=does-not-exist")
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.json()["message"], "Not Found")
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_empty_entities_with_data(self):
         res = self.dt_authz_counts_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
