@@ -163,6 +163,13 @@ def _resolve_filter_mapping_to_queryset_model_inner_2(
                 ("biosamples", "experiments"),
             }:
                 return field_path[2:]
+            if (not force_through_phenopackets) and field_path[:1] == ("subject",):
+                # We can skip a hop if:
+                #   a) we're not forced through phenopackets, and
+                #   b) we're mapping to experiment --> ... --> individual:
+                return "biosample", "individual", *field_path[1:]
+            if field_path[:1] == ("biosamples",):
+                return "biosample", *field_path[1:]
             return "biosample", "phenopackets", *field_path
         case ("experiment", "individual"):  # re-writing the latter to the former
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
