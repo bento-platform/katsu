@@ -209,29 +209,85 @@ class TestJsonFieldUtils(TestCase):
 
 class TestResolveFilterMapping(TestCase):
     def test_resolve_filter_mapping(self):
-        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], str]] = [
-            ("phenopacket", "individual", ("sex",), "subject__sex"),
-            ("individual", "phenopacket", ("subject", "sex"), "sex"),
+        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], bool | None, str]] = [
+            # starting at the second discovery entity with the field path, mapping to the first
+            ("phenopacket", "individual", ("sex",), None, "subject__sex"),
+            ("phenopacket", "individual", ("phenopackets", "subject", "sex"), None, "subject__sex"),
+            ("individual", "phenopacket", ("subject", "sex"), None, "sex"),
+            ("individual", "phenopacket", ("subject", "phenopackets", "subject", "sex"), None, "sex"),
+            ("individual", "phenopacket", ("biosamples", "sampled_tissue"), False, "biosamples__sampled_tissue"),
             (
                 "experiment",
                 "phenopacket",
                 ("biosamples", "experiment", "extra_properties", "prop"),
+                None,
                 "extra_properties__prop",
             ),
             (
                 "experiment",
                 "phenopacket",
                 ("biosamples", "experiments", "extra_properties", "prop"),
+                None,
                 "extra_properties__prop",
             ),
-            ("biosample", "individual", ("sex",), "phenopackets__subject__sex"),
-            ("biosample", "phenopacket", ("biosamples", "sampled_tissue"), "sampled_tissue"),
+            ("biosample", "individual", ("sex",), False, "individual__sex"),
+            ("biosample", "individual", ("sex",), True, "phenopackets__subject__sex"),
+            ("biosample", "phenopacket", ("subject", "sex"), False, "individual__sex"),
+            ("biosample", "phenopacket", ("subject", "sex"), True, "phenopackets__subject__sex"),
+            ("biosample", "phenopacket", ("biosamples", "sampled_tissue"), None, "sampled_tissue"),
+            ("experiment", "individual", ("sex",), False, "biosample__individual__sex"),
+            ("experiment", "individual", ("sex",), True, "biosample__phenopackets__subject__sex"),
+            (
+                "experiment",
+                "individual",
+                ("phenopackets", "biosamples", "experiments", "experiment_type"),
+                None,
+                "experiment_type",
+            ),
+            (
+                "experiment",
+                "individual",
+                ("biosamples", "experiments", "experiment_type"),
+                None,
+                "experiment_type",
+            ),
+            (
+                "experiment",
+                "individual",
+                ("biosamples", "experiments", "extra_properties", "prop"),
+                None,
+                "extra_properties__prop",
+            ),
+            (
+                "experiment",
+                "individual",
+                ("phenopackets", "biosamples", "experiments", "extra_properties", "prop"),
+                None,
+                "extra_properties__prop",
+            ),
+            ("experiment_result", "individual", ("sex",), False, "experiments__biosample__individual__sex"),
+            ("experiment_result", "individual", ("sex",), True, "experiments__biosample__phenopackets__subject__sex"),
+            (
+                "experiment_result",
+                "experiment",
+                ("experiment_result", "genome_assembly_id"),
+                None,
+                "genome_assembly_id",
+            ),
             # TODO: more
         ]
 
         for params in subtests:
             with self.subTest(params=params):
-                self.assertEqual(resolve_filter_mapping_to_queryset_model(*params[:3]), params[3])
+                if params[3] is None:
+                    self.assertEqual(resolve_filter_mapping_to_queryset_model(
+                        params[0], params[1], params[2], False
+                    ), params[4])
+                    self.assertEqual(resolve_filter_mapping_to_queryset_model(
+                        params[0], params[1], params[2], True
+                    ), params[4])
+                else:
+                    self.assertEqual(resolve_filter_mapping_to_queryset_model(*params[:4]), params[4])
 
     def test_resolve_filter_mapping_exc(self):
         # we cannot rewrite these as invalid discovery entities
@@ -258,6 +314,34 @@ class TestResolveFilterMapping(TestCase):
             (
                 ("phenopacket", ("biosamples", "experiments", "extra_properties", "some_prop")),
                 ("experiment", ("extra_properties", "some_prop")),
+            ),
+            (
+                ("individual", ("phenopackets", "subject", "sex")),
+                ("individual", ("sex",)),
+            ),
+            (
+                ("individual", ("biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("individual", ("biosamples", "individual", "biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "phenopackets", "biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("experiment", ("experiment_results", "genome_assembly_id")),
+                ("experiment_result", ("genome_assembly_id",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "experiments", "experiment_results", "genome_assembly_id")),
+                ("experiment_result", ("genome_assembly_id",)),
             ),
             # TODO: more
         ]
