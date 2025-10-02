@@ -196,6 +196,8 @@ def _resolve_filter_mapping_to_queryset_model_inner_2(
                 ("biosamples", "experiments", "experiment_results"),
             }:
                 return field_path[3:]
+            if (not force_through_phenopackets) and field_path[:1] == ("subject",):
+                return "experiments", "biosample", "individual", *field_path[1:]
             return "experiments", "biosample", "phenopackets", *field_path
         case ("experiment_result", "individual"):
             # biosamples__experiment: old path, prior to related_name; biosamples__experiments: after
@@ -216,13 +218,13 @@ def _resolve_filter_mapping_to_queryset_model_inner_2(
         case ("experiment_result", "biosample"):
             # experiment: old path, prior to related_name; experiments: after
             if field_path[:2] in {
-                ("experiment", "experiment_result"),  # TODO: remove in future version
-                ("experiments", "experiment_result"),
+                ("experiment", "experiment_results"),  # TODO: remove in future version
+                ("experiments", "experiment_results"),
             }:
                 return field_path[2:]
             return "experiments", "biosample", *field_path
         case ("experiment_result", "experiment"):
-            if field_path[:1] == ("experiment_result",):
+            if field_path[:1] == ("experiment_results",):
                 return field_path[1:]
             return "experiments", *field_path
         # --------------------------------------------------------------------------------------------------------------
