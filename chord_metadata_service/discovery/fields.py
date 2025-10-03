@@ -1,20 +1,25 @@
 import datetime
 
-from bento_lib.discovery import DiscoveryConfig, DateFieldDefinition, FieldDefinition
+from bento_lib.discovery import (
+    DiscoveryConfig, DateFieldDefinition, FieldDefinition, NumberFieldDefinition, StringFieldDefinition, DiscoveryEntity
+)
 from calendar import month_abbr
 from collections import Counter, defaultdict
-from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q
+
+from chord_metadata_service.discovery.censorship import get_threshold
+from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q, Exists, OuterRef
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
 from typing import Any, Mapping
 
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 
 from . import fields_utils as f_utils
-from .censorship import get_threshold, thresholded_count
+from .censorship import censor_count, thresholded_count
+from .fields_utils import DiscoveryFieldSubquery
 from .scope import ValidatedDiscoveryScope
+from .pydantic_models import BinWithValue, BinList
 from .stats import stats_for_field
-from .types import BinWithValue
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
@@ -35,13 +40,20 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
 
 
 async def get_field_options(
-    field: str, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
+    queryset_entity: DiscoveryEntity,
+    queryset: QuerySet,
+    field_id: str,
+    scope: ValidatedDiscoveryScope,
+    field_permissions: DataPermissions,
 ) -> list[Any]:
     """
     Given properties for a public field, return the list of authorized options for
     querying this field.
     """
-    field_props = discovery.fields[field]
+
+    field_props = scope.discovery.fields[field_id]
+    threshold = get_threshold(scope, field_permissions)
+
     if field_props.datatype == "string":
         options = getattr(field_props.config, "enum", None)
         # Special case: no list of values specified
@@ -49,14 +61,15 @@ async def get_field_options(
             # We must be careful here not to leak 'small cell' values as options
             # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
             #   should be treated as if the field isn't in the database at all.
-            options = await get_distinct_field_values(field, discovery, field_permissions)
+            options = await get_distinct_field_values(queryset_entity, queryset, field_props, threshold)
     elif field_props.datatype == "number":
         options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     elif field_props.datatype == "date":
         # Assumes the field is in extra_properties, thus can not be aggregated
         # using SQL MIN/MAX functions
-        start, end = await get_month_date_range(field_props)
+        start, end = await get_month_date_range(queryset_entity, queryset, field_props, threshold)
         options = [
+            # TODO: need to pass a threshold to monthly range generator
             f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
         ] if start else []
     else:  # pragma: no cover
@@ -68,26 +81,26 @@ async def get_field_options(
 
 
 async def get_distinct_field_values(
-    field: str, discovery: DiscoveryConfig, field_permissions: DataPermissionsDict
+    queryset_entity: DiscoveryEntity, queryset: QuerySet, field_props: FieldDefinition, threshold: int
 ) -> list[Any]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
-    field_props = discovery.fields[field]
-    model, mapping_field = f_utils.get_model_and_field(field_props.mapping)
-    threshold = get_threshold(discovery, field_permissions)
+
+    mapping_field = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
     field_query = mapping_field
     if gb := field_props.group_by:
         # JSONField containing an array
         # use jsonb_path_query field expression
         field_query = f_utils.get_jsonb_path_query(mapping_field, gb)
-    values_with_counts = model.objects.values_list(field_query).annotate(count=Count(mapping_field))
+
+    values_with_counts = queryset.values_list(field_query).annotate(count=Count(mapping_field))
 
     return [
         val
         async for val, count in values_with_counts
-        if count > threshold
+        if censor_count(count, threshold)
     ]
 
 
@@ -117,7 +130,7 @@ async def get_age_numeric_binned(
     individual_queryset: QuerySet,
     bin_size: int,
     discovery: DiscoveryConfig,
-    field_permissions: DataPermissionsDict,
+    field_permissions: DataPermissions,
 ) -> dict:
     """
     age_numeric is computed at ingestion time of phenopackets. On some instances
@@ -141,12 +154,14 @@ async def get_age_numeric_binned(
     }
 
 
-async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | None, str | None]:
+async def get_month_date_range(
+    queryset_entity: DiscoveryEntity, queryset: QuerySet, field_props: DateFieldDefinition, threshold: int
+) -> tuple[str | None, str | None]:
     """
     Get start date and end date from the database
     Note that dates within a JSON are stored as strings, not instances of datetime.
     TODO: for now, only dates in extra_properties are handled. Aggregate functions
-    are not available for data in JSON fields.
+     are not available for data in JSON fields.
     Implement handling dates as regular fields when needed.
     TODO: for now only dates binned by month are handled.
     """
@@ -154,7 +169,7 @@ async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | 
     # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
     # need to check for it here.
 
-    model, field_name = f_utils.get_model_and_field(field_props.mapping)
+    field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
     if "extra_properties" not in field_name:
         raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
@@ -162,8 +177,10 @@ async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | 
     is_not_null_filter = {f"{field_name}__isnull": False}   # property may be missing: avoid handling "None"
 
     # Note: lexicographic sort is correct with date strings like `2021-03-09`
+    # TODO: this can leak months that have below threshold count!
+    # TODO: should this be passed a queryset?
     query_set = (
-        model.objects
+        queryset
         .filter(**is_not_null_filter)
         .values(field_name)
         .distinct()
@@ -181,11 +198,12 @@ async def get_month_date_range(field_props: DateFieldDefinition) -> tuple[str | 
 
 async def get_range_stats(
     scope: ValidatedDiscoveryScope,
-    field: str,
-    field_permissions: DataPermissionsDict,
-) -> list[BinWithValue]:
-    field_props = scope.discovery.fields[field]
-    model, field_mapping = f_utils.get_model_and_field(field_props.mapping)
+    queryset_entity: DiscoveryEntity,
+    queryset: QuerySet,
+    field_props: NumberFieldDefinition,
+    field_permissions: DataPermissions,
+) -> BinList:
+    field_mapping = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
     # JSONField array specific field props
     group_by = getattr(field_props, "group_by", None)
@@ -199,7 +217,7 @@ async def get_range_stats(
         whens = [When(
             # Django's gte and lte lookups cannot span multiple JSON array indexes,
             # so we use the jsonb_path_exists function instead.
-            f_utils.get_json_range_condition(field_props, floor, ceil),
+            f_utils.get_json_range_condition(queryset_entity, field_props, floor, ceil),
             then=Value(label)
         ) for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     else:
@@ -212,39 +230,40 @@ async def get_range_stats(
             for floor, ceil, label in f_utils.labelled_range_generator(field_props)
         ]
 
-    query_set = (
-        model.get_model_scoped_queryset(scope)
+    queryset = (
+        queryset
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
 
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
-    async for item in query_set:
-        stats[item["label"]] = thresholded_count(item["total"], scope.discovery, field_permissions)
+    async for item in queryset:
+        stats[item["label"]] = thresholded_count(item["total"], scope, field_permissions)
 
     # All the bins between start and end must be represented and ordered
-    bins: list[BinWithValue] = [
-        {"label": label, "value": stats.get(label, 0)}
+    bins: BinList = BinList(root=[
+        BinWithValue(label=label, value=stats.get(label, 0))
         for floor, ceil, label in f_utils.labelled_range_generator(field_props)
-    ]
+    ])
 
     if "missing" in stats:
-        bins.append({"label": "missing", "value": stats["missing"]})
+        bins.append(BinWithValue(label="missing", value=stats["missing"]))
 
     return bins
 
 
 async def get_categorical_stats(
     scope: ValidatedDiscoveryScope,
-    field: str,
-    field_permissions: DataPermissionsDict,
-) -> list[BinWithValue]:
+    queryset_entity: DiscoveryEntity,
+    queryset: QuerySet,
+    field_props: StringFieldDefinition,
+    field_permissions: DataPermissions,
+) -> BinList:
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    field_props = scope.discovery.fields[field]
-    model, field_name = f_utils.get_model_and_field(field_props.mapping)
+    field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
@@ -252,7 +271,7 @@ async def get_categorical_stats(
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
     stats: Mapping[str, int] = await stats_for_field(
-        model, scope, field_name, field_permissions, add_missing=True, group_by=field_props.group_by
+        queryset, scope.discovery, field_name, field_permissions, add_missing=True, group_by=field_props.group_by
     )
 
     # Enforce values order from config and apply policies
@@ -273,18 +292,20 @@ async def get_categorical_stats(
         )
 
     # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
-    return [
+    return BinList(root=[
         # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
-        *({"label": category, "value": stats.get(category, 0)} for category in labels),
-        {"label": "missing", "value": stats["missing"]},
-    ]
+        *(BinWithValue(label=category, value=stats.get(category, 0)) for category in labels),
+        BinWithValue(label="missing", value=stats["missing"]),
+    ])
 
 
 async def get_date_stats(
     scope: ValidatedDiscoveryScope,
-    field: str,
-    field_permissions: DataPermissionsDict,
-) -> list[BinWithValue]:
+    queryset_entity: DiscoveryEntity,
+    queryset: QuerySet,
+    field_props: DateFieldDefinition,
+    field_permissions: DataPermissions,
+) -> BinList:
     """
     Fetches statistics for a given date field, fill the gaps in the date range
     and apply privacy policies.
@@ -293,23 +314,19 @@ async def get_date_stats(
      regular fields when needed.
     TODO: for now only dates binned by month are handled
     """
-    field_props = scope.discovery.fields.get(field)
-    if not field_props:
-        msg = f"Field {field} is not in the provided discovery config."
-        raise NotImplementedError(msg)
 
     # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
     # need to check for it here.
 
-    model, field_name = f_utils.get_model_and_field(field_props.mapping)
+    field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
     if "extra_properties" not in field_name:
         msg = "Binning date-like fields that are not in extra-properties is not implemented"
         raise NotImplementedError(msg)
 
     # Note: lexical sort works on ISO dates
-    query_set = (
-        model.get_model_scoped_queryset(scope)
+    queryset = (
+        queryset
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
@@ -319,7 +336,7 @@ async def get_date_stats(
     start: str | None = None
     end: str | None = None
     # Key the counts on yyyy-mm combination (aggregate same month counts)
-    async for item in query_set:
+    async for item in queryset:
         key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
         stats[key] += item["total"]
 
@@ -333,27 +350,51 @@ async def get_date_stats(
             start = key
 
     # All the bins between start and end date must be represented
-    bins: list[BinWithValue] = []
+    bins: BinList = BinList(root=[])
     if start:   # at least one month
         for year, month in f_utils.monthly_generator(start, end or start):
             key = f"{year}-{month:02d}"
             label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
-            bins.append({
-                "label": label,
-                "value": thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
-            })
+            bins.append(BinWithValue(
+                label=label,
+                value=thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
+            ))
 
     # Append missing items at the end if any
     if "missing" in stats:
-        bins.append({
-            "label": "missing",
-            "value": thresholded_count(stats["missing"], scope.discovery, field_permissions),
-        })
+        bins.append(BinWithValue(
+            label="missing",
+            value=thresholded_count(stats["missing"], scope.discovery, field_permissions),
+        ))
 
     return bins
 
 
-def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger):
+def get_condition_for_non_jsonb_field(
+    field: str,
+    ops: tuple[tuple[str, int | str], ...],
+    subquery: DiscoveryFieldSubquery | None,
+):
+    if subquery:
+        # If we do a simple filter on `field` in the case of crossing a many-to-many or many-to-one
+        # relationship boundary, we end up with an inner join that prevents us from getting correct stats of
+        # values for the matching queryset entity.
+        # Instead, we do an Exists subquery to check if we have at least one matching object from the other side
+        # of the m2m/many-to-one relation which matches the field query (which as been rewritten to be valid for
+        # the model referred to in the relation rather than the queryset model.)
+        return Q(Exists(
+            subquery.queryset.filter(**{
+                subquery.related_field: OuterRef("pk"),
+                **{f"{subquery.inner_field}__{op}": value for op, value in ops}
+            })
+        ))
+    else:
+        return Q(**{f"{field}__{op}": value for op, value in ops})
+
+
+async def filter_queryset_field_value(
+    queryset_entity: DiscoveryEntity, qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger
+) -> tuple[QuerySet, DiscoveryEntity]:
     """
     Further filter a queryset using the field defined by field_props and the
     given value.
@@ -364,7 +405,11 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
     the `mapping` value is based on the same model as the queryset.
     """
 
-    model, field = f_utils.get_model_and_field(field_props.mapping_for_search_filter or field_props.mapping)
+    # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
+    #   model
+    field, subquery, queried_entity = f_utils.get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
+
+    # TODO: resolve schema including extra properties
 
     if field_props.datatype == "string":
         if gb := field_props.group_by:
@@ -372,44 +417,48 @@ def filter_queryset_field_value(qs: QuerySet, field_props: FieldDefinition, valu
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
-            condition = Q(**{f"{field}__iexact": value})
+            condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
+
     elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800"
 
         if value.startswith("["):
             [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
-            if json_range_condition := f_utils.get_json_range_condition(field_props, start, end):
+            if json_range_condition := f_utils.get_json_range_condition(queryset_entity, field_props, start, end):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 condition = json_range_condition
             else:
-                condition = Q(**{
-                    f"{field}__gte": start,
-                    f"{field}__lt": end
-                })
+                condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lt", end)), subquery)
         else:
             [sym, val] = value.split(" ")
             if sym == "≥":
-                if json_range_condition := f_utils.get_json_range_condition(field_props, min=int(val)):
+                if json_range_condition := f_utils.get_json_range_condition(
+                    queryset_entity, field_props, min=int(val)
+                ):
                     condition = json_range_condition
                 else:
-                    condition = Q(**{f"{field}__gte": int(val)})
+                    condition = get_condition_for_non_jsonb_field(field, (("gte", int(val)),), subquery)
             elif sym == "<":
-                if json_range_condition := f_utils.get_json_range_condition(field_props, max=int(val)):
+                if json_range_condition := f_utils.get_json_range_condition(
+                    queryset_entity, field_props, max=int(val)
+                ):
                     condition = json_range_condition
                 else:
-                    condition = Q(**{f"{field}__lt": int(val)})
+                    condition = get_condition_for_non_jsonb_field(field, (("lt", int(val)),), subquery)
             else:
                 raise NotImplementedError()
     elif field_props.datatype == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
-        condition = Q(**{f"{field}__startswith": val})
+        condition = get_condition_for_non_jsonb_field(field, (("startswith", val),), subquery)
     else:  # pragma: no cover
         # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
         # values of `datatype` to the cases above.
         raise NotImplementedError()
 
-    logger.debug("filtering model field with condition", model=model, field=field, condition=condition)
+    await logger.adebug(
+        "filtering entity field with condition", entity=queried_entity, field=field, condition=condition
+    )
 
-    return qs.filter(condition)
+    return qs.filter(condition), queried_entity

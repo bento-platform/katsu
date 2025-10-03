@@ -3,10 +3,12 @@ from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.discovery.api_views import (
-    public_rules,
-    public_search_fields,
-    public_overview,
-    discovery_schema
+    discovery_endpoint,
+    discovery_matches,
+    discovery_rules,
+    discovery_search_fields,
+    discovery_schema,
+    discovery_ui_hints,
 )
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
@@ -49,12 +51,13 @@ urlpatterns = [
     path('', include(batch_router.urls)),
 
     # apps schemas
-    path('schemas/phenopacket', phenopacket_views.get_chord_phenopacket_schema,
-         name="chord-phenopacket-schema"),
-    path('schemas/phenopacket/<path:subschema>', phenopacket_views.get_chord_phenopacket_subschema,
-         name="chord-phenopacket-subschema"),
-    path('schemas/experiment', experiment_views.get_experiment_schema,
-         name="experiment-schema"),
+    path('schemas/phenopacket', phenopacket_views.get_chord_phenopacket_schema, name="chord-phenopacket-schema"),
+    path(
+        'schemas/phenopacket/<path:subschema>',
+        phenopacket_views.get_chord_phenopacket_subschema,
+        name="chord-phenopacket-subschema",
+    ),
+    path('schemas/experiment', experiment_views.get_experiment_schema, name="experiment-schema"),
     path('schemas/experiment/<path:subschema>', experiment_views.get_experiment_subschema, name="experiment-subschema"),
     path('schemas/discovery', discovery_schema, name="discovery-schema"),
     # extra properties schema types
@@ -63,10 +66,11 @@ urlpatterns = [
     # overviews (statistics)
     path('search_overview', search_overview, name="search-overview"),
 
-    # public endpoints (no confidential information leak)
-    path('public', individual_views.PublicListIndividuals.as_view(),
-         name='public',),
-    path('public_search_fields', public_search_fields, name='public-search-fields'),
-    path('public_overview', public_overview, name='public-overview',),
-    path('public_rules', public_rules, name='public-rules'),
+    # discovery endpoints
+    path('discovery', discovery_endpoint, name='discovery'),
+    path('discovery_matches', discovery_matches, name='discovery-matches'),
+    path('discovery_search_fields', discovery_search_fields, name='discovery-search-fields'),
+    path('discovery_ui_hints', discovery_ui_hints, name='discovery-ui-hints'),
+    path('public', individual_views.PublicListIndividuals.as_view(), name='public',),
+    path('discovery_rules', discovery_rules, name='discovery-rules'),
 ]

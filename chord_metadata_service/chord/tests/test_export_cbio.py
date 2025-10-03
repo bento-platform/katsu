@@ -164,7 +164,7 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = pm.Biosample.objects.filter(phenopacket=self.p)
+        samples = pm.Biosample.objects.filter(phenopackets=self.p)
 
         with io.StringIO() as output:
             async_to_sync(exp.sample_export)(samples, output)
@@ -209,9 +209,9 @@ class ExportCBioTest(TestCase):
             self.assertEqual(sample_count, samples.count())
 
     def test_export_maf_list(self):
-        exp_res = self.exp_res.filter(experiment__dataset_id=self.study_id)\
+        exp_res = self.exp_res.filter(experiments__dataset_id=self.study_id)\
             .filter(file_format="MAF") \
-            .annotate(biosample_id=F("experiment__biosample"))
+            .annotate(biosample_id=F("experiments__biosample"))
         maf_count = exp_res.count()
         self.assertTrue(maf_count > 0)
         with io.StringIO() as output:
@@ -235,9 +235,9 @@ class ExportCBioTest(TestCase):
         self.assertEqual(content["data_filename"], MUTATION_DATA_FILENAME)
 
     def test_export_case_list(self):
-        exp_res = self.exp_res.filter(experiment__dataset_id=self.study_id)\
+        exp_res = self.exp_res.filter(experiments__dataset_id=self.study_id)\
             .filter(file_format="MAF") \
-            .annotate(biosample_id=F("experiment__biosample"))
+            .annotate(biosample_id=F("experiments__biosample"))
         self.assertGreater(exp_res.count(), 0)
         with io.StringIO() as output:
             exp.case_list_export(self.study_id, exp_res, output)

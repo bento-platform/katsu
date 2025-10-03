@@ -43,7 +43,7 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     # filter by datasets
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="experiment__dataset_id",
+        field_name="experiments__dataset_id",
         label="Datasets"
     )
 

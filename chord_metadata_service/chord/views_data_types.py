@@ -16,7 +16,7 @@ from typing import Callable
 
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
@@ -62,7 +62,7 @@ async def _filtered_query(data_type: str, scope: ValidatedDiscoveryScope) -> Que
 async def get_count_for_data_type(
     data_type: str,
     scope: ValidatedDiscoveryScope,
-    permissions: DataPermissionsDict,
+    permissions: DataPermissions,
 ) -> int:
     """
     Returns the count for a particular data type. If dataset is provided, project will be ignored. If neither are
@@ -87,14 +87,14 @@ async def make_data_type_response_object(
     data_type_id: str,
     data_type_details: dict,
     scope: ValidatedDiscoveryScope,
-    permissions: DataPermissionsDict,
+    permissions: DataPermissions,
 ) -> dict:
     return {
         **data_type_details,
         "id": data_type_id,
         **(
             {"count": await get_count_for_data_type(data_type_id, scope, permissions)}
-            if permissions["counts"] else {}
+            if permissions.counts else {}
         ),
         "last_ingested": await get_last_ingested_for_data_type(data_type_id, scope)
     }

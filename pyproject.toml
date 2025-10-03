@@ -32,9 +32,9 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10.0"
-bento-lib = {version = "^13.0.0", extras = ["django"]}
+bento-lib = {version = "^13.2.0", extras = ["django"]}
 Django = "~5.1.8"
-django-autocomplete-light = "^3.11.0"
+django-autocomplete-light = "^3.12.1"
 django-cors-headers = "^4.3.1"
 django-filter = "^24.2"
 djangorestframework = "~3.16.0"
@@ -56,6 +56,7 @@ referencing = "^0.32.1"
 django-structlog = "^9.1.1"
 pycountry = "^24.6.1"
 structlog = "^25.2.0"
+pydantic = "^2.11.3"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.4.0"
@@ -64,3 +65,6 @@ tox = "^4.12.1"
 debugpy = "^1.6.7"
 daphne = "^4.1.0"
 aioresponses = "^0.7.6"
+# when virtualenv >=20.35 is released, we can revert this pin
+#  - see https://github.com/pypa/virtualenv/issues/2944 - this must be released in a version
+virtualenv = ">=20.32.0,<20.33"

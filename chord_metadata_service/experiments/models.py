@@ -63,17 +63,26 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     qc_flags = ArrayField(CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "qc_flags")),
                           blank=True, default=list)
     # SAMPLE
-    biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
-    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    biosample = models.ForeignKey(
+        Biosample,
+        on_delete=models.CASCADE,
+        related_name="experiments",
+        help_text=rec_help(d.EXPERIMENT, "biosample"),
+    )
+    dataset = models.ForeignKey(
+        "chord.Dataset", on_delete=models.CASCADE, blank=True, null=True, related_name="experiments"
+    )  # TODO: Help text
 
     # EXPERIMENT RESULT
     #  - Many-to-many because experiment results can contain analyses involving multiple experiments,
     #    e.g., a pairwise analysis
-    experiment_results = models.ManyToManyField("experiments.ExperimentResult", blank=True,
-                                                help_text=rec_help(d.EXPERIMENT, "experiment_results"))
+    experiment_results = models.ManyToManyField(
+        "experiments.ExperimentResult", blank=True,
+        help_text=rec_help(d.EXPERIMENT, "experiment_results"), related_name="experiments"
+    )
     # INSTRUMENT
     instrument = models.ForeignKey("experiments.Instrument", on_delete=models.CASCADE, blank=True, null=True,
-                                   help_text=rec_help(d.EXPERIMENT, "instrument"))
+                                   help_text=rec_help(d.EXPERIMENT, "instrument"), related_name="experiments")
     # EXTRA
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
                                  help_text=rec_help(d.EXPERIMENT, "extra_properties"))
@@ -89,12 +98,12 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
     def get_scope_filters() -> ModelScopeFilters:
         return {
             "project": {
-                "filter": "experiment__dataset__project_id",
-                "prefetch_related": ("experiment_set__dataset",),
+                "filter": "experiments__dataset__project_id",
+                "prefetch_related": ("experiments__dataset",),
             },
             "dataset": {
-                "filter": "experiment__dataset_id",
-                "prefetch_related": ("experiment_set",),
+                "filter": "experiments__dataset_id",
+                "prefetch_related": ("experiments",),
             },
         }
 

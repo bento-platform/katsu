@@ -5,7 +5,7 @@ from bento_lib.auth.types import EvaluationResultMatrix
 from rest_framework.test import APITransactionTestCase
 from typing import Literal
 
-from ..types import DataPermissionsDict
+from ..types import DataPermissions
 
 
 __all__ = [
@@ -166,23 +166,7 @@ class AuthzAPITestCase(APITransactionTestCase):
 
 
 class PermissionsTestCaseMixin:
-    permissions_none: DataPermissionsDict = {
-        "bool_": False,
-        "counts": False,
-        "data": False,
-    }
-    permissions_bool: DataPermissionsDict = {
-        "bool_": True,
-        "counts": False,
-        "data": False,
-    }
-    permissions_counts: DataPermissionsDict = {
-        "bool_": True,
-        "counts": True,
-        "data": False,
-    }
-    permissions_full: DataPermissionsDict = {
-        "bool_": True,
-        "counts": True,
-        "data": True,
-    }
+    permissions_none: DataPermissions = DataPermissions(bool_=False, counts=False, data=False)
+    permissions_bool: DataPermissions = DataPermissions(bool_=True, counts=False, data=False)
+    permissions_counts: DataPermissions = DataPermissions(bool_=True, counts=True, data=False)
+    permissions_full: DataPermissions = DataPermissions(bool_=True, counts=True, data=True)

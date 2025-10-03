@@ -2,12 +2,14 @@ import json
 import csv
 from uuid import UUID
 from typing import Dict, Optional, Any
+
+from pydantic import BaseModel
 from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.renderers import JSONRenderer
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 from chord_metadata_service.phenopackets.utils import parse_onset
@@ -22,6 +24,8 @@ __all__ = [
     "BiosamplesCSVRenderer",
     "ExperimentCSVRenderer",
     "IndividualBentoSearchRenderer",
+    "PydanticJSONRenderer",
+    "PydanticBrowsableAPIRenderer",
 ]
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -256,3 +260,25 @@ class IndividualBentoSearchRenderer(JSONRenderer):
     """
     media_type = 'application/json'
     format = OUTPUT_FORMAT_BENTO_SEARCH_RESULT
+
+
+def _json_dump_if_pyd(data):
+    return data.model_dump(mode="json") if isinstance(data, BaseModel) else data
+
+
+class PydanticJSONRenderer(JSONRenderer):
+    """
+    An extended version of the default DRF JSONRenderer class, which handles Pydantic model instances if passed. If the
+    data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
+    """
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
+
+
+class PydanticBrowsableAPIRenderer(BrowsableAPIRenderer):
+    """
+    An extended version of the default DRF BrowsableAPIRenderer class, which handles Pydantic model instances if passed.
+    If the data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
+    """
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)

@@ -78,7 +78,7 @@ async def search_overview(request: DrfRequest):
 
     authz_middleware.mark_authz_done(request)
 
-    if not dt_permissions[DATA_TYPE_PHENOPACKET]["data"]:
+    if not dt_permissions[DATA_TYPE_PHENOPACKET].data:
         # If we don't have query:data on phenopackets, we cannot request a search overview
         return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
