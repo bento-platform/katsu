@@ -482,7 +482,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
         blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEASUREMENT_SCHEMA)])
     biosamples = models.ManyToManyField(
         Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"), related_name="phenopackets"
-    )
+    )  # TODO: ForeignKey on Biosample instead?
 
     # NOTE: As of Phenopackets V2.0, genes and variants fields are replaced with interpretations
     interpretations = models.ManyToManyField(
