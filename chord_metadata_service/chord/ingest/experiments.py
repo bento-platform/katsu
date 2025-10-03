@@ -35,7 +35,6 @@ def create_instrument(instrument: dict) -> em.Instrument:
     elif model := instrument.get("model"):
         instrument_obj.device = model
 
-    model = instrument.get("model")
     instrument_obj.device = instrument.get("device")
     instrument_obj.device_ontology = instrument.get("device_ontology")
     instrument_obj.description = instrument.get("description")
