@@ -11,6 +11,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Rename 'model' => 'device' to preserve data, then alter field
         migrations.RenameField(
             model_name='instrument',
             old_name='model',
@@ -20,11 +21,11 @@ class Migration(migrations.Migration):
             model_name='instrument',
             name='platform',
         ),
-        # migrations.AddField(
-        #     model_name='instrument',
-        #     name='device',
-        #     field=models.CharField(blank=True, help_text='The specific model of the instrument. The most accurate information available.', max_length=200, null=True),
-        # ),
+        migrations.AlterField(
+            model_name='instrument',
+            name='device',
+            field=models.CharField(blank=True, help_text='The specific model of the instrument. The most accurate information available.', max_length=500, null=True),
+        ),
         migrations.AddField(
             model_name='instrument',
             name='device_ontology',
