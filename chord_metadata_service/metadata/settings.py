@@ -272,6 +272,11 @@ CACHES = {
 }
 
 REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": (
+        # override defaults with extended versions of defaults which can handle Pydantic model instance rendering:
+        "chord_metadata_service.restapi.api_renderers.PydanticJSONRenderer",
+        "chord_metadata_service.restapi.api_renderers.PydanticBrowsableAPIRenderer",
+    ),
     'DEFAULT_PARSER_CLASSES': (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',

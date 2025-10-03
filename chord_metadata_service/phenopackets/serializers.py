@@ -88,7 +88,7 @@ class DiseaseSerializer(GenericSerializer):
 
 class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
-    experiments = ExperimentSerializer(read_only=True, many=True, source='experiment_set')
+    experiments = ExperimentSerializer(read_only=True, many=True)
     location_collected = GeoLocationSerializer(required=False)
 
     class Meta:

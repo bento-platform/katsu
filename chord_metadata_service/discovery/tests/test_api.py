@@ -13,6 +13,7 @@ from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
+from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
@@ -80,12 +81,12 @@ class TestDiscoveryConfigsDict(TypedDict):
     none: None
 
 
-class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
+class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
-        self.individual_1 = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
             **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
@@ -123,8 +124,8 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         }
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_public_search_fields_configured(self):
-        search_fields_url = reverse("public-search-fields")
+    def test_discovery_search_fields_configured(self):
+        search_fields_url = reverse("discovery-search-fields")
 
         subtest_params: list[tuple[DTAccessLevel, str, int, TestDiscoveryConfigKey | dict]] = [
             # SCOPE: whole node
@@ -175,28 +176,28 @@ class PublicSearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                         self.assert_response_section_fields(res.json(), expected_body_config.model_dump(mode="json"))
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
-    def test_public_search_fields_not_configured(self):
-        response = self.dt_authz_counts_get(reverse("public-search-fields"), content_type="application/json")
+    def test_discovery_search_fields_not_configured(self):
+        response = self.dt_authz_counts_get(reverse("discovery-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         response_obj = response.json()
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, dres.NO_PUBLIC_FIELDS_CONFIGURED)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS)
-    def test_public_search_fields_missing_extra_properties(self):
-        response = self.dt_authz_counts_get(reverse("public-search-fields"), content_type="application/json")
+    def test_discovery_search_fields_missing_extra_properties(self):
+        response = self.dt_authz_counts_get(reverse("discovery-search-fields"), content_type="application/json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assert_response_section_fields(response.json(), settings.CONFIG_PUBLIC.model_dump(mode="json"))
 
 
-class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
+class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
     def setUp(self) -> None:
-        self.url = '/api/public_overview'
+        self.url = '/api/discovery'
 
         # individuals (count 8)
         individuals = {
-            f"individual_{i}": ph_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
+            f"individual_{i}": pa_m.Individual.objects.create(**ind) for i, ind in enumerate(VALID_INDIVIDUALS, start=1)
         }
         # all individuals are in phenopackets that belong to dataset_a
         phenopackets = {
@@ -231,7 +232,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.experiment = exp_m.Experiment.objects.create(**experiment_2)
 
         self.data_type_counts_ds_a: dict[str, int] = {
-            "individual": ph_m.Individual.objects.all().count(),
+            "individual": pa_m.Individual.objects.all().count(),
             "biosample": ph_m.Biosample.objects.all().count(),
             "experiment": exp_m.Experiment.objects.all().count(),  # two - below censor threshold for counts-access
         }
@@ -376,7 +377,7 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.assertEqual(
             # 1 more bin than intervals expected: e.g. for config.bins = [2, 3, 4],
             # we expect data entries for ≤2, [2 3), [3 4), ≥4
-            len(response_obj["fields"]["lab_test_result_value"]["config"]["bins"]) + 1,
+            len(response_obj["fields"]["lab_test_result_value"]["definition"]["config"]["bins"]) + 1,
             len(response_obj["fields"]["lab_test_result_value"]["data"]),
         )
 
@@ -388,13 +389,15 @@ class PublicOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class PublicOverviewTest2(AuthzAPITestCase):
+class DiscoveryOverviewTest2(AuthzAPITestCase):
 
     def setUp(self) -> None:
-        self.url = '/api/public_overview'
+        self.url = '/api/discovery'
         # create only 2 individuals
-        for ind in VALID_INDIVIDUALS[:2]:
-            ph_m.Individual.objects.create(**ind)
+        for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
+            ind_obj = pa_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_response(self):
@@ -414,50 +417,133 @@ class PublicOverviewTest2(AuthzAPITestCase):
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
 
-class PublicOverviewNotSupportedDataTypesListTest(AuthzAPITestCase):
+class DiscoveryOverviewInvalidExtraPropsDataTypesListTest(AuthzAPITestCase):
     # individuals (count 8)
     def setUp(self) -> None:
         # create individuals including those who have not accepted data types
-        for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST:
-            ph_m.Individual.objects.create(**ind)
+        for i, ind in enumerate(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST):
+            ind_obj = ph_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_overview_response(self):
         # test overview response with passing TypeError exception
 
-        response = self.dt_authz_counts_get('/api/public_overview')
+        response = self.dt_authz_counts_get('/api/discovery')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
+
+        self.assertEqual(response_obj["counts"]["phenopacket"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+        self.assertEqual(response_obj["counts"]["individual"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+
         # the field name is present, but the keys are not (except 'missing')
         self.assertIn("baseline_creatinine", response_obj["fields"])
         self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
-        # if we add support for an array values for the public_overview
+        # if we add support for an array values for the discovery fields response
         # then this assertion will fail, so far there is no support for it
         self.assertNotIn(
             100,
             [data["value"] for data in response_obj["fields"]["baseline_creatinine"]["data"]])
 
 
-class PublicOverviewNotSupportedDataTypesDictTest(AuthzAPITestCase):
-    # individuals (count 8)
+class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
+    # phenopackets+individuals (count 8)
+    # used to be individuals only, but with the new discovery endpoint we switched to being phenopackets-centric
     def setUp(self) -> None:
-        # create individuals including those who have not accepted data types
-        for ind in INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT:
-            ph_m.Individual.objects.create(**ind)
+        # create individuals including those who have invalid extra properties types
+        for i, ind in enumerate(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT):
+            ind_obj = ph_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-    def test_overview_response(self):
+    def test_discovery_response(self):
         # test overview response with passing TypeError exception
-        response = self.dt_authz_counts_get('/api/public_overview')
+        response = self.dt_authz_counts_get('/api/discovery')
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        # the field name is present, but the keys are not (except 'missing')
+
+        self.assertEqual(response_obj["counts"]["phenopacket"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+        self.assertEqual(response_obj["counts"]["individual"], len(INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT))  # 8
+
+        # the field name is present, but the keys are not since they're of the wrong type; only 'missing'
         self.assertIn("baseline_creatinine", response_obj["fields"])
         self.assertIn("missing", response_obj["fields"]["baseline_creatinine"]["data"][-1]["label"])
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
+
+
+class DiscoveryUIHintsTest(AuthzAPITestCase):
+    def setUp(self):
+        self.url = reverse("discovery-ui-hints")
+
+    def test_empty_discovery(self):
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_bad_scope(self):
+        res = self.dt_authz_counts_get(f"{self.url}?project=does-not-exist")
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.json()["message"], "Not Found")
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_empty_entities_with_data(self):
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertListEqual(res.json()["entities_with_data"], [])
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_few_entities(self):
+        # create only 2 individuals
+        for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
+            ind_obj = pa_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
+
+        # -------------------------------------------------------------------------------
+
+        # With bool/counts, this is below the censorship threshold, so we get no entities with data.
+        # With full data access, we can learn we have phenopackets/individuals.
+
+        res = self.dt_authz_bool_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertListEqual(res.json()["entities_with_data"], [])
+
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertListEqual(res.json()["entities_with_data"], [])
+
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_many_entities(self):
+        for i, ind in enumerate(VALID_INDIVIDUALS):
+            ind_obj = pa_m.Individual.objects.create(**ind)
+            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
+
+        # -------------------------------------------------------------------------------
+
+        # Since we have many entities (and are now above the censorship threshold), we should now get entities_with_data
+        # being "complete" in all authorization cases:
+
+        res = self.dt_authz_bool_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+        res = self.dt_authz_counts_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
+
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertSetEqual(set(res.json()["entities_with_data"]), {"phenopacket", "individual"})
 
 
 class DiscoverySchemaTest(AuthzAPITestCase):
@@ -470,7 +556,7 @@ class DiscoverySchemaTest(AuthzAPITestCase):
 
 class DiscoveryRulesTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def setUp(self):
-        self.url = reverse("public-rules")
+        self.url = reverse("discovery-rules")
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_rules(self):

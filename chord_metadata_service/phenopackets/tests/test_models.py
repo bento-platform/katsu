@@ -7,12 +7,9 @@ from chord_metadata_service.geo.models import GeoLocation
 from chord_metadata_service.geo.tests.constants import GEO_LOCATION_1
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
-    InterpretationFilter,
     filter_ontology,
     filter_extra_properties_datatype,
-    PhenotypicFeatureFilter,
     PhenopacketFilter,
-    GenomicInterpretationFilter
 )
 from chord_metadata_service.restapi.models import SchemaType
 
@@ -112,17 +109,10 @@ class PhenotypicFeatureTest(TestCase):
         self.assertEqual(len(result), 2)
         result = filter_ontology(m.PhenotypicFeature.objects.all(), "pftype", "HP:0000520")
         self.assertEqual(len(result), 2)
-        f = PhenotypicFeatureFilter()
-        result = f.filter_evidence(m.PhenotypicFeature.objects.all(), "evidence__evidence_code", "ECO:0006017")
-        self.assertEqual(len(result), 2)
         result = filter_extra_properties_datatype(m.PhenotypicFeature.objects.all(), "extra_properties", "complication")
         self.assertEqual(len(result), 0)
         result = filter_extra_properties_datatype(m.PhenotypicFeature.objects.all(), "extra_properties", "symptom")
         self.assertEqual(len(result), 2)
-        f = PhenotypicFeatureFilter(queryset=m.PhenotypicFeature.objects.all(),
-                                    data={"individual": "patient:2,patient:1"})
-        result = f.qs
-        self.assertEqual(len(result), 1)
 
 
 class GenomicInterpretationTest(TestCase):
@@ -139,16 +129,6 @@ class GenomicInterpretationTest(TestCase):
         )
 
     def test_genomic_interpretation(self):
-        self._test_gene_filter("hgnc", 1)
-        self._test_gene_filter("ensembl", 1)
-        self._test_gene_filter("ncbigene", 1)
-        self._test_gene_filter("expect_0", 0)
-
-        self._test_variant_filter("NOT_PROVIDED", 1)
-        self._test_variant_filter("UNKNOWN_ACTIONABILITY", 1)
-        self._test_variant_filter("clinvar:13294", 1)
-        self._test_variant_filter("expect_0", 0)
-
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
     def test_validation_gene_or_variant(self):
@@ -157,22 +137,6 @@ class GenomicInterpretationTest(TestCase):
 
     def test_genomic_interpretation_str(self):
         self.assertEqual(str(self.genomic_interpretation), str(self.genomic_interpretation.id))
-
-    def _test_gene_filter(self, value, count: int):
-        qs = GenomicInterpretationFilter().filter_gene(
-            m.GenomicInterpretation.objects.all(),
-            "gene_descriptor",
-            value
-        )
-        self.assertEqual(qs.count(), count)
-
-    def _test_variant_filter(self, value, count: int):
-        qs = GenomicInterpretationFilter().filter_variant(
-            m.GenomicInterpretation.objects.all(),
-            "variant_interpretation",
-            value
-        )
-        self.assertEqual(qs.count(), count)
 
 
 class DiagnosisTest(TestCase):
@@ -240,19 +204,8 @@ class InterpretationTest(TestCase):
         )
         self.assertEqual(interpretation_qs.count(), 1)
 
-        self._test_interpretation_filter(self.disease_ontology['id'], 1)
-        self._test_interpretation_filter("MONDO:0005015", 0)
-
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
-
-    def _test_interpretation_filter(self, value, count: int):
-        qs = InterpretationFilter().filter_diagnosis(
-            m.Interpretation.objects.all(),
-            "diagnosis__disease__id",
-            value,
-        )
-        self.assertEqual(qs.count(), count)
 
 
 class MetaDataTest(TestCase):

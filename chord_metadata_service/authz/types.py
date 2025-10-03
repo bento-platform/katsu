@@ -1,17 +1,24 @@
-from typing import TypedDict
+from dataclasses import dataclass
+from typing import TypeAlias
+
+from chord_metadata_service.chord.data_types import KatsuDataType
 
 __all__ = [
-    "DataPermissionsDict",
+    "DataPermissions",
     "DataTypeDiscoveryPermissions",
     "FieldDiscoveryPermissions",
 ]
 
 
-class DataPermissionsDict(TypedDict):
+@dataclass
+class DataPermissions:
     bool_: bool
     counts: bool
     data: bool
 
+    def any_permissions(self):
+        return self.bool_ or self.counts or self.data
 
-DataTypeDiscoveryPermissions = dict[str, DataPermissionsDict]  # str <=> data type
-FieldDiscoveryPermissions = dict[str, DataPermissionsDict]  # str <=> field ID
+
+DataTypeDiscoveryPermissions: TypeAlias = dict[KatsuDataType, DataPermissions]
+FieldDiscoveryPermissions: TypeAlias = dict[str, DataPermissions]  # str <=> field ID

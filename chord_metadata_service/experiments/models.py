@@ -1,11 +1,18 @@
 from django.db import models
 from django.db.models import CharField, JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel, TOP_LEVEL_MODEL_SCOPE_FILTERS
+from chord_metadata_service.discovery.scopeable_model import (
+    BaseScopeableModel,
+    TOP_LEVEL_MODEL_SCOPE_FILTERS,
+)
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator, ontology_validator
+from chord_metadata_service.restapi.validators import (
+    ontology_validator,
+    ontology_list_validator,
+    base_extra_properties_validator,
+)
 from chord_metadata_service.phenopackets.models import Biosample
 
 from . import descriptions as d
@@ -33,50 +40,124 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     def get_scope_filters() -> ModelScopeFilters:
         return TOP_LEVEL_MODEL_SCOPE_FILTERS
 
-    id = CharField(primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id"))
+    id = CharField(
+        primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id")
+    )
     # STUDY TYPE
     # ["Whole Genome Sequencing","Metagenomics","Transcriptome Analysis","Resequencing","Epigenetics",
     # "Synthetic Genomics","Forensic or Paleo-genomics","Gene Regulation Study","Cancer Genomics",
     # "Population Genomics","RNASeq","Pooled Clone Sequencing","Transcriptome Sequencing","Other"]
-    study_type = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "study_type"))
+    study_type = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "study_type"),
+    )
     # TYPE
-    experiment_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type"))
-    experiment_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
-                                    help_text=rec_help(d.EXPERIMENT, "experiment_ontology"))
+    experiment_type = CharField(
+        max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type")
+    )
+    experiment_ontology = JSONField(
+        blank=True,
+        default=list,
+        validators=[ontology_list_validator],
+        help_text=rec_help(d.EXPERIMENT, "experiment_ontology"),
+    )
     # MOLECULE
-    molecule = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "molecule"))
-    molecule_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
-                                  help_text=rec_help(d.EXPERIMENT, "molecule_ontology"))
+    molecule = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "molecule"),
+    )
+    molecule_ontology = JSONField(
+        blank=True,
+        default=list,
+        validators=[ontology_list_validator],
+        help_text=rec_help(d.EXPERIMENT, "molecule_ontology"),
+    )
     # LIBRARY
-    library_strategy = CharField(max_length=200, blank=True, null=True,
-                                 help_text=rec_help(d.EXPERIMENT, "library_strategy"))
-    library_source = CharField(max_length=200, blank=True, null=True,
-                               help_text=rec_help(d.EXPERIMENT, "library_source"))
-    library_selection = CharField(max_length=200, blank=True, null=True,
-                                  help_text=rec_help(d.EXPERIMENT, "library_selection"))
-    library_layout = CharField(max_length=200, blank=True, null=True,
-                               help_text=rec_help(d.EXPERIMENT, "library_layout"))
-    extraction_protocol = CharField(max_length=200, blank=True, null=True,
-                                    help_text=rec_help(d.EXPERIMENT, "extraction_protocol"))
-    reference_registry_id = CharField(max_length=200, blank=True, null=True,
-                                      help_text=rec_help(d.EXPERIMENT, "reference_registry_id"))
-    qc_flags = ArrayField(CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "qc_flags")),
-                          blank=True, default=list)
+    library_strategy = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "library_strategy"),
+    )
+    library_source = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "library_source"),
+    )
+    library_selection = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "library_selection"),
+    )
+    library_layout = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "library_layout"),
+    )
+    extraction_protocol = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "extraction_protocol"),
+    )
+    reference_registry_id = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "reference_registry_id"),
+    )
+    qc_flags = ArrayField(
+        CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "qc_flags")),
+        blank=True,
+        default=list,
+    )
     # SAMPLE
-    biosample = models.ForeignKey(Biosample, on_delete=models.CASCADE, help_text=rec_help(d.EXPERIMENT, "biosample"))
-    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    biosample = models.ForeignKey(
+        Biosample,
+        on_delete=models.CASCADE,
+        related_name="experiments",
+        help_text=rec_help(d.EXPERIMENT, "biosample"),
+    )
+    dataset = models.ForeignKey(
+        "chord.Dataset",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="experiments",
+    )  # TODO: Help text
 
     # EXPERIMENT RESULT
     #  - Many-to-many because experiment results can contain analyses involving multiple experiments,
     #    e.g., a pairwise analysis
-    experiment_results = models.ManyToManyField("experiments.ExperimentResult", blank=True,
-                                                help_text=rec_help(d.EXPERIMENT, "experiment_results"))
+    experiment_results = models.ManyToManyField(
+        "experiments.ExperimentResult",
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "experiment_results"),
+        related_name="experiments",
+    )
     # INSTRUMENT
-    instrument = models.ForeignKey("experiments.Instrument", on_delete=models.CASCADE, blank=True, null=True,
-                                   help_text=rec_help(d.EXPERIMENT, "instrument"))
+    instrument = models.ForeignKey(
+        "experiments.Instrument",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "instrument"),
+        related_name="experiments",
+    )
     # EXTRA
-    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
-                                 help_text=rec_help(d.EXPERIMENT, "extra_properties"))
+    extra_properties = JSONField(
+        blank=True,
+        default=dict,
+        validators=[base_extra_properties_validator],
+        help_text=rec_help(d.EXPERIMENT, "extra_properties"),
+    )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -89,45 +170,94 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
     def get_scope_filters() -> ModelScopeFilters:
         return {
             "project": {
-                "filter": "experiment__dataset__project_id",
-                "prefetch_related": ("experiment_set__dataset",),
+                "filter": "experiments__dataset__project_id",
+                "prefetch_related": ("experiments__dataset",),
             },
             "dataset": {
-                "filter": "experiment__dataset_id",
-                "prefetch_related": ("experiment_set",),
+                "filter": "experiments__dataset_id",
+                "prefetch_related": ("experiments",),
             },
         }
 
     """ Class to represent information about analysis of sequencing data in a file format. """
     # TODO identifier assigned by lab (?)
-    identifier = CharField(max_length=200, blank=True, null=True,
-                           help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
-    description = CharField(max_length=500, blank=True, null=True,
-                            help_text=rec_help(d.EXPERIMENT_RESULT, "description"))
-    filename = CharField(max_length=500, blank=True, null=True,
-                         help_text=rec_help(d.EXPERIMENT_RESULT, "filename"))
+    identifier = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"),
+    )
+    description = CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "description"),
+    )
+    filename = CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "filename"),
+    )
     # URLs:
     #  - one file for the experiment result file proper
-    url = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.EXPERIMENT_RESULT, "url"))
+    url = CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "url"),
+    )
     #  - an array of index file objects (e.g., FAI, Tabix, Tribble, BGZF), formatted like
     #    { "url": "...", "format": "FAI" | "TABIX" | "TRIBBLE " | ... }
-    indices = JSONField(blank=True, default=list, validators=[file_index_list_validator],
-                        help_text=rec_help(d.EXPERIMENT_RESULT, "indices"))
+    indices = JSONField(
+        blank=True,
+        default=list,
+        validators=[file_index_list_validator],
+        help_text=rec_help(d.EXPERIMENT_RESULT, "indices"),
+    )
 
-    genome_assembly_id = CharField(max_length=50, blank=True, null=True,
-                                   help_text=rec_help(d.EXPERIMENT_RESULT, "genome_assembly_id"))
-    file_format = CharField(max_length=50, blank=True, null=True,
-                            help_text=rec_help(d.EXPERIMENT_RESULT, "file_format"))
-    data_output_type = CharField(max_length=200, blank=True, null=True,
-                                 help_text=rec_help(d.EXPERIMENT_RESULT, "data_output_type"))
-    usage = CharField(max_length=200, blank=True, null=True,
-                      help_text=rec_help(d.EXPERIMENT_RESULT, "usage"))
-    creation_date = CharField(max_length=500, blank=True, null=True,
-                              help_text=rec_help(d.EXPERIMENT_RESULT, "creation_date"))
-    created_by = CharField(max_length=200, blank=True, null=True,
-                           help_text=rec_help(d.EXPERIMENT_RESULT, "created_by"))
-    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
-                                 help_text=rec_help(d.EXPERIMENT_RESULT, "extra_properties"))
+    genome_assembly_id = CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "genome_assembly_id"),
+    )
+    file_format = CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "file_format"),
+    )
+    data_output_type = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "data_output_type"),
+    )
+    usage = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "usage"),
+    )
+    creation_date = CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "creation_date"),
+    )
+    created_by = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "created_by"),
+    )
+    extra_properties = JSONField(
+        blank=True,
+        default=dict,
+        validators=[base_extra_properties_validator],
+        help_text=rec_help(d.EXPERIMENT_RESULT, "extra_properties"),
+    )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -136,17 +266,39 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
 
 
 class Instrument(models.Model, IndexableMixin):
-    """ Class to represent information about instrument used to perform a sequencing experiment. """
+    """Class to represent information about instrument used to perform a sequencing experiment."""
 
     # TODO identifier assigned by lab (?)
-    identifier = CharField(max_length=200, blank=True, null=True,
-                           help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
-    device = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "device"))
-    device_ontology = JSONField(blank=True, null=True, validators=[ontology_validator],
-                                help_text=rec_help(d.INSTRUMENT, "device_ontology"))
-    description = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "description"))
-    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
-                                 help_text=rec_help(d.INSTRUMENT, "extra_properties"))
+    identifier = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"),
+    )
+    device = CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.INSTRUMENT, "device"),
+    )
+    device_ontology = JSONField(
+        blank=True,
+        null=True,
+        validators=[ontology_validator],
+        help_text=rec_help(d.INSTRUMENT, "device_ontology"),
+    )
+    description = CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.INSTRUMENT, "description"),
+    )
+    extra_properties = JSONField(
+        blank=True,
+        default=dict,
+        validators=[base_extra_properties_validator],
+        help_text=rec_help(d.INSTRUMENT, "extra_properties"),
+    )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 

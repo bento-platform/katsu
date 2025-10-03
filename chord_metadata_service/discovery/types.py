@@ -1,14 +1,11 @@
-from typing import TypedDict
+from bento_lib.discovery import DiscoveryEntity
+from typing import TypeAlias, TypedDict
 
 __all__ = [
-    "BinWithValue",
     "ModelScopeFilters",
+    "EntityCounts",
+    "EntityCountOrBoolResponse",
 ]
-
-
-class BinWithValue(TypedDict):
-    label: str
-    value: int
 
 
 class ScopeLevelFilters(TypedDict):
@@ -21,3 +18,7 @@ class ScopeLevelFilters(TypedDict):
 class ModelScopeFilters(TypedDict):
     project: ScopeLevelFilters
     dataset: ScopeLevelFilters
+
+
+EntityCounts: TypeAlias = dict[DiscoveryEntity, int]
+EntityCountOrBoolResponse: TypeAlias = dict[DiscoveryEntity, int | bool]

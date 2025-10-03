@@ -119,7 +119,7 @@ async def phenopacket_query_results(
             *fields,
             alternate_ids=Coalesce(F("subject__alternate_ids"), []),
         ).annotate(
-            num_experiments=Count("biosamples__experiment"),
+            num_experiments=Count("biosamples__experiments"),
             biosamples=Coalesce(ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)), []),
         )
 
@@ -406,6 +406,9 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     search_params, err = get_chord_search_parameters(request, logger)
     if err:
         return bad_request_response(err)
+
+    logger = logger.bind(search_params=search_params)
+    await logger.adebug("executing chord_dataset_search")
 
     data, err = await chord_dataset_search(scope, search_params, start, logger)
     if err:

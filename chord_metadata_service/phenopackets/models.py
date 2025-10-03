@@ -136,12 +136,12 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
     def get_scope_filters() -> ModelScopeFilters:
         return {
             "project": {
-                "filter": "phenopacket__dataset__project__identifier",
-                "prefetch_related": ("phenopacket__dataset__project",),
+                "filter": "phenopackets__dataset__project__identifier",
+                "prefetch_related": ("phenopackets__dataset__project",),
             },
             "dataset": {
-                "filter": "phenopacket__dataset__identifier",
-                "prefetch_related": ("phenopacket__dataset",),
+                "filter": "phenopackets__dataset__identifier",
+                "prefetch_related": ("phenopackets__dataset",),
             },
         }
 
@@ -478,13 +478,21 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
 
     measurements = models.JSONField(
         blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEASUREMENT_SCHEMA)])
-    biosamples = models.ManyToManyField(Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"))
+    biosamples = models.ManyToManyField(
+        Biosample, blank=True, help_text=rec_help(d.PHENOPACKET, "biosamples"), related_name="phenopackets"
+    )
 
     # NOTE: As of Phenopackets V2.0, genes and variants fields are replaced with interpretations
     interpretations = models.ManyToManyField(
-        Interpretation, blank=True, help_text=rec_help(d.PHENOPACKET, "interpretations"))
+        Interpretation,
+        blank=True,
+        help_text=rec_help(d.PHENOPACKET, "interpretations"),
+        related_name="phenopackets",
+    )
 
-    diseases = models.ManyToManyField(Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"))
+    diseases = models.ManyToManyField(
+        Disease, blank=True, help_text=rec_help(d.PHENOPACKET, "diseases"), related_name="phenopackets"
+    )
 
     medical_actions = models.JSONField(
         blank=True, null=True,

@@ -4,6 +4,7 @@ from bento_lib.auth.resources import build_resource
 from bento_lib.discovery import DiscoveryConfig
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpRequest
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.chord import models as cm
@@ -104,8 +105,8 @@ class ValidatedDiscoveryScope:
         return build_resource(self.project_id, self.dataset_id, data_type=data_type)
 
 
-def _get_project_id_and_dataset_id_from_request(request: DrfRequest) -> tuple[str | None, str | None]:
-    return request.query_params.get("project") or None, request.query_params.get("dataset") or None
+def _get_project_id_and_dataset_id_from_request(request: DrfRequest | HttpRequest) -> tuple[str | None, str | None]:
+    return request.GET.get("project") or None, request.GET.get("dataset") or None
 
 
 async def _get_project_by_id(project_id: str) -> cm.Project:

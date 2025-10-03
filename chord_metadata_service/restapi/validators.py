@@ -8,7 +8,6 @@ __all__ = [
     "age_or_age_range_validator",
     "ontology_validator",
     "ontology_list_validator",
-    "key_value_validator",
     "base_extra_properties_validator",
 ]
 
@@ -72,5 +71,4 @@ class JsonSchemaValidator:
 age_or_age_range_validator = JsonSchemaValidator(schema_ref=SchemaRefs.AGE_OR_AGE_RANGE)
 ontology_validator = JsonSchemaValidator(schema_ref=SchemaRefs.ONTOLOGY_CLASS)
 ontology_list_validator = JsonSchemaValidator(schema_ref=SchemaRefs.ONTOLOGY_CLASS_LIST)
-key_value_validator = JsonSchemaValidator(schema_ref=SchemaRefs.KEY_VALUE_OBJECT)
 base_extra_properties_validator = JsonSchemaValidator(schema_ref=SchemaRefs.EXTRA_PROPERTIES_SCHEMA)

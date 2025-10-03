@@ -51,7 +51,6 @@ DISCOVERY_CONFIG_TEST_DICT = {
         },
         "tissues": {
             "mapping": "biosample/sampled_tissue/label",
-            "mapping_for_search_filter": "individual/biosamples/sampled_tissue/label",
             "title": "Tissue",
             "description": "Tissue from which the biosample was extracted",
             "datatype": "string",
@@ -88,7 +87,6 @@ DISCOVERY_CONFIG_TEST_DICT = {
         },
         "extraction_protocol": {
             "mapping": "experiment/extraction_protocol",
-            "mapping_for_search_filter": "individual/biosamples/experiment/extraction_protocol",
             "title": "Experiment Extraction Protocol",
             "description": "experiment extraction protocol",
             "datatype": "string",
@@ -253,3 +251,11 @@ CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT["fields"].update([
 CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS: DiscoveryConfig = DiscoveryConfig.model_validate(
     CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS_DICT
 )
+
+DISCOVERY_ZERO_COUNTS = {
+    "phenopacket": 0,
+    "individual": 0,
+    "biosample": 0,
+    "experiment": 0,
+    "experiment_result": 0,
+}
