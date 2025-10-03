@@ -1,16 +1,26 @@
 import json
 import os
 
+from functools import cache
+from jsonschema import Draft4Validator
 from glob import glob
 from pathlib import Path
+
+__all__ = [
+    "get_dats_schema",
+    "get_dats_schema_validator",
+    "CREATORS",
+]
 
 DATS_PATH = os.path.join(Path(os.path.dirname(os.path.realpath(__file__))).parent, "dats")
 
 
-def get_dats_schema(field):
+@cache  # If no exception is raised, cache to result to avoid repetitive file reading
+def get_dats_schema(field: str):
     """
     Call this function when validating a field.
     Returns json schema for the specified field.
+    Uses functools.cache to avoid slow disk IO for reading the file every time.
     """
 
     # mapping dataset model fields to dats schemas
@@ -35,10 +45,20 @@ def get_dats_schema(field):
         schema_name = Path(filename).stem
         field_schema_name = fields_mapping.get(field, None)
         if schema_name == field_schema_name:
-            schema_file = open(filename)
-            schema = json.loads(schema_file.read())
-            schema_file.close()
+            with open(filename) as schema_file:
+                schema = json.loads(schema_file.read())
             return schema
+
+    # Avoid caching None responses; also we should know if this occurs...
+    raise Exception(f"DATS schema not found: {field}")
+
+
+@cache
+def get_dats_schema_validator(field: str) -> Draft4Validator:
+    """
+    Cache DATS field schema validators to avoid initializing them on the fly as much.
+    """
+    return Draft4Validator(get_dats_schema(field))
 
 
 def _get_creators_schema(creator_type):

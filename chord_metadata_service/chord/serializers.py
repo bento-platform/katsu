@@ -6,7 +6,7 @@ from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from pydantic import ValidationError as PydValidationError
 from rest_framework import serializers
-from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
+from chord_metadata_service.restapi.dats_schemas import get_dats_schema_validator, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
 from .models import Project, Dataset, ProjectJsonSchema
@@ -74,7 +74,7 @@ class DatasetSerializer(GenericSerializer):
         if isinstance(value, list):
             transformed_value = [transform_keys(item) for item in value]
             validation = self.jsonschema_validation(transformed_value, CREATORS)
-            if isinstance(validation, dict):
+            if validation:
                 raise serializers.ValidationError(validation)
         return value
 
@@ -87,10 +87,9 @@ class DatasetSerializer(GenericSerializer):
 
     # noinspection PyMethodMayBeStatic
     def validate_linked_field_sets(self, value):
-        validation = LINKED_FIELD_SETS_SCHEMA_VALIDATOR.is_valid(value)
-        if not validation:
-            raise serializers.ValidationError([
-                str(error.message) for error in LINKED_FIELD_SETS_SCHEMA_VALIDATOR.iter_errors(value)])
+        if errors := [str(error.message) for error in LINKED_FIELD_SETS_SCHEMA_VALIDATOR.iter_errors(value)]:
+            # if we have >=1 error, raise serializers.ValidationError with them
+            raise serializers.ValidationError(errors)
         return value
 
     def validate(self, data):
@@ -122,21 +121,21 @@ class DatasetSerializer(GenericSerializer):
                 for item in data.get(field):
                     call_validation = self.jsonschema_validation(
                         value=transform_keys(item),
-                        schema=get_dats_schema(field),
+                        schema_or_validator=get_dats_schema_validator(field),
                         field_name=field
                     )
 
-                    if isinstance(call_validation, dict):
+                    if call_validation:
                         errors.update(call_validation)
 
             else:
                 call_validation = self.jsonschema_validation(
                     value=data.get(field),
-                    schema=get_dats_schema(field),
+                    schema_or_validator=get_dats_schema_validator(field),
                     field_name=field
                 )
 
-                if isinstance(call_validation, dict):
+                if call_validation:
                     errors.update(call_validation)
         if errors:
             raise serializers.ValidationError(errors)
@@ -144,18 +143,21 @@ class DatasetSerializer(GenericSerializer):
         return data
 
     @staticmethod
-    def jsonschema_validation(value, schema, field_name=None):
-        """ Generic validation. Returns errors dict if validation is False. """
+    def jsonschema_validation(
+        value, schema_or_validator: dict | Draft4Validator, field_name: str | None = None
+    ) -> dict | None:
+        """ Generic validation. Returns errors dict if validation is False, otherwise returns None. """
 
-        errors = {}
+        if isinstance(schema_or_validator, dict):
+            validator = Draft4Validator(schema_or_validator)
+        else:  # Draft4Validator
+            validator = schema_or_validator
 
-        v = Draft4Validator(schema)
-        validation = v.is_valid(value)
-        if not validation:
-            errors[field_name] = [str(error.message) for error in v.iter_errors(value)]
-            return errors
+        if errors := [str(error.message) for error in validator.iter_errors(value)]:
+            # If we have >=1 error, return this error dictionary
+            return {field_name: errors}
 
-        return validation
+        return None
 
     def get_counts(self, obj):
         # TODO: with more datasets, refactor to batch queries (currently N queries for N datasets)
