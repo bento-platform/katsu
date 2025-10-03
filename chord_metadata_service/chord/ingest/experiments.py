@@ -27,6 +27,15 @@ def create_instrument(instrument: dict) -> em.Instrument:
     instrument_obj, _ = em.Instrument.objects.get_or_create(
         identifier=instrument.get("identifier", str(uuid.uuid4()))
     )
+
+    # Backwards compatibility for v19
+    # Allows ingestion of "device" and "model" values as instrument.device
+    if device := instrument.get("device"):
+        instrument_obj.device = device
+    elif model := instrument.get("model"):
+        instrument_obj.device = model
+
+    model = instrument.get("model")
     instrument_obj.device = instrument.get("device")
     instrument_obj.device_ontology = instrument.get("device_ontology")
     instrument_obj.description = instrument.get("description")
