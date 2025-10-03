@@ -269,7 +269,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assertEqual(experiments[0].experiment_results.count(), ExperimentResult.objects.all().count())
 
         # instrument
-        self.assertEqual(Instrument.objects.all().count(), 1)
+        self.assertEqual(Instrument.objects.all().count(), 2)
 
         # resources for experiments
         # - check that experiments resource is in database
