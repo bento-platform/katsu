@@ -28,7 +28,7 @@ def create_instrument(instrument: dict) -> em.Instrument:
         identifier=instrument.get("identifier", str(uuid.uuid4()))
     )
     instrument_obj.device = instrument.get("device")
-    instrument_obj.device_ontology = instrument.get("device_ontology", [])
+    instrument_obj.device_ontology = instrument.get("device_ontology")
     instrument_obj.description = instrument.get("description")
     instrument_obj.extra_properties = instrument.get("extra_properties", {})
     instrument_obj.save()

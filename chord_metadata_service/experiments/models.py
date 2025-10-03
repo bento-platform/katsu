@@ -5,7 +5,7 @@ from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel,
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
+from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator, ontology_validator
 from chord_metadata_service.phenopackets.models import Biosample
 
 from . import descriptions as d
@@ -142,7 +142,7 @@ class Instrument(models.Model, IndexableMixin):
     identifier = CharField(max_length=200, blank=True, null=True,
                            help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"))
     device = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "device"))
-    device_ontology = JSONField(blank=True, default=list, validators=[ontology_list_validator],
+    device_ontology = JSONField(blank=True, null=True, validators=[ontology_validator],
                                 help_text=rec_help(d.INSTRUMENT, "device_ontology"))
     description = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "description"))
     extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],

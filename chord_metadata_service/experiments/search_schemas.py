@@ -66,10 +66,7 @@ INSTRUMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.INSTRUMENT_
         "device": {
             "search": search_optional_str(1)
         },
-        "device_ontology": {
-            "items": ONTOLOGY_SEARCH_SCHEMA,
-            "search": {"order": 2, "database": {"type": "jsonb"}}
-        },
+        "device_ontology": ONTOLOGY_SEARCH_SCHEMA,
         "description": {
             "search": search_optional_str(3)
         },
