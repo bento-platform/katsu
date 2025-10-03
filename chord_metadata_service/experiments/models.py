@@ -276,7 +276,7 @@ class Instrument(models.Model, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT_RESULT, "identifier"),
     )
     device = CharField(
-        max_length=200,
+        max_length=500,
         blank=True,
         null=True,
         help_text=rec_help(d.INSTRUMENT, "device"),

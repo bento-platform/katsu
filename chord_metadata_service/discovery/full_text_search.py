@@ -124,9 +124,8 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[list[str] | tuple[list[str]
         ["reference_registry_id"],
         (["extra_properties"], TextField),
         # Instrument fields
-        ["instrument", "platform"],
+        ["instrument", "device"],
         ["instrument", "description"],
-        ["instrument", "model"],
         (["instrument", "extra_properties"], TextField),
     ),
     "experiment_result": (

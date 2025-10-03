@@ -131,7 +131,7 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "library_layout": {
             "search": search_optional_eq(13),
         },
-        # query example: ["#ico", ["#resolve", "instrument", "model"], "Illumina"]
+        # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
         "instrument": merge_schema_dictionaries(
             INSTRUMENT_SEARCH_SCHEMA,
             {"search": {"database": {
