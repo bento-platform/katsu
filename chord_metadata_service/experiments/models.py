@@ -5,7 +5,7 @@ from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel,
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
-from chord_metadata_service.restapi.validators import ontology_list_validator, key_value_validator
+from chord_metadata_service.restapi.validators import ontology_list_validator, base_extra_properties_validator
 from chord_metadata_service.phenopackets.models import Biosample
 
 from . import descriptions as d
@@ -84,7 +84,7 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     instrument = models.ForeignKey("experiments.Instrument", on_delete=models.CASCADE, blank=True, null=True,
                                    help_text=rec_help(d.EXPERIMENT, "instrument"), related_name="experiments")
     # EXTRA
-    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
+    extra_properties = JSONField(blank=True, default=dict, validators=[base_extra_properties_validator],
                                  help_text=rec_help(d.EXPERIMENT, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -135,7 +135,7 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
                               help_text=rec_help(d.EXPERIMENT_RESULT, "creation_date"))
     created_by = CharField(max_length=200, blank=True, null=True,
                            help_text=rec_help(d.EXPERIMENT_RESULT, "created_by"))
-    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
+    extra_properties = JSONField(blank=True, default=dict, validators=[base_extra_properties_validator],
                                  help_text=rec_help(d.EXPERIMENT_RESULT, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
@@ -153,7 +153,7 @@ class Instrument(models.Model, IndexableMixin):
     platform = CharField(max_length=200, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "platform"))
     description = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "description"))
     model = CharField(max_length=500, blank=True, null=True, help_text=rec_help(d.INSTRUMENT, "model"))
-    extra_properties = JSONField(blank=True, default=dict, validators=[key_value_validator],
+    extra_properties = JSONField(blank=True, default=dict, validators=[base_extra_properties_validator],
                                  help_text=rec_help(d.INSTRUMENT, "extra_properties"))
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

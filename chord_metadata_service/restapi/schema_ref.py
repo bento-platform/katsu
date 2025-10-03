@@ -15,7 +15,6 @@ from chord_metadata_service.phenopackets.schemas import (
 from chord_metadata_service.restapi.schemas import (
     ONTOLOGY_CLASS,
     ONTOLOGY_CLASS_LIST,
-    KEY_VALUE_OBJECT,
     AGE_STRING,
     AGE,
     AGE_RANGE,
@@ -51,7 +50,10 @@ class SchemaRefs(Enum):
     EXTENSION_SCHEMA = EXTENSION_SCHEMA
     EXTRA_PROPERTIES_SCHEMA = EXTRA_PROPERTIES_SCHEMA
     GESTATIONAL_AGE = GESTATIONAL_AGE
-    KEY_VALUE_OBJECT = KEY_VALUE_OBJECT
+    # Alias for experiments/migrations/0012_alter_experiment_experiment_ontology_and_more.py
+    # Previously, the key-value object for experiment extra properties forced all dict values to be strings;
+    # it should instead allow arbitrary value types.
+    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA
     ONTOLOGY_CLASS = ONTOLOGY_CLASS
     ONTOLOGY_CLASS_LIST = ONTOLOGY_CLASS_LIST
     PHENOPACKET_EVIDENCE_SCHEMA = PHENOPACKET_EVIDENCE_SCHEMA

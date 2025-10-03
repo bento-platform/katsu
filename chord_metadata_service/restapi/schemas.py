@@ -11,7 +11,6 @@ from .schema_utils import (
 __all__ = [
     "ONTOLOGY_CLASS",
     "ONTOLOGY_CLASS_LIST",
-    "KEY_VALUE_OBJECT",
     "AGE_STRING",
     "AGE",
     "AGE_RANGE",
@@ -60,18 +59,6 @@ CURIE_SCHEMA = {
     "type": "string",
     "pattern": "^\\w[^:]*:.+$",
     "additionalProperties": False,
-}
-
-KEY_VALUE_OBJECT = {
-    "$schema": DRAFT_07,
-    "$id": sub_schema_uri(phenopacket_base_uri, "key_value_object"),
-    "title": "Key-value object",
-    "description": "The schema represents a key-value object.",
-    "type": "object",
-    "patternProperties": {
-        "^.*$": {"type": "string"}
-    },
-    "additionalProperties": False
 }
 
 EXTRA_PROPERTIES_SCHEMA = tag_ids_and_describe({
