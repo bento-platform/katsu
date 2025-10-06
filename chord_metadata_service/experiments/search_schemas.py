@@ -63,13 +63,11 @@ INSTRUMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.INSTRUMENT_
         "identifier": {
             "search": search_optional_eq(0)
         },
-        "platform": {
+        "device": {
             "search": search_optional_str(1)
         },
+        "device_ontology": ONTOLOGY_SEARCH_SCHEMA,
         "description": {
-            "search": search_optional_str(2)
-        },
-        "model": {
             "search": search_optional_str(3)
         },
     },
@@ -133,7 +131,7 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "library_layout": {
             "search": search_optional_eq(13),
         },
-        # query example: ["#ico", ["#resolve", "instrument", "model"], "Illumina"]
+        # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
         "instrument": merge_schema_dictionaries(
             INSTRUMENT_SEARCH_SCHEMA,
             {"search": {"database": {

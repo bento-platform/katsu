@@ -89,16 +89,14 @@ async def instrument_summary(
 ) -> dict:
     instruments = models.Instrument.objects.filter(experiments__in=experiments).distinct()
 
-    count, platform, model = await asyncio.gather(
+    count, device = await asyncio.gather(
         instruments.acount(),
-        queryset_stats_for_field(instruments, "platform", discovery, experiment_permissions),
-        queryset_stats_for_field(instruments, "model", discovery, experiment_permissions),
+        queryset_stats_for_field(instruments, "device", discovery, experiment_permissions),
     )
 
     return {
         "count": thresholded_count(count, discovery, experiment_permissions),
-        "platform": platform,
-        "model": model,
+        "device": device,
     }
 
 

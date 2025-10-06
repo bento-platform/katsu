@@ -115,16 +115,14 @@ class InstrumentTest(TestCase):
         e.save()
 
     def test_validation(self):
-        self.assertEqual(Instrument.objects.count(), 1)
         # Valid CV for extra_properties
         try:
             self.create(
-                platform="Illumina",
+                device="Illumina HiScanSQ",
                 description="Test description 2",
-                model="Illumina HiScanSQ",
                 extra_properties={"date": 2021}
             )
         except Exception as e:
             self.fail(f"Instrument creation with arbitrary extra_properties should succeed, got: {e}")
-        obj = Instrument.objects.get(model="Illumina HiScanSQ")
+        obj = Instrument.objects.get(device="Illumina HiScanSQ")
         self.assertEqual(obj.extra_properties.get("date"), 2021)

@@ -2,7 +2,7 @@ from django.conf import settings
 from referencing import Registry, Resource
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
@@ -118,13 +118,11 @@ INSTRUMENT_SCHEMA = tag_ids_and_describe({
         "identifier": {
             "type": "string"
         },
-        "platform": {
+        "device": {
             "type": "string"
         },
+        "device_ontology": ONTOLOGY_CLASS,
         "description": {
-            "type": "string"
-        },
-        "model": {
             "type": "string"
         },
         "extra_properties": EXTRA_PROPERTIES_SCHEMA,

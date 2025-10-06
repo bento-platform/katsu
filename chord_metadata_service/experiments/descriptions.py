@@ -82,9 +82,9 @@ INSTRUMENT = {
     "description": "Metadata about the instrument used to sequence the biological specimens.",
     "properties": {
         "identifier": "An arbitrary identifier for an instrument.",
-        "platform": "The instrument name. E.g. Illumina, Oxford Nanopore.",
+        "device": "The specific model of the instrument. The most accurate information available.",
+        "device_ontology": "The most accurate ontology for the instrument",
         "description": "Description of the instrument.",
-        "model": "The specific model of the instrument.",
         **EXTRA_PROPERTIES
     }
 }

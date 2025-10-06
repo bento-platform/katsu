@@ -30,7 +30,10 @@
           "filename": "sample1_01.vcf.gz",
           "url": "http://example.org/sample1_01.vcf.gz",
           "indices": [
-            {"url": "http://example.org/sample1_01.vcf.gz.tbi", "format": "TABIX"}
+            {
+              "url": "http://example.org/sample1_01.vcf.gz.tbi",
+              "format": "TABIX"
+            }
           ],
           "file_format": "VCF",
           "data_output_type": "Derived data",
@@ -57,9 +60,8 @@
       ],
       "instrument": {
         "identifier": "instrument:01",
-        "platform": "Illumina",
+        "device": "Illumina",
         "description": "Test description",
-        "model": "Illumina HiSeq 4000",
         "extra_properties": {
           "date": "2021-06-21"
         }
@@ -121,9 +123,8 @@
       ],
       "instrument": {
         "identifier": "instrument:01",
-        "platform": "Illumina",
+        "device": "Illumina",
         "description": "Test description",
-        "model": "Illumina HiSeq 4000",
         "extra_properties": {
           "date": "2021-06-21"
         }
