@@ -45,7 +45,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
         elif self.action == "destroy":
             return P_DELETE_DATA
         else:
-            logger.error("viewset permission_from_request(...) is not implemented for action: %s", self.action)
+            logger.error("viewset permission_from_request(...) is not implemented for action", action=self.action)
             return None
 
     async def request_has_data_type_permissions(

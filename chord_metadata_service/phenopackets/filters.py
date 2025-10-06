@@ -1,8 +1,6 @@
 import django_filters
-from django_filters.widgets import CSVWidget
 from django.db.models import Q
 
-from chord_metadata_service.patients.models import Individual
 from . import models as m
 
 
@@ -16,16 +14,6 @@ def filter_ontology(qs, name, value):
     lookup_label = "__".join([name, "label", "icontains"])
     return qs.filter(Q(**{lookup_id: value}) |
                      Q(**{lookup_label: value}))
-
-
-def filter_related_model_ids(qs, name, value):
-    """
-    Returns objects for a list of specified related model ids
-    """
-    if value:
-        lookup = "__".join([name, "in"])
-        qs = qs.filter(**{lookup: value}).distinct()
-    return qs
 
 
 def filter_extra_properties_datatype(qs, name, value):
@@ -67,90 +55,6 @@ def filter_time_element(qs, name, value):
 # FILTERS
 
 
-class MetaDataFilter(django_filters.rest_framework.FilterSet):
-    created_by = django_filters.CharFilter(lookup_expr="icontains")
-    submitted_by = django_filters.CharFilter(lookup_expr="icontains")
-    phenopacket_schema_version = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets, field_name="phenopacket__dataset__title", label="Datasets")
-
-    class Meta:
-        model = m.MetaData
-        fields = ["id"]
-
-
-class PhenotypicFeatureFilter(django_filters.rest_framework.FilterSet):
-    description = django_filters.CharFilter(lookup_expr="icontains")
-    type = django_filters.CharFilter(method=filter_ontology, field_name="pftype", label="Type")
-    severity = django_filters.CharFilter(method=filter_ontology, field_name="severity", label="Severity")
-    # TODO modifier
-    onset = django_filters.CharFilter(method=filter_ontology, field_name="onset", label="Onset")
-    evidence = django_filters.CharFilter(method="filter_evidence", field_name="evidence", label="Evidence")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    extra_properties_datatype = django_filters.CharFilter(
-        method=filter_extra_properties_datatype, field_name="extra_properties",
-        label="Extra properties datatype"
-    )
-    individual = django_filters.ModelMultipleChoiceFilter(
-        queryset=Individual.objects.all(), widget=CSVWidget,
-        field_name="phenopacket__subject", method=filter_related_model_ids,
-        label="Individual"
-    )
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-
-    class Meta:
-        model = m.PhenotypicFeature
-        fields = ["id", "excluded", "biosample", "phenopacket"]
-
-    def filter_evidence(self, qs, name, value):
-        """
-        Filters Evidence code by both id or label
-        """
-        return qs.filter(Q(evidence__evidence_code__id__icontains=value) |
-                         Q(evidence__evidence_code__label__icontains=value))
-
-
-class ProcedureFilter(django_filters.rest_framework.FilterSet):
-    code = django_filters.CharFilter(method=filter_ontology, field_name="code", label="Code")
-    body_site = django_filters.CharFilter(method=filter_ontology, field_name="body_site", label="Body site")
-    performed = django_filters.CharFilter(method=filter_time_element, field_name="performed", label="Performed")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-
-
-class DiseaseFilter(django_filters.rest_framework.FilterSet):
-    term = django_filters.CharFilter(method=filter_ontology, field_name="term", label="Term")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    extra_properties_datatype = django_filters.CharFilter(
-        method=filter_extra_properties_datatype, field_name="extra_properties",
-        label="Extra properties datatype"
-    )
-    extra_properties_comorbidities_group = django_filters.CharFilter(
-        method="filter_extra_properties_cg", field_name="extra_properties",
-        label="Extra properties comorbidities group"
-    )
-    individual = django_filters.ModelChoiceFilter(
-        queryset=Individual.objects.all(), field_name="phenopacket__subject",
-        label="Individual"
-    )
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-
-    class Meta:
-        model = m.Disease
-        fields = ["id"]
-
-    def filter_extra_properties_cg(self, qs, name, value):
-        return qs.filter(extra_properties__comorbidities_group__icontains=value)
-
-
 class BiosampleFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr="icontains")
     sampled_tissue = django_filters.CharFilter(
@@ -167,7 +71,7 @@ class BiosampleFilter(django_filters.rest_framework.FilterSet):
     extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
     datasets = django_filters.CharFilter(
         method=filter_datasets,
-        field_name="phenopacket__dataset__title",
+        field_name="phenopackets__dataset__title",
         label="Datasets"
     )
     procedure = django_filters.CharFilter(
@@ -206,74 +110,4 @@ class PhenopacketFilter(django_filters.rest_framework.FilterSet):
             Q(phenotypic_features__pftype__label__icontains=value),
             phenotypic_features__excluded=False
         ).distinct()
-        return qs
-
-
-class GenomicInterpretationFilter(django_filters.rest_framework.FilterSet):
-    status = django_filters.CharFilter(lookup_expr="iexact")
-    gene_filter = django_filters.CharFilter(method="filter_gene", field_name="gene_descriptor",
-                                            label="Filter by  GeneDescriptor IDs and symbols")
-    variant_filter = django_filters.CharFilter(method="filter_variant", field_name="variant_interpretation",
-                                               label="Filter by VariantInterpretation ID and ontologies")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-
-    def filter_gene(self, qs, name, value):
-        # GeneDescriptor filters
-        value_id_filter = Q(gene_descriptor__value_id__icontains=value)
-        symbol_filter = Q(gene_descriptor__symbol__icontains=value)
-        alt_id_filter = Q(gene_descriptor__alternate_ids__icontains=value)
-        alt_symbols_filter = Q(gene_descriptor__alternate_symbols__icontains=value)
-
-        qs = qs.filter(
-            value_id_filter | symbol_filter | alt_id_filter | alt_symbols_filter
-        ).distinct()
-        return qs
-
-    def filter_variant(self, qs, name, value):
-        id_filter = Q(variant_interpretation__variation_descriptor__id__icontains=value)
-        label_filter = Q(variant_interpretation__variation_descriptor__label__icontains=value)
-        pathology_class_filter = Q(variant_interpretation__acmg_pathogenicity_classification__icontains=value)
-        therapeutic_actionability_filter = Q(variant_interpretation__therapeutic_actionability__icontains=value)
-        qs = qs.filter(
-            id_filter | label_filter | pathology_class_filter | therapeutic_actionability_filter
-        ).distinct()
-        return qs
-
-    class Meta:
-        model = m.GenomicInterpretation
-        fields = ["id", "gene_descriptor", "variant_interpretation"]
-
-
-class DiagnosisFilter(django_filters.rest_framework.FilterSet):
-    disease_type = django_filters.CharFilter(
-        method=filter_ontology, field_name="disease__term", label="Disease type"
-    )
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="disease__phenopacket__dataset__title",
-        label="Datasets"
-    )
-
-    class Meta:
-        model = m.Diagnosis
-        fields = ["id"]
-
-
-class InterpretationFilter(django_filters.rest_framework.FilterSet):
-    progress_status = django_filters.CharFilter(lookup_expr="iexact")
-    extra_properties = django_filters.CharFilter(method=filter_extra_properties, label="Extra properties")
-    datasets = django_filters.CharFilter(
-        method=filter_datasets,
-        field_name="phenopacket__dataset__title",
-        label="Datasets"
-    )
-
-    class Meta:
-        model = m.Interpretation
-        fields = ["id", "phenopacket"]
-
-    def filter_diagnosis(self, qs, name, value):
-        lookup = "__".join([name, "icontains"])
-        qs = qs.filter(**{lookup: value}).distinct()
         return qs

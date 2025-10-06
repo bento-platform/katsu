@@ -1,12 +1,12 @@
 import asyncio
 
+from bento_lib.discovery import DiscoveryConfig
 from django.db.models import QuerySet
 
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.fields import get_age_numeric_binned
 from chord_metadata_service.discovery.stats import queryset_stats_for_field
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from . import models
 
 __all__ = ["individual_summary"]
@@ -16,7 +16,7 @@ OVERVIEW_AGE_BIN_SIZE = 10  # TODO: configurable
 
 
 async def individual_summary(
-    phenopackets: QuerySet | None, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissionsDict
+    phenopackets: QuerySet | None, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions
 ):
     individuals = (
         models.Individual.objects.all()

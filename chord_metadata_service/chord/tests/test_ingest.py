@@ -18,6 +18,7 @@ from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
 )
+from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Biosample, PhenotypicFeature, Phenopacket
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 from chord_metadata_service.resources.models import Resource
@@ -107,8 +108,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
     def test_ingesting_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET,
-            self.dataset.identifier
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
@@ -200,12 +200,10 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
     def test_reingesting_updating_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET,
-            self.dataset.identifier
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET_UPDATE,
-            self.dataset.identifier
+            EXAMPLE_INGEST_PHENOPACKET_UPDATE, self.dataset.identifier, logger
         )
 
         self.assertNotEqual(p.id, p2.id)
@@ -235,14 +233,14 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         validation = schema_validation(EXAMPLE_INGEST_INVALID_PHENOPACKET, PHENOPACKET_SCHEMA)
         self.assertEqual(validation, False)
         with self.assertRaises(IngestError):
-            validate_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET)
+            validate_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET, logger)
         with self.assertRaises(IngestError):
-            ingest_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET, "dummy", validate=True)
+            ingest_phenopacket(EXAMPLE_INGEST_INVALID_PHENOPACKET, "dummy", logger, validate=True)
 
         # valid phenopacket passes validation & doesn't raise
-        validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA)
+        validation_2 = schema_validation(EXAMPLE_INGEST_PHENOPACKET, PHENOPACKET_SCHEMA, obj_idx=0)
         self.assertEqual(validation_2, True)
-        validate_phenopacket(EXAMPLE_INGEST_PHENOPACKET)
+        validate_phenopacket(EXAMPLE_INGEST_PHENOPACKET, logger)
 
         # valid experiments pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
@@ -252,14 +250,13 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET,
-            self.dataset.identifier
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
 
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier, logger
         )
 
         # experiments
@@ -272,7 +269,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assertEqual(experiments[0].experiment_results.count(), ExperimentResult.objects.all().count())
 
         # instrument
-        self.assertEqual(Instrument.objects.all().count(), 1)
+        self.assertEqual(Instrument.objects.all().count(), 2)
 
         # resources for experiments
         # - check that experiments resource is in database
@@ -281,7 +278,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         # try ingesting the file with an invalid biosample ID
         with self.assertRaises(Biosample.DoesNotExist):
             WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.dataset.identifier
+                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.dataset.identifier, logger
             )
 
     def test_ingesting_invalid_experiment_json(self):
@@ -290,9 +287,9 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
             validation = schema_validation(exp, EXPERIMENT_SCHEMA)
             self.assertEqual(validation, False)
             with self.assertRaises(IngestError):
-                validate_experiment(exp)
+                validate_experiment(exp, logger)
             with self.assertRaises(IngestError):
-                ingest_experiment(exp, "dummy", validate=True)
+                ingest_experiment(exp, "dummy", logger, validate=True)
 
         # check valid experiment, must pass validation
         for exp in EXAMPLE_INGEST_EXPERIMENT["experiments"]:
@@ -301,19 +298,21 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
     def test_ingesting_experiment_results_json(self):
         # ingest list of experiments
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier)
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
+        )
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier
+            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier, logger
         )
         # ingest list of experiment results
         experiment_results = ingest_derived_experiment_results(
-            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.dataset.identifier
+            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.dataset.identifier, logger
         )
         self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
         # check that it has been linked to the same experiment as the file it
         # has been derived from.
         related_results = ExperimentResult.objects.filter(
-            experiment__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
+            experiments__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
         self.assertIn(
             EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
             [v["identifier"] for v in related_results.values("identifier")]
@@ -324,7 +323,7 @@ class IngestISOAgeToNumberTest(ProjectTestCase):
 
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier
+            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier, logger
         )
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001

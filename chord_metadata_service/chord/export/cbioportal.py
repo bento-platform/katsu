@@ -1,4 +1,3 @@
-import logging
 import csv
 from typing import Callable, TextIO
 import re
@@ -32,8 +31,6 @@ __all__ = [
     "study_export",
 ]
 
-logger = logging.getLogger(__name__)
-
 # predefined filenames recognized by cBioPortal
 STUDY_FILENAME = "meta_study.txt"
 SAMPLE_DATA_FILENAME = "data_clinical_sample.txt"
@@ -66,10 +63,10 @@ SAMPLE_DATATYPE = "SAMPLE"
 #   A-Z uppercase
 #   0-9 digit
 #   _   underscore
-#   \.  dot
+#   .  dot
 #   \-  hyphen
 # ]     Closing list
-REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_\.\-]")
+REGEXP_INVALID_FOR_ID = re.compile(r"[^a-zA-Z0-9_.\-]")
 
 
 async def study_export(get_path: Callable[[str], str], dataset_id: str):
@@ -99,7 +96,7 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
     # Export samples
     with open(get_path(SAMPLE_DATA_FILENAME), "w", newline="\n") as file_sample:
         biosamples = (
-            pm.Biosample.objects.filter(phenopacket__dataset_id=dataset.identifier).prefetch_related("phenopacket_set")
+            pm.Biosample.objects.filter(phenopackets__dataset_id=dataset.identifier).prefetch_related("phenopackets")
         )
         await sample_export(biosamples, file_sample)
 
@@ -111,9 +108,9 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
          open(get_path(CASE_LIST_SEQUENCED), "w", newline="\n") as file_case_list:
         exp_res = (
             ExperimentResult.objects
-            .prefetch_related("experiment_set")
-            .filter(experiment__dataset_id=dataset.identifier, file_format="MAF")
-            .annotate(biosample_id=F("experiment__biosample"))
+            .prefetch_related("experiments")
+            .filter(experiments__dataset_id=dataset.identifier, file_format="MAF")
+            .annotate(biosample_id=F("experiments__biosample"))
         )
 
         exp_res_list = [r async for r in exp_res]

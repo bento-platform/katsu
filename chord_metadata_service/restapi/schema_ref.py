@@ -1,0 +1,67 @@
+from enum import Enum
+from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
+from chord_metadata_service.experiments.schemas import EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA
+from chord_metadata_service.phenopackets.schemas import (
+    PHENOPACKET_EVIDENCE_SCHEMA,
+    PHENOPACKET_MEASUREMENT_SCHEMA,
+    EXPRESSION_SCHEMA,
+    VCF_RECORD_SCHEMA,
+    EXTENSION_SCHEMA,
+    PHENOPACKET_MEDICAL_ACTION_SCHEMA,
+    VRS_VARIATION_SCHEMA,
+    VALIDATION_PHENOPACKET_UPDATE_SCHEMA,
+    VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+)
+from chord_metadata_service.restapi.schemas import (
+    ONTOLOGY_CLASS,
+    ONTOLOGY_CLASS_LIST,
+    AGE_STRING,
+    AGE,
+    AGE_RANGE,
+    AGE_OR_AGE_RANGE,
+    TIME_INTERVAL,
+    EXTRA_PROPERTIES_SCHEMA,
+    GESTATIONAL_AGE,
+    TIME_ELEMENT_SCHEMA
+)
+
+__all__ = [
+    "SchemaRefs",
+]
+
+
+class SchemaRefs(Enum):
+    """
+    A compilation of all schema names and their associated schemas; used to create JsonSchema Validator.
+    For migration purposes, the name of the schema is stored as it is static between users and devices,
+        as opposed to storing the ever-permutating schemas and requiring
+        the generation of (essentially) duplicative migrations.
+
+    The format of this enum is `schema_name:str = schema:dict`.
+    The enum is used in an atypical manner as the elements have no defined order to them.
+    """
+    AGE = AGE
+    AGE_OR_AGE_RANGE = AGE_OR_AGE_RANGE
+    AGE_RANGE = AGE_RANGE
+    AGE_STRING = AGE_STRING
+    DISCOVERY_SCHEMA = DISCOVERY_SCHEMA
+    EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA = EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA
+    EXPRESSION_SCHEMA = EXPRESSION_SCHEMA
+    EXTENSION_SCHEMA = EXTENSION_SCHEMA
+    EXTRA_PROPERTIES_SCHEMA = EXTRA_PROPERTIES_SCHEMA
+    GESTATIONAL_AGE = GESTATIONAL_AGE
+    # Alias for experiments/migrations/0012_alter_experiment_experiment_ontology_and_more.py
+    # Previously, the key-value object for experiment extra properties forced all dict values to be strings;
+    # it should instead allow arbitrary value types.
+    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA
+    ONTOLOGY_CLASS = ONTOLOGY_CLASS
+    ONTOLOGY_CLASS_LIST = ONTOLOGY_CLASS_LIST
+    PHENOPACKET_EVIDENCE_SCHEMA = PHENOPACKET_EVIDENCE_SCHEMA
+    PHENOPACKET_MEASUREMENT_SCHEMA = PHENOPACKET_MEASUREMENT_SCHEMA
+    PHENOPACKET_MEDICAL_ACTION_SCHEMA = PHENOPACKET_MEDICAL_ACTION_SCHEMA
+    TIME_ELEMENT_SCHEMA = TIME_ELEMENT_SCHEMA
+    TIME_INTERVAL = TIME_INTERVAL
+    VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA
+    VALIDATION_PHENOPACKET_UPDATE_SCHEMA = VALIDATION_PHENOPACKET_UPDATE_SCHEMA
+    VCF_RECORD_SCHEMA = VCF_RECORD_SCHEMA
+    VRS_VARIATION_SCHEMA = VRS_VARIATION_SCHEMA

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
 from chord_metadata_service.chord.ingest.constants import DATA_TYPE_TO_INGESTION_FN
+from chord_metadata_service.logger import logger
 
 
 class Command(BaseCommand):
@@ -16,6 +17,6 @@ class Command(BaseCommand):
         parser.add_argument("data", action="store", type=str, help="JSON data file or DRS URI to ingest")
 
     def handle(self, *args, **options):
-        DATA_TYPE_TO_INGESTION_FN[options["type"]]({"json_document": options["data"]}, options["dataset"])
+        DATA_TYPE_TO_INGESTION_FN[options["type"]]({"json_document": options["data"]}, options["dataset"], logger)
 
         print("Ingested data successfully.")

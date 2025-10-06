@@ -5,13 +5,11 @@ from asgiref.sync import async_to_sync
 from bento_lib.auth.permissions import Permission, P_QUERY_DATA
 from bento_lib.responses import errors
 from bento_lib.search import build_search_response
-from copy import deepcopy
 from datetime import datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F, Q, QuerySet
+from django.db.models import Count, F, Q
 from django.db.models.functions import Coalesce
-from django.http.request import QueryDict
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import filters, serializers, status
@@ -22,21 +20,19 @@ from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericListViewSet
-from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
-from chord_metadata_service.discovery.censorship import get_max_query_parameters, get_threshold, thresholded_count
-from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.fields import get_field_options, filter_queryset_field_value
-from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
+from chord_metadata_service.discovery.censorship import get_threshold, thresholded_count
+from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
+from chord_metadata_service.discovery.filtering import discovery_filter_queryset
+from chord_metadata_service.discovery.pydantic_models import DiscoveryQuery
+from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
-from chord_metadata_service.discovery.utils import (
-    get_discovery_queryable_fields,
-    get_discovery_data_type_permissions,
-    get_discovery_field_set_permissions,
-)
+from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.api_views import BIOSAMPLE_PREFETCH, PHENOPACKET_PREFETCH
+from chord_metadata_service.phenopackets.api_views import (
+    BIOSAMPLE_PREFETCH, BIOSAMPLE_SELECT_REL, PHENOPACKET_PREFETCH, PHENOPACKET_SELECT_REL
+)
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
@@ -106,6 +102,9 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
 
     def list(self, request, *args, **kwargs):
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
+            # TODO: this whole thing is badly-placed: it really should be an alternate view of phenopackets, not
+            #  individuals. As such, it can return >1 record for the same individual if they have >1 phenopacket.
+
             scope = async_to_sync(get_request_discovery_scope)(self.request)
 
             start = datetime.now()
@@ -122,13 +121,17 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
             qs = (
                 Phenopacket
                 .get_model_scoped_queryset(scope)
+                .prefetch_related("dataset__project")
                 .filter(subject__id__in=individual_ids)
                 .values(
                     "subject_id",
+                    "dataset_id",
+                    phenopacket_id=F("id"),
+                    project_id=F("dataset__project_id"),
                     alternate_ids=Coalesce(F("subject__alternate_ids"), [])
                 )
                 .annotate(
-                    num_experiments=Count("biosamples__experiment"),
+                    num_experiments=Count("biosamples__experiments"),
                     biosamples=Coalesce(
                         ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
                         []
@@ -191,90 +194,18 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         queryset = (
             Individual
             .get_model_scoped_queryset(scope)
+            .prefetch_related(
+                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
+                *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH),
+                *(f"phenopackets__{p}" for p in PHENOPACKET_SELECT_REL),
+            )
+            .select_related("vital_status")
             .filter(**filter_by_id)
-            .prefetch_related(*(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"))
             .order_by("id")
         )
 
         return queryset
-
-
-class EmptyDiscoveryException(Exception):
-    pass
-
-
-async def public_discovery_filter_queryset(
-    discovery_scope: ValidatedDiscoveryScope,
-    request: DrfRequest,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    queryset: QuerySet,
-) -> tuple[QuerySet, list[str]]:
-    """
-    Process query parameters, check validity, and filter the queryset by the passed parameters.
-    :param discovery_scope: Discovery scope for the queryset we're filtering.
-    :param request: The request to extract the query parameters from.
-    :param dt_permissions: Permissions meta-dictionary of {data type: permissions dictionary}.
-    :param queryset: The queryset to filter using the request query parameters.
-    """
-
-    discovery = discovery_scope.discovery
-
-    if not discovery:
-        raise EmptyDiscoveryException()
-
-    # Process query parameters and check validity
-
-    qp: QueryDict = deepcopy(request.query_params)
-
-    # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and the
-    #   response yields an error, as they are (presumably) not queryable fields in the discovery config.
-    # - store project and dataset before we remove them for logging purposes.
-    if "project" in qp:
-        del qp["project"]
-    if "dataset" in qp:
-        del qp["dataset"]
-
-    queryable_fields = get_discovery_queryable_fields(discovery)
-
-    queried_fields = list(set(qp.keys()))  # deduplicate fields for determining field permissions
-    overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
-
-    # TODO: in the future, scope repr passing to exceptions should be structured data:
-    scope_repr = repr(discovery_scope)
-
-    # we check against qp, not queried_fields, for max query parameters, since a user may be filtering based on more
-    # than one value for the same field (not that this works most of the time, at the moment.)
-    if len(qp) > get_max_query_parameters(discovery, overall_permissions):
-        raise ValidationError(f"Wrong number of fields: {len(qp)} ({scope_repr})")
-
-    if not overall_permissions["counts"]:
-        raise ValidationError(f"Insufficient permissions to access counts ({scope_repr})")
-
-    for field, value in qp.items():
-        if field not in queryable_fields:
-            raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
-
-        field_props = queryable_fields[field]
-        options = await get_field_options(field, discovery, qf_permissions[field])
-        if (
-            value not in options
-            and not (
-                # case-insensitive search on categories
-                field_props["datatype"] == "string"
-                and value.lower() in [o.lower() for o in options]
-            )
-            and not (
-                # no restriction when enum is not set for categories
-                field_props["datatype"] == "string"
-                and field_props["config"]["enum"] is None
-            )
-        ):
-            raise ValidationError(f"Invalid value used in query: {value} ({scope_repr})")
-
-        # recursion
-        queryset = filter_queryset_field_value(queryset, field_props, value)
-
-    return queryset, queried_fields
 
 
 # noinspection PyMethodMayBeStatic
@@ -301,49 +232,67 @@ class PublicListIndividuals(APIView):
             authz_middleware.mark_authz_done(request)
             return Response(e.message, status=status.HTTP_404_NOT_FOUND)
 
-        discovery = discovery_scope.discovery
-
         dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
         dt_perms_pheno = dt_permissions[dts.DATA_TYPE_PHENOPACKET]
         dt_perms_exp = dt_permissions[dts.DATA_TYPE_EXPERIMENT]
 
         # We can't respond if we don't have at least phenopackets counts permission
-        if not dt_perms_pheno["counts"]:
+        if not dt_perms_pheno.counts:
             authz_middleware.mark_authz_done(request)
             return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
-        perm_pheno_query_data = dt_perms_pheno["data"]
+        discovery = discovery_scope.discovery
+
+        perm_pheno_query_data = dt_perms_pheno.data
 
         # Get individuals filtered to the requested scope
         base_qs = Individual.get_model_scoped_queryset(discovery_scope)
 
+        query = DiscoveryQuery.from_drf_request(request)
+        queried_fields = query.queried_filter_fields()
+
         try:
-            filtered_qs, queried_fields = await public_discovery_filter_queryset(
-                discovery_scope, request, dt_permissions, base_qs
-            )
-        except EmptyDiscoveryException:
+            filtered_qs = (
+                await discovery_filter_queryset(
+                    discovery_scope, query, "individual", base_qs, dt_permissions, logger
+                )
+            )[0]
+        except DiscoveryEmptyException:
             authz_middleware.mark_authz_done(request)
             return Response(dres.NO_PUBLIC_DATA_AVAILABLE, status=status.HTTP_404_NOT_FOUND)
         except ValidationError as e:
-            logger.info(f"Public individuals endpoint recieved validation error: {e} ({repr(discovery_scope)})")
+            await logger.ainfo(
+                "discovery individuals endpoint recieved validation error", exc=e, scope_repr=repr(discovery_scope)
+            )
             authz_middleware.mark_authz_done(request)
             return Response(errors.bad_request_error(
                 *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
             ), status=status.HTTP_400_BAD_REQUEST)
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
+        threshold = get_threshold(discovery, dt_perms_pheno)
+
+        # structured event logging for public search: embed search details
+        await logger.ainfo(
+            "public individuals search",
+            queried_fields=queried_fields,
+            individual_count=ind_qct,
+            threshold=threshold,
+            sub_threshold=ind_qct <= threshold,
+        )
 
         if ind_qct == 0 and not perm_pheno_query_data:
             # 0 count means insufficient data if we only have counts permissions, but means a true 0 if we have full
             # data permissions.
-            logger.info(
-                f"Public individuals endpoint queried fields {queried_fields} which resulted in "
-                f"sub-threshold count: {ind_qct} <= {get_threshold(discovery, dt_perms_pheno)} "
-                f"({repr(discovery_scope)})")
             authz_middleware.mark_authz_done(request)
             return Response(dres.INSUFFICIENT_DATA_AVAILABLE)
 
-        logger.info(f"Public individuals search queried fields {queried_fields}, resulting in {ind_qct} individuals")
+        # filtered_qs: filtered Individual queryset
+        filtered_qs = filtered_qs.annotate(
+            phenopacket_id=F("phenopackets__id"),
+            dataset_id=F("phenopackets__dataset__identifier"),
+            project_id=F("phenopackets__dataset__project__identifier"),
+        )
 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
@@ -354,15 +303,36 @@ class PublicListIndividuals(APIView):
         return Response({
             "count": ind_qct,
             # Only if we have "query:data" - this field is for Beacon, which should have an access token:
-            **({"matches": filtered_qs.values_list("id", flat=True)} if perm_pheno_query_data else {}),
+            **(
+                {
+                    "matches": filtered_qs.values_list("id", flat=True),
+                    # Below is a temporary detailed match list so we can start building a better search UI.
+                    "matches_detail": [
+                        {
+                            "id": i.id,
+                            **({
+                                "phenopacket_id": i.phenopacket_id,
+                                "project_id": i.project_id,
+                                "dataset_id": i.dataset_id,
+                            } if i.phenopacket_id else {
+                                "phenopacket_id": None,
+                                "project_id": None,
+                                "dataset_id": None,
+                            })
+                        } async for i in filtered_qs
+                    ],
+                }
+                if perm_pheno_query_data
+                else {}
+            ),
             "biosamples": {
                 "count": tissues_count,
-                "sampled_tissue": sampled_tissues,
+                "sampled_tissue": sampled_tissues.model_dump(mode="json"),
             },
             **({
                 "experiments": {
                     "count": experiments_count,
-                    "experiment_type": experiment_types,
+                    "experiment_type": experiment_types.model_dump(mode="json"),
                 }
-            } if any(dt_perms_exp.values()) else {}),
+            } if dt_perms_exp.any_permissions() else {}),
         })

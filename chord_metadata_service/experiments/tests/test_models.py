@@ -47,15 +47,16 @@ class ExperimentTest(ExperimentTestCase):
             biosample=self.biosample
         )
 
-        # Invalid value in extra_properties
-        self.assertRaises(
-            serializers.ValidationError,
-            self.create,
-            library_strategy="Bisulfite-Seq",
-            experiment_type="DNA Methylation",
-            extra_properties={"some_field": "value", "invalid_value": 42},
-            biosample=self.biosample
-        )
+        # valid value in extra_properties
+        try:
+            self.create(
+                library_strategy="Bisulfite-Seq",
+                experiment_type="DNA Methylation",
+                extra_properties={"some_field": "value", "invalid_value": 42},
+                biosample=self.biosample
+            )
+        except Exception as e:
+            self.fail(f"ExperimentResult creation with arbitrary extra_properties should succeed, got: {e}")
 
         # Missing biosample
         self.assertRaises(
@@ -85,16 +86,20 @@ class ExperimentResultTest(TestCase):
     def test_validation(self):
         self.assertEqual(ExperimentResult.objects.count(), 1)
         self.assertEqual(ExperimentResult.objects.filter(file_format="VCF").count(), 1)
-        # Invalid extra_properties
-        # serializers.ValidationError("Not valid JSON schema for this field.")
-        self.assertRaises(
-            serializers.ValidationError,
-            self.create,
-            identifier="experiment_results:1",
-            description="Test description",
-            filename="test.vcf",
-            extra_properties={"date": 2021}
-        )
+        # Valid extra_properties
+
+        try:
+            self.create(
+                identifier="experiment_results:1",
+                description="Test description",
+                filename="test.vcf",
+                extra_properties={"date": 2021}
+            )
+        except Exception as e:
+            self.fail(f"ExperimentResult creation with arbitrary extra_properties should succeed, got: {e}")
+
+        obj = ExperimentResult.objects.get(identifier="experiment_results:1")
+        self.assertEqual(obj.extra_properties.get("date"), 2021)
 
 
 class InstrumentTest(TestCase):
@@ -110,14 +115,14 @@ class InstrumentTest(TestCase):
         e.save()
 
     def test_validation(self):
-        self.assertEqual(Instrument.objects.count(), 1)
-        # Invalid CV for extra_properties
-        # serializers.ValidationError("Not valid JSON schema for this field.")
-        self.assertRaises(
-            serializers.ValidationError,
-            self.create,
-            platform="Illumina",
-            description="Test description 2",
-            model="Illumina HiScanSQ",
-            extra_properties={"date": 2021}
-        )
+        # Valid CV for extra_properties
+        try:
+            self.create(
+                device="Illumina HiScanSQ",
+                description="Test description 2",
+                extra_properties={"date": 2021}
+            )
+        except Exception as e:
+            self.fail(f"Instrument creation with arbitrary extra_properties should succeed, got: {e}")
+        obj = Instrument.objects.get(device="Illumina HiScanSQ")
+        self.assertEqual(obj.extra_properties.get("date"), 2021)

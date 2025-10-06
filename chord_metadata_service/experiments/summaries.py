@@ -1,12 +1,12 @@
 import asyncio
 
+from bento_lib.discovery import DiscoveryConfig
 from django.db.models import QuerySet
 
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.stats import queryset_stats_for_field
-from chord_metadata_service.discovery.types import DiscoveryConfig
 from . import models
 
 __all__ = [
@@ -18,7 +18,7 @@ __all__ = [
 
 
 async def experiment_summary(
-    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissionsDict
+    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissions
 ) -> dict:
     # TODO: limit to authorized field list if we're in censored discovery mode - based on discovery config
 
@@ -60,9 +60,9 @@ async def experiment_summary(
 async def experiment_result_summary(
     experiments: QuerySet,
     discovery: DiscoveryConfig,
-    experiment_permissions: DataPermissionsDict,
+    experiment_permissions: DataPermissions,
 ) -> dict:
-    experiment_results = models.ExperimentResult.objects.filter(experiment__in=experiments)
+    experiment_results = models.ExperimentResult.objects.filter(experiments__in=experiments)
 
     (
         count,
@@ -85,25 +85,23 @@ async def experiment_result_summary(
 
 
 async def instrument_summary(
-    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissionsDict
+    experiments: QuerySet, discovery: DiscoveryConfig, experiment_permissions: DataPermissions
 ) -> dict:
-    instruments = models.Instrument.objects.filter(experiment__in=experiments).distinct()
+    instruments = models.Instrument.objects.filter(experiments__in=experiments).distinct()
 
-    count, platform, model = await asyncio.gather(
+    count, device = await asyncio.gather(
         instruments.acount(),
-        queryset_stats_for_field(instruments, "platform", discovery, experiment_permissions),
-        queryset_stats_for_field(instruments, "model", discovery, experiment_permissions),
+        queryset_stats_for_field(instruments, "device", discovery, experiment_permissions),
     )
 
     return {
         "count": thresholded_count(count, discovery, experiment_permissions),
-        "platform": platform,
-        "model": model,
+        "device": device,
     }
 
 
 async def dt_experiment_summary(
-    scope: ValidatedDiscoveryScope, experiment_permissions: DataPermissionsDict, queryset: QuerySet | None = None
+    scope: ValidatedDiscoveryScope, experiment_permissions: DataPermissions, queryset: QuerySet | None = None
 ) -> dict:
     discovery = scope.discovery
 

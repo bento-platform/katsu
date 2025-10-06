@@ -37,8 +37,7 @@ def valid_experiment_result():
 def valid_instrument():
     return {
         "identifier": "instrument:01",
-        "platform": "Illumina",
+        "device": "Illumina",
         "description": "Test description 1",
-        "model": "Illumina HiSeq 4000",
         "extra_properties": {"date": "2021-06-21"}
     }

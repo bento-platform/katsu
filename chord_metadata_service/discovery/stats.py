@@ -1,13 +1,12 @@
+from bento_lib.discovery import DiscoveryConfig
 from django.db.models import Count, F, QuerySet
-from typing import Mapping, Type
+from typing import Mapping
 
-from chord_metadata_service.authz.types import DataPermissionsDict
+from chord_metadata_service.authz.types import DataPermissions
 
 from .censorship import thresholded_count
-from .fields_utils import get_jsonb_path_query
-from .scope import ValidatedDiscoveryScope
-from .scopeable_model import BaseScopeableModel
-from .types import BinWithValue, OptionalDiscoveryOrEmptyConfig
+from .fields_utils import get_jsonb_path_query, MAPPING_SEPARATOR
+from .pydantic_models import BinWithValue, BinList
 
 __all__ = [
     "individual_experiment_type_stats",
@@ -19,8 +18,8 @@ __all__ = [
 
 
 async def individual_experiment_type_stats(
-    queryset: QuerySet, discovery: OptionalDiscoveryOrEmptyConfig, field_permissions: DataPermissionsDict,
-) -> tuple[int, list[BinWithValue]]:
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions,
+) -> tuple[int, BinList]:
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for experiment type
@@ -32,16 +31,16 @@ async def individual_experiment_type_stats(
 
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("biosamples__experiment__experiment_type"))
-        .annotate(value=Count("biosamples__experiment", distinct=True)),
+        .values(label=F("phenopackets__biosamples__experiments__experiment_type"))
+        .annotate(value=Count("phenopackets__biosamples__experiments", distinct=True)),
         discovery,
         field_permissions,
     )
 
 
 async def individual_biosample_tissue_stats(
-    queryset: QuerySet, discovery: OptionalDiscoveryOrEmptyConfig, field_permissions: DataPermissionsDict
-) -> tuple[int, list[BinWithValue]]:
+    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions
+) -> tuple[int, BinList]:
     """
     Used for a fixed-response public API and beacon.
     returns count and bento_public format list of stats for biosample sampled_tissue
@@ -52,8 +51,8 @@ async def individual_biosample_tissue_stats(
 
     return await bento_public_format_count_and_stats_list(
         queryset
-        .values(label=F("biosamples__sampled_tissue__label"))
-        .annotate(value=Count("biosamples", distinct=True)),
+        .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
+        .annotate(value=Count("phenopackets__biosamples", distinct=True)),
         discovery,
         field_permissions,
     )
@@ -61,10 +60,10 @@ async def individual_biosample_tissue_stats(
 
 async def bento_public_format_count_and_stats_list(
     annotated_queryset: QuerySet,
-    discovery: OptionalDiscoveryOrEmptyConfig,
-    field_permissions: DataPermissionsDict,
-) -> tuple[int, list[BinWithValue]]:
-    stats_list: list[BinWithValue] = []
+    discovery: DiscoveryConfig,
+    field_permissions: DataPermissions,
+) -> tuple[int, BinList]:
+    stats_list: BinList = BinList(root=[])
     total: int = 0
 
     # TODO: improve censorship tests for search/beacon counts/stats
@@ -78,16 +77,16 @@ async def bento_public_format_count_and_stats_list(
 
         # Be careful not to leak values if they're in the database but below threshold
         if label is not None and thresholded_value > 0:
-            stats_list.append({"label": label, "value": thresholded_value})
+            stats_list.append(BinWithValue(label=label, value=thresholded_value))
 
     return thresholded_count(total, discovery, field_permissions), stats_list
 
 
 async def stats_for_field(
-    model: Type[BaseScopeableModel],
-    scope: ValidatedDiscoveryScope,
+    qs: QuerySet,
+    discovery: DiscoveryConfig,
     field: str,
-    field_permissions: DataPermissionsDict,
+    field_permissions: DataPermissions,
     add_missing: bool = False,
     group_by: str | None = None,
 ) -> Mapping[str, int]:
@@ -95,16 +94,15 @@ async def stats_for_field(
     Computes counts of distinct values for a given field. Mainly applicable to
     char fields representing categories
     """
-    qs = model.get_model_scoped_queryset(scope)
     return await queryset_stats_for_field(
-        qs, field, scope.discovery, field_permissions, add_missing=add_missing, group_by=group_by)
+        qs, field, discovery, field_permissions, add_missing=add_missing, group_by=group_by)
 
 
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
-    discovery: OptionalDiscoveryOrEmptyConfig,
-    field_permissions: DataPermissionsDict,
+    discovery: DiscoveryConfig,
+    field_permissions: DataPermissions,
     add_missing: bool = False,
     group_by: str | None = None
 ) -> Mapping[str, int]:
@@ -112,22 +110,33 @@ async def queryset_stats_for_field(
     Computes counts of distinct values for a queryset.
     """
 
+    # to prevent a JSONB path query from conflicting with a potentially real key on the queryset, we cannot use just the
+    # field access path as a unique ID - we can include the group_by clause as well (and add a prefix) to prevent a
+    # collision, e.g.:
+    #  with mapping=individual/phenopackets/medical_actions, group_by=procedure/code/label, just using mapping (field)
+    #  as the unique key would collide with the real medical_actions field on phenopackets after we normalize mapping.
+    #  By instead using _jsonb_medical_actions_procedure_code_label as the annotation key, we have something unique.
+    queryset_key = f"_jsonb_{field}_{group_by.replace(MAPPING_SEPARATOR, '_')}" if group_by is not None else field
+
     # values() restrict the table of results to this COLUMN
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
     if group_by is not None:
         queryset_values = queryset.values(
-            **{field: get_jsonb_path_query(field, group_by)},
+            **{queryset_key: get_jsonb_path_query(field, group_by)},
         )
     else:
         queryset_values = queryset.values(field)
-    annotated_queryset = queryset_values.annotate(total=Count("*"))
+
+    # this empty order_by() clears any previous ordering set, which can interfere with annotations
+    #  - see https://docs.djangoproject.com/en/5.2/topics/db/aggregation/#interaction-with-order-by
+    annotated_queryset = queryset_values.annotate(total=Count("*")).order_by()
     num_missing = 0
 
     stats: dict[str, int] = {}
 
     async for item in annotated_queryset:
-        key = item[field]
+        key = item[queryset_key]
         if key is None:
             num_missing = item["total"]
             continue

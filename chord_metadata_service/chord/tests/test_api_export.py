@@ -1,6 +1,7 @@
 import os
 import shutil
 import tempfile
+import uuid
 
 from django.urls import reverse
 from rest_framework import status
@@ -11,6 +12,7 @@ from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
+from chord_metadata_service.logger import logger
 
 from .constants import VALID_DATA_USE_1
 from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
@@ -20,12 +22,16 @@ class ExportTest(AuthzAPITestCase):
     def setUp(self) -> None:
         # Creates a test database and populate with a phenopacket test file
 
-        p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=p)
-        self.study_id = str(self.d.identifier)
+        project = Project.objects.create(title="Project 1", description="")
+        dataset = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
+                                         project=project)
+        self.project_id = str(project.identifier)
+        self.study_id = str(dataset.identifier)
 
-        self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.d.identifier)
+        # Ingest test phenopackets
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_PHENOPACKET, dataset.identifier, logger
+        )
 
         self.base_export_payload = {
             "format": "cbioportal",
@@ -42,7 +48,20 @@ class ExportTest(AuthzAPITestCase):
         # Test with no output_path: expect a tar archive to be returned
         r = self.one_authz_post(reverse("export"), json=self.base_export_payload)
         self.assertEqual(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
-        # TODO: More
+
+    def test_export_cbio_object_dne(self):
+        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "object_id": str(uuid.uuid4())})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_export_cbio_format_dne(self):
+        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "format": "does-not-exist"})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_export_cbio_dne_for_project(self):
+        r = self.one_authz_post(
+            reverse("export"), json={**self.base_export_payload, "object_type": "project", "object_id": self.project_id}
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_export_cbio_with_path(self):
         tmp_dir = tempfile.mkdtemp()
@@ -60,6 +79,11 @@ class ExportTest(AuthzAPITestCase):
             shutil.rmtree(tmp_dir)
 
         # TODO: More
+
+    def test_export_cbio_with_path_dne(self):
+        # Test with output_path provided (but it does not exist!)
+        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "output_path": "does_not_exist"})
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_export_cbio_forbidden(self):
         r = self.one_no_authz_post(reverse("export"), json=self.base_export_payload)

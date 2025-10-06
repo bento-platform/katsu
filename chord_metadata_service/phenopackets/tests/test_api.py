@@ -11,6 +11,7 @@ from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.geo.tests.constants import KINGSTON_GEOM_JSON
+from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests import constants as restapi_c
 
 from . import constants as c
@@ -263,9 +264,9 @@ class GetPhenopacketsApiTest(AuthzAPITestCase):
                                          project=p)
 
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            restapi_c.VALID_PHENOPACKET_1, self.d.identifier)
+            restapi_c.VALID_PHENOPACKET_1, self.d.identifier, logger)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            restapi_c.VALID_PHENOPACKET_2, self.d2.identifier)
+            restapi_c.VALID_PHENOPACKET_2, self.d2.identifier, logger)
 
     def test_get_phenopackets_no_access(self):
         """

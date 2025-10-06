@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import uuid
+from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
 
-from .logger import logger
 from .resources import ingest_resource
 from .schema import schema_validation
 
@@ -27,9 +27,17 @@ def create_instrument(instrument: dict) -> em.Instrument:
     instrument_obj, _ = em.Instrument.objects.get_or_create(
         identifier=instrument.get("identifier", str(uuid.uuid4()))
     )
-    instrument_obj.platform = instrument.get("platform")
+
+    # Backwards compatibility for v19
+    # Allows ingestion of "device" and "model" values as instrument.device
+    if device := instrument.get("device"):
+        instrument_obj.device = device
+    elif model := instrument.get("model"):
+        instrument_obj.device = model
+
+    instrument_obj.device = instrument.get("device")
+    instrument_obj.device_ontology = instrument.get("device_ontology")
     instrument_obj.description = instrument.get("description")
-    instrument_obj.model = instrument.get("model")
     instrument_obj.extra_properties = instrument.get("extra_properties", {})
     instrument_obj.save()
     return instrument_obj
@@ -54,9 +62,9 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
     return er_obj
 
 
-def validate_experiment(experiment_data, idx: int | None = None) -> None:
+def validate_experiment(experiment_data, lg: BoundLogger, idx: int | None = None) -> None:
     # Validate experiment data against experiments schema.
-    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA)
+    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA, obj_idx=idx, logger=lg)
     if not validation:
         # TODO: Report more precise errors
         raise IngestError(
@@ -67,6 +75,7 @@ def validate_experiment(experiment_data, idx: int | None = None) -> None:
 def ingest_experiment(
     experiment_data: dict,
     dataset_id: str,
+    lg: BoundLogger,
     validate: bool = True,
     idx: int | None = None,
 ) -> em.Experiment:
@@ -75,7 +84,7 @@ def ingest_experiment(
     if validate:
         # Validate experiment data against experiments schema prior to ingestion, if specified.
         # `validate` may be false if the experiment has already been validated.
-        validate_experiment(experiment_data, idx)
+        validate_experiment(experiment_data, lg, idx)
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
@@ -102,7 +111,7 @@ def ingest_experiment(
         try:
             biosample = pm.Biosample.objects.get(id=biosample_id)
         except pm.Biosample.DoesNotExist as e:
-            logger.error(f"Could not find biosample with ID: {biosample_id}")
+            lg.error("ingest_experiment: could not find biosample", biosample_id=biosample_id)
             raise e
 
     # create related experiment results
@@ -138,8 +147,9 @@ def ingest_experiment(
     return new_experiment
 
 
-def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experiment]:
+def ingest_experiments_workflow(json_data, dataset_id: str, lg: BoundLogger) -> list[em.Experiment]:
     dataset = Dataset.objects.get(identifier=dataset_id)
+    lg = lg.bind(project_id=str(dataset.project_id), dataset_id=dataset_id)
 
     for rs in json_data.get("resources", []):
         dataset.additional_resources.add(ingest_resource(rs))
@@ -148,13 +158,15 @@ def ingest_experiments_workflow(json_data, dataset_id: str) -> list[em.Experimen
 
     # First, validate all experiments with the schema before creating anything in the database.
     for idx, exp in enumerate(exps):
-        validate_experiment(exp, idx)
+        validate_experiment(exp, lg, idx)
 
     # Then, if everything passes, ingest the experiments. Don't re-do the validation in this case.
-    return [ingest_experiment(exp, dataset_id, validate=False) for exp in exps]
+    return [ingest_experiment(exp, dataset_id, lg, validate=False) for exp in exps]
 
 
-def ingest_derived_experiment_results(json_data: list[dict], dataset_id: str) -> list[em.ExperimentResult]:
+def ingest_derived_experiment_results(
+    json_data: list[dict], dataset_id: str, lg: BoundLogger
+) -> list[em.ExperimentResult]:
     """ Reads a JSON file containing a list of experiment results and adds them
         to the database.
         The linkage to experiments is inferred from the `derived_from` category
@@ -164,7 +176,7 @@ def ingest_derived_experiment_results(json_data: list[dict], dataset_id: str) ->
     # First, validate all experiment results with the schema before creating anything in the database.
 
     for idx, exp_result in enumerate(json_data):
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA)
+        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA, obj_idx=idx, logger=lg)
         if not validation:
             # TODO: Report more precise errors
             raise IngestError(
@@ -185,8 +197,12 @@ def ingest_derived_experiment_results(json_data: list[dict], dataset_id: str) ->
         derived_identifier = exp_result['extra_properties']['derived_from']
         experiment_id = exp_result2exp.get(derived_identifier, None)
         if experiment_id is None:
-            logger.warning(f"{exp_result['file_format']} file {exp_result['filename']} derived from \
-                file {derived_identifier} could not be associated with an experiment.")
+            lg.warning(
+                "ingest_derived_experiment_results: derived file could not be associated with experiment",
+                file_format=exp_result["file_format"],
+                filename=exp_result["filename"],
+                derived_id=derived_identifier,
+            )
             continue
 
         new_experiment_results = em.ExperimentResult.objects.create(**exp_result)

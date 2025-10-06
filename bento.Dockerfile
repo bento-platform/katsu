@@ -1,4 +1,4 @@
-FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.01.21
+FROM ghcr.io/bento-platform/bento_base_image:python-debian-2025.06.01
 
 SHELL ["/bin/bash", "-c"]
 

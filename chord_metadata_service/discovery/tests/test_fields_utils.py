@@ -1,49 +1,62 @@
+from bento_lib.discovery import NumberFieldDefinition, DiscoveryEntity
+from chord_metadata_service.phenopackets.models import Biosample
 from django.test import TestCase, TransactionTestCase
 from django.db.models import Q
-from django.db.models.base import ModelBase
 
-from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST
-from chord_metadata_service.discovery.model_lookups import PUBLIC_MODEL_NAMES_TO_MODEL
+from .constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_EXTRA_PROPERTIES
+from ..exceptions import DiscoveryFilterRewriteException
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
-    get_model_and_field,
-    get_public_model_name,
+    get_field_django_mapping_and_queried_entity,
+    get_field_django_mapping,
     labelled_range_generator,
-    get_nested_json_condition
+    get_nested_json_condition,
+    resolve_filter_mapping_to_queryset_model,
+    normalize_field_path_true_model,
 )
 
 
 class TestModelField(TransactionTestCase):
 
     def test_get_model_field_basic(self):
-        model, field = get_model_and_field("individual/age_numeric")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "age_numeric")
+        field, _, queried_entity = get_field_django_mapping_and_queried_entity(
+            "phenopacket", DISCOVERY_CONFIG_TEST.fields["age"]
+        )
+        self.assertEqual(field, "subject__age_numeric")
+        self.assertEqual(
+            field, "subject__" + get_field_django_mapping("individual", DISCOVERY_CONFIG_TEST.fields["age"])
+        )
+        self.assertEqual(queried_entity, "individual")
 
-        model, field = get_model_and_field("experiment/experiment_type")
-        self.assertIsInstance(model, ModelBase)
-        self.assertEqual(field, "experiment_type")
+        field = get_field_django_mapping("experiment", DISCOVERY_CONFIG_TEST.fields["extraction_protocol"])
+        self.assertEqual(field, "extraction_protocol")
 
     def test_get_model_nested_field(self):
-        model, field = get_model_and_field("individual/extra_properties/lab_test_result")
-        self.assertEqual(field, "extra_properties__lab_test_result")
+        field = get_field_django_mapping(
+            "individual", DISCOVERY_CONFIG_EXTRA_PROPERTIES.fields["lab_test_result_value"]
+        )
+        self.assertEqual(field, "extra_properties__lab_test_result_value")
+
+    def test_get_model_field_rewrite(self):
+        field = get_field_django_mapping("phenopacket", DISCOVERY_CONFIG_TEST.fields["age"])
+        self.assertEqual(field, "subject__age_numeric")
+
+        # TODO
 
     def test_get_wrong_model(self):
-        self.assertRaises(NotImplementedError, get_model_and_field, "junk/age_numeric")
-
-    def test_get_public_model_name(self):
-        for name, model in PUBLIC_MODEL_NAMES_TO_MODEL.items():
-            model_name = get_public_model_name(model)
-            self.assertEqual(name, model_name)
-
-    def test_get_public_model_name_wrong(self):
-        self.assertRaises(NotImplementedError, get_public_model_name, ModelBase)
+        with self.assertRaises(DiscoveryFilterRewriteException):
+            # noinspection PyTypeChecker
+            get_field_django_mapping("junk", DISCOVERY_CONFIG_TEST.fields["age"])
 
 
 class TestLabelledRangeGenerator(TestCase):
     def setUp(self):
-        self.fp = {
+        self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
+            "mapping": "individual/extra_properties/test",
+            "datatype": "number",
+            "title": "Test",
+            "description": "A test field",
             "config": {
                 "bin_size": 50,
                 "taper_left": 50,
@@ -51,60 +64,39 @@ class TestLabelledRangeGenerator(TestCase):
                 "minimum": 0,
                 "maximum": 1000
             }
-        }
+        })
 
     def test_config_with_tapers(self):
         rg = list(labelled_range_generator(self.fp))
-        c = self.fp["config"]
-        self.assertEqual(rg[0], (c["minimum"], c["taper_left"], f"< {c['taper_left']}"))
-        self.assertEqual(rg[-1], (c["taper_right"], c["maximum"], f"≥ {c['taper_right']}"))
-        self.assertEqual(rg[1], (c["taper_left"], c["taper_left"] + c["bin_size"],
-                         f"[{c['taper_left']}, {c['taper_left'] + c['bin_size']})"))
+        c = self.fp.config
+        self.assertEqual(rg[0], (c.minimum, c.taper_left, f"< {c.taper_left}"))
+        self.assertEqual(rg[-1], (c.taper_right, c.maximum, f"≥ {c.taper_right}"))
+        self.assertEqual(
+            rg[1],
+            (c.taper_left, c.taper_left + c.bin_size, f"[{c.taper_left}, {c.taper_left + c.bin_size})"),
+        )
 
-    def test_config_without_tappers(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "taper_left": 0,
-            "taper_right": 1000
-        }
+    def test_config_without_tapers(self):
+        self.fp.config.taper_left = 0
+        self.fp.config.taper_right = 1000
         rg = list(labelled_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
 
-    def test_wrong_config_min_max(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "minimum": 6000
-        }
-        rg = labelled_range_generator(self.fp)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_wrong_config_min_tapper_left(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "minimum": 60
-        }
-        rg = labelled_range_generator(self.fp)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_wrong_config_bin_size(self):
-        self.fp["config"] = {
-            **self.fp["config"],
-            "bin_size": 251
-        }
-        rg = labelled_range_generator(self.fp)
-        self.assertRaises(ValueError, list, rg)
-
 
 class TestLabelledRangeGeneratorCustomBins(TestCase):
     def setUp(self):
-        self.fp = {
+        self.fp: NumberFieldDefinition = NumberFieldDefinition.model_validate({
+            "mapping": "individual/extra_properties/test",
+            "datatype": "number",
+            "title": "Test",
+            "description": "A test field",
             "config": {
                 "bins": [200, 300, 500, 1000, 1500, 2000],
                 "minimum": 0,
                 "units": "mg/L"
             }
-        }
+        })
 
     def test_custom_bins_config(self):
         rg = list(labelled_range_generator(self.fp))
@@ -113,56 +105,11 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         self.assertEqual(rg[1], (200, 300, "[200, 300)"))
 
     def test_custom_bins_config_no_open_ended(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "minimum": 200,
-                "maximum": 2000
-            }
-        }
-        rg = list(labelled_range_generator(c))
+        self.fp.config.minimum = 200
+        self.fp.config.maximum = 2000
+        rg = list(labelled_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
-
-    def test_custom_bins_wrong_min(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "minimum": 300
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_custom_bins_wrong_max(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "maximum": 300
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_custom_bins_wrong_max_2(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "maximum": -10
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
-
-    def test_custom_bins_wrong_bins(self):
-        c = {
-            "config": {
-                **self.fp["config"],
-                "bins": [200]
-            }
-        }
-        rg = labelled_range_generator(c)
-        self.assertRaises(ValueError, list, rg)
 
 
 class TestJsonFieldUtils(TestCase):
@@ -211,18 +158,18 @@ class TestJsonFieldUtils(TestCase):
         })
 
     def test_get_json_range_condition(self):
-        field_props = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
+        field_props = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
 
         # GTE 0 an LT 20
-        json_range_condition_0_20 = get_json_range_condition(field_props, min=0, max=20)
+        json_range_condition_0_20 = get_json_range_condition("phenopacket", field_props, min=0, max=20)
         self.assertTrue(len(json_range_condition_0_20), 2)  # expect 2 conditions (GTE and LT)
 
         # GTE 0
-        json_range_condition_gte_0 = get_json_range_condition(field_props, min=0)
+        json_range_condition_gte_0 = get_json_range_condition("phenopacket", field_props, min=0)
         self.assertTrue(len(json_range_condition_gte_0), 1)
 
         # LT 20
-        json_range_condition_lt_20 = get_json_range_condition(field_props, max=20)
+        json_range_condition_lt_20 = get_json_range_condition("phenopacket", field_props, max=20)
         self.assertTrue(len(json_range_condition_lt_20), 1)
 
         # Combined Q object
@@ -232,30 +179,235 @@ class TestJsonFieldUtils(TestCase):
         self.assertEqual(json_range_condition_0_20, combined)
 
     def test_jsonb_path_query_empty(self):
-        model, field = get_model_and_field("biosample/measurements")
-        assay_ids_query = get_jsonb_path_query(field, "assay/id")
+        assay_ids_query = get_jsonb_path_query("measurements", "assay/id")
 
         # no values
-        assay_ids = model.objects.values_list(assay_ids_query)
+        assay_ids = Biosample.objects.values_list(assay_ids_query)
         self.assertEqual(assay_ids.count(), 0)
 
     def test_jsonb_path_query_data(self):
-        model, field = get_model_and_field("biosample/measurements")
+        field = "measurements"
         assay_ids_query = get_jsonb_path_query(field, "assay/id")
 
         # create a biosample with 2 types of measurements
-        model.objects.create(
+        Biosample.objects.create(
             id="0",
             measurements=[self.measurement_tumour, self.measurement_bmi]
         )
 
         # Get all measurement assay IDs
-        assay_ids = model.objects.values_list(assay_ids_query)
+        assay_ids = Biosample.objects.values_list(assay_ids_query)
         self.assertEqual(len(assay_ids), 2)
 
         # Get measurements values
         bmi_values_query = get_jsonb_path_query(field, "value/quantity/value")
-        bmi_values = model.objects.values_list(bmi_values_query, flat=True)
+        bmi_values = Biosample.objects.values_list(bmi_values_query, flat=True)
         self.assertEqual(len(bmi_values), 2)
         self.assertEqual(bmi_values[0], self.measurement_tumour["value"]["quantity"]["value"])
         self.assertEqual(bmi_values[1], self.measurement_bmi["value"]["quantity"]["value"])
+
+
+class TestResolveFilterMapping(TestCase):
+    def test_resolve_filter_mapping(self):
+        subtests: list[tuple[DiscoveryEntity, DiscoveryEntity, tuple[str, ...], bool | None, str]] = [
+            # starting at the second discovery entity with the field path, mapping to the first
+            ("phenopacket", "individual", ("sex",), None, "subject__sex"),
+            ("phenopacket", "individual", ("phenopackets", "subject", "sex"), None, "subject__sex"),
+            ("individual", "phenopacket", ("subject", "sex"), None, "sex"),
+            ("individual", "phenopacket", ("subject", "phenopackets", "subject", "sex"), None, "sex"),
+            ("individual", "phenopacket", ("biosamples", "sampled_tissue"), False, "biosamples__sampled_tissue"),
+            (
+                "experiment",
+                "phenopacket",
+                ("biosamples", "experiment", "extra_properties", "prop"),
+                None,
+                "extra_properties__prop",
+            ),
+            (
+                "experiment",
+                "phenopacket",
+                ("biosamples", "experiments", "extra_properties", "prop"),
+                None,
+                "extra_properties__prop",
+            ),
+            ("individual", "biosample", ("sampled_tissue",), False, "biosamples__sampled_tissue"),
+            ("individual", "biosample", ("sampled_tissue",), True, "phenopackets__biosamples__sampled_tissue"),
+            ("biosample", "individual", ("sex",), False, "individual__sex"),
+            ("biosample", "individual", ("sex",), True, "phenopackets__subject__sex"),
+            ("biosample", "phenopacket", ("subject", "sex"), False, "individual__sex"),
+            ("biosample", "phenopacket", ("subject", "sex"), True, "phenopackets__subject__sex"),
+            ("biosample", "phenopacket", ("biosamples", "sampled_tissue"), None, "sampled_tissue"),
+            ("experiment", "phenopacket", ("biosamples", "sampled_tissue"), None, "biosample__sampled_tissue"),
+            ("experiment", "phenopacket", ("subject", "sex"), False, "biosample__individual__sex"),
+            ("experiment", "phenopacket", ("subject", "sex"), True, "biosample__phenopackets__subject__sex"),
+            ("experiment", "individual", ("sex",), False, "biosample__individual__sex"),
+            ("experiment", "individual", ("sex",), True, "biosample__phenopackets__subject__sex"),
+            (
+                "experiment",
+                "individual",
+                ("phenopackets", "biosamples", "experiments", "experiment_type"),
+                None,
+                "experiment_type",
+            ),
+            (
+                "experiment",
+                "individual",
+                ("biosamples", "experiments", "experiment_type"),
+                None,
+                "experiment_type",
+            ),
+            (
+                "experiment",
+                "individual",
+                ("biosamples", "experiments", "extra_properties", "prop"),
+                None,
+                "extra_properties__prop",
+            ),
+            (
+                "experiment",
+                "individual",
+                ("phenopackets", "biosamples", "experiments", "extra_properties", "prop"),
+                None,
+                "extra_properties__prop",
+            ),
+            ("experiment_result", "individual", ("sex",), False, "experiments__biosample__individual__sex"),
+            ("experiment_result", "individual", ("sex",), True, "experiments__biosample__phenopackets__subject__sex"),
+            (
+                "experiment_result",
+                "phenopacket",
+                ("subject", "sex"),
+                False,
+                "experiments__biosample__individual__sex",
+            ),
+            (
+                "experiment_result",
+                "phenopacket",
+                ("subject", "sex"),
+                True,
+                "experiments__biosample__phenopackets__subject__sex",
+            ),
+            (
+                "experiment_result",
+                "phenopacket",
+                ("biosamples", "experiments", "experiment_results", "genome_assembly_id"),
+                None,
+                "genome_assembly_id",
+            ),
+            ("experiment_result", "biosample", ("sampled_tissue",), None, "experiments__biosample__sampled_tissue"),
+            (
+                "experiment_result",
+                "biosample",
+                ("experiments", "experiment_results", "genome_assembly_id"),
+                None,
+                "genome_assembly_id",
+            ),
+            (
+                "experiment_result",
+                "experiment",
+                ("experiment_results", "genome_assembly_id"),
+                None,
+                "genome_assembly_id",
+            ),
+            (
+                "individual",
+                "experiment_result",
+                ("genome_assembly_id",),
+                False,
+                "biosamples__experiments__experiment_results__genome_assembly_id",
+            ),
+            (
+                "individual",
+                "experiment_result",
+                ("genome_assembly_id",),
+                True,
+                "phenopackets__biosamples__experiments__experiment_results__genome_assembly_id",
+            ),
+            (
+                "phenopacket",
+                "experiment_result",
+                ("genome_assembly_id",),
+                None,
+                "biosamples__experiments__experiment_results__genome_assembly_id",
+            ),
+            (
+                "biosample",
+                "experiment_result",
+                ("genome_assembly_id",),
+                None,
+                "experiments__experiment_results__genome_assembly_id",
+            ),
+            # TODO: more
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                if params[3] is None:
+                    self.assertEqual(resolve_filter_mapping_to_queryset_model(
+                        params[0], params[1], params[2], False
+                    ), params[4])
+                    self.assertEqual(resolve_filter_mapping_to_queryset_model(
+                        params[0], params[1], params[2], True
+                    ), params[4])
+                else:
+                    self.assertEqual(resolve_filter_mapping_to_queryset_model(*params[:4]), params[4])
+
+    def test_resolve_filter_mapping_exc(self):
+        # we cannot rewrite these as invalid discovery entities
+        subtests: list[tuple[DiscoveryEntity, str, tuple[str, ...]]] = [
+            ("biosample", "junk", ("sex",)),
+            ("experiment", "junk", ("subject", "sex")),
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                with self.assertRaises(DiscoveryFilterRewriteException):
+                    resolve_filter_mapping_to_queryset_model(*params)
+
+    def test_normalize_field_path(self):
+        subtests: list[tuple[tuple[DiscoveryEntity, tuple[str, ...]], tuple[DiscoveryEntity, tuple[str, ...]]]] = [
+            (
+                ("individual", ("phenopackets", "biosamples", "extra_properties", "some_prop")),
+                ("biosample", ("extra_properties", "some_prop")),
+            ),
+            (
+                ("phenopacket", ("subject", "sex")),
+                ("individual", ("sex",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "experiments", "extra_properties", "some_prop")),
+                ("experiment", ("extra_properties", "some_prop")),
+            ),
+            (
+                ("individual", ("phenopackets", "subject", "sex")),
+                ("individual", ("sex",)),
+            ),
+            (
+                ("individual", ("biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("individual", ("biosamples", "individual", "biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "phenopackets", "biosamples", "sampled_tissue")),
+                ("biosample", ("sampled_tissue",)),
+            ),
+            (
+                ("experiment", ("experiment_results", "genome_assembly_id")),
+                ("experiment_result", ("genome_assembly_id",)),
+            ),
+            (
+                ("phenopacket", ("biosamples", "experiments", "experiment_results", "genome_assembly_id")),
+                ("experiment_result", ("genome_assembly_id",)),
+            ),
+            # TODO: more
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                self.assertTupleEqual(normalize_field_path_true_model(*params[0]), params[1])

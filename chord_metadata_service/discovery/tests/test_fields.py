@@ -1,10 +1,12 @@
+from bento_lib.discovery import DiscoveryConfig, DateFieldDefinition
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from django.test import TransactionTestCase, override_settings
 from rest_framework.test import APITestCase
 from copy import deepcopy
 
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
-from chord_metadata_service.discovery.types import DiscoveryConfig
+from chord_metadata_service.logger import logger
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
@@ -18,11 +20,11 @@ from ..fields import (
     get_month_date_range,
     filter_queryset_field_value,
 )
-# from ..utils import ValidatedDiscoveryScope
+from ..pydantic_models import BinWithValue
 
 
 class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
-    discovery: DiscoveryConfig = {
+    discovery: DiscoveryConfig = DiscoveryConfig.model_validate({
         "fields": {
             "some_prop": {
                 "datatype": "string",
@@ -34,18 +36,35 @@ class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
                 },
             }
         }
-    }
+    })
 
     async def test_get_string_options(self):
-        self.assertListEqual(await get_field_options("some_prop", self.discovery, self.permissions_full), ["a", "b"])
+        test_scope = ValidatedDiscoveryScope(None, None)
+        test_scope._discovery = TestGetFieldOptions.discovery
+        self.assertListEqual(
+            await get_field_options(
+                "phenopacket",
+                ph_m.Phenopacket.objects.all(),
+                "some_prop",
+                test_scope,
+                self.permissions_full
+            ),
+            ["a", "b"]
+        )
 
     async def test_get_field_options_not_impl(self):
         # {**self.field_some_prop, "datatype": "made_up"}
         invalid_discovery = deepcopy(self.discovery)
-        invalid_discovery["fields"]["some_prop"]["datatype"] = "made_up"
+        invalid_discovery.fields["some_prop"].datatype = "made_up"
+
+        test_scope = ValidatedDiscoveryScope(None, None)
+        test_scope._discovery = invalid_discovery
+
         with self.assertRaises(NotImplementedError):
             # noinspection PyTypeChecker
-            await get_field_options("some_prop", invalid_discovery, self.permissions_full)
+            await get_field_options(
+                "phenopacket", ph_m.Phenopacket.objects.all(), "some_prop", test_scope, self.permissions_full
+            )
 
 
 class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
@@ -62,59 +81,58 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lcf(self):
-        res = await get_categorical_stats(self.scope, "sex", field_permissions=self.permissions_full)
-        self.assertListEqual(res, [{"label": "MALE", "value": 1}, {"label": "missing", "value": 0}])
+        res = await get_categorical_stats(
+            self.scope,
+            "phenopacket",
+            ph_m.Phenopacket.objects.all(),
+            DISCOVERY_CONFIG_TEST.fields["sex"],
+            field_permissions=self.permissions_full,
+        )
+        self.assertListEqual(
+            res.root, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)]
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
-        res = await get_categorical_stats(self.scope, "sex", field_permissions=self.permissions_counts)
-        self.assertListEqual(res, [{"label": "missing", "value": 0}])
+        res = await get_categorical_stats(
+            self.scope,
+            "phenopacket",
+            ph_m.Phenopacket.objects.all(),
+            DISCOVERY_CONFIG_TEST.fields["sex"],
+            field_permissions=self.permissions_counts,
+        )
+        self.assertListEqual(res.root, [BinWithValue(label="missing", value=0)])
 
 
 class TestDateStatsExcept(ProjectTestCase, APITestCase, PermissionsTestCaseMixin):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    async def test_wrong_bin_config(self):
-        fp = {
-            "title": "Date of Consent",
-            "description": "Date of consent for study",
-            "mapping": "individual/extra_properties/date_of_consent",
-            "datatype": "date",
-            "config": {
-                "bin_by": "year"
-            }
-        }
-
-        with self.assertRaises(NotImplementedError):
-            await get_date_stats(self.scope, "date_of_consent", self.permissions_full)
-
-        with self.assertRaises(NotImplementedError):
-            await get_month_date_range(fp)
-
-    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_wrong_field_config(self):
-        fp = {
+        fp = DateFieldDefinition.model_validate({
             "title": "Date of Consent",
             "description": "Date of consent for study",
-            "mapping": "individual/date_of_consent",
+            # doesn't have extra_properties in path, will raise a NotImplementError for date:
+            "mapping": "individual/sex",
             "datatype": "date",
             "config": {
                 "bin_by": "month"
             }
-        }
+        })
 
         with self.assertRaises(NotImplementedError):
-            await get_date_stats(self.scope, "date_of_consent", self.permissions_full)
+            await get_date_stats(
+                self.scope, "individual", ph_m.Individual.objects.all(), fp, self.permissions_full
+            )
 
         with self.assertRaises(NotImplementedError):
-            await get_month_date_range(fp)
+            await get_month_date_range("individual", ph_m.Individual.objects.all(), fp, 0)
 
 
 class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     tumor_lengths = range(1, 50, 5)
-    dm_fp = DISCOVERY_CONFIG_TEST["fields"]["diagnostic_markers"]
-    mtl_fp = DISCOVERY_CONFIG_TEST["fields"]["measurement_tumor_length"]
+    dm_fp = DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"]
+    mtl_fp = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
 
     def setUp(self) -> None:
         self.tumors = [ph_c.valid_measurement_tumor_length(length) for length in self.tumor_lengths]
@@ -134,29 +152,33 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
     async def test_json_categorical_stats_lcf(self):
         res = await get_categorical_stats(
             self.scope,
-            "diagnostic_markers",
+            "phenopacket",
+            ph_m.Phenopacket.objects.all(),
+            self.dm_fp,
             field_permissions=self.permissions_full,
         )
         ground_truth = [
-            {"label": "Genetic Testing", "value": 1},
-            {"label": "Hematology Test", "value": 1},
-            {"label": "missing", "value": 0},
+            BinWithValue(label="Genetic Testing", value=1),
+            BinWithValue(label="Hematology Test", value=1),
+            BinWithValue(label="missing", value=0),
         ]
-        self.assertListEqual(res, ground_truth)
+        self.assertListEqual(res.root, ground_truth)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
         res = await get_categorical_stats(
             self.scope,
-            "diagnostic_markers",
+            "phenopacket",
+            ph_m.Phenopacket.objects.all(),
+            self.dm_fp,
             field_permissions=self.permissions_counts,
         )
         ground_truth = [
-            {"label": "missing", "value": 0},
+            BinWithValue(label="missing", value=0),
         ]
-        self.assertListEqual(res, ground_truth)
+        self.assertListEqual(res.root, ground_truth)
 
-    def test_filter_queryset_field_value_string(self):
+    async def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()
 
         subtest_params = [
@@ -168,11 +190,13 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         for params in subtest_params:
             with self.subTest(params=params):
                 q_val, expected_count = params
-                qs = filter_queryset_field_value(base_qs, self.dm_fp, q_val)
-                self.assertEqual(qs.count(), expected_count)
+                qs, queried_entity = await filter_queryset_field_value("individual", base_qs, self.dm_fp, q_val, logger)
+                self.assertEqual(await qs.acount(), expected_count)
+                self.assertEqual(queried_entity, "biosample")
 
-    def test_filter_queryset_field_value_number(self):
+    async def test_filter_queryset_field_value_number(self):
         base_qs = ph_m.Individual.objects.all()
+        base_qs_pheno = ph_m.Phenopacket.objects.all()
 
         subtest_params = [
             ("≥ 0", 1),
@@ -186,15 +210,30 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
         for params in subtest_params:
             with self.subTest(params=params):
                 q_val, expected_count = params
-                qs = filter_queryset_field_value(base_qs, self.mtl_fp, q_val)
-                self.assertEqual(qs.count(), expected_count)
+                qs, queried_entity = await filter_queryset_field_value(
+                    "individual", base_qs, self.mtl_fp, q_val, logger
+                )
+                self.assertEqual(await qs.acount(), expected_count)
+                self.assertEqual(queried_entity, "phenopacket")
+                qs, queried_entity = await filter_queryset_field_value(
+                    "phenopacket", base_qs_pheno, self.mtl_fp, q_val, logger
+                )
+                self.assertEqual(await qs.acount(), expected_count)
+                self.assertEqual(queried_entity, "phenopacket")
 
     async def test_get_distinct_values(self):
-        dm_values = await get_distinct_field_values("diagnostic_markers", DISCOVERY_CONFIG_TEST, self.permissions_full)
+        base_qs_pheno = ph_m.Phenopacket.objects.all()
+
+        # "uncensored": 0-threshold
+        dm_values = await get_distinct_field_values(
+            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 0
+        )
         self.assertEqual(len(dm_values), 2)
         self.assertTrue("Genetic Testing" in dm_values)
         self.assertTrue("Hematology Test" in dm_values)
 
+        # censored: 5-threshold eliminates all options
         dm_values_censored = await get_distinct_field_values(
-            "diagnostic_markers", DISCOVERY_CONFIG_TEST, self.permissions_counts)
+            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 5
+        )
         self.assertListEqual(dm_values_censored, [])

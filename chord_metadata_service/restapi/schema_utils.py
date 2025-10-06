@@ -2,8 +2,8 @@ from enum import Enum
 from bento_lib.search import queries as q
 from django.db import models
 from pathlib import Path
-from chord_metadata_service.logger import logger
 from copy import deepcopy
+from structlog.stdlib import BoundLogger
 
 from .description_utils import describe_schema
 from .types import ExtensionSchemaDict
@@ -354,7 +354,9 @@ def named_one_of(prop_name: str, prop_schema: dict):
 DATE_TIME = string_with_format(SchemaStringFormats.DATE_TIME)
 
 
-def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, ExtensionSchemaDict]) -> dict:
+def patch_project_schemas(
+    base_schema: dict, extension_schemas: dict[str, ExtensionSchemaDict], logger: BoundLogger
+) -> dict:
     if not isinstance(base_schema, dict) or "type" not in base_schema:
         return base_schema
 
@@ -368,7 +370,7 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, Extens
 
         if schema_id and schema_id in extension_schemas:
             ext_schema = extension_schemas[schema_id]
-            logger.debug(f"Applying ProjectJsonSchema to extra_properties of {ext_schema['schema_type']}.")
+            logger.debug("applying ProjectJsonSchema to extra_properties", schema_type=ext_schema["schema_type"])
 
             # Append or create 'required' field according to ProjectJsonSchema in use
             required = patched_schema.get("required", [])
@@ -387,7 +389,7 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, Extens
         return {
             **patched_schema,
             "properties": {
-                k: patch_project_schemas(v, extension_schemas)
+                k: patch_project_schemas(v, extension_schemas, logger)
                 for k, v in patched_schema["properties"].items()
             }
         } if "properties" in patched_schema else patched_schema
@@ -395,7 +397,7 @@ def patch_project_schemas(base_schema: dict, extension_schemas: dict[str, Extens
     if patched_schema["type"] == "array":
         return {
             **patched_schema,
-            "items": patch_project_schemas(patched_schema["items"], extension_schemas)
+            "items": patch_project_schemas(patched_schema["items"], extension_schemas, logger)
         } if "items" in patched_schema else patched_schema
 
     return patched_schema
