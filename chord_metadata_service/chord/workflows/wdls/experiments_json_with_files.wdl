@@ -41,15 +41,10 @@ workflow experiments_json_with_files {
             drs_responses = flatten(post_to_drs.response_message)
     }
 
-    call parse_json {
-        input:
-            json_responses = write_drs_responses_to_file.results_post_drs
-    }
-
     call update_experiment_json {
         input:
             json_document = json_document,
-            processed_drs_responses = parse_json.processed_drs_responses
+            drs_responses = write_drs_responses_to_file.results_post_drs
     }
 
     call ingest_task {
@@ -66,7 +61,6 @@ workflow experiments_json_with_files {
         Array[String] consolidated_paths_for_drs = path_array_for_drs.consolidated_paths_for_drs
         Array[String] drs_responses = flatten(post_to_drs.response_message)
         File results_post_drs = write_drs_responses_to_file.results_post_drs
-        File processed_drs_responses = parse_json.processed_drs_responses
         File final_updated_json = update_experiment_json.final_updated_json
     }
 }
@@ -84,12 +78,19 @@ task prepare_files_list {
     command <<<
     python3 -c "
 import json
+import logging
 import os
+import sys
 
+logger = logging.getLogger('prepare_files_list')
+
+json_document = '~{json_document}'
 directory = '~{directory}'
 filter_vcf = '~{filter_out_vcf_files}'
 
-with open('~{json_document}', 'r') as file:
+logger.info('json_document = %s, directory = %s, filter_vcf = %s', json_document, directory, filter_vcf)
+
+with open(json_document, 'r') as file:
     data = json.load(file)
 
 path_list = []
@@ -100,16 +101,18 @@ for experiment in data.get('experiments', []):
         is_vcf = filename.endswith('.vcf') or filename.endswith('.vcf.gz')
 
         if filter_vcf and is_vcf:
+            logger.info('skipping %s (is VCF)', filename)
             continue
 
         for root, dirs, files in os.walk(directory):
+            logger.debug('walking (root=%s)', root)
             if filename in files:
                 file_found = True
                 file_path = os.path.join(root, filename)
                 path_list.append({'filename': filename, 'path': file_path})
                 break
         if not file_found:
-            print(f'File not found for {filename}')
+            logger.error('File not found for %s (directory=%s)', filename, directory)
 
 with open('path_list.json', 'w') as file:
     json.dump(path_list, file, indent=4)
@@ -228,42 +231,13 @@ with open('results_post_drs.json', 'w') as outfile:
     }
 }
 
-task parse_json {
-    input {
-        File json_responses
-    }
-
-    command <<<
-    python3 -c "
-import json
-
-def parse_drs_response(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-
-    new_array = []
-    for item in data:
-        information = {
-            'name': item.get('name', ''),
-            'self_uri': item.get('self_uri', '')
-        }
-        new_array.append(information)
-
-    with open('processed_drs_responses.json', 'w') as outfile:
-        json.dump(new_array, outfile, indent=4)
-
-parse_drs_response('~{json_responses}')
-"
-    >>>
-    output {
-        File processed_drs_responses = "processed_drs_responses.json"
-    }
-}
-
 task update_experiment_json {
+    # Tags experiment results with URLs from DRS ingestion, so that we cement a link between an experiment result and a
+    # DRS object (plus, potentially, more DRS objects for indices.)
+
     input {
         File json_document
-        File processed_drs_responses
+        File drs_responses
     }
     command <<<
     python3 -c "
@@ -272,7 +246,7 @@ import json, os
 with open('~{json_document}', 'r') as f:
     data = json.load(f)
 
-with open('~{processed_drs_responses}', 'r') as f:
+with open('~{drs_responses}', 'r') as f:
     drs_data = json.load(f)
 
 def construct_index_basename(filename, fmt):
