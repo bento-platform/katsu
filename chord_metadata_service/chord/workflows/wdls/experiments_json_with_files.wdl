@@ -151,50 +151,50 @@ print(json.dumps(consolidated_paths))
 }
 
 task post_to_drs {
-  input {
-    File    file_path
-    String  drs_url
-    String  project_dataset
-    String  token
-    Boolean validate_ssl
-    File    json_document
-  }
-  command <<<
-    # Extract project_id and dataset_id
-    project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
-    dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
-
-    # Function to ingest a file into DRS
-    ingest_to_drs() {
-        local file=$1
-        curl ~{true="" false="-k" validate_ssl} \
-          -X POST \
-          -F "file=@${file}" \
-          -F "project_id=${project_id}" \
-          -F "dataset_id=${dataset_id}" \
-          -H "Authorization: Bearer ~{token}" \
-          --fail-with-body \
-          "~{drs_url}/ingest"
+    input {
+        File    file_path
+        String  drs_url
+        String  project_dataset
+        String  token
+        Boolean validate_ssl
+        File    json_document
     }
+    command <<<
+        # Extract project_id and dataset_id
+        project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
+        dataset_id=$(python3 -c 'print("~{project_dataset}".split(":")[1])')
 
-    # Ingest the main file
-    resp_main=$(ingest_to_drs "~{file_path}")
-    echo "$resp_main" | jq -c
+        # Function to ingest a file into DRS
+        ingest_to_drs() {
+            local file=$1
+            curl ~{true="" false="-k" validate_ssl} \
+              -X POST \
+              -F "file=@${file}" \
+              -F "project_id=${project_id}" \
+              -F "dataset_id=${dataset_id}" \
+              -H "Authorization: Bearer ~{token}" \
+              --fail-with-body \
+              "~{drs_url}/ingest"
+        }
 
-    # Index BAM and CRAM files
-    if [[ "~{file_path}" =~ \.(bam|cram)$ ]]; then
-      filename=$(basename "~{file_path}")
-      index_ext=".bai"
-      idx_fmt="BAI"
-      [[ "~{file_path}" =~ \.cram$ ]] && { index_ext=".crai"; idx_fmt="CRAI"; }
-      samtools index "~{file_path}" 1>/dev/null 2>&1
-      resp_index=$(ingest_to_drs "~{file_path}${index_ext}")
-      echo "$resp_index" | jq -c
-    fi
-  >>>
-  output {
-    Array[String] response_message = read_lines(stdout())
-  }
+        # Ingest the main file
+        resp_main=$(ingest_to_drs "~{file_path}")
+        echo "$resp_main" | jq -c
+
+        # Index BAM and CRAM files
+        if [[ "~{file_path}" =~ \.(bam|cram)$ ]]; then
+            filename=$(basename "~{file_path}")
+            index_ext=".bai"
+            idx_fmt="BAI"
+            [[ "~{file_path}" =~ \.cram$ ]] && { index_ext=".crai"; idx_fmt="CRAI"; }
+            samtools index "~{file_path}" 1>/dev/null 2>&1
+            resp_index=$(ingest_to_drs "~{file_path}${index_ext}")
+            echo "$resp_index" | jq -c
+        fi
+    >>>
+    output {
+        Array[String] response_message = read_lines(stdout())
+    }
 }
 
 task write_drs_responses_to_file {
