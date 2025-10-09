@@ -41,7 +41,7 @@ class BiosampleTest(ProjectTestCase):
 
     def test_phenopacket_without_individual(self):
         m.Phenopacket.objects.create(
-            id="phenopacket_id:1",
+            id="phenopacket_id:2",
             meta_data=self.meta_data,
             dataset=self.dataset,
         )
