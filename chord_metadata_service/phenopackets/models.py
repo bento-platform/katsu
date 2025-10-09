@@ -467,11 +467,14 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
             return None
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
-    # if Individual instance is deleted Phenopacket instance is deleted too
-    # CHECK !!! Force as required?
     subject = models.ForeignKey(
-        Individual, on_delete=models.CASCADE, related_name="phenopackets",
-        help_text=rec_help(d.PHENOPACKET, "subject"))
+        Individual,
+        blank=True,
+        null=True,  # phenopackets DO NOT REQUIRE a subject!
+        on_delete=models.CASCADE,  # if Individual instance is deleted Phenopacket instance is deleted too
+        related_name="phenopackets",
+        help_text=rec_help(d.PHENOPACKET, "subject"),
+    )
     # PhenotypicFeatures are present in Biosample, so can be accessed via Biosample instance
     # phenotypic_features = models.ManyToManyField(PhenotypicFeature, blank=True,
     #   help_text='Phenotypic features observed in the proband.')
