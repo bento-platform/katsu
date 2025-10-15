@@ -20,7 +20,7 @@ jobs:
         python-version: ["3.10", "3.11"]
     services:
       postgres:
-        image: ghcr.io/bento-platform/bento_postgis_dist:2025.01.28
+        image: ghcr.io/bento-platform/bento_postgis_dist:2025.09.29
         env:
           POSTGRES_DB: postgres
           POSTGRES_PASSWORD: postgres
@@ -30,11 +30,11 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         submodules: true
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Poetry
