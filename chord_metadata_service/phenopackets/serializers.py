@@ -255,5 +255,5 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
         response['subject'] = IndividualSerializer(
             instance.subject,
             exclude_when_nested=["phenopackets", "biosamples"]
-        ).data
+        ).data if instance.subject else None
         return response

@@ -39,6 +39,13 @@ class BiosampleTest(ProjectTestCase):
         # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
+    def test_phenopacket_without_individual(self):
+        m.Phenopacket.objects.create(
+            id="phenopacket_id:2",
+            meta_data=self.meta_data,
+            dataset=self.dataset,
+        )
+
     def test_biosample(self):
         biosample_one = m.Biosample.objects.get(
             tumor_progression__label='Primary Malignant Neoplasm',
