@@ -31,40 +31,37 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10.0"
-bento-lib = {version = "^13.2.0", extras = ["django"]}
-Django = "~5.1.8"
+python = "^3.12.0"
+bento-lib = {version = "^14.0.0", extras = ["django"]}
+Django = "~5.1.13"
 django-autocomplete-light = "^3.12.1"
-django-cors-headers = "^4.3.1"
-django-filter = "^24.2"
-djangorestframework = "~3.16.0"
-djangorestframework-camel-case = "^1.3.0"
-drf-spectacular = "^0.27.1"
-jsonschema = {version = "~4.23.0", extras = ["format"]}
-psycopg2-binary = "~2.9.5"
-PyJWT = {extras = ["crypto"], version = "^2.6.0"}
-python-dateutil = "^2.8.2"
-python-dotenv = "^1.0.1"
-rdflib = "^6.2.0"
-requests = "^2.32.2"
+django-cors-headers = "^4.9.0"
+django-filter = "~25.1"
+djangorestframework = "~3.16.1"
+djangorestframework-camel-case = "^1.4.1"
+drf-spectacular = "^0.28.0"
+jsonschema = {version = "~4.25.1", extras = ["format"]}
+psycopg2-binary = "~2.9.11"
+PyJWT = {extras = ["crypto"], version = "^2.10.1"}
+python-dateutil = "^2.9.0.post0"
+python-dotenv = "^1.1.1"
+rdflib = "^6.3.2"
+requests = "^2.32.5"
 rfc3987 = "^1.3.8"
 tabulate = "^0.9.0"
-uritemplate = "^4.1.1"
+uritemplate = "^4.2.0"
 pyhumps = "^3.8.0"
-adrf = "^0.1.7"
-referencing = "^0.32.1"
-django-structlog = "^9.1.1"
+adrf = "^0.1.10"
+referencing = "^0.37.0"
+django-structlog = "^10.0.0"
 pycountry = "^24.6.1"
-structlog = "^25.2.0"
-pydantic = "^2.11.3"
+structlog = "^25.4.0"
+pydantic = "^2.12.3"
 
 [tool.poetry.group.dev.dependencies]
-coverage = "^7.4.0"
-flake8 = "^7.0.0"
-tox = "^4.12.1"
-debugpy = "^1.6.7"
-daphne = "^4.1.0"
-aioresponses = "^0.7.6"
-# when virtualenv >=20.35 is released, we can revert this pin
-#  - see https://github.com/pypa/virtualenv/issues/2944 - this must be released in a version
-virtualenv = ">=20.32.0,<20.33"
+coverage = "^7.11.0"
+flake8 = "^7.3.0"
+tox = "^4.31.0"
+debugpy = "^1.8.17"
+daphne = "^4.2.1"
+aioresponses = "^0.7.8"
