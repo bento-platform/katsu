@@ -37,7 +37,7 @@ A Phenopackets-based clinical and phenotypic metadata service for the Bento plat
 
 ## License
 
-The majority of the Katsu Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2023 the Canadian
+The majority of the Katsu Metadata Service is licensed under the LGPLv3 license; copyright (c) 2019-2025 the Canadian
 Centre for Computational Genomics.
 
 Portions are copyright (c) 2019 Julius OB Jacobsen, Peter N Robinson, Christopher J Mungall (Phenopackets); licensed
