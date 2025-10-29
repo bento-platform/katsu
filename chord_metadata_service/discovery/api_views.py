@@ -7,13 +7,14 @@ from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, inline_serializer
-from functools import partial
+from functools import partial, wraps
 from operator import is_not
 from rest_framework import serializers, status
 from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from structlog.stdlib import BoundLogger
+from typing import Any, Awaitable, Callable, Literal
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
@@ -141,6 +142,46 @@ class QueryQuerysetsCache:
             return self._queryset_cache[entity]
 
 
+def inject_discovery_deps(empty_404: bool, empty_response: Literal["fields", "data"] = "data"):
+    """
+    Decorator to inject common discovery dependencies into the discovery API endpoint functions and perform a bit of
+    initial setup.
+
+    Args:
+        empty_404: specifies whether an empty discovery config means we should return a 404 error (endpoint-dependent).
+        empty_response: which empty response to return if discovery config is empty (fields or data).
+    """
+    def wrapper(
+        func: Callable[[DrfRequest, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, BoundLogger], Awaitable[Any]]
+    ):
+        @wraps(func)
+        async def wrapped(request: DrfRequest):  # wraps a DRF API view
+            # Get the request discovery scope, which can be used for, e.g., narrowing down the project/dataset for
+            # discovery charts/filtering.
+            try:
+                scope = await get_request_discovery_scope(request)
+            except DiscoveryScopeException as e:
+                return not_found(request, e.message)
+
+            if empty_404 and empty_discovery(scope):
+                # If the discovery object is "empty", i.e., no fields/charts/filters specified, this endpoint becomes a
+                # 404, here meaning no data could be found for discovery purposes.
+                return (
+                    dres.no_public_fields(request) if empty_response == "fields" else dres.no_public_data(request)
+                )
+
+            # Bind scope representation to logger
+            lg = logger.bind(scope_repr=repr(scope))
+
+            dt_permissions = await get_discovery_data_type_permissions(request, scope)
+
+            return await func(request, scope, dt_permissions, lg)
+
+        return wrapped
+
+    return wrapper
+
+
 @extend_schema(
     description="Discovery search fields with their configuration",
     responses={
@@ -156,21 +197,14 @@ class QueryQuerysetsCache:
 )
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def discovery_search_fields(request: DrfRequest):
+@inject_discovery_deps(empty_404=True, empty_response="fields")
+async def discovery_search_fields(
+    _request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, _lg: BoundLogger
+):
     """
     get:
     Return discovery search fields with their configuration
     """
-
-    try:
-        scope: ValidatedDiscoveryScope = await get_request_discovery_scope(request)
-    except DiscoveryScopeException as e:
-        return not_found(request, e.message)
-
-    if empty_discovery(scope):
-        return Response(dres.NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
-
-    dt_permissions = await get_discovery_data_type_permissions(request, scope)
 
     discovery = scope.discovery
     _, field_permissions = get_discovery_field_set_permissions(discovery, None, dt_permissions)
@@ -290,32 +324,21 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
 
 
 @api_view(["GET"])
-@permission_classes([BentoAllowAny])
-async def discovery_endpoint(request: DrfRequest):
+@permission_classes([BentoDeferToHandler])
+@inject_discovery_deps(empty_404=True)
+async def discovery_endpoint(
+    request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
+):
     """
     get:
     Overview, optionally filtered by fields, of phenopackets+experiments data.
     """
 
-    # Get the request discovery scope, which we'll use to narrow down the project/dataset for discovery
-    # charts/filtering.
-    try:
-        scope = await get_request_discovery_scope(request)
-    except DiscoveryScopeException as e:
-        return not_found(request, e.message)
-
-    lg = logger.bind(scope_repr=repr(scope))
-
-    # If the discovery object is "empty", i.e., no fields/charts/filters specified, this endpoint becomes a 404, here
-    # meaning no data could be found for discovery purposes.
-    if empty_discovery(scope):
-        return dres.no_public_data(request)
-
-    dt_permissions = await get_discovery_data_type_permissions(request, scope)
     if not any(d.bool_ for d in dt_permissions.values()):
         # At minimum, we need some bool permissions for data types in order to view True/False for having a specific
         # entity above the count threshold.
         return dres.insufficient_privileges(request)
+    authz_middleware.mark_authz_done(request)
 
     # -- Query execution -----------------------------------------------------------------------------------------------
 
@@ -405,7 +428,10 @@ async def discovery_endpoint(request: DrfRequest):
 
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
-async def discovery_matches(request: DrfRequest):
+@inject_discovery_deps(empty_404=True)
+async def discovery_matches(
+    request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
+):
     """
     Returns a paginated result-set of entity matches for a discovery query. For a given query, this endpoint can return
     different entities at the top-level using the _entity parameter.
@@ -425,23 +451,6 @@ async def discovery_matches(request: DrfRequest):
         other query parameters with _, we eliminate possible ambiguities between discovery fields.
     """
 
-    # TODO: DEDUPLICATE
-
-    # Get the request discovery scope, which we'll use to narrow down the project/dataset for discovery
-    # charts/filtering.
-    try:
-        scope = await get_request_discovery_scope(request)
-    except DiscoveryScopeException as e:
-        return not_found(request, e.message)
-
-    lg = logger.bind(scope_repr=repr(scope))
-
-    # If the discovery object is "empty", i.e., no fields/charts/filters specified, this endpoint becomes a 404, here
-    # meaning no data could be found for discovery purposes.
-    if empty_discovery(scope):
-        return dres.no_public_data(request)
-
-    dt_permissions = await get_discovery_data_type_permissions(request, scope)
     if not dt_permissions[dts.DATA_TYPE_PHENOPACKET].data:
         # "Extra" permissions check vs. regular discovery endpoint: we need full data permissions
         return dres.insufficient_privileges(request)
@@ -520,7 +529,10 @@ async def discovery_matches(request: DrfRequest):
 # TODO: extend this implementation for Bento v20+
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def discovery_ui_hints(request: DrfRequest):
+@inject_discovery_deps(empty_404=False)
+async def discovery_ui_hints(
+    request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
+):
     """
     Endpoint for returning miscellaneous UI hints for any front-end which consumes the various discovery endpoints.
     For example:
@@ -529,15 +541,6 @@ async def discovery_ui_hints(request: DrfRequest):
      - indications of the presence of certain types of data, e.g1., geographical data, to encourage API consumers to
        render a certain element (e.g., a map).
     """
-
-    try:
-        scope = await get_request_discovery_scope(request)
-    except DiscoveryScopeException as e:
-        return not_found(request, e.message)
-
-    lg = logger.bind(scope_repr=repr(scope))
-
-    dt_permissions = await get_discovery_data_type_permissions(request, scope)
 
     # TODO: support querying?
     try:
@@ -574,20 +577,16 @@ async def discovery_schema(_request: DrfRequest):
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def discovery_rules(request: DrfRequest):
+@inject_discovery_deps(empty_404=False)
+async def discovery_rules(
+    _request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, _lg: BoundLogger
+):
     """
     Endpoint for censorship / display rules (count threshold, maximum query parameters).
     Returns a serialization of the DiscoveryConfigRules object from bento_lib.discovery.models.config
     """
 
-    try:
-        discovery_scope = await get_request_discovery_scope(request)
-    except DiscoveryScopeException as e:
-        return not_found(request, e.message)
-
-    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-
     # TODO: allow filtering by fields accessed?
-    fs_permissions, _ = get_discovery_field_set_permissions(discovery_scope, None, dt_permissions)
+    fs_permissions, _ = get_discovery_field_set_permissions(scope, None, dt_permissions)
 
-    return Response(get_rules(discovery_scope, data_permissions=fs_permissions), status=status.HTTP_200_OK)
+    return Response(get_rules(scope, data_permissions=fs_permissions), status=status.HTTP_200_OK)
