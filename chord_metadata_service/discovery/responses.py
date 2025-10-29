@@ -16,6 +16,7 @@ __all__ = [
     "NO_PUBLIC_DATA_AVAILABLE",
     "no_public_data",
     "NO_PUBLIC_FIELDS_CONFIGURED",
+    "no_public_fields",
     "django_validation_error",
 ]
 
@@ -43,6 +44,11 @@ def no_public_data(request: Request):
 
 # Public response when public fields are not configured and config file is not provided
 NO_PUBLIC_FIELDS_CONFIGURED = {"message": "No public fields configured."}
+
+
+def no_public_fields(request: Request):
+    authz_middleware.mark_authz_done(request)  # may have already been done if endpoint has BentoAllowAny permissions
+    return Response(NO_PUBLIC_FIELDS_CONFIGURED, status=status.HTTP_404_NOT_FOUND)
 
 
 async def django_validation_error(
