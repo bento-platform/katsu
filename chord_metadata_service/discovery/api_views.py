@@ -441,6 +441,7 @@ async def discovery_matches(
       _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
+      _format:    Response format ("json" or "csv"; must match request Accept header[s])
       project:    Discovery scope - project ID (if not set, the global scope is used)
       dataset:    Discovery scope - dataset ID (if not set, the project or global scope is used)
 
@@ -508,6 +509,20 @@ async def discovery_matches(
     else:
         matches_page = queryset[:]
 
+    # -- Response format -----------------------------------------------------------------------------------------------
+
+    response_format = request.query_params.get("_format", "json")
+    if response_format not in ("json", "csv"):
+        return bad_request(request, "bad response format")
+
+    # noinspection PyProtectedMember
+    if (
+        (response_format == "json" and not request._request.accepts("application/json")) or
+        (response_format == "csv" and not request._request.accepts("text/csv"))
+    ):
+        # TODO: this returns a JSON/CSV error, but JSON/CSV is not accepted...
+        return bad_request(request, "mismatch between accepted and specified response formats")
+
     # -- Log discovery match page fetch event --------------------------------------------------------------------------
 
     # structured event logging for discovery: embed search details
@@ -515,6 +530,11 @@ async def discovery_matches(
 
     # -- Build and return response -------------------------------------------------------------------------------------
 
+    if response_format == "csv":
+        # TODO
+        pass
+
+    # Otherwise, return a CSV response
     return Response(
         DiscoveryMatchesPaginatedResponse(
             results_entity=queried_entity,

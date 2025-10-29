@@ -7,13 +7,14 @@ Since we have pagination, though, we should probably fetch full record details i
 
 from bento_lib.discovery import DiscoveryEntity
 from django.db.models import Manager
-from typing import Callable, TypeVar, TypedDict, Awaitable
+from typing import Awaitable, Callable, Type, TypeVar, TypedDict
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
+from chord_metadata_service.restapi import api_renderers as apir
 
 from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket, MatchIndividual
 from .scope import ValidatedDiscoveryScope
@@ -25,7 +26,9 @@ __all__ = [
     "phenopacket_matches",
     "individual_matches",
     "DISCOVERY_ENTITY_TO_MATCH_FN",
+    "DISCOVERY_ENTITY_TO_CSV_RENDERER",
 ]
+
 
 T = TypeVar("T")
 
@@ -230,4 +233,13 @@ DISCOVERY_ENTITY_TO_MATCH_FN: dict[
     "biosample": biosample_matches,
     "experiment": experiment_matches,
     "experiment_result": experiment_result_matches,
+}
+
+
+DISCOVERY_ENTITY_TO_CSV_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuCSVRenderer]] = {
+    "phenopacket": apir.PhenopacketCSVRenderer,
+    "individual": apir.IndividualCSVRenderer,
+    "biosample": apir.BiosamplesCSVRenderer,
+    "experiment": apir.ExperimentCSVRenderer,
+    "experiment_result": apir.ExperimentResultCSVRenderer,
 }

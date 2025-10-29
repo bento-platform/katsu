@@ -1,5 +1,6 @@
 import json
 import csv
+from abc import ABCMeta, abstractmethod
 from uuid import UUID
 from typing import Dict, Optional, Any
 
@@ -20,6 +21,7 @@ __all__ = [
     "JSONLDDatasetRenderer",
     "RDFDatasetRenderer",
     "render_age",
+    "KatsuCSVRenderer",
     "IndividualCSVRenderer",
     "BiosamplesCSVRenderer",
     "ExperimentCSVRenderer",
@@ -84,20 +86,6 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
         return rdf_data
 
 
-def generate_csv_response(file_name: str, columns: list[str], data: list[dict]):
-    # remove underscore and capitalize column names
-    headers = {key: key.replace("_", " ").capitalize() for key in columns}
-
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f"attachment; filename='{file_name}'"
-
-    dict_writer = csv.DictWriter(response, fieldnames=columns)
-    dict_writer.writerow(headers)
-    dict_writer.writerows(data)
-
-    return response
-
-
 def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
     if time_key not in item:
         return None
@@ -113,17 +101,34 @@ def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
     return None
 
 
-class KatsuCSVRenderer(JSONRenderer):
+class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
     media_type = "text/csv"
     format = "csv"
 
     file_name: str = "data.csv"
 
+    @abstractmethod
     def get_columns(self) -> list[str]:  # pragma: no cover
         raise NotImplementedError("get_columns() not implemented")
 
-    def get_dicts(self, data, renderer_context) -> list[dict]:  # pragma: no cover
+    @abstractmethod
+    def get_dicts(self, data, renderer_context) -> list[dict[str, str]]:  # pragma: no cover
         raise NotImplementedError("get_dicts() not implemented")
+
+    def _generate_csv_response(self, data: list[dict[str, str]]):
+        columns = self.get_columns()
+
+        # remove underscore and capitalize column names
+        headers = {key: key.replace("_", " ").capitalize() for key in columns}
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
+
+        dict_writer = csv.DictWriter(response, fieldnames=columns)
+        dict_writer.writerow(headers)
+        dict_writer.writerows(data)
+
+        return response
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if not data:
@@ -137,7 +142,17 @@ class KatsuCSVRenderer(JSONRenderer):
                 content_type="application/json; charset=utf-8",
             )
 
-        return generate_csv_response(self.file_name, self.get_columns(), self.get_dicts(data, renderer_context))
+        return self._generate_csv_response(self.get_dicts(data, renderer_context))
+
+
+class PhenopacketCSVRenderer(KatsuCSVRenderer):
+    file_name = "phenopackets.csv"
+
+    def get_columns(self) -> list[str]:
+        return ["id"]  # TODO
+
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
+        return []  # TODO
 
 
 class IndividualCSVRenderer(KatsuCSVRenderer):
@@ -146,7 +161,7 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
     def get_columns(self) -> list[str]:
         return ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
 
-    def get_dicts(self, data, _renderer_context):
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         individuals = []
 
         for individual in data["results"]:
@@ -196,7 +211,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
             "individual",
         ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict]:
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         return [
             {
                 "id": biosample["id"],
@@ -232,7 +247,7 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
             "individual_id",
         ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict]:
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         return [
             {
                 "id": experiment.get("id"),
@@ -249,6 +264,41 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
                 "individual_id": experiment.get("biosample_individual", {}).get("id", "NA"),
             }
             for experiment in data
+        ]
+
+
+class ExperimentResultCSVRenderer(KatsuCSVRenderer):
+    file_name = "experiment_results.csv"
+
+    def get_columns(self) -> list[str]:
+        return [
+            "id",
+            "description",
+            "filename",
+            "url",
+            "genome_assembly_id",
+            "file_format",
+            "data_output_type",
+            "usage",
+            "creation_date",
+            "created_by",
+        ]
+
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
+        return [
+            {
+                "id": er.get("id"),
+                "description": er.get("description"),
+                "filename": er.get("filename"),
+                "url": er.get("url"),
+                "genome_assembly_id": er.get("genome_assembly_id"),
+                "file_format": er.get("file_format"),
+                "data_output_type": er.get("data_output_type"),
+                "usage": er.get("usage"),
+                "creation_date": er.get("creation_date"),
+                "created_by": er.get("created_by"),
+            }
+            for er in data
         ]
 
 
