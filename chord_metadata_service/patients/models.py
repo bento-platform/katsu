@@ -33,13 +33,12 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexab
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return {
+            "base_prefetch_related": ("phenopackets", "phenopackets__dataset"),
             "project": {
                 "filter": "phenopackets__dataset__project_id",
-                "prefetch_related": ("phenopackets__dataset",)
             },
             "dataset": {
                 "filter": "phenopackets__dataset_id",
-                "prefetch_related": ("phenopackets",)
             }
         }
 

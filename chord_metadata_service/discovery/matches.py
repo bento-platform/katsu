@@ -69,9 +69,11 @@ async def experiment_result_matches(
                 assembly_id=er.genome_assembly_id,
                 **(
                     dict(
-                        project=scope.project_id,
-                        # TODO: have a foreign key to dataset directly to not have to do so many lookups (n+1 issue...)
-                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),
+                        project=scope.project_id or str(
+                            (await er.experiments.prefetch_related("dataset").afirst()).dataset.project_id
+                        ),  # TODO: n+1?
+                        # TODO: have a foreign key to dataset directly to not have to do so many lookups
+                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),  # TODO: n+1?
                     )
                     if root else dict()
                 ),
@@ -97,7 +99,10 @@ async def experiment_matches(
                 results=await experiment_result_matches(
                     exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
                 ),
-                **(dict(project=scope.project_id, dataset=scope.dataset_id or str(exp.dataset_id)) if root else dict()),
+                **(dict(
+                    project=scope.project_id or str(exp.dataset.project_id),
+                    dataset=scope.dataset_id or str(exp.dataset_id)
+                ) if root else dict()),
             )
         )
     return res
@@ -169,7 +174,7 @@ async def phenopacket_matches(
                 biosamples=biosamples,
                 **(
                     dict(
-                        project=scope.project_id or (phe.dataset.project_id if phe.dataset else None),
+                        project=scope.project_id or (str(phe.dataset.project_id) if phe.dataset else None),
                         dataset=scope.dataset_id or (str(phe.dataset_id) if phe.dataset else None),
                     ) if root else dict()
                 ),

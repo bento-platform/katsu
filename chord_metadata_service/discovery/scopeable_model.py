@@ -43,6 +43,10 @@ class BaseScopeableModel(Model):
         defined get_scope_filters() function to narrow the queryset.
         """
 
+        class_scope_filters_and_prefetches = cls.get_scope_filters()
+
+        base_prefetch_related = class_scope_filters_and_prefetches["base_prefetch_related"]
+
         filter_scope: PublicScopeFilterKeys
         if scope.dataset_id:
             filter_scope = "dataset"
@@ -51,11 +55,14 @@ class BaseScopeableModel(Model):
             filter_scope = "project"
             value = scope.project_id
         else:
-            return cls.objects.distinct()
+            return cls.objects.distinct().prefetch_related(*base_prefetch_related)
 
-        scope_filter_spec = cls.get_scope_filters()[filter_scope]
+        scope_filter_spec = class_scope_filters_and_prefetches[filter_scope]
 
-        prefetch = scope_filter_spec["prefetch_related"]
+        prefetch = (
+            *base_prefetch_related,
+            *(p for p in scope_filter_spec.get("prefetch_related", ()) if p not in base_prefetch_related)
+        )
 
         filter_query = scope_filter_spec["filter"]
         if isinstance(filter_query, tuple):
@@ -74,12 +81,11 @@ class BaseScopeableModel(Model):
 
 # Common model scope filters for phenopacket + experiment, which share a top-level dataset property.
 TOP_LEVEL_MODEL_SCOPE_FILTERS: ModelScopeFilters = {
+    "base_prefetch_related": ("dataset",),
     "project": {
         "filter": "dataset__project_id",
-        "prefetch_related": ("dataset",),
     },
     "dataset": {
         "filter": "dataset_id",
-        "prefetch_related": (),
     },
 }

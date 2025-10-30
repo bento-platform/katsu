@@ -470,6 +470,7 @@ async def discovery_matches(
         query = DiscoveryQuery.from_drf_request(request)
         qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
         queryset, _ = await qqs.get_query_queryset_and_queried_entities(queried_entity)
+        queryset = queryset.order_by("pk")
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
     except ValidationError as e:

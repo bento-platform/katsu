@@ -135,13 +135,12 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return {
+            "base_prefetch_related": ("phenopackets", "phenopackets__dataset", "phenopackets__dataset__project"),
             "project": {
                 "filter": "phenopackets__dataset__project__identifier",
-                "prefetch_related": ("phenopackets__dataset__project",),
             },
             "dataset": {
                 "filter": "phenopackets__dataset__identifier",
-                "prefetch_related": ("phenopackets__dataset",),
             },
         }
 
