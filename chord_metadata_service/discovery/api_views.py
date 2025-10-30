@@ -2,6 +2,7 @@ import asyncio
 import math
 
 from adrf.decorators import api_view
+from asgiref.sync import sync_to_async
 from bento_lib.discovery import SearchSection, DiscoveryEntity
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
@@ -34,7 +35,7 @@ from .fields import get_field_options, get_range_stats, get_categorical_stats, g
 from .fields_utils import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
-from .matches import DISCOVERY_ENTITY_TO_MATCH_FN
+from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .pydantic_models import (
     DiscoveryFieldResponse,
@@ -523,6 +524,8 @@ async def discovery_matches(
         # TODO: this returns a JSON/CSV error, but JSON/CSV is not accepted...
         return bad_request(request, "mismatch between accepted and specified response formats")
 
+    lg = lg.bind(response_format=response_format)
+
     # -- Log discovery match page fetch event --------------------------------------------------------------------------
 
     # structured event logging for discovery: embed search details
@@ -531,8 +534,12 @@ async def discovery_matches(
     # -- Build and return response -------------------------------------------------------------------------------------
 
     if response_format == "csv":
-        # TODO
-        pass
+        @sync_to_async
+        def _get_csv():
+            renderer = DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity]()
+            return renderer.render(renderer.get_model_serializer()(matches_page, many=True).data)
+
+        return await _get_csv()
 
     # Otherwise, return a CSV response
     return Response(

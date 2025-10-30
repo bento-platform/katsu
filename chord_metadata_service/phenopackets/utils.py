@@ -3,25 +3,39 @@ import isodate
 from decimal import Decimal, ROUND_HALF_EVEN
 
 __all__ = [
-    "parse_onset",
+    "time_element_to_str",
     "iso_duration_to_years",
     "time_element_to_years",
 ]
 
 
-def parse_onset(onset):
-    """ Fuction to parse different age schemas in disease onset. """
+def time_element_to_str(time_interval: dict) -> str | None:
+    """
+    Fuction to stringify different TimeElements (returns None if the time interval doesn't match any valid form).
+    """
 
     # age string
-    if 'age' in onset:
-        return onset['age']
-    # age ontology
-    elif 'id' in onset and 'label' in onset:
-        return f"{onset['label']} {onset['id']}"
-    # age range
-    elif 'start' in onset and 'end' in onset:
-        if 'age' in onset['start'] and 'age' in onset['end']:
-            return f"{onset['start']['age']} - {onset['end']['age']}"
+    if 'age' in time_interval:
+        return time_interval['age']
+    # OntologyClass
+    elif 'id' in time_interval and 'label' in time_interval:
+        return f"{time_interval['label']} ({time_interval['id']})"
+    # AgeRange | TimeInterval
+    elif 'start' in time_interval and 'end' in time_interval:
+        if 'age' in time_interval['start'] and 'age' in time_interval['end']:  # AgeRange
+            return f"{time_interval['start']['age']} - {time_interval['end']['age']}"
+        else:  # TimeInterval
+            return f"{time_interval['start']} - {time_interval['end']}"
+    # GestationalAge
+    elif "weeks" in time_interval:
+        return (
+            f"{time_interval['weeks']} weeks {time_interval['days']} days"
+            if "days" in time_interval
+            else f"{time_interval['weeks']} weeks"
+        )
+    # Timestamp
+    elif "timestamp" in time_interval:
+        return time_interval["timestamp"]
     else:
         return None
 

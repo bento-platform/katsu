@@ -2,7 +2,7 @@ import json
 import csv
 from abc import ABCMeta, abstractmethod
 from uuid import UUID
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Type
 
 from pydantic import BaseModel
 from rdflib import Graph
@@ -13,8 +13,12 @@ from rest_framework import status
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
-from chord_metadata_service.phenopackets.utils import parse_onset
+from chord_metadata_service.experiments import serializers as exp_s
+from chord_metadata_service.patients import serializers as pa_s
+from chord_metadata_service.phenopackets import serializers as phe_s
+from chord_metadata_service.phenopackets.utils import time_element_to_str
 from .jsonld_utils import dataset_to_jsonld
+from .serializers import GenericSerializer
 
 __all__ = [
     "PhenopacketsRenderer",
@@ -107,6 +111,11 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
 
     file_name: str = "data.csv"
 
+    @staticmethod
+    @abstractmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        pass
+
     @abstractmethod
     def get_columns(self) -> list[str]:  # pragma: no cover
         raise NotImplementedError("get_columns() not implemented")
@@ -145,18 +154,22 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
         return self._generate_csv_response(self.get_dicts(data, renderer_context))
 
 
-class PhenopacketCSVRenderer(KatsuCSVRenderer):
-    file_name = "phenopackets.csv"
-
-    def get_columns(self) -> list[str]:
-        return ["id"]  # TODO
-
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        return []  # TODO
+def _render_csv_diseases(diseases: list[dict]) -> str:
+    # use ; because some disease terms might contain , in their label
+    return "; ".join(
+        [
+            f"{d['term']['label']} ({time_element_to_str(d['onset'])})"
+            if d.get("onset") else d["term"]["label"] for d in diseases
+        ]
+    )
 
 
 class IndividualCSVRenderer(KatsuCSVRenderer):
     file_name = "individuals.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return pa_s.IndividualSerializer
 
     def get_columns(self) -> list[str]:
         return ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
@@ -180,13 +193,7 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
                 all_diseases = []
                 for phenopacket in individual["phenopackets"]:
                     if "diseases" in phenopacket:
-                        # use ; because some disease terms might contain , in their label
-                        single_phenopacket_diseases = "; ".join(
-                            [
-                                f"{d['term']['label']} ({parse_onset(d['onset'])})"
-                                if "onset" in d else d["term"]["label"] for d in phenopacket["diseases"]
-                            ]
-                        )
+                        single_phenopacket_diseases = _render_csv_diseases(phenopacket["diseases"])
                         all_diseases.append(single_phenopacket_diseases)
                 if all_diseases:
                     ind_obj["diseases"] = "; ".join(all_diseases)
@@ -195,8 +202,54 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
         return individuals
 
 
+class PhenopacketCSVRenderer(KatsuCSVRenderer):
+    file_name = "phenopackets.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return phe_s.PhenopacketSerializer
+
+    def get_columns(self) -> list[str]:
+        return [
+            "id",
+            "subject_id",
+            "subject_sex",
+            "subject_taxonomy",
+            "biosamples",
+            "diseases",
+            "created_by",
+            "submitted_by",
+        ]
+
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
+        return [
+            {
+                "id": phe["id"],
+                "subject_id": phe["subject"]["id"] if phe.get("subject") else None,
+                "subject_sex": phe["subject"]["sex"] if phe.get("subject") else None,
+                "subject_taxonomy": phe["subject"]["taxonomy"]["label"] if phe.get("subject") else None,
+                "biosamples": "; ".join(
+                    (
+                        f"{b['id']} [{b['sampled_tissue']['label']}]"
+                        if b.get("sampled_tissue")
+                        else b["id"]
+                    )
+                    for b in phe["biosamples"]
+                ) if phe.get("biosamples") else None,
+                "diseases": _render_csv_diseases(phe["diseases"]) if phe.get("diseases") else None,
+                "created_by": phe["meta_data"].get("created_by"),
+                "submitted_by": phe["meta_data"].get("submitted_by"),
+            }
+            for phe in data
+        ]
+
+
 class BiosamplesCSVRenderer(KatsuCSVRenderer):
     file_name = "biosamples.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return phe_s.BiosampleSerializer
 
     def get_columns(self) -> list[str]:
         return [
@@ -230,6 +283,10 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
 
 class ExperimentCSVRenderer(KatsuCSVRenderer):
     file_name = "experiments.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentSerializer
 
     def get_columns(self) -> list[str]:
         return [
@@ -269,6 +326,10 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
 
 class ExperimentResultCSVRenderer(KatsuCSVRenderer):
     file_name = "experiment_results.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentResultSerializer
 
     def get_columns(self) -> list[str]:
         return [
