@@ -219,6 +219,7 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
             "diseases",
             "created_by",
             "submitted_by",
+            "dataset",
         ]
 
     def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
@@ -239,6 +240,7 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
                 "diseases": _render_csv_diseases(phe["diseases"]) if phe.get("diseases") else None,
                 "created_by": phe["meta_data"].get("created_by"),
                 "submitted_by": phe["meta_data"].get("submitted_by"),
+                "dataset": phe.get("dataset"),
             }
             for phe in data
         ]
