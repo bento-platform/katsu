@@ -476,6 +476,74 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
+def make_two_individuals_with_phenopackets() -> tuple[str, str]:
+    # create project + dataset
+    p = ch_m.Project.objects.create(**ch_c.VALID_PROJECT_1)
+    d = ch_m.Dataset.objects.create(**ch_c.valid_dataset_1(p))
+
+    # create only 2 individuals
+    for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
+        ind_obj = pa_m.Individual.objects.create(**ind)
+        md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+        ph_m.Phenopacket.objects.create(id=f"phe-{i}", dataset=d, subject=ind_obj, meta_data=md)
+
+    return str(p.identifier), str(d.identifier)
+
+
+class DiscoveryMatchesTest(AuthzAPITestCase):
+    def setUp(self):
+        self.url = reverse("discovery-matches")
+        self.maxDiff = None
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_empty_matches(self):
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertDictEqual(res.json(), {
+            "results_entity": "phenopacket",
+            "results": [],
+            "pagination": {
+                "page": 0,
+                "page_size": 25,
+                "total": 0,
+            },
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_json_responses(self):
+        p, d = make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertDictEqual(res.json(), {
+            "results_entity": "phenopacket",
+            "results": [
+                {"id": "phe-0", "subject": VALID_INDIVIDUALS[0]["id"], "biosamples": [], "project": p, "dataset": d},
+                {"id": "phe-1", "subject": VALID_INDIVIDUALS[1]["id"], "biosamples": [], "project": p, "dataset": d},
+            ],
+            "pagination": {
+                "page": 0,
+                "page_size": 25,
+                "total": 2,
+            },
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses(self):
+        p, d = make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res.content.decode("utf-8"),
+            f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
+phe-0,ind:NA19648,FEMALE,Homo sapiens,,,David Lougheed,David Lougheed,{d}
+phe-1,ind:HG00096,MALE,Homo sapiens,,,David Lougheed,David Lougheed,{d}
+""".replace("\n", "\r\n")  # CSVs use \r\n line endings here
+        )
+
+
 class DiscoveryUIHintsTest(AuthzAPITestCase):
     def setUp(self):
         self.url = reverse("discovery-ui-hints")
@@ -499,10 +567,7 @@ class DiscoveryUIHintsTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_few_entities(self):
         # create only 2 individuals
-        for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
-            ind_obj = pa_m.Individual.objects.create(**ind)
-            md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-            ph_m.Phenopacket.objects.create(id=f"phe-{i}", subject=ind_obj, meta_data=md)
+        make_two_individuals_with_phenopackets()
 
         # -------------------------------------------------------------------------------
 
