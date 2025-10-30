@@ -510,7 +510,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         })
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_a_few_json_responses(self):
+    def test_a_few_json_responses_phenopackets(self):
         p, d = make_two_individuals_with_phenopackets()
 
         res = self.dt_authz_full_get(self.url)
@@ -521,6 +521,36 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             "results": [
                 {"id": "phe-0", "subject": VALID_INDIVIDUALS[0]["id"], "biosamples": [], "project": p, "dataset": d},
                 {"id": "phe-1", "subject": VALID_INDIVIDUALS[1]["id"], "biosamples": [], "project": p, "dataset": d},
+            ],
+            "pagination": {
+                "page": 0,
+                "page_size": 25,
+                "total": 2,
+            },
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_json_responses_individuals(self):
+        p, d = make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_entity=individual")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertDictEqual(res.json(), {
+            "results_entity": "individual",
+            "results": [
+                {
+                    "id": VALID_INDIVIDUALS[1]["id"],
+                    "phenopackets": [{"biosamples": [], "id": "phe-1", "subject": VALID_INDIVIDUALS[1]["id"]}],
+                    "project": p,
+                    "dataset": d,
+                },
+                {
+                    "id": VALID_INDIVIDUALS[0]["id"],
+                    "phenopackets": [{"biosamples": [], "id": "phe-0", "subject": VALID_INDIVIDUALS[0]["id"]}],
+                    "project": p,
+                    "dataset": d,
+                },
             ],
             "pagination": {
                 "page": 0,
