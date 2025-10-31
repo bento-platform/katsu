@@ -2,6 +2,7 @@ from copy import deepcopy
 import uuid
 
 from bento_lib.discovery import DiscoveryConfig, RULES_NO_PERMISSIONS
+from datetime import datetime
 from django.conf import settings
 from django.urls import reverse
 from django.test import TestCase, override_settings
@@ -476,24 +477,33 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
-def make_two_individuals_with_phenopackets() -> tuple[str, str]:
+def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Individual], list[ph_m.Phenopacket]]:
     # create project + dataset
     p = ch_m.Project.objects.create(**ch_c.VALID_PROJECT_1)
     d = ch_m.Dataset.objects.create(**ch_c.valid_dataset_1(p))
 
+    individuals = []
+    phenopackets = []
+
     # create only 2 individuals
     for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
         ind_obj = pa_m.Individual.objects.create(**ind)
+        individuals.append(ind_obj)
         md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-        ph_m.Phenopacket.objects.create(id=f"phe-{i}", dataset=d, subject=ind_obj, meta_data=md)
+        phe_obj = ph_m.Phenopacket.objects.create(id=f"phe-{i}", dataset=d, subject=ind_obj, meta_data=md)
+        phenopackets.append(phe_obj)
 
-    return str(p.identifier), str(d.identifier)
+    return str(p.identifier), str(d.identifier), individuals, phenopackets
 
 
 class DiscoveryMatchesTest(AuthzAPITestCase):
     def setUp(self):
         self.url = reverse("discovery-matches")
         self.maxDiff = None
+
+    @staticmethod
+    def _rn_newline(x: str) -> str:
+        return x.replace("\r\n", "\n").replace("\n", "\r\n")
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_empty_matches(self):
@@ -511,7 +521,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_phenopackets(self):
-        p, d = make_two_individuals_with_phenopackets()
+        p, d, individuals, _phenopackets = make_two_individuals_with_phenopackets()
 
         res = self.dt_authz_full_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -519,8 +529,8 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         self.assertDictEqual(res.json(), {
             "results_entity": "phenopacket",
             "results": [
-                {"id": "phe-0", "subject": VALID_INDIVIDUALS[0]["id"], "biosamples": [], "project": p, "dataset": d},
-                {"id": "phe-1", "subject": VALID_INDIVIDUALS[1]["id"], "biosamples": [], "project": p, "dataset": d},
+                {"id": "phe-0", "subject": str(individuals[0].id), "biosamples": [], "project": p, "dataset": d},
+                {"id": "phe-1", "subject": str(individuals[1].id), "biosamples": [], "project": p, "dataset": d},
             ],
             "pagination": {
                 "page": 0,
@@ -530,8 +540,27 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         })
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_json_responses_phenopackets_pagination(self):
+        p, d, individuals, _phenopackets = make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_page_size=1&_page=1")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertDictEqual(res.json(), {
+            "results_entity": "phenopacket",
+            "results": [
+                {"id": "phe-1", "subject": str(individuals[1].id), "biosamples": [], "project": p, "dataset": d},
+            ],
+            "pagination": {
+                "page": 1,
+                "page_size": 1,
+                "total": 2,
+            },
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_individuals(self):
-        p, d = make_two_individuals_with_phenopackets()
+        p, d, individuals, _phenopackets = make_two_individuals_with_phenopackets()
 
         res = self.dt_authz_full_get(f"{self.url}?_entity=individual")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -541,13 +570,13 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             "results": [
                 {
                     "id": VALID_INDIVIDUALS[1]["id"],
-                    "phenopackets": [{"biosamples": [], "id": "phe-1", "subject": VALID_INDIVIDUALS[1]["id"]}],
+                    "phenopackets": [{"biosamples": [], "id": "phe-1", "subject": str(individuals[1].id)}],
                     "project": p,
                     "dataset": d,
                 },
                 {
                     "id": VALID_INDIVIDUALS[0]["id"],
-                    "phenopackets": [{"biosamples": [], "id": "phe-0", "subject": VALID_INDIVIDUALS[0]["id"]}],
+                    "phenopackets": [{"biosamples": [], "id": "phe-0", "subject": str(individuals[0].id)}],
                     "project": p,
                     "dataset": d,
                 },
@@ -560,17 +589,51 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         })
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_a_few_csv_responses(self):
-        p, d = make_two_individuals_with_phenopackets()
-
+    def test_a_few_csv_responses_phenopackets(self):
+        p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
         res = self.dt_authz_full_get(f"{self.url}?_format=csv")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(
             res.content.decode("utf-8"),
-            f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
+            self._rn_newline(
+                f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
 phe-0,ind:NA19648,FEMALE,Homo sapiens,,,David Lougheed,David Lougheed,{d}
 phe-1,ind:HG00096,MALE,Homo sapiens,,,David Lougheed,David Lougheed,{d}
-""".replace("\n", "\r\n")  # CSVs use \r\n line endings here
+"""
+            )  # CSVs use \r\n line endings here
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses_phenopackets_pagination(self):
+        p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_page_size=1&_page=1")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res.content.decode("utf-8"),
+            self._rn_newline(
+                f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
+phe-1,ind:HG00096,MALE,Homo sapiens,,,David Lougheed,David Lougheed,{d}
+"""
+            )  # CSVs use \r\n line endings here
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses_individuals(self):
+        _p, _d, [i0, i1], _phenopackets = make_two_individuals_with_phenopackets()
+
+        def _iso(ts: datetime) -> str:
+            return ts.isoformat().replace("+00:00", "Z")
+
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_entity=individual")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res.content.decode("utf-8"),
+            self._rn_newline(
+                f"""Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,Updated
+ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{_iso(i1.created)},{_iso(i1.updated)}
+ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,,{_iso(i0.created)},{_iso(i0.updated)}
+"""
+            )  # CSVs use \r\n line endings here
         )
 
 
