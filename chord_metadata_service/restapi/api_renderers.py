@@ -177,7 +177,10 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
     def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         individuals = []
 
-        for individual in data["results"]:
+        if isinstance(data, dict):
+            data = data["results"]
+
+        for individual in data:
             ind_obj = {
                 "id": individual["id"],
                 "sex": individual.get("sex", None),
