@@ -151,20 +151,24 @@ def get_censored_entity_counts_for_scope(
     """
     Returns censored entity counts for all discovery entities within the given scope.
     Applies authorization and threshold-based censorship to protect privacy.
+    Uses the same pattern as discovery API views for consistency.
 
     If request is None, returns raw counts without censorship (for internal/admin use).
     """
+    from .api_views import QueryQuerysetsCache, discovery_queryset_entity_counts, DiscoveryQuery
     from .censorship import censor_entity_counts
 
-    counts = get_entity_counts_for_scope(scope)
-
     if request is None:
-        return counts
+        return get_entity_counts_for_scope(scope)
 
     @async_to_sync
     async def _get_censored_counts():
         dt_permissions = await get_discovery_data_type_permissions(request, scope)
         lg = logger.bind(request_id=getattr(request, 'id', None))
+
+        qqs = QueryQuerysetsCache(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
+        counts = await discovery_queryset_entity_counts(qqs)
+
         return await censor_entity_counts(scope, counts, dt_permissions, lg)
 
     return _get_censored_counts()
