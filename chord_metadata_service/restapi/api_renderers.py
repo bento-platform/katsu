@@ -141,7 +141,7 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if not data:
-            return b""
+            return self._generate_csv_response([])
 
         if renderer_context and (res_status := renderer_context["response"].status_code) != status.HTTP_200_OK:
             # error response as JSON instead of CSV
@@ -306,7 +306,7 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
             "created",
             "updated",
             "biosample",
-            "individual_id",
+            "individual",
         ]
 
     def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
@@ -323,7 +323,7 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
                 "created": experiment.get("created"),
                 "updated": experiment.get("updated"),
                 "biosample": experiment.get("biosample"),
-                "individual_id": experiment.get("biosample_individual", {}).get("id", "NA"),
+                "individual": experiment.get("biosample_individual", {}).get("id", "NA"),
             }
             for experiment in data
         ]
