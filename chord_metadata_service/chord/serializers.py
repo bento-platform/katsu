@@ -177,11 +177,29 @@ class ProjectSerializer(serializers.ModelSerializer):
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
+    counts = serializers.SerializerMethodField()
+
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
         if len(value.strip()) < 3:
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
+
+    def get_counts(self, obj):
+        from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
+        from chord_metadata_service.patients.models import Individual
+        from chord_metadata_service.experiments.models import Experiment
+
+        return {
+            "phenopackets": Phenopacket.objects.filter(dataset__project_id=obj.identifier).count(),
+            "individuals": Individual.objects.filter(
+                phenopackets__dataset__project_id=obj.identifier
+            ).distinct().count(),
+            "biosamples": Biosample.objects.filter(
+                phenopackets__dataset__project_id=obj.identifier
+            ).distinct().count(),
+            "experiments": Experiment.objects.filter(dataset__project_id=obj.identifier).count(),
+        }
 
     class Meta:
         model = Project
