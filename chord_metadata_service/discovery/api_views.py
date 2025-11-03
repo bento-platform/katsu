@@ -361,8 +361,6 @@ async def discovery_endpoint(
         lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
         qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
         queryset, queried_entities = await qqs.get_query_queryset_and_queried_entities(queryset_entity)
-    except DiscoveryEmptyException:
-        return dres.no_public_data(request)
     except ValidationError as e:
         return await dres.django_validation_error(request, e, lg, "discovery endpoint encountered validation error")
 
@@ -471,8 +469,6 @@ async def discovery_matches(
         qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
         queryset, _ = await qqs.get_query_queryset_and_queried_entities(queried_entity)
         queryset = queryset.order_by("pk")
-    except DiscoveryEmptyException:
-        return dres.no_public_data(request)
     except ValidationError as e:
         return await dres.django_validation_error(
             request, e, lg, "discovery matches endpoint encountered validation error"

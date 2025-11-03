@@ -277,6 +277,11 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields,
         )
 
+    def test_empty_discovery(self):
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertDictEqual(res.json(), {"message": "No public data available."})
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview(self):
         node_discovery = settings.CONFIG_PUBLIC
@@ -516,6 +521,11 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def _rn_newline(x: str) -> str:
         return x.replace("\r\n", "\n").replace("\n", "\r\n")
 
+    def test_empty_discovery(self):
+        res = self.dt_authz_full_get(self.url)
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertDictEqual(res.json(), {"message": "No public data available."})
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_empty_matches(self):
         res = self.dt_authz_full_get(self.url)
@@ -528,6 +538,65 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                 "page_size": 25,
                 "total": 0,
             },
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_bad_pagination_non_int_page(self):
+        make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_page_size=1&_page=one")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        res_json = res.json()
+        self.assertDictEqual(res_json, {
+            "code": status.HTTP_400_BAD_REQUEST,
+            "message": "Bad Request",
+            "errors": [{"message": "bad page"}],
+            "timestamp": res_json["timestamp"],
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_bad_pagination_non_int_page_size(self):
+        make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_page_size=one&_page=1")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        res_json = res.json()
+        self.assertDictEqual(res_json, {
+            "code": status.HTTP_400_BAD_REQUEST,
+            "message": "Bad Request",
+            "errors": [{"message": "bad page size"}],
+            "timestamp": res_json["timestamp"],
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_bad_pagination_too_large_page(self):
+        make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_page_size=1&_page=2")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        res_json = res.json()
+        self.assertDictEqual(res_json, {
+            "code": status.HTTP_400_BAD_REQUEST,
+            "message": "Bad Request",
+            "errors": [{"message": "bad page"}],
+            "timestamp": res_json["timestamp"],
+        })
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_bad_response_type(self):
+        make_two_individuals_with_phenopackets()
+
+        res = self.dt_authz_full_get(f"{self.url}?_format=bad")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        res_json = res.json()
+        self.assertDictEqual(res_json, {
+            "code": status.HTTP_400_BAD_REQUEST,
+            "message": "Bad Request",
+            "errors": [{"message": "bad response format"}],
+            "timestamp": res_json["timestamp"],
         })
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
