@@ -3,6 +3,7 @@ import uuid
 from django.urls import reverse
 from rest_framework import status
 from .constants import (
+    VALID_DATA_USE_1,
     VALID_PROJECT_1,
     valid_dataset_1,
     dats_dataset,
@@ -487,3 +488,102 @@ class DeleteProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
     def test_delete_project_json_schema_forbidden(self):
         r = self.one_no_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ProjectDatasetCountsTest(AuthzAPITestCase):
+    def setUp(self) -> None:
+        super().setUp()
+        from chord_metadata_service.patients.models import Individual
+        from chord_metadata_service.phenopackets.models import Biosample, Phenopacket, MetaData
+        from chord_metadata_service.experiments.models import Experiment
+        from chord_metadata_service.phenopackets.tests.constants import (
+            VALID_INDIVIDUAL_1,
+            VALID_INDIVIDUAL_2,
+            valid_biosample_1,
+            valid_biosample_2,
+            VALID_META_DATA_1,
+        )
+        from chord_metadata_service.experiments.tests.constants import valid_experiment
+
+        self.project = Project.objects.create(title="Test Project", description="Test")
+        self.dataset = Dataset.objects.create(
+            title="Test Dataset",
+            description="Test Dataset",
+            data_use=VALID_DATA_USE_1,
+            project=self.project
+        )
+
+        self.individual_1 = Individual.objects.create(**VALID_INDIVIDUAL_1)
+        self.individual_2 = Individual.objects.create(**VALID_INDIVIDUAL_2)
+
+        self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual_1))
+        self.biosample_2 = Biosample.objects.create(**valid_biosample_2(self.individual_2))
+
+        self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
+
+        self.phenopacket_1 = Phenopacket.objects.create(
+            id="phenopacket:1",
+            subject=self.individual_1,
+            meta_data=self.meta_data,
+            dataset=self.dataset
+        )
+        self.phenopacket_1.biosamples.set([self.biosample_1])
+
+        self.phenopacket_2 = Phenopacket.objects.create(
+            id="phenopacket:2",
+            subject=self.individual_2,
+            meta_data=self.meta_data,
+            dataset=self.dataset
+        )
+        self.phenopacket_2.biosamples.set([self.biosample_2])
+
+        self.experiment_1 = Experiment.objects.create(
+            **valid_experiment(self.biosample_1, dataset=self.dataset, num_experiment=1)
+        )
+        self.experiment_2 = Experiment.objects.create(
+            **valid_experiment(self.biosample_2, dataset=self.dataset, num_experiment=2)
+        )
+
+    def test_project_counts(self):
+        r = self.client.get(f"/api/projects/{self.project.identifier}")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+
+        self.assertIn("counts", data)
+        self.assertEqual(data["counts"]["phenopackets"], 2)
+        self.assertEqual(data["counts"]["individuals"], 2)
+        self.assertEqual(data["counts"]["biosamples"], 2)
+        self.assertEqual(data["counts"]["experiments"], 2)
+
+    def test_dataset_counts(self):
+        r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+
+        self.assertIn("counts", data)
+        self.assertEqual(data["counts"]["phenopackets"], 2)
+        self.assertEqual(data["counts"]["individuals"], 2)
+        self.assertEqual(data["counts"]["biosamples"], 2)
+        self.assertEqual(data["counts"]["experiments"], 2)
+
+    def test_project_list_counts(self):
+        r = self.client.get("/api/projects")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+
+        self.assertEqual(len(data["results"]), 1)
+        project_data = data["results"][0]
+        self.assertIn("counts", project_data)
+        self.assertEqual(project_data["counts"]["phenopackets"], 2)
+        self.assertEqual(project_data["counts"]["individuals"], 2)
+
+    def test_dataset_list_counts(self):
+        r = self.client.get("/api/datasets")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+
+        self.assertEqual(len(data["results"]), 1)
+        dataset_data = data["results"][0]
+        self.assertIn("counts", dataset_data)
+        self.assertEqual(dataset_data["counts"]["phenopackets"], 2)
+        self.assertEqual(dataset_data["counts"]["experiments"], 2)
