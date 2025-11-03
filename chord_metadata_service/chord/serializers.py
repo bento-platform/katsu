@@ -38,6 +38,21 @@ class DiscoveryConfigField(serializers.Field):
             raise serializers.ValidationError(detail=str(e))
 
 
+def _get_entity_counts(scope_filter):
+    from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
+    from chord_metadata_service.patients.models import Individual
+    from chord_metadata_service.experiments.models import Experiment
+
+    nested_filter = {f"phenopackets__{k}": v for k, v in scope_filter.items()}
+
+    return {
+        "phenopackets": Phenopacket.objects.filter(**scope_filter).count(),
+        "individuals": Individual.objects.filter(**nested_filter).distinct().count(),
+        "biosamples": Biosample.objects.filter(**nested_filter).distinct().count(),
+        "experiments": Experiment.objects.filter(**scope_filter).count(),
+    }
+
+
 #############################################################
 #                                                           #
 #              Project Management  Serializers              #
@@ -57,6 +72,8 @@ class DatasetSerializer(GenericSerializer):
         "discovery",
         "conditions_of_access",
     )
+
+    counts = serializers.SerializerMethodField()
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
@@ -151,6 +168,9 @@ class DatasetSerializer(GenericSerializer):
 
         return validation
 
+    def get_counts(self, obj):
+        return _get_entity_counts({'dataset_id': obj.identifier})
+
     class Meta:
         model = Dataset
         fields = '__all__'
@@ -186,20 +206,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def get_counts(self, obj):
-        from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
-        from chord_metadata_service.patients.models import Individual
-        from chord_metadata_service.experiments.models import Experiment
-
-        return {
-            "phenopackets": Phenopacket.objects.filter(dataset__project_id=obj.identifier).count(),
-            "individuals": Individual.objects.filter(
-                phenopackets__dataset__project_id=obj.identifier
-            ).distinct().count(),
-            "biosamples": Biosample.objects.filter(
-                phenopackets__dataset__project_id=obj.identifier
-            ).distinct().count(),
-            "experiments": Experiment.objects.filter(dataset__project_id=obj.identifier).count(),
-        }
+        return _get_entity_counts({'dataset__project_id': obj.identifier})
 
     class Meta:
         model = Project
