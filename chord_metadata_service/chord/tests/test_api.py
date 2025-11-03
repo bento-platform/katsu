@@ -550,10 +550,10 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         data = r.json()
 
         self.assertIn("counts", data)
-        self.assertEqual(data["counts"]["phenopackets"], 2)
-        self.assertEqual(data["counts"]["individuals"], 2)
-        self.assertEqual(data["counts"]["biosamples"], 2)
-        self.assertEqual(data["counts"]["experiments"], 2)
+        self.assertEqual(data["counts"]["phenopacket"], 2)
+        self.assertEqual(data["counts"]["individual"], 2)
+        self.assertEqual(data["counts"]["biosample"], 2)
+        self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_dataset_counts(self):
         r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
@@ -561,10 +561,10 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         data = r.json()
 
         self.assertIn("counts", data)
-        self.assertEqual(data["counts"]["phenopackets"], 2)
-        self.assertEqual(data["counts"]["individuals"], 2)
-        self.assertEqual(data["counts"]["biosamples"], 2)
-        self.assertEqual(data["counts"]["experiments"], 2)
+        self.assertEqual(data["counts"]["phenopacket"], 2)
+        self.assertEqual(data["counts"]["individual"], 2)
+        self.assertEqual(data["counts"]["biosample"], 2)
+        self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_project_list_counts(self):
         r = self.client.get("/api/projects")
@@ -574,8 +574,8 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         self.assertEqual(len(data["results"]), 1)
         project_data = data["results"][0]
         self.assertIn("counts", project_data)
-        self.assertEqual(project_data["counts"]["phenopackets"], 2)
-        self.assertEqual(project_data["counts"]["individuals"], 2)
+        self.assertEqual(project_data["counts"]["phenopacket"], 2)
+        self.assertEqual(project_data["counts"]["individual"], 2)
 
     def test_dataset_list_counts(self):
         r = self.client.get("/api/datasets")
@@ -585,5 +585,5 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         self.assertEqual(len(data["results"]), 1)
         dataset_data = data["results"][0]
         self.assertIn("counts", dataset_data)
-        self.assertEqual(dataset_data["counts"]["phenopackets"], 2)
-        self.assertEqual(dataset_data["counts"]["experiments"], 2)
+        self.assertEqual(dataset_data["counts"]["phenopacket"], 2)
+        self.assertEqual(dataset_data["counts"]["experiment"], 2)

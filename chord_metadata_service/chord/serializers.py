@@ -1,5 +1,6 @@
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
+from chord_metadata_service.discovery.types import EntityCounts
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from pydantic import ValidationError as PydValidationError
@@ -38,7 +39,7 @@ class DiscoveryConfigField(serializers.Field):
             raise serializers.ValidationError(detail=str(e))
 
 
-def _get_entity_counts(scope_filter):
+def _get_entity_counts(scope_filter: dict) -> EntityCounts:
     from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
     from chord_metadata_service.patients.models import Individual
     from chord_metadata_service.experiments.models import Experiment
@@ -46,10 +47,10 @@ def _get_entity_counts(scope_filter):
     nested_filter = {f"phenopackets__{k}": v for k, v in scope_filter.items()}
 
     return {
-        "phenopackets": Phenopacket.objects.filter(**scope_filter).count(),
-        "individuals": Individual.objects.filter(**nested_filter).distinct().count(),
-        "biosamples": Biosample.objects.filter(**nested_filter).distinct().count(),
-        "experiments": Experiment.objects.filter(**scope_filter).count(),
+        "phenopacket": Phenopacket.objects.filter(**scope_filter).count(),
+        "individual": Individual.objects.filter(**nested_filter).distinct().count(),
+        "biosample": Biosample.objects.filter(**nested_filter).distinct().count(),
+        "experiment": Experiment.objects.filter(**scope_filter).count(),
     }
 
 
