@@ -9,35 +9,34 @@ __all__ = [
 ]
 
 
-def time_element_to_str(time_interval: dict) -> str | None:
+def time_element_to_str(time_element: dict) -> str | None:
     """
     Fuction to stringify different TimeElements (returns None if the time interval doesn't match any valid form).
     """
 
     # age string
-    if 'age' in time_interval:
-        return time_interval['age']
+    if "age" in time_element:
+        return time_element["age"]
     # OntologyClass
-    elif 'id' in time_interval and 'label' in time_interval:
-        return f"{time_interval['label']} ({time_interval['id']})"
-    # AgeRange | TimeInterval
-    elif 'start' in time_interval and 'end' in time_interval:
-        if 'age' in time_interval['start'] and 'age' in time_interval['end']:  # AgeRange
-            return f"{time_interval['start']['age']} - {time_interval['end']['age']}"
-        else:  # TimeInterval
-            return f"{time_interval['start']} - {time_interval['end']}"
+    elif "ontology_class" in time_element:
+        return f"{time_element['ontology_class']['label']} ({time_element['ontology_class']['id']})"
+    # AgeRange
+    elif "age_range" in time_element:
+        return f"{time_element['age_range']['start']['age']} - {time_element['age_range']['end']['age']}"
+    # TimeInterval
+    elif "interval" in time_element:
+        return f"{time_element['interval']['start']} - {time_element['interval']['end']}"
     # GestationalAge
-    elif "weeks" in time_interval:
+    elif "gestational_age" in time_element:
         return (
-            f"{time_interval['weeks']} weeks {time_interval['days']} days"
-            if "days" in time_interval
-            else f"{time_interval['weeks']} weeks"
+            f"{time_element['gestational_age']['weeks']} weeks {time_element['gestational_age']['days']} days"
+            if "days" in time_element["gestational_age"]
+            else f"{time_element['gestational_age']['weeks']} weeks"
         )
     # Timestamp
-    elif "timestamp" in time_interval:
-        return time_interval["timestamp"]
-    else:
-        return None
+    elif "timestamp" in time_element:
+        return time_element["timestamp"]
+    return None
 
 
 DAYS_IN_A_MONTH = 30.5  # 30.5 average days in a month (including leap year)
