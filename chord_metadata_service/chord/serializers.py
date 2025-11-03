@@ -1,6 +1,8 @@
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.types import EntityCounts
+from chord_metadata_service.discovery.utils import get_entity_counts_for_scope
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from pydantic import ValidationError as PydValidationError
@@ -37,21 +39,6 @@ class DiscoveryConfigField(serializers.Field):
             return DiscoveryConfig.model_validate(data)
         except PydValidationError as e:
             raise serializers.ValidationError(detail=str(e))
-
-
-def _get_entity_counts(scope_filter: dict) -> EntityCounts:
-    from chord_metadata_service.phenopackets.models import Phenopacket, Biosample
-    from chord_metadata_service.patients.models import Individual
-    from chord_metadata_service.experiments.models import Experiment
-
-    nested_filter = {f"phenopackets__{k}": v for k, v in scope_filter.items()}
-
-    return {
-        "phenopacket": Phenopacket.objects.filter(**scope_filter).count(),
-        "individual": Individual.objects.filter(**nested_filter).distinct().count(),
-        "biosample": Biosample.objects.filter(**nested_filter).distinct().count(),
-        "experiment": Experiment.objects.filter(**scope_filter).count(),
-    }
 
 
 #############################################################
@@ -170,7 +157,8 @@ class DatasetSerializer(GenericSerializer):
         return validation
 
     def get_counts(self, obj):
-        return _get_entity_counts({'dataset_id': obj.identifier})
+        scope = ValidatedDiscoveryScope(obj.project, obj)
+        return get_entity_counts_for_scope(scope)
 
     class Meta:
         model = Dataset
@@ -207,7 +195,8 @@ class ProjectSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def get_counts(self, obj):
-        return _get_entity_counts({'dataset__project_id': obj.identifier})
+        scope = ValidatedDiscoveryScope(obj, None)
+        return get_entity_counts_for_scope(scope)
 
     class Meta:
         model = Project
