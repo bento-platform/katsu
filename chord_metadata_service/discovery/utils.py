@@ -1,7 +1,9 @@
+from asgiref.sync import async_to_sync
 from bento_lib.discovery import DiscoveryConfig, DiscoveryEntity
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from rest_framework.request import Request as DrfRequest
+from structlog import get_logger
 from typing import Iterable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
@@ -14,7 +16,9 @@ from .constants import DISCOVERY_ENTITIES
 from .fields_utils import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scope import ValidatedDiscoveryScope
-from .types import EntityCounts
+from .types import EntityCounts, EntityCountOrBoolResponse
+
+logger = get_logger(__name__)
 
 __all__ = [
     "get_discovery_data_type_permissions",
@@ -23,6 +27,7 @@ __all__ = [
     "empty_discovery",
     "get_discovery_entity_model_scoped_queryset",
     "get_entity_counts_for_scope",
+    "get_censored_entity_counts_for_scope",
 ]
 
 
@@ -137,3 +142,29 @@ def get_entity_counts_for_scope(scope: ValidatedDiscoveryScope) -> EntityCounts:
         entity: get_discovery_entity_model_scoped_queryset(entity, scope).distinct().count()
         for entity in DISCOVERY_ENTITIES
     }
+
+
+def get_censored_entity_counts_for_scope(
+    request: DrfRequest | None,
+    scope: ValidatedDiscoveryScope
+) -> EntityCountOrBoolResponse:
+    """
+    Returns censored entity counts for all discovery entities within the given scope.
+    Applies authorization and threshold-based censorship to protect privacy.
+
+    If request is None, returns raw counts without censorship (for internal/admin use).
+    """
+    from .censorship import censor_entity_counts
+
+    counts = get_entity_counts_for_scope(scope)
+
+    if request is None:
+        return counts
+
+    @async_to_sync
+    async def _get_censored_counts():
+        dt_permissions = await get_discovery_data_type_permissions(request, scope)
+        lg = logger.bind(request_id=getattr(request, 'id', None))
+        return await censor_entity_counts(scope, counts, dt_permissions, lg)
+
+    return _get_censored_counts()

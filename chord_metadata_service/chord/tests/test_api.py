@@ -545,7 +545,7 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         )
 
     def test_project_counts(self):
-        r = self.client.get(f"/api/projects/{self.project.identifier}")
+        r = self.dt_authz_counts_get(f"/api/projects/{self.project.identifier}")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
 
@@ -556,7 +556,7 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_dataset_counts(self):
-        r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+        r = self.dt_authz_counts_get(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
 
@@ -567,7 +567,7 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_project_list_counts(self):
-        r = self.client.get("/api/projects")
+        r = self.dt_authz_counts_get("/api/projects")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
 
@@ -578,7 +578,7 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         self.assertEqual(project_data["counts"]["individual"], 2)
 
     def test_dataset_list_counts(self):
-        r = self.client.get("/api/datasets")
+        r = self.dt_authz_counts_get("/api/datasets")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
 
