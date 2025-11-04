@@ -24,6 +24,9 @@ env/
 *.swo
 .vscode/*
 
+# assitant-cli related
+.claude
+
 # Keep vscode debugger configuration
 !.vscode/launch.json
 

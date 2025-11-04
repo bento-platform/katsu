@@ -545,45 +545,73 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         )
 
     def test_project_counts(self):
-        r = self.dt_authz_counts_get(f"/api/projects/{self.project.identifier}")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        data = r.json()
+        from aioresponses import aioresponses
 
-        self.assertIn("counts", data)
-        self.assertEqual(data["counts"]["phenopacket"], 2)
-        self.assertEqual(data["counts"]["individual"], 2)
-        self.assertEqual(data["counts"]["biosample"], 2)
-        self.assertEqual(data["counts"]["experiment"], 2)
+        with aioresponses() as m:
+            # Mock authorization for main API call AND for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get(f"/api/projects/{self.project.identifier}")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            data = r.json()
+
+            self.assertIn("counts", data)
+            self.assertEqual(data["counts"]["phenopacket"], 2)
+            self.assertEqual(data["counts"]["individual"], 2)
+            self.assertEqual(data["counts"]["biosample"], 2)
+            self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_dataset_counts(self):
-        r = self.dt_authz_counts_get(f"/api/datasets/{self.dataset.identifier}")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        data = r.json()
+        from aioresponses import aioresponses
 
-        self.assertIn("counts", data)
-        self.assertEqual(data["counts"]["phenopacket"], 2)
-        self.assertEqual(data["counts"]["individual"], 2)
-        self.assertEqual(data["counts"]["biosample"], 2)
-        self.assertEqual(data["counts"]["experiment"], 2)
+        with aioresponses() as m:
+            # Mock authorization for main API call AND for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            data = r.json()
+
+            self.assertIn("counts", data)
+            self.assertEqual(data["counts"]["phenopacket"], 2)
+            self.assertEqual(data["counts"]["individual"], 2)
+            self.assertEqual(data["counts"]["biosample"], 2)
+            self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_project_list_counts(self):
-        r = self.dt_authz_counts_get("/api/projects")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        data = r.json()
+        from aioresponses import aioresponses
 
-        self.assertEqual(len(data["results"]), 1)
-        project_data = data["results"][0]
-        self.assertIn("counts", project_data)
-        self.assertEqual(project_data["counts"]["phenopacket"], 2)
-        self.assertEqual(project_data["counts"]["individual"], 2)
+        with aioresponses() as m:
+            # Mock authorization for main API call AND for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get("/api/projects")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            data = r.json()
+
+            self.assertEqual(len(data["results"]), 1)
+            project_data = data["results"][0]
+            self.assertIn("counts", project_data)
+            self.assertEqual(project_data["counts"]["phenopacket"], 2)
+            self.assertEqual(project_data["counts"]["individual"], 2)
 
     def test_dataset_list_counts(self):
-        r = self.dt_authz_counts_get("/api/datasets")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        data = r.json()
+        from aioresponses import aioresponses
 
-        self.assertEqual(len(data["results"]), 1)
-        dataset_data = data["results"][0]
-        self.assertIn("counts", dataset_data)
-        self.assertEqual(dataset_data["counts"]["phenopacket"], 2)
-        self.assertEqual(dataset_data["counts"]["experiment"], 2)
+        with aioresponses() as m:
+            # Mock authorization for main API call AND for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get("/api/datasets")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            data = r.json()
+
+            self.assertEqual(len(data["results"]), 1)
+            dataset_data = data["results"][0]
+            self.assertIn("counts", dataset_data)
+            self.assertEqual(dataset_data["counts"]["phenopacket"], 2)
+            self.assertEqual(dataset_data["counts"]["experiment"], 2)

@@ -157,6 +157,11 @@ class DatasetSerializer(GenericSerializer):
 
     def get_counts(self, obj):
         request = self.context.get('request')
+
+        # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
+        if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            return {}
+
         scope = ValidatedDiscoveryScope(obj.project, obj)
         return get_censored_entity_counts_for_scope(request, scope)
 
@@ -196,6 +201,11 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_counts(self, obj):
         request = self.context.get('request')
+
+        # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
+        if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            return {}
+
         scope = ValidatedDiscoveryScope(obj, None)
         return get_censored_entity_counts_for_scope(request, scope)
 
