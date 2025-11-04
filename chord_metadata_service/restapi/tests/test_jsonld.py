@@ -1,3 +1,4 @@
+from aioresponses import aioresponses
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import VALID_DATS_CREATORS, dats_dataset
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
@@ -11,8 +12,6 @@ class JSONLDDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.one_authz_post("/api/datasets", json=self.dataset)
 
     def test_jsonld(self):
-        from aioresponses import aioresponses
-
         with aioresponses() as m:
             # Mock authorization for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
@@ -25,8 +24,6 @@ class JSONLDDatasetTest(AuthzAPITestCaseWithProjectJSON):
             self.assertEqual(get_resp_obj['results'][0]['@type'], 'Dataset')
 
     def test_rdf(self):
-        from aioresponses import aioresponses
-
         with aioresponses() as m:
             # Mock authorization for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)

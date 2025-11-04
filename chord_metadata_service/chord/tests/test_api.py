@@ -1,5 +1,6 @@
 import uuid
 
+from aioresponses import aioresponses
 from django.urls import reverse
 from rest_framework import status
 from .constants import (
@@ -545,8 +546,6 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
         )
 
     def test_project_counts(self):
-        from aioresponses import aioresponses
-
         with aioresponses() as m:
             # Mock authorization for main API call AND for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
@@ -563,8 +562,6 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
             self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_dataset_counts(self):
-        from aioresponses import aioresponses
-
         with aioresponses() as m:
             # Mock authorization for main API call AND for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
@@ -581,8 +578,6 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
             self.assertEqual(data["counts"]["experiment"], 2)
 
     def test_project_list_counts(self):
-        from aioresponses import aioresponses
-
         with aioresponses() as m:
             # Mock authorization for main API call AND for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
@@ -599,8 +594,6 @@ class ProjectDatasetCountsTest(AuthzAPITestCase):
             self.assertEqual(project_data["counts"]["individual"], 2)
 
     def test_dataset_list_counts(self):
-        from aioresponses import aioresponses
-
         with aioresponses() as m:
             # Mock authorization for main API call AND for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
