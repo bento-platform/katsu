@@ -4739,6 +4739,8 @@ TCategoryEnum
 |TCategoryEnum|T1b(s)|
 |TCategoryEnum|T1b(m)|
 |TCategoryEnum|T1c|
+|TCategoryEnum|T1c1|
+|TCategoryEnum|T1c2|
 |TCategoryEnum|T1d|
 |TCategoryEnum|T1mi|
 |TCategoryEnum|T2|

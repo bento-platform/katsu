@@ -123,6 +123,8 @@ T_CATEGORY = [
     "T1b(s)",
     "T1b(m)",
     "T1c",
+    "T1c1",
+    "T1c2",
     "T1d",
     "T1mi",
     "T2",
