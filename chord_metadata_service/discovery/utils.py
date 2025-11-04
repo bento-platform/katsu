@@ -145,7 +145,7 @@ def get_entity_counts_for_scope(scope: ValidatedDiscoveryScope) -> EntityCounts:
 
 
 def get_censored_entity_counts_for_scope(
-    request: DrfRequest | None,
+    request: DrfRequest,
     scope: ValidatedDiscoveryScope
 ) -> EntityCountOrBoolResponse:
     """
@@ -153,14 +153,10 @@ def get_censored_entity_counts_for_scope(
     Applies authorization and threshold-based censorship to protect privacy.
     Uses the same pattern as discovery API views for consistency.
 
-    If request is None, returns raw counts without censorship (for internal/admin use).
     Returns empty dict if authorization check fails (e.g., in tests without proper mocks).
     """
     from .api_views import QueryQuerysetsCache, discovery_queryset_entity_counts, DiscoveryQuery
     from .censorship import censor_entity_counts
-
-    if request is None:
-        return get_entity_counts_for_scope(scope)
 
     @async_to_sync
     async def _get_censored_counts():
