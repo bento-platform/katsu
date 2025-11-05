@@ -357,6 +357,17 @@ async def get_censored_entity_counts_async(
     - Discovery endpoint (with query filters)
     - Project/Dataset serializers (without query filters)
 
+    For each 'discovery entity', we generate either:
+     - a count (0/count-if-above-threshold), or
+     - a boolean (count > threshold)
+
+    If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
+    one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
+    ==> do this, plus the same thing for all entities nested inside other entities
+        (phenopacket -> biosample -> experiment -> experiment_result...)
+    TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
+     done in a more dynamic way, starting from the queryset entity.
+
     Args:
         scope: Validated discovery scope (project/dataset)
         dt_permissions: Data type permissions for authorization
