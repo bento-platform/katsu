@@ -156,7 +156,7 @@ class DatasetSerializer(GenericSerializer):
         return validation
 
     def get_counts(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
         if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
@@ -200,7 +200,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def get_counts(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
         if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
