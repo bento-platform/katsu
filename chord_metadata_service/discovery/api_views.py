@@ -51,7 +51,6 @@ from .pydantic_models import (
     DiscoveryMatchesPaginatedResponse,
     DiscoveryUIHintsResponse,
 )
-from .responses import INSUFFICIENT_DATA_AVAILABLE_MSG
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .types import EntityCountOrBoolResponse, EntityCounts
@@ -404,7 +403,7 @@ async def discovery_endpoint(
         not count_or_bools_res[queryset_entity]
         and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
     ):
-        message = INSUFFICIENT_DATA_AVAILABLE_MSG
+        message = dres.INSUFFICIENT_DATA_AVAILABLE_MSG
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
