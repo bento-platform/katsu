@@ -129,7 +129,9 @@ def get_discovery_entity_model_scoped_queryset(entity: DiscoveryEntity, scope: V
     return DISCOVERY_ENTITY_NAMES_TO_MODEL[entity].get_model_scoped_queryset(scope)
 
 
-def get_censored_counts_for_serializer(request: DrfRequest, scope: ValidatedDiscoveryScope) -> EntityCountOrBoolResponse:
+def get_censored_counts_for_serializer(
+    request: DrfRequest, scope: ValidatedDiscoveryScope
+) -> EntityCountOrBoolResponse:
     """
     Sync wrapper for getting censored entity counts from serializers.
     Wraps the async get_censored_entity_counts_async function.
