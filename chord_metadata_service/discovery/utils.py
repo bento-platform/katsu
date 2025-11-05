@@ -144,7 +144,13 @@ def get_censored_counts_for_serializer(
             dt_permissions = await get_discovery_data_type_permissions(request, scope)
             lg = logger.bind(request_id=getattr(request, 'id', None))
             return await get_censored_entity_counts_async(scope, dt_permissions, query=None, lg=lg)
-        except (Exception,):
+        except Exception as e:
+            logger.warning(
+                "Failed to compute entity counts for serializer, returning empty dict",
+                exc_info=e,
+                scope=scope,
+                request_id=getattr(request, 'id', None),
+            )
             return {}
 
     return _get_counts()

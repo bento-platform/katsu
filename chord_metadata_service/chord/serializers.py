@@ -2,6 +2,7 @@ from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import get_censored_counts_for_serializer
+from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from pydantic import ValidationError as PydValidationError
@@ -161,6 +162,11 @@ class DatasetSerializer(GenericSerializer):
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
         if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            logger.debug(
+                "Skipping counts computation for non-GET request",
+                dataset_id=str(obj.identifier),
+                method=request.method if request else None,
+            )
             return {}
 
         scope = ValidatedDiscoveryScope(obj.project, obj)
@@ -205,6 +211,11 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
         if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
+            logger.debug(
+                "Skipping counts computation for non-GET request",
+                project_id=str(obj.identifier),
+                method=request.method if request else None,
+            )
             return {}
 
         scope = ValidatedDiscoveryScope(obj, None)
