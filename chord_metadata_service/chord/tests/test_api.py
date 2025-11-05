@@ -1,5 +1,6 @@
 import uuid
 
+from aioresponses import aioresponses
 from django.urls import reverse
 from rest_framework import status
 from .constants import (
@@ -71,10 +72,68 @@ class CreateProjectAPITest(AuthzAPITestCase):
 class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
 
     def test_list_projects(self):
-        r = self.client.get("/api/projects")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        res = r.json()
-        self.assertEqual(len(res["results"]), 1)
+        with aioresponses() as m:
+            # Mock authorization for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get("/api/projects")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            res = r.json()
+            self.assertEqual(len(res["results"]), 1)
+
+            # Verify counts field exists
+            project = res["results"][0]
+            self.assertIn("counts", project)
+            self.assertIsInstance(project["counts"], dict)
+
+            # Verify all expected entity types are in counts
+            expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
+            for entity in expected_entities:
+                self.assertIn(entity, project["counts"])
+
+
+class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
+
+    def test_project_detail_with_counts(self):
+        with aioresponses() as m:
+            # Mock authorization for the main request AND for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get(f"/api/projects/{self.project['identifier']}")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            project = r.json()
+
+            # Verify counts field exists
+            self.assertIn("counts", project)
+            self.assertIsInstance(project["counts"], dict)
+
+            # Verify all expected entity types are in counts
+            expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
+            for entity in expected_entities:
+                self.assertIn(entity, project["counts"])
+                # Since there's no data, counts should be 0
+                self.assertEqual(project["counts"][entity], 0)
+
+    def test_project_detail_with_bool_permissions(self):
+        with aioresponses() as m:
+            # Mock authorization with boolean-only permissions
+            self.mock_authz_eval_result(m, self.dt_bool_eval_res)
+            self.mock_authz_eval_result(m, self.dt_bool_eval_res)
+
+            r = self.client.get(f"/api/projects/{self.project['identifier']}")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            project = r.json()
+
+            # Verify counts field exists
+            self.assertIn("counts", project)
+
+            # With boolean permissions, counts should be booleans
+            for entity in ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]:
+                self.assertIn(entity, project["counts"])
+                self.assertIsInstance(project["counts"][entity], bool)
+                # Since there's no data, should be False
+                self.assertFalse(project["counts"][entity])
 
 
 class UpdateProjectTest(AuthzAPITestCaseWithProjectJSON):
@@ -315,6 +374,73 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         # non-existant dataset
         r = self.client.get(f"/api/datasets/{uuid.uuid4()}/resources")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
+
+    def test_list_datasets(self):
+        with aioresponses() as m:
+            # Mock authorization for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get("/api/datasets")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            res = r.json()
+            self.assertEqual(len(res["results"]), 1)
+
+            # Verify counts field exists
+            dataset = res["results"][0]
+            self.assertIn("counts", dataset)
+            self.assertIsInstance(dataset["counts"], dict)
+
+            # Verify all expected entity types are in counts
+            expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
+            for entity in expected_entities:
+                self.assertIn(entity, dataset["counts"])
+
+
+class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
+
+    def test_dataset_detail_with_counts(self):
+        with aioresponses() as m:
+            # Mock authorization for the main request AND for counts computation
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            dataset = r.json()
+
+            # Verify counts field exists
+            self.assertIn("counts", dataset)
+            self.assertIsInstance(dataset["counts"], dict)
+
+            # Verify all expected entity types are in counts
+            expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
+            for entity in expected_entities:
+                self.assertIn(entity, dataset["counts"])
+                # Since there's no data, counts should be 0
+                self.assertEqual(dataset["counts"][entity], 0)
+
+    def test_dataset_detail_with_bool_permissions(self):
+        with aioresponses() as m:
+            # Mock authorization with boolean-only permissions
+            self.mock_authz_eval_result(m, self.dt_bool_eval_res)
+            self.mock_authz_eval_result(m, self.dt_bool_eval_res)
+
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            dataset = r.json()
+
+            # Verify counts field exists
+            self.assertIn("counts", dataset)
+
+            # With boolean permissions, counts should be booleans
+            for entity in ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]:
+                self.assertIn(entity, dataset["counts"])
+                self.assertIsInstance(dataset["counts"][entity], bool)
+                # Since there's no data, should be False
+                self.assertFalse(dataset["counts"][entity])
 
 
 class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
