@@ -1,6 +1,5 @@
 import uuid
 from django.test import override_settings
-from bento_lib.discovery import DiscoveryConfig
 
 from aioresponses import aioresponses
 from django.urls import reverse
