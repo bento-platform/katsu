@@ -1,4 +1,6 @@
 import uuid
+from django.test import override_settings
+from bento_lib.discovery import DiscoveryConfig
 
 from aioresponses import aioresponses
 from django.urls import reverse
@@ -71,6 +73,7 @@ class CreateProjectAPITest(AuthzAPITestCase):
 
 class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_list_projects(self):
         with aioresponses() as m:
             # Mock authorization for counts computation
@@ -94,6 +97,7 @@ class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
 
 class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_project_detail_with_counts(self):
         with aioresponses() as m:
             # Mock authorization for the main request AND for counts computation
@@ -115,6 +119,7 @@ class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
                 # Since there's no data, counts should be 0
                 self.assertEqual(project["counts"][entity], 0)
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_project_detail_with_bool_permissions(self):
         with aioresponses() as m:
             # Mock authorization with boolean-only permissions
@@ -378,6 +383,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
 class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_list_datasets(self):
         with aioresponses() as m:
             # Mock authorization for counts computation
@@ -401,6 +407,7 @@ class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
 
 class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_dataset_detail_with_counts(self):
         with aioresponses() as m:
             # Mock authorization for the main request AND for counts computation
@@ -422,6 +429,7 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
                 # Since there's no data, counts should be 0
                 self.assertEqual(dataset["counts"][entity], 0)
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_dataset_detail_with_bool_permissions(self):
         with aioresponses() as m:
             # Mock authorization with boolean-only permissions
