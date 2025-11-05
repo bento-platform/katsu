@@ -1,4 +1,3 @@
-from aioresponses import aioresponses
 from rest_framework import status
 from chord_metadata_service.chord.tests.constants import VALID_DATS_CREATORS, dats_dataset
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
@@ -12,23 +11,15 @@ class JSONLDDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.one_authz_post("/api/datasets", json=self.dataset)
 
     def test_jsonld(self):
-        with aioresponses() as m:
-            # Mock authorization for counts computation
-            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
-
-            get_resp = self.client.get('/api/datasets?format=json-ld')
-            get_resp_obj = get_resp.json()
-            self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-            self.assertIsInstance(get_resp_obj['results'][0]['@context'], list)
-            self.assertIsNotNone(get_resp_obj['results'][0]['@context'], True)
-            self.assertEqual(get_resp_obj['results'][0]['@type'], 'Dataset')
+        get_resp = self.client.get('/api/datasets?format=json-ld')
+        get_resp_obj = get_resp.json()
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        self.assertIsInstance(get_resp_obj['results'][0]['@context'], list)
+        self.assertIsNotNone(get_resp_obj['results'][0]['@context'], True)
+        self.assertEqual(get_resp_obj['results'][0]['@type'], 'Dataset')
 
     def test_rdf(self):
-        with aioresponses() as m:
-            # Mock authorization for counts computation
-            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
-
-            get_resp = self.client.get('/api/datasets?format=rdf')
-            self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-            self.assertEqual(get_resp.accepted_media_type, 'application/rdf+xml')
-            self.assertIsInstance(get_resp.content, bytes)
+        get_resp = self.client.get('/api/datasets?format=rdf')
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(get_resp.accepted_media_type, 'application/rdf+xml')
+        self.assertIsInstance(get_resp.content, bytes)
