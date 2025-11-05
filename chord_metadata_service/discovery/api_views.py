@@ -14,7 +14,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from structlog.stdlib import BoundLogger
-from typing import Any, Awaitable, Callable, Literal
+from typing import Any, Awaitable, Callable, Literal, overload
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
@@ -323,6 +323,67 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
     }
 
 
+@overload
+async def get_censored_entity_counts_async(
+    scope: ValidatedDiscoveryScope,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    query: DiscoveryQuery | None = None,
+    lg: BoundLogger | None = None,
+    return_raw_counts: Literal[False] = False,
+) -> EntityCountOrBoolResponse: ...
+
+
+@overload
+async def get_censored_entity_counts_async(
+    scope: ValidatedDiscoveryScope,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    query: DiscoveryQuery | None,
+    lg: BoundLogger | None,
+    return_raw_counts: Literal[True],
+) -> tuple[EntityCounts, EntityCountOrBoolResponse]: ...
+
+
+async def get_censored_entity_counts_async(
+    scope: ValidatedDiscoveryScope,
+    dt_permissions: DataTypeDiscoveryPermissions,
+    query: DiscoveryQuery | None = None,
+    lg: BoundLogger | None = None,
+    return_raw_counts: bool = False,
+) -> EntityCountOrBoolResponse | tuple[EntityCounts, EntityCountOrBoolResponse]:
+    """
+    Get censored entity counts for a scope with given permissions.
+
+    This is the shared implementation used by both:
+    - Discovery endpoint (with query filters)
+    - Project/Dataset serializers (without query filters)
+
+    Args:
+        scope: Validated discovery scope (project/dataset)
+        dt_permissions: Data type permissions for authorization
+        query: Optional discovery query with filters/FTS (defaults to empty query)
+        lg: Optional logger instance (defaults to module logger)
+        return_raw_counts: If True, return tuple of (raw_counts, censored_counts) for logging
+
+    Returns:
+        If return_raw_counts=False: Dictionary mapping entities to censored counts (int) or booleans
+        If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)
+    """
+    if query is None:
+        query = DiscoveryQuery(fts=None, filters={})
+
+    if lg is None:
+        lg = logger
+
+    qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
+    counts = await discovery_queryset_entity_counts(qqs)
+    censored = await censor_entity_counts(scope, counts, dt_permissions, lg)
+
+    if return_raw_counts:
+        return counts, censored
+
+    return censored
+
+
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
 @inject_discovery_deps(empty_404=True)
@@ -388,18 +449,12 @@ async def discovery_endpoint(
     # -- Counts processing ---------------------------------------------------------------------------------------------
 
     message: str = ""
-    counts: EntityCounts = await discovery_queryset_entity_counts(qqs)
 
-    # for each 'discovery entity', we generate either:
-    #  - a count (0/count-if-above-threshold), or
-    #  - a boolean (count > threshold)
-    # If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
-    # one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
-    # ==> do this, plus the same thing for all entities nested inside other entities
-    #     (phenopacket -> biosample -> experiment -> experiment_result...)
-    # TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
-    #  done in a more dynamic way, starting from the queryset entity.
-    count_or_bools_res: EntityCountOrBoolResponse = await censor_entity_counts(discovery, counts, dt_permissions, lg)
+    # Get both raw counts (for logging) and censored counts (for response)
+    # Uses the same shared implementation as Project/Dataset serializers
+    counts, count_or_bools_res = await get_censored_entity_counts_async(
+        scope, dt_permissions, query, lg, return_raw_counts=True
+    )
 
     if (
         not count_or_bools_res[queryset_entity]

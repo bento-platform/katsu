@@ -149,26 +149,22 @@ def get_censored_entity_counts_for_scope(
     """
     Returns censored entity counts for all discovery entities within the given scope.
     Applies authorization and threshold-based censorship to protect privacy.
-    Uses the same pattern as discovery API views for consistency.
+    Uses the same shared implementation as discovery endpoint for consistency.
 
     Returns empty dict if authorization check fails (e.g., in tests without proper mocks).
     """
-    # Imports inside function to avoid circular import: utils → api_views → censorship → utils
+    # Import inside function to avoid circular import: utils → api_views → censorship → utils
     from aiohttp.client_exceptions import ClientError
-    from .api_views import QueryQuerysetsCache, discovery_queryset_entity_counts, DiscoveryQuery
-    from .censorship import censor_entity_counts
+    from .api_views import get_censored_entity_counts_async
 
     @async_to_sync
     async def _get_censored_counts():
         try:
-
             dt_permissions = await get_discovery_data_type_permissions(request, scope)
             lg = logger.bind(request_id=getattr(request, 'id', None))
 
-            qqs = QueryQuerysetsCache(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
-            counts = await discovery_queryset_entity_counts(qqs)
-
-            return await censor_entity_counts(scope, counts, dt_permissions, lg)
+            # Use shared implementation - same as discovery_endpoint but without query filters
+            return await get_censored_entity_counts_async(scope, dt_permissions, query=None, lg=lg)
         except (ClientError, ValueError):
             # If authorization service is unavailable or response is malformed, return empty dict
             # This can happen in tests without proper authorization mocks
