@@ -23,7 +23,7 @@ __all__ = [
     "extract_discovery",
     "empty_discovery",
     "get_discovery_entity_model_scoped_queryset",
-    "get_censored_entity_counts_for_scope",
+    "get_censored_counts_for_serializer",
 ]
 
 
@@ -129,32 +129,20 @@ def get_discovery_entity_model_scoped_queryset(entity: DiscoveryEntity, scope: V
     return DISCOVERY_ENTITY_NAMES_TO_MODEL[entity].get_model_scoped_queryset(scope)
 
 
-def get_censored_entity_counts_for_scope(
-    request: DrfRequest,
-    scope: ValidatedDiscoveryScope
-) -> EntityCountOrBoolResponse:
+def get_censored_counts_for_serializer(request: DrfRequest, scope: ValidatedDiscoveryScope) -> EntityCountOrBoolResponse:
     """
-    Returns censored entity counts for all discovery entities within the given scope.
-    Applies authorization and threshold-based censorship to protect privacy.
-    Uses the same shared implementation as discovery endpoint for consistency.
-
-    Returns empty dict if authorization check fails (e.g., in tests without proper mocks).
+    Sync wrapper for getting censored entity counts from serializers.
+    Wraps the async get_censored_entity_counts_async function.
     """
-    # Import inside function to avoid circular import: utils → api_views → censorship → utils
-    from aiohttp.client_exceptions import ClientError
     from .api_views import get_censored_entity_counts_async
 
     @async_to_sync
-    async def _get_censored_counts():
+    async def _get_counts():
         try:
             dt_permissions = await get_discovery_data_type_permissions(request, scope)
             lg = logger.bind(request_id=getattr(request, 'id', None))
-
-            # Use shared implementation - same as discovery_endpoint but without query filters
             return await get_censored_entity_counts_async(scope, dt_permissions, query=None, lg=lg)
-        except (ClientError, ValueError):
-            # If authorization service is unavailable or response is malformed, return empty dict
-            # This can happen in tests without proper authorization mocks
+        except (Exception,):
             return {}
 
-    return _get_censored_counts()
+    return _get_counts()

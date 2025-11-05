@@ -1,7 +1,7 @@
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
-from chord_metadata_service.discovery.utils import get_censored_entity_counts_for_scope
+from chord_metadata_service.discovery.utils import get_censored_counts_for_serializer
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from pydantic import ValidationError as PydValidationError
@@ -163,7 +163,7 @@ class DatasetSerializer(GenericSerializer):
             return {}
 
         scope = ValidatedDiscoveryScope(obj.project, obj)
-        return get_censored_entity_counts_for_scope(request, scope)
+        return get_censored_counts_for_serializer(request, scope)
 
     class Meta:
         model = Dataset
@@ -207,7 +207,7 @@ class ProjectSerializer(serializers.ModelSerializer):
             return {}
 
         scope = ValidatedDiscoveryScope(obj, None)
-        return get_censored_entity_counts_for_scope(request, scope)
+        return get_censored_counts_for_serializer(request, scope)
 
     class Meta:
         model = Project
