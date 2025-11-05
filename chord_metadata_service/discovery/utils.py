@@ -3,7 +3,6 @@ from bento_lib.discovery import DiscoveryConfig, DiscoveryEntity
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from rest_framework.request import Request as DrfRequest
-from structlog import get_logger
 from typing import Iterable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
@@ -11,14 +10,13 @@ from chord_metadata_service.authz.types import (
     DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
 from chord_metadata_service.chord.data_types import KatsuDataType
+from chord_metadata_service.logger import logger
 
 from .constants import DISCOVERY_ENTITIES
 from .fields_utils import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scope import ValidatedDiscoveryScope
 from .types import EntityCounts, EntityCountOrBoolResponse
-
-logger = get_logger(__name__)
 
 __all__ = [
     "get_discovery_data_type_permissions",
@@ -155,13 +153,14 @@ def get_censored_entity_counts_for_scope(
 
     Returns empty dict if authorization check fails (e.g., in tests without proper mocks).
     """
+    # Imports inside function to avoid circular import: utils → api_views → censorship → utils
+    from aiohttp.client_exceptions import ClientError
     from .api_views import QueryQuerysetsCache, discovery_queryset_entity_counts, DiscoveryQuery
     from .censorship import censor_entity_counts
 
     @async_to_sync
     async def _get_censored_counts():
         try:
-            from aiohttp.client_exceptions import ClientError
 
             dt_permissions = await get_discovery_data_type_permissions(request, scope)
             lg = logger.bind(request_id=getattr(request, 'id', None))
