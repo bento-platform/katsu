@@ -12,11 +12,10 @@ from chord_metadata_service.authz.types import (
 from chord_metadata_service.chord.data_types import KatsuDataType
 from chord_metadata_service.logger import logger
 
-from .constants import DISCOVERY_ENTITIES
 from .fields_utils import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scope import ValidatedDiscoveryScope
-from .types import EntityCounts, EntityCountOrBoolResponse
+from .types import EntityCountOrBoolResponse
 
 __all__ = [
     "get_discovery_data_type_permissions",
@@ -24,7 +23,6 @@ __all__ = [
     "extract_discovery",
     "empty_discovery",
     "get_discovery_entity_model_scoped_queryset",
-    "get_entity_counts_for_scope",
     "get_censored_entity_counts_for_scope",
 ]
 
@@ -129,17 +127,6 @@ def get_discovery_entity_model_scoped_queryset(entity: DiscoveryEntity, scope: V
     Small utility for the semi-common usage pattern of getting a scoped queryset for a discovery entity's Django model.
     """
     return DISCOVERY_ENTITY_NAMES_TO_MODEL[entity].get_model_scoped_queryset(scope)
-
-
-def get_entity_counts_for_scope(scope: ValidatedDiscoveryScope) -> EntityCounts:
-    """
-    Returns entity counts for all discovery entities within the given scope.
-    Uses distinct() for entities that can appear multiple times through relationships.
-    """
-    return {
-        entity: get_discovery_entity_model_scoped_queryset(entity, scope).distinct().count()
-        for entity in DISCOVERY_ENTITIES
-    }
 
 
 def get_censored_entity_counts_for_scope(
