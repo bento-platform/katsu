@@ -58,6 +58,7 @@ class DatasetSerializer(GenericSerializer):
         "project",
         "discovery",
         "conditions_of_access",
+        "counts",
     )
 
     counts = serializers.SerializerMethodField()
