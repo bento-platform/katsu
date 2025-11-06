@@ -1,3 +1,6 @@
+import csv
+import io
+import json
 from copy import deepcopy
 import uuid
 
@@ -540,64 +543,68 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             },
         })
 
+    def assertErrorRes(
+        self, res, error_text: str, is_csv_response: bool = False, code: int = status.HTTP_400_BAD_REQUEST, **kwargs
+    ):
+        self.assertEqual(res.status_code, code)
+
+        if is_csv_response:
+            r = csv.DictReader(io.StringIO(res.content.decode("utf-8")))
+            res_dict = next(r)
+            self.assertDictEqual(res_dict, {k: str(v) for k, v in {
+                "code": code,
+                "message": "Bad Request",
+                "errors": json.dumps([{"message": error_text}], indent=None).strip(),
+                "timestamp": res_dict["timestamp"],
+                **kwargs,
+            }.items()})
+        else:
+            res_json = res.json()
+            self.assertDictEqual(res_json, {
+                "code": code,
+                "message": "Bad Request",
+                "errors": [{"message": error_text}],
+                "timestamp": res_json["timestamp"],
+                **kwargs,
+            })
+
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_bad_pagination_non_int_page(self):
         make_two_individuals_with_phenopackets()
-
         res = self.dt_authz_full_get(f"{self.url}?_page_size=1&_page=one")
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-        res_json = res.json()
-        self.assertDictEqual(res_json, {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "message": "Bad Request",
-            "errors": [{"message": "bad page"}],
-            "timestamp": res_json["timestamp"],
-        })
+        self.assertErrorRes(res, "bad page")
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_bad_pagination_non_int_page_size(self):
         make_two_individuals_with_phenopackets()
-
         res = self.dt_authz_full_get(f"{self.url}?_page_size=one&_page=1")
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-        res_json = res.json()
-        self.assertDictEqual(res_json, {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "message": "Bad Request",
-            "errors": [{"message": "bad page size"}],
-            "timestamp": res_json["timestamp"],
-        })
+        self.assertErrorRes(res, "bad page size")
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_bad_pagination_too_large_page(self):
         make_two_individuals_with_phenopackets()
-
         res = self.dt_authz_full_get(f"{self.url}?_page_size=1&_page=2")
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-        res_json = res.json()
-        self.assertDictEqual(res_json, {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "message": "Bad Request",
-            "errors": [{"message": "bad page"}],
-            "timestamp": res_json["timestamp"],
-        })
+        self.assertErrorRes(res, "bad page")
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_bad_response_type(self):
         make_two_individuals_with_phenopackets()
-
         res = self.dt_authz_full_get(f"{self.url}?_format=bad")
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        res_json = res.json()
-        self.assertDictEqual(res_json, {
-            "code": status.HTTP_400_BAD_REQUEST,
-            "message": "Bad Request",
-            "errors": [{"message": "bad response format"}],
-            "timestamp": res_json["timestamp"],
-        })
+        self.assertErrorRes(res, "bad response format")
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_response_type_mismatch(self):
+        make_two_individuals_with_phenopackets()
+        for fmt, accept in [("csv", "application/json"), ("json", "text/csv")]:
+            with self.subTest(params=(fmt, accept)):
+                res = self.dt_authz_full_get(f"{self.url}?_format={fmt}", headers={"Accept": accept})
+                self.assertErrorRes(
+                    res,
+                    "mismatch between accepted and specified response formats",
+                    is_csv_response=accept.endswith("csv"),
+                    code=status.HTTP_406_NOT_ACCEPTABLE,
+                    message="Not Acceptable",
+                )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_phenopackets(self):
@@ -766,7 +773,8 @@ phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,David Loug
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_csv_responses_phenopackets_pagination(self):
         p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
-        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_page_size=1&_page=1")
+        # also (at the same time) test that accept works with unspecified format:
+        res = self.dt_authz_full_get(f"{self.url}?_page_size=1&_page=1", headers={"Accept": "text/csv"})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(
             res.content.decode("utf-8"),

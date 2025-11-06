@@ -1,10 +1,12 @@
 from bento_lib.discovery import DiscoveryEntity
-from typing import NotRequired, TypeAlias, TypedDict
+from typing import Literal, NotRequired, TypeAlias, TypedDict
 
 __all__ = [
     "ModelScopeFilters",
     "EntityCounts",
     "EntityCountOrBoolResponse",
+    "DiscoveryResponseFormat",
+    "AcceptedDiscoveryResponseFormats",
 ]
 
 
@@ -23,3 +25,6 @@ class ModelScopeFilters(TypedDict):
 
 EntityCounts: TypeAlias = dict[DiscoveryEntity, int]
 EntityCountOrBoolResponse: TypeAlias = dict[DiscoveryEntity, int | bool]
+
+DiscoveryResponseFormat = Literal["json", "csv"]
+AcceptedDiscoveryResponseFormats: TypeAlias = frozenset[DiscoveryResponseFormat]

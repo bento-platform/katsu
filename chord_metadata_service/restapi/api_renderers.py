@@ -10,7 +10,7 @@ from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer, BaseRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 from chord_metadata_service.experiments import serializers as exp_s
@@ -25,6 +25,7 @@ __all__ = [
     "JSONLDDatasetRenderer",
     "RDFDatasetRenderer",
     "render_age",
+    "PassThruCSVRenderer",
     "KatsuCSVRenderer",
     "IndividualCSVRenderer",
     "BiosamplesCSVRenderer",
@@ -103,6 +104,19 @@ def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
     if "age" in time_to_render:
         return time_to_render["age"]["iso8601duration"]
     return None
+
+
+class PassThruCSVRenderer(BaseRenderer):
+    """
+    A sort-of skeleton CSV renderer, which assumes data are already CSV bytes and just handles negotiation and response
+    content type.
+    """
+
+    media_type = "text/csv"
+    format = "csv"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return HttpResponse(data, content_type="text/csv")  # CSV should already be rendered as bytes here
 
 
 class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):

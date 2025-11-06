@@ -4,6 +4,7 @@ import math
 from adrf.decorators import api_view
 from asgiref.sync import sync_to_async
 from bento_lib.discovery import SearchSection, DiscoveryEntity
+from bento_lib.responses import errors
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
 from django.db.models import QuerySet
@@ -11,7 +12,8 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
 from rest_framework import serializers, status
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, renderer_classes
+from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 from structlog.stdlib import BoundLogger
@@ -23,8 +25,8 @@ from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscover
 from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
+from chord_metadata_service.restapi.api_renderers import PassThruCSVRenderer
 from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE
-from chord_metadata_service.restapi.responses import bad_request, not_found
 from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
@@ -53,7 +55,7 @@ from .pydantic_models import (
 )
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
-from .types import EntityCountOrBoolResponse, EntityCounts
+from .types import EntityCountOrBoolResponse, EntityCounts, DiscoveryResponseFormat, AcceptedDiscoveryResponseFormats
 from .utils import (
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
@@ -142,6 +144,23 @@ class QueryQuerysetsCache:
             return self._queryset_cache[entity]
 
 
+def get_accepted_formats(request: DrfRequest) -> AcceptedDiscoveryResponseFormats:
+    # use these rather than the negotiated renderer, which lets the endpoint return according to _format as well
+    # (in the case of discovery matches)
+
+    fmts: set[DiscoveryResponseFormat] = set()
+
+    # noinspection PyProtectedMember
+    if request._request.accepts("application/json"):
+        fmts.add("json")
+
+    # noinspection PyProtectedMember
+    if request._request.accepts("text/csv"):
+        fmts.add("csv")
+
+    return frozenset(fmts)
+
+
 def inject_discovery_deps(empty_404: bool, empty_response: Literal["fields", "data"] = "data"):
     """
     Decorator to inject common discovery dependencies into the discovery API endpoint functions and perform a bit of
@@ -156,18 +175,23 @@ def inject_discovery_deps(empty_404: bool, empty_response: Literal["fields", "da
     ):
         @wraps(func)
         async def wrapped(request: DrfRequest):  # wraps a DRF API view
+            # for returning error messages
+            accepted_formats: AcceptedDiscoveryResponseFormats = get_accepted_formats(request)
+
             # Get the request discovery scope, which can be used for, e.g., narrowing down the project/dataset for
             # discovery charts/filtering.
             try:
                 scope = await get_request_discovery_scope(request)
             except DiscoveryScopeException as e:
-                return not_found(request, e.message)
+                return dres.csv_or_json_error_response(request, errors.not_found_error(e.message), accepted_formats)
 
             if empty_404 and empty_discovery(scope):
                 # If the discovery object is "empty", i.e., no fields/charts/filters specified, this endpoint becomes a
                 # 404, here meaning no data could be found for discovery purposes.
                 return (
-                    dres.no_public_fields(request) if empty_response == "fields" else dres.no_public_data(request)
+                    dres.no_public_fields(request, accepted_formats)
+                    if empty_response == "fields"
+                    else dres.no_public_data(request, accepted_formats)
                 )
 
             # Bind scope representation to logger
@@ -425,7 +449,8 @@ async def discovery_endpoint(
 
 
 @api_view(["GET"])
-@permission_classes([BentoDeferToHandler])
+@permission_classes([BentoAllowAny])  # BentoDeferToHandler
+@renderer_classes([JSONRenderer, PassThruCSVRenderer])  # renderers here are just handling negotiation
 @inject_discovery_deps(empty_404=True)
 async def discovery_matches(
     request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
@@ -450,16 +475,51 @@ async def discovery_matches(
         other query parameters with _, we eliminate possible ambiguities between discovery fields.
     """
 
+    # -- Response format -----------------------------------------------------------------------------------------------
+
+    accepted_formats: AcceptedDiscoveryResponseFormats = get_accepted_formats(request)
+
+    response_format_param: str = request.query_params.get("_format", "")
+
+    if not response_format_param:
+        if "json" in accepted_formats:
+            # default response format: JSON
+            response_format_param = "json"
+        elif "csv" in accepted_formats:
+            # if we can accept CSV but not JSON and _format is not set --> response format should be CSV
+            response_format_param = "csv"
+
+    if response_format_param not in ("json", "csv"):
+        return dres.csv_or_json_error_response(
+            request, errors.bad_request_error("bad response format"), accepted_formats
+        )
+
+    # we've now validated these values so this can be coerced to the DiscoveryResponseFormat Literal type
+    response_format: DiscoveryResponseFormat = response_format_param
+
+    # noinspection PyProtectedMember
+    if response_format not in accepted_formats:
+        return dres.csv_or_json_error_response(
+            request,
+            errors.not_acceptable_error("mismatch between accepted and specified response formats"),
+            accepted_formats,
+        )
+
+    lg = lg.bind(response_format=response_format)
+
+    # -- Permissions check ---------------------------------------------------------------------------------------------
+
     if not dt_permissions[dts.DATA_TYPE_PHENOPACKET].data:
         # "Extra" permissions check vs. regular discovery endpoint: we need full data permissions
-        return dres.insufficient_privileges(request)
+        return dres.insufficient_privileges(request, accepted_formats)
+
     authz_middleware.mark_authz_done(request)
 
     # -- Query execution -----------------------------------------------------------------------------------------------
 
     queried_entity: DiscoveryEntity = request.query_params.get("_entity", "phenopacket")
     if queried_entity not in DISCOVERY_ENTITIES:
-        return bad_request(request, "invalid entity")
+        return dres.csv_or_json_error_response(request, errors.bad_request_error("invalid entity"), accepted_formats)
 
     lg = lg.bind(queried_entity=queried_entity)
 
@@ -470,7 +530,7 @@ async def discovery_matches(
         queryset = queryset.order_by("pk")
     except ValidationError as e:
         return await dres.django_validation_error(
-            request, e, lg, "discovery matches endpoint encountered validation error"
+            request, e, lg, "discovery matches endpoint encountered validation error", accepted_formats
         )
 
     lg = lg.bind(query=query.model_dump(mode="json"))
@@ -483,7 +543,7 @@ async def discovery_matches(
     try:
         page: int = int(request.query_params.get("_page", str(page)))
     except ValueError:
-        return bad_request(request, "bad page")
+        return dres.csv_or_json_error_response(request, errors.bad_request_error("bad page"), accepted_formats)
 
     try:
         # if page_size is set to 0, all records will be returned.
@@ -491,12 +551,12 @@ async def discovery_matches(
         #  to that value.
         page_size = min(max(int(request.query_params.get("_page_size", str(page_size))), 0), DEFAULT_MAX_PAGE_SIZE)
     except ValueError:
-        return bad_request(request, "bad page size")
+        return dres.csv_or_json_error_response(request, errors.bad_request_error("bad page size"), accepted_formats)
 
     total_count = await queryset.acount()
 
     if page < 0 or (page_size and total_count and page >= math.ceil(total_count / page_size)):
-        return bad_request(request, "bad page")
+        return dres.csv_or_json_error_response(request, errors.bad_request_error("bad page"), accepted_formats)
 
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
     lg = lg.bind(pagination=pagination.model_dump(mode="json"))
@@ -505,22 +565,6 @@ async def discovery_matches(
         matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
     else:
         matches_page = queryset[:]
-
-    # -- Response format -----------------------------------------------------------------------------------------------
-
-    response_format = request.query_params.get("_format", "json")
-    if response_format not in ("json", "csv"):
-        return bad_request(request, "bad response format")
-
-    # noinspection PyProtectedMember
-    if (
-        (response_format == "json" and not request._request.accepts("application/json")) or
-        (response_format == "csv" and not request._request.accepts("text/csv"))
-    ):
-        # TODO: this returns a JSON/CSV error, but JSON/CSV is not accepted...
-        return bad_request(request, "mismatch between accepted and specified response formats")
-
-    lg = lg.bind(response_format=response_format)
 
     # -- Log discovery match page fetch event --------------------------------------------------------------------------
 
