@@ -449,7 +449,7 @@ async def discovery_endpoint(
 
 
 @api_view(["GET"])
-@permission_classes([BentoAllowAny])  # BentoDeferToHandler
+@permission_classes([BentoDeferToHandler])
 @renderer_classes([JSONRenderer, PassThruCSVRenderer])  # renderers here are just handling negotiation
 @inject_discovery_deps(empty_404=True)
 async def discovery_matches(

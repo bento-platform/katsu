@@ -14,11 +14,11 @@ class ScopeLevelFilters(TypedDict):
     # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for, e.g., the
     # Resource model, where there are multiple possible paths one can take from the object to the parent dataset(s).
     filter: str | tuple[str, ...]
-    prefetch_related: NotRequired[tuple[str, ...]]
+    prefetch_related: NotRequired[tuple[str, ...]]  # optional (currently unused): additional prefetches for this level
 
 
 class ModelScopeFilters(TypedDict):
-    base_prefetch_related: tuple[str, ...]  # scope-related prefetches to includ on all querysets (scoped or instance)
+    base_prefetch_related: tuple[str, ...]  # scope-related prefetches to include on all querysets (scoped or instance)
     project: ScopeLevelFilters
     dataset: ScopeLevelFilters
 

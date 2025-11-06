@@ -29,7 +29,6 @@ __all__ = [
     "DISCOVERY_ENTITY_TO_CSV_RENDERER",
 ]
 
-
 T = TypeVar("T")
 
 

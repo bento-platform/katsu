@@ -50,14 +50,14 @@ class DiscoveryCsvJsonErrorResponseTest(SimpleTestCase):
             ([], "code,message,timestamp\r\n404,Not Found,%TS%\r\n"),
             (
                 ["extra_message"],
-                'code,message,timestamp,errors\r\n404,Not Found,%TS%,"[{{""message"": ""extra_message""}}]"\r\n',
+                'code,message,timestamp,errors\r\n404,Not Found,%TS%,"[{""message"": ""extra_message""}]"\r\n',
             ),
             (
                 ["extra_message", "extra_message_2"],
                 (
                     'code,message,timestamp,errors\r\n'
                     '404,Not Found,%TS%,'
-                    '"[{{""message"": ""extra_message""}}, {{""message"": ""extra_message_2""}}]"\r\n'
+                    '"[{""message"": ""extra_message""}, {""message"": ""extra_message_2""}]"\r\n'
                 ),
             )
         ]
