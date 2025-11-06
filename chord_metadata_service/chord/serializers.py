@@ -1,7 +1,6 @@
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
-from chord_metadata_service.discovery.utils import get_censored_counts_for_serializer
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
@@ -12,6 +11,7 @@ from chord_metadata_service.restapi.utils import transform_keys
 
 from .models import Project, Dataset, ProjectJsonSchema
 from .schemas import LINKED_FIELD_SETS_SCHEMA
+from .utils import get_censored_counts_for_serializer
 
 
 __all__ = [
@@ -170,6 +170,7 @@ class DatasetSerializer(GenericSerializer):
             return {}
 
         scope = ValidatedDiscoveryScope(obj.project, obj)
+        # return get_censored_counts_for_serializer(request, scope)
         return get_censored_counts_for_serializer(request, scope)
 
     class Meta:

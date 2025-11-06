@@ -1,4 +1,3 @@
-from asgiref.sync import async_to_sync
 from bento_lib.discovery import DiscoveryConfig, DiscoveryEntity
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -10,12 +9,10 @@ from chord_metadata_service.authz.types import (
     DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
 from chord_metadata_service.chord.data_types import KatsuDataType
-from chord_metadata_service.logger import logger
 
 from .fields_utils import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scope import ValidatedDiscoveryScope
-from .types import EntityCountOrBoolResponse
 
 __all__ = [
     "get_discovery_data_type_permissions",
@@ -23,7 +20,6 @@ __all__ = [
     "extract_discovery",
     "empty_discovery",
     "get_discovery_entity_model_scoped_queryset",
-    "get_censored_counts_for_serializer",
 ]
 
 
@@ -127,30 +123,3 @@ def get_discovery_entity_model_scoped_queryset(entity: DiscoveryEntity, scope: V
     Small utility for the semi-common usage pattern of getting a scoped queryset for a discovery entity's Django model.
     """
     return DISCOVERY_ENTITY_NAMES_TO_MODEL[entity].get_model_scoped_queryset(scope)
-
-
-def get_censored_counts_for_serializer(
-    request: DrfRequest, scope: ValidatedDiscoveryScope
-) -> EntityCountOrBoolResponse:
-    """
-    Sync wrapper for getting censored entity counts from serializers.
-    Wraps the async get_censored_entity_counts_async function.
-    """
-    from .api_views import get_censored_entity_counts_async
-
-    @async_to_sync
-    async def _get_counts():
-        try:
-            dt_permissions = await get_discovery_data_type_permissions(request, scope)
-            lg = logger.bind(request_id=getattr(request, 'id', None))
-            return await get_censored_entity_counts_async(scope, dt_permissions, query=None, lg=lg)
-        except Exception as e:
-            logger.warning(
-                "Failed to compute entity counts for serializer, returning empty dict",
-                exc_info=e,
-                scope=scope,
-                request_id=getattr(request, 'id', None),
-            )
-            return {}
-
-    return _get_counts()
