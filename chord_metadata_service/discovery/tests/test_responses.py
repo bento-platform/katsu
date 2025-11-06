@@ -47,20 +47,17 @@ class DiscoveryCsvJsonErrorResponseTest(SimpleTestCase):
 
     def test_csv_or_json_error_response_csv(self):
         csv_params = [
-            ([], f"code,message,timestamp\r\n404,Not Found,%TS%\r\n"),
+            ([], "code,message,timestamp\r\n404,Not Found,%TS%\r\n"),
             (
                 ["extra_message"],
-                (
-                    f'code,message,timestamp,errors\r\n'
-                    f'404,Not Found,%TS%,"[{{""message"": ""extra_message""}}]"\r\n'
-                ),
+                'code,message,timestamp,errors\r\n404,Not Found,%TS%,"[{{""message"": ""extra_message""}}]"\r\n',
             ),
             (
                 ["extra_message", "extra_message_2"],
                 (
-                    f'code,message,timestamp,errors\r\n'
-                    f'404,Not Found,%TS%,'
-                    f'"[{{""message"": ""extra_message""}}, {{""message"": ""extra_message_2""}}]"\r\n'
+                    'code,message,timestamp,errors\r\n'
+                    '404,Not Found,%TS%,'
+                    '"[{{""message"": ""extra_message""}}, {{""message"": ""extra_message_2""}}]"\r\n'
                 ),
             )
         ]
