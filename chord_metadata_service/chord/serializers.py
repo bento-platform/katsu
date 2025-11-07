@@ -97,20 +97,20 @@ class DatasetSerializer(GenericSerializer):
         """ Validate all fields against DATS schemas. """
 
         dataset_dats_fields = (
-            'alternate_identifiers',
-            'related_identifiers',
-            'dates',
-            'stored_in',
-            'spatial_coverage',
-            'types',
-            'distributions',
-            'dimensions',
-            'primary_publications',
-            'citations',
-            'produced_by',
-            'licenses',
-            'acknowledges',
-            'keywords',
+            "alternate_identifiers",
+            "related_identifiers",
+            "dates",
+            "stored_in",
+            "spatial_coverage",
+            "types",
+            "distributions",
+            "dimensions",
+            "primary_publications",
+            "citations",
+            "produced_by",
+            "licenses",
+            "acknowledges",
+            "keywords",
         )
 
         errors = {}
@@ -161,7 +161,7 @@ class DatasetSerializer(GenericSerializer):
         request = self.context.get("request")
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
-        if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
+        if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
             logger.debug(
                 "Skipping counts computation for non-GET request",
                 dataset_id=str(obj.identifier),
@@ -211,7 +211,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
-        if not request or request.method not in ('GET', 'HEAD', 'OPTIONS'):
+        if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
             logger.debug(
                 "Skipping counts computation for non-GET request",
                 project_id=str(obj.identifier),
