@@ -1,8 +1,8 @@
 import uuid
-from django.test import override_settings
 
 from aioresponses import aioresponses
 from django.urls import reverse
+from django.test import override_settings
 from rest_framework import status
 from .constants import (
     VALID_PROJECT_1,
