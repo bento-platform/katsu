@@ -24,7 +24,7 @@ env/
 *.swo
 .vscode/*
 
-# assitant-cli related
+# assistant-cli related
 .claude
 CLAUDE.md
 
