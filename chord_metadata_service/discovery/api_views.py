@@ -66,6 +66,8 @@ is_not_none = partial(is_not, None)
 
 QueryExecutionResult = tuple[QuerySet, frozenset[DiscoveryEntity]]
 
+EMPTY_DISCOVERY_QUERY = DiscoveryQuery(fts=None, filters={})
+
 
 class QueryQuerysetsCache:
     """
@@ -382,8 +384,7 @@ async def get_censored_entity_counts_async(
         If return_raw_counts=False: Dictionary mapping entities to censored counts (int) or booleans
         If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)
     """
-    if query is None:
-        query = DiscoveryQuery(fts=None, filters={})
+    query = query or EMPTY_DISCOVERY_QUERY
 
     qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
     counts = await discovery_queryset_entity_counts(qqs)
@@ -610,7 +611,7 @@ async def discovery_ui_hints(
 
     # TODO: support querying?
     try:
-        qqs = QueryQuerysetsCache(DiscoveryQuery(fts=None, filters={}), scope, dt_permissions, lg)
+        qqs = QueryQuerysetsCache(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
         counts = await discovery_queryset_entity_counts(qqs)
     except DiscoveryEmptyException:
         return dres.no_public_data(request)
