@@ -327,8 +327,9 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
 async def get_censored_entity_counts_async(
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
+    *,
+    lg: BoundLogger,
     query: DiscoveryQuery | None = None,
-    lg: BoundLogger | None = None,
     return_raw_counts: Literal[False] = False,
 ) -> EntityCountOrBoolResponse: ...
 
@@ -337,8 +338,9 @@ async def get_censored_entity_counts_async(
 async def get_censored_entity_counts_async(
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
+    *,
+    lg: BoundLogger,
     query: DiscoveryQuery | None,
-    lg: BoundLogger | None,
     return_raw_counts: Literal[True],
 ) -> tuple[EntityCounts, EntityCountOrBoolResponse]: ...
 
@@ -346,8 +348,9 @@ async def get_censored_entity_counts_async(
 async def get_censored_entity_counts_async(
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
+    *,
+    lg: BoundLogger,
     query: DiscoveryQuery | None = None,
-    lg: BoundLogger | None = None,
     return_raw_counts: bool = False,
 ) -> EntityCountOrBoolResponse | tuple[EntityCounts, EntityCountOrBoolResponse]:
     """
@@ -371,8 +374,8 @@ async def get_censored_entity_counts_async(
     Args:
         scope: Validated discovery scope (project/dataset)
         dt_permissions: Data type permissions for authorization
+        lg: Logger instance for structured logging
         query: Optional discovery query with filters/FTS (defaults to empty query)
-        lg: Optional logger instance (defaults to module logger)
         return_raw_counts: If True, return tuple of (raw_counts, censored_counts) for logging
 
     Returns:
@@ -381,9 +384,6 @@ async def get_censored_entity_counts_async(
     """
     if query is None:
         query = DiscoveryQuery(fts=None, filters={})
-
-    if lg is None:
-        lg = logger
 
     qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
     counts = await discovery_queryset_entity_counts(qqs)
@@ -464,7 +464,7 @@ async def discovery_endpoint(
     # Get both raw counts (for logging) and censored counts (for response)
     # Uses the same shared implementation as Project/Dataset serializers
     counts, count_or_bools_res = await get_censored_entity_counts_async(
-        scope, dt_permissions, query, lg, return_raw_counts=True
+        scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 
     if (
