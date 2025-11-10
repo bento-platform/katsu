@@ -326,7 +326,7 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
 
 
 @overload
-async def get_censored_entity_counts_async(
+async def get_censored_entity_counts(
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     *,
@@ -337,7 +337,7 @@ async def get_censored_entity_counts_async(
 
 
 @overload
-async def get_censored_entity_counts_async(
+async def get_censored_entity_counts(
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     *,
@@ -347,7 +347,7 @@ async def get_censored_entity_counts_async(
 ) -> tuple[EntityCounts, EntityCountOrBoolResponse]: ...
 
 
-async def get_censored_entity_counts_async(
+async def get_censored_entity_counts(
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     *,
@@ -464,7 +464,7 @@ async def discovery_endpoint(
 
     # Get both raw counts (for logging) and censored counts (for response)
     # Uses the same shared implementation as Project/Dataset serializers
-    counts, count_or_bools_res = await get_censored_entity_counts_async(
+    counts, count_or_bools_res = await get_censored_entity_counts(
         scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 

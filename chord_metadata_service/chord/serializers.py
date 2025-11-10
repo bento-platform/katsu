@@ -160,21 +160,7 @@ class DatasetSerializer(GenericSerializer):
     def get_counts(self, obj):
         request = self.context.get("request")
         scope = ValidatedDiscoveryScope(obj.project, obj)
-        scope_repr = repr(scope)
-
-        # Create bound logger with structured context
-        lg = logger.bind(
-            dataset_id=str(obj.identifier),
-            method=request.method if request else None,
-            scope_repr=scope_repr,
-        )
-
-        # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
-        if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
-            lg.debug("Skipping counts computation for non-GET request")
-            return {}
-
-        return get_censored_counts_for_serializer(request, scope, lg)
+        return get_censored_counts_for_serializer(request, scope, logger)
 
     class Meta:
         model = Dataset
@@ -214,21 +200,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_counts(self, obj):
         request = self.context.get("request")
         scope = ValidatedDiscoveryScope(obj, None)
-        scope_repr = repr(scope)
-
-        # Create bound logger with structured context
-        lg = logger.bind(
-            project_id=str(obj.identifier),
-            method=request.method if request else None,
-            scope_repr=scope_repr,
-        )
-
-        # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
-        if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
-            lg.debug("Skipping counts computation for non-GET request")
-            return {}
-
-        return get_censored_counts_for_serializer(request, scope, lg)
+        return get_censored_counts_for_serializer(request, scope, logger)
 
     class Meta:
         model = Project
