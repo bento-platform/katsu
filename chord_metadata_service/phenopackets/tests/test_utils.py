@@ -6,8 +6,8 @@ from chord_metadata_service.phenopackets.utils import time_element_to_str
 class PhenopacketUtilsTest(SimpleTestCase):
     def test_time_element_to_str(self):
         subtests = [
-            ({"age": "P40Y"}, "P40Y"),
-            ({"age_range": {"start": {"age": "P30Y"}, "end": {"age": "P33Y"}}}, "P30Y - P33Y"),
+            ({"age": {"iso8601duration": "P40Y"}}, "P40Y"),
+            ({"age_range": {"start": {"iso8601duration": "P30Y"}, "end": {"iso8601duration": "P33Y"}}}, "P30Y - P33Y"),
             ({"gestational_age": {"weeks": 5}}, "5 weeks"),
             ({"gestational_age": {"weeks": 5, "days": 2}}, "5 weeks 2 days"),
             ({"ontology_class": {"label": "adolescent", "id": "PATO:0001189"}}, "adolescent (PATO:0001189)"),

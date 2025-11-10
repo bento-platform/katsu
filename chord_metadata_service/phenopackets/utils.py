@@ -12,28 +12,30 @@ __all__ = [
 def time_element_to_str(time_element: dict) -> str | None:
     """
     Fuction to stringify different TimeElements (returns None if the time interval doesn't match any valid form).
+    See https://phenopacket-schema.readthedocs.io/en/latest/time-element.html for more information on TimeElement.
     """
 
-    # age string
+    # Age: https://phenopacket-schema.readthedocs.io/en/latest/age.html
     if "age" in time_element:
-        return time_element["age"]
-    # OntologyClass
+        return time_element["age"]["iso8601duration"]
+    # OntologyClass: https://phenopacket-schema.readthedocs.io/en/latest/ontologyclass.html
     elif "ontology_class" in time_element:
         return f"{time_element['ontology_class']['label']} ({time_element['ontology_class']['id']})"
-    # AgeRange
+    # AgeRange: https://phenopacket-schema.readthedocs.io/en/latest/age.html#rstagerange
     elif "age_range" in time_element:
-        return f"{time_element['age_range']['start']['age']} - {time_element['age_range']['end']['age']}"
-    # TimeInterval
+        ar = time_element["age_range"]
+        return f"{ar['start']['iso8601duration']} - {ar['end']['iso8601duration']}"
+    # TimeInterval: https://phenopacket-schema.readthedocs.io/en/latest/time-interval.html
     elif "interval" in time_element:
         return f"{time_element['interval']['start']} - {time_element['interval']['end']}"
-    # GestationalAge
+    # GestationalAge: https://phenopacket-schema.readthedocs.io/en/latest/gestational-age.html
     elif "gestational_age" in time_element:
         return (
             f"{time_element['gestational_age']['weeks']} weeks {time_element['gestational_age']['days']} days"
             if "days" in time_element["gestational_age"]
             else f"{time_element['gestational_age']['weeks']} weeks"
         )
-    # Timestamp
+    # Timestamp: https://phenopacket-schema.readthedocs.io/en/latest/timestamp.html
     elif "timestamp" in time_element:
         return time_element["timestamp"]
     return None
