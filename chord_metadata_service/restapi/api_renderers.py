@@ -294,7 +294,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
                 "extra_properties": f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
                 "created": biosample["created"],
                 "updated": biosample["updated"],
-                "individual": biosample["individual"]
+                "individual": biosample.get("individual")
             }
             for biosample in data
         ]
