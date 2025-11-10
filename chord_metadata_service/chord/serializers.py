@@ -159,19 +159,22 @@ class DatasetSerializer(GenericSerializer):
 
     def get_counts(self, obj):
         request = self.context.get("request")
+        scope = ValidatedDiscoveryScope(obj.project, obj)
+        scope_repr = repr(scope)
+
+        # Create bound logger with structured context
+        lg = logger.bind(
+            dataset_id=str(obj.identifier),
+            method=request.method if request else None,
+            scope_repr=scope_repr,
+        )
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
         if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
-            logger.debug(
-                "Skipping counts computation for non-GET request",
-                dataset_id=str(obj.identifier),
-                method=request.method if request else None,
-            )
+            lg.debug("Skipping counts computation for non-GET request")
             return {}
 
-        scope = ValidatedDiscoveryScope(obj.project, obj)
-        # return get_censored_counts_for_serializer(request, scope)
-        return get_censored_counts_for_serializer(request, scope)
+        return get_censored_counts_for_serializer(request, scope, lg)
 
     class Meta:
         model = Dataset
@@ -193,6 +196,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         "title",
         "description",
         "discovery",
+        "counts",
     )
 
     discovery = DiscoveryConfigField(required=False, allow_null=True)
@@ -209,18 +213,22 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_counts(self, obj):
         request = self.context.get("request")
+        scope = ValidatedDiscoveryScope(obj, None)
+        scope_repr = repr(scope)
+
+        # Create bound logger with structured context
+        lg = logger.bind(
+            project_id=str(obj.identifier),
+            method=request.method if request else None,
+            scope_repr=scope_repr,
+        )
 
         # Only compute counts for read operations (GET), not write operations (POST/PUT/PATCH)
         if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
-            logger.debug(
-                "Skipping counts computation for non-GET request",
-                project_id=str(obj.identifier),
-                method=request.method if request else None,
-            )
+            lg.debug("Skipping counts computation for non-GET request")
             return {}
 
-        scope = ValidatedDiscoveryScope(obj, None)
-        return get_censored_counts_for_serializer(request, scope)
+        return get_censored_counts_for_serializer(request, scope, lg)
 
     class Meta:
         model = Project
