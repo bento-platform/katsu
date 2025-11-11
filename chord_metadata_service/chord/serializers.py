@@ -158,6 +158,7 @@ class DatasetSerializer(GenericSerializer):
         return validation
 
     def get_counts(self, obj):
+        # TODO: with more datasets, refactor to batch queries (currently N queries for N datasets)
         request = self.context.get("request")
         scope = ValidatedDiscoveryScope(obj.project, obj)
         return get_censored_counts_for_serializer(request, scope, logger)
@@ -198,6 +199,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def get_counts(self, obj):
+        # TODO: with more projects, refactor to batch queries (currently N queries for N projects)
         request = self.context.get("request")
         scope = ValidatedDiscoveryScope(obj, None)
         return get_censored_counts_for_serializer(request, scope, logger)
