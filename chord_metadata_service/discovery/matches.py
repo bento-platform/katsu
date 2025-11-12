@@ -7,13 +7,14 @@ Since we have pagination, though, we should probably fetch full record details i
 
 from bento_lib.discovery import DiscoveryEntity
 from django.db.models import Manager
-from typing import Callable, TypeVar, TypedDict, Awaitable
+from typing import Awaitable, Callable, Type, TypeVar, TypedDict
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
+from chord_metadata_service.restapi import api_renderers as apir
 
 from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket, MatchIndividual
 from .scope import ValidatedDiscoveryScope
@@ -25,6 +26,7 @@ __all__ = [
     "phenopacket_matches",
     "individual_matches",
     "DISCOVERY_ENTITY_TO_MATCH_FN",
+    "DISCOVERY_ENTITY_TO_CSV_RENDERER",
 ]
 
 T = TypeVar("T")
@@ -66,9 +68,11 @@ async def experiment_result_matches(
                 assembly_id=er.genome_assembly_id,
                 **(
                     dict(
-                        project=scope.project_id,
-                        # TODO: have a foreign key to dataset directly to not have to do so many lookups (n+1 issue...)
-                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),
+                        project=scope.project_id or str(
+                            (await er.experiments.prefetch_related("dataset").afirst()).dataset.project_id
+                        ),  # TODO: n+1?
+                        # TODO: have a foreign key to dataset directly to not have to do so many lookups
+                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),  # TODO: n+1?
                     )
                     if root else dict()
                 ),
@@ -94,7 +98,10 @@ async def experiment_matches(
                 results=await experiment_result_matches(
                     exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
                 ),
-                **(dict(project=scope.project_id, dataset=scope.dataset_id or str(exp.dataset_id)) if root else dict()),
+                **(dict(
+                    project=scope.project_id or str(exp.dataset.project_id),
+                    dataset=scope.dataset_id or str(exp.dataset_id)
+                ) if root else dict()),
             )
         )
     return res
@@ -166,7 +173,7 @@ async def phenopacket_matches(
                 biosamples=biosamples,
                 **(
                     dict(
-                        project=scope.project_id or (phe.dataset.project_id if phe.dataset else None),
+                        project=scope.project_id or (str(phe.dataset.project_id) if phe.dataset else None),
                         dataset=scope.dataset_id or (str(phe.dataset_id) if phe.dataset else None),
                     ) if root else dict()
                 ),
@@ -230,4 +237,13 @@ DISCOVERY_ENTITY_TO_MATCH_FN: dict[
     "biosample": biosample_matches,
     "experiment": experiment_matches,
     "experiment_result": experiment_result_matches,
+}
+
+
+DISCOVERY_ENTITY_TO_CSV_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuCSVRenderer]] = {
+    "phenopacket": apir.PhenopacketCSVRenderer,
+    "individual": apir.IndividualCSVRenderer,
+    "biosample": apir.BiosamplesCSVRenderer,
+    "experiment": apir.ExperimentCSVRenderer,
+    "experiment_result": apir.ExperimentResultCSVRenderer,
 }

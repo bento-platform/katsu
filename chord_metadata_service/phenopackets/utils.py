@@ -3,27 +3,42 @@ import isodate
 from decimal import Decimal, ROUND_HALF_EVEN
 
 __all__ = [
-    "parse_onset",
+    "time_element_to_str",
     "iso_duration_to_years",
     "time_element_to_years",
 ]
 
 
-def parse_onset(onset):
-    """ Fuction to parse different age schemas in disease onset. """
+def time_element_to_str(time_element: dict) -> str | None:
+    """
+    Fuction to stringify different TimeElements (returns None if the time interval doesn't match any valid form).
+    See https://phenopacket-schema.readthedocs.io/en/latest/time-element.html for more information on TimeElement.
+    """
 
-    # age string
-    if 'age' in onset:
-        return onset['age']
-    # age ontology
-    elif 'id' in onset and 'label' in onset:
-        return f"{onset['label']} {onset['id']}"
-    # age range
-    elif 'start' in onset and 'end' in onset:
-        if 'age' in onset['start'] and 'age' in onset['end']:
-            return f"{onset['start']['age']} - {onset['end']['age']}"
-    else:
-        return None
+    # Age: https://phenopacket-schema.readthedocs.io/en/latest/age.html
+    if "age" in time_element:
+        return time_element["age"]["iso8601duration"]
+    # OntologyClass: https://phenopacket-schema.readthedocs.io/en/latest/ontologyclass.html
+    elif "ontology_class" in time_element:
+        return f"{time_element['ontology_class']['label']} ({time_element['ontology_class']['id']})"
+    # AgeRange: https://phenopacket-schema.readthedocs.io/en/latest/age.html#rstagerange
+    elif "age_range" in time_element:
+        ar = time_element["age_range"]
+        return f"{ar['start']['iso8601duration']} - {ar['end']['iso8601duration']}"
+    # TimeInterval: https://phenopacket-schema.readthedocs.io/en/latest/time-interval.html
+    elif "interval" in time_element:
+        return f"{time_element['interval']['start']} - {time_element['interval']['end']}"
+    # GestationalAge: https://phenopacket-schema.readthedocs.io/en/latest/gestational-age.html
+    elif "gestational_age" in time_element:
+        return (
+            f"{time_element['gestational_age']['weeks']} weeks {time_element['gestational_age']['days']} days"
+            if "days" in time_element["gestational_age"]
+            else f"{time_element['gestational_age']['weeks']} weeks"
+        )
+    # Timestamp: https://phenopacket-schema.readthedocs.io/en/latest/timestamp.html
+    elif "timestamp" in time_element:
+        return time_element["timestamp"]
+    return None
 
 
 DAYS_IN_A_MONTH = 30.5  # 30.5 average days in a month (including leap year)

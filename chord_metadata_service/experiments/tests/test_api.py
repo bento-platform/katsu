@@ -218,7 +218,7 @@ class TestExperimentCSVRenderer(TestCase):
         reader = csv.DictReader(csv_file)
         expected_headers = ['Id', 'Study type', 'Experiment type', 'Molecule', 'Library strategy',
                             'Library source', 'Library selection', 'Library layout',
-                            'Created', 'Updated', 'Biosample', 'Individual id']
+                            'Created', 'Updated', 'Biosample', 'Individual']
         self.assertListEqual(list(reader.fieldnames), expected_headers)
 
     def test_csv_render_with_missing_fields(self):

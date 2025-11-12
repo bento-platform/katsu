@@ -169,13 +169,12 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return {
+            "base_prefetch_related": ("experiments", "experiments__dataset"),
             "project": {
                 "filter": "experiments__dataset__project_id",
-                "prefetch_related": ("experiments__dataset",),
             },
             "dataset": {
                 "filter": "experiments__dataset_id",
-                "prefetch_related": ("experiments",),
             },
         }
 

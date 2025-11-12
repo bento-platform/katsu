@@ -1,7 +1,8 @@
 import json
 import csv
+from abc import ABCMeta, abstractmethod
 from uuid import UUID
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Type
 
 from pydantic import BaseModel
 from rdflib import Graph
@@ -9,17 +10,23 @@ from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
+from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer, BaseRenderer
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
-from chord_metadata_service.phenopackets.utils import parse_onset
+from chord_metadata_service.experiments import serializers as exp_s
+from chord_metadata_service.patients import serializers as pa_s
+from chord_metadata_service.phenopackets import serializers as phe_s
+from chord_metadata_service.phenopackets.utils import time_element_to_str
 from .jsonld_utils import dataset_to_jsonld
+from .serializers import GenericSerializer
 
 __all__ = [
     "PhenopacketsRenderer",
     "JSONLDDatasetRenderer",
     "RDFDatasetRenderer",
     "render_age",
+    "PassThruCSVRenderer",
+    "KatsuCSVRenderer",
     "IndividualCSVRenderer",
     "BiosamplesCSVRenderer",
     "ExperimentCSVRenderer",
@@ -84,20 +91,6 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
         return rdf_data
 
 
-def generate_csv_response(file_name: str, columns: list[str], data: list[dict]):
-    # remove underscore and capitalize column names
-    headers = {key: key.replace("_", " ").capitalize() for key in columns}
-
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f"attachment; filename='{file_name}'"
-
-    dict_writer = csv.DictWriter(response, fieldnames=columns)
-    dict_writer.writerow(headers)
-    dict_writer.writerows(data)
-
-    return response
-
-
 def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
     if time_key not in item:
         return None
@@ -113,21 +106,56 @@ def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
     return None
 
 
-class KatsuCSVRenderer(JSONRenderer):
+class PassThruCSVRenderer(BaseRenderer):
+    """
+    A sort-of skeleton CSV renderer, which assumes data are already CSV bytes and just handles negotiation and response
+    content type.
+    """
+
+    media_type = "text/csv"
+    format = "csv"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return HttpResponse(data, content_type="text/csv")  # CSV should already be rendered as bytes here
+
+
+class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
     media_type = "text/csv"
     format = "csv"
 
     file_name: str = "data.csv"
 
+    @staticmethod
+    @abstractmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        pass
+
+    @abstractmethod
     def get_columns(self) -> list[str]:  # pragma: no cover
         raise NotImplementedError("get_columns() not implemented")
 
-    def get_dicts(self, data, renderer_context) -> list[dict]:  # pragma: no cover
+    @abstractmethod
+    def get_dicts(self, data, renderer_context) -> list[dict[str, str]]:  # pragma: no cover
         raise NotImplementedError("get_dicts() not implemented")
+
+    def _generate_csv_response(self, data: list[dict[str, str]]):
+        columns = self.get_columns()
+
+        # remove underscore and capitalize column names
+        headers = {key: key.replace("_", " ").capitalize() for key in columns}
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
+
+        dict_writer = csv.DictWriter(response, fieldnames=columns)
+        dict_writer.writerow(headers)
+        dict_writer.writerows(data)
+
+        return response
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         if not data:
-            return b""
+            return self._generate_csv_response([])
 
         if renderer_context and (res_status := renderer_context["response"].status_code) != status.HTTP_200_OK:
             # error response as JSON instead of CSV
@@ -137,19 +165,36 @@ class KatsuCSVRenderer(JSONRenderer):
                 content_type="application/json; charset=utf-8",
             )
 
-        return generate_csv_response(self.file_name, self.get_columns(), self.get_dicts(data, renderer_context))
+        return self._generate_csv_response(self.get_dicts(data, renderer_context))
+
+
+def _render_csv_diseases(diseases: list[dict]) -> str:
+    # use ; because some disease terms might contain , in their label
+    return "; ".join(
+        [
+            f"{d['term']['label']} ({time_element_to_str(d['onset'])})"
+            if d.get("onset") else d["term"]["label"] for d in diseases
+        ]
+    )
 
 
 class IndividualCSVRenderer(KatsuCSVRenderer):
     file_name = "individuals.csv"
 
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return pa_s.IndividualSerializer
+
     def get_columns(self) -> list[str]:
         return ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
 
-    def get_dicts(self, data, _renderer_context):
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         individuals = []
 
-        for individual in data["results"]:
+        if isinstance(data, dict):
+            data = data["results"]
+
+        for individual in data:
             ind_obj = {
                 "id": individual["id"],
                 "sex": individual.get("sex", None),
@@ -165,13 +210,7 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
                 all_diseases = []
                 for phenopacket in individual["phenopackets"]:
                     if "diseases" in phenopacket:
-                        # use ; because some disease terms might contain , in their label
-                        single_phenopacket_diseases = "; ".join(
-                            [
-                                f"{d['term']['label']} ({parse_onset(d['onset'])})"
-                                if "onset" in d else d["term"]["label"] for d in phenopacket["diseases"]
-                            ]
-                        )
+                        single_phenopacket_diseases = _render_csv_diseases(phenopacket["diseases"])
                         all_diseases.append(single_phenopacket_diseases)
                 if all_diseases:
                     ind_obj["diseases"] = "; ".join(all_diseases)
@@ -180,8 +219,56 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
         return individuals
 
 
+class PhenopacketCSVRenderer(KatsuCSVRenderer):
+    file_name = "phenopackets.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return phe_s.PhenopacketSerializer
+
+    def get_columns(self) -> list[str]:
+        return [
+            "id",
+            "subject_id",
+            "subject_sex",
+            "subject_taxonomy",
+            "biosamples",
+            "diseases",
+            "created_by",
+            "submitted_by",
+            "dataset",
+        ]
+
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
+        return [
+            {
+                "id": phe["id"],
+                "subject_id": phe["subject"]["id"] if phe.get("subject") else None,
+                "subject_sex": phe["subject"]["sex"] if phe.get("subject") else None,
+                "subject_taxonomy": phe["subject"]["taxonomy"]["label"] if phe.get("subject") else None,
+                "biosamples": "; ".join(
+                    (
+                        f"{b['id']} [{b['sampled_tissue']['label']}]"
+                        if b.get("sampled_tissue")
+                        else b["id"]
+                    )
+                    for b in phe["biosamples"]
+                ) if phe.get("biosamples") else None,
+                "diseases": _render_csv_diseases(phe["diseases"]) if phe.get("diseases") else None,
+                "created_by": phe["meta_data"].get("created_by"),
+                "submitted_by": phe["meta_data"].get("submitted_by"),
+                "dataset": phe.get("dataset"),
+            }
+            for phe in data
+        ]
+
+
 class BiosamplesCSVRenderer(KatsuCSVRenderer):
     file_name = "biosamples.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return phe_s.BiosampleSerializer
 
     def get_columns(self) -> list[str]:
         return [
@@ -196,7 +283,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
             "individual",
         ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict]:
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         return [
             {
                 "id": biosample["id"],
@@ -207,7 +294,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
                 "extra_properties": f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
                 "created": biosample["created"],
                 "updated": biosample["updated"],
-                "individual": biosample["individual"]
+                "individual": biosample.get("individual")
             }
             for biosample in data
         ]
@@ -215,6 +302,10 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
 
 class ExperimentCSVRenderer(KatsuCSVRenderer):
     file_name = "experiments.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentSerializer
 
     def get_columns(self) -> list[str]:
         return [
@@ -229,10 +320,10 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
             "created",
             "updated",
             "biosample",
-            "individual_id",
+            "individual",
         ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict]:
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
         return [
             {
                 "id": experiment.get("id"),
@@ -246,9 +337,48 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
                 "created": experiment.get("created"),
                 "updated": experiment.get("updated"),
                 "biosample": experiment.get("biosample"),
-                "individual_id": experiment.get("biosample_individual", {}).get("id", "NA"),
+                "individual": experiment.get("biosample_individual", {}).get("id", "NA"),
             }
             for experiment in data
+        ]
+
+
+class ExperimentResultCSVRenderer(KatsuCSVRenderer):
+    file_name = "experiment_results.csv"
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentResultSerializer
+
+    def get_columns(self) -> list[str]:
+        return [
+            "id",
+            "description",
+            "filename",
+            "url",
+            "genome_assembly_id",
+            "file_format",
+            "data_output_type",
+            "usage",
+            "creation_date",
+            "created_by",
+        ]
+
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
+        return [
+            {
+                "id": er.get("id"),
+                "description": er.get("description"),
+                "filename": er.get("filename"),
+                "url": er.get("url"),
+                "genome_assembly_id": er.get("genome_assembly_id"),
+                "file_format": er.get("file_format"),
+                "data_output_type": er.get("data_output_type"),
+                "usage": er.get("usage"),
+                "creation_date": er.get("creation_date"),
+                "created_by": er.get("created_by"),
+            }
+            for er in data
         ]
 
 
