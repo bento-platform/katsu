@@ -1,5 +1,7 @@
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
 from pydantic import ValidationError as PydValidationError
@@ -9,6 +11,7 @@ from chord_metadata_service.restapi.utils import transform_keys
 
 from .models import Project, Dataset, ProjectJsonSchema
 from .schemas import LINKED_FIELD_SETS_SCHEMA
+from .utils import get_censored_counts_for_serializer
 
 
 __all__ = [
@@ -56,7 +59,10 @@ class DatasetSerializer(GenericSerializer):
         "project",
         "discovery",
         "conditions_of_access",
+        "counts",
     )
+
+    counts = serializers.SerializerMethodField()
 
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
@@ -91,20 +97,20 @@ class DatasetSerializer(GenericSerializer):
         """ Validate all fields against DATS schemas. """
 
         dataset_dats_fields = (
-            'alternate_identifiers',
-            'related_identifiers',
-            'dates',
-            'stored_in',
-            'spatial_coverage',
-            'types',
-            'distributions',
-            'dimensions',
-            'primary_publications',
-            'citations',
-            'produced_by',
-            'licenses',
-            'acknowledges',
-            'keywords',
+            "alternate_identifiers",
+            "related_identifiers",
+            "dates",
+            "stored_in",
+            "spatial_coverage",
+            "types",
+            "distributions",
+            "dimensions",
+            "primary_publications",
+            "citations",
+            "produced_by",
+            "licenses",
+            "acknowledges",
+            "keywords",
         )
 
         errors = {}
@@ -151,6 +157,12 @@ class DatasetSerializer(GenericSerializer):
 
         return validation
 
+    def get_counts(self, obj):
+        # TODO: with more datasets, refactor to batch queries (currently N queries for N datasets)
+        request = self.context.get("request")
+        scope = ValidatedDiscoveryScope(obj.project, obj)
+        return get_censored_counts_for_serializer(request, scope, logger)
+
     class Meta:
         model = Dataset
         fields = '__all__'
@@ -171,17 +183,26 @@ class ProjectSerializer(serializers.ModelSerializer):
         "title",
         "description",
         "discovery",
+        "counts",
     )
 
     discovery = DiscoveryConfigField(required=False, allow_null=True)
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
+    counts = serializers.SerializerMethodField()
+
     # noinspection PyMethodMayBeStatic
     def validate_title(self, value):
         if len(value.strip()) < 3:
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
+
+    def get_counts(self, obj):
+        # TODO: with more projects, refactor to batch queries (currently N queries for N projects)
+        request = self.context.get("request")
+        scope = ValidatedDiscoveryScope(obj, None)
+        return get_censored_counts_for_serializer(request, scope, logger)
 
     class Meta:
         model = Project
