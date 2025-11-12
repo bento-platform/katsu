@@ -871,6 +871,7 @@ class DiscoveryUIHintsTest(AuthzAPITestCase):
     def setUp(self):
         self.url = reverse("discovery-ui-hints")
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_empty_discovery(self):
         res = self.dt_authz_counts_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)

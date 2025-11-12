@@ -970,6 +970,7 @@ class DiscoveryFilteringMatchesTest(AuthzAPITestCase):
         self.assertEqual(len(response_obj["results"]), results_length)
         self.assertEqual(response_obj["pagination"]["total"], total)
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_discovery_matches_response_no_discovery_config(self):
         response = self.dt_authz_full_get('/api/discovery_matches?sex=MALE')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

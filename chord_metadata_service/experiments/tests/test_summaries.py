@@ -1,3 +1,6 @@
+from bento_lib.discovery import DiscoveryConfig
+from django.test import override_settings
+
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
@@ -35,6 +38,7 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
             title="Empty Dataset", description="", data_use=VALID_DATA_USE_1, project=self.empty_project
         )
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     async def test_summary_1_exp_no_perms_whole_instance(self):
         self.maxDiff = None
 
