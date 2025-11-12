@@ -32,12 +32,20 @@ __all__ = [
 T = TypeVar("T")
 
 
-async def list_or_manager_to_list(x: list[T] | Manager) -> list[T]:
+async def list_or_manager_to_list(x: list[T] | Manager, prefetch: tuple[str, ...] = ()) -> list[T]:
     """
     Given an object which is either a list of T or an instance of a T manager in an async Django DB context,
     return a list[T].
     """
-    return x if isinstance(x, list) else [y async for y in x.all()]
+
+    if isinstance(x, list):
+        return x
+
+    qs = x.all()
+    if prefetch:
+        qs = qs.prefetch_related(*prefetch)
+
+    return [y async for y in qs]
 
 
 class MatchContext(TypedDict, total=False):
@@ -82,22 +90,25 @@ async def experiment_result_matches(
 
 
 async def experiment_matches(
-    mrm: list[em.Experiment] | Manager,
+    mrm: Manager,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
     ctx: MatchContext,
 ) -> list[MatchExperiment]:
     res: list[MatchExperiment] = []
-    for exp in await list_or_manager_to_list(mrm):
+    for exp in await list_or_manager_to_list(mrm, prefetch=("biosample__phenopackets",)):
         # TODO: right now, experiment results are not filtered even if a query is executed on them.
+        phenopacket = (await exp.biosample.phenopackets.afirst()) if exp.biosample else None  # TODO: n+1?
         res.append(
             MatchExperiment(
                 id=str(exp.id),
+                experiment_type=exp.experiment_type,
                 study_type=exp.study_type,
                 results=await experiment_result_matches(
                     exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
                 ),
+                phenopacket=str(phenopacket.id) if phenopacket else None,
                 **(dict(
                     project=scope.project_id or str(exp.dataset.project_id),
                     dataset=scope.dataset_id or str(exp.dataset_id)
@@ -192,7 +203,7 @@ async def individual_matches(
 ) -> list[MatchIndividual]:
     res: list[MatchIndividual] = []
 
-    for ind in await list_or_manager_to_list(mrm):
+    for ind in await list_or_manager_to_list(mrm, prefetch=("phenopackets__dataset",)):
         ind_id = str(ind.id)
         # TODO: prefetch all the time, even when not filtering.
         # TODO: return both all phenopackets and matching phenopackets?
@@ -204,7 +215,7 @@ async def individual_matches(
             {**ctx, "individual": ind_id},
         )
 
-        first_phenopacket = await ind.phenopackets.prefetch_related("dataset").afirst()
+        first_phenopacket = await ind.phenopackets.afirst()
 
         res.append(
             MatchIndividual(

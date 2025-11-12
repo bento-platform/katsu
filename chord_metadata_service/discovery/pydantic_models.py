@@ -83,8 +83,11 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
-    study_type: str
+    experiment_type: str = Field(..., title="Experiment Type")
+    study_type: str = Field(..., title="Study Type")
     results: list[MatchExperimentResult]
+    # backlink:
+    phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 
 class MatchBiosample(BaseMatchModel):
