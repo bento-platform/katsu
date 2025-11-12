@@ -32,7 +32,7 @@ from chord_metadata_service.utils import build_id_set
 from . import responses as dres
 from .censorship import get_rules, thresholded_count, censor_entity_counts
 from .constants import DISCOVERY_ENTITIES
-from .exceptions import DiscoveryEmptyException, DiscoveryScopeException
+from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .fields_utils import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
@@ -110,6 +110,7 @@ class QueryQuerysetsCache:
 
         # May raise:
         #  - DiscoveryEmptyException
+        #     although in all cases in these API calls this should be mitigated by an initial empty_discovery(...) check
         #  - ValidationError
         filtered_queryset, queried_entities = await discovery_filter_queryset(
             self._scope,
@@ -663,9 +664,9 @@ async def discovery_matches(
 # TODO: extend this implementation for Bento v20+
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-@inject_discovery_deps(empty_404=False)
+@inject_discovery_deps(empty_404=True)
 async def discovery_ui_hints(
-    request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
+    _request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
 ):
     """
     Endpoint for returning miscellaneous UI hints for any front-end which consumes the various discovery endpoints.
@@ -677,11 +678,8 @@ async def discovery_ui_hints(
     """
 
     # TODO: support querying?
-    try:
-        qqs = QueryQuerysetsCache(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
-        counts = await discovery_queryset_entity_counts(qqs)
-    except DiscoveryEmptyException:
-        return dres.no_public_data(request)
+    qqs = QueryQuerysetsCache(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
+    counts = await discovery_queryset_entity_counts(qqs)
 
     return Response(DiscoveryUIHintsResponse.model_validate({
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
