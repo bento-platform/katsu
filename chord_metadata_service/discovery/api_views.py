@@ -349,7 +349,10 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
         )
     }
 
-async def discovery_queryset_entity_counts_by_dataset(qqs: QueryQuerysetsCache) -> dict[str, dict[DiscoveryEntity, int]]:
+
+async def discovery_queryset_entity_counts_by_dataset(
+        qqs: QueryQuerysetsCache
+        ) -> dict[str, dict[DiscoveryEntity, int]]:
     """
     Returns a dictionary of discovery entity counts grouped by dataset identifier for a given scope/query context.
     """
@@ -541,7 +544,9 @@ async def discovery_endpoint(
         scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 
-    counts_by_dataset_raw: dict[DiscoveryEntity, dict[str, int]] = await discovery_queryset_entity_counts_by_dataset(qqs)
+    counts_by_dataset_raw: dict[DiscoveryEntity, dict[str, int]] = await discovery_queryset_entity_counts_by_dataset(
+        qqs
+        )
 
     # Censor and process dataset-specific counts
     counts_by_dataset_res: dict[DiscoveryEntity, dict[str, int | bool]] = await censor_entity_counts_by_dataset(
