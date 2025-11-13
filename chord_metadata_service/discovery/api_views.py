@@ -7,7 +7,7 @@ from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Count
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
@@ -31,7 +31,7 @@ from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
 from .censorship import get_rules, thresholded_count, censor_entity_counts
-from .constants import DISCOVERY_ENTITIES
+from .constants import DISCOVERY_ENTITIES, ENTITY_TO_DATASET_GROUP_BY
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .fields_utils import normalize_field_path_true_model
@@ -349,6 +349,56 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
         )
     }
 
+async def discovery_queryset_entity_counts_by_dataset(qqs: QueryQuerysetsCache) -> dict[str, dict[DiscoveryEntity, int]]:
+    """
+    Returns a dictionary of discovery entity counts grouped by dataset identifier for a given scope/query context.
+    """
+    async def _get_entity_counts_by_dataset(ee: DiscoveryEntity) -> dict[str, int]:
+        qs, _ = await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False)
+        group_by = ENTITY_TO_DATASET_GROUP_BY[ee]
+        res = await sync_to_async(list)(qs.values(group_by).annotate(count=Count('id', distinct=True)))
+        return {str(r[group_by]): r['count'] for r in res if r[group_by] is not None}
+
+    entity_counts = await asyncio.gather(*(_get_entity_counts_by_dataset(e) for e in DISCOVERY_ENTITIES))
+
+    # Invert: collect all unique dataset IDs and build dict[dataset_id][entity] = count
+    all_datasets = set()
+    for ec in entity_counts:
+        all_datasets.update(ec.keys())
+
+    res = {}
+    for ds in all_datasets:
+        res[ds] = {list(DISCOVERY_ENTITIES)[i]: entity_counts[i].get(ds, 0) for i in range(len(DISCOVERY_ENTITIES))}
+
+    return res
+
+
+async def censor_entity_counts_by_dataset(
+    discovery,
+    counts_by_dataset: dict[str, dict[DiscoveryEntity, int]],
+    dt_permissions: DataTypeDiscoveryPermissions,
+    lg: BoundLogger,
+) -> dict[str, dict[DiscoveryEntity, int | bool]]:
+    """
+    Censors per-dataset counts based on permissions, mirroring censor_entity_counts.
+    Applies thresholding if counts permission; uses boolean if bool_ permission; skips entity if neither.
+    """
+    res = {}
+    threshold = discovery.rules.count_threshold
+
+    for ds, entity_counts in counts_by_dataset.items():
+        ds_res = {}
+        for e, c in entity_counts.items():
+            dp = dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]]
+            if dp.counts:
+                ds_res[e] = thresholded_count(c, discovery, dp)
+            elif dp.bool_:
+                ds_res[e] = c >= threshold
+        if ds_res:
+            res[ds] = ds_res
+
+    return res
+
 
 @overload
 async def get_censored_entity_counts(
@@ -491,6 +541,13 @@ async def discovery_endpoint(
         scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 
+    counts_by_dataset_raw: dict[DiscoveryEntity, dict[str, int]] = await discovery_queryset_entity_counts_by_dataset(qqs)
+
+    # Censor and process dataset-specific counts
+    counts_by_dataset_res: dict[DiscoveryEntity, dict[str, int | bool]] = await censor_entity_counts_by_dataset(
+        discovery, counts_by_dataset_raw, dt_permissions, lg
+    )
+
     if (
         not count_or_bools_res[queryset_entity]
         and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
@@ -512,6 +569,7 @@ async def discovery_endpoint(
             message=message,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
             counts=count_or_bools_res,
+            counts_by_dataset=counts_by_dataset_res,
         )
     )
 
