@@ -16,7 +16,14 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.restapi import api_renderers as apir
 
-from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket, MatchIndividual
+from .pydantic_models import (
+    MatchBiosample,
+    MatchExperiment,
+    ExperimentResultIndices,
+    MatchExperimentResult,
+    MatchPhenopacket,
+    MatchIndividual,
+)
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
@@ -69,11 +76,19 @@ async def experiment_result_matches(
         res.append(
             MatchExperimentResult(
                 id=er.id,
+                identifier=er.identifier,  # TODO: cleanup this across Katsu
+                description=er.description or "",  # TODO: clean up null vs blank?
                 filename=er.filename,
                 url=er.url,
-                indices=er.indices,
+                indices=ExperimentResultIndices.model_validate(er.indices),
+                genome_assembly_id=er.genome_assembly_id,
                 file_format=er.file_format,
-                assembly_id=er.genome_assembly_id,
+                data_output_type=er.data_output_type,
+                usage=er.usage,
+                creation_date=er.creation_date,
+                created_by=er.created_by,
+                extra_properties=er.extra_properties,
+                # ----------------------------------------------------------------------------------------------------
                 **(
                     dict(
                         project=scope.project_id or str(
@@ -136,6 +151,7 @@ async def biosample_matches(
         res.append(
             MatchBiosample(
                 id=str(b.id),
+                individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
                 experiments=(
                     # TODO: prefetch all the time, even when not filtering?
