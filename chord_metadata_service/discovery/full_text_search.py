@@ -4,7 +4,7 @@ from django.db.models import BooleanField, Field, TextField
 from django.db.models.functions import Cast
 from typing import Type
 
-from chord_metadata_service.discovery.fields_utils import resolve_filter_mapping_to_queryset_model
+from chord_metadata_service.discovery.field_paths.resolve import resolve_filter_mapping_to_queryset_model
 
 __all__ = [
     "FULL_TEXT_SEARCH_FIELDS",

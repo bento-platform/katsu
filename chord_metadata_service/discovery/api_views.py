@@ -34,7 +34,7 @@ from .censorship import get_rules, thresholded_count, censor_entity_counts
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .fields_utils import normalize_field_path_true_model
+from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER

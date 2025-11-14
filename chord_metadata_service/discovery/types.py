@@ -1,4 +1,10 @@
-from bento_lib.discovery import DiscoveryEntity
+from bento_lib.discovery import (
+    DateFieldDefinition,
+    DiscoveryEntity,
+    FieldDefinition,
+    NumberFieldDefinition,
+    StringFieldDefinition,
+)
 from typing import Literal, NotRequired, TypeAlias, TypedDict
 
 __all__ = [
@@ -7,6 +13,7 @@ __all__ = [
     "EntityCountOrBoolResponse",
     "DiscoveryResponseFormat",
     "AcceptedDiscoveryResponseFormats",
+    "AnyFieldDefinition",
 ]
 
 
@@ -28,3 +35,5 @@ EntityCountOrBoolResponse: TypeAlias = dict[DiscoveryEntity, int | bool]
 
 DiscoveryResponseFormat = Literal["json", "csv"]
 AcceptedDiscoveryResponseFormats: TypeAlias = frozenset[DiscoveryResponseFormat]
+
+AnyFieldDefinition: TypeAlias = FieldDefinition | NumberFieldDefinition | StringFieldDefinition | DateFieldDefinition
