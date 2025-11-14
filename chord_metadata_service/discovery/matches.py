@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 This file contains functions to build match response lists for the discovery matches endpoint.
 These match lists are built from the match models in the pydantic_models.py file. They are not complete instances of
@@ -6,14 +8,15 @@ Since we have pagination, though, we should probably fetch full record details i
 """
 
 from bento_lib.discovery import DiscoveryEntity
-from django.db.models import Manager
-from typing import Awaitable, Callable, Type, TypeVar, TypedDict
+from django.db.models import QuerySet, Manager
+from typing import Awaitable, Callable, Type, TypeVar, TypedDict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import ManyRelatedManager, RelatedManager
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as em
-from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.restapi import api_renderers as apir
 
 from .pydantic_models import (
@@ -39,18 +42,26 @@ __all__ = [
 T = TypeVar("T")
 
 
-async def list_or_manager_to_list(x: list[T] | Manager, prefetch: tuple[str, ...] = ()) -> list[T]:
+async def queryset_or_related_manager_to_list(
+    qs: QuerySet | ManyRelatedManager | RelatedManager,
+    prefetch: tuple[str, ...] = (),
+    select_related: tuple[str, ...] = (),
+) -> list[T]:
     """
-    Given an object which is either a list of T or an instance of a T manager in an async Django DB context,
+    Given an object which is either a QuerySet of T or an instance of a T manager in an async Django DB context,
     return a list[T].
     """
 
-    if isinstance(x, list):
-        return x
+    if isinstance(qs, Manager):
+        qs = qs.all()
+    elif not isinstance(qs, QuerySet):
+        raise AssertionError(f"queryset_to_list argument must be QuerySet | RelatedManager | list (got {type(qs)})")
 
-    qs = x.all()
     if prefetch:
         qs = qs.prefetch_related(*prefetch)
+
+    if select_related:
+        qs = qs.select_related(*select_related)
 
     return [y async for y in qs]
 
@@ -63,7 +74,7 @@ class MatchContext(TypedDict, total=False):
 
 
 async def experiment_result_matches(
-    mrm,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     _dt_permissions,
     root: bool,
@@ -105,14 +116,16 @@ async def experiment_result_matches(
 
 
 async def experiment_matches(
-    mrm: Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
     ctx: MatchContext,
 ) -> list[MatchExperiment]:
     res: list[MatchExperiment] = []
-    for exp in await list_or_manager_to_list(mrm, prefetch=("biosample__phenopackets",)):
+    for exp in await queryset_or_related_manager_to_list(
+        mrm, select_related=("biosample",), prefetch=("biosample__phenopackets",)
+    ):
         # TODO: right now, experiment results are not filtered even if a query is executed on them.
         phenopacket = (await exp.biosample.phenopackets.afirst()) if exp.biosample else None  # TODO: n+1?
         res.append(
@@ -134,14 +147,14 @@ async def experiment_matches(
 
 
 async def biosample_matches(
-    mrm: list[pm.Biosample] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
     ctx: MatchContext,
 ) -> list[MatchBiosample]:
     res: list[MatchBiosample] = []
-    for b in await list_or_manager_to_list(mrm):
+    for b in await queryset_or_related_manager_to_list(mrm):
         p = (ctx or {}).get("phenopacket")
         ds = scope.dataset_id
         if not p and (p_obj := await b.phenopackets.afirst()):
@@ -173,7 +186,7 @@ async def biosample_matches(
 
 
 async def phenopacket_matches(
-    mrm: list[pm.Phenopacket] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
@@ -181,7 +194,7 @@ async def phenopacket_matches(
 ) -> list[MatchPhenopacket]:
     res: list[MatchPhenopacket] = []
 
-    for phe in await list_or_manager_to_list(mrm):
+    for phe in await queryset_or_related_manager_to_list(mrm, select_related=("dataset",)):
         phe_id = str(phe.id)
         s_id = phe.subject_id
         # TODO: prefetch all the time, even when not filtering.
@@ -211,7 +224,7 @@ async def phenopacket_matches(
 
 
 async def individual_matches(
-    mrm: list[Individual] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
@@ -219,7 +232,7 @@ async def individual_matches(
 ) -> list[MatchIndividual]:
     res: list[MatchIndividual] = []
 
-    for ind in await list_or_manager_to_list(mrm, prefetch=("phenopackets__dataset",)):
+    for ind in await queryset_or_related_manager_to_list(mrm, prefetch=("phenopackets__dataset",)):
         ind_id = str(ind.id)
         # TODO: prefetch all the time, even when not filtering.
         # TODO: return both all phenopackets and matching phenopackets?
@@ -231,7 +244,7 @@ async def individual_matches(
             {**ctx, "individual": ind_id},
         )
 
-        first_phenopacket = await ind.phenopackets.afirst()
+        first_phenopacket = await ind.phenopackets.get_queryset().select_related("dataset").afirst()
 
         res.append(
             MatchIndividual(
@@ -241,7 +254,7 @@ async def individual_matches(
                     dict(
                         # TODO: put this on Individual itself, i.e., link individual with project/dataset?
                         project=scope.project_id or (
-                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset else None
+                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None
                         ),
                         dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
                     ) if root else dict()
@@ -255,7 +268,7 @@ async def individual_matches(
 DISCOVERY_ENTITY_TO_MATCH_FN: dict[
     DiscoveryEntity,
     Callable[
-        [list | Manager, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, bool, MatchContext],
+        [QuerySet, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, bool, MatchContext],
         Awaitable[list]
     ]
 ] = {

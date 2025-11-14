@@ -633,6 +633,7 @@ async def discovery_matches(
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
     lg = lg.bind(pagination=pagination.model_dump(mode="json"))
 
+    matches_page: QuerySet
     if page_size > 0:
         matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
     else:
