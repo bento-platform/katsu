@@ -1,8 +1,10 @@
 from django.apps import apps
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
+from chord_metadata_service.discovery.full_text_search import full_text_search_vector
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel, TOP_LEVEL_MODEL_SCOPE_FILTERS
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.geo import models as geo_models
@@ -131,6 +133,9 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
 
     FHIR: Specimen
     """
+
+    class Meta:
+        indexes = [GinIndex(full_text_search_vector("biosample", include_m2m=False), name="biosample_fts_gin_idx")]
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -448,6 +453,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
         constraints = [
             models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
         ]
+        indexes = [GinIndex(full_text_search_vector("phenopacket", include_m2m=False), name="phenopacket_fts_gin_idx")]
 
     @property
     def schema_type(self) -> SchemaType:

@@ -7,7 +7,7 @@ from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
@@ -33,6 +33,7 @@ from . import responses as dres
 from .censorship import get_rules, thresholded_count, censor_entity_counts
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryScopeException
+from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
@@ -88,10 +89,28 @@ class QueryQuerysetsCache:
         self._query: DiscoveryQuery = query
         self._scope: ValidatedDiscoveryScope = scope
         self._dt_permissions: DataTypeDiscoveryPermissions = dt_permissions
+
         self._queryset_cache: dict[DiscoveryEntity, QueryExecutionResult] = {}
         self._queryset_locks = defaultdict(asyncio.Lock)
 
+        self._fts_cache: dict[tuple[DiscoveryEntity, str], set[str]] = {}
+        self._fts_cache_locks = defaultdict(asyncio.Lock)
+
         self._logger: BoundLogger = lg
+
+    async def _get_fts_ids(self, fts_entity: DiscoveryEntity, query: str) -> set[str]:
+        """
+        TODO: explain
+        """
+        k = (fts_entity, query)
+        qs = get_discovery_entity_model_scoped_queryset(fts_entity, self._scope)
+        async with self._fts_cache_locks[k]:
+            if k not in self._fts_cache:
+                self._fts_cache[k] = await build_id_set(
+                    qs.annotate(search=full_text_search_vector(fts_entity)).filter(search=query),
+                    field="id",
+                )
+            return self._fts_cache[k]
 
     async def _execute_discovery_query(
         self, queryset_entity: DiscoveryEntity, lg: BoundLogger | None, validate_field: bool
@@ -99,14 +118,23 @@ class QueryQuerysetsCache:
         queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
 
         if fts := self._query.fts:
-            ids_set = await build_id_set(
-                queryset.annotate(search=full_text_search_vector(queryset_entity)).filter(search=fts),
-                field="id",
-            )
+            # TODO: explain what we're doing here
+            ids_set = await self._get_fts_ids(queryset_entity, fts)
+            fts_filters = Q(pk__in=ids_set)
+            for entity in DISCOVERY_ENTITIES - {queryset_entity}:
+                e_ids_set = await self._get_fts_ids(entity, fts)
+                epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
+                fts_filters |= Q(**{f"{epk}__in": e_ids_set})
+
+            # TODO: add other m2m fields...!!!!!!!!!!!!!!!!!!!!
+
+            # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
+            #  or something.
+
             # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
             #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
             #    join? it's unclear, but for now we just do this ugly thing instead.
-            queryset = queryset.filter(id__in=ids_set)
+            queryset = queryset.filter(fts_filters)
 
         # May raise:
         #  - DiscoveryEmptyException
@@ -140,9 +168,9 @@ class QueryQuerysetsCache:
                 await (lg or self._logger).adebug(
                     "QueryQuerysetsCache executing query", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
                 )
-                res = await self._execute_discovery_query(entity, lg, validate_field=validate_field)
-                self._queryset_cache[entity] = res
-                return res
+                self._queryset_cache[entity] = await self._execute_discovery_query(
+                    entity, lg, validate_field=validate_field
+                )
 
             return self._queryset_cache[entity]
 

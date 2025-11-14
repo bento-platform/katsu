@@ -2,7 +2,7 @@ from bento_lib.discovery import DiscoveryEntity
 from django.contrib.postgres.search import SearchVector
 from django.db.models import BooleanField, Field, TextField
 from django.db.models.functions import Cast
-from typing import Type
+from typing import Type, TypeAlias
 
 from chord_metadata_service.discovery.field_paths.resolve import resolve_filter_mapping_to_queryset_model
 
@@ -17,17 +17,45 @@ GENE_DESCRIPTOR_PATH = (*GENOMIC_INTERPRETATION_PATH, "gene_descriptor")
 VARIANT_INTERPRETATION_PATH = (*GENOMIC_INTERPRETATION_PATH, "variant_interpretation")
 VARIATION_DESCRIPTOR_PATH = (*VARIANT_INTERPRETATION_PATH, "variation_descriptor")
 
-FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[list[str] | tuple[list[str], Type[Field]], ...]] = {
+# TODO: maybe we can get this automatically
+ENTITY_M2M_FIELDS: dict[DiscoveryEntity, tuple[str, ...]] = {
+    "phenopacket": ("phenotypic_features", "interpretations", "diseases"),
+}
+
+FTSFieldDescriptor: TypeAlias = list[str] | tuple[list[str], Type[Field]]
+
+PHENOTYPIC_FEATURE_FTS_FIELDS: tuple[FTSFieldDescriptor, ...] = (
+    ["description"],
+    (["pftype"], TextField),
+    (["severity"], TextField),
+    (["modifiers"], TextField),
+    (["onset"], TextField),
+    (["evidence"], TextField),
+    (["extra_properties"], TextField),
+)
+
+DISEASE_FTS_FIELDS: tuple[FTSFieldDescriptor, ...] = (
+    (["diseases", "term"], TextField),
+    (["diseases", "excluded"], BooleanField),
+    (["diseases", "onset"], TextField),
+    (["diseases", "resolution"], TextField),
+    (["diseases", "disease_stage"], TextField),
+    (["diseases", "clinical_tnm_finding"], TextField),
+    (["diseases", "primary_site"], TextField),
+    (["diseases", "laterality"], TextField),
+    (["diseases", "extra_properties"], TextField),
+)
+
+
+def _prefix_fts_field_descriptor(prefix: tuple[str, ...], f: FTSFieldDescriptor) -> FTSFieldDescriptor:
+    return [*prefix, *f] if isinstance(f, list) else ([*prefix, *f], f[1])
+
+
+FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] = {
     "phenopacket": (
         ["id"],
         # Phenotypic features field
-        ["phenotypic_features", "description"],
-        (["phenotypic_features", "pftype"], TextField),
-        (["phenotypic_features", "severity"], TextField),
-        (["phenotypic_features", "modifiers"], TextField),
-        (["phenotypic_features", "onset"], TextField),
-        (["phenotypic_features", "evidence"], TextField),
-        (["phenotypic_features", "extra_properties"], TextField),
+        *(_prefix_fts_field_descriptor(("phenotypic_features",), ff) for ff in PHENOTYPIC_FEATURE_FTS_FIELDS),
         # Interpretations
         ["interpretations", "progress_status"],
         ["interpretations", "summary"],
@@ -66,15 +94,7 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[list[str] | tuple[list[str]
         ([*GENE_DESCRIPTOR_PATH, "alternate_symbols"], TextField),
         ([*GENE_DESCRIPTOR_PATH, "extra_properties"], TextField),
         # Disease
-        (["diseases", "term"], TextField),
-        (["diseases", "excluded"], BooleanField),
-        (["diseases", "onset"], TextField),
-        (["diseases", "resolution"], TextField),
-        (["diseases", "disease_stage"], TextField),
-        (["diseases", "clinical_tnm_finding"], TextField),
-        (["diseases", "primary_site"], TextField),
-        (["diseases", "laterality"], TextField),
-        (["diseases", "extra_properties"], TextField),
+        *(_prefix_fts_field_descriptor(("diseases",), ff) for ff in DISEASE_FTS_FIELDS),
     ),
     "individual": (
         ["id"],
@@ -142,7 +162,7 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[list[str] | tuple[list[str]
 }
 
 
-def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
+def full_text_search_vector(queryset_entity: DiscoveryEntity, include_m2m: bool = False) -> SearchVector:
     """
     Given a queryset entity (most likely phenopacket or individual, since they're more "top-level"), generate a Postgres
     SearchVector object for full-text search across the entity/linked entities.
@@ -150,8 +170,10 @@ def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
     """
 
     args = []
-    for k, v in FULL_TEXT_SEARCH_FIELDS.items():
-        for f in v:
+
+    def _add_args(fe: DiscoveryEntity):
+        fields = FULL_TEXT_SEARCH_FIELDS[fe]
+        for f in fields:
             field: list[str]
             fc: Type[Field] | None
 
@@ -165,9 +187,24 @@ def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
                 field = f[0]
                 fc = f[-1]
 
+            # TODO: explain
+            if not include_m2m and field[0] in ENTITY_M2M_FIELDS.get(fe, ()):
+                continue  # skip m2m field if we're not including them
+
             # re-write the field from a list[str] to a Django path, resolved to the current entity being queried.
             #  e.g, individual [sex] would be rewritten to "subject__sex" for a phenopacket queryset entity.
-            resolved_field = resolve_filter_mapping_to_queryset_model(queryset_entity, k, tuple(field))
+            resolved_field = resolve_filter_mapping_to_queryset_model(queryset_entity, fe, tuple(field))
             args.append(Cast(resolved_field, fc()) if fc is not None else resolved_field)
+
+    if include_m2m:
+        for field_entity, fts_fields in FULL_TEXT_SEARCH_FIELDS.items():
+            _add_args(field_entity)
+    else:
+        # TODO: explain
+        _add_args(queryset_entity)
+
+        # TODO: explain
+        if queryset_entity == "phenopacket":
+            _add_args("individual")
 
     return SearchVector(*args)

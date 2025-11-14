@@ -1,6 +1,8 @@
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import CharField, JSONField
 from django.contrib.postgres.fields import ArrayField
+from chord_metadata_service.discovery.full_text_search import full_text_search_vector
 from chord_metadata_service.discovery.scopeable_model import (
     BaseScopeableModel,
     TOP_LEVEL_MODEL_SCOPE_FILTERS,
@@ -35,6 +37,9 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     may be derived from multiple experiments. Consider, for example, the results of a pairwise analysis derived from
     two Experiments, each of which was performed on a different Biosample.
     """
+
+    class Meta:
+        indexes = [GinIndex(full_text_search_vector("experiment", include_m2m=False), name="experiment_fts_gin_idx")]
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -166,6 +171,14 @@ class Experiment(BaseScopeableModel, IndexableMixin):
 
 
 class ExperimentResult(BaseScopeableModel, IndexableMixin):
+    class Meta:
+        indexes = [
+            GinIndex(
+                full_text_search_vector("experiment_result", include_m2m=False),
+                name="experiment_result_gin_idx",
+            ),
+        ]
+
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return {

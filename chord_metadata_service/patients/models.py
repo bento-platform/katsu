@@ -1,13 +1,15 @@
 from django.apps import apps
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.discovery.full_text_search import full_text_search_vector
+from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator
 from .values import PatientStatus, Sex, KaryotypicSex
-from ..discovery.types import ModelScopeFilters
 
 
 class VitalStatus(BaseTimeStamp, IndexableMixin):
@@ -25,6 +27,9 @@ class VitalStatus(BaseTimeStamp, IndexableMixin):
 
 class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
+
+    class Meta:
+        indexes = [GinIndex(full_text_search_vector("individual", include_m2m=False), name="individual_fts_gin_idx")]
 
     @property
     def schema_type(self) -> SchemaType:
