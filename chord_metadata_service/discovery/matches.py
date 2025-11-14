@@ -54,8 +54,6 @@ async def queryset_or_related_manager_to_list(
 
     if isinstance(qs, Manager):
         qs = qs.all()
-    elif not isinstance(qs, QuerySet):
-        raise AssertionError(f"queryset_to_list argument must be QuerySet | RelatedManager | list (got {type(qs)})")
 
     if prefetch:
         qs = qs.prefetch_related(*prefetch)
