@@ -30,7 +30,7 @@ from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT
 from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
-from .censorship import get_rules, thresholded_count, censor_entity_counts
+from .censorship import get_rules, thresholded_count, censor_entity_counts, censor_entity_counts_by_dataset, aggregate_counts_from_censored_by_dataset
 from .constants import DISCOVERY_ENTITIES, ENTITY_TO_DATASET_GROUP_BY
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
@@ -351,54 +351,35 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
 
 
 async def discovery_queryset_entity_counts_by_dataset(
-        qqs: QueryQuerysetsCache
-        ) -> dict[str, dict[DiscoveryEntity, int]]:
+    qqs: QueryQuerysetsCache,
+) -> dict[str, EntityCounts]:
     """
     Returns a dictionary of discovery entity counts grouped by dataset identifier for a given scope/query context.
     """
     async def _get_entity_counts_by_dataset(ee: DiscoveryEntity) -> dict[str, int]:
         qs, _ = await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False)
         group_by = ENTITY_TO_DATASET_GROUP_BY[ee]
-        res = await sync_to_async(list)(qs.values(group_by).annotate(count=Count('id', distinct=True)))
-        return {str(r[group_by]): r['count'] for r in res if r[group_by] is not None}
+        res = await sync_to_async(list)(
+            qs.values(group_by).annotate(count=Count("id", distinct=True))
+        )
+        return {str(r[group_by]): r["count"] for r in res if r[group_by] is not None}
 
-    entity_counts = await asyncio.gather(*(_get_entity_counts_by_dataset(e) for e in DISCOVERY_ENTITIES))
+    entity_counts_per_entity = await asyncio.gather(
+        *(_get_entity_counts_by_dataset(e) for e in DISCOVERY_ENTITIES)
+    )
 
-    # Invert: collect all unique dataset IDs and build dict[dataset_id][entity] = count
-    all_datasets = set()
-    for ec in entity_counts:
+    all_datasets: set[str] = set()
+    for ec in entity_counts_per_entity:
         all_datasets.update(ec.keys())
 
-    res = {}
+    res: dict[str, EntityCounts] = {}
+    entities = tuple(DISCOVERY_ENTITIES)
+
     for ds in all_datasets:
-        res[ds] = {list(DISCOVERY_ENTITIES)[i]: entity_counts[i].get(ds, 0) for i in range(len(DISCOVERY_ENTITIES))}
-
-    return res
-
-
-async def censor_entity_counts_by_dataset(
-    discovery,
-    counts_by_dataset: dict[str, dict[DiscoveryEntity, int]],
-    dt_permissions: DataTypeDiscoveryPermissions,
-    lg: BoundLogger,
-) -> dict[str, dict[DiscoveryEntity, int | bool]]:
-    """
-    Censors per-dataset counts based on permissions, mirroring censor_entity_counts.
-    Applies thresholding if counts permission; uses boolean if bool_ permission; skips entity if neither.
-    """
-    res = {}
-    threshold = discovery.rules.count_threshold
-
-    for ds, entity_counts in counts_by_dataset.items():
-        ds_res = {}
-        for e, c in entity_counts.items():
-            dp = dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]]
-            if dp.counts:
-                ds_res[e] = thresholded_count(c, discovery, dp)
-            elif dp.bool_:
-                ds_res[e] = c >= threshold
-        if ds_res:
-            res[ds] = ds_res
+        res[ds] = {
+            entity: entity_counts_per_entity[i].get(ds, 0)
+            for i, entity in enumerate(entities)
+        }
 
     return res
 
@@ -544,14 +525,26 @@ async def discovery_endpoint(
         scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 
-    counts_by_dataset_raw: dict[DiscoveryEntity, dict[str, int]] = await discovery_queryset_entity_counts_by_dataset(
+     # Raw per-dataset counts: dataset_id -> {entity -> count}
+    counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(
         qqs
         )
 
-    # Censor and process dataset-specific counts
-    counts_by_dataset_res: dict[DiscoveryEntity, dict[str, int | bool]] = await censor_entity_counts_by_dataset(
-        discovery, counts_by_dataset_raw, dt_permissions, lg
+    # Censor per-dataset counts 
+    counts_by_dataset_res: dict[str, EntityCountOrBoolResponse] = await censor_entity_counts_by_dataset(
+        scope,
+        counts_by_dataset_raw,
+        dt_permissions,
+        lg,
     )
+
+    # When we expose per-dataset counts, recompute the top-level counts from the
+    # censored per-dataset view to avoid residual disclosure (total - sum(others)).
+    if counts_by_dataset_res:
+        count_or_bools_res = aggregate_counts_from_censored_by_dataset(
+            counts_by_dataset_res,
+            count_or_bools_res,
+        )
 
     if (
         not count_or_bools_res[queryset_entity]
