@@ -3,7 +3,7 @@ import abc
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
 from pydantic import BaseModel, Field, RootModel
 from rest_framework.request import Request as DrfRequest
-from typing import TypeAlias, Optional, Dict
+from typing import TypeAlias
 
 from .types import EntityCountOrBoolResponse
 
@@ -150,7 +150,7 @@ class DiscoveryResponse(BaseModel):
         dict[str, EntityCountOrBoolResponse] |
         dict[str, dict[str, EntityCountOrBoolResponse]]
     )
-    counts_by_dataset: Optional[Dict[str, Dict[DiscoveryEntity, int | bool]]] = Field(default_factory=dict)
+    counts_by_dataset: dict[str, EntityCountOrBoolResponse] = Field(default_factory=dict)
 
 
 class DiscoveryMatchesPaginatedResponse(BaseModel):
