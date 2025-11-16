@@ -3,6 +3,7 @@ from bento_lib.discovery import (
     DiscoveryConfigRules,
     RULES_NO_PERMISSIONS,
     RULES_FULL_PERMISSIONS,
+    DiscoveryEntity,
 )
 from structlog.stdlib import BoundLogger
 from typing import TypeAlias
@@ -21,6 +22,8 @@ __all__ = [
     "get_max_query_parameters",
     "get_rules",
     "censor_entity_counts",
+    "censor_entity_counts_by_dataset",
+    "aggregate_counts_from_censored_by_dataset",
 ]
 
 # If only we had interfaces...
@@ -138,3 +141,35 @@ async def censor_entity_counts_by_dataset(
             res[dataset_id] = censored
 
     return res
+
+
+def aggregate_counts_from_censored_by_dataset(
+    counts_by_dataset: dict[str, EntityCountOrBoolResponse],
+    base_counts: EntityCountOrBoolResponse,
+) -> EntityCountOrBoolResponse:
+
+    aggregated: EntityCountOrBoolResponse = dict(base_counts)
+
+    # Collect entities in base_counts or any per-dataset mapping
+    all_entities: set[DiscoveryEntity] = set(aggregated.keys())
+    for ds_counts in counts_by_dataset.values():
+        all_entities.update(ds_counts.keys())
+
+    for entity in all_entities:
+        # All dataset-level values for this entity (int | bool)
+        values: list[int | bool] = [
+            ds_counts[entity]
+            for ds_counts in counts_by_dataset.values()
+            if entity in ds_counts
+        ]
+        if not values:
+            continue
+
+        # If any dataset-level value is boolean, treat the aggregated value as boolean (OR)
+        if any(isinstance(v, bool) for v in values):
+            aggregated[entity] = any(bool(v) for v in values)
+        else:
+            # All numeric: sum them
+            aggregated[entity] = sum(int(v) for v in values)
+
+    return aggregated
