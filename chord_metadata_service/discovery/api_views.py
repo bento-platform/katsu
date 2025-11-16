@@ -30,7 +30,12 @@ from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT
 from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
-from .censorship import get_rules, thresholded_count, censor_entity_counts, censor_entity_counts_by_dataset, aggregate_counts_from_censored_by_dataset
+from .censorship import (
+    get_rules, thresholded_count,
+    censor_entity_counts,
+    censor_entity_counts_by_dataset,
+    aggregate_counts_from_censored_by_dataset,
+)
 from .constants import DISCOVERY_ENTITIES, ENTITY_TO_DATASET_GROUP_BY
 from .exceptions import DiscoveryScopeException
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
@@ -525,12 +530,12 @@ async def discovery_endpoint(
         scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 
-     # Raw per-dataset counts: dataset_id -> {entity -> count}
+    # Raw per-dataset counts: dataset_id -> {entity -> count}
     counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(
         qqs
-        )
+    )
 
-    # Censor per-dataset counts 
+    # Censor per-dataset counts
     counts_by_dataset_res: dict[str, EntityCountOrBoolResponse] = await censor_entity_counts_by_dataset(
         scope,
         counts_by_dataset_raw,
