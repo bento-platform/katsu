@@ -121,3 +121,20 @@ async def censor_entity_counts(
                 count_or_bools_res[ee] = 0 if ee_perms.counts else False
 
     return count_or_bools_res
+
+
+async def censor_entity_counts_by_dataset(
+    scope: ValidatedDiscoveryScope,
+    counts_by_dataset: dict[str, EntityCounts],
+    dt_permissions: DataTypeDiscoveryPermissions,
+    lg: BoundLogger,
+) -> dict[str, EntityCountOrBoolResponse]:
+
+    res: dict[str, EntityCountOrBoolResponse] = {}
+
+    for dataset_id, entity_counts in counts_by_dataset.items():
+        censored = await censor_entity_counts(scope, entity_counts, dt_permissions, lg)
+        if censored:
+            res[dataset_id] = censored
+
+    return res
