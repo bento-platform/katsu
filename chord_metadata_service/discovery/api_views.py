@@ -180,7 +180,10 @@ class QueryQuerysetsCache:
         async with self._queryset_locks[entity]:
             if entity not in self._queryset_cache:
                 await (lg or self._logger).adebug(
-                    "QueryQuerysetsCache executing query", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
+                    "QueryQuerysetsCache executing query",
+                    entity=entity,
+                    query=self._query,
+                    cache_keys=tuple(self._queryset_cache.keys()),
                 )
                 self._queryset_cache[entity] = await self._execute_discovery_query(
                     entity, lg, validate_field=validate_field
