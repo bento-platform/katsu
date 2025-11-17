@@ -38,6 +38,7 @@ class TestResolveFilterMapping(TestCase):
             ("biosample", "phenopacket", ("subject", "sex"), False, "individual__sex"),
             ("biosample", "phenopacket", ("subject", "sex"), True, "phenopackets__subject__sex"),
             ("biosample", "phenopacket", ("biosamples", "sampled_tissue"), None, "sampled_tissue"),
+            ("biosample", "experiment", ("biosample", "extra_properties", "prop"), None, "extra_properties__prop"),
             ("experiment", "phenopacket", ("biosamples", "sampled_tissue"), None, "biosample__sampled_tissue"),
             ("experiment", "phenopacket", ("subject", "sex"), False, "biosample__individual__sex"),
             ("experiment", "phenopacket", ("subject", "sex"), True, "biosample__phenopackets__subject__sex"),
