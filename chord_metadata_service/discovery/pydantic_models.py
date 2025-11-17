@@ -3,8 +3,9 @@ import abc
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
 from pydantic import BaseModel, Field, RootModel
 from rest_framework.request import Request as DrfRequest
-from typing import TypeAlias
+from typing import TypeAlias, Literal
 
+from chord_metadata_service.experiments.types import ExperimentResultFileFormat
 from .types import EntityCountOrBoolResponse
 
 __all__ = [
@@ -14,6 +15,8 @@ __all__ = [
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
     "BaseMatchModel",
+    "ExperimentResultIndex",
+    "ExperimentResultIndices",
     "MatchExperimentResult",
     "MatchExperiment",
     "MatchBiosample",
@@ -67,15 +70,38 @@ class BaseMatchModel(BaseModel, abc.ABC):
     dataset: str | None = Field(default=None, title="Dataset ID")
 
 
+class ExperimentResultIndex(BaseModel):
+    url: str
+    format: Literal[
+        "BAI",  # BAM index files ( http://samtools.github.io/hts-specs/SAMv1.pdf "BAI" )
+        "BGZF",  # BGZip index files (often .gzi)
+        "CRAI",  # CRAM index files ( https://samtools.github.io/hts-specs/CRAMv3.pdf "CRAM index" )
+        "CSI",  # See http://samtools.github.io/hts-specs/CSIv1.pdf
+        "TABIX",  # See https://samtools.github.io/hts-specs/tabix.pdf
+        "TRIBBLE",
+    ]
+
+
+class ExperimentResultIndices(RootModel):
+    root: list[ExperimentResultIndex]
+
+
+# TODO: just merge this with the main serializer; there's no point in returning a subset -- possibly via drf-pydantic
 class MatchExperimentResult(BaseMatchModel):
     id: int = Field(..., title="Experiment result ID")
-    # TODO: experiments backlink
+    identifier: str = Field(..., title="Experiment result laboratory identifier")
+    description: str = Field(..., title="Description")
     filename: str | None = Field(..., title="File name")
     url: str | None = Field(..., title="URL")
-    # list of experiment_result_file_index objects (see experiments/schemas.py)
-    indices: list[dict] = Field(..., title="Indices")
-    file_format: str | None = Field(..., title="File format")
-    assembly_id: str | None = Field(..., title="Genome assembly ID")
+    indices: ExperimentResultIndices = Field(..., title="Indices")
+    file_format: ExperimentResultFileFormat | None = Field(..., title="File format")
+    data_output_type: Literal["Raw data", "Derived data"] | None = Field(..., title="Data output type")
+    usage: str | None = Field(..., title="Usage")
+    creation_date: str | None = Field(..., title="Creation date")
+    created_by: str | None = Field(..., title="Created by")
+    genome_assembly_id: str | None = Field(..., title="Genome assembly ID")
+    extra_properties: dict = Field(..., title="Extra properties")
+    # TODO: experiments backlink
 
 
 class MatchExperiment(BaseMatchModel):
@@ -83,8 +109,11 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
-    study_type: str
+    experiment_type: str = Field(..., title="Experiment Type")
+    study_type: str = Field(..., title="Study Type")
     results: list[MatchExperimentResult]
+    # backlink:
+    phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 
 class MatchBiosample(BaseMatchModel):
@@ -94,6 +123,7 @@ class MatchBiosample(BaseMatchModel):
     id: str = Field(..., title="Biosample ID")
     # sampled_tissue: OntologyTerm | None
     # sample_type: OntologyTerm | None
+    individual_id: str | None = Field(..., title="Individual ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
     experiments: list[MatchExperiment] | None
 

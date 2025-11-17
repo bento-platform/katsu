@@ -23,6 +23,7 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 
+from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE
 from chord_metadata_service.restapi.tests.constants import (
     VALID_INDIVIDUALS,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST,
@@ -610,10 +611,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def test_a_few_json_responses_phenopackets(self):
         p, d, individuals, phenopackets = make_two_individuals_with_phenopackets()
 
-        res = self.dt_authz_full_get(self.url)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-        self.assertDictEqual(res.json(), {
+        full_res = {
             "results_entity": "phenopacket",
             "results": [
                 {
@@ -621,6 +619,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     "subject": str(individuals[0].id),
                     "biosamples": [{
                         "id": str(phenopackets[0].biosamples.first().id),
+                        "individual_id": str(phenopackets[0].subject_id),
                         "experiments": [],
                         "phenopacket": str(phenopackets[0].id),
                     }],
@@ -632,6 +631,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     "subject": str(individuals[1].id),
                     "biosamples": [{
                         "id": str(phenopackets[1].biosamples.first().id),
+                        "individual_id": str(phenopackets[1].subject_id),
                         "experiments": [],
                         "phenopacket": str(phenopackets[1].id),
                     }],
@@ -644,7 +644,19 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                 "page_size": 25,
                 "total": 2,
             },
-        })
+        }
+
+        full_response_page_sizes = [None, 2, 25, 0]  # page sizes
+
+        for page_size in full_response_page_sizes:
+            with self.subTest(params=(page_size,)):
+                res = self.dt_authz_full_get(
+                    f"{self.url}?_page_size={page_size}" if page_size is not None else self.url
+                )
+                self.assertEqual(res.status_code, status.HTTP_200_OK)
+                expected_res = deepcopy(full_res)
+                expected_res["pagination"]["page_size"] = page_size if page_size is not None else DEFAULT_PAGE_SIZE
+                self.assertDictEqual(res.json(), expected_res)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_phenopackets_pagination(self):
@@ -661,6 +673,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     "subject": str(individuals[1].id),
                     "biosamples": [{
                         "id": str(phenopackets[1].biosamples.first().id),
+                        "individual_id": str(phenopackets[1].subject_id),
                         "experiments": [],
                         "phenopacket": str(phenopackets[1].id),
                     }],
@@ -691,6 +704,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                         {
                             "biosamples": [{
                                 "id": str(phenopackets[1].biosamples.first().id),
+                                "individual_id": str(phenopackets[1].subject_id),
                                 "experiments": [],
                                 "phenopacket": str(phenopackets[1].id),
                             }],
@@ -707,6 +721,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                         {
                             "biosamples": [{
                                 "id": str(phenopackets[0].biosamples.first().id),
+                                "individual_id": str(phenopackets[0].subject_id),
                                 "experiments": [],
                                 "phenopacket": str(phenopackets[0].id),
                             }],

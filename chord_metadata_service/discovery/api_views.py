@@ -357,6 +357,7 @@ async def get_censored_entity_counts(
     *,
     lg: BoundLogger,
     query: DiscoveryQuery | None = None,
+    qqs: QueryQuerysetsCache | None = None,
     return_raw_counts: Literal[False] = False,
 ) -> EntityCountOrBoolResponse: ...
 
@@ -368,6 +369,7 @@ async def get_censored_entity_counts(
     *,
     lg: BoundLogger,
     query: DiscoveryQuery | None,
+    qqs: QueryQuerysetsCache | None,
     return_raw_counts: Literal[True],
 ) -> tuple[EntityCounts, EntityCountOrBoolResponse]: ...
 
@@ -378,6 +380,7 @@ async def get_censored_entity_counts(
     *,
     lg: BoundLogger,
     query: DiscoveryQuery | None = None,
+    qqs: QueryQuerysetsCache | None = None,
     return_raw_counts: bool = False,
 ) -> EntityCountOrBoolResponse | tuple[EntityCounts, EntityCountOrBoolResponse]:
     """
@@ -403,6 +406,7 @@ async def get_censored_entity_counts(
         dt_permissions: Data type permissions for authorization
         lg: Logger instance for structured logging
         query: Optional discovery query with filters/FTS (defaults to empty query)
+        qqs: An existing instance of QueryQuerysetsCache, if one is available; otherwise, one will be created
         return_raw_counts: If True, return tuple of (raw_counts, censored_counts) for logging
 
     Returns:
@@ -410,8 +414,8 @@ async def get_censored_entity_counts(
         If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)
     """
     query = query or EMPTY_DISCOVERY_QUERY
+    qqs = qqs or QueryQuerysetsCache(query, scope, dt_permissions, lg)
 
-    qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
     counts = await discovery_queryset_entity_counts(qqs)
     censored = await censor_entity_counts(scope, counts, dt_permissions, lg)
 
@@ -488,7 +492,7 @@ async def discovery_endpoint(
     # Get both raw counts (for logging) and censored counts (for response)
     # Uses the same shared implementation as Project/Dataset serializers
     counts, count_or_bools_res = await get_censored_entity_counts(
-        scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
+        scope, dt_permissions, lg=lg, query=query, qqs=qqs, return_raw_counts=True
     )
 
     if (
@@ -629,6 +633,7 @@ async def discovery_matches(
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
     lg = lg.bind(pagination=pagination.model_dump(mode="json"))
 
+    matches_page: QuerySet
     if page_size > 0:
         matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
     else:
