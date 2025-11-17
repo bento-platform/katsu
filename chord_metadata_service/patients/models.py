@@ -3,7 +3,7 @@ from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
-from chord_metadata_service.discovery.full_text_search import full_text_search_vector, BaseFTSModel, ToFTSReprMixin
+from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
