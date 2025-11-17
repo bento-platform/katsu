@@ -93,10 +93,12 @@ class QueryQuerysetsCache:
         self._scope: ValidatedDiscoveryScope = scope
         self._dt_permissions: DataTypeDiscoveryPermissions = dt_permissions
 
+        # Cache dictionary for constructed querysets for executed queries
+        # + corresponding locks for accessing/cache manipulation:
         self._queryset_cache: dict[DiscoveryEntity, QueryExecutionResult] = {}
         self._queryset_locks = defaultdict(asyncio.Lock)
 
-        # Cache dictionary (and corresponding locks for accessing/cache manipulation) with:
+        # Cache dictionary for full-text searches (and corresponding locks for accessing/cache manipulation) with:
         #  - keys being (discovery entity, search query)
         #  - values being sets of IDs of objects of the same type as the discovery entity in the key.
         self._fts_cache: dict[tuple[DiscoveryEntity, str], set] = {}
