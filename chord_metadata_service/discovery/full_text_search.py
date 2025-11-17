@@ -23,11 +23,6 @@ VARIATION_DESCRIPTOR_PATH = (*VARIANT_INTERPRETATION_PATH, "variation_descriptor
 
 FTSFieldDescriptor: TypeAlias = list[str] | tuple[list[str], Type[Field]]
 
-
-def _prefix_fts_field_descriptor(prefix: tuple[str, ...], f: FTSFieldDescriptor) -> FTSFieldDescriptor:
-    return [*prefix, *f] if isinstance(f, list) else ([*prefix, *f], f[1])
-
-
 FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] = {
     "phenopacket": (
         ["id"],
@@ -203,5 +198,5 @@ class ToFTSReprMixin:
     values to be then converted to a string by <...>.fts_repr_values_to_str(). This is for full-text search purposes.
     """
 
-    def fts_repr_values(self) -> tuple:
+    def fts_repr_values(self) -> tuple:  # pragma no cover
         return ()
