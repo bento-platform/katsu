@@ -83,9 +83,6 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTS
                                      help_text="The vital status of the individual e.g. whether they are alive or"
                                                " the time and cause of death")
 
-    # to be used for full-text/trigram search only; not the source of truth!
-    # vital_status_fts = models.TextField(blank=True, null=False, default="")
-
     sex = models.CharField(choices=SEX, max_length=200, blank=True, null=True,
                            help_text='Observed apparent sex of the individual.')
     karyotypic_sex = models.CharField(choices=KARYOTYPIC_SEX, max_length=200, default=KaryotypicSex.UNKNOWN_KARYOTYPE,

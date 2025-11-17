@@ -152,8 +152,6 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "instrument"),
         related_name="experiments",
     )
-    # to be used for full-text/trigram search only; not the source of truth!
-    # instrument_fts = models.TextField(blank=True, null=False, default="")
     # EXTRA
     extra_properties = JSONField(
         blank=True,
