@@ -1,10 +1,9 @@
 from django.apps import apps
-from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
-from chord_metadata_service.discovery.full_text_search import full_text_search_vector
+from chord_metadata_service.discovery.full_text_search import full_text_search_vector, BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
@@ -12,7 +11,7 @@ from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontol
 from .values import PatientStatus, Sex, KaryotypicSex
 
 
-class VitalStatus(BaseTimeStamp, IndexableMixin):
+class VitalStatus(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
 
     VITAL_STATUS = PatientStatus.as_django_values()
     status = models.CharField(choices=VITAL_STATUS, max_length=200, blank=True, null=False)
@@ -24,12 +23,13 @@ class VitalStatus(BaseTimeStamp, IndexableMixin):
     survival_time_in_days = models.IntegerField(blank=True, null=True, help_text="Number of days the patient was alive"
                                                                                  " after their primary diagnosis")
 
+    def fts_repr_values(self) -> tuple:
+        # Don't include survival_time_in_days - it's just a context-free integer.
+        return self.status, self.time_of_death, self.cause_of_death
 
-class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, IndexableMixin):
+
+class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTSModel, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
-
-    class Meta:
-        indexes = [GinIndex(full_text_search_vector("individual", include_m2m=False), name="individual_fts_gin_idx")]
 
     @property
     def schema_type(self) -> SchemaType:
@@ -74,7 +74,7 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexab
 
     time_at_last_encounter = models.JSONField(blank=True, null=True,
                                               validators=[
-                                                JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)
+                                                  JsonSchemaValidator(schema_ref=SchemaRefs.TIME_ELEMENT_SCHEMA)
                                               ],
                                               help_text="TimeElement of the patient when last encountered.")
 
@@ -82,6 +82,9 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexab
                                      related_name="individuals",
                                      help_text="The vital status of the individual e.g. whether they are alive or"
                                                " the time and cause of death")
+
+    # to be used for full-text/trigram search only; not the source of truth!
+    # vital_status_fts = models.TextField(blank=True, null=False, default="")
 
     sex = models.CharField(choices=SEX, max_length=200, blank=True, null=True,
                            help_text='Observed apparent sex of the individual.')
@@ -92,9 +95,16 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexab
     gender = JSONField(blank=True, null=True, validators=[ontology_validator],
                        help_text='Self-identified gender')
 
+    # ------------------------------------------------------------------------------------------------------------------
+
     # extra
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def get_fts_extra(self) -> tuple:
+        return (self.vital_status,)
 
     def __str__(self):
         return str(self.id)

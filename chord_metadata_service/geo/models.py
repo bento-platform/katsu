@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 
+from chord_metadata_service.discovery.full_text_search import ToFTSReprMixin
 from chord_metadata_service.restapi.models import BaseTimeStamp
 from chord_metadata_service.restapi.validators import base_extra_properties_validator
 
@@ -13,7 +14,7 @@ __all__ = [
 ]
 
 
-class GeoLocation(BaseTimeStamp):
+class GeoLocation(BaseTimeStamp, ToFTSReprMixin):
     """
     Model describing a specific geographical location. Heavily inspired by the Progenetix GeoLocation schema block:
     https://schemablocks.org/schema_pages/Progenetix/GeoLocation/
@@ -48,6 +49,9 @@ class GeoLocation(BaseTimeStamp):
     )
 
     # ------------------------------------------------------------------------------------------------------------------
+
+    def fts_repr_values(self) -> tuple:
+        return self.label, self.city, self.country, self.iso_a3_code, self.precision, self.extra_properties
 
     def __str__(self):
         # noinspection PyTypeChecker

@@ -1,10 +1,9 @@
 from django.apps import apps
-from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.discovery.full_text_search import full_text_search_vector
+from chord_metadata_service.discovery.full_text_search import full_text_search_vector, BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel, TOP_LEVEL_MODEL_SCOPE_FILTERS
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.geo import models as geo_models
@@ -29,7 +28,7 @@ from .validators import vrs_variation_validator
 #############################################################
 
 
-class MetaData(BaseTimeStamp):
+class MetaData(BaseTimeStamp, ToFTSReprMixin):
     """
     Class to store structured definitions of the resources
     and ontologies used within the phenopacket
@@ -53,6 +52,10 @@ class MetaData(BaseTimeStamp):
     def __str__(self):
         return str(self.id)
 
+    def fts_repr_values(self) -> tuple:
+        # TODO: support resources?
+        return self.created_by, self.submitted_by, self.updates, self.external_references, self.extra_properties
+
 
 #############################################################
 
@@ -64,7 +67,7 @@ class MetaData(BaseTimeStamp):
 #############################################################
 
 
-class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
+class PhenotypicFeature(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
     """
     Class to describe a phenotype of an Individual
 
@@ -100,8 +103,21 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin):
     def __str__(self):
         return str(self.id)
 
+    def fts_repr_values(self) -> tuple:
+        return (
+            self.description,
+            self.pftype,
+            "excluded" if self.excluded else None,  # FTS booleans are not useful, inject a useful term
+            self.severity,
+            self.modifiers,
+            self.onset,
+            self.resolution,
+            self.evidence,
+            self.extra_properties,
+        )
 
-class Disease(BaseTimeStamp, IndexableMixin):
+
+class Disease(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
     """
     Class to represent a diagnosis and inference or hypothesis about the cause
     underlying the observed phenotypic abnormalities
@@ -126,16 +142,26 @@ class Disease(BaseTimeStamp, IndexableMixin):
     def __str__(self):
         return str(self.id)
 
+    def fts_repr_values(self) -> tuple:
+        return (
+            self.term,
+            "excluded" if self.excluded else None,  # FTS booleans are not useful, inject a useful term
+            self.onset,
+            self.resolution,
+            self.disease_stage,
+            self.clinical_tnm_finding,
+            self.primary_site,
+            self.laterality,
+            self.extra_properties,
+        )
 
-class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeableModel):
+
+class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin, BaseScopeableModel):
     """
     Class to describe a unit of biological material
 
     FHIR: Specimen
     """
-
-    class Meta:
-        indexes = [GinIndex(full_text_search_vector("biosample", include_m2m=False), name="biosample_fts_gin_idx")]
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -231,6 +257,12 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
             return None
         return phenopackets.first().get_project_id()
 
+    def get_fts_extra(self) -> tuple:
+        return (
+            self.location_collected,
+            *(pf for pf in self.phenotypic_features.all()),
+        )
+
 
 #############################################################
 #                                                           #
@@ -238,7 +270,7 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, IndexableMixin, BaseScopeabl
 #                                                           #
 #############################################################
 
-class GeneDescriptor(BaseTimeStamp):
+class GeneDescriptor(BaseTimeStamp, ToFTSReprMixin):
     # Corresponds to GeneDescriptor.value_id field in schema
     value_id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.GENE_DESCRIPTOR, "value_id"))
     symbol = models.CharField(max_length=200, blank=True, help_text=rec_help(d.GENE_DESCRIPTOR, "symbol"))
@@ -252,11 +284,22 @@ class GeneDescriptor(BaseTimeStamp):
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
 
+    def fts_repr_values(self) -> tuple:
+        return (
+            self.value_id,
+            self.symbol,
+            self.description,
+            self.alternate_symbols,
+            self.xrefs,
+            self.alternate_symbols,
+            self.extra_properties,
+        )
+
     def __str__(self) -> str:
         return str(self.value_id)
 
 
-class VariationDescriptor(BaseTimeStamp):
+class VariationDescriptor(BaseTimeStamp, ToFTSReprMixin):
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.VARIANT_DESCRIPTOR, "id"))
     variation = models.JSONField(blank=True, null=True, help_text=rec_help(d.VARIANT_DESCRIPTOR, "variation"),
                                  validators=[vrs_variation_validator])
@@ -287,11 +330,29 @@ class VariationDescriptor(BaseTimeStamp):
     allelic_state = models.JSONField(blank=True, null=True, validators=[
         ontology_validator], help_text=rec_help(d.VARIANT_DESCRIPTOR, "allelic_state"))
 
+    def fts_repr_values(self) -> tuple:
+        return (
+            self.id,
+            self.variation,
+            self.label,
+            self.description,
+            self.gene_context,
+            self.expressions,
+            self.vcf_record,
+            self.xrefs,
+            self.alternate_labels,
+            self.extensions,
+            self.molecule_context,
+            self.structural_type,
+            self.vrs_ref_allele_seq,
+            self.allelic_state,
+        )
+
     def __str__(self) -> str:
         return str(self.id)
 
 
-class VariantInterpretation(BaseTimeStamp):
+class VariantInterpretation(BaseTimeStamp, ToFTSReprMixin):
     # Acmg pathogenicity classification choices
     NOT_PROVIDED = 'NOT_PROVIDED'
     BENIGN = 'BENIGN'
@@ -328,11 +389,18 @@ class VariantInterpretation(BaseTimeStamp):
     variation_descriptor = models.ForeignKey(VariationDescriptor, on_delete=models.CASCADE,
                                              help_text=rec_help(d.VARIANT_INTERPRETATION, "variant"))
 
+    def fts_repr_values(self) -> tuple:
+        return (
+            self.acmg_pathogenicity_classification,
+            self.therapeutic_actionability,
+            self.variation_descriptor,
+        )
+
     def __str__(self) -> str:
         return str(self.id)
 
 
-class GenomicInterpretation(BaseTimeStamp):
+class GenomicInterpretation(BaseTimeStamp, ToFTSReprMixin):
     """
     Class to represent a statement about the contribution
     of a genomic element towards the observed phenotype
@@ -375,6 +443,9 @@ class GenomicInterpretation(BaseTimeStamp):
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
 
+    def fts_repr_values(self) -> tuple:
+        return self.interpretation_status, self.gene_descriptor, self.variant_interpretation, self.extra_properties
+
     def clean(self):
         if not (self.gene_descriptor or self.variant_interpretation):
             raise ValidationError('Either Gene or Variant must be specified')
@@ -385,7 +456,7 @@ class GenomicInterpretation(BaseTimeStamp):
         return str(self.id)
 
 
-class Diagnosis(BaseTimeStamp):
+class Diagnosis(BaseTimeStamp, ToFTSReprMixin):
     """
     Class to refer to disease that is present in the individual analyzed
 
@@ -400,11 +471,14 @@ class Diagnosis(BaseTimeStamp):
     extra_properties = JSONField(
         blank=True, null=True, help_text='Extra properties that are not supported by current schema')
 
+    def fts_repr_values(self) -> tuple:
+        return self.id, self.disease, self.genomic_interpretations.all(), self.extra_properties
+
     def __str__(self):
         return str(self.id)
 
 
-class Interpretation(BaseTimeStamp):
+class Interpretation(BaseTimeStamp, ToFTSReprMixin):
     """
     Class to represent the interpretation of a genomic analysis
 
@@ -432,6 +506,9 @@ class Interpretation(BaseTimeStamp):
     extra_properties = JSONField(blank=True, null=True,
                                  help_text='Extra properties that are not supported by current schema')
 
+    def fts_repr_values(self) -> tuple:
+        return self.id, self.progress_status, self.diagnosis, self.summary, self.extra_properties
+
     def __str__(self):
         return str(self.id)
 
@@ -442,7 +519,7 @@ class Interpretation(BaseTimeStamp):
 #                                                           #
 #############################################################
 
-class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, IndexableMixin):
+class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTSModel, IndexableMixin):
     """
     Class to aggregate Individual's experiments data
 
@@ -453,7 +530,6 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
         constraints = [
             models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
         ]
-        indexes = [GinIndex(full_text_search_vector("phenopacket", include_m2m=False), name="phenopacket_fts_gin_idx")]
 
     @property
     def schema_type(self) -> SchemaType:
@@ -470,6 +546,8 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
             return project.identifier
         except ObjectDoesNotExist:
             return None
+
+    # ------------------------------------------------------------------------------------------------------------------
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.PHENOPACKET, "id"))
     subject = models.ForeignKey(
@@ -508,8 +586,20 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, Indexa
 
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
+
+    # ------------------------------------------------------------------------------------------------------------------
+
     dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def get_fts_extra(self) -> tuple:
+        return (
+            *(it for it in self.interpretations.all().prefetch_related("diagnosis__genomic_interpretations")),
+            *(ds for ds in self.diseases.all()),
+            *(pf for pf in self.phenotypic_features.all()),
+        )
 
     def __str__(self):
         return str(self.id)

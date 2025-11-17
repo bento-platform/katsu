@@ -1,8 +1,7 @@
-from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import CharField, JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.discovery.full_text_search import full_text_search_vector
+from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.scopeable_model import (
     BaseScopeableModel,
     TOP_LEVEL_MODEL_SCOPE_FILTERS,
@@ -28,7 +27,7 @@ __all__ = ["Experiment", "ExperimentResult", "Instrument"]
 # model for the desired purposes.
 
 
-class Experiment(BaseScopeableModel, IndexableMixin):
+class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     """
     Class to store Experiment information. This model is primarily designed for genomic experiments; it is thus
     linked to a specific biosample.
@@ -37,9 +36,6 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     may be derived from multiple experiments. Consider, for example, the results of a pairwise analysis derived from
     two Experiments, each of which was performed on a different Biosample.
     """
-
-    class Meta:
-        indexes = [GinIndex(full_text_search_vector("experiment", include_m2m=False), name="experiment_fts_gin_idx")]
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -156,6 +152,8 @@ class Experiment(BaseScopeableModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "instrument"),
         related_name="experiments",
     )
+    # to be used for full-text/trigram search only; not the source of truth!
+    # instrument_fts = models.TextField(blank=True, null=False, default="")
     # EXTRA
     extra_properties = JSONField(
         blank=True,
@@ -166,18 +164,17 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def get_fts_extra(self) -> tuple:
+        # avoid circular 'dependencies' here - don't include biosample
+        return (self.instrument,)
+
     def __str__(self):
         return str(self.id)
 
 
-class ExperimentResult(BaseScopeableModel, IndexableMixin):
-    class Meta:
-        indexes = [
-            GinIndex(
-                full_text_search_vector("experiment_result", include_m2m=False),
-                name="experiment_result_gin_idx",
-            ),
-        ]
+class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -273,11 +270,13 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    # ------------------------------------------------------------------------------------------------------------------
+
     def __str__(self):
         return str(self.identifier)
 
 
-class Instrument(models.Model, IndexableMixin):
+class Instrument(models.Model, IndexableMixin, ToFTSReprMixin):
     """Class to represent information about instrument used to perform a sequencing experiment."""
 
     # TODO identifier assigned by lab (?)
@@ -316,3 +315,6 @@ class Instrument(models.Model, IndexableMixin):
 
     def __str__(self):
         return str(self.id)
+
+    def fts_repr_values(self) -> tuple:
+        return self.identifier, self.device, self.device_ontology, self.description, self.extra_properties

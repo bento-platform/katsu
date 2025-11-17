@@ -93,7 +93,7 @@ class BiosampleSerializer(GenericSerializer):
 
     class Meta:
         model = Biosample
-        fields = '__all__'
+        exclude = ("fts_extra",)
 
     def create(self, validated_data):
         if (
@@ -231,7 +231,7 @@ class SimplePhenopacketSerializer(GenericSerializer):
 
     class Meta:
         model = Phenopacket
-        fields = '__all__'
+        exclude = ("fts_extra",)
 
     def to_representation(self, instance):
         """"
