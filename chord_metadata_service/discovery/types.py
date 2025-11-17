@@ -14,6 +14,7 @@ __all__ = [
     "DiscoveryResponseFormat",
     "AcceptedDiscoveryResponseFormats",
     "AnyFieldDefinition",
+    "FTSType",
 ]
 
 
@@ -37,3 +38,8 @@ DiscoveryResponseFormat = Literal["json", "csv"]
 AcceptedDiscoveryResponseFormats: TypeAlias = frozenset[DiscoveryResponseFormat]
 
 AnyFieldDefinition: TypeAlias = FieldDefinition | NumberFieldDefinition | StringFieldDefinition | DateFieldDefinition
+
+# Full-text search type; see:
+#  - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
+#  - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
+FTSType: TypeAlias = Literal["plain", "phrase", "websearch"]
