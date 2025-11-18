@@ -31,7 +31,7 @@ def normalize_field_path_true_model(
         # TODO: remove old experiment path in a future version:
         case ("biosample", ("experiment" | "experiments", *rest)):  # "experiment" is old name, "experiments" is new
             return normalize_field_path_true_model("experiment", tuple(rest))
-        case ("experiment", ("biosamples", *rest)):
+        case ("experiment", ("biosample", *rest)):
             return normalize_field_path_true_model("biosample", tuple(rest))
         case ("experiment", ("experiment_results", *rest)):
             return normalize_field_path_true_model("experiment_result", tuple(rest))
