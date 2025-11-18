@@ -127,7 +127,9 @@ def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
     return SearchVector(*args)
 
 
-ONTOLOGY_CLASS_KEYS = frozenset({"id", "label"})
+AGE_KEY = frozenset({"age"})
+ISO_8601_DURATION_KEY = frozenset({"iso8601duration"})
+UNHELPFUL_KEYS = frozenset({"id", "description", "label", "ontology_class"})
 
 
 class FTSHelpersMixin:
@@ -141,13 +143,18 @@ class FTSHelpersMixin:
         on v to get the values to include in its stringification.
         """
 
-        if isinstance(v, dict) and frozenset(v.keys()) == ONTOLOGY_CLASS_KEYS:  # duck-type as ontology class
-            return f"{v['id']} {v['label']}"
+        if isinstance(v, dict):
+            items = []
+            for kk, vv in v.items():
+                if kk not in UNHELPFUL_KEYS:
+                    items.append(kk)
+                items.append(vv)
+            return cls.fts_repr_values_to_str(*items)
         elif isinstance(v, ToFTSReprMixin):
             return cls.fts_repr_values_to_str(*v.fts_repr_values())
         elif isinstance(v, list) or isinstance(v, tuple):
             return cls.fts_repr_values_to_str(*v)
-        return str(v)
+        return str(v).strip()
 
     @classmethod
     def fts_repr_should_be_skipped(cls, v) -> bool:
