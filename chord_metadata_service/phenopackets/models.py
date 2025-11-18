@@ -18,6 +18,7 @@ from chord_metadata_service.restapi.validators import (
     ontology_list_validator
 )
 from . import descriptions as d
+from .utils import time_element_to_str
 from .validators import vrs_variation_validator
 
 
@@ -110,8 +111,8 @@ class PhenotypicFeature(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
             "excluded" if self.excluded else None,  # FTS booleans are not useful, inject a useful term
             self.severity,
             self.modifiers,
-            self.onset,
-            self.resolution,
+            time_element_to_str(self.onset),
+            time_element_to_str(self.resolution),
             self.evidence,
             self.extra_properties,
         )
@@ -146,8 +147,8 @@ class Disease(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
         return (
             self.term,
             "excluded" if self.excluded else None,  # FTS booleans are not useful, inject a useful term
-            self.onset,
-            self.resolution,
+            time_element_to_str(self.onset),
+            time_element_to_str(self.resolution),
             self.disease_stage,
             self.clinical_tnm_finding,
             self.primary_site,
@@ -599,6 +600,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
             *(it for it in self.interpretations.all().prefetch_related("diagnosis__genomic_interpretations")),
             *(ds for ds in self.diseases.all()),
             *(pf for pf in self.phenotypic_features.all()),
+            self.meta_data,
         )
 
     def __str__(self):
