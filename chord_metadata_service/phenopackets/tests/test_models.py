@@ -39,13 +39,6 @@ class BiosampleTest(ProjectTestCase):
         # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
 
-    def test_phenopacket_without_individual(self):
-        m.Phenopacket.objects.create(
-            id="phenopacket_id:2",
-            meta_data=self.meta_data,
-            dataset=self.dataset,
-        )
-
     def test_biosample(self):
         biosample_one = m.Biosample.objects.get(
             tumor_progression__label='Primary Malignant Neoplasm',
@@ -225,9 +218,19 @@ class MetaDataTest(TestCase):
         self.metadata.resources.set([self.resource_1, self.resource_2])
 
     def test_metadata(self):
-        metadata = m.MetaData.objects.get(created_by__icontains='victor')
+        metadata = m.MetaData.objects.get(created_by__icontains="victor")
         self.assertEqual(metadata.submitted_by, c.VALID_META_DATA_2["submitted_by"])
         self.assertEqual(metadata.resources.count(), 2)
+        self.assertTupleEqual(
+            metadata.fts_repr_values(),
+            (
+                c.VALID_META_DATA_2["created_by"],
+                c.VALID_META_DATA_2["submitted_by"],
+                c.VALID_META_DATA_2["updates"],
+                c.VALID_META_DATA_2["external_references"],
+                None,
+            )
+        )
 
     def test_metadata_str(self):
         self.assertEqual(str(self.metadata), str(self.metadata.id))
@@ -237,6 +240,8 @@ class PhenopacketTest(ProjectTestCase):
     """ Test module for Phenopacket model """
 
     def setUp(self):
+        self.maxDiff = None
+
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
@@ -265,6 +270,19 @@ class PhenopacketTest(ProjectTestCase):
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
 
+        # force back-populate FTS representations
+        self.phenopacket.save()
+
+    def test_phenopacket_without_individual(self):
+        obj = m.Phenopacket.objects.create(
+            id="phenopacket_id:2",
+            meta_data=self.meta_data,
+            dataset=self.dataset,
+        )
+
+        # should be populated with metadata stuff
+        self.assertEqual(obj.fts_extra, "David Lougheed David Lougheed")
+
     def test_phenopacket(self):
         phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")
         self.assertEqual(len(phenopacket), 1)
@@ -273,6 +291,22 @@ class PhenopacketTest(ProjectTestCase):
         instance = phenopacket.get()
         self.assertEqual(instance.schema_type, SchemaType.PHENOPACKET)
         self.assertEqual(instance.get_project_id(), self.project.identifier)
+        self.assertEqual(
+            instance.fts_extra,
+            (
+                "interpretation:1 IN_PROGRESS interpretation:1 OMIM:164400 Spinocerebellar ataxia 1 comment test data "
+                "Test interpretation comment test data OMIM:164400 Spinocerebellar ataxia 1 P25Y3M2D P28Y3M2D "
+                "NCIT:C48233 Cancer TNM Finding by Site NCIT:C28091 Gleason Score 7 comment test data This is a test "
+                "phenotypic feature HP:0000520 Proptosis excluded HP:0012825 Mild HP:0012825 Mild HP:0012823 Semi-mild "
+                "Congenital onset (HP:0003577) reference PMID:30962759 Recurrent Erythema Nodosum in a Child with a "
+                "SHOC2 Gene Mutation evidence_code ECO:0006017 Author statement from published clinical study used in "
+                "manual assertion comment test data datatype symptom This is a test phenotypic feature HP:0000520 "
+                "Proptosis excluded HP:0012825 Mild HP:0012825 Mild HP:0012823 Semi-mild Congenital onset (HP:0003577) "
+                "reference PMID:30962759 Recurrent Erythema Nodosum in a Child with a SHOC2 Gene Mutation evidence_code"
+                " ECO:0006017 Author statement from published clinical study used in manual assertion comment test data"
+                " datatype symptom David Lougheed David Lougheed"
+            ),
+        )  # should be populated with interpretations + diseases + phenotypic features + metadata stuff
 
     def test_filtering(self):
         f = PhenopacketFilter()

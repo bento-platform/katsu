@@ -498,16 +498,16 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
         },
         excluded=True,
         severity={
-            "id": "HP: 0012825",
+            "id": "HP:0012825",
             "label": "Mild"
         },
         modifiers=[
             {
-                "id": "HP: 0012825 ",
+                "id": "HP:0012825",
                 "label": "Mild"
             },
             {
-                "id": "HP: 0012823 ",
+                "id": "HP:0012823",
                 "label": "Semi-mild"
             }
         ],
@@ -541,7 +541,7 @@ def invalid_phenotypic_feature():
         description='This is a test phenotypic feature',
         excluded=True,
         severity={
-            "id": "HP: 0012825",
+            "id": "HP:0012825",
             "label": "Mild"
         },
         modifiers=[
@@ -549,7 +549,7 @@ def invalid_phenotypic_feature():
                 "label": "Mild"
             },
             {
-                "id": "HP: 0012823 "
+                "id": "HP:0012823"
             }
         ],
         onset={
