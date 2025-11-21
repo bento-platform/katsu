@@ -507,8 +507,8 @@ def valid_phenotypic_feature(biosample=None, phenopacket=None):
                 "label": "Mild"
             },
             {
-                "id": "HP:0012823",
-                "label": "Semi-mild"
+                "id": "HP:0012826",
+                "label": "Moderate"
             }
         ],
         onset={
