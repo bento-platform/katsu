@@ -191,6 +191,9 @@ class BaseFTSModel(models.Model, FTSHelpersMixin):
         abstract = True
 
     def get_fts_extra(self) -> tuple:
+        # This will in general be overridden to return a mixture of fields from the current model, and other model
+        # objects (which can be thought of as "sub-models" of this main model, e.g., a phenotypic feature) that
+        # themselves implement the below ToFTSReprMixin class, allowing them to specify their own FTS fields/values.
         return ()
 
     def populate_fts_extra(self):
@@ -203,6 +206,9 @@ class ToFTSReprMixin:
     """
     Mixin class for Django models implementing <...>.fts_repr_values(), which converts a model instance to a list of
     values to be then converted to a string by <...>.fts_repr_values_to_str(). This is for full-text search purposes.
+
+    In general, the Django models implementing this mixin are NOT discovery entity models, but rather "sub-models"
+    (non-top-level concepts) linked from discovery entity models.
     """
 
     def fts_repr_values(self) -> tuple:  # pragma no cover
