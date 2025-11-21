@@ -11,6 +11,8 @@ class Command(BaseCommand):
         for e, m in DISCOVERY_ENTITY_NAMES_TO_MODEL.items():
             self.stdout.write(f"Working on entity {e}\n")
 
+            # prefetch/selected related in all cases for performance while populating fts_extra
+
             qs = m.objects.all()
             if e == "biosample":
                 qs = qs.prefetch_related("phenotypic_features").select_related("location_collected")

@@ -445,6 +445,7 @@ class GenomicInterpretation(BaseTimeStamp, ToFTSReprMixin):
                                  help_text='Extra properties that are not supported by current schema')
 
     def fts_repr_values(self) -> tuple:
+        # foreign keys here are recursively populated, see chord_metadata_service.discovery.full_text_search
         return self.interpretation_status, self.gene_descriptor, self.variant_interpretation, self.extra_properties
 
     def clean(self):

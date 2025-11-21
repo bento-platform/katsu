@@ -150,7 +150,7 @@ class FTSHelpersMixin:
                     items.append(kk)
                 items.append(vv)
             return cls.fts_repr_values_to_str(*items)
-        elif isinstance(v, ToFTSReprMixin):
+        elif isinstance(v, ToFTSReprMixin):  # helps recursively populate fts_extra fields
             return cls.fts_repr_values_to_str(*v.fts_repr_values())
         elif isinstance(v, list) or isinstance(v, tuple):
             return cls.fts_repr_values_to_str(*v)

@@ -38,7 +38,7 @@ def get_field_django_mapping_and_queried_entity(
     are the field with their possible joins through tables relations.
     Returns a tuple of (
         the Django string representation of the field for this object relative to the queryset entity,
-        a specification for executing an Exists(...) subqueyr IF crossing a many-to-many or many-to-one boundary,
+        a specification for executing an Exists(...) subquery IF crossing a many-to-many or many-to-one boundary,
         the queried entity name,
     )
     Can raise django.core.exceptions.FieldDoesNotExist if the field mapping does not correspond to a real model field.
