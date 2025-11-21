@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.test import TestCase
 
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.discovery.full_text_search import FTSHelpersMixin
 from chord_metadata_service.geo.models import GeoLocation
 from chord_metadata_service.geo.tests.constants import GEO_LOCATION_1
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
@@ -115,10 +116,23 @@ class PhenotypicFeatureTest(TestCase):
         self.assertEqual(len(result), 2)
 
 
+class GeneDescriptorTest(TestCase):
+    def setUp(self):
+        self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
+
+    def test_gene_descriptor_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.gene_descriptor.fts_repr_values()),
+            "HGNC:347 ETF1 ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data",
+        )
+
+
 class GenomicInterpretationTest(TestCase):
     """ Test module for GenomicInterpretation model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
         self.variant_descriptor = m.VariationDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
         self.variant_interpretation = m.VariantInterpretation.objects.create(
@@ -135,8 +149,24 @@ class GenomicInterpretationTest(TestCase):
         with self.assertRaises(ValidationError):
             m.GenomicInterpretation.objects.create(**c.valid_genomic_interpretation()).clean()
 
+    def test_variant_descriptor_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.variant_descriptor),
+            "clinvar:13294 syntax hgvs value NM_001848.2:c.877G\u003eA GENO:0000135 heterozygous",
+        )
+
     def test_genomic_interpretation_str(self):
         self.assertEqual(str(self.genomic_interpretation), str(self.genomic_interpretation.id))
+
+    def test_genomic_interpretation_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.genomic_interpretation),
+            (
+                "CANDIDATE HGNC:347 ETF1 ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data NOT_PROVIDED"
+                " UNKNOWN_ACTIONABILITY clinvar:13294 syntax hgvs value NM_001848.2:c.877G\u003eA GENO:0000135 "
+                "heterozygous comment test data"
+            ),
+        )
 
 
 class DiagnosisTest(TestCase):

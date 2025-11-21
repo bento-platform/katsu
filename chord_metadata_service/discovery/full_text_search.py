@@ -173,6 +173,8 @@ class FTSHelpersMixin:
         Given a list of full-text search values, convert them into a string, skipping anything that doesn't make sense
         to include (e.g., context-free integers/booleans).
         """
+        if len(args) == 1 and isinstance(args[0], ToFTSReprMixin):
+            args = args[0].fts_repr_values()
         return " ".join(map(cls.fts_repr_value_to_str, filter(lambda x: not cls.fts_repr_should_be_skipped(x), args)))
 
 
