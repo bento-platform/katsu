@@ -276,10 +276,9 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def assert_scoped_fields(
         self, overview_response: dict, discovery: DiscoveryConfig, expected_fields: set[str] | None = None
     ):
-        self.assertSetEqual(
-            set(field for field in overview_response["fields"].keys()),
-            set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields,
-        )
+        response_fields = set(field for field in overview_response["fields"].keys())
+        chart_fields = set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields
+        self.assertSetEqual(response_fields, chart_fields)
 
     def test_empty_discovery(self):
         res = self.dt_authz_full_get(self.url)
@@ -324,8 +323,8 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             ("?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
         ]
 
-        for params in subtest_params:
-            with self.subTest(params=params):
+        for i, params in enumerate(subtest_params):
+            with self.subTest(params=(i, *params)):
                 qp, expected_status_code, discovery, dts = params
                 url = f"{self.url}{qp}"
 
@@ -347,7 +346,8 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     #   no fields have counts permissions, so we don't get any fields back
                     self.assert_scoped_fields(res_json, discovery, expected_fields=set())
 
-                # with counts permissions, we should get the expected status code + (if success) censored counts
+                # with counts permissions, we should get the expected status code + (if success) censored counts, but we
+                # may be missing some fields
 
                 res = self.dt_get("counts", url)
                 self.assertEqual(res.status_code, expected_status_code)
@@ -356,9 +356,16 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     res_json = res.json()
                     self.assertIsInstance(res_json, dict)
                     self.assert_counts_censored(res_json, discovery, dts)
+
+                    expected_fields = set(discovery.get_chart_field_ids())
+                    if not res_json["counts"].get("biosample"):
+                        # remove biosample fields from expected response if biosamples censored
+                        expected_fields -= {"tissues", "diagnostic_markers"}
+
                     self.assert_scoped_fields(res_json, discovery)
 
-                # with full permissions, we should get the expected status code + (if success) uncensored counts
+                # with full permissions, we should get the expected status code + (if success) uncensored counts plus
+                # all scoped field responses
 
                 res = self.dt_get("full", url)
                 self.assertEqual(res.status_code, expected_status_code)
@@ -367,14 +374,30 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     res_json = res.json()
                     self.assertIsInstance(res_json, dict)
                     self.assert_counts_not_censored(res_json, dts)
-                    self.assert_scoped_fields(res_json, discovery)
+                    self.assert_scoped_fields(res_json, discovery)  # should have all fields, even ones with 0-counts
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_project_dataset(self):
         # SCOPE: project_a + dataset_a
         response = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_a}")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assert_scoped_fields(response.json(), self.dataset_a.discovery)
+        res_json = response.json()
+        discovery = self.dataset_a.discovery
+        # we only have two biosamples, so any fields involving them (tissues, diagnostic_markers) or experiments
+        # (theoretically) gets censored.
+        self.assert_scoped_fields(
+            res_json,
+            discovery,
+            expected_fields=set(discovery.get_chart_field_ids()) - {"tissues", "diagnostic_markers"},
+        )
+        # because we only have two biosamples, counts of biosamples + entities nested under (experiments)
+        self.assertDictEqual(res_json["counts"], {
+            "phenopacket": 8,
+            "individual": 8,
+            "biosample": 0,
+            "experiment": 0,
+            "experiment_result": 0,
+        })
 
         # SCOPE: project_a + dataset_b (invalid)
         response_invalid = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
