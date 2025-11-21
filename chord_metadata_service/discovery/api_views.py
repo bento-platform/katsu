@@ -19,6 +19,7 @@ from rest_framework.response import Response
 from structlog.stdlib import BoundLogger
 from typing import Any, Awaitable, Callable, Literal, overload
 
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions
@@ -530,26 +531,38 @@ async def discovery_endpoint(
         scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
     )
 
-    # Raw per-dataset counts: dataset_id -> {entity -> count}
-    counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(
-        qqs
-    )
+    # -- Per-dataset counts (permissions-dependent) -------------------------------------------------------------------
 
-    # Censor per-dataset counts
-    counts_by_dataset_res: dict[str, EntityCountOrBoolResponse] = await censor_entity_counts_by_dataset(
-        scope,
-        counts_by_dataset_raw,
-        dt_permissions,
-        lg,
-    )
+    counts_by_dataset_res: dict[str, EntityCountOrBoolResponse] = {}
 
-    # When we expose per-dataset counts, recompute the top-level counts from the
-    # censored per-dataset view to avoid residual disclosure (total - sum(others)).
-    if counts_by_dataset_res:
-        count_or_bools_res = aggregate_counts_from_censored_by_dataset(
-            counts_by_dataset_res,
-            count_or_bools_res,
+    ds_level_permissions = await get_data_type_query_permissions(
+        request,
+        list(DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE.values()),
+        dataset_level=True,
+    )
+    has_ds_level_counts_permission = any(p.counts for p in ds_level_permissions.values())
+
+    if has_ds_level_counts_permission:
+        # Raw per-dataset counts: dataset_id -> {entity -> count}
+        counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(
+            qqs
         )
+
+        # Censor per-dataset counts using the same logic as for top-level counts
+        counts_by_dataset_res = await censor_entity_counts_by_dataset(
+            scope,
+            counts_by_dataset_raw,
+            dt_permissions,
+            lg,
+        )
+
+        # When we expose per-dataset counts, recompute the top-level counts from the
+        # censored per-dataset view to avoid residual disclosure (total - sum(others)).
+        if counts_by_dataset_res:
+            count_or_bools_res = aggregate_counts_from_censored_by_dataset(
+                counts_by_dataset_res,
+                count_or_bools_res,
+            )
 
     if (
         not count_or_bools_res[queryset_entity]
