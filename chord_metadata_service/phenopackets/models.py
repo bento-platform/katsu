@@ -478,7 +478,7 @@ class Diagnosis(BaseTimeStamp, ToFTSReprMixin):
         blank=True, null=True, help_text='Extra properties that are not supported by current schema')
 
     def fts_repr_values(self) -> tuple:
-        return self.id, self.disease, self.genomic_interpretations.all(), self.extra_properties
+        return self.id, self.disease, *(gi for gi in self.genomic_interpretations.all()), self.extra_properties
 
     def __str__(self):
         return str(self.id)
