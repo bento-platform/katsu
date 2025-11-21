@@ -294,7 +294,7 @@ class GeneDescriptor(BaseTimeStamp, ToFTSReprMixin):
             self.value_id,
             self.symbol,
             self.description,
-            self.alternate_symbols,
+            self.alternate_ids,
             self.xrefs,
             self.alternate_symbols,
             self.extra_properties,

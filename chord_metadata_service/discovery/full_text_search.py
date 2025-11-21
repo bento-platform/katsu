@@ -12,6 +12,7 @@ __all__ = [
     "FULL_TEXT_SEARCH_FIELDS",
     "full_text_search_vector",
     "BaseFTSModel",
+    "FTSHelpersMixin",
     "ToFTSReprMixin",
 ]
 
