@@ -264,6 +264,10 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
             *(pf for pf in self.phenotypic_features.all()),
         )
 
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
+
 
 #############################################################
 #                                                           #
@@ -603,6 +607,10 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
             *(pf for pf in self.phenotypic_features.all()),
             self.meta_data,
         )
+
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.id)

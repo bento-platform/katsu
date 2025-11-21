@@ -103,5 +103,9 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTS
     def get_fts_extra(self) -> tuple:
         return (self.vital_status,)
 
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return str(self.id)

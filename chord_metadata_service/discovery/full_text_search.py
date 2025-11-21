@@ -193,10 +193,10 @@ class BaseFTSModel(models.Model, FTSHelpersMixin):
     def get_fts_extra(self) -> tuple:
         return ()
 
-    def save(self, *args, **kwargs):
+    def populate_fts_extra(self):
         vals = self.get_fts_extra()
         self.fts_extra = self.fts_repr_values_to_str(*vals) if vals else ""
-        super().save(*args, **kwargs)
+        # must call save()!
 
 
 class ToFTSReprMixin:

@@ -168,6 +168,10 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         # avoid circular 'dependencies' here - don't include biosample
         return (self.instrument,)
 
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return str(self.id)
 
@@ -269,6 +273,10 @@ class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     updated = models.DateTimeField(auto_now=True)
 
     # ------------------------------------------------------------------------------------------------------------------
+
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return str(self.identifier)
