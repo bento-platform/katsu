@@ -358,11 +358,16 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     self.assert_counts_censored(res_json, discovery, dts)
 
                     expected_fields = set(discovery.get_chart_field_ids())
+
+                    if not res_json["counts"].get("phenopacket"):
+                        expected_fields -= {"measurement_tumor_length"}
+                    if not res_json["counts"].get("individual"):
+                        expected_fields -= {"age", "sex"}
                     if not res_json["counts"].get("biosample"):
                         # remove biosample fields from expected response if biosamples censored
                         expected_fields -= {"tissues", "diagnostic_markers"}
 
-                    self.assert_scoped_fields(res_json, discovery)
+                    self.assert_scoped_fields(res_json, discovery, expected_fields=expected_fields)
 
                 # with full permissions, we should get the expected status code + (if success) uncensored counts plus
                 # all scoped field responses
