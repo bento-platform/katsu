@@ -507,10 +507,19 @@ def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Indivi
             bios.append(ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(ind_obj)))
         elif i == 1:
             bios.append(ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(ind_obj)))
+
         md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         phe_obj = ph_m.Phenopacket.objects.create(id=f"phe-{i}", dataset=d, subject=ind_obj, meta_data=md)
         phe_obj.biosamples.set(bios)
         phe_obj.save()
+
+        if i == 0:
+            # set up one phenotypic feature and one disease for the first phenopacket
+            ph_m.PhenotypicFeature.objects.create(**ph_c.valid_phenotypic_feature(phenopacket=phe_obj))
+
+            disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
+            phe_obj.diseases.set([disease])
+
         phenopackets.append(phe_obj)
 
     return str(p.identifier), str(d.identifier), individuals, phenopackets
@@ -520,6 +529,9 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def setUp(self):
         self.url = reverse("discovery-matches")
         self.maxDiff = None
+
+        self.csv_disease = "Spinocerebellar ataxia 1 (P25Y3M2D)"
+        self.csv_cr_sub = "David Lougheed,David Lougheed"
 
     @staticmethod
     def _rn_newline(x: str) -> str:
@@ -775,12 +787,13 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
         res = self.dt_authz_full_get(f"{self.url}?_format=csv")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+        sp = "Homo sapiens"
         self.assertEqual(
             res.content.decode("utf-8"),
             self._rn_newline(
                 f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
-phe-0,ind:NA19648,FEMALE,Homo sapiens,katsu.biosample_id:1 [wall of urinary bladder],,David Lougheed,David Lougheed,{d}
-phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,David Lougheed,David Lougheed,{d}
+phe-0,ind:NA19648,FEMALE,{sp},katsu.biosample_id:1 [wall of urinary bladder],{self.csv_disease},{self.csv_cr_sub},{d}
+phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d}
 """
             )  # CSVs use \r\n line endings here
         )
@@ -795,7 +808,7 @@ phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,David Loug
             res.content.decode("utf-8"),
             self._rn_newline(
                 f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
-phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,David Lougheed,David Lougheed,{d}
+phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d}
 """
             )  # CSVs use \r\n line endings here
         )
@@ -811,7 +824,7 @@ phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,David Loug
             self._rn_newline(
                 f"""Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,Updated
 ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{_iso(i1.created)},{_iso(i1.updated)}
-ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,,{_iso(i0.created)},{_iso(i0.updated)}
+ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.created)},{_iso(i0.updated)}
 """
             )  # CSVs use \r\n line endings here
         )

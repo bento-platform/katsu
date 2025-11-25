@@ -1,4 +1,10 @@
-from bento_lib.discovery import DiscoveryEntity
+from bento_lib.discovery import (
+    DateFieldDefinition,
+    DiscoveryEntity,
+    FieldDefinition,
+    NumberFieldDefinition,
+    StringFieldDefinition,
+)
 from typing import Literal, NotRequired, TypeAlias, TypedDict
 
 __all__ = [
@@ -7,6 +13,8 @@ __all__ = [
     "EntityCountOrBoolResponse",
     "DiscoveryResponseFormat",
     "AcceptedDiscoveryResponseFormats",
+    "AnyFieldDefinition",
+    "FTSType",
 ]
 
 
@@ -28,3 +36,10 @@ EntityCountOrBoolResponse: TypeAlias = dict[DiscoveryEntity, int | bool]
 
 DiscoveryResponseFormat = Literal["json", "csv"]
 AcceptedDiscoveryResponseFormats: TypeAlias = frozenset[DiscoveryResponseFormat]
+
+AnyFieldDefinition: TypeAlias = FieldDefinition | NumberFieldDefinition | StringFieldDefinition | DateFieldDefinition
+
+# Full-text search type; see:
+#  - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
+#  - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
+FTSType: TypeAlias = Literal["plain", "phrase", "websearch"]

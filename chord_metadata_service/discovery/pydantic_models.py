@@ -6,7 +6,7 @@ from rest_framework.request import Request as DrfRequest
 from typing import TypeAlias, Literal
 
 from chord_metadata_service.experiments.types import ExperimentResultFileFormat
-from .types import EntityCountOrBoolResponse
+from .types import EntityCountOrBoolResponse, FTSType
 
 __all__ = [
     "BinWithValue",
@@ -202,7 +202,15 @@ class DiscoveryQuery(BaseModel):
     from query parameters minus project/dataset, but this could be extended in the future.
     """
 
-    fts: str | None
+    # Full text search query + search type. We cap the maximum FTS query length to something reasonable to prevent
+    # unlimited-length queries taking up too much memory with any caching we may do.
+    # See:
+    #  - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
+    #  - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
+    fts: str | None = Field(..., title="Full-text search query", max_length=256)
+    fts_type: FTSType = Field(default="plain", title="Full-text search query type")
+
+    # Filter query parameters. Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
     filters: dict[str, str]
 
     def queried_filter_fields(self) -> list[str]:
@@ -230,7 +238,7 @@ class DiscoveryQuery(BaseModel):
             # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
         }
 
-        return cls(fts=params.get("_fts") or None, filters=filters)
+        return cls(fts=params.get("_fts") or None, fts_type=params.get("_fts_type") or "plain", filters=filters)
 
 
 class DiscoveryUIHintsResponse(BaseModel):

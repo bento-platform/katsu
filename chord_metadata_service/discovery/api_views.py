@@ -6,8 +6,9 @@ from asgiref.sync import sync_to_async
 from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
+from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
@@ -33,8 +34,9 @@ from . import responses as dres
 from .censorship import get_rules, thresholded_count, censor_entity_counts
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryScopeException
+from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .fields_utils import normalize_field_path_true_model
+from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
@@ -55,7 +57,9 @@ from .pydantic_models import (
 )
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
-from .types import EntityCountOrBoolResponse, EntityCounts, DiscoveryResponseFormat, AcceptedDiscoveryResponseFormats
+from .types import (
+    EntityCountOrBoolResponse, EntityCounts, DiscoveryResponseFormat, AcceptedDiscoveryResponseFormats, FTSType
+)
 from .utils import (
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
@@ -88,10 +92,39 @@ class QueryQuerysetsCache:
         self._query: DiscoveryQuery = query
         self._scope: ValidatedDiscoveryScope = scope
         self._dt_permissions: DataTypeDiscoveryPermissions = dt_permissions
+
+        # Cache dictionary for constructed querysets for executed queries
+        # + corresponding locks for accessing/cache manipulation:
         self._queryset_cache: dict[DiscoveryEntity, QueryExecutionResult] = {}
         self._queryset_locks = defaultdict(asyncio.Lock)
 
+        # Cache dictionary for full-text searches (and corresponding locks for accessing/cache manipulation) with:
+        #  - keys being (discovery entity, search query)
+        #  - values being sets of IDs of objects of the same type as the discovery entity in the key.
+        self._fts_cache: dict[tuple[DiscoveryEntity, str], set] = {}
+        self._fts_cache_locks = defaultdict(asyncio.Lock)
+
         self._logger: BoundLogger = lg
+
+    async def _get_fts_ids(self, fts_entity: DiscoveryEntity, query: str, fts_type: FTSType) -> set:
+        """
+        Given a discovery entity to execute a full-text search on, a full-text query search string, and a full-text
+        search query type, this function executes the search and caches matching IDs in the _fts_cache private property
+        of the object for use in executing a discovery query.
+        """
+        k = (fts_entity, query)
+        qs = get_discovery_entity_model_scoped_queryset(fts_entity, self._scope)
+        async with self._fts_cache_locks[k]:
+            if k not in self._fts_cache:
+                self._fts_cache[k] = await build_id_set(
+                    (
+                        qs
+                        .annotate(search=full_text_search_vector(fts_entity))
+                        .filter(search=SearchQuery(query, search_type=fts_type))
+                    ),
+                    field="id",
+                )
+            return self._fts_cache[k]
 
     async def _execute_discovery_query(
         self, queryset_entity: DiscoveryEntity, lg: BoundLogger | None, validate_field: bool
@@ -99,14 +132,25 @@ class QueryQuerysetsCache:
         queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
 
         if fts := self._query.fts:
-            ids_set = await build_id_set(
-                queryset.annotate(search=full_text_search_vector(queryset_entity)).filter(search=fts),
-                field="id",
-            )
+            # Each entity has a corresponding FTS vector we'll use, but querying using this doesn't query across
+            # discovery entity boundaries. In order to get result sets for, e.g., phenopackets (with biosamples being
+            # the entity with actual FTS matches), we need to build a query for the queryset checking nested biosamples
+            # overlap with the ID set.
+            ids_set = await self._get_fts_ids(queryset_entity, fts, self._query.fts_type)
+            fts_filters = Q(pk__in=ids_set)
+            for entity in DISCOVERY_ENTITIES - {queryset_entity}:
+                e_ids_set = await self._get_fts_ids(entity, fts, self._query.fts_type)
+                epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
+                fts_filters |= Q(**{f"{epk}__in": e_ids_set})
+
+            # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
+            #  or something. Although we currently have the same issue with filters, so we'll need to do some grand
+            #  unified thing for this.
+
             # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
             #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
             #    join? it's unclear, but for now we just do this ugly thing instead.
-            queryset = queryset.filter(id__in=ids_set)
+            queryset = queryset.filter(fts_filters)
 
         # May raise:
         #  - DiscoveryEmptyException
@@ -138,11 +182,14 @@ class QueryQuerysetsCache:
         async with self._queryset_locks[entity]:
             if entity not in self._queryset_cache:
                 await (lg or self._logger).adebug(
-                    "QueryQuerysetsCache executing query", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
+                    "QueryQuerysetsCache executing query",
+                    entity=entity,
+                    query=self._query,
+                    cache_keys=tuple(self._queryset_cache.keys()),
                 )
-                res = await self._execute_discovery_query(entity, lg, validate_field=validate_field)
-                self._queryset_cache[entity] = res
-                return res
+                self._queryset_cache[entity] = await self._execute_discovery_query(
+                    entity, lg, validate_field=validate_field
+                )
 
             return self._queryset_cache[entity]
 
@@ -533,6 +580,8 @@ async def discovery_matches(
 
     Query parameters:
       /^[^_].*$/: Discovery field filters, like discovery_endpoint above
+      _fts:       Full-text search (FTS) query
+      _fts_type:  FTS query type (from Django, see DiscoveryQuery model for more information). Default: 'plain'.
       _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
@@ -545,6 +594,10 @@ async def discovery_matches(
         parameter except "project", "dataset", and those starting with "_" and tries to find fields to query.
         By separating the namespace for discovery filter query parameters from "other" query parameters by prefixing
         other query parameters with _, we eliminate possible ambiguities between discovery fields.
+
+    Links for full-text search type:
+      - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
+      - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
     """
 
     # -- Response format -----------------------------------------------------------------------------------------------

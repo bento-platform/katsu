@@ -22,3 +22,4 @@ MODEL_ATTRS_TO_PREDEF_PROPS = {
 }
 
 MODEL_PREDEF_PROPS_TO_ATTRS = {v: k for k, v in MODEL_ATTRS_TO_PREDEF_PROPS.items()}
+MODEL_PREDEF_PROPS_TO_ATTRS["iso3166alpha3"] = "iso_a3_code"  # lowercase alternate name for country code

@@ -168,7 +168,7 @@ def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Bi
 
     if isinstance(bs_loc_json := bs.get("location_collected"), dict):
         bs_obj.location_collected = get_or_create_geo_location(bs_loc_json)
-        bs_obj.save()
+        # will be saved below
 
     if derived_from_id := bs.get("derived_from_id"):
         try:
@@ -186,6 +186,11 @@ def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Bi
         bs_obj.phenotypic_features.set(bs_pfs)
 
     # TODO: Update phenotypic features otherwise?
+
+    # this bs_obj.save() call does two things:
+    #  - saves location_collected, if set
+    #  - populates the fts_extra field with the latest data (phenotypic features)
+    bs_obj.save()
 
     return bs_obj
 
@@ -441,6 +446,9 @@ def ingest_phenopacket(
     phenopacket.interpretations.set(interpretations_db)
     phenopacket.biosamples.set(biosamples_db)
     phenopacket.diseases.set(diseases_db)
+
+    # ... and re-save it, to populate the fts_extra field from the above related models
+    phenopacket.save()
 
     return phenopacket
 

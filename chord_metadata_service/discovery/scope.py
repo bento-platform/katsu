@@ -69,6 +69,9 @@ class ValidatedDiscoveryScope:
     def __repr__(self):
         return f"<ValidatedDiscoveryScope project={self.project_id} dataset={self.dataset_id}>"
 
+    def __hash__(self):
+        return hash(f"{self.project_id or ''}|{self.dataset_id or ''}")
+
     def _get_project_discovery_or_fallback(self) -> DiscoveryConfig:
         if self._project and (d := self._project.discovery):
             return d

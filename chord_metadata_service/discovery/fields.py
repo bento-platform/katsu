@@ -16,7 +16,7 @@ from chord_metadata_service.authz.types import DataPermissions
 
 from . import fields_utils as f_utils
 from .censorship import censor_count, thresholded_count
-from .fields_utils import DiscoveryFieldSubquery
+from .field_paths.django_field_query import DiscoveryFieldSubquery, get_field_django_mapping_and_queried_entity
 from .scope import ValidatedDiscoveryScope
 from .pydantic_models import BinWithValue, BinList
 from .stats import stats_for_field
@@ -407,7 +407,7 @@ async def filter_queryset_field_value(
 
     # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
     #   model
-    field, subquery, queried_entity = f_utils.get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
+    field, subquery, queried_entity = get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
 
     # TODO: resolve schema including extra properties
 

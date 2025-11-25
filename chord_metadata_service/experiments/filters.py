@@ -49,7 +49,7 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = ExperimentResult
-        exclude = ["creation_date", "created", "updated"]
+        exclude = ["creation_date", "created", "updated", "fts_extra"]
 
     def filter_indices(self, qs, name, value):
         return qs.filter(indices__icontains=value)

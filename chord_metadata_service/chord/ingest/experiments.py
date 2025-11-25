@@ -120,7 +120,7 @@ def ingest_experiment(
     # create related instrument
     instrument_db = create_instrument(instrument)
 
-    # create new experiment
+    # create new experiment - create(...) calls save(...), which automatically populates fts_extra
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
         study_type=study_type,

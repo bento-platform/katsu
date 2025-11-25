@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import CharField, JSONField
 from django.contrib.postgres.fields import ArrayField
+from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.scopeable_model import (
     BaseScopeableModel,
     TOP_LEVEL_MODEL_SCOPE_FILTERS,
@@ -26,7 +27,7 @@ __all__ = ["Experiment", "ExperimentResult", "Instrument"]
 # model for the desired purposes.
 
 
-class Experiment(BaseScopeableModel, IndexableMixin):
+class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     """
     Class to store Experiment information. This model is primarily designed for genomic experiments; it is thus
     linked to a specific biosample.
@@ -161,11 +162,22 @@ class Experiment(BaseScopeableModel, IndexableMixin):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def get_fts_extra(self) -> tuple:
+        # avoid circular 'dependencies' here - don't include biosample
+        return (self.instrument,)
+
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return str(self.id)
 
 
-class ExperimentResult(BaseScopeableModel, IndexableMixin):
+class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
+
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return {
@@ -260,11 +272,17 @@ class ExperimentResult(BaseScopeableModel, IndexableMixin):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def save(self, *args, **kwargs):
+        self.populate_fts_extra()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return str(self.identifier)
 
 
-class Instrument(models.Model, IndexableMixin):
+class Instrument(models.Model, IndexableMixin, ToFTSReprMixin):
     """Class to represent information about instrument used to perform a sequencing experiment."""
 
     # TODO identifier assigned by lab (?)
@@ -303,3 +321,6 @@ class Instrument(models.Model, IndexableMixin):
 
     def __str__(self):
         return str(self.id)
+
+    def fts_repr_values(self) -> tuple:
+        return self.identifier, self.device, self.device_ontology, self.description, self.extra_properties

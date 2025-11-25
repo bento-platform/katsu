@@ -16,6 +16,9 @@ class ExperimentTest(ExperimentTestCase):
         e.full_clean()
         e.save()
 
+    def test_fts_extra(self):
+        self.assertEqual(self.experiment.fts_extra, "")
+
     def test_str_rep(self):
         self.assertEqual(str(self.experiment), self.experiment.id)
 
