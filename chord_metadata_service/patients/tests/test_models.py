@@ -3,7 +3,7 @@ from chord_metadata_service.phenopackets.tests import constants as c
 from chord_metadata_service.phenopackets import models as m
 from chord_metadata_service.restapi.models import SchemaType
 
-from ..models import Individual
+from ..models import Individual, VitalStatus
 from ..filters import IndividualFilter
 
 
@@ -11,7 +11,10 @@ class IndividualTest(ProjectTestCase):
     """ Test module for Individual model """
 
     def setUp(self):
-        self.individual_one = Individual.objects.create(id='patient:1', sex='FEMALE')
+        self.vs = VitalStatus.objects.create(status="ALIVE")
+        self.individual_one = Individual.objects.create(
+            id='patient:1', sex='FEMALE', vital_status=self.vs, extra_properties={"covid_severity": "Severe"}
+        )
         self.individual_two = Individual.objects.create(id='patient:2', sex='FEMALE')
         self.diseases = [
             m.Disease.objects.create(**c.VALID_DISEASE_1),
@@ -42,6 +45,10 @@ class IndividualTest(ProjectTestCase):
         self.assertEqual(number_of_pf_two, 0)
         self.assertEqual(individual_one.schema_type, SchemaType.INDIVIDUAL)
         self.assertEqual(individual_one.get_project_id(), self.project.identifier)
+
+        # FTS extra representations
+        self.assertEqual(individual_one.fts_extra, "ALIVE")
+        self.assertEqual(individual_two.fts_extra, "")
 
     def test_filtering(self):
         f = IndividualFilter()

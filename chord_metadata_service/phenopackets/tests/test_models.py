@@ -173,6 +173,8 @@ class DiagnosisTest(TestCase):
     """ Test module for Diagnosis model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         # With GeneDescriptor
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
 
@@ -206,6 +208,18 @@ class DiagnosisTest(TestCase):
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
 
+    def test_diagnosis_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.diagnosis),
+            (
+                "interpretation:1 OMIM:164400 Spinocerebellar ataxia 1 CANDIDATE HGNC:347 ETF1 "
+                "ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data NOT_PROVIDED UNKNOWN_ACTIONABILITY "
+                "clinvar:13294 HGNC:347 ETF1 ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data value "
+                "NM_001848.2:c.877G>A syntax hgvs GENO:0000135 heterozygous comment test data CANDIDATE HGNC:347 ETF1 "
+                "ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data comment test data comment test data"
+            ),
+        )
+
     def _test_disease_filter(self, filter: Q, count: int):
         result = m.Diagnosis.objects.all().filter(filter)
         self.assertEqual(result.count(), count)
@@ -215,6 +229,8 @@ class InterpretationTest(TestCase):
     """ Test module for Interpretation model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease_ontology))
         self.meta_data_phenopacket = m.MetaData.objects.create(**c.VALID_META_DATA_1)
@@ -234,6 +250,13 @@ class InterpretationTest(TestCase):
         )
         self.assertEqual(interpretation_qs.count(), 1)
 
+    def test_interpretation_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.interpretation),
+            "interpretation:1 IN_PROGRESS interpretation:1 OMIM:164400 Spinocerebellar ataxia 1 comment test "
+            "data Test interpretation comment test data",
+        )
+
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
 
@@ -242,6 +265,8 @@ class MetaDataTest(TestCase):
     """ Test module for MetaData model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.resource_1 = m.Resource.objects.create(**VALID_RESOURCE_1)
         self.resource_2 = m.Resource.objects.create(**VALID_RESOURCE_2)
         self.metadata = m.MetaData.objects.create(**c.VALID_META_DATA_2)
@@ -251,14 +276,24 @@ class MetaDataTest(TestCase):
         metadata = m.MetaData.objects.get(created_by__icontains="victor")
         self.assertEqual(metadata.submitted_by, c.VALID_META_DATA_2["submitted_by"])
         self.assertEqual(metadata.resources.count(), 2)
+
+    def test_metadata_fts_repr(self):
         self.assertTupleEqual(
-            metadata.fts_repr_values(),
+            self.metadata.fts_repr_values(),
             (
                 c.VALID_META_DATA_2["created_by"],
                 c.VALID_META_DATA_2["submitted_by"],
                 c.VALID_META_DATA_2["updates"],
                 c.VALID_META_DATA_2["external_references"],
                 None,
+            )
+        )
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.metadata),
+            (
+                "Victor Rocheleau Victor Rocheleau timestamp 2018-06-10T10:59:06Z updated_by Julius J. comment added "
+                "phenotypic features to individual patient:1 DOI:10.1016/j.jaccas.2020.04.001 reference PMID:32292915 "
+                "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS in a Patient on Durable LVAD Support"
             )
         )
 
@@ -270,7 +305,7 @@ class PhenopacketTest(ProjectTestCase):
     """ Test module for Phenopacket model """
 
     def setUp(self):
-        self.maxDiff = None
+        self.maxDiff = None  # for seeing long string diffs
 
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
