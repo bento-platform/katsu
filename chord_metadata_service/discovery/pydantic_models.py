@@ -216,6 +216,9 @@ class DiscoveryQuery(BaseModel):
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
 
+    def is_empty(self) -> bool:
+        return self.fts is None and len(self.filters) == 0
+
     @classmethod
     def from_drf_request(cls, request: DrfRequest) -> "DiscoveryQuery":
         """
@@ -247,5 +250,5 @@ class DiscoveryUIHintsResponse(BaseModel):
     make the UI nicer by, e.g., selectively hiding parts.
     """
 
-    entities_with_data: list[DiscoveryEntity]
+    entities_with_data: frozenset[DiscoveryEntity]
     # biosample_location_present: bool  TODO

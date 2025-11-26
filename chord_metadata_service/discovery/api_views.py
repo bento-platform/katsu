@@ -111,6 +111,10 @@ class QueryHelper:
         # Cache: entity counts for the scope+permissions+query combination; populated by a call to _get_entity_counts
         self._entity_counts: EntityCounts | None = None
 
+        # Cache: entities with data for the scope (not applying the query);
+        # populated by a call to get_scope_entities_with_data()
+        self._scope_entities_with_data: frozenset[DiscoveryEntity] | None = None
+
         self._logger: BoundLogger = lg
 
     @property
@@ -146,6 +150,8 @@ class QueryHelper:
     ) -> QueryExecutionResult:
         queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
 
+        fts_queried_entities = frozenset()
+
         if fts := self._query.fts:
             # Each entity has a corresponding FTS vector we'll use, but querying using this doesn't query across
             # discovery entity boundaries. In order to get result sets for, e.g., phenopackets (with biosamples being
@@ -166,12 +172,13 @@ class QueryHelper:
             #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
             #    join? it's unclear, but for now we just do this ugly thing instead.
             queryset = queryset.filter(fts_filters)
+            fts_queried_entities = await self.get_scope_entities_with_data()
 
         # May raise:
         #  - DiscoveryEmptyException
         #     although in all cases in these API calls this should be mitigated by an initial empty_discovery(...) check
         #  - ValidationError
-        filtered_queryset, queried_entities = await discovery_filter_queryset(
+        filtered_queryset, filter_queried_entities = await discovery_filter_queryset(
             self._scope,
             self._query,
             queryset_entity,
@@ -181,7 +188,7 @@ class QueryHelper:
             validate_field=validate_field,
         )
 
-        return filtered_queryset, queried_entities
+        return filtered_queryset, fts_queried_entities | filter_queried_entities
 
     async def get_query_queryset_and_queried_entities(
         self,
@@ -284,6 +291,23 @@ class QueryHelper:
             return counts, censored
 
         return censored
+
+    async def get_scope_entities_with_data(self) -> frozenset[DiscoveryEntity]:
+        """
+        Gets all discovery entities with data in the current scope, ignoring the query. This helps the logic for
+        "queried entities" with full-text search (FTS), since entities that aren't present in the current scope should
+        not be listed as being queried by the FTS process.
+        """
+
+        if self._scope_entities_with_data is None:
+            if self._query.is_empty():
+                counts = await self.get_censored_entity_counts()
+            else:
+                qh = QueryHelper(EMPTY_DISCOVERY_QUERY, self.scope, self.dt_permissions, self._logger)
+                counts = await qh.get_censored_entity_counts()
+            self._scope_entities_with_data = frozenset((e for e, v in counts.items() if v))
+
+        return self._scope_entities_with_data
 
 
 def get_accepted_formats(request: DrfRequest) -> AcceptedDiscoveryResponseFormats:
@@ -733,19 +757,19 @@ async def discovery_ui_hints(
 
     # TODO: support querying?
     qh = QueryHelper(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
-    counts = await qh.get_censored_entity_counts()
+    entities_with_data = await qh.get_scope_entities_with_data()
 
-    return Response(DiscoveryUIHintsResponse.model_validate({
+    return Response(DiscoveryUIHintsResponse(
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
         # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
         # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
         # search, but we don't want them
-        "entities_with_data": [e for e, v in counts.items() if v],
+        entities_with_data=entities_with_data,
         # TODO: implement something like this for hinting towards maps
         # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
         #  should present a consolidated map view?
         # "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
-    }))
+    ))
 
 
 @api_view(["GET"])

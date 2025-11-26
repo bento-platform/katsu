@@ -13,8 +13,10 @@ class TestDiscoveryQueryModel(SimpleTestCase):
     def test_queried_filter_fields(self):
         query = DiscoveryQuery(fts=None, filters={})
         self.assertListEqual(query.queried_filter_fields(), [])
+        self.assertTrue(query.is_empty())
         query = DiscoveryQuery(fts=None, filters={"sex": "MALE", "age": "< 10"})
         self.assertListEqual(query.queried_filter_fields(), ["sex", "age"])
+        self.assertFalse(query.is_empty())
 
     def test_construction_from_get_request(self):
         dr = HttpRequest()
@@ -33,6 +35,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         self.assertEqual(fts_q.fts, "'text' | 'text2'")
         self.assertEqual(fts_q.fts_type, "websearch")
         self.assertDictEqual(fts_q.filters, {})
+        self.assertFalse(fts_q.is_empty())
 
         dr = HttpRequest()
         dr.method = "GET"
@@ -41,6 +44,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr))
         self.assertIsNone(filter_q.fts)
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
+        self.assertFalse(filter_q.is_empty())
 
     @staticmethod
     def _mock_json_post(content: dict | list):

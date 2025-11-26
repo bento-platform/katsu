@@ -14,11 +14,15 @@ class QueryHelperTest(TransactionTestCase):
 
     def setUp(self):
         self.fts_query = DiscoveryQuery(fts="cancer", filters={})
-        self.filters_query = DiscoveryQuery(fts=None, filters={"smoking": "Smoker"})
+        self.filters_query = DiscoveryQuery(fts=None, filters={"sex": "MALE"})
         self.scope = ValidatedDiscoveryScope(project=None, dataset=None)
         self.dt_permissions = {
             DATA_TYPE_PHENOPACKET: DataPermissions(bool_=True, counts=True, data=False),
             DATA_TYPE_EXPERIMENT: DataPermissions(bool_=True, counts=True, data=False),
+        }
+        self.dt_permissions_full = {
+            DATA_TYPE_PHENOPACKET: DataPermissions(bool_=True, counts=True, data=True),
+            DATA_TYPE_EXPERIMENT: DataPermissions(bool_=True, counts=True, data=True),
         }
         self.logger = get_logger("query-helper-test")
 
@@ -33,12 +37,11 @@ class QueryHelperTest(TransactionTestCase):
         qh = QueryHelper(self.fts_query, self.scope, self.dt_permissions, self.logger)
         qs, qe = await qh.get_query_queryset_and_queried_entities("phenopacket")
         # TODO: queried entities for FTS?
-        self.assertEqual(qe, frozenset({"TODO"}))
+        self.assertEqual(qe, frozenset({}))
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    async def test_empty_querying_filters(self):
+    async def test_querying_filters_full_perms(self):
         # nothing here
-        qh = QueryHelper(self.filters_query, self.scope, self.dt_permissions, self.logger)
+        qh = QueryHelper(self.filters_query, self.scope, self.dt_permissions_full, self.logger)
         qs, qe = await qh.get_query_queryset_and_queried_entities("phenopacket")
-        print(qs, qe)
         self.assertEqual(qe, frozenset({"individual"}))
