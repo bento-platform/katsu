@@ -434,11 +434,12 @@ async def discovery_field_response(
         # this with relative grace (not show a chart/search field, ...).
         return None
 
-    if not censored_counts[field_entity]:
+    if not censored_counts[field_entity] and not field_perms.data:
         # We can have counts above the threshold for the field entity that then must get censored because a parent
         # entity is being censored due to low counts. For example, with # phenopackets = 3 and # biosamples = 7, the
         # latter clears the censorship threshold but indirectly reveals the presence of phenopackets, so they both must
         # be censored to 0/False.
+        # Of course, if we have the query:data permission for the field, we can safely reveal the true count.
         return None
 
     # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to small cell
