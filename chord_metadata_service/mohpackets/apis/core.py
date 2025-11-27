@@ -211,7 +211,7 @@ class NetworkAuth:
                     service=self.service_name, token=service_token
                 )
                 logger.debug(
-                    f"verify_service_token: {is_valid_token}. X-Service-Token is: {service_token}",
+                    f"verify_service_token: {is_valid_token}. X-Service-Token is: {service_token}. Service is: {self.service_name}",
                     request,
                 )
                 return is_valid_token
