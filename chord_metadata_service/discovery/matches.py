@@ -80,8 +80,16 @@ async def experiment_result_matches(
 ) -> list[MatchExperimentResult]:
     res: list[MatchExperimentResult] = []
     er: em.ExperimentResult
-    async for er in mrm.all():
+    for er in await queryset_or_related_manager_to_list(
+        mrm, prefetch=("experiments", "experiments__dataset", "experiments__biosample__phenopackets")
+    ):
         # noinspection PyUnresolvedReferences
+        first_exp = await (
+            er.experiments.select_related("biosample").prefetch_related("biosample__phenopackets").afirst()
+        )
+        # TODO: n+1?
+        phenopacket = (await first_exp.biosample.phenopackets.afirst()) if first_exp and first_exp.biosample else None
+
         res.append(
             MatchExperimentResult(
                 id=er.id,
@@ -98,13 +106,14 @@ async def experiment_result_matches(
                 created_by=er.created_by,
                 extra_properties=er.extra_properties,
                 # ----------------------------------------------------------------------------------------------------
+                experiments=[v async for v in er.experiments.values_list("id", flat=True)],
+                phenopacket=ctx.get("phenopacket") or (phenopacket.id if phenopacket else None),
+                # ----------------------------------------------------------------------------------------------------
                 **(
                     dict(
-                        project=scope.project_id or str(
-                            (await er.experiments.prefetch_related("dataset").afirst()).dataset.project_id
-                        ),  # TODO: n+1?
+                        project=scope.project_id or (str(first_exp.dataset.project_id) if first_exp else None),
                         # TODO: have a foreign key to dataset directly to not have to do so many lookups
-                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),  # TODO: n+1?
+                        dataset=scope.dataset_id or (str(first_exp.dataset_id) if first_exp else None),
                     )
                     if root else dict()
                 ),
@@ -132,7 +141,11 @@ async def experiment_matches(
                 experiment_type=exp.experiment_type,
                 study_type=exp.study_type,
                 results=await experiment_result_matches(
-                    exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
+                    exp.experiment_results,
+                    scope,
+                    dt_permissions,
+                    False,
+                    {**ctx, "phenopacket": phenopacket.id if phenopacket else None, "experiment": str(exp.id)},
                 ),
                 phenopacket=str(phenopacket.id) if phenopacket else None,
                 **(dict(
