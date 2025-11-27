@@ -14,7 +14,7 @@ class QueryHelperTest(TransactionTestCase):
 
     def setUp(self):
         self.fts_query = DiscoveryQuery(fts="cancer", filters={})
-        self.filters_query = DiscoveryQuery(fts=None, filters={"sex": "MALE"})
+        self.filters_query = DiscoveryQuery(filters={"sex": "MALE"})
         self.scope = ValidatedDiscoveryScope(project=None, dataset=None)
         self.dt_permissions = {
             DATA_TYPE_PHENOPACKET: DataPermissions(bool_=True, counts=True, data=False),

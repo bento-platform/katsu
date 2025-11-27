@@ -71,7 +71,7 @@ is_not_none = partial(is_not, None)
 
 QueryExecutionResult = tuple[QuerySet, frozenset[DiscoveryEntity]]
 
-EMPTY_DISCOVERY_QUERY = DiscoveryQuery(fts=None, filters={})
+EMPTY_DISCOVERY_QUERY = DiscoveryQuery()
 
 
 class QueryHelper:
@@ -152,7 +152,7 @@ class QueryHelper:
 
         fts_queried_entities = frozenset()
 
-        if fts := self._query.fts:
+        if fts := self._query.fts:  # Execute FTS if self._query.fts is not ""
             # Each entity has a corresponding FTS vector we'll use, but querying using this doesn't query across
             # discovery entity boundaries. In order to get result sets for, e.g., phenopackets (with biosamples being
             # the entity with actual FTS matches), we need to build a query for the queryset checking nested biosamples

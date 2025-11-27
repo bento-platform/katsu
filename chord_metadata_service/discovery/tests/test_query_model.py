@@ -10,11 +10,21 @@ from ..pydantic_models import DiscoveryQuery
 
 
 class TestDiscoveryQueryModel(SimpleTestCase):
-    def test_queried_filter_fields(self):
-        query = DiscoveryQuery(fts=None, filters={})
+    def test_empty_queries(self):
+        query = DiscoveryQuery()
         self.assertListEqual(query.queried_filter_fields(), [])
         self.assertTrue(query.is_empty())
-        query = DiscoveryQuery(fts=None, filters={"sex": "MALE", "age": "< 10"})
+
+        query = DiscoveryQuery(filters={})
+        self.assertListEqual(query.queried_filter_fields(), [])
+        self.assertTrue(query.is_empty())
+
+        query = DiscoveryQuery(fts="", filters={})
+        self.assertListEqual(query.queried_filter_fields(), [])
+        self.assertTrue(query.is_empty())
+
+    def test_queried_filter_fields(self):
+        query = DiscoveryQuery(filters={"sex": "MALE", "age": "< 10"})
         self.assertListEqual(query.queried_filter_fields(), ["sex", "age"])
         self.assertFalse(query.is_empty())
 
@@ -42,7 +52,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         dr.GET["sex"] = "MALE"
         dr.GET["age"] = "< 10"
         filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr))
-        self.assertIsNone(filter_q.fts)
+        self.assertEqual(filter_q.fts, "")  # no FTS
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
         self.assertFalse(filter_q.is_empty())
 
@@ -61,7 +71,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
 
     def test_construction_from_post_request(self):
         filter_q = DiscoveryQuery.from_drf_request(self._mock_json_post({"sex": "MALE", "age": "< 10"}))
-        self.assertIsNone(filter_q.fts)
+        self.assertEqual(filter_q.fts, "")  # no FTS
         self.assertEqual(filter_q.fts_type, "plain")  # default
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
 
@@ -84,3 +94,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
             dr.GET["_fts"] = "text"
             DiscoveryQuery.from_drf_request(DrfRequest(dr))
             # Not implemented - method is not GET|POST
+
+    def test_construction_blank_fts_from_request(self):
+        q = DiscoveryQuery.from_drf_request(self._mock_json_post({}))
+        self.assertEqual(q.fts, "")
