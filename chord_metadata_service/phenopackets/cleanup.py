@@ -10,6 +10,10 @@ __all__ = [
     "clean_meta_data",
     "clean_biosamples",
     "clean_phenotypic_features",
+    "clean_interpretations",
+    "clean_diagnoses",
+    "clean_genomic_interpretations",
+    "clean_variant_interpretations",
 ]
 
 
@@ -80,4 +84,11 @@ async def clean_genomic_interpretations(logger: BoundLogger) -> int:
     gi_referenced = await build_id_set_from_model(pm.Diagnosis, "genomic_interpretations__id")
     return await remove_not_referenced(
         pm.GenomicInterpretation, gi_referenced, "genomic interpretations", logger
+    )
+
+
+async def clean_variant_interpretations(logger: BoundLogger) -> int:
+    vis_referenced = await build_id_set_from_model(pm.GenomicInterpretation, "variant_interpretation")
+    return await remove_not_referenced(
+        pm.VariantInterpretation, vis_referenced, "variant interpretations", logger
     )
