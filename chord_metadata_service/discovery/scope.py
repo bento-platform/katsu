@@ -52,6 +52,12 @@ class ValidatedDiscoveryScope:
         # class MUST NOT be mutated.
         self._discovery: DiscoveryConfig | None = None  # If None, not cached yet
 
+    def __eq__(self, other) -> bool:
+        return isinstance(other, ValidatedDiscoveryScope) and all((
+            (self.project_id is None and other.project_id is None) or self.project_id == other.project_id,
+            (self.dataset_id is None and other.dataset_id is None) or self.dataset_id == other.dataset_id,
+        ))
+
     @property
     def project_id(self) -> str | None:
         """

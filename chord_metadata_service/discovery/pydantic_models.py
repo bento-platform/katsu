@@ -3,7 +3,7 @@ import abc
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
 from pydantic import BaseModel, Field, RootModel
 from rest_framework.request import Request as DrfRequest
-from typing import TypeAlias, Literal
+from typing import Literal
 
 from chord_metadata_service.experiments.types import ExperimentResultFileFormat
 from .types import EntityCountOrBoolResponse, FTSType
@@ -145,7 +145,7 @@ class MatchIndividual(BaseMatchModel):
     phenopackets: list[MatchPhenopacket]
 
 
-MatchObject: TypeAlias = (
+type MatchObject = (
     list[MatchPhenopacket] |
     list[MatchIndividual] |
     list[MatchBiosample] |
@@ -203,18 +203,25 @@ class DiscoveryQuery(BaseModel):
     """
 
     # Full text search query + search type. We cap the maximum FTS query length to something reasonable to prevent
-    # unlimited-length queries taking up too much memory with any caching we may do.
+    # unlimited-length queries taking up too much memory with any caching we may do. A blank value for `fts` means no
+    # FTS query will be executed.
     # See:
     #  - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
     #  - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
-    fts: str | None = Field(..., title="Full-text search query", max_length=256)
+    fts: str = Field(default="", title="Full-text search query", max_length=256)
     fts_type: FTSType = Field(default="plain", title="Full-text search query type")
 
     # Filter query parameters. Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
-    filters: dict[str, str]
+    filters: dict[str, str] = Field(default_factory=dict, title="Filters")
 
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
+
+    def is_empty(self) -> bool:
+        """
+        Returns whether the query instance is equivalent to an empty query.
+        """
+        return not self.fts and len(self.filters) == 0
 
     @classmethod
     def from_drf_request(cls, request: DrfRequest) -> "DiscoveryQuery":
@@ -238,7 +245,7 @@ class DiscoveryQuery(BaseModel):
             # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
         }
 
-        return cls(fts=params.get("_fts") or None, fts_type=params.get("_fts_type") or "plain", filters=filters)
+        return cls(fts=params.get("_fts", ""), fts_type=params.get("_fts_type") or "plain", filters=filters)
 
 
 class DiscoveryUIHintsResponse(BaseModel):
@@ -247,5 +254,5 @@ class DiscoveryUIHintsResponse(BaseModel):
     make the UI nicer by, e.g., selectively hiding parts.
     """
 
-    entities_with_data: list[DiscoveryEntity]
+    entities_with_data: frozenset[DiscoveryEntity]
     # biosample_location_present: bool  TODO

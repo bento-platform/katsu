@@ -24,6 +24,15 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
         self.assertEqual(self.project_dataset_scope.project_id, str(self.project.identifier))
         self.assertEqual(self.project_dataset_scope.dataset_id, str(self.dataset.identifier))
 
+    def test_scope_eq(self):
+        self.assertEqual(self.project_scope, ValidatedDiscoveryScope(self.project, None))
+        self.assertEqual(INSTANCE_SCOPE, ValidatedDiscoveryScope(None, None))
+        self.assertEqual(ValidatedDiscoveryScope(None, None), ValidatedDiscoveryScope(None, None))
+        self.assertEqual(self.project_dataset_scope, ValidatedDiscoveryScope(self.project, self.dataset))
+        self.assertNotEqual(INSTANCE_SCOPE, self.project_scope)
+        self.assertNotEqual(INSTANCE_SCOPE, self.project_dataset_scope)
+        self.assertNotEqual(self.project_scope, ValidatedDiscoveryScope(self.project_2, None))
+
     def test_scope_hash(self):
         self.assertEqual(hash(self.instance_scope), hash("|"))
         self.assertEqual(hash(self.project_scope), hash(f"{self.project.identifier}|"))
