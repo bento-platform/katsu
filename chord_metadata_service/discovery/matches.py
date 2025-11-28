@@ -85,7 +85,7 @@ async def experiment_result_matches(
     ):
         # noinspection PyUnresolvedReferences
         first_exp = await (
-            er.experiments.select_related("biosample").prefetch_related("biosample__phenopackets").afirst()
+            er.experiments.select_related("biosample", "dataset").prefetch_related("biosample__phenopackets").afirst()
         )
         # TODO: n+1?
         phenopacket = (await first_exp.biosample.phenopackets.afirst()) if first_exp and first_exp.biosample else None

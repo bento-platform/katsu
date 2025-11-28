@@ -20,11 +20,11 @@ def valid_experiment(biosample, instrument=None, dataset=None, num_experiment=1)
     }
 
 
-def valid_experiment_result():
+def valid_experiment_result(num_exp_res=1):
     return {
-        "identifier": "experiment_result:1",
-        "description": "Test Experiment result 1",
-        "filename": "01.vcf.gz",
+        "identifier": f"experiment_result:{num_exp_res}",
+        "description": f"Test Experiment result {num_exp_res}",
+        "filename": f"0{num_exp_res}.vcf.gz",
         "file_format": "VCF",
         "data_output_type": "Derived data",
         "usage": "download",
