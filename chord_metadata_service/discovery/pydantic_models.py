@@ -101,7 +101,12 @@ class MatchExperimentResult(BaseMatchModel):
     created_by: str | None = Field(..., title="Created by")
     genome_assembly_id: str | None = Field(..., title="Genome assembly ID")
     extra_properties: dict = Field(..., title="Extra properties")
-    # TODO: experiments backlink
+    # backlinks to linked experiments
+    experiments: list[str] = Field(
+        ..., title="Experiment IDs", description="Experiments which link to this experiment result."
+    )
+    # backlink to phenopacket
+    phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 
 class MatchExperiment(BaseMatchModel):
