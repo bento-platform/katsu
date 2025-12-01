@@ -40,7 +40,7 @@ async def export(request: DrfRequest):
 
     res = await authz_middleware.async_evaluate_one(request, RESOURCE_EVERYTHING, P_EXPORT_DATA, mark_authz_done=True)
     if not res:
-        return Response(errors.forbidden_error("Fobidden"), status=status.HTTP_403_FORBIDDEN)
+        return Response(errors.forbidden_error("Forbidden"), status=status.HTTP_403_FORBIDDEN)
 
     # TODO: Schema for OpenAPI doc
 
