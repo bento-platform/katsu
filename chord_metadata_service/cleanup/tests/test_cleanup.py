@@ -124,6 +124,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         self.assertEqual(await pc.clean_diagnoses(logger), 0)
         self.assertEqual(await pc.clean_genomic_interpretations(logger), 0)
         self.assertEqual(await pc.clean_variant_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_variation_descriptors(logger), 0)
         self.assertEqual(await clean_individuals(logger), 0)
         self.assertEqual(await clean_resources(logger), 0)
 
