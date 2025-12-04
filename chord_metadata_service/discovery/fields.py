@@ -18,7 +18,7 @@ from . import fields_utils as f_utils
 from .censorship import censor_count, thresholded_count
 from .field_paths.django_field_query import DiscoveryFieldSubquery, get_field_django_mapping_and_queried_entity
 from .scope import ValidatedDiscoveryScope
-from .pydantic_models import BinWithValue, BinList
+from .pydantic_models import BinWithValue, BinList, DiscoveryQueryFilterOneOf
 from .stats import stats_for_field
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
@@ -392,25 +392,13 @@ def get_condition_for_non_jsonb_field(
         return Q(**{f"{field}__{op}": value for op, value in ops})
 
 
-async def filter_queryset_field_value(
-    queryset_entity: DiscoveryEntity, qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger
-) -> tuple[QuerySet, DiscoveryEntity]:
-    """
-    Further filter a queryset using the field defined by field_props and the
-    given value.
-    It is a prerequisite that the field mapping defined in field_props is represented
-    in the queryset object.
-    `mapping_for_search_filter` is an optional property that gets precedence over `mapping`
-    for the necessity of filtering. It is not necessary to specify this when
-    the `mapping` value is based on the same model as the queryset.
-    """
-
-    # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
-    #   model
-    field, subquery, queried_entity = get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
-
-    # TODO: resolve schema including extra properties
-
+def queryset_field_single_value_condition(
+    queryset_entity: DiscoveryEntity,
+    field: str,
+    field_props: FieldDefinition,
+    value: str,
+    subquery: DiscoveryFieldSubquery | None,
+):
     if field_props.datatype == "string":
         if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
@@ -456,6 +444,41 @@ async def filter_queryset_field_value(
         # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
         # values of `datatype` to the cases above.
         raise NotImplementedError()
+
+    return condition
+
+
+async def filter_queryset_field_value(
+    queryset_entity: DiscoveryEntity,
+    qs: QuerySet,
+    field_props: FieldDefinition,
+    value: str | DiscoveryQueryFilterOneOf,
+    logger: BoundLogger
+) -> tuple[QuerySet, DiscoveryEntity]:
+    """
+    Further filter a queryset using the field defined by field_props and the
+    given value.
+    It is a prerequisite that the field mapping defined in field_props is represented
+    in the queryset object.
+    `mapping_for_search_filter` is an optional property that gets precedence over `mapping`
+    for the necessity of filtering. It is not necessary to specify this when
+    the `mapping` value is based on the same model as the queryset.
+    """
+
+    # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
+    #   model
+    field, subq, queried_entity = get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
+
+    # TODO: resolve schema including extra properties
+
+    if isinstance(value, DiscoveryQueryFilterOneOf):
+        # build the OR query if our filter value is DiscoveryQueryFilterOneOf
+        # TODO: check subquery works here...
+        condition = queryset_field_single_value_condition(queryset_entity, field, field_props, value.values[0], subq)
+        for v in value.values[1:]:
+            condition |= queryset_field_single_value_condition(queryset_entity, field, field_props, v, subq)
+    else:
+        condition = queryset_field_single_value_condition(queryset_entity, field, field_props, value, subq)
 
     await logger.adebug(
         "filtering entity field with condition", entity=queried_entity, field=field, condition=condition

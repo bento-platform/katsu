@@ -29,6 +29,7 @@ __all__ = [
     "DiscoveryMatchesPaginatedResponse",
     "DiscoverySearchSectionWithOptions",
     "DiscoverySearchFieldsResponse",
+    "DiscoveryQueryFilterOneOf",
     "DiscoveryQuery",
     "DiscoveryUIHintsResponse",
 ]
@@ -202,6 +203,11 @@ class DiscoverySearchFieldsResponse(BaseModel):
     sections: list[DiscoverySearchSectionWithOptions]
 
 
+class DiscoveryQueryFilterOneOf(BaseModel):
+    filter_type: Literal["one_of"]  # really more like "one or more of" - essentially Boolean Or for filter values
+    values: list[str] = Field(..., min_length=1)  # must have at least one value specified
+
+
 class DiscoveryQuery(BaseModel):
     """
     Model for discovery filtering queries. Right now, this is just a dictionary of {discovery field ID: value} extracted
@@ -217,8 +223,10 @@ class DiscoveryQuery(BaseModel):
     fts: str = Field(default="", title="Full-text search query", max_length=256)
     fts_type: FTSType = Field(default="plain", title="Full-text search query type")
 
-    # Filter query parameters. Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
-    filters: dict[str, str] = Field(default_factory=dict, title="Filters")
+    # Filter query parameters:
+    #  - Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
+    #  - Values can be either a string, or (with query:data permissions) a more advanced filter structure.
+    filters: dict[str, str | DiscoveryQueryFilterOneOf] = Field(default_factory=dict, title="Filters")
 
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
@@ -240,6 +248,8 @@ class DiscoveryQuery(BaseModel):
             raise NotImplementedError("from_drf_request implemented for GET|POST only")
 
         params = request.query_params if request.method == "GET" else request.data
+
+        # TODO: post JSON - directly validate with Pydantic
 
         # Process query parameters and check validity
         filters: dict[str, str] = {

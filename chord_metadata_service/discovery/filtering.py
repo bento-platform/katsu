@@ -8,7 +8,7 @@ from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, Dat
 from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
 from .fields import get_field_options, filter_queryset_field_value
-from .pydantic_models import DiscoveryQuery
+from .pydantic_models import DiscoveryQueryFilterOneOf, DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
 
@@ -30,7 +30,7 @@ async def validate_field_query_value(
     queryset: QuerySet,
     scope: ValidatedDiscoveryScope,
     field_id: str,
-    value: str,
+    value: str | DiscoveryQueryFilterOneOf,
     field_permissions: DataPermissions
 ):
     """
@@ -47,7 +47,11 @@ async def validate_field_query_value(
         value not in options
         and not (
             # case-insensitive search on categories
-            field_props.datatype == "string" and _in_case_insensitive(value, options)
+            field_props.datatype == "string" and (
+                _in_case_insensitive(value, options)
+                if isinstance(value, str)
+                else all(_in_case_insensitive(v, options) for v in value.values)
+            )
         )
         and not (
             # no restriction when enum is not set for categories
