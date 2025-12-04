@@ -147,6 +147,7 @@ async def experiment_matches(
                     False,
                     {**ctx, "phenopacket": phenopacket.id if phenopacket else None, "experiment": str(exp.id)},
                 ),
+                biosample=str(exp.biosample.id) if exp.biosample else None,
                 phenopacket=str(phenopacket.id) if phenopacket else None,
                 **(dict(
                     project=scope.project_id or str(exp.dataset.project_id),
