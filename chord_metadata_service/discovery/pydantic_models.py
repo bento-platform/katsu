@@ -117,7 +117,8 @@ class MatchExperiment(BaseMatchModel):
     experiment_type: str = Field(..., title="Experiment Type")
     study_type: str = Field(..., title="Study Type")
     results: list[MatchExperimentResult]
-    # backlink:
+    # backlinks:
+    biosample: str | None = Field(..., title="Biosample ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 

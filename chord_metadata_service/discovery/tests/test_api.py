@@ -586,6 +586,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             "experiment_type": "DNA Methylation",
             "study_type": "Whole genome Sequencing",
             "results": [DiscoveryMatchesTest.exp_res_match_dict(biosample, phenopacket, num)],
+            "biosample": str(biosample.id),
             "phenopacket": str(phenopacket.id),
         }
 
