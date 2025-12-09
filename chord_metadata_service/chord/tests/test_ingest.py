@@ -404,3 +404,24 @@ class IngestGenomicInterpretationsTest(ProjectTestCase):
 
         # should have same ID due to re-use:
         self.assertEqual(gi.pk, gi2.pk)
+
+    def test_genomic_interpretation_reuse_behaviour(self):
+        gi = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.biosample.id)},
+            self.individual,
+            self.biosamples,
+        )
+        self.assertEqual(gi.biosample, self.biosample)
+        self.assertIsNone(gi.subject)
+
+        # different because it uses an individual ID instead
+        gi2 = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.individual.id)},
+            self.individual,
+            self.biosamples,
+        )
+        self.assertEqual(gi2.subject, self.individual)
+        self.assertIsNone(gi2.biosample)
+
+        # ... and thus have different primary keys:
+        self.assertNotEqual(gi.pk, gi2.pk)
