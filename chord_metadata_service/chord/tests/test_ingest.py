@@ -425,3 +425,10 @@ class IngestGenomicInterpretationsTest(ProjectTestCase):
 
         # ... and thus have different primary keys:
         self.assertNotEqual(gi.pk, gi2.pk)
+
+    def test_genomic_interpretation_same_id_error(self):
+        ind = Individual.objects.create(**{**pc.VALID_INDIVIDUAL_1, "id": "same-id"})
+        bio = pm.Biosample.objects.create(**{**pc.valid_biosample_1(self.individual), "id": "same-id"})
+
+        with self.assertRaises(IngestError):
+            get_or_create_genomic_interpretation({**self.base_dict, "subject_or_biosample_id": "same-id"}, ind, [bio])
