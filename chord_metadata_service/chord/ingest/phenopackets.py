@@ -265,16 +265,13 @@ def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpre
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
+        **({"subject": related_obj} if is_subject else {}),
+        **({"biosample": related_obj} if is_biosample else {}),
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
         extra_properties=remove_computed_properties(gen_interp.get("extra_properties", {})),
     )
-
-    if related_obj:
-        # Set the link with Biosample/Individual
-        related_obj.genomic_interpretations.add(gen_obj)
-        related_obj.save()
 
     return gen_obj
 
