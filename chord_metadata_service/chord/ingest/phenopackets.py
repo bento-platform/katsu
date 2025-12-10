@@ -12,7 +12,7 @@ from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
-from chord_metadata_service.patients.models import VitalStatus
+from chord_metadata_service.patients.models import Individual, VitalStatus
 from chord_metadata_service.patients.values import KaryotypicSex
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
@@ -238,43 +238,49 @@ def get_or_create_variant_interp(variant_interp_data: dict) -> pm.VariantInterpr
     return variant_interpretation
 
 
-def get_or_create_genomic_interpretation(gen_interp: dict) -> pm.GenomicInterpretation:
-    # Check if a Biosample or Individual with subject_or_biosample_id exists
-    subject_or_biosample_id = gen_interp["subject_or_biosample_id"]
-    is_biosample = pm.Biosample.objects.filter(id=subject_or_biosample_id).exists()
-    is_subject = pm.Individual.objects.filter(id=subject_or_biosample_id).exists()
+def get_or_create_genomic_interpretation(
+    gen_interp: dict, subject: Individual | None, biosamples: list[pm.Biosample]
+) -> pm.GenomicInterpretation:
+    """
+    Given a phenopackets-ish genomic interpretation dictionary and some context from the phenopacket being ingested,
+    create a new GenomicInterpretation ORM object (or re-use an existing one if one matches).
+    """
 
-    if is_biosample and is_subject:
+    # Check if a Biosample or Individual with subject_or_biosample_id matches the phenopacket context passed in via
+    # arguments, since we shouldn't have any genomic interpretations that are trying to describe a phenopacket different
+    # than the one they're in.
+    subject_or_biosample_id = gen_interp["subject_or_biosample_id"]
+    related_biosample = next((b for b in biosamples if str(b.id) == subject_or_biosample_id), None)
+    related_subject = subject if str(subject.id) == subject_or_biosample_id else None
+
+    if related_biosample and related_subject:
         # Cannot be both
         raise IngestError(
             f"Ambiguous GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
             "points to a Biosample AND a Subject. Must point to a Biosample or a Subject, not both.")
-    elif is_biosample:
-        # Get related Biosample
-        related_obj = pm.Biosample.objects.get(id=subject_or_biosample_id)
-    elif is_subject:
-        # Get related Individual
-        related_obj = pm.Individual.objects.get(id=subject_or_biosample_id)
+    elif related_biosample:
+        related_obj = related_biosample
+    elif related_subject:
+        related_obj = related_subject
     else:
         # Cannot be neither
         raise IngestError(
             f"GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
-            "has no matching Biosample or Individual.")
+            "has no matching Biosample or Individual in the phenopacket context.")
 
     gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
 
     gen_obj, _ = pm.GenomicInterpretation.objects.get_or_create(
+        # must be one or the other of these two foreign keys, although this cannot really be modeled in SQL:
+        **({"subject": related_obj} if related_subject else {}),
+        **({"biosample": related_obj} if related_biosample else {}),
+        # ---
         interpretation_status=gen_interp["interpretation_status"],
         gene_descriptor=gene_descriptor,
         variant_interpretation=variant_interpretation,
         extra_properties=remove_computed_properties(gen_interp.get("extra_properties", {})),
     )
-
-    if related_obj:
-        # Set the link with Biosample/Individual
-        related_obj.genomic_interpretations.add(gen_obj)
-        related_obj.save()
 
     return gen_obj
 
@@ -294,19 +300,21 @@ def get_or_create_disease(disease) -> pm.Disease:
     return d_obj
 
 
-def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis | None:
+def get_or_create_interpretation_diagnosis(
+    interpretation: dict, subject: Individual | None, biosamples: list[pm.Biosample]
+) -> pm.Diagnosis | None:
     diagnosis = interpretation.get("diagnosis")
 
     if not diagnosis:
         # No diagnosis to create
-        return
+        return None
 
     # One-to-one relation between Interpretation and Diagnosis.
     # If an Interpretation has a Diagnosis, the created Diagnosis row uses the interpretation's ID as its PK
     # This ensures unique diagnoses if more than one share the same disease/extra_properties
-    id = interpretation.get("id")
+    interpretation_id = interpretation.get("id")
     diag_obj, created = pm.Diagnosis.objects.get_or_create(
-        id=id,
+        id=interpretation_id,
         disease=diagnosis.get("disease", {}),
         extra_properties=remove_computed_properties(diagnosis.get("extra_properties", {})),
     )
@@ -315,7 +323,7 @@ def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis
         # Create GenomicInterpretation
         genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
         genomic_interpretations = [
-            get_or_create_genomic_interpretation(gen_interp)
+            get_or_create_genomic_interpretation(gen_interp, subject, biosamples)
             for gen_interp
             in genomic_interpretations_data
         ]
@@ -323,8 +331,10 @@ def get_or_create_interpretation_diagnosis(interpretation: dict) -> pm.Diagnosis
     return diag_obj
 
 
-def get_or_create_interpretation(interpretation: dict) -> pm.Interpretation:
-    diagnosis = get_or_create_interpretation_diagnosis(interpretation)
+def get_or_create_interpretation(
+    interpretation: dict, subject: Individual | None, biosamples: list[pm.Biosample]
+) -> pm.Interpretation:
+    diagnosis = get_or_create_interpretation_diagnosis(interpretation, subject, biosamples)
     interp_obj, _ = pm.Interpretation.objects.get_or_create(
         id=interpretation["id"],
         diagnosis=diagnosis,
@@ -412,7 +422,10 @@ def ingest_phenopacket(
     # Get or create all resources (ontologies, etc.) in the phenopacket
     resources_db = [ingest_resource(rs) for rs in resources]
 
-    interpretations_db = [get_or_create_interpretation(interp) for interp in interpretations]
+    interpretations_db = [
+        get_or_create_interpretation(interp, subject=subject_obj, biosamples=biosamples_db)
+        for interp in interpretations
+    ]
     diseases_db = [get_or_create_disease(disease) for disease in diseases]
 
     # Create phenopacket metadata object

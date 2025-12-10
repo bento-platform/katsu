@@ -10,6 +10,7 @@ from chord_metadata_service.chord.ingest.experiments import (
 from chord_metadata_service.chord.ingest.schema import schema_validation
 from chord_metadata_service.chord.ingest.phenopackets import (
     get_or_create_phenotypic_feature,
+    get_or_create_genomic_interpretation,
     validate_phenopacket,
     ingest_phenopacket,
 )
@@ -19,8 +20,10 @@ from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_PHENOPACKETS_JSON,
 )
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.models import Biosample, PhenotypicFeature, Phenopacket
+from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
+from chord_metadata_service.phenopackets.tests import constants as pc
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
@@ -54,7 +57,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
             "evidence": []
         })
 
-        p2 = PhenotypicFeature.objects.get(description="test")
+        p2 = pm.PhenotypicFeature.objects.get(description="test")
 
         self.assertEqual(p1.pk, p2.pk)
 
@@ -110,7 +113,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
-        self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
+        self.assertEqual(p.id, pm.Phenopacket.objects.get(id=p.id).id)
 
         # Subject
         self.assertEqual(p.subject.date_of_birth, isoparse(EXAMPLE_INGEST_PHENOPACKET["subject"]["date_of_birth"]))
@@ -252,7 +255,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
-        self.assertEqual(p.id, Phenopacket.objects.get(id=p.id).id)
+        self.assertEqual(p.id, pm.Phenopacket.objects.get(id=p.id).id)
 
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
@@ -276,7 +279,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assertIn(EXAMPLE_INGEST_EXPERIMENT["resources"][0]["id"], [v["id"] for v in Resource.objects.values("id")])
 
         # try ingesting the file with an invalid biosample ID
-        with self.assertRaises(Biosample.DoesNotExist):
+        with self.assertRaises(pm.Biosample.DoesNotExist):
             WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
                 EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.dataset.identifier, logger
             )
@@ -327,10 +330,105 @@ class IngestISOAgeToNumberTest(ProjectTestCase):
         )
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001
-        ind_1 = Phenopacket.objects.get(subject="ind:NA20509001")
+        ind_1 = pm.Phenopacket.objects.get(subject="ind:NA20509001")
         self.assertIsNotNone(ind_1.subject.extra_properties)
         self.assertIsNotNone(ind_1.subject.date_of_birth)
         # test for all individuals
         for phenopacket in ingested_phenopackets:
             self.assertIsNotNone(phenopacket.subject.extra_properties)
             self.assertIsNotNone(ind_1.subject.date_of_birth)
+
+
+class IngestGenomicInterpretationsTest(ProjectTestCase):
+
+    def setUp(self):
+        self.individual = Individual.objects.create(**pc.VALID_INDIVIDUAL_1)
+        self.biosample = pm.Biosample.objects.create(**pc.valid_biosample_1(self.individual))
+        self.biosamples = [self.biosample]
+
+        self.base_dict = pc.valid_genomic_interpretation(
+            pc.VALID_GENE_DESCRIPTOR_1, pc.valid_variant_interpretation(pc.VALID_VARIANT_DESCRIPTOR)
+        )
+
+    def test_genomic_interpretation_missing_fk_ingestion(self):
+        # cannot create a genomic interpretation with a bad subject or biosample attached:
+        with self.assertRaises(IngestError):
+            get_or_create_genomic_interpretation(
+                {**self.base_dict, "subject_or_biosample_id": ""},
+                self.individual,
+                self.biosamples,
+            )
+
+    def test_genomic_interpretation_biosample_ingestion(self):
+        gi = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.biosample.id)},
+            self.individual,
+            self.biosamples,
+        )
+
+        self.assertEqual(gi.biosample, self.biosample)
+        self.assertIsNone(gi.subject)
+
+        # same thing again, should reuse
+        gi2 = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.biosample.id)},
+            self.individual,
+            self.biosamples,
+        )
+
+        self.assertEqual(gi2.biosample, self.biosample)
+        self.assertIsNone(gi2.subject)
+
+        # should have same ID due to re-use:
+        self.assertEqual(gi.pk, gi2.pk)
+
+    def test_genomic_interpretation_subject_ingestion(self):
+        gi = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.individual.id)},
+            self.individual,
+            self.biosamples,
+        )
+
+        self.assertEqual(gi.subject, self.individual)
+        self.assertIsNone(gi.biosample)
+
+        # same thing again, should reuse
+        gi2 = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.individual.id)},
+            self.individual,
+            self.biosamples,
+        )
+
+        self.assertEqual(gi2.subject, self.individual)
+        self.assertIsNone(gi2.biosample)
+
+        # should have same ID due to re-use:
+        self.assertEqual(gi.pk, gi2.pk)
+
+    def test_genomic_interpretation_reuse_behaviour(self):
+        gi = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.biosample.id)},
+            self.individual,
+            self.biosamples,
+        )
+        self.assertEqual(gi.biosample, self.biosample)
+        self.assertIsNone(gi.subject)
+
+        # different because it uses an individual ID instead
+        gi2 = get_or_create_genomic_interpretation(
+            {**self.base_dict, "subject_or_biosample_id": str(self.individual.id)},
+            self.individual,
+            self.biosamples,
+        )
+        self.assertEqual(gi2.subject, self.individual)
+        self.assertIsNone(gi2.biosample)
+
+        # ... and thus have different primary keys:
+        self.assertNotEqual(gi.pk, gi2.pk)
+
+    def test_genomic_interpretation_same_id_error(self):
+        ind = Individual.objects.create(**{**pc.VALID_INDIVIDUAL_1, "id": "same-id"})
+        bio = pm.Biosample.objects.create(**{**pc.valid_biosample_1(self.individual), "id": "same-id"})
+
+        with self.assertRaises(IngestError):
+            get_or_create_genomic_interpretation({**self.base_dict, "subject_or_biosample_id": "same-id"}, ind, [bio])
