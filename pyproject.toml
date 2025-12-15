@@ -36,7 +36,7 @@ bento-lib = {version = "^14.0.4", extras = ["django"]}
 Django = "~5.2.9"
 django-autocomplete-light = "^3.12.1"
 django-cors-headers = "^4.9.0"
-django-filter = "~25.1"
+django-filter = "~25.2"
 djangorestframework = "~3.16.1"
 djangorestframework-camel-case = "^1.4.1"
 drf-spectacular = "^0.29.0"
