@@ -41,6 +41,8 @@ class CreateIndividualTest(AuthzAPITestCase):
         self.valid_payload = c.VALID_INDIVIDUAL
         self.invalid_payload = c.INVALID_INDIVIDUAL
 
+        self.maxDiff = None
+
     def test_create_individual(self):
         """ POST a new individual. """
 
@@ -51,7 +53,15 @@ class CreateIndividualTest(AuthzAPITestCase):
 
         response = self.one_authz_get(reverse('individuals-detail', kwargs={'pk': 'patient:1'}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.json(), self.valid_payload)
+        response_without_ts = response.json()
+        # don't compare timestamps
+        del response_without_ts["created"]
+        del response_without_ts["updated"]
+        rhs = {
+            **self.valid_payload,
+            "karyotypic_sex": "UNKNOWN_KARYOTYPE",  # default value
+        }
+        self.assertDictEqual(response_without_ts, rhs)
 
     def test_create_individual_forbidden(self):
         response = self.one_no_authz_post(reverse('individuals-list'), json=self.valid_payload)
