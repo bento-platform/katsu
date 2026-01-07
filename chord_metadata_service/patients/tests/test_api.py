@@ -66,7 +66,7 @@ class CreateIndividualTest(AuthzAPITestCase):
         }
         self.assertDictEqual(self._without_timestamps(response.json()), rhs)
 
-    def create_individual_no_vital_status(self):
+    def test_create_individual_no_vital_status(self):
         """ POST a new individual without a vital status. """
 
         vp = {**self.valid_payload}
