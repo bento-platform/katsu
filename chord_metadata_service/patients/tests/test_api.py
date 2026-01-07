@@ -43,6 +43,13 @@ class CreateIndividualTest(AuthzAPITestCase):
 
         self.maxDiff = None
 
+    @staticmethod
+    def _without_timestamps(x: dict) -> dict:
+        y = {**x}
+        del y["created"]
+        del y["updated"]
+        return y
+
     def test_create_individual(self):
         """ POST a new individual. """
 
@@ -53,15 +60,29 @@ class CreateIndividualTest(AuthzAPITestCase):
 
         response = self.one_authz_get(reverse('individuals-detail', kwargs={'pk': 'patient:1'}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_without_ts = response.json()
-        # don't compare timestamps
-        del response_without_ts["created"]
-        del response_without_ts["updated"]
         rhs = {
             **self.valid_payload,
             "karyotypic_sex": "UNKNOWN_KARYOTYPE",  # default value
         }
-        self.assertDictEqual(response_without_ts, rhs)
+        self.assertDictEqual(self._without_timestamps(response.json()), rhs)
+
+    def create_individual_no_vital_status(self):
+        """ POST a new individual without a vital status. """
+
+        vp = {**self.valid_payload}
+        del vp["vital_status"]
+        response = self.one_authz_post(reverse('individuals-list'), json=vp)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Individual.objects.count(), 1)
+        self.assertEqual(Individual.objects.get().id, 'patient:1')
+
+        response = self.one_authz_get(reverse('individuals-detail', kwargs={'pk': 'patient:1'}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rhs = {
+            **vp,
+            "karyotypic_sex": "UNKNOWN_KARYOTYPE",  # default value
+        }
+        self.assertDictEqual(self._without_timestamps(response.json()), rhs)
 
     def test_create_individual_forbidden(self):
         response = self.one_no_authz_post(reverse('individuals-list'), json=self.valid_payload)
