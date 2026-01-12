@@ -97,14 +97,14 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
             "search": search_optional_eq(3),
         },
         "experiment_ontology": {
-            "items": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
+            **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
             "search": {"order": 4, "database": {"type": "jsonb"}}
         },
         "molecule": {
             "search": search_optional_eq(5),
         },
         "molecule_ontology": {
-            "items": ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
+            **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
             "search": {"order": 6, "database": {"type": "jsonb"}}
         },
         "library_strategy": {
