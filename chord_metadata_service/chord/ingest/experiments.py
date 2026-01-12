@@ -89,9 +89,9 @@ def ingest_experiment(
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
-    experiment_ontology = experiment_data.get("experiment_ontology", [])
+    experiment_ontology = experiment_data.get("experiment_ontology", {})
     molecule = experiment_data.get("molecule")
-    molecule_ontology = experiment_data.get("molecule_ontology", [])
+    molecule_ontology = experiment_data.get("molecule_ontology", {})
     library_strategy = experiment_data.get("library_strategy")
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
