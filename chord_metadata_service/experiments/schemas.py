@@ -153,13 +153,13 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
                      "Neutralizing antibody titers", "Metabolite profiling",
                      "Antibody measurement", "Viral WGS", "Other"]
         },
-        "experiment_ontology": ONTOLOGY_CLASS_LIST,
+        "experiment_ontology": ONTOLOGY_CLASS,
         "molecule": {
             "type": "string",
             "enum": ["total RNA", "polyA RNA", "cytoplasmic RNA", "nuclear RNA",
                      "small RNA", "genomic DNA", "protein", "Other"]
         },
-        "molecule_ontology": ONTOLOGY_CLASS_LIST,
+        "molecule_ontology": ONTOLOGY_CLASS,
         "library_strategy": {
             "type": "string",
             "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "WGS", "RAD-Seq", "AMPLICON", "Other"]
