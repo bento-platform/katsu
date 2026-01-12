@@ -15,14 +15,14 @@ EXPERIMENT = {
                            "Histone H3K4me1, etc.).",
         "experiment_ontology": {
             "description": "Links to experiment ontology information (e.g. via the OBI ontology.).",
-            "items": ontology_class("describing the experiment"),
+            **ontology_class("describing the experiment"),
         },
         "molecule": "(Controlled Vocabulary) The type of molecule that was extracted from the biological material."
                     "Include one of the following: total RNA, polyA RNA, cytoplasmic RNA, nuclear RNA, small RNA, "
                     "genomic DNA, protein, or other.",
         "molecule_ontology": {
             "description": "Links to molecule ontology information (e.g. via the SO ontology.).",
-            "items": ontology_class("describing a molecular property"),
+            **ontology_class("describing a molecular property"),
         },
         "library_strategy": "(Controlled Vocabulary) The assay used. These are defined within the SRA metadata "
                             "specifications with a controlled vocabulary (e.g. Bisulfite-Seq, RNA-Seq, ChIP-Seq)."
