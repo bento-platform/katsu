@@ -104,8 +104,9 @@ async def get_distinct_field_values(
     ]
 
     # Ensure options have a consistent sort order. For now, sort alphabetically, but in the future we may wish to sort
-    # by count or something like that.
-    res.sort()
+    # by count or something like that. PyCharm gets angry about passing str.casefold directly, but it works fine.
+    # noinspection PyTypeChecker
+    res.sort(key=str.casefold)
 
     return res
 
