@@ -13,6 +13,9 @@
       "library_source": "Genomic",
       "library_selection": "Random",
       "library_layout": "Single",
+      "library_id": "lib_id_01", 
+      "ga4gh_template_id": "v1.0",
+      "insert_size": 400,
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",
       "molecule_ontology": {
@@ -68,16 +71,16 @@
       "biosample": "sample2",
       "study_type": "Epigenomics",
       "experiment_type": "Other",
-      "experiment_ontology": [
-        {
+      "experiment_ontology": {
           "id": "http://www.ebi.ac.uk/efo/EFO_0002692",
           "label": "ChIP-seq"
-        }
-      ],
+      },
       "library_strategy": "ChIP-Seq",
       "library_source": "Genomic",
       "library_selection": "Random",
       "library_layout": "Single",
+      "library_id": "lib_id_02",
+      "ga4gh_template_id": "v1.0",
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",
       "molecule_ontology": {
