@@ -5,6 +5,8 @@
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
+DEFAULT_GA4GH_TEMPLATE_ID = "v1.0"
+
 EXPERIMENT = {
     "description": "Experiment related metadata.",
     "properties": {
@@ -33,6 +35,12 @@ EXPERIMENT = {
         "library_selection": "Method used to enrich the target in the sequence library preparation. "
                              "E.g. Random, PCR, Random PCR, RT-PCR, MF and other.",
         "library_layout": "The library layout. E.g. Single, Paired.",
+        "library_id": "The identifier associated with the sequencing library.",
+        "library_extract_id": "Optional identifier for a given specific extraction.",
+        "insert_size": "The size of the DNA fragment inserted into the vector (Integer).",
+        "description": "Free-text experimental design description.",
+        "protocol_url": "URL to the sequencing protocol.",
+        "library_description": "Specific free-text details about library construction.",
         "extraction_protocol": "The protocol used to isolate the extract material.",
         "reference_registry_id": "The IHEC EpiRR ID for this dataset, only for IHEC Reference Epigenome datasets. "
                                  "Otherwise leave empty.",
@@ -42,6 +50,7 @@ EXPERIMENT = {
         },
         "experiment_results": "Related files containing the analysis of sequencing data.",
         "instrument": "The instrument used to sequence the biological specimens.",
+        "ga4gh_template_id": "An ID referring to the GA4GH template used for this experiment (e.g. v1.0).",
         "biosample": "Biosample on which this experiment was done.",
         **EXTRA_PROPERTIES
     }
