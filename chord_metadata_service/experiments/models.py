@@ -114,7 +114,7 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "library_extract_id")
     )
     library_description = models.TextField(
-        null=True, 
+        null=True,
         blank=True,
         help_text=rec_help(d.EXPERIMENT, "library_description")
     )
@@ -136,13 +136,13 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         default=list,
     )
     insert_size = models.IntegerField(
-        null=True, 
+        null=True,
         blank=True,
         help_text=rec_help(d.EXPERIMENT, "insert_size")
     )
     protocol_url = models.URLField(
         max_length=500,
-        null=True, 
+        null=True,
         blank=True,
         help_text=rec_help(d.EXPERIMENT, "protocol_url")
     )
