@@ -1,6 +1,6 @@
 from django.conf import settings
 from referencing import Registry, Resource
-from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
+from .descriptions import DEFAULT_GA4GH_TEMPLATE_ID, EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
@@ -176,6 +176,34 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "library_layout": {
             "type": "string",
             "enum": ["Single", "Paired"]
+        },
+        "library_id": {
+            "type": "string",
+            "pattern": MODEL_ID_PATTERN,
+        },
+        "library_extract_id": {
+        "type": "string"
+        },
+        "insert_size": {
+            "type": "integer",
+            "description": "Insert size (integer)."
+        },
+        "description": {
+            "type": "string",
+            "description": "Experimental design description."
+        },
+        "protocol_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the protocol."
+        },
+        "library_description": {
+            "type": "string",
+            "description": "Details about library construction."
+        },
+        "ga4gh_template_id": {
+            "type": "string",
+            "default": DEFAULT_GA4GH_TEMPLATE_ID,
         },
         "extraction_protocol": {
             "type": "string"
