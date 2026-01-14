@@ -29,7 +29,7 @@ COPY poetry.lock .
 # Without --no-root, we get errors related to the code not being copied in yet.
 # But we don't want the code here, otherwise Docker cache doesn't work well.
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-root
+    poetry install --no-root --no-cache --no-interaction
 
 # Create temporary directory for downloading files etc.
 RUN mkdir -p /app/tmp
