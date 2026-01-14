@@ -131,6 +131,27 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "library_layout": {
             "search": search_optional_eq(13),
         },
+        "library_id": {
+        "search": search_optional_str(order=14),
+        },
+        "ga4gh_template_id": {
+        "search": search_optional_str(order=15),
+        },
+        "insert_size": {
+        "search": search_optional_eq(order=16),
+        },
+        "description": {
+            "search": search_optional_str(order=17),
+        },
+        "protocol_url": {
+            "search": search_optional_str(order=18),
+        },
+        "library_description": {
+            "search": search_optional_str(order=19),
+        },
+        "library_extract_id": {
+        "search": search_optional_str(order=20),
+        },
         # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
         "instrument": merge_schema_dictionaries(
             INSTRUMENT_SEARCH_SCHEMA,
