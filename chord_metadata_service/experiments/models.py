@@ -11,7 +11,6 @@ from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import (
     ontology_validator,
-    ontology_list_validator,
     base_extra_properties_validator,
 )
 from chord_metadata_service.phenopackets.models import Biosample
@@ -115,10 +114,10 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "library_extract_id")
     )
     library_description = models.TextField(
-    null=True, 
-    blank=True,
-    help_text=rec_help(d.EXPERIMENT, "library_description")
-)
+        null=True, 
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "library_description")
+    )
     extraction_protocol = CharField(
         max_length=200,
         blank=True,
