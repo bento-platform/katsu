@@ -4,6 +4,7 @@ import uuid
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.chord.models import Dataset
+from chord_metadata_service.experiments.descriptions import DEFAULT_GA4GH_TEMPLATE_ID
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
@@ -96,11 +97,18 @@ def ingest_experiment(
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
     library_layout = experiment_data.get("library_layout")
+    library_id = experiment_data.get("library_id")
+    library_extract_id = experiment_data.get("library_extract_id")
+    insert_size = experiment_data.get("insert_size")
+    description = experiment_data.get("description")
+    protocol_url = experiment_data.get("protocol_url")
+    library_description = experiment_data.get("library_description")
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
     biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
+    ga4gh_template_id = experiment_data.get("ga4gh_template_id", DEFAULT_GA4GH_TEMPLATE_ID)
     instrument = experiment_data.get("instrument", {})
     extra_properties = experiment_data.get("extra_properties", {})
 
@@ -132,10 +140,17 @@ def ingest_experiment(
         library_source=library_source,
         library_selection=library_selection,
         library_layout=library_layout,
+        library_id=library_id,
+        library_extract_id=library_extract_id,
+        insert_size=insert_size,
+        description=description,
+        protocol_url=protocol_url,
+        library_description=library_description,
         extraction_protocol=extraction_protocol,
         reference_registry_id=reference_registry_id,
         qc_flags=qc_flags,
         biosample=biosample,
+        ga4gh_template_id=ga4gh_template_id,
         instrument=instrument_db,
         extra_properties=extra_properties,
         dataset=Dataset.objects.get(identifier=dataset_id)
