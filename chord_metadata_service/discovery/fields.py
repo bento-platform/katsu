@@ -82,7 +82,7 @@ async def get_field_options(
 
 async def get_distinct_field_values(
     queryset_entity: DiscoveryEntity, queryset: QuerySet, field_props: FieldDefinition, threshold: int
-) -> list[Any]:
+) -> list[str]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
@@ -97,11 +97,18 @@ async def get_distinct_field_values(
 
     values_with_counts = queryset.values_list(field_query).annotate(count=Count(mapping_field))
 
-    return [
-        val
+    res = [
+        str(val)  # should already be a string, since get_distinct_field_values is only used by string discovery fields
         async for val, count in values_with_counts
         if censor_count(count, threshold)
     ]
+
+    # Ensure options have a consistent sort order. For now, sort alphabetically, but in the future we may wish to sort
+    # by count or something like that. PyCharm gets angry about passing str.casefold directly, but it works fine.
+    # noinspection PyTypeChecker
+    res.sort(key=str.casefold)
+
+    return res
 
 
 async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> list[int]:
