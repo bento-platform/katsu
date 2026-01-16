@@ -17,7 +17,6 @@ class TestNotImplViewSet(BentoAuthzScopedModelGenericListViewSet):
 
 
 class AuthzBaseViewsetTest(AuthzAPITestCase, ProjectTestCase):
-
     def setUp(self):
         super().setUp()
         self.individual = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
