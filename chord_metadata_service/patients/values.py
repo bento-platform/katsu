@@ -67,5 +67,5 @@ class PatientStatus(ValuesCollection):
     values = (
         UNKNOWN_STATUS,
         ALIVE,
-        DECEASED
+        DECEASED,
     )

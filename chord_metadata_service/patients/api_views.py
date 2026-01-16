@@ -31,7 +31,10 @@ from chord_metadata_service.discovery.stats import individual_biosample_tissue_s
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import (
-    BIOSAMPLE_PREFETCH, BIOSAMPLE_SELECT_REL, PHENOPACKET_PREFETCH, PHENOPACKET_SELECT_REL
+    BIOSAMPLE_PREFETCH,
+    BIOSAMPLE_SELECT_REL,
+    PHENOPACKET_PREFETCH,
+    PHENOPACKET_SELECT_REL,
 )
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
@@ -119,8 +122,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
             # TODO: code duplicated from chord/view_search.py
             biosamples_experiments_details = get_biosamples_with_experiment_details(individual_ids)
             qs = (
-                Phenopacket
-                .get_model_scoped_queryset(scope)
+                Phenopacket.get_model_scoped_queryset(scope)
                 .prefetch_related("dataset__project")
                 .filter(subject__id__in=individual_ids)
                 .values(
@@ -128,21 +130,21 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
                     "dataset_id",
                     phenopacket_id=F("id"),
                     project_id=F("dataset__project_id"),
-                    alternate_ids=Coalesce(F("subject__alternate_ids"), [])
+                    alternate_ids=Coalesce(F("subject__alternate_ids"), []),
                 )
                 .annotate(
                     num_experiments=Count("biosamples__experiments"),
                     biosamples=Coalesce(
                         ArrayAgg("biosamples__id", distinct=True, filter=Q(biosamples__id__isnull=False)),
-                        []
-                    )
+                        [],
+                    ),
                 )
             )
             experiments_with_biosamples = build_experiments_by_subject(biosamples_experiments_details)
             results = [
                 {
                     **data,
-                    "experiments_with_biosamples": experiments_with_biosamples.get(data["subject_id"], [])
+                    "experiments_with_biosamples": experiments_with_biosamples.get(data["subject_id"], []),
                 }
                 for data in qs
             ]
@@ -166,12 +168,11 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
         return response_optionally_as_attachment(
             request,
             PhenopacketSerializer(phenopackets, many=True).data,
-            f"{individual.id}_phenopackets.json"
+            f"{individual.id}_phenopackets.json",
         )
 
 
 class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
-
     serializer_class = IndividualSerializer
     pagination_class = BatchResultsSetPagination
     renderer_classes = (
@@ -192,8 +193,7 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         individual_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
         queryset = (
-            Individual
-            .get_model_scoped_queryset(scope)
+            Individual.get_model_scoped_queryset(scope)
             .prefetch_related(
                 *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
                 *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
@@ -213,12 +213,12 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
     description="Individual list available in public endpoint",
     responses={
         200: inline_serializer(
-            name='PublicListIndividuals_response',
+            name="PublicListIndividuals_response",
             fields={
-                'count': serializers.JSONField(),
-            }
-        )
-    }
+                "count": serializers.JSONField(),
+            },
+        ),
+    },
 )
 class PublicListIndividuals(APIView):
     """
@@ -253,9 +253,7 @@ class PublicListIndividuals(APIView):
 
         try:
             filtered_qs = (
-                await discovery_filter_queryset(
-                    discovery_scope, query, "individual", base_qs, dt_permissions, logger
-                )
+                await discovery_filter_queryset(discovery_scope, query, "individual", base_qs, dt_permissions, logger)
             )[0]
         except DiscoveryEmptyException:
             authz_middleware.mark_authz_done(request)
@@ -265,9 +263,12 @@ class PublicListIndividuals(APIView):
                 "discovery individuals endpoint recieved validation error", exc=e, scope_repr=repr(discovery_scope)
             )
             authz_middleware.mark_authz_done(request)
-            return Response(errors.bad_request_error(
-                *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
-            ), status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                errors.bad_request_error(
+                    *(e.error_list if hasattr(e, "error_list") else e.error_dict.items()),
+                ),
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         ind_qct = thresholded_count(await filtered_qs.acount(), discovery, dt_perms_pheno)
         threshold = get_threshold(discovery, dt_perms_pheno)
@@ -300,39 +301,50 @@ class PublicListIndividuals(APIView):
         )
 
         authz_middleware.mark_authz_done(request)
-        return Response({
-            "count": ind_qct,
-            # Only if we have "query:data" - this field is for Beacon, which should have an access token:
-            **(
-                {
-                    "matches": filtered_qs.values_list("id", flat=True),
-                    # Below is a temporary detailed match list so we can start building a better search UI.
-                    "matches_detail": [
-                        {
-                            "id": i.id,
-                            **({
-                                "phenopacket_id": i.phenopacket_id,
-                                "project_id": i.project_id,
-                                "dataset_id": i.dataset_id,
-                            } if i.phenopacket_id else {
-                                "phenopacket_id": None,
-                                "project_id": None,
-                                "dataset_id": None,
-                            })
-                        } async for i in filtered_qs
-                    ],
-                }
-                if perm_pheno_query_data
-                else {}
-            ),
-            "biosamples": {
-                "count": tissues_count,
-                "sampled_tissue": sampled_tissues.model_dump(mode="json"),
-            },
-            **({
-                "experiments": {
-                    "count": experiments_count,
-                    "experiment_type": experiment_types.model_dump(mode="json"),
-                }
-            } if dt_perms_exp.any_permissions() else {}),
-        })
+        return Response(
+            {
+                "count": ind_qct,
+                # Only if we have "query:data" - this field is for Beacon, which should have an access token:
+                **(
+                    {
+                        "matches": filtered_qs.values_list("id", flat=True),
+                        # Below is a temporary detailed match list so we can start building a better search UI.
+                        "matches_detail": [
+                            {
+                                "id": i.id,
+                                **(
+                                    {
+                                        "phenopacket_id": i.phenopacket_id,
+                                        "project_id": i.project_id,
+                                        "dataset_id": i.dataset_id,
+                                    }
+                                    if i.phenopacket_id
+                                    else {
+                                        "phenopacket_id": None,
+                                        "project_id": None,
+                                        "dataset_id": None,
+                                    }
+                                ),
+                            }
+                            async for i in filtered_qs
+                        ],
+                    }
+                    if perm_pheno_query_data
+                    else {}
+                ),
+                "biosamples": {
+                    "count": tissues_count,
+                    "sampled_tissue": sampled_tissues.model_dump(mode="json"),
+                },
+                **(
+                    {
+                        "experiments": {
+                            "count": experiments_count,
+                            "experiment_type": experiment_types.model_dump(mode="json"),
+                        }
+                    }
+                    if dt_perms_exp.any_permissions()
+                    else {}
+                ),
+            }
+        )
