@@ -13,7 +13,7 @@ import os
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chord_metadata_service.metadata.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chord_metadata_service.metadata.settings")
 
 logger = structlog.stdlib.get_logger("katsu.wsgi")
 
@@ -21,7 +21,8 @@ logger = structlog.stdlib.get_logger("katsu.wsgi")
 if settings.DEBUG:
     try:
         import debugpy
-        DEBUGGER_PORT = int(os.environ.get('DEBUGGER_PORT', 5678))
+
+        DEBUGGER_PORT = int(os.environ.get("DEBUGGER_PORT", 5678))
         debugpy.listen(("0.0.0.0", DEBUGGER_PORT))
         logger.info("debugger attached")
     except ImportError:
