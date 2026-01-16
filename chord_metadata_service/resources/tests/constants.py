@@ -4,7 +4,7 @@ VALID_RESOURCE_1 = {
     "url": "http://purl.obolibrary.org/obo/ncit.owl",
     "version": "http://purl.obolibrary.org/obo/ncit/releases/2019-11-26/ncit.owl",
     "namespace_prefix": "NCIT",
-    "iri_prefix": "http://purl.obolibrary.org/obo/NCIT_"
+    "iri_prefix": "http://purl.obolibrary.org/obo/NCIT_",
 }
 
 VALID_RESOURCE_2 = {
@@ -13,7 +13,7 @@ VALID_RESOURCE_2 = {
     "url": "http://purl.obolibrary.org/obo/mondo.obo",
     "version": "http://purl.obolibrary.org/obo/mondo/releases/2021-11-26/mondo.owl",
     "namespace_prefix": "MONDO",
-    "iri_prefix": "http://purl.obolibrary.org/obo/MONDO_"
+    "iri_prefix": "http://purl.obolibrary.org/obo/MONDO_",
 }
 
 DUPLICATE_RESOURCE_3 = {
@@ -22,5 +22,5 @@ DUPLICATE_RESOURCE_3 = {
     "url": "http://purl.obolibrary.org/obo/mondo.obo",
     "version": "http://purl.obolibrary.org/obo/mondo/releases/2021-11-26/mondo.owl",
     "namespace_prefix": "MONDO",
-    "iri_prefix": "http://purl.obolibrary.org/obo/MONDO_"
+    "iri_prefix": "http://purl.obolibrary.org/obo/MONDO_",
 }

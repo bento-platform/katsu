@@ -4,7 +4,6 @@ from ..ingest import get_or_create_geo_location
 
 
 class GeoLocationIngestTest(TestCase):
-
     def test_ingest_no_extra_props(self):
         gl1 = get_or_create_geo_location({"type": "Feature", "geometry": KINGSTON_GEOM_JSON})
         self.assertDictEqual(gl1.extra_properties, {})
@@ -39,7 +38,10 @@ class GeoLocationIngestTest(TestCase):
 
         self.assertEqual(gl.label, "Kingston")
         self.assertEqual(gl.country, "CAN")
-        self.assertDictEqual(gl.extra_properties, {
-            "my_cool_prop": 4321,
-            "my_cool_prop_2": "abc",
-        })
+        self.assertDictEqual(
+            gl.extra_properties,
+            {
+                "my_cool_prop": 4321,
+                "my_cool_prop_2": "abc",
+            },
+        )
