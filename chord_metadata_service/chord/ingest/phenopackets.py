@@ -436,6 +436,7 @@ def ingest_phenopacket(
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version=meta_data.get("phenopacket_schema_version"),
         external_references=meta_data.get("external_references", []),
+        updates=meta_data.get("updates", []),
         extra_properties=remove_computed_properties(meta_data.get("extra_properties", {})),
     )
     meta_data_obj.save()
