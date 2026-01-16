@@ -8,7 +8,6 @@ from .constants import GeoLocationTestCase
 
 
 class GeoCleanupTestCase(GeoLocationTestCase):
-
     async def test_basic_geo_clean_up(self):
         self.assertEqual(await GeoLocation.objects.acount(), 3)
         # no locations referred to by top-level elements; this should remove them all:
@@ -16,7 +15,7 @@ class GeoCleanupTestCase(GeoLocationTestCase):
         self.assertEqual(await GeoLocation.objects.acount(), 0)
 
     async def test_partial_referenced_geo_clean_up(self):
-        individual, _ = await pm.Individual.objects.aget_or_create(id='patient:1', sex='FEMALE')
+        individual, _ = await pm.Individual.objects.aget_or_create(id="patient:1", sex="FEMALE")
         biosample_1 = await pm.Biosample.objects.acreate(location_collected=self.loc_1, **valid_biosample_1(individual))
 
         # one kept behind since biosample above refers to it

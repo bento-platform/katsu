@@ -9,4 +9,4 @@ __all__ = ["ResourceSerializer"]
 class ResourceSerializer(GenericSerializer):
     class Meta:
         model = Resource
-        fields = '__all__'
+        fields = "__all__"
