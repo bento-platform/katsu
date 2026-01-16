@@ -315,7 +315,7 @@ def get_or_create_interpretation_diagnosis(
     interpretation_id = interpretation.get("id")
     diag_obj, created = pm.Diagnosis.objects.get_or_create(
         id=interpretation_id,
-        disease=diagnosis.get("disease", {}),
+        disease=diagnosis["disease"],
         extra_properties=remove_computed_properties(diagnosis.get("extra_properties", {})),
     )
 
