@@ -178,7 +178,13 @@ def ingest_derived_experiment_results(
 
     for idx, exp_result in enumerate(json_data):
         errors = []
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA, obj_idx=idx, logger=lg, validation_errors=errors)
+        validation = schema_validation(
+            exp_result,
+            EXPERIMENT_RESULT_SCHEMA,
+            obj_idx=idx,
+            logger=lg,
+            validation_errors=errors
+        )
         if not validation:
             error_details = extract_error_msg(errors)
             raise IngestError(

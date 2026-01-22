@@ -58,7 +58,7 @@ def schema_validation(
         errors = [e for e in validator.iter_errors(obj)]
         if validation_errors is not None:
             validation_errors.extend(errors)
-        
+
         lg.info(
             "JSON schema validation failed",
             errors=[
