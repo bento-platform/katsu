@@ -8,8 +8,24 @@ from chord_metadata_service.logger import logger as logger_
 __all__ = ["schema_validation"]
 
 
+def extract_error_msg(errors: list[ValidationError]) -> str:
+    """
+    Helper to format the first validation error into a readable string.
+    """
+    if not errors:
+        return "Unknown validation error"
+    first_error = errors[0]
+    error_path = " -> ".join(map(str, first_error.path)) or "root"
+    return f"at field '{error_path}': {first_error.message}"
+
+
 def schema_validation(
-    obj, schema, registry: Registry = None, obj_idx: int | None = None, logger: BoundLogger | None = None
+    obj,
+    schema,
+    registry: Registry = None,
+    obj_idx: int | None = None,
+    logger: BoundLogger | None = None,
+    validation_errors: list | None = None
 ):
     """
     Validates an object (obj) against a json-schema (schema).
@@ -40,6 +56,9 @@ def schema_validation(
         return True
     except ValidationError:
         errors = [e for e in validator.iter_errors(obj)]
+        if validation_errors is not None:
+            validation_errors.extend(errors)
+        
         lg.info(
             "JSON schema validation failed",
             errors=[
