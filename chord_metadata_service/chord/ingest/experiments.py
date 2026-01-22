@@ -9,7 +9,7 @@ from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERI
 from chord_metadata_service.phenopackets import models as pm
 
 from .resources import ingest_resource
-from .schema import schema_validation
+from .schema import schema_validation, extract_error_msg
 
 __all__ = [
     "create_instrument",
@@ -63,13 +63,14 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
 
 
 def validate_experiment(experiment_data, lg: BoundLogger, idx: int | None = None) -> None:
+    errors = []
     # Validate experiment data against experiments schema.
-    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA, obj_idx=idx, logger=lg)
+    validation = schema_validation(experiment_data, EXPERIMENT_SCHEMA, obj_idx=idx, logger=lg, validation_errors=errors)
     if not validation:
-        # TODO: Report more precise errors
+        error_details = extract_error_msg(errors)
         raise IngestError(
             f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
-            f"(check Katsu logs for more information)")
+            f"{error_details} (check Katsu logs for more information)")
 
 
 def ingest_experiment(
@@ -176,12 +177,13 @@ def ingest_derived_experiment_results(
     # First, validate all experiment results with the schema before creating anything in the database.
 
     for idx, exp_result in enumerate(json_data):
-        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA, obj_idx=idx, logger=lg)
+        errors = []
+        validation = schema_validation(exp_result, EXPERIMENT_RESULT_SCHEMA, obj_idx=idx, logger=lg, validation_errors=errors)
         if not validation:
-            # TODO: Report more precise errors
+            error_details = extract_error_msg(errors)
             raise IngestError(
                 f"Failed schema validation for experiment result {idx} "
-                f"(check Katsu logs for more information)")
+                f"{error_details}(check Katsu logs for more information)")
 
     # If everything passes, perform the actual ingestion next.
 
