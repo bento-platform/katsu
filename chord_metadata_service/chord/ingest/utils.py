@@ -17,7 +17,7 @@ from .exceptions import IngestError
 
 __all__ = [
     "map_if_list",
-    "get_ontology_term"
+    "get_ontology_term",
     "query_and_check_nulls",
     "workflow_file_output_to_path",
 ]
@@ -39,10 +39,10 @@ def map_if_list(fn: Callable, data: Any, *args, **kwargs) -> Any:
 
 
 def get_ontology_term(data, key):
-        val = data.get(key)
-        if isinstance(val, list):
-            return val[0] if val else None
-        return val
+    val = data.get(key)
+    if isinstance(val, list):
+        return val[0] if val else None
+    return val
 
 
 def query_and_check_nulls(obj: dict, key: str, transform: Callable = lambda x: x):

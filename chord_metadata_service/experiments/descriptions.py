@@ -18,7 +18,7 @@ EXPERIMENT = {
         "molecule": "(Controlled Vocabulary) The type of molecule that was extracted from the biological material."
                     "Include one of the following: total RNA, polyA RNA, cytoplasmic RNA, nuclear RNA, small RNA, "
                     "genomic DNA, protein, or other.",
-        "molecule_ontology":  ontology_class("describing the molecule, e.g., via the OBI ontology") ,
+        "molecule_ontology":  ontology_class("describing the molecule, e.g., via the OBI ontology"),
         "library_strategy": "(Controlled Vocabulary) The assay used. These are defined within the SRA metadata "
                             "specifications with a controlled vocabulary (e.g. Bisulfite-Seq, RNA-Seq, ChIP-Seq)."
                             " For a complete list, see https://www.ebi.ac.uk/ena/submit/reads-library-strategy.",
