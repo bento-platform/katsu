@@ -59,7 +59,7 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     )
     experiment_ontology = JSONField(
         blank=True,
-        default=dict,
+        null=True,
         validators=[ontology_validator],
         help_text=rec_help(d.EXPERIMENT, "experiment_ontology"),
     )
@@ -72,7 +72,7 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     )
     molecule_ontology = JSONField(
         blank=True,
-        default=dict,
+        null=True,
         validators=[ontology_validator],
         help_text=rec_help(d.EXPERIMENT, "molecule_ontology"),
     )
