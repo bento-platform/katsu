@@ -1,6 +1,6 @@
 from django.conf import settings
 from referencing import Registry, Resource
-from .descriptions import DEFAULT_GA4GH_TEMPLATE_ID, EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
+from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
