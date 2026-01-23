@@ -93,6 +93,7 @@ def ingest_experiment(
     experiment_ontology = get_ontology_term(experiment_data, "experiment_ontology")
     molecule = experiment_data.get("molecule")
     molecule_ontology = get_ontology_term(experiment_data, "molecule_ontology")
+    # library fields  
     library_strategy = experiment_data.get("library_strategy")
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
@@ -100,12 +101,14 @@ def ingest_experiment(
     library_id = experiment_data.get("library_id")
     library_extract_id = experiment_data.get("library_extract_id")
     insert_size = experiment_data.get("insert_size")
+    library_description = experiment_data.get("library_description")
+    # protocol fields
     description = experiment_data.get("description")
     protocol_url = experiment_data.get("protocol_url")
-    library_description = experiment_data.get("library_description")
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
+    
     biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
     instrument = experiment_data.get("instrument", {})
