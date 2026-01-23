@@ -5,7 +5,6 @@
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
-DEFAULT_GA4GH_TEMPLATE_ID = "v1.0"
 
 EXPERIMENT = {
     "description": "Experiment related metadata.",
@@ -15,17 +14,11 @@ EXPERIMENT = {
                       "E.g. Epigenomics, Proteomics, Metagenomics, Transcriptomics, Metabolomics.",
         "experiment_type": "(Controlled Vocabulary) The assay target (e.g. DNA Methylation, mRNA-Seq, smRNA-Seq, "
                            "Histone H3K4me1, etc.).",
-        "experiment_ontology": {
-            "description": "Links to experiment ontology information (e.g. via the OBI ontology.).",
-            **ontology_class("describing the experiment"),
-        },
+        "experiment_ontology":  ontology_class("describing the experiment, e.g., via the OBI ontology"),
         "molecule": "(Controlled Vocabulary) The type of molecule that was extracted from the biological material."
                     "Include one of the following: total RNA, polyA RNA, cytoplasmic RNA, nuclear RNA, small RNA, "
                     "genomic DNA, protein, or other.",
-        "molecule_ontology": {
-            "description": "Links to molecule ontology information (e.g. via the SO ontology.).",
-            **ontology_class("describing a molecular property"),
-        },
+        "molecule_ontology":  ontology_class("describing the molecule, e.g., via the OBI ontology") ,
         "library_strategy": "(Controlled Vocabulary) The assay used. These are defined within the SRA metadata "
                             "specifications with a controlled vocabulary (e.g. Bisulfite-Seq, RNA-Seq, ChIP-Seq)."
                             " For a complete list, see https://www.ebi.ac.uk/ena/submit/reads-library-strategy.",
