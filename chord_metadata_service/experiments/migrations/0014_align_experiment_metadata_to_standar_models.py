@@ -8,7 +8,7 @@ import chord_metadata_service.restapi.validators
 def convert_list_to_object(apps, schema_editor):
     """
     Iterates through all experiments. If ontology fields are lists,
-    converts them to a single object (the first item) or an empty dict.
+    converts them to a single object (the first item) or None.
     """
     # retrieve the historical version of the model
     Experiment = apps.get_model('experiments', 'Experiment')
@@ -18,12 +18,12 @@ def convert_list_to_object(apps, schema_editor):
         mol_data = exp.molecule_ontology
         if isinstance(mol_data, list):
             # Take the first element if exists, otherwise empty dict
-            exp.molecule_ontology = mol_data[0] if len(mol_data) > 0 else {}
+            exp.molecule_ontology = mol_data[0] if len(mol_data) > 0 else None
         
         # fix experiment_ontology
         exp_data = exp.experiment_ontology
         if isinstance(exp_data, list):
-            exp.experiment_ontology = exp_data[0] if len(exp_data) > 0 else {}
+            exp.experiment_ontology = exp_data[0] if len(exp_data) > 0 else None
             
         exp.save()
 
@@ -38,13 +38,17 @@ def reverse_object_to_list(apps, schema_editor):
         # Revert molecule_ontology
         mol_data = exp.molecule_ontology
         if isinstance(mol_data, dict):
-            exp.molecule_ontology = [mol_data] if mol_data else []
+            exp.molecule_ontology = [mol_data]
+        elif mol_data is None:
+            exp.molecule_ontology = []
             
         # Revert experiment_ontology
         exp_data = exp.experiment_ontology
         if isinstance(exp_data, dict):
-            exp.experiment_ontology = [exp_data] if exp_data else []
-            
+            exp.experiment_ontology = [exp_data]
+        elif exp_data is None:
+            exp.experiment_ontology = []
+
         exp.save()
 
 # --- MIGRATION CLASS ---
@@ -94,11 +98,11 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='experiment',
             name='experiment_ontology',
-            field=models.JSONField(blank=True, default=dict, help_text='An ontology term describing the experiment.', validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=None, schema_ref='ONTOLOGY_CLASS')]),
+            field=models.JSONField(blank=True, null=True, help_text='An ontology term describing the experiment.', validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=None, schema_ref='ONTOLOGY_CLASS')]),
         ),
         migrations.AlterField(
             model_name='experiment',
             name='molecule_ontology',
-            field=models.JSONField(blank=True, default=dict, help_text='An ontology term describing a molecular property.', validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=None, schema_ref='ONTOLOGY_CLASS')]),
+            field=models.JSONField(blank=True, null=True, help_text='An ontology term describing a molecular property.', validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=None, schema_ref='ONTOLOGY_CLASS')]),
         ),
     ]
