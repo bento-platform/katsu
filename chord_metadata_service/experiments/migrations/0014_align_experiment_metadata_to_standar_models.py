@@ -64,11 +64,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='experiment',
-            name='ga4gh_template_id',
-            field=models.CharField(blank=True, default='v1.0', help_text='An ID referring to the GA4GH template used for this experiment (e.g. v1.0).', max_length=200, null=True),
-        ),
-        migrations.AddField(
-            model_name='experiment',
             name='insert_size',
             field=models.IntegerField(blank=True, help_text='The size of the DNA fragment inserted into the vector (Integer).', null=True),
         ),

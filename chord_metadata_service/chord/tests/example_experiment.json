@@ -13,8 +13,7 @@
       "library_source": "Genomic",
       "library_selection": "Random",
       "library_layout": "Single",
-      "library_id": "lib_id_01", 
-      "ga4gh_template_id": "v1.0",
+      "library_id": "lib_id_01",
       "insert_size": 400,
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",
@@ -80,7 +79,6 @@
       "library_selection": "Random",
       "library_layout": "Single",
       "library_id": "lib_id_02",
-      "ga4gh_template_id": "v1.0",
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",
       "molecule_ontology": {

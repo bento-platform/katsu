@@ -19,7 +19,6 @@
       "description": "Test description from JSON",
       "protocol_url": "http://example.org/protocol1",
       "library_description": "Library description from JSON",
-      "ga4gh_template_id": "v1.0",
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",
       "molecule_ontology": {

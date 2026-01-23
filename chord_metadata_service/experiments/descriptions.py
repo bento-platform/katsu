@@ -50,7 +50,6 @@ EXPERIMENT = {
         },
         "experiment_results": "Related files containing the analysis of sequencing data.",
         "instrument": "The instrument used to sequence the biological specimens.",
-        "ga4gh_template_id": "An ID referring to the GA4GH template used for this experiment (e.g. v1.0).",
         "biosample": "Biosample on which this experiment was done.",
         **EXTRA_PROPERTIES
     }

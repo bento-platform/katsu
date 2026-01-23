@@ -179,14 +179,6 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "instrument"),
         related_name="experiments",
     )
-    # SCHEMA VERSIONING
-    ga4gh_template_id = CharField(
-        max_length=200,
-        blank=True,
-        null=True,
-        default="v1.0",
-        help_text=rec_help(d.EXPERIMENT, "ga4gh_template_id")
-    )
     # EXPERIMENT DESCRIPTION
     description = models.TextField(
         blank=True,

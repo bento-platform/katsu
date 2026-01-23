@@ -134,9 +134,6 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "library_id": {
             "search": search_optional_str(order=14),
         },
-        "ga4gh_template_id": {
-            "search": search_optional_str(order=15),
-        },
         "insert_size": {
             "search": search_optional_eq(order=16),
         },

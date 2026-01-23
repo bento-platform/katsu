@@ -201,10 +201,6 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "type": "string",
             "description": "Details about library construction."
         },
-        "ga4gh_template_id": {
-            "type": "string",
-            "default": DEFAULT_GA4GH_TEMPLATE_ID,
-        },
         "extraction_protocol": {
             "type": "string"
         },

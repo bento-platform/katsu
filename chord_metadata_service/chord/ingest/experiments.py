@@ -4,7 +4,6 @@ import uuid
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.chord.models import Dataset
-from chord_metadata_service.experiments.descriptions import DEFAULT_GA4GH_TEMPLATE_ID
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
@@ -108,7 +107,6 @@ def ingest_experiment(
     qc_flags = experiment_data.get("qc_flags", [])
     biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
-    ga4gh_template_id = experiment_data.get("ga4gh_template_id", DEFAULT_GA4GH_TEMPLATE_ID)
     instrument = experiment_data.get("instrument", {})
     extra_properties = experiment_data.get("extra_properties", {})
 
@@ -150,7 +148,6 @@ def ingest_experiment(
         reference_registry_id=reference_registry_id,
         qc_flags=qc_flags,
         biosample=biosample,
-        ga4gh_template_id=ga4gh_template_id,
         instrument=instrument_db,
         extra_properties=extra_properties,
         dataset=Dataset.objects.get(identifier=dataset_id)

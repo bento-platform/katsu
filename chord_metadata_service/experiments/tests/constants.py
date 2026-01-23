@@ -16,7 +16,6 @@ def valid_experiment(biosample, instrument=None, dataset=None, num_experiment=1)
         "description": f"Experimental design description for {num_experiment}",
         "protocol_url": f"http://protocols.io/view/protocol-{num_experiment}",
         "library_description": f"Library construction details for {num_experiment}",
-        "ga4gh_template_id": "v1.0",
         "extraction_protocol": "NGS",
         "reference_registry_id": "some_id",
         "qc_flags": ["flag 1", "flag 2"],
