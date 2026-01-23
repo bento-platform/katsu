@@ -10,6 +10,7 @@ from chord_metadata_service.phenopackets import models as pm
 
 from .resources import ingest_resource
 from .schema import schema_validation
+from .utils import get_ontology_term
 
 __all__ = [
     "create_instrument",
@@ -89,9 +90,9 @@ def ingest_experiment(
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
     study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
-    experiment_ontology = experiment_data.get("experiment_ontology", {})
+    experiment_ontology = get_ontology_term(experiment_data, "experiment_ontology")
     molecule = experiment_data.get("molecule")
-    molecule_ontology = experiment_data.get("molecule_ontology", {})
+    molecule_ontology = get_ontology_term(experiment_data, "molecule_ontology")
     library_strategy = experiment_data.get("library_strategy")
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
