@@ -1,15 +1,16 @@
 from bento_lib.discovery import DiscoveryConfig
+from bento_lib.provenance.dataset import DatasetModel
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from jsonschema import Draft7Validator, Draft4Validator
-from pydantic import ValidationError as PydValidationError
+from pydantic import ValidationError as PydanticValidationError
 from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, ProjectJsonSchema
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 from .utils import get_censored_counts_for_serializer
 
@@ -166,6 +167,68 @@ class DatasetSerializer(GenericSerializer):
     class Meta:
         model = Dataset
         fields = '__all__'
+
+class DatasetV2Serializer(serializers.ModelSerializer):
+    """
+    Serializer that uses Pydantic for input validation and 
+    delegates to the model's from_schema/to_schema methods.
+    """
+    
+    class Meta:
+        model = DatasetV2
+        fields = [
+            'id',
+            'project_id',
+            'schema_version',
+            'title',
+            'description',
+            'release_date',
+            'last_modified',
+            'version',
+            'privacy',
+            'study_status',
+            'study_context',
+            'data',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+
+    def to_internal_value(self, data):
+        """Validate incoming data with Pydantic."""
+        try:
+            schema = DatasetModel.model_validate(data)
+            # Store validated schema for use in create/update
+            self._validated_schema = schema
+            return schema.model_dump(mode='json')
+        except PydanticValidationError as e:
+            raise serializers.ValidationError(e.errors())
+
+    def to_representation(self, instance):
+        """Convert model instance to dict via Pydantic schema."""
+        schema = instance.to_schema()
+        return schema.model_dump(mode='json')
+
+    def create(self, validated_data):
+        return DatasetV2.from_schema(self._validated_schema)
+
+    def update(self, instance, validated_data):
+        """Update instance from validated Pydantic data."""
+        data = self._validated_schema.model_dump(mode='json')
+        
+        # Update column fields
+        for field in instance.COLUMN_FIELDS:
+            if field in data:
+                setattr(instance, field, data[field])
+        
+        # Update JSONB field
+        jsonb_data = {
+            k: v for k, v in data.items()
+            if k not in instance.COLUMN_FIELDS
+        }
+        setattr(instance, instance.JSONB_FIELD, jsonb_data)
+        
+        return instance
 
 
 class ProjectJsonSchemaSerializer(GenericSerializer):
