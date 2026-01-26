@@ -7,7 +7,7 @@ class PydanticJSONBMixin:
     
     Requires:
         - COLUMN_FIELDS: set of field names stored as actual columns
-        - JSONB_FIELD: name of the JSONField (default: 'extra_data')
+        - JSONB_FIELD: name of the JSONField (default: 'other_data')
         - SCHEMA_CLASS: the Pydantic model class
     """
     COLUMN_FIELDS: Set[str] = set()
