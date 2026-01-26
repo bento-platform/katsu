@@ -16,7 +16,7 @@ class PydanticJSONBMixin:
     
     @classmethod
     def from_schema(cls, schema: BaseModel, **extra_column_kwargs):
-        data = schema.model_dump(exclude_unset=True)
+        data = schema.model_dump(exclude_unset=True, mode='json')
         
         column_data = {
             k: v for k, v in data.items() 
