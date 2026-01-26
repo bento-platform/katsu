@@ -1,6 +1,7 @@
 import collections
 import uuid
 from bento_lib.discovery import DiscoveryConfig
+from bento_lib.provenance.dataset import DatasetModel
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -10,6 +11,7 @@ from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
+from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBMixin
 
 
 __all__ = ["Project", "Dataset", "ProjectJsonSchema"]
@@ -82,7 +84,7 @@ class Dataset(BaseProjectOrDataset):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
-        related_name="datasets"
+        related_name="datasets_old"
     )
 
     data_use = models.JSONField()
@@ -202,6 +204,66 @@ class Dataset(BaseProjectOrDataset):
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
 
+class DatasetV2(PydanticJSONBMixin, models.Model):
+    # Mixin configuration
+    COLUMN_FIELDS = {
+        'schema_version',
+        'title', 
+        'description',
+        'release_date',
+        'last_modified',
+        'version',
+        'privacy',
+        'study_status',
+        'study_context',
+    }
+    JSONB_FIELD = 'data'
+    SCHEMA_CLASS = DatasetModel
+
+    # --- Django fields ---
+    schema_version = models.CharField(max_length=8, default="1.0")
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,  # Delete dataset upon project deletion
+        related_name="datasets"
+    )
+
+    id = models.CharField(
+        max_length=128,
+        unique=True,
+        db_index=True,
+        help_text="If from PCGL, inherit. Otherwise created in Katsu.",
+    )
+
+    title = models.CharField(max_length=512)
+    description = models.TextField()
+
+    release_date = models.DateField(db_index=True)
+    last_modified = models.DateField(db_index=True)
+
+    version = models.CharField(max_length=64, null=True, blank=True)
+    privacy = models.CharField(max_length=255, null=True, blank=True)
+
+    study_status = models.CharField(max_length=16, null=True, blank=True)
+    study_context = models.CharField(max_length=16, null=True, blank=True)
+
+    # Store the whole validated payload (everything in your Pydantic DatasetModel)
+    data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["dataset_id"]),
+            models.Index(fields=["release_date"]),
+            models.Index(fields=["last_modified"]),
+            models.Index(fields=["study_status", "study_context"]),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.id}: {self.title}"
 
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
