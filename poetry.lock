@@ -352,27 +352,25 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "14.0.4"
+version = "14.1.2"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
-python-versions = "<4.0,>=3.12"
+python-versions = "^3.12"
 groups = ["main"]
-files = [
-    {file = "bento_lib-14.0.4-py3-none-any.whl", hash = "sha256:2471e618ab75a859b2dc1c7ef6c79ae74ffdbce0edc9b59663a53094af13d8cd"},
-    {file = "bento_lib-14.0.4.tar.gz", hash = "sha256:985ed6209e4e651e0efc7fc16915f25d7a097d2e4ae378269a81dd73ef02ded3"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 aiofiles = ">=24.1.0,<26"
 aiohttp = ">=3.10.10,<4"
-django = {version = ">=5.1.8,<5.3", optional = true, markers = "extra == \"django\""}
-djangorestframework = {version = ">=3.16.0,<3.17", optional = true, markers = "extra == \"django\""}
-geojson-pydantic = ">=2.0.0,<3.0.0"
+django = {version = ">=5.1.8,<5.3", optional = true}
+djangorestframework = {version = ">=3.16.0,<3.17", optional = true}
+geojson-pydantic = "^2.0.0"
 jsonschema = ">=4.23.0,<5"
 psycopg2-binary = ">=2.9.9,<3.0"
-pydantic = ">=2.11.3,<3"
+pydantic = {version = ">=2.11.3,<3", extras = ["email"]}
 pydantic-settings = ">=2.8.1"
-redis = ">=5.2.1,<7"
+redis = ">=5.2.1,<8"
 requests = ">=2.32.3,<3"
 rich = ">=14.0.0,<15"
 structlog = ">=25.2.0,<26"
@@ -381,8 +379,14 @@ werkzeug = ">=3.0.6,<4"
 [package.extras]
 asyncpg = ["asyncpg (>=0.29.0,<0.32.0)"]
 django = ["django (>=5.1.8,<5.3)", "djangorestframework (>=3.16.0,<3.17)"]
-fastapi = ["fastapi (>=0.115.12,<0.124)", "uvicorn"]
+fastapi = ["fastapi (>=0.115.12,<0.129)", "uvicorn"]
 flask = ["flask (>=3.0.3,<4)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/bento-platform/bento_lib.git"
+reference = "feature/dataset-model"
+resolved_reference = "c8fe5ddccf074e4cfa2b4e2d9b390a3c558f308d"
 
 [[package]]
 name = "cachetools"
@@ -1112,6 +1116,27 @@ files = [
 ]
 
 [[package]]
+name = "dnspython"
+version = "2.8.0"
+description = "DNS toolkit"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af"},
+    {file = "dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f"},
+]
+
+[package.extras]
+dev = ["black (>=25.1.0)", "coverage (>=7.0)", "flake8 (>=7)", "hypercorn (>=0.17.0)", "mypy (>=1.17)", "pylint (>=3)", "pytest (>=8.4)", "pytest-cov (>=6.2.0)", "quart-trio (>=0.12.0)", "sphinx (>=8.2.0)", "sphinx-rtd-theme (>=3.0.0)", "twine (>=6.1.0)", "wheel (>=0.45.0)"]
+dnssec = ["cryptography (>=45)"]
+doh = ["h2 (>=4.2.0)", "httpcore (>=1.0.0)", "httpx (>=0.28.0)"]
+doq = ["aioquic (>=1.2.0)"]
+idna = ["idna (>=3.10)"]
+trio = ["trio (>=0.30)"]
+wmi = ["wmi (>=1.5.1) ; platform_system == \"Windows\""]
+
+[[package]]
 name = "drf-spectacular"
 version = "0.29.0"
 description = "Sane and flexible OpenAPI 3 schema generation for Django REST framework"
@@ -1134,6 +1159,22 @@ uritemplate = ">=2.0.0"
 [package.extras]
 offline = ["drf-spectacular-sidecar"]
 sidecar = ["drf-spectacular-sidecar"]
+
+[[package]]
+name = "email-validator"
+version = "2.3.0"
+description = "A robust email address syntax and deliverability validation library."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4"},
+    {file = "email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426"},
+]
+
+[package.dependencies]
+dnspython = ">=2.0.0"
+idna = ">=2.0.0"
 
 [[package]]
 name = "filelock"
@@ -2202,6 +2243,7 @@ files = [
 
 [package.dependencies]
 annotated-types = ">=0.6.0"
+email-validator = {version = ">=2.0.0", optional = true, markers = "extra == \"email\""}
 pydantic-core = "2.41.5"
 typing-extensions = ">=4.14.1"
 typing-inspection = ">=0.4.2"
@@ -3456,4 +3498,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "f4848660ad2dbeb06eaaf3427f6d1b83a314dcf93a7ae1711ea401a3efc85037"
+content-hash = "46adac817e18483d430a9b455c1fcfc88db9836a7ee3a8ec197a2447f1f0ebdd"
