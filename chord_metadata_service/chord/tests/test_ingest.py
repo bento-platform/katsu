@@ -347,6 +347,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         missing_data = {}
         self.assertIsNone(get_single_ontology_term(missing_data, key))
 
+
 class IngestISOAgeToNumberTest(ProjectTestCase):
 
     def test_ingesting_phenopackets_json(self):
