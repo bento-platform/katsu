@@ -88,6 +88,7 @@ def ingest_experiment(
         validate_experiment(experiment_data, lg, idx)
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
+    description = experiment_data.get("description")
     study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
     experiment_ontology = get_single_ontology_term(experiment_data, "experiment_ontology")
@@ -103,7 +104,6 @@ def ingest_experiment(
     insert_size = experiment_data.get("insert_size")
     library_description = experiment_data.get("library_description")
     # protocol fields
-    description = experiment_data.get("description")
     protocol_url = experiment_data.get("protocol_url")
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
@@ -133,6 +133,7 @@ def ingest_experiment(
     # create new experiment - create(...) calls save(...), which automatically populates fts_extra
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
+        description=description,
         study_type=study_type,
         experiment_type=experiment_type,
         experiment_ontology=experiment_ontology,
@@ -145,7 +146,6 @@ def ingest_experiment(
         library_id=library_id,
         library_extract_id=library_extract_id,
         insert_size=insert_size,
-        description=description,
         protocol_url=protocol_url,
         library_description=library_description,
         extraction_protocol=extraction_protocol,

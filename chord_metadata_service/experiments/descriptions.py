@@ -10,6 +10,7 @@ EXPERIMENT = {
     "description": "Experiment related metadata.",
     "properties": {
         "id": "An arbitrary identifier for the experiment.",
+        "description": "Free-text experimental design description.",
         "study_type": "Which study type the experiment belongs to."
                       "E.g. Epigenomics, Proteomics, Metagenomics, Transcriptomics, Metabolomics.",
         "experiment_type": "(Controlled Vocabulary) The assay target (e.g. DNA Methylation, mRNA-Seq, smRNA-Seq, "
@@ -29,11 +30,10 @@ EXPERIMENT = {
                              "E.g. Random, PCR, Random PCR, RT-PCR, MF and other.",
         "library_layout": "The library layout. E.g. Single, Paired.",
         "library_id": "The identifier associated with the sequencing library.",
+        "library_description": "Specific free-text details about library construction.",
         "library_extract_id": "Optional identifier for a given specific extraction.",
         "insert_size": "The size of the DNA fragment inserted into the vector (Integer).",
-        "description": "Free-text experimental design description.",
         "protocol_url": "URL to the sequencing protocol.",
-        "library_description": "Specific free-text details about library construction.",
         "extraction_protocol": "The protocol used to isolate the extract material.",
         "reference_registry_id": "The IHEC EpiRR ID for this dataset, only for IHEC Reference Epigenome datasets. "
                                  "Otherwise leave empty.",

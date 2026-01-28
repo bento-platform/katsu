@@ -181,6 +181,10 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "type": "string",
             "pattern": MODEL_ID_PATTERN,
         },
+        "library_description": {
+            "type": "string",
+            "description": "Details about library construction."
+        },
         "library_extract_id": {
             "type": "string"
         },
@@ -196,10 +200,6 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "type": "string",
             "format": "uri",
             "description": "URL to the protocol."
-        },
-        "library_description": {
-            "type": "string",
-            "description": "Details about library construction."
         },
         "extraction_protocol": {
             "type": "string"

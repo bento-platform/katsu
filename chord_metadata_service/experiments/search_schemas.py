@@ -134,6 +134,12 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "library_id": {
             "search": search_optional_str(order=14),
         },
+        "library_description": {
+            "search": search_optional_str(order=19),
+        },
+        "library_extract_id": {
+            "search": search_optional_str(order=20),
+        },
         "insert_size": {
             "search": search_optional_eq(order=16),
         },
@@ -142,12 +148,6 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         },
         "protocol_url": {
             "search": search_optional_str(order=18),
-        },
-        "library_description": {
-            "search": search_optional_str(order=19),
-        },
-        "library_extract_id": {
-            "search": search_optional_str(order=20),
         },
         # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
         "instrument": merge_schema_dictionaries(
