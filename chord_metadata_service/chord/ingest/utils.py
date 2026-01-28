@@ -17,7 +17,7 @@ from .exceptions import IngestError
 
 __all__ = [
     "map_if_list",
-    "get_ontology_term",
+    "get_single_ontology_term",
     "query_and_check_nulls",
     "workflow_file_output_to_path",
 ]
@@ -38,7 +38,10 @@ def map_if_list(fn: Callable, data: Any, *args, **kwargs) -> Any:
     )
 
 
-def get_ontology_term(data, key):
+# This check is added for the previous experiment schema,
+# where fields like experiment_ontology were lists of single ontology items.
+# Help to handling both legacy List formats and current Object formats.
+def get_single_ontology_term(data, key: str):
     val = data.get(key)
     if isinstance(val, list):
         return val[0] if val else None
