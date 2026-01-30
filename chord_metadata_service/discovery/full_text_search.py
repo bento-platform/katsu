@@ -190,7 +190,7 @@ class BaseFTSModel(models.Model, FTSHelpersMixin):
     fts_extra = models.TextField(blank=True, null=False, default="")
 
     class Meta:
-        # Abstract prevents the creation of a BaseTimeStamp table
+        # Abstract prevents the creation of a BaseFTSModel table
         abstract = True
 
     def get_fts_extra(self) -> tuple:
