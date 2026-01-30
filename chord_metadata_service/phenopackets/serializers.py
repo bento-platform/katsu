@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.fields import CharField
 
 from chord_metadata_service.restapi.utils import computed_property
 from .models import (
@@ -224,6 +225,8 @@ class InterpretationSerializer(GenericSerializer):
 
 class SimplePhenopacketSerializer(GenericSerializer):
     # Note: this serializer is always nested
+
+    project = CharField(read_only=True)
 
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     interpretations = InterpretationSerializer(many=True, required=False)
