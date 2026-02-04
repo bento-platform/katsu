@@ -167,7 +167,7 @@ def ingest_experiments_workflow(json_data, dataset_id: str, lg: BoundLogger) -> 
     lg = lg.bind(project_id=str(dataset.project_id), dataset_id=dataset_id)
 
     for rs in json_data.get("resources", []):
-        dataset.additional_resources.add(ingest_resource(rs))
+        dataset.additional_resources.add(ingest_resource(rs, lg))
 
     exps = json_data.get("experiments", [])
 
