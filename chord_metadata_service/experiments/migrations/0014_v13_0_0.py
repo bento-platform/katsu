@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import chord_metadata_service.restapi.validators
 
+
 # --- DATA MIGRATION FUNCTIONS ---
 
 def convert_list_to_object(apps, schema_editor):
@@ -27,6 +28,7 @@ def convert_list_to_object(apps, schema_editor):
             
         exp.save()
 
+
 def reverse_object_to_list(apps, schema_editor):
     """
     Reverse logic: wraps the single object back into a list 
@@ -50,6 +52,7 @@ def reverse_object_to_list(apps, schema_editor):
             exp.experiment_ontology = []
 
         exp.save()
+
 
 # --- MIGRATION CLASS ---
 
@@ -92,17 +95,35 @@ class Migration(migrations.Migration):
             field=models.URLField(blank=True, help_text='URL to the sequencing protocol.', max_length=500, null=True),
         ),
 
-        # transform Lists [] into Dicts
-        migrations.RunPython(convert_list_to_object, reverse_object_to_list),
-
-        migrations.AlterField(
+         migrations.AlterField(
             model_name='experiment',
             name='experiment_ontology',
-            field=models.JSONField(blank=True, null=True, help_text='An ontology term describing the experiment.', validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=None, schema_ref='ONTOLOGY_CLASS')]),
+            field=models.JSONField(
+                blank=True,
+                null=True,
+                help_text='An ontology term describing the experiment, e.g., via the OBI ontology.',
+                validators=[
+                    chord_metadata_service.restapi.validators.JsonSchemaValidator(
+                        formats=None, schema_ref='ONTOLOGY_CLASS'
+                    )
+                ],
+            ),
         ),
         migrations.AlterField(
             model_name='experiment',
             name='molecule_ontology',
-            field=models.JSONField(blank=True, null=True, help_text='An ontology term describing a molecular property.', validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=None, schema_ref='ONTOLOGY_CLASS')]),
+            field=models.JSONField(
+                blank=True,
+                null=True,
+                help_text='An ontology term describing the molecule, e.g., via the OBI ontology.',
+                validators=[
+                    chord_metadata_service.restapi.validators.JsonSchemaValidator(
+                        formats=None, schema_ref='ONTOLOGY_CLASS'
+                    )
+                ],
+            ),
         ),
+
+        # transform Lists [] into Dicts
+        migrations.RunPython(convert_list_to_object, reverse_object_to_list),
     ]
