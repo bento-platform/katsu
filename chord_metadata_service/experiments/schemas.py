@@ -2,7 +2,7 @@ from django.conf import settings
 from referencing import Registry, Resource
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, ONTOLOGY_CLASS_LIST, EXTRA_PROPERTIES_SCHEMA
+from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
 from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
@@ -153,13 +153,13 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
                      "Neutralizing antibody titers", "Metabolite profiling",
                      "Antibody measurement", "Viral WGS", "Other"]
         },
-        "experiment_ontology": ONTOLOGY_CLASS_LIST,
+        "experiment_ontology": ONTOLOGY_CLASS,
         "molecule": {
             "type": "string",
             "enum": ["total RNA", "polyA RNA", "cytoplasmic RNA", "nuclear RNA",
                      "small RNA", "genomic DNA", "protein", "Other"]
         },
-        "molecule_ontology": ONTOLOGY_CLASS_LIST,
+        "molecule_ontology": ONTOLOGY_CLASS,
         "library_strategy": {
             "type": "string",
             "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "WGS", "RAD-Seq", "AMPLICON", "Other"]
@@ -176,6 +176,30 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "library_layout": {
             "type": "string",
             "enum": ["Single", "Paired"]
+        },
+        "library_id": {
+            "type": "string",
+            "pattern": MODEL_ID_PATTERN,
+        },
+        "library_description": {
+            "type": "string",
+            "description": "Details about library construction."
+        },
+        "library_extract_id": {
+            "type": "string"
+        },
+        "insert_size": {
+            "type": "integer",
+            "description": "Insert size (integer)."
+        },
+        "description": {
+            "type": "string",
+            "description": "Experimental design description."
+        },
+        "protocol_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the protocol."
         },
         "extraction_protocol": {
             "type": "string"

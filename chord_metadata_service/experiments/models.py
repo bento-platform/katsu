@@ -11,7 +11,6 @@ from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import (
     ontology_validator,
-    ontology_list_validator,
     base_extra_properties_validator,
 )
 from chord_metadata_service.phenopackets.models import Biosample
@@ -60,8 +59,8 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     )
     experiment_ontology = JSONField(
         blank=True,
-        default=list,
-        validators=[ontology_list_validator],
+        null=True,
+        validators=[ontology_validator],
         help_text=rec_help(d.EXPERIMENT, "experiment_ontology"),
     )
     # MOLECULE
@@ -73,8 +72,8 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     )
     molecule_ontology = JSONField(
         blank=True,
-        default=list,
-        validators=[ontology_list_validator],
+        null=True,
+        validators=[ontology_validator],
         help_text=rec_help(d.EXPERIMENT, "molecule_ontology"),
     )
     # LIBRARY
@@ -102,6 +101,23 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         null=True,
         help_text=rec_help(d.EXPERIMENT, "library_layout"),
     )
+    library_id = CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "library_id")
+    )
+    library_extract_id = CharField(
+        max_length=200,
+        null=True,
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "library_extract_id")
+    )
+    library_description = models.TextField(
+        null=True,
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "library_description")
+    )
     extraction_protocol = CharField(
         max_length=200,
         blank=True,
@@ -118,6 +134,17 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "qc_flags")),
         blank=True,
         default=list,
+    )
+    insert_size = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "insert_size")
+    )
+    protocol_url = models.URLField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text=rec_help(d.EXPERIMENT, "protocol_url")
     )
     # SAMPLE
     biosample = models.ForeignKey(
@@ -151,6 +178,12 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         null=True,
         help_text=rec_help(d.EXPERIMENT, "instrument"),
         related_name="experiments",
+    )
+    # EXPERIMENT DESCRIPTION
+    description = models.TextField(
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT, "description")
     )
     # EXTRA
     extra_properties = JSONField(
