@@ -28,14 +28,12 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferTo
 
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 
-from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
 from chord_metadata_service.logger import logger as katsu_logger
 
-from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
@@ -90,23 +88,26 @@ async def experiment_query_results(
 ):
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
-    queryset = Experiment.get_model_scoped_queryset(scope).filter(
+    queryset = Experiment.get_model_scoped_queryset(scope, prefetch_and_select_related="top_level").filter(
         id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         return get_values_list(queryset, options)
 
-    return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH)
+    return queryset
 
 
 async def phenopacket_query_results(
     scope: ValidatedDiscoveryScope, query: sql.Composable, params, logger: BoundLogger, options: dict | None = None
 ):
-    queryset = Phenopacket.get_model_scoped_queryset(scope).filter(
-        id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
-
     output_format = options.get("output") if options else None
+
+    queryset = (
+        Phenopacket.get_model_scoped_queryset(scope, prefetch_and_select_related="top_level")
+        .filter(id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
+    )
+
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         return get_values_list(queryset, options)
 
@@ -136,7 +137,7 @@ async def phenopacket_query_results(
 
         return results
     else:
-        return queryset.select_related(*PHENOPACKET_SELECT_REL).prefetch_related(*PHENOPACKET_PREFETCH)
+        return queryset
 
 
 QUERY_RESULTS_FN: dict[

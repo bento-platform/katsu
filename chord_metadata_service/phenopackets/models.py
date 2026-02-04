@@ -18,6 +18,7 @@ from chord_metadata_service.restapi.validators import (
     ontology_list_validator
 )
 from . import descriptions as d
+from .related_fields import BIOSAMPLE_SELECT_REL, PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH, BIOSAMPLE_PREFETCH
 from .utils import time_element_to_str
 from .validators import vrs_variation_validator
 
@@ -175,6 +176,14 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
                 "filter": "phenopackets__dataset__identifier",
             },
         }
+
+    @staticmethod
+    def get_select_related() -> tuple[str, ...]:
+        return BIOSAMPLE_SELECT_REL
+
+    @staticmethod
+    def get_prefetch(top_level: bool) -> tuple[str, ...]:
+        return BIOSAMPLE_PREFETCH
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))
     # if Individual instance is deleted Biosample instance is deleted too
@@ -544,6 +553,14 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return TOP_LEVEL_MODEL_SCOPE_FILTERS
+
+    @staticmethod
+    def get_select_related() -> tuple[str, ...]:
+        return PHENOPACKET_SELECT_REL
+
+    @staticmethod
+    def get_prefetch(top_level: bool) -> tuple[str, ...]:
+        return PHENOPACKET_PREFETCH
 
     def get_project_id(self) -> str | None:
         model = apps.get_model("chord.Project")

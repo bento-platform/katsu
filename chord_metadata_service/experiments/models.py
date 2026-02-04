@@ -17,6 +17,7 @@ from chord_metadata_service.restapi.validators import (
 from chord_metadata_service.phenopackets.models import Biosample
 
 from . import descriptions as d
+from .related_fields import EXPERIMENT_PREFETCH, EXPERIMENT_SELECT_REL
 from .validators import file_index_list_validator
 
 __all__ = ["Experiment", "ExperimentResult", "Instrument"]
@@ -40,6 +41,14 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return TOP_LEVEL_MODEL_SCOPE_FILTERS
+
+    @staticmethod
+    def get_select_related() -> tuple[str, ...]:
+        return EXPERIMENT_SELECT_REL
+
+    @staticmethod
+    def get_prefetch(top_level: bool) -> tuple[str, ...]:
+        return EXPERIMENT_PREFETCH
 
     id = CharField(
         primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id")
