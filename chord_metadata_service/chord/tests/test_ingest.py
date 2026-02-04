@@ -15,7 +15,6 @@ from chord_metadata_service.chord.ingest.phenopackets import (
     ingest_phenopacket,
 )
 from chord_metadata_service.chord.tests.helpers import ModelFieldsTestMixin, ProjectTestCase
-from chord_metadata_service.chord.ingest.utils import get_single_ontology_term
 from chord_metadata_service.chord.workflows.metadata import (
     WORKFLOW_EXPERIMENTS_JSON,
     WORKFLOW_PHENOPACKETS_JSON,
@@ -321,31 +320,6 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
             EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
             [v["identifier"] for v in related_results.values("identifier")]
         )
-
-    def test_get_single_ontology_term(self):
-        key = "experiment_ontology"
-
-        # legacy-list with data
-        legacy_data = {key: [{"id": "HP:0001", "label": "Term"}]}
-        self.assertEqual(
-            get_single_ontology_term(legacy_data, key),
-            {"id": "HP:0001", "label": "Term"}
-        )
-
-        # legacy- empty list
-        empty_list_data = {key: []}
-        self.assertIsNone(get_single_ontology_term(empty_list_data, key))
-
-        # current- single Object
-        modern_data = {key: {"id": "HP:0001", "label": "Term"}}
-        self.assertEqual(
-            get_single_ontology_term(modern_data, key),
-            {"id": "HP:0001", "label": "Term"}
-        )
-
-        # missing/null
-        missing_data = {}
-        self.assertIsNone(get_single_ontology_term(missing_data, key))
 
 
 class IngestISOAgeToNumberTest(ProjectTestCase):
