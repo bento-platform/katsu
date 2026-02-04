@@ -28,7 +28,6 @@ GEO_LOCATION_PREDEF_ATTRS = ("label", "city", "country", "iso_a3_code", "precisi
 
 
 class GeoLocationSerializer(serializers.Serializer):
-
     type = serializers.CharField(validators=[type_is_feature])
     geometry = PointSerializer()
     properties = serializers.DictField(required=False, write_only=True)
@@ -46,10 +45,12 @@ class GeoLocationSerializer(serializers.Serializer):
             },
             "properties": {
                 **({k: v for k, v in instance.extra_properties.items() if k not in GEO_LOCATION_PREDEF_ATTRS}),
-                **({
-                    MODEL_ATTRS_TO_PREDEF_PROPS[k]: getattr(instance, k)
-                    for k in GEO_LOCATION_PREDEF_ATTRS
-                    if getattr(instance, k)
-                }),
+                **(
+                    {
+                        MODEL_ATTRS_TO_PREDEF_PROPS[k]: getattr(instance, k)
+                        for k in GEO_LOCATION_PREDEF_ATTRS
+                        if getattr(instance, k)
+                    }
+                ),
             },
         }

@@ -36,6 +36,7 @@ VALID_INDIVIDUAL = {
         "id": "NCBITaxon:9606",
         "label": "human"
     },
+    "vital_status": VITAL_STATUS_DECEASED,
     "date_of_birth": "1960-01-01",
     "time_at_last_encounter": {
         "age_range": {

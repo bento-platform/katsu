@@ -97,7 +97,7 @@ PHENOPACKET_UPDATE_SCHEMA = describe_schema({
         "comment": base_type(SchemaTypes.STRING)
     },
     "additionalProperties": False,
-    "required": ["timestamp", "comment"],
+    "required": ["timestamp"],
 }, descriptions.UPDATE)
 
 

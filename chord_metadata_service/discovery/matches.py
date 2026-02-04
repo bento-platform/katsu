@@ -1,11 +1,11 @@
-from __future__ import annotations
-
 """
 This file contains functions to build match response lists for the discovery matches endpoint.
 These match lists are built from the match models in the pydantic_models.py file. They are not complete instances of
 their corresponding entities, but rather are subsets right now.
 Since we have pagination, though, we should probably fetch full record details in a future version - TODO
 """
+
+from __future__ import annotations
 
 from bento_lib.discovery import DiscoveryEntity
 from django.db.models import QuerySet, Manager

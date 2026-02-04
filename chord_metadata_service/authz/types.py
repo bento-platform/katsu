@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataPermissions:
     bool_: bool
     counts: bool
