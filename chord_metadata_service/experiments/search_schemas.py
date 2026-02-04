@@ -84,70 +84,70 @@ EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_
         "id": {
             "search": {"order": 0, "database": {"field": models.Experiment._meta.pk.column}}
         },
+        "description": {
+            "search": search_optional_str(1),
+        },
         "reference_registry_id": {
-            "search": search_optional_str(1, queryable="internal"),
+            "search": search_optional_str(2, queryable="internal"),
         },
         "qc_flags": {
             "items": {
                 "search": search_optional_str(0),
             },
-            "search": {"order": 2, "database": {"type": "array"}}
+            "search": {"order": 3, "database": {"type": "array"}}
         },
         "experiment_type": {
-            "search": search_optional_eq(3),
+            "search": search_optional_eq(4),
         },
         "experiment_ontology": {
             **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
-            "search": {"order": 4, "database": {"type": "jsonb"}}
+            "search": {"order": 5, "database": {"type": "jsonb"}}
         },
         "molecule": {
-            "search": search_optional_eq(5),
+            "search": search_optional_eq(6),
         },
         "molecule_ontology": {
             **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
-            "search": {"order": 6, "database": {"type": "jsonb"}}
+            "search": {"order": 7, "database": {"type": "jsonb"}}
         },
         "library_strategy": {
-            "search": search_optional_eq(7),
+            "search": search_optional_eq(8),
         },
         "biosample": {
             "search": merge_schema_dictionaries(
-                search_optional_eq(8),
+                search_optional_eq(9),
                 {"database": {"field": models.Experiment._meta.get_field("biosample").column}}
             )
         },
         "extraction_protocol": {
-            "search": search_optional_str(9),
+            "search": search_optional_str(10),
         },
         "study_type": {
-            "search": search_optional_eq(10),
-        },
-        "library_source": {
             "search": search_optional_eq(11),
         },
-        "library_selection": {
-            "search": search_optional_eq(12),
-        },
-        "library_layout": {
-            "search": search_optional_eq(13),
-        },
         "library_id": {
-            "search": search_optional_str(order=14),
+            "search": search_optional_str(12),
         },
         "library_description": {
-            "search": search_optional_str(order=19),
+            "search": search_optional_str(13),
+        },
+        "library_source": {
+            "search": search_optional_eq(14),
+        },
+        "library_selection": {
+            "search": search_optional_eq(15),
+        },
+        "library_layout": {
+            "search": search_optional_eq(16),
         },
         "library_extract_id": {
-            "search": search_optional_str(order=20),
+            "search": search_optional_str(17),
         },
         "insert_size": {
-            "search": search_optional_eq(order=16),
-        },
-        "description": {
-            "search": search_optional_str(order=17),
+            "search": search_optional_eq(18),
         },
         "protocol_url": {
-            "search": search_optional_str(order=18),
+            "search": search_optional_str(19),
         },
         # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
         "instrument": merge_schema_dictionaries(
