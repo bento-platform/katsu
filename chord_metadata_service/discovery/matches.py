@@ -105,10 +105,10 @@ async def experiment_result_matches(
                 creation_date=er.creation_date,
                 created_by=er.created_by,
                 extra_properties=er.extra_properties,
-                # ----------------------------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------------------------------
                 experiments=[v async for v in er.experiments.values_list("id", flat=True)],
                 phenopacket=ctx.get("phenopacket") or (phenopacket.id if phenopacket else None),
-                # ----------------------------------------------------------------------------------------------------
+                # ------------------------------------------------------------------------------------------------------
                 **(
                     dict(
                         project=scope.project_id or (str(first_exp.dataset.project_id) if first_exp else None),
@@ -135,20 +135,24 @@ async def experiment_matches(
     ):
         # TODO: right now, experiment results are not filtered even if a query is executed on them.
         phenopacket = (await exp.biosample.phenopackets.afirst()) if exp.biosample else None  # TODO: n+1?
+        experiment_results = await experiment_result_matches(
+            exp.experiment_results,
+            scope,
+            dt_permissions,
+            False,
+            {**ctx, "phenopacket": phenopacket.id if phenopacket else None, "experiment": str(exp.id)},
+        )
+        experiment_results.sort(key=lambda er: er.id)
         res.append(
             MatchExperiment(
                 id=str(exp.id),
                 experiment_type=exp.experiment_type,
                 study_type=exp.study_type,
-                results=await experiment_result_matches(
-                    exp.experiment_results,
-                    scope,
-                    dt_permissions,
-                    False,
-                    {**ctx, "phenopacket": phenopacket.id if phenopacket else None, "experiment": str(exp.id)},
-                ),
+                results=experiment_results,
+                # ------------------------------------------------------------------------------------------------------
                 biosample=str(exp.biosample.id) if exp.biosample else None,
                 phenopacket=str(phenopacket.id) if phenopacket else None,
+                # ------------------------------------------------------------------------------------------------------
                 **(dict(
                     project=scope.project_id or str(exp.dataset.project_id),
                     dataset=scope.dataset_id or str(exp.dataset_id)
@@ -173,24 +177,26 @@ async def biosample_matches(
             p = str(p_obj.id)
             ds = str(p_obj.dataset_id)
 
+        # TODO: prefetch all the time, even when not filtering?
+        experiments = (
+            await experiment_matches(
+                getattr(b, "experiment_matches", b.experiments),
+                scope,
+                dt_permissions,
+                False,
+                {**ctx, "biosample": str(b.id)},
+            )
+        ) if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
+
+        if experiments:
+            experiments.sort(key=lambda e: e.id)
+
         res.append(
             MatchBiosample(
                 id=str(b.id),
                 individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
-                experiments=(
-                    # TODO: prefetch all the time, even when not filtering?
-                    (
-                        await experiment_matches(
-                            getattr(b, "experiment_matches", b.experiments),
-                            scope,
-                            dt_permissions,
-                            False,
-                            {**ctx, "biosample": str(b.id)},
-                        )
-                    )
-                    if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
-                ),
+                experiments=experiments,
                 **(dict(project=scope.project_id, dataset=ds) if root else dict()),
             )
         )
@@ -211,6 +217,7 @@ async def phenopacket_matches(
         s_id = phe.subject_id
         # TODO: prefetch all the time, even when not filtering.
         # TODO: return both all biosamples and matching biosamples?
+
         biosamples = await biosample_matches(
             getattr(phe, "biosample_matches", phe.biosamples),
             scope,
@@ -218,6 +225,8 @@ async def phenopacket_matches(
             False,
             {**ctx, "phenopacket": phe_id},
         )
+        biosamples.sort(key=lambda b: b.id)
+
         res.append(
             MatchPhenopacket(
                 id=phe_id,
