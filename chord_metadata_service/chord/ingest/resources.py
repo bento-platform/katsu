@@ -48,7 +48,6 @@ def ingest_resource(resource: dict, logger: BoundLogger) -> rm.Resource:
         version=version,
         iri_prefix=resource["iri_prefix"],
         extra_properties=resource.get("extra_properties", {}),
-        # TODO extra_properties
     )
 
     return rs_obj
