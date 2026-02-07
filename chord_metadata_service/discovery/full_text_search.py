@@ -67,16 +67,21 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
     ),
     "experiment": (
         # Experiment fields
+        ["description"],
         ["study_type"],
         ["experiment_type"],
         (["experiment_ontology"], TextField),
         ["molecule"],
         (["molecule_ontology"], TextField),
+        ["library_id"],
+        ["library_description"],
         ["library_strategy"],
         ["library_source"],
         ["library_selection"],
         ["library_layout"],
+        ["library_extract_id"],
         ["extraction_protocol"],
+        ["protocol_url"],
         ["reference_registry_id"],
         (["extra_properties"], TextField),
         # instrument is in fts_extra, as Instrument implements ToFTSReprMixin
