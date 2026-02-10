@@ -25,11 +25,11 @@ from .stats import stats_for_field
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
 # Number range patterns
-BEGIN_RANGE_PATTERN = re.compile(r"(?P<sym>[<≤]) (?P<val>-?\d+(\.\d+)?)")
-MIDDLE_RANGE_PATTERN = re.compile(
+MAX_VALUE_PATTERN = re.compile(r"(?P<sym>[<≤]) (?P<val>-?\d+(\.\d+)?)")
+RANGE_PATTERN = re.compile(
     r"(?P<start_sym>[\[(>≥])(?P<start>-?\d+(\.\d+)?), (?P<end>-?\d+(\.\d+)?)(?P<end_sym>[])<≤])"
 )
-END_RANGE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>-?\d+(\.\d+)?)")
+MIN_VALUE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>-?\d+(\.\d+)?)")
 
 
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
@@ -460,7 +460,7 @@ async def filter_queryset_field_value(
         # values are of the form "[50, 150)", "< 50" or "≥ 800".
         # important: custom bins can have decimals in them!
 
-        if mrp_match := MIDDLE_RANGE_PATTERN.match(value):
+        if mrp_match := RANGE_PATTERN.match(value):
             # full value looks like "[50, 60)", "< 50", or "≥ 60" if we're validating bins line up with censored
             # discovery (validated elsewhere).
             # with full discovery access (query:data), we can accept the following other forms:
@@ -484,10 +484,11 @@ async def filter_queryset_field_value(
             else:
                 condition = get_condition_for_non_jsonb_field(field, ((start_op, start), (end_op, end)), subquery)
 
-        elif brp_match := BEGIN_RANGE_PATTERN.match(value):
-            # full value looks like "> 50" or "≥ 50" (only the latter is valid for censored discovery.)
-            val = f_utils.str_to_numeric(brp_match["val"])
-            min_op = symbol_django_op(brp_match["sym"])
+        elif min_match := MIN_VALUE_PATTERN.match(value):
+            # full value looks like "> 50" or "≥ 50", where 50 is the minimum value either exclusively or inclusively.
+            # only the latter is valid for censored discovery.
+            val = f_utils.str_to_numeric(min_match["val"])
+            min_op = symbol_django_op(min_match["sym"])
             if json_range_condition := f_utils.get_json_range_condition(
                 queryset_entity, field_props, min_value=val, min_inclusive=min_op == "gte"
             ):
@@ -495,10 +496,11 @@ async def filter_queryset_field_value(
             else:
                 condition = get_condition_for_non_jsonb_field(field, ((min_op, val),), subquery)
 
-        elif erp_match := END_RANGE_PATTERN.match(value):
-            # full value looks like "< 50" or "≤ 50" (only the former is valid for censored discovery.)
-            val = f_utils.str_to_numeric(erp_match["val"])
-            max_op = symbol_django_op(erp_match["sym"])
+        elif max_match := MAX_VALUE_PATTERN.match(value):
+            # full value looks like "< 50" or "≤ 50", where 50 is the maximum either exclusively or inclusively.
+            # only the former is valid for censored discovery.
+            val = f_utils.str_to_numeric(max_match["val"])
+            max_op = symbol_django_op(max_match["sym"])
             if json_range_condition := f_utils.get_json_range_condition(
                 queryset_entity, field_props, max_value=val, max_inclusive=max_op == "lte"
             ):
