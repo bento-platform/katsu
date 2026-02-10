@@ -27,7 +27,7 @@ LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 # Number range patterns
 BEGIN_RANGE_PATTERN = re.compile(r"(?P<sym>[<≤]) (?P<val>-?\d+(\.\d+)?)")
 MIDDLE_RANGE_PATTERN = re.compile(
-    r"(?P<start_sym>[\[(])(?P<start>-?\d+(\.\d+)?), (?P<end>-?\d+(\.\d+)?)(?P<end_sym>[])])"
+    r"(?P<start_sym>[\[(>≥])(?P<start>-?\d+(\.\d+)?), (?P<end>-?\d+(\.\d+)?)(?P<end_sym>[])<≤])"
 )
 END_RANGE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>-?\d+(\.\d+)?)")
 
@@ -407,6 +407,20 @@ def get_condition_for_non_jsonb_field(
         return Q(**{f"{field}__{op}": value for op, value in ops})
 
 
+def symbol_django_op(sym: str) -> str:
+    match sym:
+        case "<" | ")":
+            return "lt"
+        case "≤" | "]":
+            return "lte"
+        case ">" | "(":
+            return "gt"
+        case "≥" | "[":
+            return "gte"
+        case _:
+            raise NotImplemented()
+
+
 async def filter_queryset_field_value(
     queryset_entity: DiscoveryEntity, qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger
 ) -> tuple[QuerySet, DiscoveryEntity]:
@@ -426,21 +440,34 @@ async def filter_queryset_field_value(
 
     # TODO: resolve schema including extra properties
 
-    if field_props.datatype == "string":
+    if field_props.datatype in ("string", "ontology_class"):
         if gb := field_props.group_by:
+            if field_props.datatype == "ontology-class":
+                # append `/id` to path to search by ontology class ID
+                gb = gb + "/id"
+
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
-            condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
+            f = field
+            if field_props.datatype == "ontology-class":
+                # append __id to path to search by ontology class ID
+                f += "__id"
+            condition = get_condition_for_non_jsonb_field(f, (("iexact", value),), subquery)
 
     elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800".
         # important: custom bins can have decimals in them!
 
         if mrp_match := MIDDLE_RANGE_PATTERN.match(value):
-            min_inclusive = mrp_match["start_sym"] == "["
-            max_inclusive = mrp_match["end_sym"] == "]"
+            # full value looks like "[50, 60)", "< 50", or "≥ 60" if we're validating bins line up with censored
+            # discovery (validated elsewhere).
+            # with full discovery access (query:data), we can accept the following other forms:
+            #   "(50, 60)", "[50, 60)", "[50, 60]", "≥50, <60", "≤ 50", "> 60"
+
+            start_op = symbol_django_op(mrp_match["start_sym"])
+            end_op = symbol_django_op(mrp_match["end_sym"])
             start = f_utils.str_to_numeric(mrp_match["start"])
             end = f_utils.str_to_numeric(mrp_match["end"])
 
@@ -448,42 +475,36 @@ async def filter_queryset_field_value(
                 queryset_entity,
                 field_props,
                 min_value=start,
-                min_inclusive=min_inclusive,
+                min_inclusive=start_op == "gte",
                 max_value=end,
-                max_inclusive=max_inclusive,
+                max_inclusive=end_op == "lte",
             ):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 condition = json_range_condition
             else:
-                condition = get_condition_for_non_jsonb_field(
-                    field,
-                    (("gte" if min_inclusive else "gt", start), ("lte" if max_inclusive else "lt", end)),
-                    subquery,
-                )
+                condition = get_condition_for_non_jsonb_field(field, ((start_op, start), (end_op, end)), subquery)
 
         elif brp_match := BEGIN_RANGE_PATTERN.match(value):
+            # full value looks like "> 50" or "≥ 50" (only the latter is valid for censored discovery.)
             val = f_utils.str_to_numeric(brp_match["val"])
-            min_inclusive = brp_match["sym"] == "≥"
+            min_op = symbol_django_op(brp_match["sym"])
             if json_range_condition := f_utils.get_json_range_condition(
-                queryset_entity, field_props, min_value=val, min_inclusive=min_inclusive
+                queryset_entity, field_props, min_value=val, min_inclusive=min_op == "gte"
             ):
                 condition = json_range_condition
             else:
-                condition = get_condition_for_non_jsonb_field(
-                    field, (("gte" if min_inclusive else "gt", val),), subquery
-                )
+                condition = get_condition_for_non_jsonb_field(field, ((min_op, val),), subquery)
 
         elif erp_match := END_RANGE_PATTERN.match(value):
+            # full value looks like "< 50" or "≤ 50" (only the former is valid for censored discovery.)
             val = f_utils.str_to_numeric(erp_match["val"])
-            max_inclusive = erp_match["sym"] == "≤"
+            max_op = symbol_django_op(erp_match["sym"])
             if json_range_condition := f_utils.get_json_range_condition(
-                queryset_entity, field_props, max_value=val, max_inclusive=max_inclusive
+                queryset_entity, field_props, max_value=val, max_inclusive=max_op == "lte"
             ):
                 condition = json_range_condition
             else:
-                condition = get_condition_for_non_jsonb_field(
-                    field, (("lte" if max_inclusive else "lt", val),), subquery
-                )
+                condition = get_condition_for_non_jsonb_field(field, ((max_op, val),), subquery)
 
         else:
             raise NotImplementedError()
@@ -493,9 +514,10 @@ async def filter_queryset_field_value(
         d = datetime.datetime.strptime(value, "%b %Y")
         val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
         condition = get_condition_for_non_jsonb_field(field, (("startswith", val),), subquery)
+
     else:  # pragma: no cover
         # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
-        # values of `datatype` to the cases above.
+        # values of `datatype` to the cases above (unless a new possible value is added to FieldDefinition).
         raise NotImplementedError()
 
     await logger.adebug(
