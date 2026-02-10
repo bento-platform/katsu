@@ -25,9 +25,11 @@ from .stats import stats_for_field
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
 # Number range patterns
-BEGIN_RANGE_PATTERN = re.compile(r"(?P<sym>[<≤]) \d+(\.\d+)?")
-MIDDLE_RANGE_PATTERN = re.compile(r"(?P<start_sym>[\[(])(?P<start>\d+(\.\d+)?), (?P<end>\d+(\.\d+)?)(?P<end_sym>[])])")
-END_RANGE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>\d+(\.\d+)?)")
+BEGIN_RANGE_PATTERN = re.compile(r"(?P<sym>[<≤]) (?P<val>-?\d+(\.\d+)?)")
+MIDDLE_RANGE_PATTERN = re.compile(
+    r"(?P<start_sym>[\[(])(?P<start>-?\d+(\.\d+)?), (?P<end>-?\d+(\.\d+)?)(?P<end_sym>[])])"
+)
+END_RANGE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>-?\d+(\.\d+)?)")
 
 
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
