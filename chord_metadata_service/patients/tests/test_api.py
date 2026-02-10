@@ -747,33 +747,43 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_range_string_1(self):
-        # sex string search and extra_properties range search
-        response = self.dt_authz_counts_get(
-            '/api/discovery?sex=female&lab_test_result_value=< 200'
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        range_parameters = {
-            "sex__iexact": "female",
-            "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200
-        }
-        db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        self._test_individual_counts(response_obj, db_count)
+        # test combined sex string search + extra_properties range search,
+        # with variety of ranges for lab_test_result_value including some decimal ones (which used to not work!)
+
+        subtests = [
+            ("< 55.5", 0, 55.5),
+            ("[200, 300)", 200, 300),
+            ("[1000, 1255.5)", 1000, 1255.5),
+            ("[1255.5, 1500)", 1000, 1255.5),
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                # sex string search and extra_properties range search
+                response = self.dt_authz_counts_get(f"/api/discovery?sex=female&lab_test_result_value={params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                range_parameters = {
+                    "sex__iexact": "female",
+                    "extra_properties__lab_test_result_value__gte": params[1],
+                    "extra_properties__lab_test_result_value__lt": params[2],
+                }
+                db_count = Individual.objects.filter(**range_parameters).count()
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+                self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_range_string_2(self):
         # extra_properties range search and extra_properties string search (single value)
 
         response = self.dt_authz_counts_get(
-            '/api/discovery?lab_test_result_value=< 200&covidstatus=positive'
+            '/api/discovery?lab_test_result_value=< 55.5&covidstatus=positive'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200,
+            "extra_properties__lab_test_result_value__lt": 55.5,
             "extra_properties__covidstatus__iexact": "positive",
         }
 
@@ -786,13 +796,13 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.dt_authz_counts_get(
-            '/api/discovery?lab_test_result_value=< 200&baseline_creatinine=[100, 150)'
+            '/api/discovery?lab_test_result_value=< 55.5&baseline_creatinine=[100, 150)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200,
+            "extra_properties__lab_test_result_value__lt": 55.5,
             "extra_properties__baseline_creatinine__gte": 100,
             "extra_properties__baseline_creatinine__lt": 150,
         }
@@ -821,14 +831,14 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
         response = self.dt_authz_counts_get(
-            '/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 200'
+            '/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__date_of_consent__startswith": "2021-03",
             "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200,
+            "extra_properties__lab_test_result_value__lt": 55.5,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])

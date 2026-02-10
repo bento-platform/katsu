@@ -427,10 +427,11 @@ async def filter_queryset_field_value(
             condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
 
     elif field_props.datatype == "number":
-        # values are of the form "[50, 150)", "< 50" or "≥ 800"
+        # values are of the form "[50, 150)", "< 50" or "≥ 800".
+        # important: custom bins can have decimals in them!
 
         if value.startswith("["):
-            [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
+            [start, end] = [f_utils.str_to_numeric(v) for v in value.lstrip("[").rstrip(")").split(", ")]
             if json_range_condition := f_utils.get_json_range_condition(queryset_entity, field_props, start, end):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 condition = json_range_condition
@@ -438,20 +439,21 @@ async def filter_queryset_field_value(
                 condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lt", end)), subquery)
         else:
             [sym, val] = value.split(" ")
+            val_numeric = f_utils.str_to_numeric(val)
             if sym == "≥":
                 if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, min=int(val)
+                    queryset_entity, field_props, min_value=val_numeric
                 ):
                     condition = json_range_condition
                 else:
-                    condition = get_condition_for_non_jsonb_field(field, (("gte", int(val)),), subquery)
+                    condition = get_condition_for_non_jsonb_field(field, (("gte", val_numeric),), subquery)
             elif sym == "<":
                 if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, max=int(val)
+                    queryset_entity, field_props, max_value=val_numeric
                 ):
                     condition = json_range_condition
                 else:
-                    condition = get_condition_for_non_jsonb_field(field, (("lt", int(val)),), subquery)
+                    condition = get_condition_for_non_jsonb_field(field, (("lt", val_numeric),), subquery)
             else:
                 raise NotImplementedError()
     elif field_props.datatype == "date":
