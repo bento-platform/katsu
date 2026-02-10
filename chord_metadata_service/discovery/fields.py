@@ -418,7 +418,7 @@ def symbol_django_op(sym: str) -> str:
         case "≥" | "[":
             return "gte"
         case _:
-            raise NotImplemented()
+            raise NotImplementedError()
 
 
 async def filter_queryset_field_value(
