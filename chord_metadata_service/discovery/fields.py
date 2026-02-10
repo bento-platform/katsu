@@ -232,7 +232,7 @@ async def get_range_stats(
         whens = [When(
             # Django's gte and lte lookups cannot span multiple JSON array indexes,
             # so we use the jsonb_path_exists function instead.
-            f_utils.get_json_range_condition(queryset_entity, field_props, floor, ceil),
+            f_utils.get_json_range_condition(queryset_entity, field_props, min_value=floor, max_value=ceil),
             then=Value(label)
         ) for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
     else:
