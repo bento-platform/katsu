@@ -181,8 +181,11 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
 def get_json_range_condition(
     filtering_entity: DiscoveryEntity,
     field_props: AnyFieldDefinition,
+    *,
     min_value: int | float | None = None,
+    min_inclusive: bool = True,
     max_value: int | float | None = None,
+    max_inclusive: bool = True,
 ) -> Q:
     """
     Takes field props for a 'number' data type contained in a JSONField array,
@@ -208,19 +211,21 @@ def get_json_range_condition(
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
         if min_value is not None:
+            op = '>=' if min_inclusive else '>'
             min_condition = Q(JSONBPathFilter(
                 # Points to the JSONField
                 F(field),
                 # JSON path expression with GTE and group_by_value condition
-                Value(f'$[*] ? (@.{value_json_path} >= {min_value} && @.{group_by_json_path} == "{group_by_value}")')
+                Value(f'$[*] ? (@.{value_json_path} {op} {min_value} && @.{group_by_json_path} == "{group_by_value}")')
             ))
             range_condition.add(min_condition, conn_type=Q.AND)
         if max_value is not None:
+            op = '<=' if max_inclusive else '<'
             max_condition = Q(JSONBPathFilter(
                 # Points to the JSONField
                 F(field),
                 # JSON path expression with LT and group_by_value condition
-                Value(f'$[*] ? (@.{value_json_path} < {max_value} && @.{group_by_json_path} == "{group_by_value}")')
+                Value(f'$[*] ? (@.{value_json_path} {op} {max_value} && @.{group_by_json_path} == "{group_by_value}")')
             ))
             range_condition.add(max_condition, Q.AND)
 

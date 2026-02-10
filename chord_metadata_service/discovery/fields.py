@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from bento_lib.discovery import (
     DiscoveryConfig, DateFieldDefinition, FieldDefinition, NumberFieldDefinition, StringFieldDefinition, DiscoveryEntity
@@ -22,6 +23,11 @@ from .pydantic_models import BinWithValue, BinList
 from .stats import stats_for_field
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+
+# Number range patterns
+BEGIN_RANGE_PATTERN = re.compile(r"(?P<sym>[<≤]) \d+(\.\d+)?")
+MIDDLE_RANGE_PATTERN = re.compile(r"(?P<start_sym>[\[(])(?P<start>\d+(\.\d+)?), (?P<end>\d+(\.\d+)?)(?P<end_sym>[])])")
+END_RANGE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>\d+(\.\d+)?)")
 
 
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
@@ -430,32 +436,56 @@ async def filter_queryset_field_value(
         # values are of the form "[50, 150)", "< 50" or "≥ 800".
         # important: custom bins can have decimals in them!
 
-        if value.startswith("["):
-            [start, end] = [f_utils.str_to_numeric(v) for v in value.lstrip("[").rstrip(")").split(", ")]
-            if json_range_condition := f_utils.get_json_range_condition(queryset_entity, field_props, start, end):
+        if mrp_match := MIDDLE_RANGE_PATTERN.match(value):
+            min_inclusive = mrp_match["start_sym"] == "["
+            max_inclusive = mrp_match["end_sym"] == "]"
+            start = f_utils.str_to_numeric(mrp_match["start"])
+            end = f_utils.str_to_numeric(mrp_match["end"])
+
+            if json_range_condition := f_utils.get_json_range_condition(
+                queryset_entity,
+                field_props,
+                min_value=start,
+                min_inclusive=min_inclusive,
+                max_value=end,
+                max_inclusive=max_inclusive,
+            ):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 condition = json_range_condition
             else:
-                condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lt", end)), subquery)
-        else:
-            [sym, val] = value.split(" ")
-            val_numeric = f_utils.str_to_numeric(val)
-            if sym == "≥":
-                if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, min_value=val_numeric
-                ):
-                    condition = json_range_condition
-                else:
-                    condition = get_condition_for_non_jsonb_field(field, (("gte", val_numeric),), subquery)
-            elif sym == "<":
-                if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, max_value=val_numeric
-                ):
-                    condition = json_range_condition
-                else:
-                    condition = get_condition_for_non_jsonb_field(field, (("lt", val_numeric),), subquery)
+                condition = get_condition_for_non_jsonb_field(
+                    field,
+                    (("gte" if min_inclusive else "gt", start), ("lte" if max_inclusive else "lt", end)),
+                    subquery,
+                )
+
+        elif brp_match := BEGIN_RANGE_PATTERN.match(value):
+            val = f_utils.str_to_numeric(brp_match["val"])
+            min_inclusive = brp_match["sym"] == "≥"
+            if json_range_condition := f_utils.get_json_range_condition(
+                queryset_entity, field_props, min_value=val, min_inclusive=min_inclusive
+            ):
+                condition = json_range_condition
             else:
-                raise NotImplementedError()
+                condition = get_condition_for_non_jsonb_field(
+                    field, (("gte" if min_inclusive else "gt", val),), subquery
+                )
+
+        elif erp_match := END_RANGE_PATTERN.match(value):
+            val = f_utils.str_to_numeric(erp_match["val"])
+            max_inclusive = erp_match["sym"] == "≤"
+            if json_range_condition := f_utils.get_json_range_condition(
+                queryset_entity, field_props, max_value=val, max_inclusive=max_inclusive
+            ):
+                condition = json_range_condition
+            else:
+                condition = get_condition_for_non_jsonb_field(
+                    field, (("lte" if max_inclusive else "lt", val),), subquery
+                )
+
+        else:
+            raise NotImplementedError()
+
     elif field_props.datatype == "date":
         # For now, limited to date expressed as month/year such as "May 2022"
         d = datetime.datetime.strptime(value, "%b %Y")
