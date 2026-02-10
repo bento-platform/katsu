@@ -15,6 +15,7 @@ __all__ = [
     "monthly_generator",
     "get_nested_json_condition",
     "get_json_range_condition",
+    "str_to_numeric",
 ]
 
 MAPPING_SEPARATOR = "/"
@@ -178,7 +179,10 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
 
 
 def get_json_range_condition(
-    filtering_entity: DiscoveryEntity, field_props: AnyFieldDefinition, min: int = None, max: int = None
+    filtering_entity: DiscoveryEntity,
+    field_props: AnyFieldDefinition,
+    min_value: int | float | None = None,
+    max_value: int | float | None = None,
 ) -> Q:
     """
     Takes field props for a 'number' data type contained in a JSONField array,
@@ -203,21 +207,25 @@ def get_json_range_condition(
         field = get_field_django_mapping(filtering_entity, field_props)
         group_by_json_path = mapping_to_json_path(group_by)
         value_json_path = mapping_to_json_path(value_mapping)
-        if min is not None:
+        if min_value is not None:
             min_condition = Q(JSONBPathFilter(
                 # Points to the JSONField
                 F(field),
                 # JSON path expression with GTE and group_by_value condition
-                Value(f'$[*] ? (@.{value_json_path} >= {min} && @.{group_by_json_path} == "{group_by_value}")')
+                Value(f'$[*] ? (@.{value_json_path} >= {min_value} && @.{group_by_json_path} == "{group_by_value}")')
             ))
             range_condition.add(min_condition, conn_type=Q.AND)
-        if max is not None:
+        if max_value is not None:
             max_condition = Q(JSONBPathFilter(
                 # Points to the JSONField
                 F(field),
                 # JSON path expression with LT and group_by_value condition
-                Value(f'$[*] ? (@.{value_json_path} < {max} && @.{group_by_json_path} == "{group_by_value}")')
+                Value(f'$[*] ? (@.{value_json_path} < {max_value} && @.{group_by_json_path} == "{group_by_value}")')
             ))
             range_condition.add(max_condition, Q.AND)
 
     return range_condition
+
+
+def str_to_numeric(value: str) -> int | float:
+    return float(value) if "." in value else int(value)
