@@ -1,6 +1,7 @@
 import abc
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
+from bento_lib.ontologies.models import OntologyClass
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import Literal
@@ -37,7 +38,7 @@ __all__ = [
 class BinWithValue(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    label: str
+    label: str | OntologyClass
     value: int
 
 
