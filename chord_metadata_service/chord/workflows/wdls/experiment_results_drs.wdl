@@ -18,7 +18,15 @@ workflow experiment_results_drs {
     }
 
     call associate_experiment_results_with_drs_objects {
+        input:
+            katsu_url = katsu_url,
+            access_token = access_token,
+            validate_ssl = validate_ssl,
+            drs_json = fetch_drs_objects.response_json
+    }
 
+    output {
+        File experiment_result_updates = associate_experiment_results_with_drs_objects.experiment_result_updates
     }
 }
 
@@ -63,6 +71,8 @@ task associate_experiment_results_with_drs_objects {
             '.tbi': 'TABIX',
         }
 
+        updates = []
+
         with open('~{drs_json}') as fh:
             drs_records = json.load(fh)
 
@@ -106,10 +116,19 @@ task associate_experiment_results_with_drs_objects {
                         verify=verify_ssl,
                     )
 
+                    updates.append({'id': er_id, 'patch': update})
+
             # go to next page of results:
             er_url = experiment_results['next']
 
+        with open('./experiment_result_updates.json', 'w') as fh:
+            json.dump(updates, fh)
+
 "
-    >>> # TODO: associate files & indices
-    output {}
+    >>>
+    output {
+        File experiment_result_updates = "experiment_result_updates.json"
+        File task_stdout = stdout()
+        File task_stderr = stderr()
+    }
 }
