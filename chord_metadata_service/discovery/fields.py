@@ -291,7 +291,6 @@ async def get_categorical_stats(
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = getattr(field_props.config, "enum")
-    derived_labels: bool = labels is None
 
     # Special case: for some fields, values are based on what's present in the
     # dataset (enum is null in the public JSON).
@@ -300,7 +299,7 @@ async def get_categorical_stats(
     # - Note that in this situation, we explictly MUST HAVE remove rounded-down 0-counts (below the threshold) below,
     #   otherwise we LEAK that there is 1 <= x <= threshold matching entries in the DB. However, since
     #   stats_for_field(...) has already handled not adding these keys, these labels don't make it into this list.
-    if derived_labels:
+    if labels is None:
         labels = sorted(
             [k for k in stats.keys() if k != "missing"],
             key=lambda x: x.lower()
