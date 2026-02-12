@@ -20,6 +20,7 @@ WORKFLOW_EXPERIMENTS_JSON = "experiments_json"
 WORKFLOW_EXPERIMENTS_JSON_WITH_FILES = "experiments_json_with_files"
 
 WORKFLOW_EXPERIMENT_RESULTS_FILES = "experiment_results_files"
+WORKFLOW_EXPERIMENT_RESULTS_DRS = "experiment_results_drs"
 WORKFLOW_VCF2MAF = "vcf2maf"
 WORKFLOW_CBIOPORTAL = "cbioportal"
 
@@ -109,7 +110,7 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENT_RESULTS_FILES, wm.WorkflowDefiniti
     name="Experiment Results Files",
     description="This workflow ingests files into DRS which have been already listed as experiment results.",
     data_type=DATA_TYPE_EXPERIMENT,  # for permissions
-    tags=frozenset({DATA_TYPE_EXPERIMENT, "experiment_result"}),
+    tags=frozenset({DATA_TYPE_EXPERIMENT, "experiment_result", "drs"}),
     file="experiment_results_files.wdl",
     inputs=[
         # injected
@@ -123,6 +124,23 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENT_RESULTS_FILES, wm.WorkflowDefiniti
 ))
 
 # Analysis workflows ---------------------------------------------------------------------------------------------------
+
+workflow_set.add_workflow(WORKFLOW_EXPERIMENT_RESULTS_DRS, wm.WorkflowDefinition(
+    type="analysis",
+    name="Associate experiment results with DRS objects",
+    description="TODO",
+    file="experiment_results_drs.wdl",
+    tags=frozenset({DATA_TYPE_EXPERIMENT, "experiment_result", "drs"}),
+    inputs=[
+        # injected
+        ACCESS_TOKEN_INPUT,
+        DRS_URL_INPUT,
+        KATSU_URL_INPUT,
+        VALIDATE_SSL_INPUT,
+        # user
+        PROJECT_DATASET_INPUT,
+    ]
+))
 
 workflow_set.add_workflow(WORKFLOW_VCF2MAF, wm.WorkflowDefinition(
     type="analysis",
