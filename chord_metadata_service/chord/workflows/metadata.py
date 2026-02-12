@@ -128,7 +128,10 @@ workflow_set.add_workflow(WORKFLOW_EXPERIMENT_RESULTS_FILES, wm.WorkflowDefiniti
 workflow_set.add_workflow(WORKFLOW_EXPERIMENT_RESULTS_DRS, wm.WorkflowDefinition(
     type="analysis",
     name="Associate experiment results with DRS objects",
-    description="TODO",
+    description=(
+        "This workflow will associate existing experiment results with existing DRS objects in the same project/dataset"
+        "which match based on filename."
+    ),
     file="experiment_results_drs.wdl",
     tags=frozenset({DATA_TYPE_EXPERIMENT, "experiment_result", "drs"}),
     inputs=[
