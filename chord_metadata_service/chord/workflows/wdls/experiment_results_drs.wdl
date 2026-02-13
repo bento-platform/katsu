@@ -103,8 +103,19 @@ task associate_experiment_results_with_drs_objects {
                 update = {}
                 if f in drs_uris_and_created_by_filename:
                     update['url'] = drs_uris_and_created_by_filename[f][0]
-                elif any((f + s) in drs_uris_and_created_by_filename for s in INDEX_SUFFIXES.keys()):
-                    pass  # TODO
+                else:
+                    er_index_urls = {ei['url'] for ei in er.get('indices', [])}
+                    er_index_types = {ei['format'] for ei in er.get('indices', [])}
+                    indices_to_add = []
+                    for s, idx_type in INDEX_SUFFIXES.items():
+                        f_idx = f + s
+                        if drs_tpl := drs_uris_and_created_by_filename.get(f_idx):
+                            if (idx_url := drs_tpl[0]) not in er_index_urls and idx_type not in er_index_types:
+                                indices_to_add.append({'url': idx_url, 'format': idx_type})
+                                er_index_urls.add(idx_url)
+                                er_index_types.add(idx_type)
+                    if indices_to_add:
+                        update['indices'] = indices_to_add
 
                 if update:
                     er_id = er['id']
@@ -123,7 +134,6 @@ task associate_experiment_results_with_drs_objects {
 
         with open('./experiment_result_updates.json', 'w') as fh:
             json.dump(updates, fh)
-
 "
     >>>
     output {
