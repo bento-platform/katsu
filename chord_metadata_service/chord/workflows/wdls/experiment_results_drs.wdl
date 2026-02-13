@@ -124,14 +124,18 @@ while er_url is not None:
                 update['indices'] = indices_to_add
 
         if update:
+            print('----------------------------------------------------------------------------------------')
             er_id = er['id']
             print('updating experiment result', er_id, update)
+            print(json.dumps(er, indent=2), end='')
+            print('update:', json.dumps(update))
             requests.patch(
                 f'~{katsu_url}/api/experimentresults/{er_id}',
                 json=update,
                 headers=auth_headers,
                 verify=verify_ssl,
             )
+            print('========================================================================================')
 
             updates.append({'id': er_id, 'patch': update})
 
