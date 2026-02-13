@@ -35,7 +35,7 @@ task fetch_drs_objects {
         String drs_url
         String project_dataset
         String access_token
-        String validate_ssl
+        Boolean validate_ssl
     }
     command <<<
         project_id=$(python3 -c 'print("~{project_dataset}".split(":")[0])')
