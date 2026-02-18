@@ -257,27 +257,111 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         return await sync_to_async(super().update)(request, *args, **kwargs)  # TODO: handle invalid
 
 
+# class DatasetV2ViewSet(CHORDPublicModelViewSet):
+#     queryset = DatasetV2.objects.all()
+#     serializer_class = DatasetV2Serializer
+#     lookup_field = 'id'
+
+#     def get_queryset(self):
+#         queryset = super().get_queryset()
+        
+#         project_id = self.request.query_params.get('project_id')
+#         if project_id:
+#             queryset = queryset.filter(project_id=project_id)
+        
+#         return queryset
+
+#     def perform_create(self, serializer):
+#         instance = serializer.save()
+#         instance.save()
+
+#     def perform_update(self, serializer):
+#         instance = serializer.save()
+#         instance.save()
+
 class DatasetV2ViewSet(CHORDPublicModelViewSet):
     queryset = DatasetV2.objects.all()
     serializer_class = DatasetV2Serializer
-    lookup_field = 'id'
+
+    # If you’re using the router with default lookup ("pk"), you can keep lookup_field='id'.
+    # If your URL kwarg is dataset_id (like DatasetViewSet), also add lookup_url_kwarg.
+    lookup_field = "id"
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        
-        project_id = self.request.query_params.get('project_id')
+        project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
-        
         return queryset
 
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        instance.save()
+    def list(self, request, *args, **kwargs):
+        authz.mark_authz_done(request)
+        return super().list(request, *args, **kwargs)
 
-    def perform_update(self, serializer):
-        instance = serializer.save()
-        instance.save()
+    @async_to_sync
+    async def create(self, request, *args, **kwargs):
+        # Decide project from request body (preferred) or fallback to query param
+        project_id = request.data.get("project") or request.data.get("project_id")
+
+        if project_id is None:
+            return bad_request(request, "No project ID in request body")  
+        if not (
+            await authz.async_evaluate_one(
+                request,
+                build_resource(project=str(project_id)),
+                P_CREATE_DATASET,
+            )
+        ):
+            return forbidden(request) 
+
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().create)(request, *args, **kwargs)
+
+    @async_to_sync
+    async def update(self, request, *args, **kwargs):
+        try:
+            dataset = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  
+        dataset_project_id = str(dataset.project_id)
+
+        if not (
+            await authz.async_evaluate_one(
+                request,
+                build_resource(
+                    project=dataset_project_id,
+                    dataset=str(dataset.id),  
+                ),
+                P_EDIT_DATASET,
+            )
+        ):
+            return forbidden(request) 
+        
+        incoming_project = request.data.get("project") or request.data.get("project_id")
+        if incoming_project is not None and str(incoming_project) != dataset_project_id:
+            return bad_request(request, "Dataset project ID cannot change")
+
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().update)(request, *args, **kwargs)
+
+    @async_to_sync
+    async def destroy(self, request, *args, **kwargs):
+        try:
+            dataset = await self.get_obj_async()
+        except Http404:
+            return not_found(request)  # side effect: sets authz done flag
+
+        if not (
+            await authz.async_evaluate_one(
+                request,
+                build_resource(project=str(dataset.project_id)),
+                P_DELETE_DATASET,
+            )
+        ):
+            return forbidden(request)  # side effect: sets authz done flag
+
+        authz.mark_authz_done(request)
+        return await sync_to_async(super().destroy)(request, *args, **kwargs)
 
 class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
     """

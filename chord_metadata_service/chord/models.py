@@ -84,7 +84,7 @@ class Dataset(BaseProjectOrDataset):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
-        related_name="datasets_old"
+        related_name="datasets"
     )
 
     data_use = models.JSONField()
@@ -207,6 +207,7 @@ class Dataset(BaseProjectOrDataset):
 class DatasetV2(PydanticJSONBMixin, models.Model):
     # Mixin configuration
     COLUMN_FIELDS = {
+        'id',
         'schema_version',
         'title', 
         'description',
@@ -226,15 +227,20 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
-        related_name="datasets"
+        related_name="dv2"
     )
 
     id = models.CharField(
         max_length=128,
         unique=True,
         db_index=True,
+        primary_key=True,
         help_text="If from PCGL, inherit. Otherwise created in Katsu.",
     )
+
+    @property
+    def identifier(self):
+        return self.id
 
     title = models.CharField(max_length=512)
     description = models.TextField()
@@ -256,7 +262,7 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["dataset_id"]),
+            models.Index(fields=["id"]),
             models.Index(fields=["release_date"]),
             models.Index(fields=["last_modified"]),
             models.Index(fields=["study_status", "study_context"]),

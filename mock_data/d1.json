@@ -1,0 +1,130 @@
+{
+  "id": "pcgl-ds-001",
+  "schema_version": "1.0",
+  "project": "ce2979e8-25d5-4716-aa67-fcf5bbcdba84",
+  "title": "Mock Genomic Variants Dataset for Rare Disease Research",
+  "description": "A synthetic dataset representing genomic variant observations collected for methodological testing in rare disease studies.",
+  "keywords": [
+    "genomics",
+    "rare disease",
+    "variant analysis"
+  ],
+  "stakeholders": [
+    {
+      "name": "Mock Research Institute",
+      "description": "A fictional research institute for testing metadata pipelines.",
+      "contact": {
+        "email": ["info@mockri.org"],
+        "address": "123 Science Ave, Test City, Testland",
+        "phone": {
+          "country_code": 1,
+          "number": 5551234567,
+          "extension": null
+        }
+      },
+      "roles": ["Institution", "Research Center"],
+      "grant_number": null
+    },
+    {
+      "name": "Dr. Alice Nguyen",
+      "honorific": "Dr.",
+      "other_names": ["Alice T. Nguyen"],
+      "affiliations": ["Mock Research Institute"],
+      "roles": ["Principal Investigator", "Researcher"]
+    }
+  ],
+  "spatial_coverage": "Canada",
+  "version": "0.1.0",
+  "privacy": "De-identified human genomic data",
+  "license": {
+    "label": "Creative Commons Attribution 4.0",
+    "type": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "counts": [
+    {
+      "count_entity": "Participants",
+      "value": 250,
+      "description": "Number of enrolled study participants"
+    },
+    {
+      "count_entity": "Variants",
+      "value": 1250000,
+      "description": "Total number of observed genomic variants"
+    }
+  ],
+  "primary_contact": {
+    "name": "Dr. Alice Nguyen",
+    "honorific": "Dr.",
+    "other_names": [],
+    "affiliations": ["Mock Research Institute"],
+    "roles": ["Principal Investigator"]
+  },
+  "links": [
+    {
+      "label": "Data Management Plan",
+      "uri": "https://example.org/dmp/mock-genomics",
+      "type": "Data Management Plan"
+    },
+    {
+      "label": "Dataset Schema",
+      "uri": "https://example.org/schema/mock-genomics",
+      "type": "Schema"
+    }
+  ],
+  "publications": [
+    {
+      "title": "A Synthetic Benchmark for Rare Disease Variant Analysis",
+      "url": "https://doi.org/10.1234/mock.2025.001",
+      "doi": "10.1234/mock.2025.001",
+      "publication_type": "Journal Article",
+      "authors": [
+        {
+          "name": "Dr. Alice Nguyen",
+          "honorific": "Dr.",
+          "other_names": [],
+          "affiliations": ["Mock Research Institute"],
+          "roles": ["Researcher"]
+        }
+      ],
+      "publication_date": "2025-01-15",
+      "publication_venue": {
+        "name": "Journal of Synthetic Biomedical Data",
+        "venue_type": "Journal",
+        "publisher": "Mock Science Press",
+        "location": "Online"
+      },
+      "description": "Describes the construction and validation of a synthetic genomic dataset."
+    }
+  ],
+  "logos": [
+    {
+      "url": "https://example.org/logos/mockri-default.png",
+      "theme": "default",
+      "description": "Default logo for Mock Research Institute"
+    }
+  ],
+  "data_access_links": [
+    "https://example.org/data/mock-genomics/download"
+  ],
+  "release_date": "2025-02-01",
+  "last_modified": "2025-02-10",
+  "participant_criteria": [
+    {
+      "type": "Inclusion",
+      "description": "Participants diagnosed with a suspected rare genetic disorder"
+    },
+    {
+      "type": "Exclusion",
+      "description": "Participants without informed consent"
+    }
+  ],
+  "study_status": "ONGOING",
+  "study_context": "RESEARCH",
+  "pcgl_domain": ["Genomics", "Rare Diseases"],
+  "pcgl_program_name": "PCGL Mock Program",
+  "extra_properties": {
+    "synthetic": true,
+    "intended_use": "Testing and development only"
+  }
+}

@@ -19,6 +19,7 @@ __all__ = [
     "ProjectSerializer",
     "ProjectJsonSchemaSerializer",
     "DatasetSerializer",
+    "DatasetV2Serializer"
 ]
 
 
