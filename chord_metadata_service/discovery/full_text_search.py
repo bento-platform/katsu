@@ -107,8 +107,8 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
 
 def entity_search_fields(queryset_entity: DiscoveryEntity) -> list[str | Cast]:
     """
-    TODO
-
+    Given a discovery entity, returns a list of fields to be used for full-text search - either just the field name, if
+    they're already text fields/compatible, or a Cast to TextField if they need to be cast as text in Postgres.
     """
 
     args: list[str | Cast] = []
@@ -146,7 +146,9 @@ def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
 
 def normal_full_text_search(queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, fts_type: FTSType) -> QuerySet:
     """
-    TODO
+    Given a queryset for a particular discovery entity, apply a Postgres full-text search for a query, using the
+    specified full-text search type. See also:
+    https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
     """
     return (
         qs
@@ -159,7 +161,8 @@ def trigram_similarity_search(
     queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, min_similarity: float = TRIGRAM_MINIMUM_SIMILARITY
 ) -> QuerySet:
     """
-    TODO
+    Given a queryset for a particular discovery entity, apply a text query using a trigram similarity search, taking
+    the greatest trigram similarity of all text search fields as the overall record similarity.
     """
     return (
         qs

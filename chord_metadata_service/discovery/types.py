@@ -42,5 +42,5 @@ AnyFieldDefinition: TypeAlias = FieldDefinition | NumberFieldDefinition | String
 # Full-text search type; see:
 #  - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
 #  - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
-#  - https://www.postgresql.org/docs/current/pgtrgm.html ("trigram" only
+#  - https://www.postgresql.org/docs/current/pgtrgm.html ("trigram" only)
 FTSType: TypeAlias = Literal["plain", "phrase", "websearch", "trigram"]
