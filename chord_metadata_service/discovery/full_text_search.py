@@ -1,21 +1,26 @@
 from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
-from django.contrib.postgres.search import SearchVector
+from django.contrib.postgres.search import SearchVector, TrigramSimilarity, SearchQuery
 from django.db import models
-from django.db.models import Field, TextField
-from django.db.models.functions import Cast
+from django.db.models import Field, TextField, QuerySet
+from django.db.models.functions import Cast, Greatest
 from typing import Type, TypeAlias
 
-from chord_metadata_service.discovery.field_paths.utils import field_path_to_django_mapping
+from .field_paths.utils import field_path_to_django_mapping
+from .types import FTSType
 
 __all__ = [
     "FULL_TEXT_SEARCH_FIELDS",
+    "entity_search_fields",
     "full_text_search_vector",
+    "normal_full_text_search",
+    "trigram_similarity_search",
     "BaseFTSModel",
     "FTSHelpersMixin",
     "ToFTSReprMixin",
 ]
 
+TRIGRAM_MINIMUM_SIMILARITY = 0.1
 
 GENOMIC_INTERPRETATION_PATH = ("interpretations", "diagnosis", "genomic_interpretations")
 GENE_DESCRIPTOR_PATH = (*GENOMIC_INTERPRETATION_PATH, "gene_descriptor")
@@ -36,8 +41,8 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
     ),
     "individual": (
         ["id"],
-        ["alternate_ids"],
-        ["date_of_birth"],
+        (["alternate_ids"], TextField),
+        (["date_of_birth"], TextField),
         ["sex"],
         ["karyotypic_sex"],
         (["gender"], TextField),
@@ -100,13 +105,13 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
 }
 
 
-def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
+def entity_search_fields(queryset_entity: DiscoveryEntity) -> list[str | Cast]:
     """
-    Given a queryset entity (most likely phenopacket or individual, since they're more "top-level"), generate a Postgres
-    SearchVector object for full-text search across the entity/linked entities (that aren't other discovery entities).
+    TODO
+
     """
 
-    args = []
+    args: list[str | Cast] = []
 
     fields: tuple[FTSFieldDescriptor, ...] = (*FULL_TEXT_SEARCH_FIELDS[queryset_entity], ["fts_extra"])
     for f in fields:
@@ -128,9 +133,39 @@ def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
         field_str = field_path_to_django_mapping(field)
         args.append(Cast(field_str, fc()) if fc is not None else field_str)
 
-    # TODO: explain
+    return args
 
-    return SearchVector(*args)
+
+def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
+    """
+    Given a queryset entity (most likely phenopacket or individual, since they're more "top-level"), generate a Postgres
+    SearchVector object for full-text search across the entity/linked entities (that aren't other discovery entities).
+    """
+    return SearchVector(*entity_search_fields(queryset_entity))
+
+
+def normal_full_text_search(queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, fts_type: FTSType) -> QuerySet:
+    """
+    TODO
+    """
+    return (
+        qs
+        .annotate(search=full_text_search_vector(queryset_entity))
+        .filter(search=SearchQuery(query, search_type=fts_type))
+    )
+
+
+def trigram_similarity_search(
+    queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, min_similarity: float = TRIGRAM_MINIMUM_SIMILARITY
+) -> QuerySet:
+    """
+    TODO
+    """
+    return (
+        qs
+        .annotate(similarity=Greatest(*(TrigramSimilarity(e, query) for e in entity_search_fields(queryset_entity))))
+        .filter(similarity__gte=min_similarity)
+    )
 
 
 AGE_KEY = frozenset({"age"})
