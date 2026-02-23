@@ -156,21 +156,26 @@ class QueryHelper:
             # discovery entity boundaries. In order to get result sets for, e.g., phenopackets (with biosamples being
             # the entity with actual FTS matches), we need to build a query for the queryset checking nested biosamples
             # overlap with the ID set.
-            ids_set = await self._get_fts_ids(queryset_entity, fts, self._query.fts_type)
-            fts_filters = Q(pk__in=ids_set)
-            for entity in DISCOVERY_ENTITIES - {queryset_entity}:
-                e_ids_set = await self._get_fts_ids(entity, fts, self._query.fts_type)
-                epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
-                fts_filters |= Q(**{f"{epk}__in": e_ids_set})
-
-            # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
-            #  or something. Although we currently have the same issue with filters, so we'll need to do some grand
-            #  unified thing for this.
-
-            # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
-            #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
-            #    join? it's unclear, but for now we just do this ugly thing instead.
-            queryset = queryset.filter(fts_filters)
+            # ids_set = await self._get_fts_ids(queryset_entity, fts, self._query.fts_type)
+            # fts_filters = Q(pk__in=ids_set)
+            # for entity in DISCOVERY_ENTITIES - {queryset_entity}:
+            #     e_ids_set = await self._get_fts_ids(entity, fts, self._query.fts_type)
+            #     epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
+            #     fts_filters |= Q(**{f"{epk}__in": e_ids_set})
+            #
+            # # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
+            # #  or something. Although we currently have the same issue with filters, so we'll need to do some grand
+            # #  unified thing for this.
+            #
+            # # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
+            # #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
+            # #    join? it's unclear, but for now we just do this ugly thing instead.
+            # queryset = queryset.filter(fts_filters)
+            queryset = (
+                trigram_similarity_search(queryset_entity, queryset, fts)
+                if self._query.fts_type == "trigram"
+                else normal_full_text_search(queryset_entity, queryset, fts, self._query.fts_type)
+            )
             fts_queried_entities = await self.get_scope_entities_with_data()
 
         # May raise:
