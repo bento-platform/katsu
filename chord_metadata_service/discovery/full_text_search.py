@@ -1,6 +1,6 @@
 from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
-from django.contrib.postgres.search import SearchVector, TrigramSimilarity, SearchQuery
+from django.contrib.postgres.search import SearchVector, TrigramWordSimilarity, SearchQuery
 from django.db import models
 from django.db.models import Field, TextField, QuerySet
 from django.db.models.functions import Cast, Greatest
@@ -20,7 +20,7 @@ __all__ = [
     "ToFTSReprMixin",
 ]
 
-TRIGRAM_MINIMUM_SIMILARITY = 0.1
+TRIGRAM_MINIMUM_SIMILARITY = 0.5
 
 GENOMIC_INTERPRETATION_PATH = ("interpretations", "diagnosis", "genomic_interpretations")
 GENE_DESCRIPTOR_PATH = (*GENOMIC_INTERPRETATION_PATH, "gene_descriptor")
@@ -161,12 +161,16 @@ def trigram_similarity_search(
     queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, min_similarity: float = TRIGRAM_MINIMUM_SIMILARITY
 ) -> QuerySet:
     """
-    Given a queryset for a particular discovery entity, apply a text query using a trigram similarity search, taking
-    the greatest trigram similarity of all text search fields as the overall record similarity.
+    Given a queryset for a particular discovery entity, apply a text query using a trigram word similarity search,
+    taking the greatest trigram word similarity of all text search fields as the overall record similarity.
+    Word similarity measures whether the query matches any word/token within the field, making it suitable for
+    searching within long strings such as file paths.
     """
     return (
         qs
-        .annotate(similarity=Greatest(*(TrigramSimilarity(e, query) for e in entity_search_fields(queryset_entity))))
+        .annotate(similarity=Greatest(*(
+            TrigramWordSimilarity(query, e) for e in entity_search_fields(queryset_entity)
+        )))
         .filter(similarity__gte=min_similarity)
     )
 
