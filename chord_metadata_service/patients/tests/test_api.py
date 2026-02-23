@@ -619,6 +619,17 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_sex_via_fts_trigram(self):
+        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field
+        # with trigram search, this will just return everything since "MALE" is in both "MALE" and "FEMALE"
+        response = self.dt_authz_counts_get('/api/discovery?_fts=MALE&_fts_type=trigram')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_obj = response.json()
+        db_count = Individual.objects.filter(sex__icontains='male').count()
+        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+        self._test_individual_counts(response_obj, db_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_2_fields(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
