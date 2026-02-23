@@ -168,7 +168,9 @@ def trigram_similarity_search(
     """
     return (
         qs
-        .annotate(similarity=Greatest(*(TrigramWordSimilarity(query, e) for e in entity_search_fields(queryset_entity))))
+        .annotate(similarity=Greatest(*(
+            TrigramWordSimilarity(query, e) for e in entity_search_fields(queryset_entity)
+        )))
         .filter(similarity__gte=min_similarity)
     )
 
