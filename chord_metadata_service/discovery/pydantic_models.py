@@ -72,6 +72,7 @@ class DiscoveryFieldResponses(RootModel):
 class BaseMatchModel(BaseModel, abc.ABC):
     project: str | None = Field(default=None, title="Project ID")
     dataset: str | None = Field(default=None, title="Dataset ID")
+    rank: float | None = Field(default=None, title="Search Rank")
 
 
 class ExperimentResultIndex(BaseModel):

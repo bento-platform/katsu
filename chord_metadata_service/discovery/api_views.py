@@ -7,7 +7,8 @@ from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet, Q, Case, When, Subquery, OuterRef
+from django.db.models.functions import Greatest
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
@@ -36,7 +37,8 @@ from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
-from .full_text_search import trigram_similarity_search, normal_full_text_search
+from .full_text_search import trigram_similarity_search, normal_full_text_search, build_rank_dict, \
+    normal_full_text_search_annotations, trigram_similarity_search_annotations, TRIGRAM_MINIMUM_SIMILARITY
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .pydantic_models import (
@@ -104,7 +106,7 @@ class QueryHelper:
         # Cache dictionary for full-text searches (and corresponding locks for accessing/cache manipulation) with:
         #  - keys being (discovery entity, search query, FTS search type)
         #  - values being sets of IDs of objects of the same type as the discovery entity in the key.
-        self._fts_cache: dict[tuple[DiscoveryEntity, str, FTSType], set] = {}
+        self._fts_cache: dict[tuple[DiscoveryEntity, str, FTSType], dict] = {}
         self._fts_cache_locks = defaultdict(asyncio.Lock)
 
         # Cache: entity counts for the scope+permissions+query combination; populated by a call to _get_entity_counts
@@ -124,7 +126,17 @@ class QueryHelper:
     def dt_permissions(self) -> DataTypeDiscoveryPermissions:
         return self._dt_permissions
 
-    async def _get_fts_ids(self, fts_entity: DiscoveryEntity, query: str, fts_type: FTSType) -> set:
+    @staticmethod
+    def _qs_fts(fts_entity: DiscoveryEntity, qs: QuerySet, query: str, fts_type: FTSType) -> QuerySet:
+        return (
+            trigram_similarity_search(fts_entity, qs, query)
+            if fts_type == "trigram"
+            else normal_full_text_search(fts_entity, qs, query, fts_type)
+        )
+
+    async def _get_fts_ids_and_rank(
+        self, root_entity: DiscoveryEntity, fts_entity: DiscoveryEntity, query: str, fts_type: FTSType
+    ) -> dict:
         """
         Given a discovery entity to execute a full-text search on, a full-text query search string, and a full-text
         search query type, this function executes the search and caches matching IDs in the _fts_cache private property
@@ -134,13 +146,10 @@ class QueryHelper:
         qs = get_discovery_entity_model_scoped_queryset(fts_entity, self._scope)
         async with self._fts_cache_locks[k]:
             if k not in self._fts_cache:
-                self._fts_cache[k] = await build_id_set(
-                    qs=(
-                        trigram_similarity_search(fts_entity, qs, query)
-                        if fts_type == "trigram"
-                        else normal_full_text_search(fts_entity, qs, query, fts_type)
-                    ),
-                    field="id",
+                self._fts_cache[k] = await build_rank_dict(
+                    self._qs_fts(fts_entity, qs, query, fts_type),
+                    resolve_filter_mapping_to_queryset_model(fts_entity, root_entity, ("pk",)),
+                    (fts_entity, root_entity),
                 )
             return self._fts_cache[k]
 
@@ -150,28 +159,93 @@ class QueryHelper:
         queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
 
         fts_queried_entities = frozenset()
+        fts_ids_rank_dict = {}  # if FTS is executed, this contains {pk: rank [higher --> sorted earlier]}
 
         if fts := self._query.fts:  # Execute FTS if self._query.fts is not ""
             # Each entity has a corresponding FTS vector we'll use, but querying using this doesn't query across
             # discovery entity boundaries. In order to get result sets for, e.g., phenopackets (with biosamples being
             # the entity with actual FTS matches), we need to build a query for the queryset checking nested biosamples
             # overlap with the ID set.
-            ids_set = await self._get_fts_ids(queryset_entity, fts, self._query.fts_type)
-            fts_filters = Q(pk__in=ids_set)
-            for entity in DISCOVERY_ENTITIES - {queryset_entity}:
-                e_ids_set = await self._get_fts_ids(entity, fts, self._query.fts_type)
-                epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
-                fts_filters |= Q(**{f"{epk}__in": e_ids_set})
 
-            # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
-            #  or something. Although we currently have the same issue with filters, so we'll need to do some grand
-            #  unified thing for this.
+            fts_type = self._query.fts_type
 
-            # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
-            #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
-            #    join? it's unclear, but for now we just do this ugly thing instead.
-            queryset = queryset.filter(fts_filters)
-            fts_queried_entities = await self.get_scope_entities_with_data()
+            filters = Q()
+
+            if fts_type == "trigram":
+                filters = Q(max_rank__gte=TRIGRAM_MINIMUM_SIMILARITY)
+            else:
+                # TODO
+                pass
+
+            queryset = queryset.annotate(
+                max_rank=Subquery(
+                    queryset.filter(pk=OuterRef("pk")).annotate(
+                        **(
+                            trigram_similarity_search_annotations(queryset_entity, fts)
+                            if fts_type == "trigram"
+                            else normal_full_text_search_annotations(queryset_entity, fts, fts_type)
+                        ),
+                        **{
+                            f"{fts_entity}__fts_rank": Subquery(
+                                self._qs_fts(
+                                    fts_entity,
+                                    get_discovery_entity_model_scoped_queryset(fts_entity, self._scope),
+                                    fts,
+                                    fts_type,
+                                ).filter(
+                                    **{
+                                        resolve_filter_mapping_to_queryset_model(fts_entity, queryset_entity,
+                                                                                 ("pk",)): OuterRef("pk")
+                                    }
+                                ).values("rank")
+                            )
+                            for fts_entity in DISCOVERY_ENTITIES - {queryset_entity}
+                        }
+                    ).annotate(
+                        max_rank=Greatest(
+                            "rank", *(f"{e}__fts_rank" for e in DISCOVERY_ENTITIES - {queryset_entity})
+                        )
+                    ).values("max_rank")
+                )
+            ).filter(filters).order_by("-max_rank")
+
+            # async for res in queryset:
+            #     print(res.__dict__)
+
+            # fts_ids_rank_dict = await self._get_fts_ids_and_rank(
+            #     queryset_entity, queryset_entity, fts, self._query.fts_type
+            # )
+            # fts_filters = Q(pk__in=set(fts_ids_rank_dict.keys()))
+            # for entity in DISCOVERY_ENTITIES - {queryset_entity}:
+            #     e_ids_rank_dict = await self._get_fts_ids_and_rank(queryset_entity, entity, fts, self._query.fts_type)
+            #
+            #     # TODO; explain
+            #     for e_pk, (qs_pks, rnk) in e_ids_rank_dict.items():
+            #         print(e_pk, qs_pks, rnk)
+            #         if qs_pks:
+            #             for qs_pk in qs_pks:
+            #                 if qs_pk in fts_ids_rank_dict:
+            #                     fts_ids_rank_dict[qs_pk] = (
+            #                         fts_ids_rank_dict[qs_pk][0],
+            #                         max(fts_ids_rank_dict[qs_pk][1], rnk),
+            #                     )
+            #                 else:
+            #                     fts_ids_rank_dict[qs_pk] = (qs_pks, rnk)
+            #
+            #     epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
+            #     fts_filters |= Q(**{f"{epk}__in": set(e_ids_rank_dict.keys())})
+            #
+            # print(f"UPDATED for {queryset_entity}", fts_ids_rank_dict)
+            #
+            # # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
+            # #  or something. Although we currently have the same issue with filters, so we'll need to do some grand
+            # #  unified thing for this.
+            #
+            # # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
+            # #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
+            # #    join? it's unclear, but for now we just do this ugly thing instead.
+            # queryset = queryset.filter(fts_filters)
+            # fts_queried_entities = await self.get_scope_entities_with_data()
 
         # May raise:
         #  - DiscoveryEmptyException
@@ -186,6 +260,16 @@ class QueryHelper:
             lg or self._logger,
             validate_field=validate_field,
         )
+
+        # if fts_ids_rank_dict:
+        #     filtered_queryset = filtered_queryset.annotate(
+        #         final_rank=Case(
+        #             *(When(pk=r_id, then=r_val) for r_id, (_, r_val) in fts_ids_rank_dict.items()),
+        #             default=0.0,
+        #         )
+        #     ).order_by("-final_rank", "pk")
+        # else:
+        #     filtered_queryset = filtered_queryset.order_by("pk")
 
         return filtered_queryset, fts_queried_entities | filter_queried_entities
 
@@ -671,7 +755,7 @@ async def discovery_matches(
         query = DiscoveryQuery.from_drf_request(request)
         qh = QueryHelper(query, scope, dt_permissions, lg)
         queryset, _ = await qh.get_query_queryset_and_queried_entities(queried_entity)
-        queryset = queryset.order_by("pk")
+        # queryset = queryset.order_by("pk")
     except ValidationError as e:
         return await dres.django_validation_error(
             request, e, lg, "discovery matches endpoint encountered validation error", accepted_formats

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
-from django.contrib.postgres.search import SearchVector, TrigramWordSimilarity, SearchQuery
+from django.contrib.postgres.aggregates import ArrayAgg, JSONBAgg
+from django.contrib.postgres.search import SearchVector, TrigramWordSimilarity, SearchQuery, SearchRank
 from django.db import models
 from django.db.models import Field, TextField, QuerySet
 from django.db.models.functions import Cast, Greatest
@@ -144,17 +145,25 @@ def full_text_search_vector(queryset_entity: DiscoveryEntity) -> SearchVector:
     return SearchVector(*entity_search_fields(queryset_entity))
 
 
+def normal_full_text_search_annotations(queryset_entity: DiscoveryEntity, query: str, fts_type: FTSType):
+    vector = full_text_search_vector(queryset_entity)
+    sq = SearchQuery(query, search_type=fts_type)
+    return dict(search=vector, rank=SearchRank(vector, sq))
+
+
 def normal_full_text_search(queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, fts_type: FTSType) -> QuerySet:
     """
     Given a queryset for a particular discovery entity, apply a Postgres full-text search for a query, using the
     specified full-text search type. See also:
     https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
     """
-    return (
-        qs
-        .annotate(search=full_text_search_vector(queryset_entity))
-        .filter(search=SearchQuery(query, search_type=fts_type))
-    )
+    vector = full_text_search_vector(queryset_entity)
+    sq = SearchQuery(query, search_type=fts_type)
+    return qs.annotate(search=vector, rank=SearchRank(vector, sq)).filter(search=sq)
+
+
+def trigram_similarity_search_annotations(queryset_entity: DiscoveryEntity, query: str):
+    return dict(rank=Greatest(*(TrigramWordSimilarity(query, e) for e in entity_search_fields(queryset_entity))))
 
 
 def trigram_similarity_search(
@@ -168,11 +177,23 @@ def trigram_similarity_search(
     """
     return (
         qs
-        .annotate(similarity=Greatest(*(
-            TrigramWordSimilarity(query, e) for e in entity_search_fields(queryset_entity)
-        )))
-        .filter(similarity__gte=min_similarity)
+        .annotate(rank=Greatest(*(TrigramWordSimilarity(query, e) for e in entity_search_fields(queryset_entity))))
+        .filter(rank__gte=min_similarity)
     )
+
+
+async def build_rank_dict(qs: QuerySet, root_pk_field: str, extra) -> dict:
+    """
+    TODO
+    """
+    res = {}
+    print("building", root_pk_field, extra)
+    rank_values = qs.annotate(root_pks=JSONBAgg(root_pk_field, default=[])).values_list("pk", "root_pks", "rank")
+    async for f, rpk, r in rank_values:
+        print(f, rpk, r)
+        res[f] = (rpk, r)
+    print("done building", extra)
+    return res
 
 
 AGE_KEY = frozenset({"age"})

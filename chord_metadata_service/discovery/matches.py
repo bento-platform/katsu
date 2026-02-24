@@ -114,6 +114,7 @@ async def experiment_result_matches(
                         project=scope.project_id or (str(first_exp.dataset.project_id) if first_exp else None),
                         # TODO: have a foreign key to dataset directly to not have to do so many lookups
                         dataset=scope.dataset_id or (str(first_exp.dataset_id) if first_exp else None),
+                        rank=getattr(er, "final_rank", 0.0),
                     )
                     if root else dict()
                 ),
@@ -155,7 +156,8 @@ async def experiment_matches(
                 # ------------------------------------------------------------------------------------------------------
                 **(dict(
                     project=scope.project_id or str(exp.dataset.project_id),
-                    dataset=scope.dataset_id or str(exp.dataset_id)
+                    dataset=scope.dataset_id or str(exp.dataset_id),
+                    rank=getattr(exp, "final_rank", 0.0),
                 ) if root else dict()),
             )
         )
@@ -197,7 +199,7 @@ async def biosample_matches(
                 individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
                 experiments=experiments,
-                **(dict(project=scope.project_id, dataset=ds) if root else dict()),
+                **(dict(project=scope.project_id, dataset=ds, rank=getattr(b, "final_rank", 0.0)) if root else dict()),
             )
         )
     return res
@@ -236,6 +238,7 @@ async def phenopacket_matches(
                     dict(
                         project=scope.project_id or (str(phe.dataset.project_id) if phe.dataset else None),
                         dataset=scope.dataset_id or (str(phe.dataset_id) if phe.dataset else None),
+                        rank=getattr(phe, "final_rank", 0.0),
                     ) if root else dict()
                 ),
             )
@@ -278,6 +281,7 @@ async def individual_matches(
                             str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None
                         ),
                         dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
+                        rank=getattr(ind, "final_rank", 0.0),
                     ) if root else dict()
                 ),
             )
