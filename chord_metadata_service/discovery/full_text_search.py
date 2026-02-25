@@ -1,5 +1,6 @@
 from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
+from django.contrib.postgres.indexes import GinIndex, OpClass
 from django.contrib.postgres.search import SearchVector, TrigramSimilarity, TrigramWordSimilarity, SearchQuery
 from django.db import models
 from django.db.models import Field, Func, TextField, QuerySet, Q
@@ -288,6 +289,10 @@ class BaseFTSModel(models.Model, FTSHelpersMixin):
 
     # to be used for full-text/trigram search only; not any source of truth!
     fts_extra = models.TextField(blank=True, null=False, default="")
+
+    @staticmethod
+    def get_fts_extra_trgm_index(name_base: str) -> GinIndex:
+        return GinIndex(name=f"{name_base}_fts_extra_trgm_idx", fields=["fts_extra"], opclasses=["gin_trgm_ops"])
 
     class Meta:
         # Abstract prevents the creation of a BaseFTSModel table
