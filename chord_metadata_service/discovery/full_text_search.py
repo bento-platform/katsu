@@ -45,8 +45,8 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
         # special case: for trigram search, we can't use word similarity in reciprocal search cases since these share
         # common roots (unknown, other) in their controlled vocabulary separated by underscores. of course, there are
         # other uses of "unknown" in phenopackets that we don't deal with...
-        (["sex"], None, lambda q: TrigramSimilarity if '_ka' in q.lower() else TrigramWordSimilarity),
-        (["karyotypic_sex"], None, lambda q: TrigramSimilarity if '_se' in q.lower() else TrigramWordSimilarity),
+        (["sex"], None, lambda q: TrigramSimilarity if "_ka" in q.lower() else TrigramWordSimilarity),
+        (["karyotypic_sex"], None, lambda q: TrigramSimilarity if "_se" in q.lower() else TrigramWordSimilarity),
         # ---
         (["gender"], TextField, TrigramWordSimilarity),
         (["taxonomy"], TextField, TrigramWordSimilarity),
@@ -184,10 +184,8 @@ def normal_full_text_search(queryset_entity: DiscoveryEntity, qs: QuerySet, quer
     specified full-text search type. See also:
     https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
     """
-    return (
-        qs
-        .annotate(search=full_text_search_vector(queryset_entity))
-        .filter(search=SearchQuery(query, search_type=fts_type))
+    return qs.annotate(search=full_text_search_vector(queryset_entity)).filter(
+        search=SearchQuery(query, search_type=fts_type)
     )
 
 
@@ -224,14 +222,10 @@ def trigram_similarity_search(queryset_entity: DiscoveryEntity, qs: QuerySet, qu
         else:  # isinstance(t, TrigramWordSimilarity)
             word_similarity_fields.append(t)
 
-    return (
-        qs
-        .annotate(
-            similarity=greatest_or_only(similarity_fields),
-            word_similarity=greatest_or_only(word_similarity_fields),
-        )
-        .filter(Q(similarity__gte=min_similarity) | Q(word_similarity__gte=min_word_similarity))
-    )
+    return qs.annotate(
+        similarity=greatest_or_only(similarity_fields),
+        word_similarity=greatest_or_only(word_similarity_fields),
+    ).filter(Q(similarity__gte=min_similarity) | Q(word_similarity__gte=min_word_similarity))
 
 
 AGE_KEY = frozenset({"age"})
