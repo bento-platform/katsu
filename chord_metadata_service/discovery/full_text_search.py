@@ -20,8 +20,6 @@ __all__ = [
     "ToFTSReprMixin",
 ]
 
-TRIGRAM_MINIMUM_SIMILARITY = 0.5
-
 GENOMIC_INTERPRETATION_PATH = ("interpretations", "diagnosis", "genomic_interpretations")
 GENE_DESCRIPTOR_PATH = (*GENOMIC_INTERPRETATION_PATH, "gene_descriptor")
 VARIANT_INTERPRETATION_PATH = (*GENOMIC_INTERPRETATION_PATH, "variant_interpretation")
@@ -105,6 +103,19 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
 }
 
 
+def get_trigram_min_similarity(query_len: int) -> float:
+    """
+    Given the length of a trigram full-text search query, returns the minimum trigram similarity for matches.
+    This helps give fewer false positives with short queries, since two-letter overlaps become significant.
+    """
+    if query_len <= 4:
+        return 0.65
+    elif query_len <= 10:
+        return 0.5
+    else:
+        return 0.4
+
+
 def entity_search_fields(queryset_entity: DiscoveryEntity) -> list[str | Cast]:
     """
     Given a discovery entity, returns a list of fields to be used for full-text search - either just the field name, if
@@ -157,15 +168,17 @@ def normal_full_text_search(queryset_entity: DiscoveryEntity, qs: QuerySet, quer
     )
 
 
-def trigram_similarity_search(
-    queryset_entity: DiscoveryEntity, qs: QuerySet, query: str, min_similarity: float = TRIGRAM_MINIMUM_SIMILARITY
-) -> QuerySet:
+def trigram_similarity_search(queryset_entity: DiscoveryEntity, qs: QuerySet, query: str) -> QuerySet:
     """
     Given a queryset for a particular discovery entity, apply a text query using a trigram word similarity search,
     taking the greatest trigram word similarity of all text search fields as the overall record similarity.
     Word similarity measures whether the query matches any word/token within the field, making it suitable for
     searching within long strings such as file paths.
     """
+
+    # we need to be more strict with shorter queries since otherwise we get weird false positives
+    min_similarity = get_trigram_min_similarity(len(query))
+
     return (
         qs
         .annotate(similarity=Greatest(*(
