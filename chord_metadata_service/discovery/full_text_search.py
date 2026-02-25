@@ -145,7 +145,8 @@ def entity_search_fields(queryset_entity: DiscoveryEntity, trigram_query: str | 
         # Our fields listed in FULL_TEXT_SEARCH_FIELDS[entity] contain the following entries:
         #  list[str]
         #  Type[Field]: a cast to a specific type of field for searching if needed, otherwise None if string-like
-        #  Type[TrigramWordSimilarity] | Type[TrigramSimilarity] | lambda --> aforementioned: TODO
+        #  Type[TrigramWordSimilarity] | Type[TrigramSimilarity] | lambda --> aforementioned:
+        #   trigram search function (or lambda from query --> trigram search function) to use for this field/query
         field = f[0]
         fc = f[1]
         trigram_func = f[2]
@@ -190,6 +191,13 @@ def normal_full_text_search(queryset_entity: DiscoveryEntity, qs: QuerySet, quer
     )
 
 
+def greatest_or_only(fs: list[Func]) -> Func:
+    """
+    The ORM Greatest function only works with more than one term; if there's only one term, we just use it directly.
+    """
+    return Greatest(*fs) if len(fs) > 1 else fs[0]
+
+
 def trigram_similarity_search(queryset_entity: DiscoveryEntity, qs: QuerySet, query: str) -> QuerySet:
     """
     Given a queryset for a particular discovery entity, apply a text query using a trigram word similarity search,
@@ -207,28 +215,20 @@ def trigram_similarity_search(queryset_entity: DiscoveryEntity, qs: QuerySet, qu
 
     trigram_fields = entity_search_fields(queryset_entity, trigram_query=query)
 
-    trigram_similarity_fields = []
-    trigram_word_similarity_fields = []
+    similarity_fields = []
+    word_similarity_fields = []
 
     for t in trigram_fields:
         if isinstance(t, TrigramSimilarity):
-            trigram_similarity_fields.append(t)
+            similarity_fields.append(t)
         else:  # isinstance(t, TrigramWordSimilarity)
-            trigram_word_similarity_fields.append(t)
+            word_similarity_fields.append(t)
 
     return (
         qs
         .annotate(
-            similarity=(
-                Greatest(*trigram_similarity_fields)
-                if len(trigram_similarity_fields) > 1
-                else trigram_similarity_fields[0]
-            ),
-            word_similarity=(
-                Greatest(*trigram_word_similarity_fields)
-                if len(trigram_word_similarity_fields) > 1
-                else trigram_word_similarity_fields[0]
-            ),
+            similarity=greatest_or_only(similarity_fields),
+            word_similarity=greatest_or_only(word_similarity_fields),
         )
         .filter(Q(similarity__gte=min_similarity) | Q(word_similarity__gte=min_word_similarity))
     )
