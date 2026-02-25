@@ -31,6 +31,7 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.restapi.utils import response_optionally_as_attachment
 
 from .models import Project, Dataset, ProjectJsonSchema
+from .related_fields import DATASET_PREFETCH, PROJECT_PREFETCH
 from .serializers import (
     ProjectJsonSchemaSerializer,
     ProjectSerializer,
@@ -74,7 +75,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.all().order_by("identifier")
+    queryset = Project.objects.all().order_by("identifier").prefetch_related(*PROJECT_PREFETCH)
     serializer_class = ProjectSerializer
 
     @async_to_sync
@@ -130,7 +131,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
     serializer_class = DatasetSerializer
     renderer_classes = tuple(CHORDPublicModelViewSet.renderer_classes) + (JSONLDDatasetRenderer, RDFDatasetRenderer,)
-    queryset = Dataset.objects.all().order_by("title")
+    queryset = Dataset.objects.all().order_by("title").prefetch_related(*DATASET_PREFETCH)
 
     @action(detail=True, methods=['get'])
     def dats(self, request: DrfRequest, *_args, **_kwargs):

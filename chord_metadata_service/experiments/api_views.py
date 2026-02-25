@@ -22,6 +22,7 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination,
 
 from .serializers import ExperimentSerializer, ExperimentResultSerializer
 from .models import Experiment, ExperimentResult
+from .related_fields import EXPERIMENT_PREFETCH, EXPERIMENT_SELECT_REL
 from .schemas import EXPERIMENT_SCHEMA, experiment_resolver, experiment_base_uri
 from .filters import ExperimentFilter, ExperimentResultFilter
 
@@ -31,16 +32,6 @@ __all__ = [
     "ExperimentViewSet",
     "get_experiment_schema",
 ]
-
-
-EXPERIMENT_SELECT_REL = (
-    "instrument",
-)
-
-EXPERIMENT_PREFETCH = (
-    "experiment_results",
-    "biosample__individual"
-)
 
 
 class ExperimentViewSet(BentoAuthzScopedModelViewSet):
@@ -63,13 +54,8 @@ class ExperimentViewSet(BentoAuthzScopedModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
-        return (
-            Experiment
-            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
-            .select_related(*EXPERIMENT_SELECT_REL)
-            .prefetch_related(*EXPERIMENT_PREFETCH)
-            .order_by("id")
-        )
+        scope = await get_request_discovery_scope(self.request)
+        return Experiment.get_model_scoped_queryset(scope, prefetch_and_select_related="top_level").order_by("id")
 
 
 class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
@@ -92,12 +78,14 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
     async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
         # We pre-filter experiments to the scope. This way, if they specify an ID outside the scope, it's just ignored
         #  - the requester won't even know if it exists.
-        queryset = Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+        queryset = Experiment.get_model_scoped_queryset(
+            await get_request_discovery_scope(self.request), prefetch_and_select_related="top_level"
+        )
 
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH).order_by("id")
+        return queryset.order_by("id")
 
     @async_to_sync
     async def get_queryset(self):
@@ -142,7 +130,9 @@ class ExperimentResultViewSet(BentoAuthzScopedModelViewSet):
     async def get_queryset(self):
         return (
             ExperimentResult
-            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            .get_model_scoped_queryset(
+                await get_request_discovery_scope(self.request), prefetch_and_select_related="top_level"
+            )
             .order_by("id")
         )
 

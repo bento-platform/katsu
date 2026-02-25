@@ -33,20 +33,6 @@ class PhenopacketsModelViewSet(BentoAuthzScopedModelViewSet):
     pagination_class = LargeResultsSetPagination
 
 
-BIOSAMPLE_PREFETCH = (
-    "phenotypic_features",
-    "experiments",
-    "experiments__experiment_results",
-    "experiments__instrument",
-)
-
-BIOSAMPLE_SELECT_REL = (
-    "individual",
-    "derived_from_id",
-    "location_collected",
-)
-
-
 class BiosampleViewSet(PhenopacketsModelViewSet):
     """
     get:
@@ -64,12 +50,8 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
     # required to have discovery-scope-enabled queryset here to use a BentoAuthzScopedModelViewSet-derived viewset
     @async_to_sync
     async def get_queryset(self):
-        return (
-            m.Biosample.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
-            .prefetch_related(*BIOSAMPLE_PREFETCH)
-            .select_related(*BIOSAMPLE_SELECT_REL)
-            .order_by("id")
-        )
+        scope = await get_request_discovery_scope(self.request)
+        return m.Biosample.get_model_scoped_queryset(scope, prefetch_and_select_related="top_level").order_by("id")
 
 
 class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
@@ -99,12 +81,13 @@ class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
     async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
         # We pre-filter biosamples to the scope. This way, if they specify an ID outside the scope, it's just ignored
         #  - the requester won't even know if it exists.
-        queryset = m.Biosample.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+        scope = await get_request_discovery_scope(self.request)
+        queryset = m.Biosample.get_model_scoped_queryset(scope, prefetch_and_select_related="top_level")
 
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        return queryset.prefetch_related(*BIOSAMPLE_PREFETCH).select_related(*BIOSAMPLE_SELECT_REL).order_by("id")
+        return queryset.order_by("id")
 
     def get_queryset(self):
         return self._get_filtered_queryset(ids_list=self.request.data.get("id", None))
@@ -128,28 +111,6 @@ class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-PHENOPACKET_PREFETCH = (
-    *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-    *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
-    "meta_data__resources",
-    "diseases",
-    "phenotypic_features",
-    "interpretations",
-    "interpretations__diagnosis",
-    "interpretations__diagnosis__genomic_interpretations",
-    "interpretations__diagnosis__genomic_interpretations__biosample",
-    "interpretations__diagnosis__genomic_interpretations__subject",
-    "interpretations__diagnosis__genomic_interpretations__gene_descriptor",
-    "interpretations__diagnosis__genomic_interpretations__variant_interpretation__variation_descriptor",
-)
-
-PHENOPACKET_SELECT_REL = (
-    "dataset",
-    "subject",
-    "meta_data",
-)
-
-
 class PhenopacketViewSet(PhenopacketsModelViewSet):
     """
     get:
@@ -167,10 +128,9 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
     # required to have discovery-scope-enabled queryset here to use a BentoAuthzScopedModelViewSet-derived viewset
     @async_to_sync
     async def get_queryset(self):
+        scope = await get_request_discovery_scope(self.request)
         return (
-            m.Phenopacket.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
-            .prefetch_related(*PHENOPACKET_PREFETCH)
-            .select_related(*PHENOPACKET_SELECT_REL)
+            m.Phenopacket.get_model_scoped_queryset(scope, prefetch_and_select_related="top_level")
             .annotate(project=F("dataset__project_id"))
             .order_by("id")
         )

@@ -39,7 +39,7 @@ from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import full_text_search_vector
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
-from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import (
     DiscoveryFieldResponse,
     DiscoveryFieldResponses,
@@ -195,7 +195,10 @@ class QueryHelper:
         entity: DiscoveryEntity,
         lg: BoundLogger | None = None,
         validate_field: bool = True,
+        for_full_response: bool = False,
     ) -> tuple[QuerySet, frozenset[DiscoveryEntity]]:
+        lg = (lg or self._logger).bind(entity=entity)
+
         # We use an async lock here to prevent executing the same entity query multiple times if we have parallel async
         # requests happening (liable to happen with field-level data collection in discovery_field_response, where we do
         # an asyncio.gather across all the fields).
@@ -203,9 +206,8 @@ class QueryHelper:
         # "promise"/awaitable if one already exists.
         async with self._queryset_locks[entity]:
             if entity not in self._queryset_cache:
-                await (lg or self._logger).adebug(
+                await lg.adebug(
                     "QueryHelper executing query",
-                    entity=entity,
                     query=self._query,
                     cache_keys=tuple(self._queryset_cache.keys()),
                 )
@@ -213,7 +215,16 @@ class QueryHelper:
                     entity, lg, validate_field=validate_field
                 )
 
-            return self._queryset_cache[entity]
+            qs, es = self._queryset_cache[entity]
+            if for_full_response:
+                await lg.adebug("adding full response prefetch/select_related")
+                m = DISCOVERY_ENTITY_NAMES_TO_MODEL[entity]
+                qs = (
+                    qs.prefetch_related(*m.get_prefetch(top_level=True))
+                    .select_related(*m.get_select_related())
+                )
+
+            return qs, es
 
     async def _get_entity_counts(self) -> EntityCounts:
         """
@@ -671,7 +682,7 @@ async def discovery_matches(
     try:
         query = DiscoveryQuery.from_drf_request(request)
         qh = QueryHelper(query, scope, dt_permissions, lg)
-        queryset, _ = await qh.get_query_queryset_and_queried_entities(queried_entity)
+        queryset, _ = await qh.get_query_queryset_and_queried_entities(queried_entity, for_full_response=True)
         queryset = queryset.order_by("pk")
     except ValidationError as e:
         return await dres.django_validation_error(

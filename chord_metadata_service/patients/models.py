@@ -5,9 +5,11 @@ from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.types import ModelScopeFilters
+from chord_metadata_service.phenopackets.related_fields import PHENOPACKET_PREFETCH
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator
+from .related_fields import INDIVIDUAL_SELECT_REL
 from .values import PatientStatus, Sex, KaryotypicSex
 
 
@@ -46,6 +48,19 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTS
                 "filter": "phenopackets__dataset_id",
             }
         }
+
+    @staticmethod
+    def get_select_related() -> tuple[str, ...]:
+        return INDIVIDUAL_SELECT_REL
+
+    @staticmethod
+    def get_prefetch(top_level: bool) -> tuple[str, ...]:
+        if top_level:
+            return (
+                "phenopackets",
+                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if not p.startswith("subject")),
+            )
+        return ()
 
     def get_project_id(self) -> str | None:
         if not self.phenopackets.count():
