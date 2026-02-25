@@ -5,6 +5,8 @@ import uuid
 
 from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
+
+from django.db.models import Q
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
@@ -621,13 +623,32 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_sex_via_fts_trigram(self):
         # sex string search using full-text search as a proxy for the unique keyword we have in the sex field
-        # with trigram search, this will just return everything since "MALE" is in both "MALE" and "FEMALE"
-        response = self.dt_authz_counts_get('/api/discovery?_fts=MALE&_fts_type=trigram')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        db_count = Individual.objects.filter(sex__icontains='male').count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        self._test_individual_counts(response_obj, db_count)
+        # with trigram search, our strict similarity for smaller queries means this will return only males despite
+        # 'female' containing 'male'.
+
+        params = [
+            ("female", Q(sex="UNKNOWN_SEX")),
+            ("male", Q(sex="MALE")),
+            ("unkn_sex", Q(sex="UNKNOWN_SEX")),
+            ("unknw_sex", Q(sex="UNKNOWN_SEX")),
+            # word search means this 'unknown' matches other stuff too:
+            ("unknown_sex", Q(sex="UNKNOWN_SEX")),
+            ("unknown", Q(sex="UNKNOWN_SEX") | Q(karyotypic_sex="UNKNOWN_KARYOTYPE")),
+            ("unknown_", Q(sex="UNKNOWN_SEX") | Q(karyotypic_sex="UNKNOWN_KARYOTYPE")),
+            ("other", Q(sex="OTHER_SEX")),
+            ("oth", Q(sex="OTHER_SEX")),
+        ]
+        for p in params:
+            with self.subTest(params=p):
+                response = self.dt_authz_counts_get(f"/api/discovery?_fts={p[0].upper()}&_fts_type=trigram")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                db_count = Individual.objects.filter(p[1]).count()
+                self.assertIn(
+                    self.response_threshold_check(response_obj),
+                    [db_count, dres.INSUFFICIENT_DATA_AVAILABLE],
+                )
+                self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_2_fields(self):
