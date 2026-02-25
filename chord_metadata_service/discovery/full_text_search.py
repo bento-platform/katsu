@@ -108,7 +108,9 @@ def get_trigram_min_similarity(query_len: int) -> float:
     Given the length of a trigram full-text search query, returns the minimum trigram similarity for matches.
     This helps give fewer false positives with short queries, since two-letter overlaps become significant.
     """
-    if query_len <= 4:
+    if query_len <= 2:
+        return 1.0
+    elif query_len <= 4:
         return 0.65
     elif query_len <= 10:
         return 0.5
