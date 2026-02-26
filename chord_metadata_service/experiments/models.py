@@ -40,6 +40,7 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     class Meta:
         indexes = [
             GinIndex(name="exp_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_desc_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="exp_study_type_trgm_idx", fields=["study_type"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="exp_experiment_type_trgm_idx", fields=["experiment_type"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="exp_molecule_trgm_idx", fields=["molecule"], opclasses=["gin_trgm_ops"]),
@@ -206,12 +207,10 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
 class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     class Meta:
         indexes = [
-            GinIndex(name="expres_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_identifier_trgm_idx", fields=["identifier"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_description_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_filename_trgm_idx", fields=["filename"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_url_trgm_idx", fields=["url"], opclasses=["gin_trgm_ops"]),
-            GinIndex(name="expres_indices_trgm_idx", fields=["indices"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_asm_id_trgm_idx", fields=["genome_assembly_id"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_file_format_trgm_idx", fields=["file_format"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_data_output_trgm_idx", fields=["data_output_type"], opclasses=["gin_trgm_ops"]),
