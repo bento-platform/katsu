@@ -137,7 +137,7 @@ while er_url is not None:
             )
             print('========================================================================================')
 
-            updates.append({'id': er_id, 'patch': update})
+            updates.append({'id': er_id, 'filename': er['filename'], 'patch': update})
 
     # go to next page of results:
     er_url = experiment_results['next']
