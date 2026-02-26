@@ -1,6 +1,6 @@
 from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
-from django.contrib.postgres.indexes import GinIndex, OpClass
+from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector, TrigramSimilarity, TrigramWordSimilarity, SearchQuery
 from django.db import models
 from django.db.models import Field, Func, TextField, QuerySet, Q
