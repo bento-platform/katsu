@@ -6,7 +6,6 @@ from asgiref.sync import sync_to_async
 from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
-from django.contrib.postgres.search import SearchQuery
 from django.core.exceptions import FieldError, ValidationError
 from django.db.models import QuerySet, Q
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -37,7 +36,7 @@ from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
 from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
-from .full_text_search import full_text_search_vector
+from .full_text_search import trigram_similarity_search, normal_full_text_search
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .pydantic_models import (
@@ -103,9 +102,9 @@ class QueryHelper:
         self._queryset_locks = defaultdict(asyncio.Lock)
 
         # Cache dictionary for full-text searches (and corresponding locks for accessing/cache manipulation) with:
-        #  - keys being (discovery entity, search query)
+        #  - keys being (discovery entity, search query, FTS search type)
         #  - values being sets of IDs of objects of the same type as the discovery entity in the key.
-        self._fts_cache: dict[tuple[DiscoveryEntity, str], set] = {}
+        self._fts_cache: dict[tuple[DiscoveryEntity, str, FTSType], set] = {}
         self._fts_cache_locks = defaultdict(asyncio.Lock)
 
         # Cache: entity counts for the scope+permissions+query combination; populated by a call to _get_entity_counts
@@ -131,15 +130,15 @@ class QueryHelper:
         search query type, this function executes the search and caches matching IDs in the _fts_cache private property
         of the object for use in executing a discovery query.
         """
-        k = (fts_entity, query)
+        k = (fts_entity, query, fts_type)
         qs = get_discovery_entity_model_scoped_queryset(fts_entity, self._scope)
         async with self._fts_cache_locks[k]:
             if k not in self._fts_cache:
                 self._fts_cache[k] = await build_id_set(
-                    (
-                        qs
-                        .annotate(search=full_text_search_vector(fts_entity))
-                        .filter(search=SearchQuery(query, search_type=fts_type))
+                    qs=(
+                        trigram_similarity_search(fts_entity, qs, query)
+                        if fts_type == "trigram"
+                        else normal_full_text_search(fts_entity, qs, query, fts_type)
                     ),
                     field="id",
                 )
