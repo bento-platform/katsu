@@ -102,12 +102,12 @@ while er_url is not None:
     experiment_results = requests.get(er_url, headers=auth_headers, verify=verify_ssl).json()
 
     for er in experiment_results['results']:
-        f = er['filename']
+        f = er.get('filename')
         if not f:
             continue
 
         update = {}
-        if f in drs_uris_and_created_by_filename and not er['url']:
+        if f in drs_uris_and_created_by_filename and not er.get('url'):
             update['url'] = drs_uris_and_created_by_filename[f][0]
 
         # This doesn't narrow down by file format, but it should be fast enough for us to get away with it since we
@@ -139,7 +139,7 @@ while er_url is not None:
             )
             print('========================================================================================')
 
-            updates.append({'id': er_id, 'filename': er['filename'], 'patch': update})
+            updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update})
 
     # go to next page of results:
     er_url = experiment_results['next']
