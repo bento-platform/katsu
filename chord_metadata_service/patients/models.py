@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
@@ -30,6 +31,14 @@ class VitalStatus(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
 
 class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTSModel, IndexableMixin):
     """ Class to store demographic information about an Individual (Patient) """
+
+    class Meta:
+        indexes = [
+            GinIndex(name="ind_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="ind_sex_trgm_idx", fields=["sex"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="ind_karyotypic_sex_trgm_idx", fields=["karyotypic_sex"], opclasses=["gin_trgm_ops"]),
+            BaseFTSModel.get_fts_extra_trgm_index("ind"),
+        ]
 
     @property
     def schema_type(self) -> SchemaType:
