@@ -147,7 +147,8 @@ def entity_search_fields(queryset_entity: DiscoveryEntity, trigram_query: str | 
         #  list[str]
         #  Type[Field]: a cast to a specific type of field for searching if needed, otherwise None if string-like
         #  Type[TrigramWordSimilarity] | Type[TrigramSimilarity] | lambda --> aforementioned:
-        #   trigram search function (or lambda from query --> trigram search function) to use for this field/query
+        #   trigram search function (or lambda from query --> trigram search function) to use for this field/query.
+        #   We have lambdas for weird little edge-cases where we determine the similarity function based on the query.
         field = f[0]
         fc = f[1]
         trigram_func = f[2]
