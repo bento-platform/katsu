@@ -194,6 +194,8 @@ def greatest_or_only(fs: list[Func]) -> Func:
     """
     The ORM Greatest function only works with more than one term; if there's only one term, we just use it directly.
     """
+    # TODO: investigate using average of similarities above a certain threshold, to properly rank a search term like
+    #  "male hashimoto" where we have more than one word match across different columns.
     return Greatest(*fs) if len(fs) > 1 else fs[0]
 
 
