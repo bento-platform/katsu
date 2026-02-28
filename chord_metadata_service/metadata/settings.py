@@ -18,7 +18,7 @@ from bento_lib.discovery import DiscoveryConfig, load_discovery_config
 from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
 from structlog.stdlib import get_logger
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
@@ -108,10 +108,6 @@ APPEND_SLASH = False
 # Bento misc. settings
 
 SERVICE_TEMP = os.environ.get("KATSU_TEMP", os.environ.get("SERVICE_TEMP"))
-
-#  - DRS URL - by default in Bento Singularity context, use internal NGINX DRS (to avoid auth hassles)
-NGINX_INTERNAL_SOCKET = quote(os.environ.get("NGINX_INTERNAL_SOCKET", "/chord/tmp/nginx_internal.sock"), safe="")
-DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/drs").strip().rstrip("/")
 
 # Application definition
 
@@ -374,8 +370,8 @@ SPECTACULAR_SETTINGS = {
 
 # SPECTACULAR_SETTINGS['SERVERS'] defines the url to which calls are made when
 # testing a request within the swagger UI
-if CHORD_URL:
-    SPECTACULAR_SETTINGS["SERVERS"] = [{"url": CHORD_URL + FORCE_SCRIPT_NAME}]
+if SERVICE_URL_BASE_PATH:
+    SPECTACULAR_SETTINGS["SERVERS"] = [{"url": SERVICE_URL_BASE_PATH}]
 
 # ----------------------------------------------------------------------------------------------------------------------
 
