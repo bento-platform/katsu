@@ -50,15 +50,19 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
 
 async def get_field_options(
     queryset_entity: DiscoveryEntity,
-    queryset: QuerySet,
     field_id: str,
     scope: ValidatedDiscoveryScope,
     field_permissions: DataPermissions,
 ) -> list[Any]:
     """
-    Given properties for a public field, return the list of authorized options for
+    Given properties for a discovery field, return the list of authorized options for
     querying this field.
     """
+
+    # Rather than accepting a queryset as a parameter, we use the whole-scope queryset for the entity to calculate field
+    # options. We don't want to apply any filtering to the queryset used to determine field options, to avoid filters on
+    # the queryset accidentally eliminating valid options.
+    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
     field_props = scope.discovery.fields[field_id]
     threshold = get_threshold(scope, field_permissions)

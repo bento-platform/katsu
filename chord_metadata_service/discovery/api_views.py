@@ -418,7 +418,7 @@ async def discovery_search_fields(
         return DiscoveryFieldAndOptions(
             id=field,
             definition=field_props,
-            options=await get_field_options(queryset_entity, queryset, field, scope, field_permissions[field]),
+            options=await get_field_options(queryset_entity, field, scope, field_permissions[field]),
         )
 
     async def _get_section_response(section: SearchSection) -> DiscoverySearchSectionWithOptions | None:

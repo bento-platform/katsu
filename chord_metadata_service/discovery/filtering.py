@@ -27,7 +27,6 @@ def _in_case_insensitive(val: str, i: Iterable[str]) -> bool:
 
 async def validate_field_query_value(
     queryset_entity: DiscoveryEntity,
-    queryset: QuerySet,
     scope: ValidatedDiscoveryScope,
     field_id: str,
     value: str,
@@ -42,7 +41,7 @@ async def validate_field_query_value(
 
     # Ensure the passed value is in our pre-determined array of options (or, if an {enum: null} string field, check that
     # the passed value is in the database [above the censorship threshold as needed]):
-    options = await get_field_options(queryset_entity, queryset, field_id, scope, field_permissions)
+    options = await get_field_options(queryset_entity, field_id, scope, field_permissions)
     if (
         value not in options
         and not (
@@ -118,7 +117,7 @@ async def discovery_filter_queryset(
         #    queryset model
         if validate_field:
             await validate_field_query_value(
-                queryset_entity, queryset, discovery_scope, field, value, qf_permissions[field]
+                queryset_entity, discovery_scope, field, value, qf_permissions[field]
             )
 
         # Update queryset to include the Django ORM filter for this query field/value
