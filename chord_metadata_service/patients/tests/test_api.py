@@ -803,9 +803,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_range_string_2(self):
         # extra_properties range search and extra_properties string search (single value)
 
-        response = self.dt_authz_counts_get(
-            '/api/discovery?lab_test_result_value=< 55.5&covidstatus=positive'
-        )
+        response = self.dt_authz_counts_get("/api/discovery?lab_test_result_value=< 55.5&covidstatus=positive")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
@@ -823,7 +821,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.dt_authz_counts_get(
-            '/api/discovery?lab_test_result_value=< 55.5&baseline_creatinine=[100, 150)'
+            "/api/discovery?lab_test_result_value=< 55.5&baseline_creatinine=[100, 150)"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
@@ -853,9 +851,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
-        response = self.dt_authz_counts_get(
-            '/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5'
-        )
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
