@@ -37,7 +37,7 @@ __all__ = [
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
-register('json-ld', Serializer, 'rdflib_jsonld.serializer', 'JsonLDSerializer')
+register("json-ld", Serializer, "rdflib_jsonld.serializer", "JsonLDSerializer")
 
 
 class UUIDEncoder(json.JSONEncoder):
@@ -49,20 +49,20 @@ class UUIDEncoder(json.JSONEncoder):
 
 
 class PhenopacketsRenderer(CamelCaseJSONRenderer):
-    media_type = 'application/json'
-    format = 'phenopackets'
+    media_type = "application/json"
+    format = "phenopackets"
 
     def render(self, data, media_type=None, renderer_context=None):
         return super().render(data, media_type, renderer_context)
 
 
 class JSONLDDatasetRenderer(PhenopacketsRenderer):
-    media_type = 'application/ld+json'
-    format = 'json-ld'
+    media_type = "application/ld+json"
+    format = "json-ld"
 
     def render(self, data, media_type=None, renderer_context=None):
-        if 'results' in data:
-            json_obj = {'results': [dataset_to_jsonld(item) for item in data['results']]}
+        if "results" in data:
+            json_obj = {"results": [dataset_to_jsonld(item) for item in data["results"]]}
         else:
             json_obj = dataset_to_jsonld(data)
 
@@ -71,23 +71,23 @@ class JSONLDDatasetRenderer(PhenopacketsRenderer):
 
 class RDFDatasetRenderer(PhenopacketsRenderer):
     # change for 'application/rdf+xml'
-    media_type = 'application/rdf+xml'
-    render_style = 'binary'
-    charset = 'utf-8'
-    format = 'rdf'
+    media_type = "application/rdf+xml"
+    render_style = "binary"
+    charset = "utf-8"
+    format = "rdf"
 
     def render(self, data, media_type=None, renderer_context=None):
-        if 'results' in data:
+        if "results" in data:
             g = Graph()
-            for item in data['results']:
+            for item in data["results"]:
                 ld_context_item = dataset_to_jsonld(item)
-                small_g = Graph().parse(data=json.dumps(ld_context_item, cls=UUIDEncoder), format='json-ld')
+                small_g = Graph().parse(data=json.dumps(ld_context_item, cls=UUIDEncoder), format="json-ld")
                 # join graphs
                 g = g + small_g
         else:
             ld_context_data = dataset_to_jsonld(data)
-            g = Graph().parse(data=json.dumps(ld_context_data, cls=UUIDEncoder), format='json-ld')
-        rdf_data = g.serialize(format='pretty-xml')
+            g = Graph().parse(data=json.dumps(ld_context_data, cls=UUIDEncoder), format="json-ld")
+        rdf_data = g.serialize(format="pretty-xml")
         return rdf_data
 
 
@@ -172,8 +172,8 @@ def _render_csv_diseases(diseases: list[dict]) -> str:
     # use ; because some disease terms might contain , in their label
     return "; ".join(
         [
-            f"{d['term']['label']} ({time_element_to_str(d['onset'])})"
-            if d.get("onset") else d["term"]["label"] for d in diseases
+            f"{d['term']['label']} ({time_element_to_str(d['onset'])})" if d.get("onset") else d["term"]["label"]
+            for d in diseases
         ]
     )
 
@@ -204,7 +204,7 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
                 "age": render_age(individual, "time_at_last_encounter"),
                 "diseases": None,
                 "created": individual["created"],
-                "updated": individual["updated"]
+                "updated": individual["updated"],
             }
             if "phenopackets" in individual:
                 all_diseases = []
@@ -246,14 +246,14 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
                 "subject_id": phe["subject"]["id"] if phe.get("subject") else None,
                 "subject_sex": phe["subject"]["sex"] if phe.get("subject") else None,
                 "subject_taxonomy": phe["subject"]["taxonomy"]["label"] if phe.get("subject") else None,
-                "biosamples": "; ".join(
-                    (
-                        f"{b['id']} [{b['sampled_tissue']['label']}]"
-                        if b.get("sampled_tissue")
-                        else b["id"]
+                "biosamples": (
+                    "; ".join(
+                        (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
+                        for b in phe["biosamples"]
                     )
-                    for b in phe["biosamples"]
-                ) if phe.get("biosamples") else None,
+                    if phe.get("biosamples")
+                    else None
+                ),
                 "diseases": _render_csv_diseases(phe["diseases"]) if phe.get("diseases") else None,
                 "created_by": phe["meta_data"].get("created_by"),
                 "submitted_by": phe["meta_data"].get("submitted_by"),
@@ -294,7 +294,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
                 "extra_properties": f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
                 "created": biosample["created"],
                 "updated": biosample["updated"],
-                "individual": biosample.get("individual")
+                "individual": biosample.get("individual"),
             }
             for biosample in data
         ]
@@ -388,7 +388,8 @@ class IndividualBentoSearchRenderer(JSONRenderer):
     Note: this seems necessary to be able to use the format parameter
     "bento_search_result" in the Individual ViewSet.
     """
-    media_type = 'application/json'
+
+    media_type = "application/json"
     format = OUTPUT_FORMAT_BENTO_SEARCH_RESULT
 
 
@@ -401,6 +402,7 @@ class PydanticJSONRenderer(JSONRenderer):
     An extended version of the default DRF JSONRenderer class, which handles Pydantic model instances if passed. If the
     data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
     """
+
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
 
@@ -410,5 +412,6 @@ class PydanticBrowsableAPIRenderer(BrowsableAPIRenderer):
     An extended version of the default DRF BrowsableAPIRenderer class, which handles Pydantic model instances if passed.
     If the data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
     """
+
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)

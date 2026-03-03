@@ -9,7 +9,6 @@ from rest_framework.negotiation import DefaultContentNegotiation
 
 
 class FormatInPostContentNegotiation(DefaultContentNegotiation):
-
     def select_renderer(self, request, renderers, format_suffix):
         """
         Select renderer based on the `format` parameter from the (POST) request.

@@ -9,37 +9,21 @@ from chord_metadata_service.restapi.models import SchemaType
 
 
 class TestBaseExtraProperties(ProjectTestCase):
-
     def setUp(self) -> None:
         BASE_PJS = {
             "project": self.project,
             "required": False,
             "json_schema": {"type": "object"},
         }
-        self.individual_pjs = ProjectJsonSchema.objects.create(
-            **BASE_PJS,
-            schema_type=SchemaType.INDIVIDUAL
-        )
-        self.biosample_pjs = ProjectJsonSchema.objects.create(
-            **BASE_PJS,
-            schema_type=SchemaType.BIOSAMPLE
-        )
-        self.phenopacket_pjs = ProjectJsonSchema.objects.create(
-            **BASE_PJS,
-            schema_type=SchemaType.PHENOPACKET
-        )
+        self.individual_pjs = ProjectJsonSchema.objects.create(**BASE_PJS, schema_type=SchemaType.INDIVIDUAL)
+        self.biosample_pjs = ProjectJsonSchema.objects.create(**BASE_PJS, schema_type=SchemaType.BIOSAMPLE)
+        self.phenopacket_pjs = ProjectJsonSchema.objects.create(**BASE_PJS, schema_type=SchemaType.PHENOPACKET)
 
         self.individual = Individual.objects.create(**pheno_consts.VALID_INDIVIDUAL_1)
         self.biosample = Biosample.objects.create(**pheno_consts.valid_biosample_1(self.individual))
-        meta_data = MetaData.objects.create(
-            created_by="test",
-            submitted_by="test"
-        )
+        meta_data = MetaData.objects.create(created_by="test", submitted_by="test")
         self.phenopacket = Phenopacket.objects.create(
-            id="phenopacket_id:1",
-            subject=self.individual,
-            meta_data=meta_data,
-            dataset=self.dataset
+            id="phenopacket_id:1", subject=self.individual, meta_data=meta_data, dataset=self.dataset
         )
         self.phenopacket.biosamples.set([self.biosample])
 
@@ -59,9 +43,11 @@ class TestBaseExtraProperties(ProjectTestCase):
         self.assertIsNone(self.no_proj_phenopacket.get_project_id())
 
     def test_validate_json_schema(self):
-        invalid_individual = Individual(**{
-            **pheno_consts.VALID_INDIVIDUAL_1,
-            "extra_properties": "invalid extra_properties of type 'string', expects 'object'"
-        })
+        invalid_individual = Individual(
+            **{
+                **pheno_consts.VALID_INDIVIDUAL_1,
+                "extra_properties": "invalid extra_properties of type 'string', expects 'object'",
+            }
+        )
         with self.assertRaises(ValidationError):
             invalid_individual.save()

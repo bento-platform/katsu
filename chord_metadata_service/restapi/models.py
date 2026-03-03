@@ -20,6 +20,7 @@ class BaseTimeStamp(models.Model):
     columns for 'created' and 'updated' timestamps.
     Use in inheritance.
     """
+
     created = models.DateTimeField(auto_now=True, null=True, blank=True)
     updated = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
@@ -71,10 +72,7 @@ class BaseExtraProperties(models.Model):
         model = apps.get_model("chord", "ProjectJsonSchema")
         json_schema = None
         try:
-            project_json_schema = model.objects.get(
-                Q(project_id=project_id) &
-                Q(schema_type=self.schema_type)
-            )
+            project_json_schema = model.objects.get(Q(project_id=project_id) & Q(schema_type=self.schema_type))
             json_schema = project_json_schema.json_schema
         except ObjectDoesNotExist:
             lg.debug("no ProjectJsonSchema found for schema type")

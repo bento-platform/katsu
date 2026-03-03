@@ -22,7 +22,7 @@ from chord_metadata_service.restapi.schemas import (
     TIME_INTERVAL,
     EXTRA_PROPERTIES_SCHEMA,
     GESTATIONAL_AGE,
-    TIME_ELEMENT_SCHEMA
+    TIME_ELEMENT_SCHEMA,
 )
 
 __all__ = [
@@ -40,6 +40,7 @@ class SchemaRefs(Enum):
     The format of this enum is `schema_name:str = schema:dict`.
     The enum is used in an atypical manner as the elements have no defined order to them.
     """
+
     AGE = AGE
     AGE_OR_AGE_RANGE = AGE_OR_AGE_RANGE
     AGE_RANGE = AGE_RANGE
