@@ -457,7 +457,7 @@ async def filter_queryset_field_value(
 
     # TODO: resolve schema including extra properties
 
-    if field_props.datatype in ("string", "ontology_class"):
+    if field_props.datatype in ("string", "ontology-class"):
         if gb := field_props.group_by:
             if field_props.datatype == "ontology-class":
                 # append `/id` to path to search by ontology class ID
