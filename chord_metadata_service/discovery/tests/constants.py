@@ -151,7 +151,7 @@ DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT["fields"].update({
         "description": "This acts as a placeholder for numeric values",
         "datatype": "number",
         "config": {
-            "bins": [200, 300, 500, 1000, 1500, 2000],
+            "bins": [55.5, 200, 300, 500, 1000, 1255.5, 1500, 2000],
             "minimum": 0,
             "units": "mg/L"
         }

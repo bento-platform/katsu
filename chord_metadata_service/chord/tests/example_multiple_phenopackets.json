@@ -54,6 +54,9 @@
         }
       ],
       "phenopacket_schema_version": "2.0"
+    },
+    "extra_properties": {
+      "root_level": true
     }
   },
   {
@@ -111,6 +114,9 @@
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
       ]
+    },
+    "extra_properties": {
+      "root_level": true
     }
   },
   {
@@ -168,6 +174,9 @@
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
       ]
+    },
+    "extra_properties": {
+      "root_level": true
     }
   },
   {
@@ -223,6 +232,9 @@
       ],
       "updates": [],
       "external_references": []
+    },
+    "extra_properties": {
+      "root_level": true
     }
   },
   {
@@ -282,6 +294,9 @@
       ],
       "updates": [],
       "external_references": []
+    },
+    "extra_properties": {
+      "root_level": true
     }
   },
   {
@@ -330,6 +345,9 @@
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
       ]
+    },
+    "extra_properties": {
+      "root_level": true
     }
   },
   {
@@ -378,6 +396,9 @@
           "iri_prefix": "https://ncit.nci.nih.gov"
         }
       ]
+    },
+    "extra_properties": {
+      "root_level": true
     }
   }
 ]

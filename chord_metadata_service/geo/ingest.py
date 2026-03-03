@@ -23,10 +23,6 @@ def get_or_create_geo_location(geoloc_json: dict) -> gm.GeoLocation:
             for gk, gv in geoloc_json_props.items()
             if gk in gc.MODEL_PREDEF_PROPS_TO_ATTRS
         },
-        extra_properties={
-            gk: gv
-            for gk, gv in geoloc_json_props.items()
-            if gk not in gc.MODEL_PREDEF_PROPS_TO_ATTRS
-        },
+        extra_properties={gk: gv for gk, gv in geoloc_json_props.items() if gk not in gc.MODEL_PREDEF_PROPS_TO_ATTRS},
     )
     return geoloc

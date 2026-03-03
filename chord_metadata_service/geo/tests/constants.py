@@ -16,7 +16,6 @@ GEO_LOCATION_1 = {
 
 
 class GeoLocationTestCase(TestCase):
-
     def setUp(self):
         self.loc_1 = GeoLocation.objects.create(**GEO_LOCATION_1)
         self.loc_2 = GeoLocation.objects.create(

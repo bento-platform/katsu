@@ -1,7 +1,7 @@
 import abc
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import Literal
 
@@ -36,6 +36,8 @@ __all__ = [
 
 
 class BinWithValue(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     label: str
     value: int
 
@@ -53,6 +55,8 @@ class BaseDiscoveryResolvedField(BaseModel):
 
 
 class DiscoveryFieldAndOptions(BaseDiscoveryResolvedField):
+    model_config = ConfigDict(frozen=True)
+
     # field ID + field definition + field filter options
     options: list[str]
 
@@ -166,6 +170,8 @@ class DiscoveryMatches(RootModel):
 
 
 class DiscoveryPagination(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     page: int
     page_size: int
     total: int  # total count of matches, whichever output format is chosen
@@ -269,6 +275,8 @@ class DiscoveryUIHintsResponse(BaseModel):
     Model representing the UI hints discovery response, which gives any API consumer some hints/suggestions on how to
     make the UI nicer by, e.g., selectively hiding parts.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     entities_with_data: frozenset[DiscoveryEntity]
     # biosample_location_present: bool  TODO

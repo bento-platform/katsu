@@ -5,6 +5,8 @@ import uuid
 
 from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
+
+from django.db.models import Q
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
@@ -21,7 +23,7 @@ from chord_metadata_service.discovery.tests.constants import (
 )
 from chord_metadata_service.experiments import models as ex_m
 from chord_metadata_service.experiments.tests import constants as ex_c
-from chord_metadata_service.patients.models import Individual
+from chord_metadata_service.patients.models import Individual, VitalStatus
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets.utils import iso_duration_to_years
@@ -41,6 +43,15 @@ class CreateIndividualTest(AuthzAPITestCase):
         self.valid_payload = c.VALID_INDIVIDUAL
         self.invalid_payload = c.INVALID_INDIVIDUAL
 
+        self.maxDiff = None
+
+    @staticmethod
+    def _without_timestamps(x: dict) -> dict:
+        y = {**x}
+        del y["created"]
+        del y["updated"]
+        return y
+
     def test_create_individual(self):
         """ POST a new individual. """
 
@@ -48,6 +59,32 @@ class CreateIndividualTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Individual.objects.count(), 1)
         self.assertEqual(Individual.objects.get().id, 'patient:1')
+
+        response = self.one_authz_get(reverse('individuals-detail', kwargs={'pk': 'patient:1'}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rhs = {
+            **self.valid_payload,
+            "karyotypic_sex": "UNKNOWN_KARYOTYPE",  # default value
+        }
+        self.assertDictEqual(self._without_timestamps(response.json()), rhs)
+
+    def test_create_individual_no_vital_status(self):
+        """ POST a new individual without a vital status. """
+
+        vp = {**self.valid_payload}
+        del vp["vital_status"]
+        response = self.one_authz_post(reverse('individuals-list'), json=vp)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Individual.objects.count(), 1)
+        self.assertEqual(Individual.objects.get().id, 'patient:1')
+
+        response = self.one_authz_get(reverse('individuals-detail', kwargs={'pk': 'patient:1'}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rhs = {
+            **vp,
+            "karyotypic_sex": "UNKNOWN_KARYOTYPE",  # default value
+        }
+        self.assertDictEqual(self._without_timestamps(response.json()), rhs)
 
     def test_create_individual_forbidden(self):
         response = self.one_no_authz_post(reverse('individuals-list'), json=self.valid_payload)
@@ -61,31 +98,41 @@ class CreateIndividualTest(AuthzAPITestCase):
         self.assertEqual(Individual.objects.count(), 0)
 
 
-class UpdateIndividualTest(AuthzAPITestCase):
+class TestWithIndividual(AuthzAPITestCase):
+    def setUp(self):
+        self.vital_status = VitalStatus.objects.create(**c.VALID_INDIVIDUAL["vital_status"])
+        self.individual_one = Individual.objects.create(**{**c.VALID_INDIVIDUAL, "vital_status": self.vital_status})
+
+
+class TestWithTwoIndividuals(TestWithIndividual):
+    def setUp(self):
+        super().setUp()
+        # second individual without vital status
+        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+
+
+class UpdateIndividualTest(TestWithIndividual):
     """ Test module for updating an existing Individual record. """
 
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-
-        self.put_valid_payload = {
-            "id": "patient:1",
-            "taxonomy": {
-                "id": "NCBITaxon:9606",
-                "label": "human"
+    put_valid_payload = {
+        "id": "patient:1",
+        "taxonomy": {
+            "id": "NCBITaxon:9606",
+            "label": "human"
+        },
+        "date_of_birth": "2001-01-01",
+        "age": {
+            "start": {
+                "age": "P45Y"
             },
-            "date_of_birth": "2001-01-01",
-            "age": {
-                "start": {
-                    "age": "P45Y"
-                },
-                "end": {
-                    "age": "P49Y"
-                }
-            },
-            "sex": "FEMALE",
-        }
+            "end": {
+                "age": "P49Y"
+            }
+        },
+        "sex": "FEMALE",
+    }
 
-        self.invalid_payload = c.INVALID_INDIVIDUAL
+    invalid_payload = c.INVALID_INDIVIDUAL
 
     def test_update_individual(self):
         """ PUT new data in an existing Individual record. """
@@ -113,11 +160,8 @@ class UpdateIndividualTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteIndividualTest(AuthzAPITestCase):
+class DeleteIndividualTest(TestWithIndividual):
     """ Test module for deleting an existing Individual record. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
     def test_delete_individual(self):
         """ DELETE an existing Individual record. """
@@ -142,9 +186,13 @@ class DeleteIndividualTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
-class IndividualListFilterTest(AuthzAPITestCase):
+class IndividualListFilterTest(TestWithTwoIndividuals):
 
     def setUp(self):
+        super().setUp()
+
+        # ----
+
         self.project_1 = cm.Project.objects.create(title="Project 1", description="p1")
         self.dataset_1 = cm.Dataset.objects.create(**{
             "title": "Dataset 1",
@@ -165,13 +213,15 @@ class IndividualListFilterTest(AuthzAPITestCase):
 
         self.md1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
 
-        self.ind1 = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.pheno1 = ph_m.Phenopacket.objects.create(**ph_c.valid_phenopacket(self.ind1, self.md1, "phenopacket:1"))
+        self.pheno1 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(self.individual_one, self.md1, "phenopacket:1")
+        )
         self.pheno1.dataset = self.dataset_1
         self.pheno1.save()
 
-        self.ind2 = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
-        self.pheno2 = ph_m.Phenopacket.objects.create(**ph_c.valid_phenopacket(self.ind2, self.md1, "phenopacket:2"))
+        self.pheno2 = ph_m.Phenopacket.objects.create(
+            **ph_c.valid_phenopacket(self.individual_two, self.md1, "phenopacket:2")
+        )
         self.pheno2.dataset = self.dataset_2
         self.pheno2.save()
 
@@ -184,12 +234,12 @@ class IndividualListFilterTest(AuthzAPITestCase):
         r = self.one_authz_get(f"/api/individuals?project={self.project_1.identifier}")
         data = r.json()
         self.assertEqual(len(data["results"]), 1)
-        self.assertEqual(data["results"][0]["id"], self.ind1.id)
+        self.assertEqual(data["results"][0]["id"], self.individual_one.id)
 
         r = self.one_authz_get(f"/api/individuals?project={self.project_2.identifier}")
         data = r.json()
         self.assertEqual(len(data["results"]), 1)
-        self.assertEqual(data["results"][0]["id"], self.ind2.id)
+        self.assertEqual(data["results"][0]["id"], self.individual_two.id)
 
     def test_individuals_dataset_scope(self):
         r = self.one_authz_get(
@@ -197,14 +247,14 @@ class IndividualListFilterTest(AuthzAPITestCase):
         )
         data = r.json()
         self.assertEqual(len(data["results"]), 1)
-        self.assertEqual(data["results"][0]["id"], self.ind1.id)
+        self.assertEqual(data["results"][0]["id"], self.individual_one.id)
 
         r = self.one_authz_get(
             f"/api/individuals?project={self.project_2.identifier}&dataset={self.dataset_2.identifier}"
         )
         data = r.json()
         self.assertEqual(len(data["results"]), 1)
-        self.assertEqual(data["results"][0]["id"], self.ind2.id)
+        self.assertEqual(data["results"][0]["id"], self.individual_two.id)
 
     def test_individuals_forbidden(self):
         r = self.one_no_authz_get("/api/individuals")
@@ -214,11 +264,8 @@ class IndividualListFilterTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class IndividualCSVRendererTest(AuthzAPITestCase):
+class IndividualCSVRendererTest(TestWithIndividual):
     """ Test csv export for Individuals. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
 
     def test_csv_export(self):
         get_resp = self.one_authz_get('/api/individuals?format=csv')
@@ -237,7 +284,7 @@ class IndividualCSVRendererTest(AuthzAPITestCase):
         self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
+class IndividualWithPhenopacketSearchTest(TestWithTwoIndividuals):
     """ Test for api/individuals?search= """
 
     # params, expected # results, expected result object # keys
@@ -260,8 +307,8 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
     )
 
     def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
+        super().setUp()
+
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
             **ph_c.valid_phenopacket(subject=self.individual_one, meta_data=self.metadata_1)
@@ -314,12 +361,8 @@ class IndividualWithPhenopacketSearchTest(AuthzAPITestCase):
 # One hypothesis is that using POST requests without actually
 # adding data to the database creates unexpected behaviour with one of the
 # libraries used  during the testing (?) maybe at teardown time.
-class BatchIndividualsCSVTest(AuthzAPITestCase):
+class BatchIndividualsCSVTest(TestWithTwoIndividuals):
     """ Test for getting a batch of individuals as csv. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_no_ids(self):
         response = self.one_authz_post(reverse('batch/individuals'), json={'format': 'csv'})
@@ -330,12 +373,8 @@ class BatchIndividualsCSVTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class BatchIndividualsCSVTest1(AuthzAPITestCase):
+class BatchIndividualsCSVTest1(TestWithTwoIndividuals):
     """ Test for getting a batch of individuals as csv. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv(self):
         get_resp = self.one_authz_post(
@@ -356,24 +395,16 @@ class BatchIndividualsCSVTest1(AuthzAPITestCase):
             self.assertEqual(resp_body[i][:-2], correct_body[i][:-2])
 
 
-class BatchIndividualsCSVTest2(AuthzAPITestCase):
+class BatchIndividualsCSVTest2(TestWithTwoIndividuals):
     """ Test for getting a batch of individuals as csv. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_ids(self):
         response = self.one_authz_post(reverse('batch/individuals'), json={'format': 'csv', 'id': ['invalid']})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
-class BatchIndividualsCSVTest3(AuthzAPITestCase):
+class BatchIndividualsCSVTest3(TestWithTwoIndividuals):
     """ Test for getting a batch of individuals as csv. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_ids(self):
         response = self.one_authz_post(
@@ -386,12 +417,8 @@ class BatchIndividualsCSVTest3(AuthzAPITestCase):
         self.assertEqual(nb_lines, 2)   # 2 lines expected: header + individual_one
 
 
-class BatchIndividualsCSVTest4(AuthzAPITestCase):
+class BatchIndividualsCSVTest4(TestWithTwoIndividuals):
     """ Test for getting a batch of individuals as csv. """
-
-    def setUp(self):
-        self.individual_one = Individual.objects.create(**c.VALID_INDIVIDUAL)
-        self.individual_two = Individual.objects.create(**c.VALID_INDIVIDUAL_2)
 
     def test_batch_individuals_csv_invalid_format(self):
         # defaults to default renderer
@@ -594,6 +621,36 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_sex_via_fts_trigram(self):
+        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field
+        # with trigram search, our strict similarity for smaller queries means this will return only males despite
+        # 'female' containing 'male'.
+
+        params = [
+            ("female", Q(sex="UNKNOWN_SEX")),
+            ("male", Q(sex="MALE")),
+            ("unkn_sex", Q(sex="UNKNOWN_SEX")),
+            ("unknw_sex", Q(sex="UNKNOWN_SEX")),
+            # word search means this 'unknown' matches other stuff too:
+            ("unknown_sex", Q(sex="UNKNOWN_SEX")),
+            ("unknown", Q(sex="UNKNOWN_SEX") | Q(karyotypic_sex="UNKNOWN_KARYOTYPE")),
+            ("unknown_", Q(sex="UNKNOWN_SEX") | Q(karyotypic_sex="UNKNOWN_KARYOTYPE")),
+            ("other", Q(sex="OTHER_SEX")),
+            ("oth", Q(sex="OTHER_SEX")),
+        ]
+        for p in params:
+            with self.subTest(params=p):
+                response = self.dt_authz_counts_get(f"/api/discovery?_fts={p[0].upper()}&_fts_type=trigram")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                db_count = Individual.objects.filter(p[1]).count()
+                self.assertIn(
+                    self.response_threshold_check(response_obj),
+                    [db_count, dres.INSUFFICIENT_DATA_AVAILABLE],
+                )
+                self._test_individual_counts(response_obj, db_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_2_fields(self):
         # sex and extra_properties string search
         # test GET query string search for extra_properties field
@@ -722,33 +779,43 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_range_string_1(self):
-        # sex string search and extra_properties range search
-        response = self.dt_authz_counts_get(
-            '/api/discovery?sex=female&lab_test_result_value=< 200'
-        )
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        range_parameters = {
-            "sex__iexact": "female",
-            "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200
-        }
-        db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        self._test_individual_counts(response_obj, db_count)
+        # test combined sex string search + extra_properties range search,
+        # with variety of ranges for lab_test_result_value including some decimal ones (which used to not work!)
+
+        subtests = [
+            ("< 55.5", 0, 55.5),
+            ("[200, 300)", 200, 300),
+            ("[1000, 1255.5)", 1000, 1255.5),
+            ("[1255.5, 1500)", 1000, 1255.5),
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                # sex string search and extra_properties range search
+                response = self.dt_authz_counts_get(f"/api/discovery?sex=female&lab_test_result_value={params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                range_parameters = {
+                    "sex__iexact": "female",
+                    "extra_properties__lab_test_result_value__gte": params[1],
+                    "extra_properties__lab_test_result_value__lt": params[2],
+                }
+                db_count = Individual.objects.filter(**range_parameters).count()
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+                self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_range_string_2(self):
         # extra_properties range search and extra_properties string search (single value)
 
         response = self.dt_authz_counts_get(
-            '/api/discovery?lab_test_result_value=< 200&covidstatus=positive'
+            '/api/discovery?lab_test_result_value=< 55.5&covidstatus=positive'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200,
+            "extra_properties__lab_test_result_value__lt": 55.5,
             "extra_properties__covidstatus__iexact": "positive",
         }
 
@@ -761,13 +828,13 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.dt_authz_counts_get(
-            '/api/discovery?lab_test_result_value=< 200&baseline_creatinine=[100, 150)'
+            '/api/discovery?lab_test_result_value=< 55.5&baseline_creatinine=[100, 150)'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200,
+            "extra_properties__lab_test_result_value__lt": 55.5,
             "extra_properties__baseline_creatinine__gte": 100,
             "extra_properties__baseline_creatinine__lt": 150,
         }
@@ -796,14 +863,14 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
         response = self.dt_authz_counts_get(
-            '/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 200'
+            '/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         range_parameters = {
             "extra_properties__date_of_consent__startswith": "2021-03",
             "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 200,
+            "extra_properties__lab_test_result_value__lt": 55.5,
         }
         db_count = Individual.objects.filter(**range_parameters).count()
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])

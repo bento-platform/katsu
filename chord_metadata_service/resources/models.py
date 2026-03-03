@@ -26,7 +26,9 @@ class Resource(BaseScopeableModel):
     def get_scope_filters() -> ModelScopeFilters:
         return {
             "base_prefetch_related": (
-                "dataset_set", "metadata_set__phenopacket_set", "metadata_set__phenopacket_set__dataset"
+                "dataset_set",
+                "metadata_set__phenopacket_set",
+                "metadata_set__phenopacket_set__dataset",
             ),
             "project": {
                 "filter": ("dataset__project_id", "metadata__phenopacket__dataset__project_id"),
@@ -53,11 +55,14 @@ class Resource(BaseScopeableModel):
         # ideally want to identify resources by the pair (namespace_prefix, version). In this case, we hack this by
         # enforcing that id == (namespace_prefix, version). In the case of an unspecified version, enforce
         # id == namespace_prefix.
-        if (self.version and self.id != f"{self.namespace_prefix}:{self.version}") or \
-                (not self.version and self.id != self.namespace_prefix):
-            raise ValidationError({
-                "id": [ValidationError("Resource ID must match the format 'namespace_prefix:version'")],
-            })
+        if (self.version and self.id != f"{self.namespace_prefix}:{self.version}") or (
+            not self.version and self.id != self.namespace_prefix
+        ):
+            raise ValidationError(
+                {
+                    "id": [ValidationError("Resource ID must match the format 'namespace_prefix:version'")],
+                }
+            )
 
     def save(self, *args, **kwargs):
         self.clean()
