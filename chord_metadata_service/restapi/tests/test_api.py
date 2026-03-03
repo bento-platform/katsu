@@ -29,19 +29,18 @@ class ServiceInfoTest(APITestCase):
 
 class ExtraPropertiesSchemaTypesTest(APITestCase):
     def test_extra_properties_schema_types(self):
-        response = self.client.get('/api/extra_properties_schema_types')
+        response = self.client.get("/api/extra_properties_schema_types")
         response_obj = response.json()
         expected_response = {
             "PHENOPACKET": "Phenopacket",
             "BIOSAMPLE": "Biosample",
-            "INDIVIDUAL": "Individual"
+            "INDIVIDUAL": "Individual",
         }
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response_obj, expected_response)
 
 
 class OverviewTest(AuthzAPITestCase, ProjectTestCase):
-
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
@@ -54,7 +53,7 @@ class OverviewTest(AuthzAPITestCase, ProjectTestCase):
             dataset=self.dataset,
         )
         self.phenopacket_2 = ph_m.Phenopacket.objects.create(
-            id='phenopacket:2', subject=self.individual_2, meta_data=self.metadata_2
+            id="phenopacket:2", subject=self.individual_2, meta_data=self.metadata_2
         )
         self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
         self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1))
@@ -74,19 +73,19 @@ class OverviewTest(AuthzAPITestCase, ProjectTestCase):
         self.experiment.experiment_results.set([self.experiment_result])
 
     def test_search_overview(self):
-        payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
-        response = self.dt_authz_full_post(reverse('search-overview'), data=payload, content_type='application/json')
+        payload = json.dumps({"id": [ph_c.VALID_INDIVIDUAL_1["id"]]})
+        response = self.dt_authz_full_post(reverse("search-overview"), data=payload, content_type="application/json")
         response_obj = response.json()
-        phenopacket_res = response_obj['phenopacket']['data_type_specific']
+        phenopacket_res = response_obj["phenopacket"]["data_type_specific"]
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
-        self.assertEqual(phenopacket_res['biosamples']['count'], 1)
-        self.assertIn('wall of urinary bladder', phenopacket_res['biosamples']['sampled_tissue'])
-        self.assertIn('Proptosis', phenopacket_res['phenotypic_features']['type'])
-        self.assertIn(ph_c.VALID_DISEASE_1['term']['label'], phenopacket_res['diseases']['term'])
+        self.assertEqual(phenopacket_res["biosamples"]["count"], 1)
+        self.assertIn("wall of urinary bladder", phenopacket_res["biosamples"]["sampled_tissue"])
+        self.assertIn("Proptosis", phenopacket_res["phenotypic_features"]["type"])
+        self.assertIn(ph_c.VALID_DISEASE_1["term"]["label"], phenopacket_res["diseases"]["term"])
 
     def test_search_overview_forbidden(self):
-        payload = json.dumps({'id': [ph_c.VALID_INDIVIDUAL_1['id']]})
-        response = self.dt_authz_counts_post(reverse('search-overview'), data=payload, content_type='application/json')
+        payload = json.dumps({"id": [ph_c.VALID_INDIVIDUAL_1["id"]]})
+        response = self.dt_authz_counts_post(reverse("search-overview"), data=payload, content_type="application/json")
         # search overview should be forbidden with counts, since we have to be able to query by ID:
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
