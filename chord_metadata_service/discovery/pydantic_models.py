@@ -209,7 +209,12 @@ class DiscoverySearchFieldsResponse(BaseModel):
     sections: list[DiscoverySearchSectionWithOptions]
 
 
-class DiscoveryQueryFilterOneOf(BaseModel):
+class DiscoveryQueryFilterBase(BaseModel):
+    filter_type: Literal["one_of"]
+    negated: bool = False
+
+
+class DiscoveryQueryFilterOneOf(DiscoveryQueryFilterBase):
     filter_type: Literal["one_of"]  # really more like "one or more of" - essentially Boolean Or for filter values
     values: list[str] = Field(..., min_length=1)  # must have at least one value specified
 
@@ -243,6 +248,13 @@ class DiscoveryQuery(BaseModel):
         """
         return not self.fts and len(self.filters) == 0
 
+    @staticmethod
+    def _filter_query_param(qp: str):
+        # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and
+        #   the response yields an error, as they are (presumably) not queryable fields in the discovery config.
+        # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
+        return qp and qp not in ("project", "dataset") and qp[0] != "_"
+
     @classmethod
     def from_drf_request(cls, request: DrfRequest) -> "DiscoveryQuery":
         """
@@ -258,14 +270,16 @@ class DiscoveryQuery(BaseModel):
         # TODO: post JSON - directly validate with Pydantic
 
         # Process query parameters and check validity
-        filters: dict[str, str] = {
-            k: v[0] if isinstance(v, list) else v
-            for k, v in params.items()
-            if k and k not in ("project", "dataset") and k[0] != "_"
-            # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and
-            #   the response yields an error, as they are (presumably) not queryable fields in the discovery config.
-            # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
-        }
+        filters: dict[str, str | DiscoveryQueryFilterOneOf] = {}
+        for k in filter(cls._filter_query_param, params.keys()):
+            match len(v := params.getlist(k)):
+                case 0:
+                    pass  # ignore empty lists if these somehow occur
+                case 1:
+                    filters[k] = v
+                case _:
+                    # TODO: will we be able to support AllOf queries with GET, or just OneOf?
+                    filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
 
         return cls(fts=params.get("_fts", ""), fts_type=params.get("_fts_type") or "plain", filters=filters)
 

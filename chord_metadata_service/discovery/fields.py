@@ -500,6 +500,8 @@ async def filter_queryset_field_value(
         condition = queryset_field_single_value_condition(queryset_entity, field, field_props, value.values[0], subq)
         for v in value.values[1:]:
             condition |= queryset_field_single_value_condition(queryset_entity, field, field_props, v, subq)
+        if value.negated:
+            condition = ~condition
     else:
         condition = queryset_field_single_value_condition(queryset_entity, field, field_props, value, subq)
 
