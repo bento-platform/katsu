@@ -20,6 +20,7 @@ from .field_paths.django_field_query import DiscoveryFieldSubquery, get_field_dj
 from .scope import ValidatedDiscoveryScope
 from .pydantic_models import BinWithValue, BinList
 from .stats import stats_for_field
+from .utils import get_discovery_entity_model_scoped_queryset
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
 
@@ -237,15 +238,18 @@ async def get_range_stats(
             for floor, ceil, label in f_utils.labelled_range_generator(field_props)
         ]
 
-    queryset = (
-        queryset
+    # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the search
+    # queryset directly).
+    # TODO: cache IDs from search queryset?
+    stats_queryset = (
+        get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
 
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
-    async for item in queryset:
+    async for item in stats_queryset:
         stats[item["label"]] = thresholded_count(item["total"], scope, field_permissions)
 
     # All the bins between start and end must be represented and ordered
@@ -272,13 +276,18 @@ async def get_categorical_stats(
     """
     field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
+    # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the search
+    # queryset directly).
+    # TODO: cache IDs from search queryset?
+    stats_queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset)
+
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
     stats: Mapping[str, int] = await stats_for_field(
-        queryset, scope.discovery, field_name, field_permissions, add_missing=True, group_by=field_props.group_by
+        stats_queryset, scope.discovery, field_name, field_permissions, add_missing=True, group_by=field_props.group_by
     )
 
     # Enforce values order from config and apply policies
@@ -332,8 +341,13 @@ async def get_date_stats(
         raise NotImplementedError(msg)
 
     # Note: lexical sort works on ISO dates
-    queryset = (
-        queryset
+
+    # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the search
+    # queryset directly).
+    # TODO: cache IDs from search queryset?
+    stats_queryset = (
+        get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
+        .filter(pk__in=queryset)
         .values(field_name)
         .order_by(field_name)
         .annotate(total=Count(field_name))
@@ -343,7 +357,7 @@ async def get_date_stats(
     start: str | None = None
     end: str | None = None
     # Key the counts on yyyy-mm combination (aggregate same month counts)
-    async for item in queryset:
+    async for item in stats_queryset:
         key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
         stats[key] += item["total"]
 
@@ -427,10 +441,11 @@ async def filter_queryset_field_value(
             condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
 
     elif field_props.datatype == "number":
-        # values are of the form "[50, 150)", "< 50" or "≥ 800"
+        # values are of the form "[50, 150)", "< 50" or "≥ 800".
+        # important: custom bins can have decimals in them!
 
         if value.startswith("["):
-            [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
+            [start, end] = [f_utils.str_to_numeric(v) for v in value.lstrip("[").rstrip(")").split(", ")]
             if json_range_condition := f_utils.get_json_range_condition(queryset_entity, field_props, start, end):
                 # JSONField array range stats must use 'jsonb_path_exists' conditions
                 condition = json_range_condition
@@ -438,20 +453,21 @@ async def filter_queryset_field_value(
                 condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lt", end)), subquery)
         else:
             [sym, val] = value.split(" ")
+            val_numeric = f_utils.str_to_numeric(val)
             if sym == "≥":
                 if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, min=int(val)
+                    queryset_entity, field_props, min_value=val_numeric
                 ):
                     condition = json_range_condition
                 else:
-                    condition = get_condition_for_non_jsonb_field(field, (("gte", int(val)),), subquery)
+                    condition = get_condition_for_non_jsonb_field(field, (("gte", val_numeric),), subquery)
             elif sym == "<":
                 if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, max=int(val)
+                    queryset_entity, field_props, max_value=val_numeric
                 ):
                     condition = json_range_condition
                 else:
-                    condition = get_condition_for_non_jsonb_field(field, (("lt", int(val)),), subquery)
+                    condition = get_condition_for_non_jsonb_field(field, (("lt", val_numeric),), subquery)
             else:
                 raise NotImplementedError()
     elif field_props.datatype == "date":

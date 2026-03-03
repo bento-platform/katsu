@@ -1,4 +1,5 @@
 from django.apps import apps
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from django.db.models import JSONField
@@ -163,6 +164,13 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
 
     FHIR: Specimen
     """
+
+    class Meta:
+        indexes = [
+            GinIndex(name="sample_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="sample_description_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
+            BaseFTSModel.get_fts_extra_trgm_index("sample"),
+        ]
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -535,6 +543,10 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
+        ]
+        indexes = [
+            GinIndex(name="pheno_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
+            BaseFTSModel.get_fts_extra_trgm_index("pheno"),
         ]
 
     @property

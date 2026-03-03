@@ -87,18 +87,27 @@ def ingest_experiment(
         validate_experiment(experiment_data, lg, idx)
 
     new_experiment_id = experiment_data.get("id", str(uuid.uuid4()))
+    description = experiment_data.get("description")
     study_type = experiment_data.get("study_type")
     experiment_type = experiment_data["experiment_type"]
-    experiment_ontology = experiment_data.get("experiment_ontology", [])
+    experiment_ontology = experiment_data.get("experiment_ontology")
     molecule = experiment_data.get("molecule")
-    molecule_ontology = experiment_data.get("molecule_ontology", [])
+    molecule_ontology = experiment_data.get("molecule_ontology")
+    # library fields
     library_strategy = experiment_data.get("library_strategy")
     library_source = experiment_data.get("library_source")
     library_selection = experiment_data.get("library_selection")
     library_layout = experiment_data.get("library_layout")
+    library_id = experiment_data.get("library_id")
+    library_extract_id = experiment_data.get("library_extract_id")
+    insert_size = experiment_data.get("insert_size")
+    library_description = experiment_data.get("library_description")
+    # protocol fields
+    protocol_url = experiment_data.get("protocol_url")
     extraction_protocol = experiment_data.get("extraction_protocol")
     reference_registry_id = experiment_data.get("reference_registry_id")
     qc_flags = experiment_data.get("qc_flags", [])
+
     biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
     instrument = experiment_data.get("instrument", {})
@@ -123,6 +132,7 @@ def ingest_experiment(
     # create new experiment - create(...) calls save(...), which automatically populates fts_extra
     new_experiment = em.Experiment.objects.create(
         id=new_experiment_id,
+        description=description,
         study_type=study_type,
         experiment_type=experiment_type,
         experiment_ontology=experiment_ontology,
@@ -132,6 +142,11 @@ def ingest_experiment(
         library_source=library_source,
         library_selection=library_selection,
         library_layout=library_layout,
+        library_id=library_id,
+        library_extract_id=library_extract_id,
+        insert_size=insert_size,
+        protocol_url=protocol_url,
+        library_description=library_description,
         extraction_protocol=extraction_protocol,
         reference_registry_id=reference_registry_id,
         qc_flags=qc_flags,
@@ -152,7 +167,7 @@ def ingest_experiments_workflow(json_data, dataset_id: str, lg: BoundLogger) -> 
     lg = lg.bind(project_id=str(dataset.project_id), dataset_id=dataset_id)
 
     for rs in json_data.get("resources", []):
-        dataset.additional_resources.add(ingest_resource(rs))
+        dataset.additional_resources.add(ingest_resource(rs, lg))
 
     exps = json_data.get("experiments", [])
 

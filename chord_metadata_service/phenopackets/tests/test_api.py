@@ -257,11 +257,11 @@ class GetPhenopacketsApiTest(AuthzAPITestCase):
         """
         Create two datasets and ingest 1 phenopacket into each.
         """
-        p = Project.objects.create(title="Project 1", description="")
+        self.p = Project.objects.create(title="Project 1", description="")
         self.d = Dataset.objects.create(title="dataset_1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=p)
+                                        project=self.p)
         self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                         project=p)
+                                         project=self.p)
 
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             restapi_c.VALID_PHENOPACKET_1, self.d.identifier, logger)
@@ -291,6 +291,8 @@ class GetPhenopacketsApiTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data["results"]), 1)
+        self.assertEqual(response_data["results"][0]["project"], str(self.p.identifier))
+        self.assertEqual(response_data["results"][0]["dataset"], str(self.d.identifier))
 
     def test_get_phenopackets_with_valid_dataset_via_scope_no_access(self):
         """

@@ -1,3 +1,4 @@
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import CharField, JSONField
 from django.contrib.postgres.fields import ArrayField
@@ -11,7 +12,6 @@ from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
 from chord_metadata_service.restapi.validators import (
     ontology_validator,
-    ontology_list_validator,
     base_extra_properties_validator,
 )
 from chord_metadata_service.phenopackets.models import Biosample
@@ -37,13 +37,30 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     two Experiments, each of which was performed on a different Biosample.
     """
 
+    class Meta:
+        indexes = [
+            GinIndex(name="exp_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_desc_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_study_type_trgm_idx", fields=["study_type"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_experiment_type_trgm_idx", fields=["experiment_type"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_molecule_trgm_idx", fields=["molecule"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_lib_strategy_trgm_idx", fields=["library_strategy"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_lib_source_trgm_idx", fields=["library_source"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_lib_selection_trgm_idx", fields=["library_selection"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_lib_layout_trgm_idx", fields=["library_layout"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_lib_id_trgm_idx", fields=["library_id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_lib_extract_id_trgm_idx", fields=["library_extract_id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_extract_proto_trgm_idx", fields=["extraction_protocol"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_protocol_url_trgm_idx", fields=["protocol_url"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="exp_ref_registry_id_trgm_idx", fields=["reference_registry_id"], opclasses=["gin_trgm_ops"]),
+            BaseFTSModel.get_fts_extra_trgm_index("exp"),
+        ]
+
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
         return TOP_LEVEL_MODEL_SCOPE_FILTERS
 
-    id = CharField(
-        primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id")
-    )
+    id = CharField(primary_key=True, max_length=200, help_text=rec_help(d.EXPERIMENT, "id"))
     # STUDY TYPE
     # ["Whole Genome Sequencing","Metagenomics","Transcriptome Analysis","Resequencing","Epigenetics",
     # "Synthetic Genomics","Forensic or Paleo-genomics","Gene Regulation Study","Cancer Genomics",
@@ -55,13 +72,11 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "study_type"),
     )
     # TYPE
-    experiment_type = CharField(
-        max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type")
-    )
+    experiment_type = CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "experiment_type"))
     experiment_ontology = JSONField(
         blank=True,
-        default=list,
-        validators=[ontology_list_validator],
+        null=True,
+        validators=[ontology_validator],
         help_text=rec_help(d.EXPERIMENT, "experiment_ontology"),
     )
     # MOLECULE
@@ -73,8 +88,8 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     )
     molecule_ontology = JSONField(
         blank=True,
-        default=list,
-        validators=[ontology_list_validator],
+        null=True,
+        validators=[ontology_validator],
         help_text=rec_help(d.EXPERIMENT, "molecule_ontology"),
     )
     # LIBRARY
@@ -102,6 +117,13 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         null=True,
         help_text=rec_help(d.EXPERIMENT, "library_layout"),
     )
+    library_id = CharField(max_length=200, null=True, blank=True, help_text=rec_help(d.EXPERIMENT, "library_id"))
+    library_extract_id = CharField(
+        max_length=200, null=True, blank=True, help_text=rec_help(d.EXPERIMENT, "library_extract_id")
+    )
+    library_description = models.TextField(
+        null=True, blank=True, help_text=rec_help(d.EXPERIMENT, "library_description")
+    )
     extraction_protocol = CharField(
         max_length=200,
         blank=True,
@@ -118,6 +140,10 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         CharField(max_length=200, help_text=rec_help(d.EXPERIMENT, "qc_flags")),
         blank=True,
         default=list,
+    )
+    insert_size = models.IntegerField(null=True, blank=True, help_text=rec_help(d.EXPERIMENT, "insert_size"))
+    protocol_url = models.URLField(
+        max_length=500, null=True, blank=True, help_text=rec_help(d.EXPERIMENT, "protocol_url")
     )
     # SAMPLE
     biosample = models.ForeignKey(
@@ -152,6 +178,8 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "instrument"),
         related_name="experiments",
     )
+    # EXPERIMENT DESCRIPTION
+    description = models.TextField(blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "description"))
     # EXTRA
     extra_properties = JSONField(
         blank=True,
@@ -177,6 +205,20 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
 
 
 class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
+    class Meta:
+        indexes = [
+            GinIndex(name="expres_identifier_trgm_idx", fields=["identifier"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_description_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_filename_trgm_idx", fields=["filename"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_url_trgm_idx", fields=["url"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_asm_id_trgm_idx", fields=["genome_assembly_id"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_file_format_trgm_idx", fields=["file_format"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_data_output_trgm_idx", fields=["data_output_type"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_usage_trgm_idx", fields=["usage"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_creation_date_trgm_idx", fields=["creation_date"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_created_by_trgm_idx", fields=["created_by"], opclasses=["gin_trgm_ops"]),
+            BaseFTSModel.get_fts_extra_trgm_index("expres"),
+        ]
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:

@@ -162,6 +162,8 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
             Phenopacket.get_model_scoped_queryset(scope)
             .filter(subject=individual)
             .prefetch_related(*PHENOPACKET_PREFETCH)
+            .select_related(*PHENOPACKET_SELECT_REL)
+            .annotate(project=F("dataset__project_id"))
             .order_by("id")
         )
 

@@ -45,5 +45,6 @@ config.json
 # MacOS
 .DS_Store
 
+static/
 tmp/
 chord_metadata_service/vrs

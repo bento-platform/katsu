@@ -5,25 +5,21 @@
 
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
+
 EXPERIMENT = {
     "description": "Experiment related metadata.",
     "properties": {
         "id": "An arbitrary identifier for the experiment.",
+        "description": "Free-text experimental design description.",
         "study_type": "Which study type the experiment belongs to."
                       "E.g. Epigenomics, Proteomics, Metagenomics, Transcriptomics, Metabolomics.",
         "experiment_type": "(Controlled Vocabulary) The assay target (e.g. DNA Methylation, mRNA-Seq, smRNA-Seq, "
                            "Histone H3K4me1, etc.).",
-        "experiment_ontology": {
-            "description": "Links to experiment ontology information (e.g. via the OBI ontology.).",
-            "items": ontology_class("describing the experiment"),
-        },
+        "experiment_ontology":  ontology_class("describing the experiment, e.g., via the OBI ontology"),
         "molecule": "(Controlled Vocabulary) The type of molecule that was extracted from the biological material."
                     "Include one of the following: total RNA, polyA RNA, cytoplasmic RNA, nuclear RNA, small RNA, "
                     "genomic DNA, protein, or other.",
-        "molecule_ontology": {
-            "description": "Links to molecule ontology information (e.g. via the SO ontology.).",
-            "items": ontology_class("describing a molecular property"),
-        },
+        "molecule_ontology":  ontology_class("describing the molecule, e.g., via the OBI ontology"),
         "library_strategy": "(Controlled Vocabulary) The assay used. These are defined within the SRA metadata "
                             "specifications with a controlled vocabulary (e.g. Bisulfite-Seq, RNA-Seq, ChIP-Seq)."
                             " For a complete list, see https://www.ebi.ac.uk/ena/submit/reads-library-strategy.",
@@ -33,6 +29,11 @@ EXPERIMENT = {
         "library_selection": "Method used to enrich the target in the sequence library preparation. "
                              "E.g. Random, PCR, Random PCR, RT-PCR, MF and other.",
         "library_layout": "The library layout. E.g. Single, Paired.",
+        "library_id": "The identifier associated with the sequencing library.",
+        "library_description": "Specific free-text details about library construction.",
+        "library_extract_id": "Optional identifier for a given specific extraction.",
+        "insert_size": "The size of the DNA fragment inserted into the vector (Integer).",
+        "protocol_url": "URL to the sequencing protocol.",
         "extraction_protocol": "The protocol used to isolate the extract material.",
         "reference_registry_id": "The IHEC EpiRR ID for this dataset, only for IHEC Reference Epigenome datasets. "
                                  "Otherwise leave empty.",

@@ -422,7 +422,7 @@ def ingest_phenopacket(
     biosamples_db = [get_or_create_biosample(bs, lg) for bs in biosamples]
 
     # Get or create all resources (ontologies, etc.) in the phenopacket
-    resources_db = [ingest_resource(rs) for rs in resources]
+    resources_db = [ingest_resource(rs, lg) for rs in resources]
 
     interpretations_db = [
         get_or_create_interpretation(interp, subject=subject_obj, biosamples=biosamples_db)
@@ -436,6 +436,7 @@ def ingest_phenopacket(
         submitted_by=meta_data.get("submitted_by"),
         phenopacket_schema_version=meta_data.get("phenopacket_schema_version"),
         external_references=meta_data.get("external_references", []),
+        updates=meta_data.get("updates", []),
         extra_properties=remove_computed_properties(meta_data.get("extra_properties", {})),
     )
     meta_data_obj.save()
