@@ -39,8 +39,9 @@ TIME_INTERVAL = {
 }
 
 TIME_ELEMENT = {
-    "description": "This element intends to bundle all of the various ways of denoting time or age in phenopackets "
-    "schema.",
+    "description": (
+        "This element intends to bundle all of the various ways of denoting time or age in phenopackets schema."
+    ),
     "properties": {
         "gestational_age": GESTATIONAL_AGE,
         "age": AGE,

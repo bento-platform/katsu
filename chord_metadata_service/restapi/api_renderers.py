@@ -246,12 +246,14 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
                 "subject_id": phe["subject"]["id"] if phe.get("subject") else None,
                 "subject_sex": phe["subject"]["sex"] if phe.get("subject") else None,
                 "subject_taxonomy": phe["subject"]["taxonomy"]["label"] if phe.get("subject") else None,
-                "biosamples": "; ".join(
-                    (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
-                    for b in phe["biosamples"]
-                )
-                if phe.get("biosamples")
-                else None,
+                "biosamples": (
+                    "; ".join(
+                        (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
+                        for b in phe["biosamples"]
+                    )
+                    if phe.get("biosamples")
+                    else None
+                ),
                 "diseases": _render_csv_diseases(phe["diseases"]) if phe.get("diseases") else None,
                 "created_by": phe["meta_data"].get("created_by"),
                 "submitted_by": phe["meta_data"].get("submitted_by"),
