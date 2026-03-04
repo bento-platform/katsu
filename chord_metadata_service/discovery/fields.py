@@ -33,6 +33,10 @@ RANGE_PATTERN = re.compile(
 MIN_VALUE_PATTERN = re.compile(r"(?P<sym>[>≥]) (?P<val>-?\d+(\.\d+)?)")
 
 
+def is_number_query_format(value: str) -> bool:
+    return bool(MAX_VALUE_PATTERN.match(value) or RANGE_PATTERN.match(value) or MIN_VALUE_PATTERN.match(value))
+
+
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
     # computes a new column "binned" by substracting the modulo by bin size to
     # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)

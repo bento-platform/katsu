@@ -7,7 +7,7 @@ from structlog.stdlib import BoundLogger
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
-from .fields import get_field_options, filter_queryset_field_value
+from .fields import is_number_query_format, get_field_options, filter_queryset_field_value
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
@@ -51,6 +51,10 @@ async def validate_field_query_value(
         and not (
             # no restriction when enum is not set for categories
             field_props.datatype == "string" and field_props.config.enum is None  # narrowed type via datatype ==
+        )
+        and not (
+            # with query:data permissions, we can query ANY range of numbers
+            field_permissions.data and field_props.datatype == "number" and is_number_query_format(value)
         )
     ):
         raise ValidationError(f"Invalid value used in field query: {field_id}={value} ({repr(scope)})")
