@@ -401,7 +401,6 @@ async def discovery_search_fields(
     # ------------------------------------------------------------------------------------------------------------------
 
     queryset_entity: DiscoveryEntity = "phenopacket"
-    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
     # ------------------------------------------------------------------------------------------------------------------
 
