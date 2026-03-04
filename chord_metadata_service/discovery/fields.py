@@ -457,21 +457,13 @@ async def filter_queryset_field_value(
 
     # TODO: resolve schema including extra properties
 
-    if field_props.datatype in ("string", "ontology-class"):
+    if field_props.datatype == "string":
         if gb := field_props.group_by:
-            if field_props.datatype == "ontology-class":
-                # append `/id` to path to search by ontology class ID
-                gb = gb + "/id"
-
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
-            f = field
-            if field_props.datatype == "ontology-class":
-                # append __id to path to search by ontology class ID
-                f += "__id"
-            condition = get_condition_for_non_jsonb_field(f, (("iexact", value),), subquery)
+            condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
 
     elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800".

@@ -475,7 +475,7 @@ async def discovery_field_response(
     stats: BinList
 
     try:
-        if field_props.datatype in ("string", "ontology-class"):
+        if field_props.datatype == "string":
             stats = await get_categorical_stats(scope, field_entity, queryset, field_props.root, field_perms)
         elif field_props.datatype == "number":
             stats = await get_range_stats(scope, field_entity, queryset, field_props.root, field_perms)
