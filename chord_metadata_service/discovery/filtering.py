@@ -7,7 +7,7 @@ from structlog.stdlib import BoundLogger
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
-from .fields import is_number_query_format, get_field_options, filter_queryset_field_value
+from .fields import is_number_query_format, is_date_query_format, get_field_options, filter_queryset_field_value
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
 from .utils import get_discovery_field_set_permissions, empty_discovery
@@ -39,8 +39,13 @@ async def validate_field_query_value(
 
     field_props = scope.discovery.fields[field_id]
 
-    # Ensure the passed value is in our pre-determined array of options (or, if an {enum: null} string field, check that
-    # the passed value is in the database [above the censorship threshold as needed]):
+    # Validation for the field filter value:
+    #  - check it is in our pre-determined array of options
+    #  - or, if an {enum: null} string field, check that the passed value is in the database
+    #    [above the censorship threshold as needed]
+    #  - or, if the requester has query:data permissions, check that the passed value matches a valid format for the
+    #    field (a range query for a number or date)
+
     options = await get_field_options(queryset_entity, field_id, scope, field_permissions)
     if (
         value not in options
@@ -55,6 +60,10 @@ async def validate_field_query_value(
         and not (
             # with query:data permissions, we can query ANY range of numbers
             field_permissions.data and field_props.datatype == "number" and is_number_query_format(value)
+        )
+        and not (
+            # with query:data permissions, we can query ANY range of dates
+            field_permissions.data and field_props.datatype == "date" and is_date_query_format(value)
         )
     ):
         raise ValidationError(f"Invalid value used in field query: {field_id}={value} ({repr(scope)})")
