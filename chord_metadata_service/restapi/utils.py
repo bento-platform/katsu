@@ -27,12 +27,9 @@ FILENAME_REPLACE_PATTERN = re.compile(r"[\\/:*?\"<>|]")
 
 
 def camel_case_field_names(string) -> str:
-    """ Function to convert snake_case field names to camelCase """
+    """Function to convert snake_case field names to camelCase"""
     # Capitalize every part except the first
-    return "".join(
-        part.title() if i > 0 else part
-        for i, part in enumerate(string.split("_"))
-    )
+    return "".join(part.title() if i > 0 else part for i, part in enumerate(string.split("_")))
 
 
 # TODO: Typing: generics
@@ -46,10 +43,7 @@ def transform_keys(obj: Any) -> Any:
         return [transform_keys(i) for i in obj]
 
     if isinstance(obj, dict):
-        return {
-            camel_case_field_names(key): transform_keys(value)
-            for key, value in obj.items()
-        }
+        return {camel_case_field_names(key): transform_keys(value) for key, value in obj.items()}
 
     return obj
 
@@ -77,18 +71,14 @@ def get_biosamples_with_experiment_details(subject_ids):
     details of any associated experiment. If a biosample does not have an associated experiment, the experiment
     details are returned as None.
     """
-    biosamples_exp_tissue_details = (
-        Biosample.objects
-        .filter(phenopackets__subject_id__in=subject_ids)
-        .values(
-            subject_id=F("phenopackets__subject_id"),
-            biosample_id=F("id"),
-            experiment_id=F("experiments__id"),
-            experiment_type=F("experiments__experiment_type"),
-            study_type=F("experiments__study_type"),
-            tissue_id=F("sampled_tissue__id"),
-            tissue_label=F("sampled_tissue__label")
-        )
+    biosamples_exp_tissue_details = Biosample.objects.filter(phenopackets__subject_id__in=subject_ids).values(
+        subject_id=F("phenopackets__subject_id"),
+        biosample_id=F("id"),
+        experiment_id=F("experiments__id"),
+        experiment_type=F("experiments__experiment_type"),
+        study_type=F("experiments__study_type"),
+        tissue_id=F("sampled_tissue__id"),
+        tissue_label=F("sampled_tissue__label"),
     )
     return biosamples_exp_tissue_details
 
@@ -96,18 +86,17 @@ def get_biosamples_with_experiment_details(subject_ids):
 def build_experiments_by_subject(biosamples_experiments_details: list[dict]) -> dict[str, list[dict]]:
     experiments_with_biosamples = defaultdict(list)
     for b in biosamples_experiments_details:
-        experiments_with_biosamples[b["subject_id"]].append({
-            "biosample_id": b["biosample_id"],
-            "sampled_tissue": {
-                "id": b["tissue_id"],
-                "label": b["tissue_label"]
-            },
-            "experiment": {
-                "experiment_id": b["experiment_id"],
-                "experiment_type": b["experiment_type"],
-                "study_type": b["study_type"]
+        experiments_with_biosamples[b["subject_id"]].append(
+            {
+                "biosample_id": b["biosample_id"],
+                "sampled_tissue": {"id": b["tissue_id"], "label": b["tissue_label"]},
+                "experiment": {
+                    "experiment_id": b["experiment_id"],
+                    "experiment_type": b["experiment_type"],
+                    "study_type": b["study_type"],
+                },
             }
-        })
+        )
     return experiments_with_biosamples
 
 
@@ -121,7 +110,7 @@ def response_as_attachment(request: DrfRequest) -> bool:
 
 def attachment_content_disposition(filename: str) -> dict[str, str]:
     filename_safe = FILENAME_REPLACE_PATTERN.sub("_", filename)
-    return {"Content-Disposition": f"attachment; filename=\"{filename_safe}\""}
+    return {"Content-Disposition": f'attachment; filename="{filename_safe}"'}
 
 
 def response_optionally_as_attachment(request: DrfRequest, data, filename: str) -> Response:

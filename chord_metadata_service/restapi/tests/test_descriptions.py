@@ -3,15 +3,9 @@ from .. import description_utils as du
 
 
 TEST_SCHEMA_1 = {"type": "string"}
-TEST_SCHEMA_2 = {
-    "type": "array",
-    "items": {"type": "string"}
-}
+TEST_SCHEMA_2 = {"type": "array", "items": {"type": "string"}}
 
-TEST_HELP_2 = {
-    "description": "1",
-    "items": "2"
-}
+TEST_HELP_2 = {"description": "1", "items": "2"}
 
 
 class TestDescriptions(TestCase):

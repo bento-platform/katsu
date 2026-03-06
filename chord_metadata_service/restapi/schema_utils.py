@@ -38,11 +38,7 @@ __all__ = [
 
 DRAFT_07 = "http://json-schema.org/draft-07/schema#"
 
-SEARCH_DATABASE_JSONB = {
-    "database": {
-        "type": "jsonb"
-    }
-}
+SEARCH_DATABASE_JSONB = {"database": {"type": "jsonb"}}
 
 
 class SchemaTypes(Enum):
@@ -59,6 +55,7 @@ class SchemaStringFormats(Enum):
     Json-schema supported string formats as enums
     See: https://json-schema.org/understanding-json-schema/reference/string.html#format
     """
+
     DATE_TIME = "date-time"
     TIME = "time"
     DATE = "date"
@@ -106,7 +103,7 @@ def _searchable_field(operations: list[str], order: int, queryable: str = "all",
         "canNegate": True,
         "required": False,
         "order": order,
-        "type": "multiple" if multiple else "single"
+        "type": "multiple" if multiple else "single",
     }
 
 
@@ -115,14 +112,19 @@ def search_optional_eq(order: int, queryable: str = "all"):
 
 
 def search_optional_str(order: int, queryable: str = "all", multiple: bool = False):
-    return _searchable_field([
-        q.SEARCH_OP_EQ,
-        q.SEARCH_OP_ICO,
-        q.SEARCH_OP_IN,
-        q.SEARCH_OP_ISW,
-        q.SEARCH_OP_IEW,
-        q.SEARCH_OP_ILIKE,
-    ], order, queryable, multiple)
+    return _searchable_field(
+        [
+            q.SEARCH_OP_EQ,
+            q.SEARCH_OP_ICO,
+            q.SEARCH_OP_IN,
+            q.SEARCH_OP_ISW,
+            q.SEARCH_OP_IEW,
+            q.SEARCH_OP_ILIKE,
+        ],
+        order,
+        queryable,
+        multiple,
+    )
 
 
 def search_db_pk(model: models.Model):
@@ -132,10 +134,8 @@ def search_db_pk(model: models.Model):
     return {
         "search": {
             **search_optional_eq(0),
-            "database": {
-                "field": model._meta.pk.column
-            }
-        }
+            "database": {"field": model._meta.pk.column},
+        },
     }
 
 
@@ -145,7 +145,7 @@ def search_db_fk(type_: str, foreign_model: models.Model, field_name: str):
             "database": {
                 "relationship": {
                     "type": type_,
-                    "foreign_key": foreign_model._meta.get_field(field_name).column
+                    "foreign_key": foreign_model._meta.get_field(field_name).column,
                 }
             }
         }
@@ -156,8 +156,8 @@ def search_table_ref(model: models.Model):
     return {
         "database": {
             "primary_key": model._meta.pk.column,
-            "relation": model._meta.db_table
-        }
+            "relation": model._meta.db_table,
+        },
     }
 
 
@@ -177,19 +177,26 @@ def tag_schema_with_search_properties(schema, search_descriptions: dict | None):
     if schema["type"] == "object":
         return {
             **schema_with_search,
-            **({
-                "properties": {
-                    p: tag_schema_with_search_properties(s, search_descriptions["properties"].get(p))
-                    for p, s in schema["properties"].items()
+            **(
+                {
+                    "properties": {
+                        p: tag_schema_with_search_properties(s, search_descriptions["properties"].get(p))
+                        for p, s in schema["properties"].items()
+                    }
                 }
-            } if "properties" in schema and "properties" in search_descriptions else {})
+                if "properties" in schema and "properties" in search_descriptions
+                else {}
+            ),
         }
 
     if schema["type"] == "array":
         return {
             **schema_with_search,
-            **({"items": tag_schema_with_search_properties(schema["items"], search_descriptions["items"])}
-               if "items" in schema and "items" in search_descriptions else {})
+            **(
+                {"items": tag_schema_with_search_properties(schema["items"], search_descriptions["items"])}
+                if "items" in schema and "items" in search_descriptions
+                else {}
+            ),
         }
 
     return schema_with_search
@@ -203,25 +210,40 @@ def tag_schema_with_nested_ids(schema: dict, override_children: bool = False):
     schema_type = schema.get("type")
 
     if schema_type == "object":
-        return {
-            **schema,
-            "properties": {
-                k: tag_schema_with_nested_ids(
-                    schema={**v, "$id": f"{schema_id}/{k}"} if override_children or "$id" not in v else v,
-                    override_children=override_children
-                )
-                for k, v in schema["properties"].items()
-            },
-        } if "properties" in schema else schema
+        return (
+            {
+                **schema,
+                "properties": {
+                    k: tag_schema_with_nested_ids(
+                        schema={**v, "$id": f"{schema_id}/{k}"} if override_children or "$id" not in v else v,
+                        override_children=override_children,
+                    )
+                    for k, v in schema["properties"].items()
+                },
+            }
+            if "properties" in schema
+            else schema
+        )
 
     if schema_type == "array":
-        return {
-            **schema,
-            "items": tag_schema_with_nested_ids({
-                **schema["items"],
-                "$id": f"{schema_id}/item",
-            } if override_children or "$id" not in schema["items"] else schema["items"], override_children),
-        } if "items" in schema else schema
+        return (
+            {
+                **schema,
+                "items": tag_schema_with_nested_ids(
+                    (
+                        {
+                            **schema["items"],
+                            "$id": f"{schema_id}/item",
+                        }
+                        if override_children or "$id" not in schema["items"]
+                        else schema["items"]
+                    ),
+                    override_children,
+                ),
+            }
+            if "items" in schema
+            else schema
+        )
 
     # If nothing to tag, return itself (base case)
     return schema
@@ -237,9 +259,17 @@ def tag_ids_and_describe(schema: dict, descriptions: dict, override_children: bo
     return tag_schema_with_nested_ids(describe_schema(schema, descriptions), override_children)
 
 
-def customize_schema(first_typeof: dict, second_typeof: dict, first_property: str, second_property: str,
-                     schema_id: str = None, title: str = None, description: str = None,
-                     additional_properties: bool = False, required: list[str] = None) -> dict:
+def customize_schema(
+    first_typeof: dict,
+    second_typeof: dict,
+    first_property: str,
+    second_property: str,
+    schema_id: str = None,
+    title: str = None,
+    description: str = None,
+    additional_properties: bool = False,
+    required: list[str] = None,
+) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,
@@ -248,15 +278,21 @@ def customize_schema(first_typeof: dict, second_typeof: dict, first_property: st
         "type": "object",
         "properties": {
             first_property: first_typeof,
-            second_property: second_typeof
+            second_property: second_typeof,
         },
         "required": required or [],
-        "additionalProperties": additional_properties
+        "additionalProperties": additional_properties,
     }
 
 
-def make_object_schema(properties: dict, schema_id: str = None, title: str = None, description: str = None,
-                       additional_properties: bool = False, required: list[str] = None) -> dict:
+def make_object_schema(
+    properties: dict,
+    schema_id: str = None,
+    title: str = None,
+    description: str = None,
+    additional_properties: bool = False,
+    required: list[str] = None,
+) -> dict:
     return {
         "$schema": DRAFT_07,
         "$id": schema_id,
@@ -265,30 +301,27 @@ def make_object_schema(properties: dict, schema_id: str = None, title: str = Non
         "type": "object",
         "properties": properties,
         "required": required or [],
-        "additionalProperties": additional_properties
+        "additionalProperties": additional_properties,
     }
 
 
 def describe_schema_opt(schema: dict, description: str):
-    """ Optionally adds a description entry to a schema dict """
+    """Optionally adds a description entry to a schema dict"""
     if description:
-        return {
-            **schema,
-            "description": description
-        }
+        return {**schema, "description": description}
     else:
         return schema
 
 
 def validation_schema_list(schema):
-    """ Schema to validate JSON array values. """
+    """Schema to validate JSON array values."""
 
     return {
         "$schema": DRAFT_07,
         "$id": sub_schema_uri(base_uri, "schema_list"),
         "title": "Schema list",
         "type": "array",
-        "items": schema
+        "items": schema,
     }
 
 
@@ -297,18 +330,12 @@ def array_of(item, description=""):
     Simple array schema with items schema specified by argument.
     Use to simplify/shorthen json-schema writing.
     """
-    schema = {
-        "type": "array",
-        "items": item
-    }
+    schema = {"type": "array", "items": item}
     return describe_schema_opt(schema, description)
 
 
 def enum_of(values: list[str], description=""):
-    schema = {
-        "type": "string",
-        "enum": values
-    }
+    schema = {"type": "string", "enum": values}
     return describe_schema_opt(schema, description)
 
 
@@ -323,18 +350,12 @@ def string_with_pattern(pattern: str, description=""):
     """
     Creates a regex formated string schema
     """
-    schema = {
-        "type": "string",
-        "pattern": pattern
-    }
+    schema = {"type": "string", "pattern": pattern}
     return describe_schema_opt(schema, description)
 
 
 def string_with_format(format_: SchemaStringFormats, description=""):
-    schema = {
-        "type": "string",
-        "format": format_.value
-    }
+    schema = {"type": "string", "format": format_.value}
     return describe_schema_opt(schema, description)
 
 
@@ -344,10 +365,8 @@ def named_one_of(prop_name: str, prop_schema: dict):
     """
     return {
         "type": "object",
-        "properties": {
-            prop_name: prop_schema
-        },
-        "required": [prop_name]
+        "properties": {prop_name: prop_schema},
+        "required": [prop_name],
     }
 
 
@@ -379,25 +398,27 @@ def patch_project_schemas(
 
             patched_schema = {
                 **patched_schema,
-                "properties": {
-                    **patched_schema["properties"],
-                    "extra_properties": ext_schema["json_schema"]
-                },
-                "required": required
+                "properties": {**patched_schema["properties"], "extra_properties": ext_schema["json_schema"]},
+                "required": required,
             }
 
-        return {
-            **patched_schema,
-            "properties": {
-                k: patch_project_schemas(v, extension_schemas, logger)
-                for k, v in patched_schema["properties"].items()
+        return (
+            {
+                **patched_schema,
+                "properties": {
+                    k: patch_project_schemas(v, extension_schemas, logger)
+                    for k, v in patched_schema["properties"].items()
+                },
             }
-        } if "properties" in patched_schema else patched_schema
+            if "properties" in patched_schema
+            else patched_schema
+        )
 
     if patched_schema["type"] == "array":
-        return {
-            **patched_schema,
-            "items": patch_project_schemas(patched_schema["items"], extension_schemas, logger)
-        } if "items" in patched_schema else patched_schema
+        return (
+            {**patched_schema, "items": patch_project_schemas(patched_schema["items"], extension_schemas, logger)}
+            if "items" in patched_schema
+            else patched_schema
+        )
 
     return patched_schema
