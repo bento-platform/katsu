@@ -204,15 +204,14 @@ class Dataset(BaseProjectOrDataset):
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
 
+
 class DatasetV2(PydanticJSONBMixin, models.Model):
 
-    #TODO: Make langouage compound key
-
-    # Mixin configuration
+    # --- Mixin configuration ---
     COLUMN_FIELDS = {
-        'id',
+        'identifier',
         'schema_version',
-        'title', 
+        'title',
         'description',
         'release_date',
         'last_modified',
@@ -233,17 +232,16 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
         related_name="dv2"
     )
 
-    id = models.CharField(
+    identifier = models.CharField(
         max_length=128,
-        unique=True,
         db_index=True,
-        primary_key=True,
         help_text="If from PCGL, inherit. Otherwise created in Katsu.",
     )
 
-    @property
-    def identifier(self):
-        return self.id
+    language = models.CharField(
+        max_length=2,
+        db_index=True,
+    )
 
     title = models.CharField(max_length=512)
     description = models.TextField()
@@ -263,8 +261,18 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Compound key of id/language
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["identifier", "language"],
+                name="unique_dataset_identifier_per_language",
+            )
+        ]
+
     def __str__(self) -> str:
-        return f"{self.id}: {self.title}"
+        return f"{self.identifier}: {self.title}"
+
 
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
