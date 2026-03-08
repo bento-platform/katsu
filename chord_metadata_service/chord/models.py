@@ -271,7 +271,7 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.identifier}: {self.title}"
+        return f"{self.identifier}: {self.title} ({self.language})"
 
 
 class ProjectJsonSchema(models.Model):
