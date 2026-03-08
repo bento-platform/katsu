@@ -1,3 +1,4 @@
+from pydantic import ValidationError as PydValidationError
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import DatasetModel
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
