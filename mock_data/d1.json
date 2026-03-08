@@ -1,130 +1,196 @@
 {
-  "id": "pcgl-ds-001",
+  "id": "dataset-json-full-001",
+  "language": "en",
   "schema_version": "1.0",
-  "project": "ce2979e8-25d5-4716-aa67-fcf5bbcdba84",
-  "title": "Mock Genomic Variants Dataset for Rare Disease Research",
-  "description": "A synthetic dataset representing genomic variant observations collected for methodological testing in rare disease studies.",
+  "title": "Full Test Dataset from JSON",
+  "description": "A comprehensive dataset loaded from JSON fixture with all fields populated",
+  "long_description": {
+    "content": "<h1>Full Dataset Description</h1><p>This is a comprehensive test dataset with all fields populated.</p>",
+    "content_type": "text/html"
+  },
   "keywords": [
     "genomics",
-    "rare disease",
-    "variant analysis"
+    "cancer",
+    {"id": "HP:0001250", "label": "Seizure"},
+    {"id": "HP:0002664", "label": "Neoplasm"}
+  ],
+  "resources": [
+    {
+      "id": "hp",
+      "version": "2024-04-26",
+      "namespace_prefix": "HP",
+      "iri_prefix": "http://purl.obolibrary.org/obo/HP_",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "name": "Human Phenotype Ontology"
+    }
   ],
   "stakeholders": [
     {
-      "name": "Mock Research Institute",
-      "description": "A fictional research institute for testing metadata pipelines.",
-      "contact": {
-        "email": ["info@mockri.org"],
-        "address": "123 Science Ave, Test City, Testland",
-        "phone": {
-          "country_code": 1,
-          "number": 5551234567,
-          "extension": null
+      "type": "person",
+      "name": "Jane Doe",
+      "honorific": "Dr.",
+      "other_names": ["J. Doe", "Jane D."],
+      "location": "City, Country",
+      "affiliations": [
+        "Test University",
+        {
+          "type": "organization",
+          "name": "Research Institute",
+          "description": "A leading research institution",
+          "contact": {
+            "website": "https://research.org",
+            "email": ["contact@research.org"],
+            "address": "123 Research Ave, City, Country",
+            "phone": {
+              "country_code": 1,
+              "number": 5551234567
+            }
+          },
+          "location": "City, Country",
+          "roles": ["Research Center"]
         }
-      },
-      "roles": ["Institution", "Research Center"],
-      "grant_number": null
+      ],
+      "roles": ["Principal Investigator", "Researcher"]
     },
     {
-      "name": "Dr. Alice Nguyen",
-      "honorific": "Dr.",
-      "other_names": ["Alice T. Nguyen"],
-      "affiliations": ["Mock Research Institute"],
-      "roles": ["Principal Investigator", "Researcher"]
+      "type": "person",
+      "name": "John Smith",
+      "honorific": "Prof.",
+      "contact": {
+        "email": ["contact@research.org"],
+        "address": "123 Research Ave, City, Country",
+        "phone": {
+          "country_code": 1,
+          "number": 5551234567
+        }
+      },
+      "affiliations": ["Test University"],
+      "roles": ["Co-Investigator"]
     }
   ],
-  "spatial_coverage": "Canada",
-  "version": "0.1.0",
-  "privacy": "De-identified human genomic data",
+  "funding_sources": [
+    {
+      "funder": "National Science Foundation",
+      "grant_numbers": ["NSF-2024-001", "NSF-2024-002"]
+    },
+    {
+      "funder": "Jane Doe"
+    }
+  ],
+  "spatial_coverage": "New York City, USA",
+  "version": "2.1.0",
+  "privacy": "De-identified according to HIPAA Safe Harbor method",
   "license": {
     "label": "Creative Commons Attribution 4.0",
-    "type": "CC-BY-4.0",
+    "type": "CC BY 4.0",
     "url": "https://creativecommons.org/licenses/by/4.0/"
   },
   "counts": [
     {
-      "count_entity": "Participants",
-      "value": 250,
-      "description": "Number of enrolled study participants"
+      "count_entity": "participants",
+      "value": 1500,
+      "description": "Total number of study participants"
     },
     {
-      "count_entity": "Variants",
-      "value": 1250000,
-      "description": "Total number of observed genomic variants"
+      "count_entity": "samples",
+      "value": 3200,
+      "description": "Total number of biological samples collected"
     }
   ],
   "primary_contact": {
-    "name": "Dr. Alice Nguyen",
+    "type": "person",
+    "name": "Jane Doe",
     "honorific": "Dr.",
-    "other_names": [],
-    "affiliations": ["Mock Research Institute"],
+    "affiliations": ["Test University"],
     "roles": ["Principal Investigator"]
   },
   "links": [
     {
-      "label": "Data Management Plan",
-      "uri": "https://example.org/dmp/mock-genomics",
-      "type": "Data Management Plan"
+      "label": "Study Protocol",
+      "url": "https://example.org/protocol.pdf",
+      "type": "Downloadable Artifact"
     },
     {
-      "label": "Dataset Schema",
-      "uri": "https://example.org/schema/mock-genomics",
+      "label": "Data Dictionary",
+      "url": "https://example.org/data-dictionary",
       "type": "Schema"
+    },
+    {
+      "label": "Data Access",
+      "url": "https://data.example.org/access",
+      "type": "Data Access"
+    },
+    {
+      "label": "Download Portal",
+      "url": "https://portal.example.org/download",
+      "type": "Data Access"
     }
   ],
   "publications": [
     {
-      "title": "A Synthetic Benchmark for Rare Disease Variant Analysis",
-      "url": "https://doi.org/10.1234/mock.2025.001",
-      "doi": "10.1234/mock.2025.001",
+      "title": "Genomic Analysis of Cancer Patients",
+      "url": "https://doi.org/10.1234/example",
+      "doi": "10.1234/example",
       "publication_type": "Journal Article",
       "authors": [
         {
-          "name": "Dr. Alice Nguyen",
+          "type": "person",
+          "name": "Jane Doe",
           "honorific": "Dr.",
-          "other_names": [],
-          "affiliations": ["Mock Research Institute"],
-          "roles": ["Researcher"]
+          "affiliations": ["Test University"],
+          "roles": ["Principal Investigator"]
+        },
+        {
+          "type": "person",
+          "name": "John Smith",
+          "honorific": "Prof.",
+          "affiliations": ["Test University"],
+          "roles": ["Co-Investigator"]
         }
       ],
-      "publication_date": "2025-01-15",
+      "publication_date": "2023-06-15",
       "publication_venue": {
-        "name": "Journal of Synthetic Biomedical Data",
+        "name": "Journal of Genomics",
         "venue_type": "Journal",
-        "publisher": "Mock Science Press",
-        "location": "Online"
+        "publisher": "Academic Press",
+        "location": "New York"
       },
-      "description": "Describes the construction and validation of a synthetic genomic dataset."
+      "description": "Primary publication describing the study methodology and initial results"
     }
   ],
   "logos": [
     {
-      "url": "https://example.org/logos/mockri-default.png",
-      "theme": "default",
-      "description": "Default logo for Mock Research Institute"
+      "url": "https://example.org/logo-light.png",
+      "theme": "light",
+      "description": "Study logo for light backgrounds"
+    },
+    {
+      "url": "https://example.org/logo-dark.png",
+      "theme": "dark",
+      "description": "Study logo for dark backgrounds"
     }
   ],
-  "data_access_links": [
-    "https://example.org/data/mock-genomics/download"
-  ],
-  "release_date": "2025-02-01",
-  "last_modified": "2025-02-10",
+  "release_date": "2023-01-15",
+  "last_modified": "2024-06-01",
   "participant_criteria": [
     {
       "type": "Inclusion",
-      "description": "Participants diagnosed with a suspected rare genetic disorder"
+      "description": "Adults aged 18-65 with confirmed diagnosis"
     },
     {
       "type": "Exclusion",
-      "description": "Participants without informed consent"
+      "description": "Participants with prior treatment within 6 months"
     }
   ],
   "study_status": "ONGOING",
   "study_context": "RESEARCH",
-  "pcgl_domain": ["Genomics", "Rare Diseases"],
-  "pcgl_program_name": "PCGL Mock Program",
+  "pcgl_domain": ["Genomics", "Cancer Research"],
+  "pcgl_program_name": "National Cancer Genomics Program",
   "extra_properties": {
-    "synthetic": true,
-    "intended_use": "Testing and development only"
+    "institution_code": "TU-001",
+    "ethics_approval": "IRB-2022-456",
+    "recruitment_target": 2000,
+    "completion_rate": 0.75,
+    "data_sharing_allowed": true
   }
 }
