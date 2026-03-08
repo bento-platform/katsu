@@ -205,6 +205,9 @@ class Dataset(BaseProjectOrDataset):
         return f"{self.title} (ID: {self.identifier})"
 
 class DatasetV2(PydanticJSONBMixin, models.Model):
+
+    #TODO: Make langouage compound key
+
     # Mixin configuration
     COLUMN_FIELDS = {
         'id',
@@ -259,14 +262,6 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["id"]),
-            models.Index(fields=["release_date"]),
-            models.Index(fields=["last_modified"]),
-            models.Index(fields=["study_status", "study_context"]),
-        ]
 
     def __str__(self) -> str:
         return f"{self.id}: {self.title}"
