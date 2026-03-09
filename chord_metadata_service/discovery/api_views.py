@@ -500,9 +500,9 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
-async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCounts:
+async def discovery_queryset_entity_counts(qqs: QueryHelper) -> EntityCounts:
     """
-    Returns a dictionary of discovery entity counts for a given scope/query context (i.e., a given QueryQuerysetsCache
+    Returns a dictionary of discovery entity counts for a given scope/query context (i.e., a given QueryHelper
     instance). In other words, for each discovery entity, we'll get a queryset of the query executed on the entity and
     count the number of matching entities.
     """
@@ -528,7 +528,7 @@ async def discovery_queryset_entity_counts(qqs: QueryQuerysetsCache) -> EntityCo
 
 
 async def discovery_queryset_entity_counts_by_dataset(
-    qqs: QueryQuerysetsCache,
+    qqs: QueryHelper,
 ) -> dict[str, EntityCounts]:
     """
     Returns a dictionary of discovery entity counts grouped by dataset identifier for a given scope/query context.
@@ -622,7 +622,7 @@ async def get_censored_entity_counts(
     """
     query = query or EMPTY_DISCOVERY_QUERY
 
-    qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
+    qqs = QueryHelper(query, scope, dt_permissions, lg)
     counts = await discovery_queryset_entity_counts(qqs)
     censored = await censor_entity_counts(scope, counts, dt_permissions, lg)
 
@@ -694,9 +694,7 @@ async def discovery_endpoint(
 
     # Get both raw counts (for logging) and censored counts (for response)
     # Uses the same shared implementation as Project/Dataset serializers
-    counts, count_or_bools_res = await get_censored_entity_counts(
-        scope, dt_permissions, lg=lg, query=query, return_raw_counts=True
-    )
+    counts, count_or_bools_res = await qh.get_censored_entity_counts(return_raw_counts=True)
 
     # -- Per-dataset counts (permissions-dependent) -------------------------------------------------------------------
 
@@ -712,7 +710,7 @@ async def discovery_endpoint(
     if has_ds_level_counts_permission:
         # Raw per-dataset counts: dataset_id -> {entity -> count}
         counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(
-            qqs
+            qh
         )
 
         # Censor per-dataset counts using the same logic as for top-level counts
