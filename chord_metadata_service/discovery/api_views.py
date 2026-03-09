@@ -31,7 +31,7 @@ from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
 from .censorship import (
-    get_rules, thresholded_count,
+    get_rules,
     censor_entity_counts,
     censor_entity_counts_by_dataset,
     aggregate_counts_from_censored_by_dataset,
@@ -618,7 +618,7 @@ async def get_censored_entity_counts(
 
     Returns:
         If return_raw_counts=False: Dictionary mapping entities to censored counts (int) or booleans
-        If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict) 
+        If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)
     """
     query = query or EMPTY_DISCOVERY_QUERY
 
