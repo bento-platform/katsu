@@ -618,7 +618,7 @@ async def get_censored_entity_counts(
 
     Returns:
         If return_raw_counts=False: Dictionary mapping entities to censored counts (int) or booleans
-        If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)  
+        If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict) 
     """
     query = query or EMPTY_DISCOVERY_QUERY
 
