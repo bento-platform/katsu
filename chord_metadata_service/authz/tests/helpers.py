@@ -139,11 +139,15 @@ class AuthzAPITestCase(APITransactionTestCase):
     def dt_get(self, level: Literal["none", "bool", "counts", "full"], url: str, *args, **kwargs):
         with aioresponses() as m:
             self.mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
+            # Some endpoints make a second authz call for dataset-level permissions.
+            self.mock_authz_eval_result(m, self.dt_levels[level])
             return self.client.get(url, *args, **kwargs)
 
     def dt_post(self, level: Literal["none", "bool", "counts", "full"], url: str, *args, **kwargs):
         with aioresponses() as m:
             self.mock_authz_eval_result(m, self.dt_levels[level])  # data type permissions: bool, counts, data
+            # Some endpoints make a second authz call for dataset-level permissions.
+            self.mock_authz_eval_result(m, self.dt_levels[level])
             return self.client.post(url, *args, **kwargs)
 
     def dt_authz_none_get(self, url: str, *args, **kwargs):
