@@ -632,8 +632,6 @@ async def get_censored_entity_counts(
     return censored
 
 
-=======
->>>>>>> develop
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
 @inject_discovery_deps(empty_404=True)
