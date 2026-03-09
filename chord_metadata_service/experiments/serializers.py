@@ -9,7 +9,7 @@ __all__ = ["ExperimentSerializer", "ExperimentResultSerializer", "InstrumentSeri
 class ExperimentResultSerializer(GenericSerializer):
     class Meta:
         model = ExperimentResult
-        fields = "__all__"
+        exclude = ("fts_extra",)
 
 
 class InstrumentSerializer(GenericSerializer):
@@ -43,4 +43,4 @@ class ExperimentSerializer(GenericSerializer):
 
     class Meta:
         model = Experiment
-        fields = "__all__"
+        exclude = ("fts_extra",)

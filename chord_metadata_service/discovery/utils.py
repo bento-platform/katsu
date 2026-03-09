@@ -10,7 +10,7 @@ from chord_metadata_service.authz.types import (
 )
 from chord_metadata_service.chord.data_types import KatsuDataType
 
-from .fields_utils import normalize_field_path_true_model
+from .field_paths.normalize import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .scope import ValidatedDiscoveryScope
 

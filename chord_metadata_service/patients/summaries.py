@@ -20,7 +20,8 @@ async def individual_summary(
 ):
     individuals = (
         models.Individual.objects.all()
-        if phenopackets is None else models.Individual.objects.filter(phenopackets__in=phenopackets).distinct()
+        if phenopackets is None
+        else models.Individual.objects.filter(phenopackets__in=phenopackets).distinct()
     )
 
     individual_count, individual_sex, individual_k_sex, individual_age, individual_taxonomy = await asyncio.gather(

@@ -3,16 +3,19 @@ from chord_metadata_service.phenopackets.tests import constants as c
 from chord_metadata_service.phenopackets import models as m
 from chord_metadata_service.restapi.models import SchemaType
 
-from ..models import Individual
+from ..models import Individual, VitalStatus
 from ..filters import IndividualFilter
 
 
 class IndividualTest(ProjectTestCase):
-    """ Test module for Individual model """
+    """Test module for Individual model"""
 
     def setUp(self):
-        self.individual_one = Individual.objects.create(id='patient:1', sex='FEMALE')
-        self.individual_two = Individual.objects.create(id='patient:2', sex='FEMALE')
+        self.vs = VitalStatus.objects.create(status="ALIVE")
+        self.individual_one = Individual.objects.create(
+            id="patient:1", sex="FEMALE", vital_status=self.vs, extra_properties={"covid_severity": "Severe"}
+        )
+        self.individual_two = Individual.objects.create(id="patient:2", sex="FEMALE")
         self.diseases = [
             m.Disease.objects.create(**c.VALID_DISEASE_1),
             m.Disease.objects.create(**c.INVALID_DISEASE_2),
@@ -22,7 +25,7 @@ class IndividualTest(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual_one,
             meta_data=self.meta_data,
-            dataset=self.dataset
+            dataset=self.dataset,
         )
         self.phenopacket.diseases.set(self.diseases)
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
@@ -33,15 +36,19 @@ class IndividualTest(ProjectTestCase):
         )
 
     def test_individual(self):
-        individual_one = Individual.objects.get(id='patient:1')
-        individual_two = Individual.objects.get(id='patient:2')
-        self.assertEqual(individual_one.sex, 'FEMALE')
+        individual_one = Individual.objects.get(id="patient:1")
+        individual_two = Individual.objects.get(id="patient:2")
+        self.assertEqual(individual_one.sex, "FEMALE")
         number_of_pf_one = len(m.PhenotypicFeature.objects.filter(phenopacket__subject=individual_one))
         self.assertEqual(number_of_pf_one, 2)
         number_of_pf_two = len(m.PhenotypicFeature.objects.filter(phenopacket__subject=individual_two))
         self.assertEqual(number_of_pf_two, 0)
         self.assertEqual(individual_one.schema_type, SchemaType.INDIVIDUAL)
         self.assertEqual(individual_one.get_project_id(), self.project.identifier)
+
+        # FTS extra representations
+        self.assertEqual(individual_one.fts_extra, "ALIVE")
+        self.assertEqual(individual_two.fts_extra, "")
 
     def test_filtering(self):
         f = IndividualFilter()

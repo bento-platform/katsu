@@ -18,7 +18,7 @@ from bento_lib.discovery import DiscoveryConfig, load_discovery_config
 from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
 from structlog.stdlib import get_logger
-from urllib.parse import quote, urlparse
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 
 from .. import __version__
@@ -37,12 +37,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", '=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc')
+SECRET_KEY = os.environ.get("SERVICE_SECRET_KEY", "=p1@hhp5m4v0$c#eba3a+rx!$9-xk^q*7cb9(cd!wn1&_*osyc")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = str_to_bool(
-    os.environ.get("KATSU_DEBUG", os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true")))
-)
+DEBUG = str_to_bool(os.environ.get("KATSU_DEBUG", os.environ.get("BENTO_DEBUG", os.environ.get("CHORD_DEBUG", "true"))))
 
 
 # CHORD-specific settings
@@ -91,10 +89,7 @@ KATSU_PHENOPACKET_LABEL = os.getenv("KATSU_PHENOPACKET_LABEL", "Clinical Data")
 
 # Additional allowed hosts, comma-delimited (no spaces!)
 # Use HOST_CONTAINER_NAME as a separate value for backwards compatibility.
-ADDITIONAL_ALLOWED_HOSTS = [
-    v for v in os.environ.get("KATSU_ALLOWED_HOSTS", "").split(",")
-    if v.strip()
-]
+ADDITIONAL_ALLOWED_HOSTS = [v for v in os.environ.get("KATSU_ALLOWED_HOSTS", "").split(",") if v.strip()]
 if container_name := os.environ.get("HOST_CONTAINER_NAME", "").strip():
     ADDITIONAL_ALLOWED_HOSTS.append(container_name)
 
@@ -114,103 +109,99 @@ APPEND_SLASH = False
 
 SERVICE_TEMP = os.environ.get("KATSU_TEMP", os.environ.get("SERVICE_TEMP"))
 
-#  - DRS URL - by default in Bento Singularity context, use internal NGINX DRS (to avoid auth hassles)
-NGINX_INTERNAL_SOCKET = quote(os.environ.get("NGINX_INTERNAL_SOCKET", "/chord/tmp/nginx_internal.sock"), safe="")
-DRS_URL = os.environ.get("DRS_URL", f"http+unix://{NGINX_INTERNAL_SOCKET}/api/drs").strip().rstrip("/")
-
 # Application definition
 
-INSTALLED_APPS = (['daphne'] if os.environ.get('BENTO_CONTAINER_LOCAL') else []) + [
-    'dal',
-    'dal_select2',
-
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.gis',
-    'django.contrib.messages',
-    'django.contrib.sessions',
-    'django.contrib.staticfiles',
-    'django.contrib.postgres',
-
-    'chord_metadata_service.chord.apps.ChordConfig',
-    'chord_metadata_service.experiments.apps.ExperimentsConfig',
-    'chord_metadata_service.geo.apps.GeoConfig',
-    'chord_metadata_service.patients.apps.PatientsConfig',
-    'chord_metadata_service.phenopackets.apps.PhenopacketsConfig',
-    'chord_metadata_service.resources.apps.ResourcesConfig',
-    'chord_metadata_service.restapi.apps.RestapiConfig',
-
-    'corsheaders',
-    'django_filters',
-    'django_structlog',
-    'rest_framework',
-    'adrf',
-    'drf_spectacular',
+INSTALLED_APPS = (["daphne"] if os.environ.get("BENTO_CONTAINER_LOCAL") else []) + [
+    "dal",
+    "dal_select2",
+    # --- django.contrib --------------------------------------------------------------------------
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.gis",
+    "django.contrib.messages",
+    "django.contrib.sessions",
+    "django.contrib.staticfiles",
+    "django.contrib.postgres",
+    # --- katsu apps ------------------------------------------------------------------------------
+    "chord_metadata_service.chord.apps.ChordConfig",
+    "chord_metadata_service.experiments.apps.ExperimentsConfig",
+    "chord_metadata_service.geo.apps.GeoConfig",
+    "chord_metadata_service.patients.apps.PatientsConfig",
+    "chord_metadata_service.phenopackets.apps.PhenopacketsConfig",
+    "chord_metadata_service.resources.apps.ResourcesConfig",
+    "chord_metadata_service.restapi.apps.RestapiConfig",
+    # --- other third-party apps ------------------------------------------------------------------
+    "corsheaders",
+    "django_filters",
+    "django_structlog",
+    "rest_framework",
+    "adrf",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'chord_metadata_service.logger.access_middleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'chord_metadata_service.authz.middleware.AuthzMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "chord_metadata_service.logger.access_middleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "chord_metadata_service.authz.middleware.AuthzMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
 CORS_ALLOWED_ORIGINS = [orig.strip() for orig in os.environ.get("CORS_ORIGINS", "").split(";") if orig.strip()]
 CORS_ALLOW_CREDENTIALS = True
 CORS_PREFLIGHT_MAX_AGE = 0
 
-ROOT_URLCONF = 'chord_metadata_service.metadata.urls'
+ROOT_URLCONF = "chord_metadata_service.metadata.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-ASGI_APPLICATION = 'chord_metadata_service.metadata.asgi.application'
-WSGI_APPLICATION = 'chord_metadata_service.metadata.wsgi.application'
+ASGI_APPLICATION = "chord_metadata_service.metadata.asgi.application"
+WSGI_APPLICATION = "chord_metadata_service.metadata.wsgi.application"
 
 # Logging --------------------------------------------------------------------------------------------------------------
 
 LOG_LEVEL = os.environ.get("KATSU_LOG_LEVEL", "debug" if DEBUG else "info").lower()
 USE_JSON_LOGS: bool = str_to_bool(os.environ.get("BENTO_JSON_LOGS", str(not BENTO_CONTAINER_LOCAL)))
 
-_logging_propagate_to_root = {'handlers': [], 'propagate': True}
+_logging_propagate_to_root = {"handlers": [], "propagate": True}
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
+    "version": 1,
+    "disable_existing_loggers": False,
     # formatter + handler configured by configure_structlog(...) function below
-    'loggers': {
-        'asyncio': _logging_propagate_to_root,
-        'daphne': {
+    "loggers": {
+        "asyncio": _logging_propagate_to_root,
+        "daphne": {
             # suppress daphne's DEBUG log spam
-            'level': 'INFO',
+            "level": "INFO",
             **_logging_propagate_to_root,
         },
-        'daphne.server': _logging_propagate_to_root,
-        'django': _logging_propagate_to_root,
+        "daphne.server": _logging_propagate_to_root,
+        "django": _logging_propagate_to_root,
         # Log SQL queries to diagnose N+1 / other inefficient query issues when we're in debug mode:
-        **({'django.db.backends': {'level': 'DEBUG'}} if DEBUG else {}),
-        'django.request': _logging_propagate_to_root,
-        'django.channels.server': {'level': 'WARNING'},  # silence in favour of custom access middleware
-        'katsu': _logging_propagate_to_root
+        **({"django.db.backends": {"level": "DEBUG"}} if DEBUG else {}),
+        "django.request": _logging_propagate_to_root,
+        "django.channels.server": {"level": "WARNING"},  # silence in favour of custom access middleware
+        "katsu": _logging_propagate_to_root,
     },
 }
 
@@ -219,7 +210,7 @@ configure_structlog(USE_JSON_LOGS, LOG_LEVEL)
 configure_structlog_uvicorn()  # in production, if Katsu is served with Uvicorn, suppress its default access logging
 
 # if we are running the test suite, only log CRITICAL messages
-if len(sys.argv) > 1 and sys.argv[1] == 'test':
+if len(sys.argv) > 1 and sys.argv[1] == "test":
     logging.disable(logging.CRITICAL)
 
 settings_logger = get_logger("katsu.settings")
@@ -249,25 +240,25 @@ def get_secret(path):
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': "django.contrib.gis.db.backends.postgis",
-        'NAME': os.environ.get("POSTGRES_DATABASE", "metadata"),
-        'USER': os.environ.get("POSTGRES_USER", "admin"),
-        'PASSWORD': (
+    "default": {
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": os.environ.get("POSTGRES_DATABASE", "metadata"),
+        "USER": os.environ.get("POSTGRES_USER", "admin"),
+        "PASSWORD": (
             get_secret(os.environ["POSTGRES_PASSWORD_FILE"])
             if os.environ.get("POSTGRES_PASSWORD_FILE")
             else os.environ.get("POSTGRES_PASSWORD", "admin")
         ),
         # Use sockets if we're inside a CHORD container / as a priority
-        'HOST': os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
-        'PORT': os.environ.get("POSTGRES_PORT", "5432"),
+        "HOST": os.environ.get("POSTGRES_SOCKET_DIR", os.environ.get("POSTGRES_HOST", "localhost")),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }
 }
 
 # Django default cache
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
 
@@ -277,19 +268,19 @@ REST_FRAMEWORK = {
         "chord_metadata_service.restapi.api_renderers.PydanticJSONRenderer",
         "chord_metadata_service.restapi.api_renderers.PydanticBrowsableAPIRenderer",
     ),
-    'DEFAULT_PARSER_CLASSES': (
+    "DEFAULT_PARSER_CLASSES": (
         # allows serializers to use snake_case field names, but parse incoming data as camelCase
-        'djangorestframework_camel_case.parser.CamelCaseJSONParser',
-        'djangorestframework_camel_case.parser.CamelCaseFormParser',
-        'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+        "djangorestframework_camel_case.parser.CamelCaseFormParser",
+        "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
     ),
-    'DEFAULT_PERMISSION_CLASSES': ['chord_metadata_service.authz.permissions.BentoDeferToHandler'],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'EXCEPTION_HANDLER': 'chord_metadata_service.restapi.exception_handler.katsu_exception_handler',
-    'JSON_UNDERSCOREIZE': {
-        'no_underscore_before_number': True
-    }
+    "DEFAULT_PERMISSION_CLASSES": ["chord_metadata_service.authz.permissions.BentoDeferToHandler"],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "EXCEPTION_HANDLER": "chord_metadata_service.restapi.exception_handler.katsu_exception_handler",
+    "JSON_UNDERSCOREIZE": {
+        "no_underscore_before_number": True,
+    },
 }
 
 # Password validation
@@ -297,31 +288,31 @@ REST_FRAMEWORK = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 
-AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend'] if DEBUG else []
+AUTHENTICATION_BACKENDS = ["django.contrib.auth.backends.ModelBackend"] if DEBUG else []
 
 # Models
-DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -333,53 +324,54 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
 # Cache time constant
-CACHE_TIME = int(os.getenv('CACHE_TIME', 60 * 60 * 2))
+CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
 
 # Settings related to the Public APIs
 
 # Read instance-specific config.json that contains chart and search field definitions:
 #  - By default, set to an empty discovery configuration with no fields and maximally restrictive count rules:
 CONFIG_PUBLIC: DiscoveryConfig = DiscoveryConfig()
-if os.path.isfile(config_path := os.path.join(BASE_DIR, 'config.json')):
+if os.path.isfile(config_path := os.path.join(BASE_DIR, "config.json")):
     CONFIG_PUBLIC, _ = load_discovery_config(config_path, settings_logger)
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Metadata Service API',
-    'DESCRIPTION': ('Metadata Service provides a phenotypic description of an '
-                    'Individual in the context of biomedical research.'),
-    'VERSION': __version__,
-    'SERVE_INCLUDE_SCHEMA': False,
+    "TITLE": "Metadata Service API",
+    "DESCRIPTION": (
+        "Metadata Service provides a phenotypic description of an Individual in the context of biomedical research."
+    ),
+    "VERSION": __version__,
+    "SERVE_INCLUDE_SCHEMA": False,
     # Filter out the url patterns we don't want documented
-    'PREPROCESSING_HOOKS': ['chord_metadata_service.metadata.hooks.preprocessing_filter_path'],
+    "PREPROCESSING_HOOKS": ["chord_metadata_service.metadata.hooks.preprocessing_filter_path"],
     # Split components into request and response parts where appropriate
-    'COMPONENT_SPLIT_REQUEST': True,
+    "COMPONENT_SPLIT_REQUEST": True,
     # Aid client generator targets that have trouble with read-only properties.
-    'COMPONENT_NO_READ_ONLY_REQUIRED': True,
+    "COMPONENT_NO_READ_ONLY_REQUIRED": True,
     # Create separate components for PATCH endpoints (without required list)
-    'COMPONENT_SPLIT_PATCH': True,
+    "COMPONENT_SPLIT_PATCH": True,
     # Adds "blank" and "null" enum choices where appropriate. disable on client generation issues
-    'ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE': True,
+    "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": True,
     # Determines if and how free-form 'additionalProperties' should be emitted in the schema. Some
     # code generator targets are sensitive to this. None disables generic 'additionalProperties'.
     # allowed values are 'dict', 'bool', None
-    'GENERIC_ADDITIONAL_PROPERTIES': 'dict',
+    "GENERIC_ADDITIONAL_PROPERTIES": "dict",
     # Determines whether operation parameters should be sorted alphanumerically or just in
     # the order they arrived. Accepts either True, False, or a callable for sort's key arg.
-    'SORT_OPERATION_PARAMETERS': False,
+    "SORT_OPERATION_PARAMETERS": False,
     # modify and override the SwaggerUI template
-    'SWAGGER_UI_SETTINGS': {
-        'docExpansion': 'none',  # collapse all endpoints by default
-        'supportedSubmitMethods': ['get', 'put', 'post', 'delete', 'patch'] if DEBUG else ['get'],  # readonly in prod
-    }
+    "SWAGGER_UI_SETTINGS": {
+        "docExpansion": "none",  # collapse all endpoints by default
+        "supportedSubmitMethods": ["get", "put", "post", "delete", "patch"] if DEBUG else ["get"],  # readonly in prod
+    },
 }
 
 # SPECTACULAR_SETTINGS['SERVERS'] defines the url to which calls are made when
 # testing a request within the swagger UI
-if CHORD_URL:
-    SPECTACULAR_SETTINGS['SERVERS'] = [{'url': CHORD_URL + FORCE_SCRIPT_NAME}]
+if SERVICE_URL_BASE_PATH:
+    SPECTACULAR_SETTINGS["SERVERS"] = [{"url": SERVICE_URL_BASE_PATH}]
 
 # ----------------------------------------------------------------------------------------------------------------------
 

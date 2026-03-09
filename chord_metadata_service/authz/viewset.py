@@ -69,11 +69,12 @@ class BentoAuthzScopedModelViewSet(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    BentoAuthzScopedModelGenericListViewSet
+    BentoAuthzScopedModelGenericListViewSet,
 ):
     """
     This class is equivalent to the DRF viewsets.ModelViewSet class, except with our BentoAuthzModelGenericViewSet
     replacing the base viewsets.GenericViewSet. In this way, we get all the scoping / permissions helper functions.
     Security note: Subclasses MUST implement a get_queryset(...) which returns a model-scoped queryset!
     """
+
     pass

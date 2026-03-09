@@ -1,11 +1,12 @@
 import abc
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
-from pydantic import BaseModel, Field, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
-from typing import TypeAlias
+from typing import Literal
 
-from .types import EntityCountOrBoolResponse
+from chord_metadata_service.experiments.types import ExperimentResultFileFormat
+from .types import EntityCountOrBoolResponse, FTSType
 
 __all__ = [
     "BinWithValue",
@@ -14,6 +15,8 @@ __all__ = [
     "DiscoveryFieldResponse",
     "DiscoveryFieldResponses",
     "BaseMatchModel",
+    "ExperimentResultIndex",
+    "ExperimentResultIndices",
     "MatchExperimentResult",
     "MatchExperiment",
     "MatchBiosample",
@@ -32,6 +35,8 @@ __all__ = [
 
 
 class BinWithValue(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     label: str
     value: int
 
@@ -49,6 +54,8 @@ class BaseDiscoveryResolvedField(BaseModel):
 
 
 class DiscoveryFieldAndOptions(BaseDiscoveryResolvedField):
+    model_config = ConfigDict(frozen=True)
+
     # field ID + field definition + field filter options
     options: list[str]
 
@@ -67,15 +74,43 @@ class BaseMatchModel(BaseModel, abc.ABC):
     dataset: str | None = Field(default=None, title="Dataset ID")
 
 
+class ExperimentResultIndex(BaseModel):
+    url: str
+    format: Literal[
+        "BAI",  # BAM index files ( http://samtools.github.io/hts-specs/SAMv1.pdf "BAI" )
+        "BGZF",  # BGZip index files (often .gzi)
+        "CRAI",  # CRAM index files ( https://samtools.github.io/hts-specs/CRAMv3.pdf "CRAM index" )
+        "CSI",  # See http://samtools.github.io/hts-specs/CSIv1.pdf
+        "TABIX",  # See https://samtools.github.io/hts-specs/tabix.pdf
+        "TRIBBLE",
+    ]
+
+
+class ExperimentResultIndices(RootModel):
+    root: list[ExperimentResultIndex]
+
+
+# TODO: just merge this with the main serializer; there's no point in returning a subset -- possibly via drf-pydantic
 class MatchExperimentResult(BaseMatchModel):
     id: int = Field(..., title="Experiment result ID")
-    # TODO: experiments backlink
+    identifier: str = Field(..., title="Experiment result laboratory identifier")
+    description: str = Field(..., title="Description")
     filename: str | None = Field(..., title="File name")
     url: str | None = Field(..., title="URL")
-    # list of experiment_result_file_index objects (see experiments/schemas.py)
-    indices: list[dict] = Field(..., title="Indices")
-    file_format: str | None = Field(..., title="File format")
-    assembly_id: str | None = Field(..., title="Genome assembly ID")
+    indices: ExperimentResultIndices = Field(..., title="Indices")
+    file_format: ExperimentResultFileFormat | None = Field(..., title="File format")
+    data_output_type: Literal["Raw data", "Derived data"] | None = Field(..., title="Data output type")
+    usage: str | None = Field(..., title="Usage")
+    creation_date: str | None = Field(..., title="Creation date")
+    created_by: str | None = Field(..., title="Created by")
+    genome_assembly_id: str | None = Field(..., title="Genome assembly ID")
+    extra_properties: dict = Field(..., title="Extra properties")
+    # backlinks to linked experiments
+    experiments: list[str] = Field(
+        ..., title="Experiment IDs", description="Experiments which link to this experiment result."
+    )
+    # backlink to phenopacket
+    phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 
 class MatchExperiment(BaseMatchModel):
@@ -83,8 +118,12 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
-    study_type: str
+    experiment_type: str = Field(..., title="Experiment Type")
+    study_type: str = Field(..., title="Study Type")
     results: list[MatchExperimentResult]
+    # backlinks:
+    biosample: str | None = Field(..., title="Biosample ID")
+    phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 
 class MatchBiosample(BaseMatchModel):
@@ -94,6 +133,7 @@ class MatchBiosample(BaseMatchModel):
     id: str = Field(..., title="Biosample ID")
     # sampled_tissue: OntologyTerm | None
     # sample_type: OntologyTerm | None
+    individual_id: str | None = Field(..., title="Individual ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
     experiments: list[MatchExperiment] | None
 
@@ -115,7 +155,7 @@ class MatchIndividual(BaseMatchModel):
     phenopackets: list[MatchPhenopacket]
 
 
-MatchObject: TypeAlias = (
+type MatchObject = (
     list[MatchPhenopacket] |
     list[MatchIndividual] |
     list[MatchBiosample] |
@@ -129,6 +169,8 @@ class DiscoveryMatches(RootModel):
 
 
 class DiscoveryPagination(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     page: int
     page_size: int
     total: int  # total count of matches, whichever output format is chosen
@@ -173,11 +215,26 @@ class DiscoveryQuery(BaseModel):
     from query parameters minus project/dataset, but this could be extended in the future.
     """
 
-    fts: str | None
-    filters: dict[str, str]
+    # Full text search query + search type. We cap the maximum FTS query length to something reasonable to prevent
+    # unlimited-length queries taking up too much memory with any caching we may do. A blank value for `fts` means no
+    # FTS query will be executed.
+    # See:
+    #  - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
+    #  - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
+    fts: str = Field(default="", title="Full-text search query", max_length=256)
+    fts_type: FTSType = Field(default="plain", title="Full-text search query type")
+
+    # Filter query parameters. Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
+    filters: dict[str, str] = Field(default_factory=dict, title="Filters")
 
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
+
+    def is_empty(self) -> bool:
+        """
+        Returns whether the query instance is equivalent to an empty query.
+        """
+        return not self.fts and len(self.filters) == 0
 
     @classmethod
     def from_drf_request(cls, request: DrfRequest) -> "DiscoveryQuery":
@@ -201,7 +258,7 @@ class DiscoveryQuery(BaseModel):
             # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
         }
 
-        return cls(fts=params.get("_fts") or None, filters=filters)
+        return cls(fts=params.get("_fts", ""), fts_type=params.get("_fts_type") or "plain", filters=filters)
 
 
 class DiscoveryUIHintsResponse(BaseModel):
@@ -210,5 +267,7 @@ class DiscoveryUIHintsResponse(BaseModel):
     make the UI nicer by, e.g., selectively hiding parts.
     """
 
-    entities_with_data: list[DiscoveryEntity]
+    model_config = ConfigDict(frozen=True)
+
+    entities_with_data: frozenset[DiscoveryEntity]
     # biosample_location_present: bool  TODO

@@ -5,18 +5,28 @@ their corresponding entities, but rather are subsets right now.
 Since we have pagination, though, we should probably fetch full record details in a future version - TODO
 """
 
+from __future__ import annotations
+
 from bento_lib.discovery import DiscoveryEntity
-from django.db.models import Manager
-from typing import Awaitable, Callable, Type, TypeVar, TypedDict
+from django.db.models import QuerySet, Manager
+from typing import Awaitable, Callable, Type, TypeVar, TypedDict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django.db.models.fields.related_descriptors import ManyRelatedManager, RelatedManager
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions
 from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments import models as em
-from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.restapi import api_renderers as apir
 
-from .pydantic_models import MatchBiosample, MatchExperiment, MatchExperimentResult, MatchPhenopacket, MatchIndividual
+from .pydantic_models import (
+    MatchBiosample,
+    MatchExperiment,
+    ExperimentResultIndices,
+    MatchExperimentResult,
+    MatchPhenopacket,
+    MatchIndividual,
+)
 from .scope import ValidatedDiscoveryScope
 
 __all__ = [
@@ -32,12 +42,26 @@ __all__ = [
 T = TypeVar("T")
 
 
-async def list_or_manager_to_list(x: list[T] | Manager) -> list[T]:
+async def queryset_or_related_manager_to_list(
+    qs: QuerySet | ManyRelatedManager | RelatedManager,
+    prefetch: tuple[str, ...] = (),
+    select_related: tuple[str, ...] = (),
+) -> list[T]:
     """
-    Given an object which is either a list of T or an instance of a T manager in an async Django DB context,
+    Given an object which is either a QuerySet of T or an instance of a T manager in an async Django DB context,
     return a list[T].
     """
-    return x if isinstance(x, list) else [y async for y in x.all()]
+
+    if isinstance(qs, Manager):
+        qs = qs.all()
+
+    if prefetch:
+        qs = qs.prefetch_related(*prefetch)
+
+    if select_related:
+        qs = qs.select_related(*select_related)
+
+    return [y async for y in qs]
 
 
 class MatchContext(TypedDict, total=False):
@@ -48,7 +72,7 @@ class MatchContext(TypedDict, total=False):
 
 
 async def experiment_result_matches(
-    mrm,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     _dt_permissions,
     root: bool,
@@ -56,23 +80,40 @@ async def experiment_result_matches(
 ) -> list[MatchExperimentResult]:
     res: list[MatchExperimentResult] = []
     er: em.ExperimentResult
-    async for er in mrm.all():
+    for er in await queryset_or_related_manager_to_list(
+        mrm, prefetch=("experiments", "experiments__dataset", "experiments__biosample__phenopackets")
+    ):
         # noinspection PyUnresolvedReferences
+        first_exp = await (
+            er.experiments.select_related("biosample", "dataset").prefetch_related("biosample__phenopackets").afirst()
+        )
+        # TODO: n+1?
+        phenopacket = (await first_exp.biosample.phenopackets.afirst()) if first_exp and first_exp.biosample else None
+
         res.append(
             MatchExperimentResult(
                 id=er.id,
+                identifier=er.identifier,  # TODO: cleanup this across Katsu
+                description=er.description or "",  # TODO: clean up null vs blank?
                 filename=er.filename,
                 url=er.url,
-                indices=er.indices,
+                indices=ExperimentResultIndices.model_validate(er.indices),
+                genome_assembly_id=er.genome_assembly_id,
                 file_format=er.file_format,
-                assembly_id=er.genome_assembly_id,
+                data_output_type=er.data_output_type,
+                usage=er.usage,
+                creation_date=er.creation_date,
+                created_by=er.created_by,
+                extra_properties=er.extra_properties,
+                # ------------------------------------------------------------------------------------------------------
+                experiments=[v async for v in er.experiments.values_list("id", flat=True)],
+                phenopacket=ctx.get("phenopacket") or (phenopacket.id if phenopacket else None),
+                # ------------------------------------------------------------------------------------------------------
                 **(
                     dict(
-                        project=scope.project_id or str(
-                            (await er.experiments.prefetch_related("dataset").afirst()).dataset.project_id
-                        ),  # TODO: n+1?
+                        project=scope.project_id or (str(first_exp.dataset.project_id) if first_exp else None),
                         # TODO: have a foreign key to dataset directly to not have to do so many lookups
-                        dataset=scope.dataset_id or str((await er.experiments.afirst()).dataset_id),  # TODO: n+1?
+                        dataset=scope.dataset_id or (str(first_exp.dataset_id) if first_exp else None),
                     )
                     if root else dict()
                 ),
@@ -82,22 +123,36 @@ async def experiment_result_matches(
 
 
 async def experiment_matches(
-    mrm: list[em.Experiment] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
     ctx: MatchContext,
 ) -> list[MatchExperiment]:
     res: list[MatchExperiment] = []
-    for exp in await list_or_manager_to_list(mrm):
+    for exp in await queryset_or_related_manager_to_list(
+        mrm, select_related=("biosample",), prefetch=("biosample__phenopackets",)
+    ):
         # TODO: right now, experiment results are not filtered even if a query is executed on them.
+        phenopacket = (await exp.biosample.phenopackets.afirst()) if exp.biosample else None  # TODO: n+1?
+        experiment_results = await experiment_result_matches(
+            exp.experiment_results,
+            scope,
+            dt_permissions,
+            False,
+            {**ctx, "phenopacket": phenopacket.id if phenopacket else None, "experiment": str(exp.id)},
+        )
+        experiment_results.sort(key=lambda er: er.id)
         res.append(
             MatchExperiment(
                 id=str(exp.id),
+                experiment_type=exp.experiment_type,
                 study_type=exp.study_type,
-                results=await experiment_result_matches(
-                    exp.experiment_results, scope, dt_permissions, False, {**ctx, "experiment": str(exp.id)}
-                ),
+                results=experiment_results,
+                # ------------------------------------------------------------------------------------------------------
+                biosample=str(exp.biosample.id) if exp.biosample else None,
+                phenopacket=str(phenopacket.id) if phenopacket else None,
+                # ------------------------------------------------------------------------------------------------------
                 **(dict(
                     project=scope.project_id or str(exp.dataset.project_id),
                     dataset=scope.dataset_id or str(exp.dataset_id)
@@ -108,37 +163,40 @@ async def experiment_matches(
 
 
 async def biosample_matches(
-    mrm: list[pm.Biosample] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
     ctx: MatchContext,
 ) -> list[MatchBiosample]:
     res: list[MatchBiosample] = []
-    for b in await list_or_manager_to_list(mrm):
+    for b in await queryset_or_related_manager_to_list(mrm):
         p = (ctx or {}).get("phenopacket")
         ds = scope.dataset_id
         if not p and (p_obj := await b.phenopackets.afirst()):
             p = str(p_obj.id)
             ds = str(p_obj.dataset_id)
 
+        # TODO: prefetch all the time, even when not filtering?
+        experiments = (
+            await experiment_matches(
+                getattr(b, "experiment_matches", b.experiments),
+                scope,
+                dt_permissions,
+                False,
+                {**ctx, "biosample": str(b.id)},
+            )
+        ) if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
+
+        if experiments:
+            experiments.sort(key=lambda e: e.id)
+
         res.append(
             MatchBiosample(
                 id=str(b.id),
+                individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
-                experiments=(
-                    # TODO: prefetch all the time, even when not filtering?
-                    (
-                        await experiment_matches(
-                            getattr(b, "experiment_matches", b.experiments),
-                            scope,
-                            dt_permissions,
-                            False,
-                            {**ctx, "biosample": str(b.id)},
-                        )
-                    )
-                    if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
-                ),
+                experiments=experiments,
                 **(dict(project=scope.project_id, dataset=ds) if root else dict()),
             )
         )
@@ -146,7 +204,7 @@ async def biosample_matches(
 
 
 async def phenopacket_matches(
-    mrm: list[pm.Phenopacket] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
@@ -154,11 +212,12 @@ async def phenopacket_matches(
 ) -> list[MatchPhenopacket]:
     res: list[MatchPhenopacket] = []
 
-    for phe in await list_or_manager_to_list(mrm):
+    for phe in await queryset_or_related_manager_to_list(mrm, select_related=("dataset",)):
         phe_id = str(phe.id)
         s_id = phe.subject_id
         # TODO: prefetch all the time, even when not filtering.
         # TODO: return both all biosamples and matching biosamples?
+
         biosamples = await biosample_matches(
             getattr(phe, "biosample_matches", phe.biosamples),
             scope,
@@ -166,6 +225,8 @@ async def phenopacket_matches(
             False,
             {**ctx, "phenopacket": phe_id},
         )
+        biosamples.sort(key=lambda b: b.id)
+
         res.append(
             MatchPhenopacket(
                 id=phe_id,
@@ -184,7 +245,7 @@ async def phenopacket_matches(
 
 
 async def individual_matches(
-    mrm: list[Individual] | Manager,
+    mrm: QuerySet,
     scope: ValidatedDiscoveryScope,
     dt_permissions: DataTypeDiscoveryPermissions,
     root: bool,
@@ -192,7 +253,7 @@ async def individual_matches(
 ) -> list[MatchIndividual]:
     res: list[MatchIndividual] = []
 
-    for ind in await list_or_manager_to_list(mrm):
+    for ind in await queryset_or_related_manager_to_list(mrm, prefetch=("phenopackets__dataset",)):
         ind_id = str(ind.id)
         # TODO: prefetch all the time, even when not filtering.
         # TODO: return both all phenopackets and matching phenopackets?
@@ -204,7 +265,7 @@ async def individual_matches(
             {**ctx, "individual": ind_id},
         )
 
-        first_phenopacket = await ind.phenopackets.prefetch_related("dataset").afirst()
+        first_phenopacket = await ind.phenopackets.get_queryset().select_related("dataset").afirst()
 
         res.append(
             MatchIndividual(
@@ -214,7 +275,7 @@ async def individual_matches(
                     dict(
                         # TODO: put this on Individual itself, i.e., link individual with project/dataset?
                         project=scope.project_id or (
-                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset else None
+                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None
                         ),
                         dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
                     ) if root else dict()
@@ -228,7 +289,7 @@ async def individual_matches(
 DISCOVERY_ENTITY_TO_MATCH_FN: dict[
     DiscoveryEntity,
     Callable[
-        [list | Manager, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, bool, MatchContext],
+        [QuerySet, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, bool, MatchContext],
         Awaitable[list]
     ]
 ] = {

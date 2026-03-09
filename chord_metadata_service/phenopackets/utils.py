@@ -9,11 +9,14 @@ __all__ = [
 ]
 
 
-def time_element_to_str(time_element: dict) -> str | None:
+def time_element_to_str(time_element: dict | None) -> str | None:
     """
     Fuction to stringify different TimeElements (returns None if the time interval doesn't match any valid form).
     See https://phenopacket-schema.readthedocs.io/en/latest/time-element.html for more information on TimeElement.
     """
+
+    if not time_element:
+        return None
 
     # Age: https://phenopacket-schema.readthedocs.io/en/latest/age.html
     if "age" in time_element:

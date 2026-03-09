@@ -5,10 +5,12 @@ def describe_schema(schema, descriptions):
     if descriptions is None:
         return schema
 
-    schema_description = (descriptions.get("description", None)
-                          if isinstance(descriptions, dict) else descriptions)
-    schema_help = (descriptions.get("help", descriptions.get("description", None))
-                   if isinstance(descriptions, dict) else descriptions)
+    schema_description = descriptions.get("description", None) if isinstance(descriptions, dict) else descriptions
+    schema_help = (
+        descriptions.get("help", descriptions.get("description", None))
+        if isinstance(descriptions, dict)
+        else descriptions
+    )
 
     new_schema = schema.copy()
 
@@ -18,16 +20,27 @@ def describe_schema(schema, descriptions):
     if schema_help is not None:
         new_schema["help"] = schema_help
 
-    if all(("type" in schema and schema["type"] == "object", "properties" in schema, isinstance(descriptions, dict),
-            "properties" in descriptions)):
-        new_schema["properties"] = {p: describe_schema(schema["properties"].get(p, None),
-                                                       descriptions["properties"].get(p, None))
-                                    for p in schema["properties"]}
+    if all(
+        (
+            "type" in schema and schema["type"] == "object",
+            "properties" in schema,
+            isinstance(descriptions, dict),
+            "properties" in descriptions,
+        )
+    ):
+        new_schema["properties"] = {
+            p: describe_schema(schema["properties"].get(p, None), descriptions["properties"].get(p, None))
+            for p in schema["properties"]
+        }
 
-    elif all(("type" in schema and schema["type"] == "array",
-              "items" in schema,
-              isinstance(descriptions, dict),
-              "items" in descriptions)):
+    elif all(
+        (
+            "type" in schema and schema["type"] == "array",
+            "items" in schema,
+            isinstance(descriptions, dict),
+            "items" in descriptions,
+        )
+    ):
         new_schema["items"] = describe_schema(schema["items"], descriptions["items"])
 
     return new_schema
@@ -53,10 +66,12 @@ def rec_help(description, *args):
     return rec_help(description["properties"][args[0]], *args[1:])
 
 
-EXTRA_PROPERTIES = {"extra_properties": {
-    # This isn't in the JSON schema, so no description needed
-    "help": "Extra properties that are not supported by current schema."
-}}
+EXTRA_PROPERTIES = {
+    "extra_properties": {
+        # This isn't in the JSON schema, so no description needed
+        "help": "Extra properties that are not supported by current schema."
+    }
+}
 
 
 def ontology_class(purpose=""):
@@ -65,8 +80,8 @@ def ontology_class(purpose=""):
         "description": f"An ontology term{padded_purpose}.",
         "properties": {
             "id": f"A CURIE-style identifier for an ontology term{padded_purpose}.",
-            "label": f"A human readable class name for an ontology term{padded_purpose}."
-        }
+            "label": f"A human readable class name for an ontology term{padded_purpose}.",
+        },
     }
 
 

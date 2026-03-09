@@ -13,7 +13,7 @@ __all__ = [
 
 
 class JsonSchemaValidator:
-    """ Custom class based validator to validate against Json schema for JSONField """
+    """Custom class based validator to validate against Json schema for JSONField"""
 
     def __init__(self, schema: dict = None, schema_ref: SchemaRefs | str = None, formats=None, registry=None):
         """
@@ -33,11 +33,11 @@ class JsonSchemaValidator:
 
         self.formats = formats
         self.validator_args = {
-            'schema': self.schema,
-            'format_checker': FormatChecker(formats=self.formats),
+            "schema": self.schema,
+            "format_checker": FormatChecker(formats=self.formats),
         }
         if registry:
-            self.validator_args['registry'] = registry
+            self.validator_args["registry"] = registry
         self.validator = Draft7Validator(**self.validator_args)
 
     def __call__(self, value):
@@ -49,22 +49,19 @@ class JsonSchemaValidator:
         return self.schema == other.schema
 
     def deconstruct(self):
-        if hasattr(self, 'schema_name'):
+        if hasattr(self, "schema_name"):
             # deconstruct using schema reference
             return (
-                'chord_metadata_service.restapi.validators.JsonSchemaValidator',
+                "chord_metadata_service.restapi.validators.JsonSchemaValidator",
                 [],
-                {
-                    "schema_ref": self.schema_name,
-                    "formats": self.formats
-                }
+                {"schema_ref": self.schema_name, "formats": self.formats},
             )
 
         # Deconstruct via `schema` kept for backward compatibility for older migrations ONLY.
         return (
-            'chord_metadata_service.restapi.validators.JsonSchemaValidator',
+            "chord_metadata_service.restapi.validators.JsonSchemaValidator",
             [self.schema],
-            {"formats": self.formats}
+            {"formats": self.formats},
         )
 
 

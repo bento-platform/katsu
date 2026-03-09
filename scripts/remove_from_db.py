@@ -26,9 +26,7 @@ def main():
 
     for table in sys.argv[1:]:
         response = subprocess.run(
-            'python ../manage.py shell --command="{}"'.format(
-                script + "{}.objects.all().delete();".format(table)
-            ),
+            'python ../manage.py shell --command="{}"'.format(script + "{}.objects.all().delete();".format(table)),
             shell=True,
             stderr=subprocess.PIPE,
         )

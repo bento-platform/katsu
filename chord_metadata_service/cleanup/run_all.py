@@ -17,13 +17,16 @@ async def run_all_cleanup(logger: BoundLogger) -> int:
 
     n_removed: int = 0
 
-    # Phenopacket artifacts - metadata objects + biosamples + phenotypic features + procedures (order matters!)
+    # Phenopacket artifacts - metadata objects + biosamples + phenotypic features + interpretations + diagnoses
+    #  + genomic/variant interpretations + variation descriptors (order matters!)
     n_removed += await pc.clean_meta_data(logger)
     n_removed += await pc.clean_biosamples(logger)
     n_removed += await pc.clean_phenotypic_features(logger)
     n_removed += await pc.clean_interpretations(logger)
     n_removed += await pc.clean_diagnoses(logger)
     n_removed += await pc.clean_genomic_interpretations(logger)
+    n_removed += await pc.clean_variant_interpretations(logger)
+    n_removed += await pc.clean_variation_descriptors(logger)
 
     # Geographic locations - referenced by biosamples (we first need to have cleaned biosamples above)
     n_removed += await gc.clean_geolocations(logger)

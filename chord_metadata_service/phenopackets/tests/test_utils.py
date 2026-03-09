@@ -16,7 +16,9 @@ class PhenopacketUtilsTest(SimpleTestCase):
                 "2020-03-15T13:00:00Z - 2020-03-25T09:00:00Z",
             ),
             ({"timestamp": "2020-03-15T13:00:00Z"}, "2020-03-15T13:00:00Z"),
+            ({}, None),
             ({"bad": "asdf"}, None),
+            (None, None),
         ]
 
         for params in subtests:

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.fields import CharField
 
 from chord_metadata_service.restapi.utils import computed_property
 from .models import (
@@ -93,7 +94,7 @@ class BiosampleSerializer(GenericSerializer):
 
     class Meta:
         model = Biosample
-        fields = '__all__'
+        exclude = ("fts_extra",)
 
     def create(self, validated_data):
         if (
@@ -225,13 +226,15 @@ class InterpretationSerializer(GenericSerializer):
 class SimplePhenopacketSerializer(GenericSerializer):
     # Note: this serializer is always nested
 
+    project = CharField(read_only=True)
+
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     interpretations = InterpretationSerializer(many=True, required=False)
     diseases = DiseaseSerializer(many=True, required=False)
 
     class Meta:
         model = Phenopacket
-        fields = '__all__'
+        exclude = ("fts_extra",)
 
     def to_representation(self, instance):
         """"

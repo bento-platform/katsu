@@ -15,23 +15,23 @@ def get_dats_schema(field):
 
     # mapping dataset model fields to dats schemas
     fields_mapping = {
-        'alternate_identifiers': 'alternate_identifier_info_schema',
-        'related_identifiers': 'related_identifier_info_schema',
-        'dates': 'date_info_schema',
-        'stored_in': 'data_repository_schema',
-        'spatial_coverage': 'place_schema',
-        'types': 'data_type_schema',
-        'distributions': 'dataset_distribution_schema',
-        'dimensions': 'dimension_schema',
-        'primary_publications': 'publication_schema',
-        'citations': 'publication_schema',
-        'produced_by': 'study_schema',
-        'licenses': 'license_schema',
-        'acknowledges': 'grant_schema',
-        'keywords': 'annotation_schema'
+        "alternate_identifiers": "alternate_identifier_info_schema",
+        "related_identifiers": "related_identifier_info_schema",
+        "dates": "date_info_schema",
+        "stored_in": "data_repository_schema",
+        "spatial_coverage": "place_schema",
+        "types": "data_type_schema",
+        "distributions": "dataset_distribution_schema",
+        "dimensions": "dimension_schema",
+        "primary_publications": "publication_schema",
+        "citations": "publication_schema",
+        "produced_by": "study_schema",
+        "licenses": "license_schema",
+        "acknowledges": "grant_schema",
+        "keywords": "annotation_schema",
     }
 
-    for filename in glob(os.path.join(DATS_PATH, '*.json')):
+    for filename in glob(os.path.join(DATS_PATH, "*.json")):
         schema_name = Path(filename).stem
         field_schema_name = fields_mapping.get(field, None)
         if schema_name == field_schema_name:
@@ -42,9 +42,9 @@ def get_dats_schema(field):
 
 
 def _get_creators_schema(creator_type):
-    """ Internal function to get creators schemas. """
+    """Internal function to get creators schemas."""
 
-    dats_creators_schema = open(os.path.join(DATS_PATH, '{}.json'.format(creator_type)))
+    dats_creators_schema = open(os.path.join(DATS_PATH, "{}.json".format(creator_type)))
     creator_schema = json.loads(dats_creators_schema.read())
     dats_creators_schema.close()
     return creator_schema
@@ -57,8 +57,8 @@ CREATORS = {
     "type": "array",
     "items": {
         "anyOf": [
-            _get_creators_schema('person_schema'),
-            _get_creators_schema('organization_schema')
-        ]
-    }
+            _get_creators_schema("person_schema"),
+            _get_creators_schema("organization_schema"),
+        ],
+    },
 }

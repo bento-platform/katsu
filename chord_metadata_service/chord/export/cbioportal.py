@@ -239,6 +239,8 @@ async def sample_export(results, file_handle: TextIO):
     - DRIVER_MUTATIONS
     """
 
+    columns = ["individual_id", "id"]
+
     samples = []
     async for sample in results:
         if sample.individual_id is None:
@@ -251,11 +253,12 @@ async def sample_export(results, file_handle: TextIO):
             "id": sanitize_id(sample.id)
         }
         if sample.sampled_tissue:
+            if "tissue_label" not in columns:
+                columns.append("tissue_label")
             sample_obj["tissue_label"] = sample.sampled_tissue.get("label", "")
 
         samples.append(sample_obj)
 
-    columns = list(samples[0].keys())
     headers = biosample_to_sample_header(columns)
 
     file_handle.writelines([f"{line}\n" for line in headers])

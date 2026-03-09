@@ -21,6 +21,7 @@ logger = structlog.stdlib.get_logger("katsu.asgi")
 if settings.DEBUG:
     try:
         import debugpy
+
         DEBUGGER_PORT = int(os.environ.get("DEBUGGER_PORT", 5678))
         debugpy.listen(("0.0.0.0", DEBUGGER_PORT))
         logger.info("debugger attached")

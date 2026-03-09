@@ -4,7 +4,7 @@ from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.types import EntityCountOrBoolResponse
-from chord_metadata_service.discovery.api_views import get_censored_entity_counts
+from chord_metadata_service.discovery.api_views import QueryHelper
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 
 
@@ -32,7 +32,7 @@ async def get_censored_counts_for_serializer(
 
     try:
         dt_permissions = await get_discovery_data_type_permissions(request, scope)
-        return await get_censored_entity_counts(scope, dt_permissions, lg=lg, query=None)
+        return await QueryHelper(None, scope, dt_permissions, lg).get_censored_entity_counts()
     except Exception as e:
         lg.warning(
             "Failed to compute entity counts for serializer, returning empty dict",

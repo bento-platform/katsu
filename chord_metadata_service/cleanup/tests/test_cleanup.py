@@ -50,7 +50,6 @@ from chord_metadata_service.chord.models import Project, Dataset
 
 
 class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
-
     def setUp(self):
         # Copied from test_api_search
 
@@ -60,12 +59,14 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         # Set up a dummy phenopacket
 
         self.individual, _ = Individual.objects.get_or_create(
-            id='patient:1', sex='FEMALE',
+            id="patient:1",
+            sex="FEMALE",
             time_at_last_encounter={
                 "age": {
-                    "iso8601duration": "P25Y3M2D"
-                }
-            })
+                    "iso8601duration": "P25Y3M2D",
+                },
+            },
+        )
 
         self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
         self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, VALID_PROCEDURE_1))
@@ -79,7 +80,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            dataset=self.dataset
+            dataset=self.dataset,
         )
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
@@ -123,6 +124,8 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         self.assertEqual(await pc.clean_interpretations(logger), 0)
         self.assertEqual(await pc.clean_diagnoses(logger), 0)
         self.assertEqual(await pc.clean_genomic_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_variant_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_variation_descriptors(logger), 0)
         self.assertEqual(await clean_individuals(logger), 0)
         self.assertEqual(await clean_resources(logger), 0)
 
@@ -140,6 +143,8 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         self.assertEqual(await pc.clean_interpretations(logger), 0)
         self.assertEqual(await pc.clean_diagnoses(logger), 0)
         self.assertEqual(await pc.clean_genomic_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_variant_interpretations(logger), 0)
+        self.assertEqual(await pc.clean_variation_descriptors(logger), 0)
         self.assertEqual(await clean_individuals(logger), 0)
         self.assertEqual(await clean_resources(logger), 0)
 
@@ -177,8 +182,10 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         # 0 linked phenotypic feature (removed via cascade with v2.17.0 database changes) +
         # 1 unlinked phenotypic feature (pretend left-over from pre v2.17.0 or created manually) +
         # 1 interpretation +
-        # 1 diagnosis
-        # 1 genomic interpretation
+        # 1 diagnosis +
+        # 1 genomic interpretation +
+        # 1 variant interpretation +
+        # 1 variation descriptor
 
         # Experiment artifacts
         # 0 experiment results +
@@ -189,8 +196,8 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
 
         # Resources
         # 1 resource +
-        # = 9 objects total
-        self.assertEqual(await run_all_cleanup(logger), 9)
+        # = 11 objects total
+        self.assertEqual(await run_all_cleanup(logger), 11)
 
         # Should have been removed via cascade with v2.17.0 database changes
         with self.assertRaises(PhenotypicFeature.DoesNotExist):
@@ -198,7 +205,6 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
 
 
 class CleanUpExperimentsTestCase(AuthzAPITestCase):
-
     def setUp(self):
         # Copied from test_api_search
 
@@ -208,20 +214,23 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
         # Set up a dummy phenopacket
 
         self.individual, _ = Individual.objects.get_or_create(
-            id='patient:1', sex='FEMALE',
+            id="patient:1",
+            sex="FEMALE",
             time_at_last_encounter={
                 "age": {
-                    "iso8601duration": "P25Y3M2D"
-                }
-            })
+                    "iso8601duration": "P25Y3M2D",
+                },
+            },
+        )
 
         self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
 
         # add Experiments metadata and link to self.biosample_1
         self.instrument = Instrument.objects.create(**valid_instrument())
         self.experiment_result = ExperimentResult.objects.create(**valid_experiment_result())
-        self.experiment = Experiment.objects.create(**valid_experiment(
-            biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset))
+        self.experiment = Experiment.objects.create(
+            **valid_experiment(biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset)
+        )
         self.experiment.experiment_results.set([self.experiment_result])
 
     async def test_experiment_deletion(self):

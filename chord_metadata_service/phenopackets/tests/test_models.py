@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.test import TestCase
 
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.discovery.full_text_search import FTSHelpersMixin
 from chord_metadata_service.geo.models import GeoLocation
 from chord_metadata_service.geo.tests.constants import GEO_LOCATION_1
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
@@ -38,13 +39,6 @@ class BiosampleTest(ProjectTestCase):
         )
         # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
-
-    def test_phenopacket_without_individual(self):
-        m.Phenopacket.objects.create(
-            id="phenopacket_id:2",
-            meta_data=self.meta_data,
-            dataset=self.dataset,
-        )
 
     def test_biosample(self):
         biosample_one = m.Biosample.objects.get(
@@ -122,10 +116,23 @@ class PhenotypicFeatureTest(TestCase):
         self.assertEqual(len(result), 2)
 
 
+class GeneDescriptorTest(TestCase):
+    def setUp(self):
+        self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
+
+    def test_gene_descriptor_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.gene_descriptor.fts_repr_values()),
+            "HGNC:347 ETF1 ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data",
+        )
+
+
 class GenomicInterpretationTest(TestCase):
     """ Test module for GenomicInterpretation model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
         self.variant_descriptor = m.VariationDescriptor.objects.create(**c.VALID_VARIANT_DESCRIPTOR)
         self.variant_interpretation = m.VariantInterpretation.objects.create(
@@ -142,14 +149,32 @@ class GenomicInterpretationTest(TestCase):
         with self.assertRaises(ValidationError):
             m.GenomicInterpretation.objects.create(**c.valid_genomic_interpretation()).clean()
 
+    def test_variant_descriptor_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.variant_descriptor),
+            "clinvar:13294 syntax hgvs value NM_001848.2:c.877G\u003eA GENO:0000135 heterozygous",
+        )
+
     def test_genomic_interpretation_str(self):
         self.assertEqual(str(self.genomic_interpretation), str(self.genomic_interpretation.id))
+
+    def test_genomic_interpretation_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.genomic_interpretation),
+            (
+                "CANDIDATE HGNC:347 ETF1 ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data NOT_PROVIDED"
+                " UNKNOWN_ACTIONABILITY clinvar:13294 syntax hgvs value NM_001848.2:c.877G\u003eA GENO:0000135 "
+                "heterozygous comment test data"
+            ),
+        )
 
 
 class DiagnosisTest(TestCase):
     """ Test module for Diagnosis model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         # With GeneDescriptor
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
 
@@ -183,6 +208,18 @@ class DiagnosisTest(TestCase):
     def test_diagnosis_str(self):
         self.assertEqual(str(self.diagnosis), str(self.diagnosis.id))
 
+    def test_diagnosis_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.diagnosis),
+            (
+                "interpretation:1 OMIM:164400 Spinocerebellar ataxia 1 CANDIDATE HGNC:347 ETF1 "
+                "ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data NOT_PROVIDED UNKNOWN_ACTIONABILITY "
+                "clinvar:13294 HGNC:347 ETF1 ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data value "
+                "NM_001848.2:c.877G>A syntax hgvs GENO:0000135 heterozygous comment test data CANDIDATE HGNC:347 ETF1 "
+                "ensembl:ENSRNOG00000019450 ncbigene:307503 comment test data comment test data comment test data"
+            ),
+        )
+
     def _test_disease_filter(self, filter: Q, count: int):
         result = m.Diagnosis.objects.all().filter(filter)
         self.assertEqual(result.count(), count)
@@ -192,6 +229,8 @@ class InterpretationTest(TestCase):
     """ Test module for Interpretation model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.disease_ontology = c.VALID_DISEASE_ONTOLOGY
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(self.disease_ontology))
         self.meta_data_phenopacket = m.MetaData.objects.create(**c.VALID_META_DATA_1)
@@ -211,6 +250,13 @@ class InterpretationTest(TestCase):
         )
         self.assertEqual(interpretation_qs.count(), 1)
 
+    def test_interpretation_fts_repr(self):
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.interpretation),
+            "interpretation:1 IN_PROGRESS interpretation:1 OMIM:164400 Spinocerebellar ataxia 1 comment test "
+            "data Test interpretation comment test data",
+        )
+
     def test_interpretation_str(self):
         self.assertEqual(str(self.interpretation), str(self.interpretation.id))
 
@@ -219,15 +265,37 @@ class MetaDataTest(TestCase):
     """ Test module for MetaData model. """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.resource_1 = m.Resource.objects.create(**VALID_RESOURCE_1)
         self.resource_2 = m.Resource.objects.create(**VALID_RESOURCE_2)
         self.metadata = m.MetaData.objects.create(**c.VALID_META_DATA_2)
         self.metadata.resources.set([self.resource_1, self.resource_2])
 
     def test_metadata(self):
-        metadata = m.MetaData.objects.get(created_by__icontains='victor')
+        metadata = m.MetaData.objects.get(created_by__icontains="victor")
         self.assertEqual(metadata.submitted_by, c.VALID_META_DATA_2["submitted_by"])
         self.assertEqual(metadata.resources.count(), 2)
+
+    def test_metadata_fts_repr(self):
+        self.assertTupleEqual(
+            self.metadata.fts_repr_values(),
+            (
+                c.VALID_META_DATA_2["created_by"],
+                c.VALID_META_DATA_2["submitted_by"],
+                c.VALID_META_DATA_2["updates"],
+                c.VALID_META_DATA_2["external_references"],
+                None,
+            )
+        )
+        self.assertEqual(
+            FTSHelpersMixin.fts_repr_values_to_str(self.metadata),
+            (
+                "Victor Rocheleau Victor Rocheleau timestamp 2018-06-10T10:59:06Z updated_by Julius J. comment added "
+                "phenotypic features to individual patient:1 DOI:10.1016/j.jaccas.2020.04.001 reference PMID:32292915 "
+                "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS in a Patient on Durable LVAD Support"
+            )
+        )
 
     def test_metadata_str(self):
         self.assertEqual(str(self.metadata), str(self.metadata.id))
@@ -237,6 +305,8 @@ class PhenopacketTest(ProjectTestCase):
     """ Test module for Phenopacket model """
 
     def setUp(self):
+        self.maxDiff = None  # for seeing long string diffs
+
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
@@ -265,6 +335,19 @@ class PhenopacketTest(ProjectTestCase):
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
         )
 
+        # force back-populate FTS representations
+        self.phenopacket.save()
+
+    def test_phenopacket_without_individual(self):
+        obj = m.Phenopacket.objects.create(
+            id="phenopacket_id:2",
+            meta_data=self.meta_data,
+            dataset=self.dataset,
+        )
+
+        # should be populated with metadata stuff
+        self.assertEqual(obj.fts_extra, "David Lougheed David Lougheed")
+
     def test_phenopacket(self):
         phenopacket = m.Phenopacket.objects.filter(id="phenopacket_id:1")
         self.assertEqual(len(phenopacket), 1)
@@ -273,6 +356,22 @@ class PhenopacketTest(ProjectTestCase):
         instance = phenopacket.get()
         self.assertEqual(instance.schema_type, SchemaType.PHENOPACKET)
         self.assertEqual(instance.get_project_id(), self.project.identifier)
+        self.assertEqual(
+            instance.fts_extra,
+            (
+                "interpretation:1 IN_PROGRESS interpretation:1 OMIM:164400 Spinocerebellar ataxia 1 comment test data "
+                "Test interpretation comment test data OMIM:164400 Spinocerebellar ataxia 1 P25Y3M2D P28Y3M2D "
+                "NCIT:C48233 Cancer TNM Finding by Site NCIT:C28091 Gleason Score 7 comment test data This is a test "
+                "phenotypic feature HP:0000520 Proptosis excluded HP:0012825 Mild HP:0012825 Mild HP:0012826 Moderate "
+                "Congenital onset (HP:0003577) reference PMID:30962759 Recurrent Erythema Nodosum in a Child with a "
+                "SHOC2 Gene Mutation evidence_code ECO:0006017 Author statement from published clinical study used in "
+                "manual assertion comment test data datatype symptom This is a test phenotypic feature HP:0000520 "
+                "Proptosis excluded HP:0012825 Mild HP:0012825 Mild HP:0012826 Moderate Congenital onset (HP:0003577) "
+                "reference PMID:30962759 Recurrent Erythema Nodosum in a Child with a SHOC2 Gene Mutation evidence_code"
+                " ECO:0006017 Author statement from published clinical study used in manual assertion comment test data"
+                " datatype symptom David Lougheed David Lougheed"
+            ),
+        )  # should be populated with interpretations + diseases + phenotypic features + metadata stuff
 
     def test_filtering(self):
         f = PhenopacketFilter()

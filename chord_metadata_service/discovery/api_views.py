@@ -7,7 +7,7 @@ from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet, Count
+from django.db.models import QuerySet, Q, Count
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
@@ -23,7 +23,6 @@ from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions
-from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.api_renderers import PassThruCSVRenderer
@@ -39,10 +38,11 @@ from .censorship import (
 )
 from .constants import DISCOVERY_ENTITIES, ENTITY_TO_DATASET_GROUP_BY
 from .exceptions import DiscoveryScopeException
+from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
 from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
-from .fields_utils import normalize_field_path_true_model
+from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
-from .full_text_search import full_text_search_vector
+from .full_text_search import trigram_similarity_search, normal_full_text_search
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
 from .pydantic_models import (
@@ -61,7 +61,9 @@ from .pydantic_models import (
 )
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
-from .types import EntityCountOrBoolResponse, EntityCounts, DiscoveryResponseFormat, AcceptedDiscoveryResponseFormats
+from .types import (
+    EntityCountOrBoolResponse, EntityCounts, DiscoveryResponseFormat, AcceptedDiscoveryResponseFormats, FTSType
+)
 from .utils import (
     get_discovery_data_type_permissions,
     get_discovery_field_set_permissions,
@@ -74,51 +76,114 @@ is_not_none = partial(is_not, None)
 
 QueryExecutionResult = tuple[QuerySet, frozenset[DiscoveryEntity]]
 
-EMPTY_DISCOVERY_QUERY = DiscoveryQuery(fts=None, filters={})
+EMPTY_DISCOVERY_QUERY = DiscoveryQuery()
 
 
-class QueryQuerysetsCache:
+class QueryHelper:
     """
-    Cache definition for a specific query, in the context of a specific request (--> scope, permissions).
-    It takes a bit of effort to build the Django queryset from field definitions/a query object, and there are specific
-    cases were we may be doing this many times, so we might as well re-use the work done.
+    Helper class and caching object for a specific query, in the context of a specific request (--> scope, permissions).
+
+    Justifications:
+     - encapsulate data/methods that operate on (query, scope, dt_permissions).
+     - cache constructed querysets for a particular instance of the above combination:
+         It takes a bit of effort to build the Django queryset from field definitions/a query object, and there are
+         specific cases were we may be doing this many times, so we might as well re-use the work done.
+     - cache intermediate data used during full-text searching
     """
 
     def __init__(
         self,
-        query: DiscoveryQuery,
+        query: DiscoveryQuery | None,
         scope: ValidatedDiscoveryScope,
         dt_permissions: DataTypeDiscoveryPermissions,
         lg: BoundLogger,
     ):
-        self._query: DiscoveryQuery = query
+        self._query: DiscoveryQuery = query or EMPTY_DISCOVERY_QUERY
         self._scope: ValidatedDiscoveryScope = scope
         self._dt_permissions: DataTypeDiscoveryPermissions = dt_permissions
+
+        # Cache dictionary for constructed querysets for executed queries
+        # + corresponding locks for accessing/cache manipulation:
         self._queryset_cache: dict[DiscoveryEntity, QueryExecutionResult] = {}
         self._queryset_locks = defaultdict(asyncio.Lock)
 
+        # Cache dictionary for full-text searches (and corresponding locks for accessing/cache manipulation) with:
+        #  - keys being (discovery entity, search query, FTS search type)
+        #  - values being sets of IDs of objects of the same type as the discovery entity in the key.
+        self._fts_cache: dict[tuple[DiscoveryEntity, str, FTSType], set] = {}
+        self._fts_cache_locks = defaultdict(asyncio.Lock)
+
+        # Cache: entity counts for the scope+permissions+query combination; populated by a call to _get_entity_counts
+        self._entity_counts: EntityCounts | None = None
+
+        # Cache: entities with data for the scope (not applying the query);
+        # populated by a call to get_scope_entities_with_data()
+        self._scope_entities_with_data: frozenset[DiscoveryEntity] | None = None
+
         self._logger: BoundLogger = lg
+
+    @property
+    def scope(self) -> ValidatedDiscoveryScope:
+        return self._scope
+
+    @property
+    def dt_permissions(self) -> DataTypeDiscoveryPermissions:
+        return self._dt_permissions
+
+    async def _get_fts_ids(self, fts_entity: DiscoveryEntity, query: str, fts_type: FTSType) -> set:
+        """
+        Given a discovery entity to execute a full-text search on, a full-text query search string, and a full-text
+        search query type, this function executes the search and caches matching IDs in the _fts_cache private property
+        of the object for use in executing a discovery query.
+        """
+        k = (fts_entity, query, fts_type)
+        qs = get_discovery_entity_model_scoped_queryset(fts_entity, self._scope)
+        async with self._fts_cache_locks[k]:
+            if k not in self._fts_cache:
+                self._fts_cache[k] = await build_id_set(
+                    qs=(
+                        trigram_similarity_search(fts_entity, qs, query)
+                        if fts_type == "trigram"
+                        else normal_full_text_search(fts_entity, qs, query, fts_type)
+                    ),
+                    field="id",
+                )
+            return self._fts_cache[k]
 
     async def _execute_discovery_query(
         self, queryset_entity: DiscoveryEntity, lg: BoundLogger | None, validate_field: bool
     ) -> QueryExecutionResult:
         queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, self._scope)
 
-        if fts := self._query.fts:
-            ids_set = await build_id_set(
-                queryset.annotate(search=full_text_search_vector(queryset_entity)).filter(search=fts),
-                field="id",
-            )
+        fts_queried_entities = frozenset()
+
+        if fts := self._query.fts:  # Execute FTS if self._query.fts is not ""
+            # Each entity has a corresponding FTS vector we'll use, but querying using this doesn't query across
+            # discovery entity boundaries. In order to get result sets for, e.g., phenopackets (with biosamples being
+            # the entity with actual FTS matches), we need to build a query for the queryset checking nested biosamples
+            # overlap with the ID set.
+            ids_set = await self._get_fts_ids(queryset_entity, fts, self._query.fts_type)
+            fts_filters = Q(pk__in=ids_set)
+            for entity in DISCOVERY_ENTITIES - {queryset_entity}:
+                e_ids_set = await self._get_fts_ids(entity, fts, self._query.fts_type)
+                epk = resolve_filter_mapping_to_queryset_model(queryset_entity, entity, ("pk",))
+                fts_filters |= Q(**{f"{epk}__in": e_ids_set})
+
+            # TODO: use the ID counts distribution here to return some hints for the UI as to where matches were found
+            #  or something. Although we currently have the same issue with filters, so we'll need to do some grand
+            #  unified thing for this.
+
             # When this is done as a subquery, it destroys performance (perhaps fixable with a PG version > 13?)
             #  - but ONLY when we have specified a scope (project/dataset), I guess due to some kind of prefetching or
             #    join? it's unclear, but for now we just do this ugly thing instead.
-            queryset = queryset.filter(id__in=ids_set)
+            queryset = queryset.filter(fts_filters)
+            fts_queried_entities = await self.get_scope_entities_with_data()
 
         # May raise:
         #  - DiscoveryEmptyException
         #     although in all cases in these API calls this should be mitigated by an initial empty_discovery(...) check
         #  - ValidationError
-        filtered_queryset, queried_entities = await discovery_filter_queryset(
+        filtered_queryset, filter_queried_entities = await discovery_filter_queryset(
             self._scope,
             self._query,
             queryset_entity,
@@ -128,7 +193,7 @@ class QueryQuerysetsCache:
             validate_field=validate_field,
         )
 
-        return filtered_queryset, queried_entities
+        return filtered_queryset, fts_queried_entities | filter_queried_entities
 
     async def get_query_queryset_and_queried_entities(
         self,
@@ -144,13 +209,110 @@ class QueryQuerysetsCache:
         async with self._queryset_locks[entity]:
             if entity not in self._queryset_cache:
                 await (lg or self._logger).adebug(
-                    "QueryQuerysetsCache executing query", entity=entity, cache_keys=tuple(self._queryset_cache.keys())
+                    "QueryHelper executing query",
+                    entity=entity,
+                    query=self._query,
+                    cache_keys=tuple(self._queryset_cache.keys()),
                 )
-                res = await self._execute_discovery_query(entity, lg, validate_field=validate_field)
-                self._queryset_cache[entity] = res
-                return res
+                self._queryset_cache[entity] = await self._execute_discovery_query(
+                    entity, lg, validate_field=validate_field
+                )
 
             return self._queryset_cache[entity]
+
+    async def _get_entity_counts(self) -> EntityCounts:
+        """
+        Returns a dictionary of discovery entity counts for a given scope/query context (i.e., a given QueryHelper
+        instance). In other words, for each discovery entity, we'll get a queryset of the query executed on the entity
+        and count the number of matching entities.
+        """
+
+        if self._entity_counts is None:
+            async def _get_entity_count(ee: DiscoveryEntity) -> int:
+                # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to
+                # small cell counts if we're in a nested entity.
+                #  => For example, if we have 10 individuals with 2 biosamples after querying, and our field entity is a
+                #     biosample but our query is on an individual, we may get a small cell count issue through biosample
+                #     but not if we're going through individual (we may have five FEMALE individuals, but only one with
+                #     a biosample).
+                #
+                # We access [0] of the result of get_query_queryset_and_queried_entities because it returns a tuple of
+                # (queryset, frozenset of queried entities), but we only need the former (to get the count).
+                return await (await self.get_query_queryset_and_queried_entities(ee, validate_field=False))[0].acount()
+
+            self._entity_counts = {
+                e: ec
+                for e, ec in zip(
+                    DISCOVERY_ENTITIES,
+                    await asyncio.gather(*(_get_entity_count(e) for e in DISCOVERY_ENTITIES)),
+                )
+            }
+
+        return self._entity_counts
+
+    @overload
+    async def get_censored_entity_counts(self, return_raw_counts: Literal[False] = False) -> EntityCountOrBoolResponse:
+        ...
+
+    @overload
+    async def get_censored_entity_counts(
+        self, return_raw_counts: Literal[True]
+    ) -> tuple[EntityCounts, EntityCountOrBoolResponse]:
+        ...
+
+    async def get_censored_entity_counts(
+        self, return_raw_counts: bool = False,
+    ) -> EntityCountOrBoolResponse | tuple[EntityCounts, EntityCountOrBoolResponse]:
+        """
+        Get censored entity counts for a scope with given permissions, i.e., a given QueryHelper instance.
+
+        This is the shared implementation used by both:
+        - Discovery endpoint (with query filters)
+        - Project/Dataset serializers (without query filters)
+
+        For each 'discovery entity', we generate either:
+         - a count (0/count-if-above-threshold), or
+         - a boolean (count > threshold)
+
+        If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
+        one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
+        ==> do this, plus the same thing for all entities nested inside other entities
+            (phenopacket -> biosample -> experiment -> experiment_result...)
+        TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
+         done in a more dynamic way, starting from the queryset entity.
+
+        Args:
+            return_raw_counts: If True, return tuple of (raw_counts, censored_counts) for logging
+
+        Returns:
+            If return_raw_counts=False: Dictionary mapping entities to censored counts (int) or booleans
+            If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)
+        """
+
+        counts = await self._get_entity_counts()  # cached if already called once here
+        censored = await censor_entity_counts(self._scope, counts, self._dt_permissions, self._logger)
+
+        if return_raw_counts:
+            return counts, censored
+
+        return censored
+
+    async def get_scope_entities_with_data(self) -> frozenset[DiscoveryEntity]:
+        """
+        Gets all discovery entities with data in the current scope, ignoring the query. This helps the logic for
+        "queried entities" with full-text search (FTS), since entities that aren't present in the current scope should
+        not be listed as being queried by the FTS process.
+        """
+
+        if self._scope_entities_with_data is None:
+            if self._query.is_empty():
+                counts = await self.get_censored_entity_counts()
+            else:
+                qh = QueryHelper(EMPTY_DISCOVERY_QUERY, self.scope, self.dt_permissions, self._logger)
+                counts = await qh.get_censored_entity_counts()
+            self._scope_entities_with_data = frozenset((e for e, v in counts.items() if v))
+
+        return self._scope_entities_with_data
 
 
 def get_accepted_formats(request: DrfRequest) -> AcceptedDiscoveryResponseFormats:
@@ -281,17 +443,18 @@ async def discovery_search_fields(
 
 
 async def discovery_field_response(
-    qqs: QueryQuerysetsCache,
-    scope: ValidatedDiscoveryScope,
+    qh: QueryHelper,
     field: str,
-    dt_permissions: DataTypeDiscoveryPermissions,
+    censored_counts: EntityCountOrBoolResponse,
     lg: BoundLogger,
 ) -> DiscoveryFieldResponse | None:
     lg = lg.bind(field=field)
 
+    scope = qh.scope
+
     field_props = scope.discovery.fields[field]
     field_entity, field_entity_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
-    field_perms: DataPermissions = dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[field_entity]]
+    field_perms: DataPermissions = qh.dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[field_entity]]
 
     if not field_perms.counts:
         # We cannot compute stats right now for boolean-level responses. Thus, if we do not have at least counts
@@ -300,12 +463,20 @@ async def discovery_field_response(
         # this with relative grace (not show a chart/search field, ...).
         return None
 
+    if not censored_counts[field_entity] and not field_perms.data:
+        # We can have counts above the threshold for the field entity that then must get censored because a parent
+        # entity is being censored due to low counts. For example, with # phenopackets = 3 and # biosamples = 7, the
+        # latter clears the censorship threshold but indirectly reveals the presence of phenopackets, so they both must
+        # be censored to 0/False.
+        # Of course, if we have the query:data permission for the field, we can safely reveal the true count.
+        return None
+
     # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to small cell
     # counts if we're in a nested entity.
     #  => For example, if we have 10 individuals with 2 biosamples after querying, and our field entity is a
     #     biosample but our query is on an individual, we may get a small cell count issue through biosample but not if
     #     we're going through individual (we may have five FEMALE individuals, but only one with a biosample).
-    queryset, _ = await qqs.get_query_queryset_and_queried_entities(field_entity, lg, validate_field=False)
+    queryset, _ = await qh.get_query_queryset_and_queried_entities(field_entity, lg, validate_field=False)
 
     stats: BinList
 
@@ -461,6 +632,8 @@ async def get_censored_entity_counts(
     return censored
 
 
+=======
+>>>>>>> develop
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
 @inject_discovery_deps(empty_404=True)
@@ -486,7 +659,7 @@ async def discovery_endpoint(
     # their respective DATA TYPES) queried. Thus, if we're querying, the above check IS NOT SUFFICIENT!
     #  --> this actual second permissions check happens inside the following function stack right now, and raises a
     #      ValidationError:
-    #        QueryQuerysetsCache
+    #        QueryHelper
     #         --> _execute_discovery_query
     #         --> discovery_filter_queryset
     #         --> the overall_permissions.bool_ check
@@ -496,8 +669,9 @@ async def discovery_endpoint(
     try:
         query = DiscoveryQuery.from_drf_request(request)
         lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
-        qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
-        queryset, queried_entities = await qqs.get_query_queryset_and_queried_entities(queryset_entity)
+        qh = QueryHelper(query, scope, dt_permissions, lg)
+        queryset, queried_entities = await qh.get_query_queryset_and_queried_entities(queryset_entity)
+        censored_counts = await qh.get_censored_entity_counts()  # to be used for censoring field responses!
     except ValidationError as e:
         return await dres.django_validation_error(request, e, lg, "discovery endpoint encountered validation error")
 
@@ -510,12 +684,7 @@ async def discovery_endpoint(
         field: field_res
         for field, field_res in zip(
             fields,
-            await asyncio.gather(
-                *(
-                    discovery_field_response(qqs, scope, field, dt_permissions, lg)
-                    for field in fields
-                )
-            )
+            await asyncio.gather(*(discovery_field_response(qh, field, censored_counts, lg) for field in fields))
         )
         if field_res is not None
         # Parallel async collection of field responses for public overview
@@ -603,6 +772,8 @@ async def discovery_matches(
 
     Query parameters:
       /^[^_].*$/: Discovery field filters, like discovery_endpoint above
+      _fts:       Full-text search (FTS) query
+      _fts_type:  FTS query type (from Django, see DiscoveryQuery model for more information). Default: 'plain'.
       _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
@@ -611,10 +782,14 @@ async def discovery_matches(
       dataset:    Discovery scope - dataset ID (if not set, the project or global scope is used)
 
     Note on query parameter names:
-      - QueryQuerysetsCache._execute_discovery_query calls build_discovery_query_from_request, which grabs every query
+      - QueryHelper._execute_discovery_query calls build_discovery_query_from_request, which grabs every query
         parameter except "project", "dataset", and those starting with "_" and tries to find fields to query.
         By separating the namespace for discovery filter query parameters from "other" query parameters by prefixing
         other query parameters with _, we eliminate possible ambiguities between discovery fields.
+
+    Links for full-text search type:
+      - https://docs.djangoproject.com/en/5.2/ref/contrib/postgres/search/#searchquery
+      - https://www.postgresql.org/docs/18/textsearch-controls.html#TEXTSEARCH-PARSING-QUERIES
     """
 
     # -- Response format -----------------------------------------------------------------------------------------------
@@ -649,15 +824,7 @@ async def discovery_matches(
 
     lg = lg.bind(response_format=response_format)
 
-    # -- Permissions check ---------------------------------------------------------------------------------------------
-
-    if not dt_permissions[dts.DATA_TYPE_PHENOPACKET].data:
-        # "Extra" permissions check vs. regular discovery endpoint: we need full data permissions
-        return dres.insufficient_privileges(request, accepted_formats)
-
-    authz_middleware.mark_authz_done(request)
-
-    # -- Query execution -----------------------------------------------------------------------------------------------
+    # -- Queried entity: grab from query parameters + validate ---------------------------------------------------------
 
     queried_entity: DiscoveryEntity = request.query_params.get("_entity", "phenopacket")
     if queried_entity not in DISCOVERY_ENTITIES:
@@ -665,10 +832,21 @@ async def discovery_matches(
 
     lg = lg.bind(queried_entity=queried_entity)
 
+    # -- Permissions check ---------------------------------------------------------------------------------------------
+
+    if not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queried_entity]].data:
+        # "Extra" permissions check vs. regular discovery endpoint: we need full data permissions
+        # Since we require query:data here, we don't need to be vigilant about censoring below
+        return dres.insufficient_privileges(request, accepted_formats)
+
+    authz_middleware.mark_authz_done(request)
+
+    # -- Query execution -----------------------------------------------------------------------------------------------
+
     try:
         query = DiscoveryQuery.from_drf_request(request)
-        qqs = QueryQuerysetsCache(query, scope, dt_permissions, lg)
-        queryset, _ = await qqs.get_query_queryset_and_queried_entities(queried_entity)
+        qh = QueryHelper(query, scope, dt_permissions, lg)
+        queryset, _ = await qh.get_query_queryset_and_queried_entities(queried_entity)
         queryset = queryset.order_by("pk")
     except ValidationError as e:
         return await dres.django_validation_error(
@@ -703,6 +881,7 @@ async def discovery_matches(
     pagination = DiscoveryPagination(page=page, page_size=page_size, total=total_count)
     lg = lg.bind(pagination=pagination.model_dump(mode="json"))
 
+    matches_page: QuerySet
     if page_size > 0:
         matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
     else:
@@ -752,23 +931,20 @@ async def discovery_ui_hints(
     """
 
     # TODO: support querying?
-    qqs = QueryQuerysetsCache(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
-    counts = await discovery_queryset_entity_counts(qqs)
+    qh = QueryHelper(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
+    entities_with_data = await qh.get_scope_entities_with_data()
 
-    return Response(DiscoveryUIHintsResponse.model_validate({
+    return Response(DiscoveryUIHintsResponse(
         # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
         # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
         # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
         # search, but we don't want them
-        "entities_with_data": [
-            e for e, v in counts.items()
-            if thresholded_count(v, scope, dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]])
-        ],
+        entities_with_data=entities_with_data,
         # TODO: implement something like this for hinting towards maps
         # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
         #  should present a consolidated map view?
         # "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
-    }))
+    ))
 
 
 @api_view(["GET"])

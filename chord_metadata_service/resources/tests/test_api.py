@@ -17,7 +17,6 @@ from .constants import VALID_RESOURCE_1, VALID_RESOURCE_2, DUPLICATE_RESOURCE_3
 
 
 class CreateResourceTest(AuthzAPITestCase):
-
     def setUp(self):
         self.resource = VALID_RESOURCE_2
         self.duplicate_resource = DUPLICATE_RESOURCE_3
@@ -38,14 +37,13 @@ class CreateResourceTest(AuthzAPITestCase):
 
 
 class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
-
     def setUp(self):
         super().setUp()
         self.url = reverse("resource-list")
         self.url_with_proj = f"{self.url}?project={self.project['identifier']}"
 
         # dataset for project 1
-        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_1(self.project['identifier']))
+        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_1(self.project["identifier"]))
         self.dataset = r.json()
         self.url_with_proj_ds = f"{self.url}?project={self.project['identifier']}&dataset={self.dataset['identifier']}"
 
@@ -54,7 +52,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         self.project_2 = r.json()
 
         #  - dataset for project 2
-        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_2(self.project_2['identifier']))
+        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_2(self.project_2["identifier"]))
         self.dataset_2 = r.json()
 
     def test_list_resources_basic(self):

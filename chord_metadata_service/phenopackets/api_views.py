@@ -1,5 +1,6 @@
 from asgiref.sync import async_to_sync
 from bento_lib.auth.permissions import P_QUERY_DATA
+from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
@@ -143,6 +144,7 @@ PHENOPACKET_PREFETCH = (
 )
 
 PHENOPACKET_SELECT_REL = (
+    "dataset",
     "subject",
     "meta_data",
 )
@@ -169,6 +171,7 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
             m.Phenopacket.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             .prefetch_related(*PHENOPACKET_PREFETCH)
             .select_related(*PHENOPACKET_SELECT_REL)
+            .annotate(project=F("dataset__project_id"))
             .order_by("id")
         )
 

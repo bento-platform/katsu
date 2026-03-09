@@ -3,13 +3,19 @@ def valid_experiment(biosample, instrument=None, dataset=None, num_experiment=1)
         "id": f"experiment:{num_experiment}",
         "study_type": "Whole genome Sequencing",
         "experiment_type": "DNA Methylation",
-        "experiment_ontology": [{"id": "ontology:1", "label": "Ontology term 1"}],
+        "experiment_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
         "molecule": "total RNA",
-        "molecule_ontology": [{"id": "ontology:1", "label": "Ontology term 1"}],
+        "molecule_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
         "library_strategy": "Bisulfite-Seq",
         "library_source": "Genomic",
         "library_selection": "PCR",
         "library_layout": "Single",
+        "library_id": f"lib_id_test-{num_experiment}",
+        "library_extract_id": f"lib_extract_id_test-{num_experiment}",
+        "insert_size": 350 + num_experiment,
+        "description": f"Experimental design description for {num_experiment}",
+        "protocol_url": f"http://protocols.io/view/protocol-{num_experiment}",
+        "library_description": f"Library construction details for {num_experiment}",
         "extraction_protocol": "NGS",
         "reference_registry_id": "some_id",
         "qc_flags": ["flag 1", "flag 2"],
@@ -20,11 +26,11 @@ def valid_experiment(biosample, instrument=None, dataset=None, num_experiment=1)
     }
 
 
-def valid_experiment_result():
+def valid_experiment_result(num_exp_res=1):
     return {
-        "identifier": "experiment_result:1",
-        "description": "Test Experiment result 1",
-        "filename": "01.vcf.gz",
+        "identifier": f"experiment_result:{num_exp_res}",
+        "description": f"Test Experiment result {num_exp_res}",
+        "filename": f"0{num_exp_res}.vcf.gz",
         "file_format": "VCF",
         "data_output_type": "Derived data",
         "usage": "download",
