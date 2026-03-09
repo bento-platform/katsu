@@ -402,7 +402,8 @@ def symbol_django_op(sym: str) -> str:
             return "gt"
         case "≥" | "[":
             return "gte"
-        case _:
+        case _:  # pragma: no cover
+            # Shouldn't occur, as the regex check should prevent these queries from being made
             raise NotImplementedError()
 
 
