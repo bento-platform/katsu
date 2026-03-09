@@ -713,11 +713,11 @@ async def discovery_endpoint(
             qh
         )
 
-        # Censor per-dataset counts using the same logic as for top-level counts
+        # Censor per-dataset counts using dataset-level permissions
         counts_by_dataset_res = await censor_entity_counts_by_dataset(
             scope,
             counts_by_dataset_raw,
-            dt_permissions,
+            ds_level_permissions,
             lg,
         )
 
