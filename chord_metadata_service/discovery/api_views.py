@@ -500,33 +500,6 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
-async def discovery_queryset_entity_counts(qqs: QueryHelper) -> EntityCounts:
-    """
-    Returns a dictionary of discovery entity counts for a given scope/query context (i.e., a given QueryHelper
-    instance). In other words, for each discovery entity, we'll get a queryset of the query executed on the entity and
-    count the number of matching entities.
-    """
-
-    async def _get_entity_count(ee: DiscoveryEntity) -> int:
-        # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to small
-        # cell counts if we're in a nested entity.
-        #  => For example, if we have 10 individuals with 2 biosamples after querying, and our field entity is a
-        #     biosample but our query is on an individual, we may get a small cell count issue through biosample but not
-        #     if we're going through individual (we may have five FEMALE individuals, but only one with a biosample).
-        #
-        # We access [0] of the result of get_query_queryset_and_queried_entities because it returns a tuple of
-        # (queryset, frozenset of queried entities), but we only need the former (to get the count).
-        return await (await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False))[0].acount()
-
-    return {
-        e: ec
-        for e, ec in zip(
-            DISCOVERY_ENTITIES,
-            await asyncio.gather(*(_get_entity_count(e) for e in DISCOVERY_ENTITIES)),
-        )
-    }
-
-
 async def discovery_queryset_entity_counts_by_dataset(
     qqs: QueryHelper,
 ) -> dict[str, EntityCounts]:
@@ -559,77 +532,6 @@ async def discovery_queryset_entity_counts_by_dataset(
         }
 
     return res
-
-
-@overload
-async def get_censored_entity_counts(
-    scope: ValidatedDiscoveryScope,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    *,
-    lg: BoundLogger,
-    query: DiscoveryQuery | None = None,
-    return_raw_counts: Literal[False] = False,
-) -> EntityCountOrBoolResponse: ...
-
-
-@overload
-async def get_censored_entity_counts(
-    scope: ValidatedDiscoveryScope,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    *,
-    lg: BoundLogger,
-    query: DiscoveryQuery | None,
-    return_raw_counts: Literal[True],
-) -> tuple[EntityCounts, EntityCountOrBoolResponse]: ...
-
-
-async def get_censored_entity_counts(
-    scope: ValidatedDiscoveryScope,
-    dt_permissions: DataTypeDiscoveryPermissions,
-    *,
-    lg: BoundLogger,
-    query: DiscoveryQuery | None = None,
-    return_raw_counts: bool = False,
-) -> EntityCountOrBoolResponse | tuple[EntityCounts, EntityCountOrBoolResponse]:
-    """
-    Get censored entity counts for a scope with given permissions.
-
-    This is the shared implementation used by both:
-    - Discovery endpoint (with query filters)
-    - Project/Dataset serializers (without query filters)
-
-    For each 'discovery entity', we generate either:
-     - a count (0/count-if-above-threshold), or
-     - a boolean (count > threshold)
-
-    If phenopacket is 0, don't reveal nested entities exist, otherwise we could get responses like (in the case of
-    one phenopacket with five biosamples): { phenopacket: 0, biosample: 5, ... }
-    ==> do this, plus the same thing for all entities nested inside other entities
-        (phenopacket -> biosample -> experiment -> experiment_result...)
-    TODO: in the future, if we have other options for non-Phenopackets-centric perspectives, this should instead be
-     done in a more dynamic way, starting from the queryset entity.
-
-    Args:
-        scope: Validated discovery scope (project/dataset)
-        dt_permissions: Data type permissions for authorization
-        lg: Logger instance for structured logging
-        query: Optional discovery query with filters/FTS (defaults to empty query)
-        return_raw_counts: If True, return tuple of (raw_counts, censored_counts) for logging
-
-    Returns:
-        If return_raw_counts=False: Dictionary mapping entities to censored counts (int) or booleans
-        If return_raw_counts=True: Tuple of (raw counts dict, censored counts dict)
-    """
-    query = query or EMPTY_DISCOVERY_QUERY
-
-    qqs = QueryHelper(query, scope, dt_permissions, lg)
-    counts = await discovery_queryset_entity_counts(qqs)
-    censored = await censor_entity_counts(scope, counts, dt_permissions, lg)
-
-    if return_raw_counts:
-        return counts, censored
-
-    return censored
 
 
 @api_view(["GET"])
