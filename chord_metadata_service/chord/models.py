@@ -1,7 +1,7 @@
 import collections
 import uuid
 from bento_lib.discovery import DiscoveryConfig
-from bento_lib.provenance.dataset import DatasetModel
+from bento_lib.provenance.dataset import ProjectScopedDatasetModel
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -11,7 +11,7 @@ from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
-from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBMixin
+from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBModelMixin
 
 
 __all__ = ["Project", "Dataset", "ProjectJsonSchema"]
@@ -205,27 +205,22 @@ class Dataset(BaseProjectOrDataset):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class DatasetV2(PydanticJSONBMixin, models.Model):
+# Model, inherted from Mixin
+class DatasetV2(PydanticJSONBModelMixin):
 
     # --- Mixin configuration ---
     COLUMN_FIELDS = {
         'identifier',
-        'schema_version',
+        'language',
+        'project',
         'title',
-        'description',
         'release_date',
         'last_modified',
-        'version',
-        'privacy',
-        'study_status',
-        'study_context',
     }
     JSONB_FIELD = 'data'
-    SCHEMA_CLASS = DatasetModel
+    SCHEMA_CLASS = ProjectScopedDatasetModel
 
     # --- Django fields ---
-    schema_version = models.CharField(max_length=8, default="1.0")
-
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
@@ -238,37 +233,25 @@ class DatasetV2(PydanticJSONBMixin, models.Model):
         help_text="If from PCGL, inherit. Otherwise created in Katsu.",
     )
 
+
     language = models.CharField(
-        max_length=2,
+        max_length=8,
         db_index=True,
     )
 
+    pk = models.CompositePrimaryKey("identifier", "language")
+
+
     title = models.CharField(max_length=512)
-    description = models.TextField()
 
     release_date = models.DateField(db_index=True)
     last_modified = models.DateField(db_index=True)
-
-    version = models.CharField(max_length=64, null=True, blank=True)
-    privacy = models.CharField(max_length=255, null=True, blank=True)
-
-    study_status = models.CharField(max_length=16, null=True, blank=True)
-    study_context = models.CharField(max_length=16, null=True, blank=True)
 
     # Store the whole validated payload (everything in your Pydantic DatasetModel)
     data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    # Compound key of id/language
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["identifier", "language"],
-                name="unique_dataset_identifier_per_language",
-            )
-        ]
 
     def __str__(self) -> str:
         return f"{self.identifier}: {self.title} ({self.language})"

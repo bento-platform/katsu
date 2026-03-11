@@ -388,7 +388,7 @@ flask = ["flask (>=3.0.3,<4)"]
 type = "git"
 url = "https://github.com/bento-platform/bento_lib.git"
 reference = "feature/dataset-model"
-resolved_reference = "79314e13fdd4365d1887d42644f33f397897c573"
+resolved_reference = "399754098e7abb7bb8af157bd646de8062a5c32a"
 
 [[package]]
 name = "cachetools"

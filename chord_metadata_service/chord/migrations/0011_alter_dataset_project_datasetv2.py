@@ -38,6 +38,6 @@ class Migration(migrations.Migration):
             options={
                 'indexes': [models.Index(fields=['id'], name='chord_datas_id_327358_idx'), models.Index(fields=['release_date'], name='chord_datas_release_8ef27a_idx'), models.Index(fields=['last_modified'], name='chord_datas_last_mo_2b6d24_idx'), models.Index(fields=['study_status', 'study_context'], name='chord_datas_study_s_675827_idx')],
             },
-            bases=(chord_metadata_service.common.mixins.pydantic_mixin.PydanticJSONBMixin, models.Model),
+            bases=(chord_metadata_service.common.mixins.pydantic_mixin.PydanticJSONBModelMixin, models.Model),
         ),
     ]

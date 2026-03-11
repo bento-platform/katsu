@@ -14,6 +14,7 @@ from bento_lib.responses import errors
 
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.request import Request as DrfRequest
@@ -282,29 +283,54 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 class DatasetV2ViewSet(CHORDPublicModelViewSet):
     queryset = DatasetV2.objects.all()
     serializer_class = DatasetV2Serializer
-
-    # If you’re using the router with default lookup ("pk"), you can keep lookup_field='id'.
-    # If your URL kwarg is dataset_id (like DatasetViewSet), also add lookup_url_kwarg.
-    lookup_field = "id"
+    lookup_field = "identifier"
+    DEFAULT_LANGUAGE = "en"
 
     def get_queryset(self):
         queryset = super().get_queryset()
         project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
+        lang = self.request.query_params.get("lang")
+        if lang:
+            queryset = queryset.filter(language=lang)
         return queryset
+
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        language = self.request.query_params.get("lang", self.DEFAULT_LANGUAGE)
+        obj = get_object_or_404(
+            queryset,
+            identifier=self.kwargs["identifier"],
+            language=language,
+        )
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    async def get_obj_async(self):
+        language = self.request.query_params.get("lang", self.DEFAULT_LANGUAGE) # type: ignore
+        try:
+            return await DatasetV2.objects.aget(
+                identifier=self.kwargs["identifier"],
+                language=language,
+            )
+        except DatasetV2.DoesNotExist:
+            raise Http404
 
     def list(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
         return super().list(request, *args, **kwargs)
+    
+    def retrieve(self, request, *args, **kwargs):
+        authz.mark_authz_done(request)
+        return super().retrieve(request, *args, **kwargs)
 
     @async_to_sync
     async def create(self, request, *args, **kwargs):
-        # Decide project from request body (preferred) or fallback to query param
-        project_id = request.data.get("project") or request.data.get("project_id")
+        project_id = request.data.get("project")
 
         if project_id is None:
-            return bad_request(request, "No project ID in request body")  
+            return bad_request(request, "No project ID in request body")
         if not (
             await authz.async_evaluate_one(
                 request,
@@ -312,7 +338,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
                 P_CREATE_DATASET,
             )
         ):
-            return forbidden(request) 
+            return forbidden(request)
 
         authz.mark_authz_done(request)
         return await sync_to_async(super().create)(request, *args, **kwargs)
@@ -322,21 +348,21 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         try:
             dataset = await self.get_obj_async()
         except Http404:
-            return not_found(request)  
-        dataset_project_id = str(dataset.project_id)
+            return not_found(request)
+        dataset_project_id = str(dataset.project)
 
         if not (
             await authz.async_evaluate_one(
                 request,
                 build_resource(
                     project=dataset_project_id,
-                    dataset=str(dataset.id),  
+                    dataset=str(dataset.identifier),
                 ),
                 P_EDIT_DATASET,
             )
         ):
-            return forbidden(request) 
-        
+            return forbidden(request)
+
         incoming_project = request.data.get("project") or request.data.get("project_id")
         if incoming_project is not None and str(incoming_project) != dataset_project_id:
             return bad_request(request, "Dataset project ID cannot change")
@@ -349,16 +375,16 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         try:
             dataset = await self.get_obj_async()
         except Http404:
-            return not_found(request)  # side effect: sets authz done flag
+            return not_found(request)
 
         if not (
             await authz.async_evaluate_one(
                 request,
-                build_resource(project=str(dataset.project_id)),
+                build_resource(project=str(dataset.project)),
                 P_DELETE_DATASET,
             )
         ):
-            return forbidden(request)  # side effect: sets authz done flag
+            return forbidden(request)
 
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
