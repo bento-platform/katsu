@@ -233,14 +233,12 @@ class DatasetV2(PydanticJSONBModelMixin):
         help_text="If from PCGL, inherit. Otherwise created in Katsu.",
     )
 
-
     language = models.CharField(
         max_length=8,
         db_index=True,
     )
 
     pk = models.CompositePrimaryKey("identifier", "language")
-
 
     title = models.CharField(max_length=512)
 
