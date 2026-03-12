@@ -20,7 +20,7 @@ NESTED_ENTITIES: dict[DiscoveryEntity, tuple[DiscoveryEntity, ...]] = {
 ENTITY_TO_DATASET_GROUP_BY = {
     "phenopacket": "dataset_id__identifier",
     "individual": "phenopackets__dataset_id__identifier",
-    "biosample": "individual__phenopackets__dataset_id__identifier",
+    "biosample": "phenopackets__dataset_id__identifier",
     "experiment": "biosample__individual__phenopackets__dataset_id__identifier",
     "experiment_result": "experiments__biosample__individual__phenopackets__dataset_id__identifier",
 }
