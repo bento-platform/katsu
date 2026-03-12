@@ -608,28 +608,43 @@ async def discovery_endpoint(
         dataset_level=True,
     )
     has_ds_level_counts_permission = any(p.counts for p in ds_level_permissions.values())
+    has_proj_level_counts_permission = any(p.counts for p in dt_permissions.values())
 
-    if has_ds_level_counts_permission:
+    if has_ds_level_counts_permission or has_proj_level_counts_permission:
         # Raw per-dataset counts: dataset_id -> {entity -> count}
         counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(
             qh
         )
 
-        # Censor per-dataset counts using dataset-level permissions
-        counts_by_dataset_res = await censor_entity_counts_by_dataset(
-            scope,
-            counts_by_dataset_raw,
-            ds_level_permissions,
-            lg,
-        )
-
-        # When we expose per-dataset counts, recompute the top-level counts from the
-        # censored per-dataset view to avoid residual disclosure (total - sum(others)).
-        if counts_by_dataset_res:
-            count_or_bools_res = aggregate_counts_from_censored_by_dataset(
-                counts_by_dataset_res,
-                count_or_bools_res,
+        if has_ds_level_counts_permission:
+            # Censor per-dataset counts using dataset-level permissions and expose the breakdown.
+            counts_by_dataset_res = await censor_entity_counts_by_dataset(
+                scope,
+                counts_by_dataset_raw,
+                ds_level_permissions,
+                lg,
             )
+            # Recompute top-level counts from the censored per-dataset view to avoid residual disclosure
+            # (total - sum(others) would reveal censored dataset counts).
+            if counts_by_dataset_res:
+                count_or_bools_res = aggregate_counts_from_censored_by_dataset(
+                    counts_by_dataset_res,
+                    count_or_bools_res,
+                )
+        else:
+            # Project-level counts only: still aggregate by dataset for residual disclosure protection, but do
+            # not expose the per-dataset breakdown (counts_by_dataset_res stays empty).
+            counts_by_dataset_proj = await censor_entity_counts_by_dataset(
+                scope,
+                counts_by_dataset_raw,
+                dt_permissions,
+                lg,
+            )
+            if counts_by_dataset_proj:
+                count_or_bools_res = aggregate_counts_from_censored_by_dataset(
+                    counts_by_dataset_proj,
+                    count_or_bools_res,
+                )
 
     if (
         not count_or_bools_res[queryset_entity]
