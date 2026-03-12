@@ -442,8 +442,8 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         res_json = response.json()
         counts_by_dataset = res_json["counts_by_dataset"]
         # all data lives in dataset_a, so it should appear in the breakdown
-        self.assertIn(self.id_ds_a, counts_by_dataset)
-        ds_counts = counts_by_dataset[self.id_ds_a]
+        self.assertIn(str(self.id_ds_a), counts_by_dataset)
+        ds_counts = counts_by_dataset[str(self.id_ds_a)]
         # 8 phenopackets and individuals are above the threshold (5), biosamples/experiments are not
         self.assertEqual(ds_counts["phenopacket"], 8)
         self.assertEqual(ds_counts["individual"], 8)
