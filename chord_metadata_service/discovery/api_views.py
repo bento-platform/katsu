@@ -523,12 +523,11 @@ async def discovery_queryset_entity_counts_by_dataset(
         all_datasets.update(ec.keys())
 
     res: dict[str, EntityCounts] = {}
-    entities = tuple(DISCOVERY_ENTITIES)
 
     for ds in all_datasets:
         res[ds] = {
             entity: entity_counts_per_entity[i].get(ds, 0)
-            for i, entity in enumerate(entities)
+            for i, entity in enumerate(DISCOVERY_ENTITIES)
         }
 
     return res
