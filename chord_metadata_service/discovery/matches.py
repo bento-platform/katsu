@@ -8,6 +8,7 @@ Since we have pagination, though, we should probably fetch full record details i
 from __future__ import annotations
 
 from bento_lib.discovery import DiscoveryEntity
+from bento_lib.ontologies.models import OntologyClass
 from django.db.models import QuerySet, Manager
 from typing import Awaitable, Callable, Type, TypeVar, TypedDict, TYPE_CHECKING
 
@@ -146,8 +147,16 @@ async def experiment_matches(
         res.append(
             MatchExperiment(
                 id=str(exp.id),
+                description=exp.description,
                 experiment_type=exp.experiment_type,
+                experiment_ontology=(
+                    OntologyClass.model_validate(exp.experiment_ontology) if exp.experiment_ontology else None
+                ),
                 study_type=exp.study_type,
+                molecule=exp.molecule,
+                molecule_ontology=(
+                    OntologyClass.model_validate(exp.molecule_ontology) if exp.molecule_ontology else None
+                ),
                 results=experiment_results,
                 # ------------------------------------------------------------------------------------------------------
                 biosample=str(exp.biosample.id) if exp.biosample else None,
