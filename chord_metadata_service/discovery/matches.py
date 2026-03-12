@@ -149,10 +149,14 @@ async def experiment_matches(
                 id=str(exp.id),
                 description=exp.description,
                 experiment_type=exp.experiment_type,
-                experiment_ontology=OntologyClass.model_validate(exp.experiment_ontology),
+                experiment_ontology=(
+                    OntologyClass.model_validate(exp.experiment_ontology) if exp.experiment_ontology else None
+                ),
                 study_type=exp.study_type,
                 molecule=exp.molecule,
-                molecule_ontology=OntologyClass.model_validate(exp.molecule_ontology),
+                molecule_ontology=(
+                    OntologyClass.model_validate(exp.molecule_ontology) if exp.molecule_ontology else None
+                ),
                 results=experiment_results,
                 # ------------------------------------------------------------------------------------------------------
                 biosample=str(exp.biosample.id) if exp.biosample else None,
