@@ -570,32 +570,15 @@ async def discovery_endpoint(
         lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
         qh = QueryHelper(query, scope, dt_permissions, lg)
         queryset, queried_entities = await qh.get_query_queryset_and_queried_entities(queryset_entity)
-        censored_counts = await qh.get_censored_entity_counts()  # to be used for censoring field responses!
+        # Get both raw counts (for logging) and censored counts; also pre-caches all entity querysets so that
+        # any ValidationError from an invalid query is caught here.
+        counts, count_or_bools_res = await qh.get_censored_entity_counts(return_raw_counts=True)
     except ValidationError as e:
         return await dres.django_validation_error(request, e, lg, "discovery endpoint encountered validation error")
-
-    # -- Field responses -----------------------------------------------------------------------------------------------
-
-    discovery = scope.discovery
-    fields: tuple[str, ...] = discovery.get_chart_field_ids()
-
-    field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
-        field: field_res
-        for field, field_res in zip(
-            fields,
-            await asyncio.gather(*(discovery_field_response(qh, field, censored_counts, lg) for field in fields))
-        )
-        if field_res is not None
-        # Parallel async collection of field responses for public overview
-    })
 
     # -- Counts processing ---------------------------------------------------------------------------------------------
 
     message: str = ""
-
-    # Get both raw counts (for logging) and censored counts (for response)
-    # Uses the same shared implementation as Project/Dataset serializers
-    counts, count_or_bools_res = await qh.get_censored_entity_counts(return_raw_counts=True)
 
     # -- Per-dataset counts (permissions-dependent) -------------------------------------------------------------------
 
@@ -650,6 +633,22 @@ async def discovery_endpoint(
         and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
     ):
         message = dres.INSUFFICIENT_DATA_AVAILABLE_MSG
+
+    # -- Field responses -----------------------------------------------------------------------------------------------
+    # Computed after count_or_bools_res is finalized so field visibility reflects per-dataset censorship.
+
+    discovery = scope.discovery
+    fields: tuple[str, ...] = discovery.get_chart_field_ids()
+
+    field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
+        field: field_res
+        for field, field_res in zip(
+            fields,
+            await asyncio.gather(*(discovery_field_response(qh, field, count_or_bools_res, lg) for field in fields))
+        )
+        if field_res is not None
+        # Parallel async collection of field responses for public overview
+    })
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
