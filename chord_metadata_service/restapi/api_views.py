@@ -61,10 +61,8 @@ async def search_overview(request: DrfRequest):
 
     individual_ids = request.GET.getlist("id") if request.method == "GET" else request.data.get("id", [])
     phenopackets = pheno_models.Phenopacket.get_model_scoped_queryset(scope).filter(subject_id__in=individual_ids)
-    experiments = (
-        experiments_models.Experiment
-        .get_model_scoped_queryset(scope)
-        .filter(biosample_id__in=[b async for b in phenopackets.values_list("biosamples__id", flat=True)])
+    experiments = experiments_models.Experiment.get_model_scoped_queryset(scope).filter(
+        biosample_id__in=[b async for b in phenopackets.values_list("biosamples__id", flat=True)]
     )
 
     # TODO: this hardcodes the biosample linked field set relationship
@@ -87,7 +85,9 @@ async def search_overview(request: DrfRequest):
         dt_experiment_summary(scope, dt_permissions[DATA_TYPE_EXPERIMENT], experiments),
     )
 
-    return Response({
-        DATA_TYPE_PHENOPACKET: phenopackets_summary,
-        DATA_TYPE_EXPERIMENT: experiments_summary,
-    })
+    return Response(
+        {
+            DATA_TYPE_PHENOPACKET: phenopackets_summary,
+            DATA_TYPE_EXPERIMENT: experiments_summary,
+        }
+    )

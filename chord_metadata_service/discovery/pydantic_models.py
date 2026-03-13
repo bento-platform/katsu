@@ -1,6 +1,7 @@
 import abc
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
+from bento_lib.ontologies.models import OntologyClass
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import Literal
@@ -119,8 +120,12 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
+    description: str | None = Field(..., title="Description")
     experiment_type: str = Field(..., title="Experiment Type")
-    study_type: str = Field(..., title="Study Type")
+    experiment_ontology: OntologyClass | None = Field(..., title="Experiment Type (Ontology)")
+    study_type: str | None = Field(..., title="Study Type")
+    molecule: str | None = Field(..., title="Molecule")
+    molecule_ontology: OntologyClass | None = Field(..., title="Molecule (Ontology)")
     results: list[MatchExperimentResult]
     # backlinks:
     biosample: str | None = Field(..., title="Biosample ID")

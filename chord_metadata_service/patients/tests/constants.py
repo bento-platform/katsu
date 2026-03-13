@@ -11,41 +11,39 @@ def generate_date_in_range(lower_year: int, upper_year: int):
     delta = upper_date - lower_date
     random_day_in_range = random.randint(1, delta.days)
     new_date = lower_date + timedelta(days=random_day_in_range)
-    return new_date.strftime('%Y-%m-%d')
+    return new_date.strftime("%Y-%m-%d")
 
 
 VITAL_STATUS_DECEASED = {
     "status": "DECEASED",
     "time_of_death": {
-        "timestamp": "2020-03-28T00:00:00Z"
+        "timestamp": "2020-03-28T00:00:00Z",
     },
     "cause_of_death": {
         "id": "MONDO:0100096",
-        "label": "COVID-19"
+        "label": "COVID-19",
     },
-    "survival_time_in_days": 20
+    "survival_time_in_days": 20,
 }
 
-VITAL_STATUS_ALIVE = {
-    "status": "ALIVE"
-}
+VITAL_STATUS_ALIVE = {"status": "ALIVE"}
 
 VALID_INDIVIDUAL = {
     "id": "patient:1",
     "taxonomy": {
         "id": "NCBITaxon:9606",
-        "label": "human"
+        "label": "human",
     },
     "vital_status": VITAL_STATUS_DECEASED,
     "date_of_birth": "1960-01-01",
     "time_at_last_encounter": {
         "age_range": {
             "start": {
-                "iso8601duration": "P45Y"
+                "iso8601duration": "P45Y",
             },
             "end": {
-                "iso8601duration": "P49Y"
-            }
+                "iso8601duration": "P49Y",
+            },
         }
     },
     "sex": "FEMALE",
@@ -54,31 +52,31 @@ VALID_INDIVIDUAL = {
 INVALID_INDIVIDUAL = {
     "id": "patient:1",
     "taxonomy": {
-        "id": "NCBITaxon:9606"
+        "id": "NCBITaxon:9606",
     },
     "date_of_birth": "1960-01-01",
     "age": {
         "start": {
-            "age": "P45Y"
+            "age": "P45Y",
         },
         "end": {
-            "age": "P49Y"
-        }
+            "age": "P49Y",
+        },
     },
-    "sex": "FEM"
+    "sex": "FEM",
 }
 
 VALID_INDIVIDUAL_2 = {
     "id": "patient:2",
     "taxonomy": {
         "id": "NCBITaxon:9606",
-        "label": "human"
+        "label": "human",
     },
     "date_of_birth": "1967-01-01",
     "time_at_last_encounter": {
         "age": {
-            "iso8601duration": "P50Y"
-        }
+            "iso8601duration": "P50Y",
+        },
     },
     "sex": "MALE",
 }
@@ -87,7 +85,7 @@ VALID_INDIVIDUAL_3 = {
     "id": "patient:3",
     "taxonomy": {
         "id": "NCBITaxon:9606",
-        "label": "human"
+        "label": "human",
     },
     "date_of_birth": "1967-01-01",
     "sex": "MALE",
@@ -114,7 +112,7 @@ def generate_valid_individual(
         "id": str(uuid.uuid4()),
         "taxonomy": {
             "id": "NCBITaxon:9606",
-            "label": "human"
+            "label": "human",
         },
         "sex": random.choice(SEX_OPTIONS) if sex_idx is None else SEX_OPTIONS[sex_idx],
         "extra_properties": {
@@ -124,7 +122,7 @@ def generate_valid_individual(
             "lab_test_result_value": round(random.uniform(0, 999.99), 2),
             "baseline_creatinine": round(random.uniform(30, 600), 0),
             "date_of_consent": generate_date_in_range(date_of_consent_range[0], date_of_consent_range[1]),
-        }
+        },
     }
 
     if age:

@@ -1,195 +1,160 @@
 from copy import deepcopy
 
 
+TAXONOMY_HOMO_SAPIENS = {
+    "id": "NCBITaxon:9606",
+    "label": "Homo sapiens",
+}
+
 VALID_INDIVIDUAL_1 = {
     "id": "ind:NA19648",
     "date_of_birth": "1993-10-04",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P28Y"
-        }
+        "age": {"iso8601duration": "P28Y"},
     },
     "sex": "FEMALE",
     "karyotypic_sex": "XX",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Passive smoker",
         "covidstatus": "Positive",
         "death_dc": "Alive",
         "mobility": "I am unable to walk about",
         "date_of_consent": "2020-08-20",
-        "lab_test_result_value": 705.91
-    }
+        "lab_test_result_value": 705.91,
+    },
 }
 
 VALID_INDIVIDUAL_2 = {
     "id": "ind:HG00096",
     "date_of_birth": "1924-03-29",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P97Y"
-        }
+        "age": {"iso8601duration": "P97Y"},
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Not specified",
         "covidstatus": "Positive",
         "death_dc": "Alive",
         "mobility": "I have no problems in walking about",
         "date_of_consent": "2020-04-04",
-        "lab_test_result_value": 581.97
-    }
+        "lab_test_result_value": 581.97,
+    },
 }
 
 VALID_INDIVIDUAL_3 = {
     "id": "ind:HG00100",
     "date_of_birth": "1997-10-29",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P24Y"
-        }
+        "age": {"iso8601duration": "P24Y"},
     },
     "sex": "FEMALE",
     "karyotypic_sex": "XX",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Former smoker",
         "covidstatus": "Negative",
         "death_dc": "Deceased",
         "mobility": "I have moderate problems in walking about",
         "date_of_consent": "2022-01-25",
-        "lab_test_result_value": 464.22
-    }
+        "lab_test_result_value": 464.22,
+    },
 }
 
 VALID_INDIVIDUAL_4 = {
     "id": "ind:HG00103",
     "date_of_birth": "1972-06-16",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P49Y"
-        }
+        "age": {"iso8601duration": "P49Y"},
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Not specified",
         "covidstatus": "Indeterminate",
         "death_dc": "Deceased",
         "mobility": "I have slight problems in walking about",
         "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
+        "lab_test_result_value": 786.86,
+    },
 }
 
 VALID_INDIVIDUAL_5 = {
     "id": "ind:HG00104",
     "date_of_birth": "1972-06-16",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P49Y"
-        }
+        "age": {"iso8601duration": "P49Y"},
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Not specified",
         "covidstatus": "Indeterminate",
         "death_dc": "Deceased",
         "mobility": "I have slight problems in walking about",
         "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
+        "lab_test_result_value": 786.86,
+    },
 }
 
 VALID_INDIVIDUAL_6 = {
     "id": "ind:HG00105",
     "date_of_birth": "1972-06-16",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P49Y"
-        }
+        "age": {"iso8601duration": "P49Y"},
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Not specified",
         "covidstatus": "Indeterminate",
         "death_dc": "Deceased",
         "mobility": "I have slight problems in walking about",
         "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
+        "lab_test_result_value": 786.86,
+    },
 }
 
 VALID_INDIVIDUAL_7 = {
     "id": "ind:HG00106",
     "date_of_birth": "1972-06-16",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P49Y"
-        }
+        "age": {"iso8601duration": "P49Y"},
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Not specified",
         "covidstatus": "Indeterminate",
         "death_dc": "Deceased",
         "mobility": "I have slight problems in walking about",
         "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
+        "lab_test_result_value": 786.86,
+    },
 }
 VALID_INDIVIDUAL_8 = {
     "id": "ind:HG00107",
     "date_of_birth": "1972-06-16",
     "time_at_last_encounter": {
-        "age": {
-            "iso8601duration": "P49Y"
-        }
+        "age": {"iso8601duration": "P49Y"},
     },
     "sex": "MALE",
     "karyotypic_sex": "XY",
-    "taxonomy": {
-        "id": "NCBITaxon:9606",
-        "label": "Homo sapiens"
-    },
+    "taxonomy": TAXONOMY_HOMO_SAPIENS,
     "extra_properties": {
         "smoking": "Not specified",
         "covidstatus": "Indeterminate",
         "death_dc": "Deceased",
         "mobility": "I have slight problems in walking about",
         "date_of_consent": "2021-03-03",
-        "lab_test_result_value": 786.86
-    }
+        "lab_test_result_value": 786.86,
+    },
 }
 
 
@@ -215,16 +180,14 @@ VALID_PHENOPACKET_1 = {
                 "iso8601duration": "P45Y",
             }
         },
-        "extra_properties": {
-            "education": "Bachelor's Degree"
-        }
+        "extra_properties": {"education": "Bachelor's Degree"},
     },
     "meta_data": {
         "phenopacket_schema_version": "2.0",
         "created": "2023-09-12T00:25:54.662Z",
         "created_by": "David Lougheed",
         "submitted_by": "David Lougheed",
-    }
+    },
 }
 
 VALID_PHENOPACKET_2 = {
@@ -238,16 +201,14 @@ VALID_PHENOPACKET_2 = {
                 "iso8601duration": "P45Y",
             }
         },
-        "extra_properties": {
-            "education": "Bachelor's Degree"
-        }
+        "extra_properties": {"education": "Bachelor's Degree"},
     },
     "meta_data": {
         "phenopacket_schema_version": "2.0",
         "created": "2023-09-12T00:25:54.662Z",
         "created_by": "David Lougheed",
         "submitted_by": "David Lougheed",
-    }
+    },
 }
 
 VALID_PHENOPACKET_SCHEMA = {
@@ -265,19 +226,19 @@ VALID_PHENOPACKET_SCHEMA = {
                         "$id": "katsu:phenopackets:biosample",
                         "type": "object",
                         "properties": {
-                            "original_biosample_extra_prop": {"type": "string"}
-                        }
-                    }
+                            "original_biosample_extra_prop": {"type": "string"},
+                        },
+                    },
                 },
                 "extra_properties": {
                     "type": "object",
                     "properties": {
-                        "original_pheno_extra_prop": {"type": "string"}
-                    }
-                }
-            }
+                        "original_pheno_extra_prop": {"type": "string"},
+                    },
+                },
+            },
         }
-    }
+    },
 }
 
 VALID_EXTRA_PROPERTIES_EXTENSIONS = {
@@ -287,9 +248,9 @@ VALID_EXTRA_PROPERTIES_EXTENSIONS = {
         "json_schema": {
             "type": "object",
             "properties": {
-                "new_pheno_prop": {"type": "string"}
+                "new_pheno_prop": {"type": "string"},
             },
-        }
+        },
     },
     "biosample": {
         "schema_type": "BIOSAMPLE",
@@ -297,10 +258,10 @@ VALID_EXTRA_PROPERTIES_EXTENSIONS = {
         "json_schema": {
             "type": "object",
             "properties": {
-                "new_biosample_prop": {"type": "string"}
-            }
-        }
-    }
+                "new_biosample_prop": {"type": "string"},
+            },
+        },
+    },
 }
 
 extra_properties_with_list = {
@@ -310,7 +271,7 @@ extra_properties_with_list = {
     "mobility": "I have slight problems in walking about",
     "date_of_consent": "2021-03-03",
     "lab_test_result_value": 699.86,
-    "baseline_creatinine": [100, 120]
+    "baseline_creatinine": [100, 120],
 }
 
 extra_properties_with_dict = {
@@ -322,8 +283,8 @@ extra_properties_with_dict = {
     "lab_test_result_value": 699.86,
     "baseline_creatinine": {
         "test_key_1": 120,
-        "test_key_2": "test_value_2"
-    }
+        "test_key_2": "test_value_2",
+    },
 }
 
 

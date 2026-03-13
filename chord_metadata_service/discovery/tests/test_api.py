@@ -583,8 +583,12 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def exp_match_dict(biosample, phenopacket, num: int):
         return {
             "id": biosample.experiments.first().id,
+            "description": f"Experimental design description for {num}",
             "experiment_type": "DNA Methylation",
+            "experiment_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
             "study_type": "Whole genome Sequencing",
+            "molecule": "total RNA",  # doesn't make sense haha
+            "molecule_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
             "results": [DiscoveryMatchesTest.exp_res_match_dict(biosample, phenopacket, num)],
             "biosample": str(biosample.id),
             "phenopacket": str(phenopacket.id),

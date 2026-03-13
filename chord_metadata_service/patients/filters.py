@@ -15,13 +15,12 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
     alternate_ids = django_filters.CharFilter(lookup_expr="icontains")
     sex = django_filters.CharFilter(lookup_expr="iexact")
     karyotypic_sex = django_filters.CharFilter(lookup_expr="iexact")
-    disease = django_filters.CharFilter(
-        method="filter_disease", field_name="phenopackets__diseases",
-        label="Disease")
+    disease = django_filters.CharFilter(method="filter_disease", field_name="phenopackets__diseases", label="Disease")
     # e.g. select all patients who have a symptom "dry cough"
     found_phenotypic_feature = django_filters.CharFilter(
-        method="filter_found_phenotypic_feature", field_name="phenopackets__phenotypic_features",
-        label="Found phenotypic feature"
+        method="filter_found_phenotypic_feature",
+        field_name="phenopackets__phenotypic_features",
+        label="Found phenotypic feature",
     )
 
     extra_properties = django_filters.CharFilter(method="filter_extra_properties", label="Extra properties")
@@ -40,16 +39,16 @@ class IndividualFilter(django_filters.rest_framework.FilterSet):
         Filters only found (present in a patient) Phenotypic features by id or label
         """
         qs = qs.filter(
-            Q(phenopackets__phenotypic_features__pftype__id__icontains=value) |
-            Q(phenopackets__phenotypic_features__pftype__label__icontains=value),
-            phenopackets__phenotypic_features__excluded=False
+            Q(phenopackets__phenotypic_features__pftype__id__icontains=value)
+            | Q(phenopackets__phenotypic_features__pftype__label__icontains=value),
+            phenopackets__phenotypic_features__excluded=False,
         ).distinct()
         return qs
 
     def filter_disease(self, qs, name, value):
         qs = qs.filter(
-            Q(phenopackets__diseases__term__id__icontains=value) |
-            Q(phenopackets__diseases__term__label__icontains=value)
+            Q(phenopackets__diseases__term__id__icontains=value)
+            | Q(phenopackets__diseases__term__label__icontains=value)
         ).distinct()
         return qs
 
