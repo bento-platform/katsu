@@ -5,12 +5,11 @@ from django.db.models import QuerySet
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
-from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
 from .fields import get_field_options, filter_queryset_field_value
 from .pydantic_models import DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
-from .utils import get_discovery_field_set_permissions, empty_discovery
+from .utils import empty_discovery
 
 __all__ = [
     "discovery_filter_queryset",
@@ -90,27 +89,16 @@ async def discovery_filter_queryset(
 
     searchable_fields = set(discovery.get_searchable_field_ids())
 
-    queried_fields = query.queried_filter_fields()  # fields for determining field permissions
-    overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
-
-    # TODO: in the future, scope repr passing to exceptions should be structured data:
-    scope_repr = repr(discovery_scope)
+    # get individual field permissions needed for our query and validate overall permissions
+    _, qf_permissions = query.get_and_validate_permissions(discovery_scope, dt_permissions)
 
     f_queryset = queryset
-
-    # right now, a user cannot be filtering based on more than one value for the same field
-    if (n_queried := len(query.filters)) > get_max_query_parameters(discovery, overall_permissions):
-        raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
-
-    if not overall_permissions.bool_:
-        raise ValidationError(f"Insufficient permissions to access discovery ({scope_repr})")
-
     queried_entities: set[DiscoveryEntity] = set()
     field_queried_entities: dict[str, DiscoveryEntity] = {}
 
     for field, value in query.filters.items():
         if field not in searchable_fields:
-            raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
+            raise ValidationError(f"Unsupported field used in query: {field} ({repr(discovery_scope)})")
 
         # Ensure the passed value is in our allowed options:
         #  - pass original queryset in for determining valid filter values
