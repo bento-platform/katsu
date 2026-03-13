@@ -281,7 +281,7 @@ class DiscoveryQuery(BaseModel):
                 case 0:
                     pass  # ignore empty lists if these somehow occur
                 case 1:
-                    filters[k] = v
+                    filters[k] = v[0]
                 case _:
                     # TODO: will we be able to support AllOf queries with GET, or just OneOf?
                     filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
