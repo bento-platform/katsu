@@ -35,9 +35,12 @@ P_DATE = r"\d{4}(-\d{2}(-\d{2})?)?"
 P_DATE_EXACT = r"\d{4}-\d{2}-\d{2}"
 
 # Number range patterns
+#  - Number range patterns
 P_NUMBER_MAX_VALUE = re.compile(rf"{P_MAX_SYM} (?P<val>{P_NUMBER})")
 P_NUMBER_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_NUMBER}), (?P<end>{P_NUMBER}){P_END_SYM}")
 P_NUMBER_MIN_VALUE = re.compile(rf"{P_MIN_SYM} (?P<val>-?\d+(\.\d+)?)")
+#  - Exact number pattern
+P_NUMBER_EXACT_VALUE = re.compile(rf"(?P<val>{P_NUMBER})")
 
 # Date patterns
 #  - Date bin pattern
@@ -55,7 +58,12 @@ def is_number_query_format(value: str) -> bool:
     Whether a filter value matches any possible number field query.
     Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*.
     """
-    return bool(P_NUMBER_MAX_VALUE.match(value) or P_NUMBER_RANGE.match(value) or P_NUMBER_MIN_VALUE.match(value))
+    return bool(
+        P_NUMBER_MAX_VALUE.match(value)
+        or P_NUMBER_RANGE.match(value)
+        or P_NUMBER_MIN_VALUE.match(value)
+        or P_NUMBER_EXACT_VALUE.match(value)
+    )
 
 
 def is_date_query_format(value: str) -> bool:
@@ -545,6 +553,10 @@ async def filter_queryset_field_value(
             # only the former is valid for censored discovery.
             condition = filter_maximum_condition(queryset_entity, field_props, max_match, field, subquery)
 
+        elif exact_match := P_NUMBER_EXACT_VALUE.match(value):
+            # full value looks like a number ("50.0", "50", "-5"). not valid for censored discovery.
+            condition = filter_equality_condition(queryset_entity, field_props, exact_match, field, subquery)
+
         else:
             raise NotImplementedError(f"Could not handle number value: '{value}'")
 
@@ -556,15 +568,19 @@ async def filter_queryset_field_value(
             condition = get_condition_for_non_jsonb_field(field, (("startswith", val),), subquery)
 
         elif mrp_match := P_DATE_RANGE.match(value):
+            # full value looks like [2022, 2023) or [2022, 2024] or [2022-02, 2023-01) or ...
             condition = filter_range_condition(queryset_entity, field_props, mrp_match, field, subquery)
 
         elif min_match := P_DATE_MIN_VALUE.match(value):
+            # full value looks like "≥ 2022-01" or "> 2023" (uses lexicographic ordering)
             condition = filter_minimum_condition(queryset_entity, field_props, min_match, field, subquery)
 
         elif max_match := P_DATE_MAX_VALUE.match(value):
+            # full value looks like "≤ 2022-01" or "< 2023" (uses lexicographic ordering)
             condition = filter_maximum_condition(queryset_entity, field_props, max_match, field, subquery)
 
         elif date_match := P_DATE_EXACT_VALUE.match(value):
+            # full value looks like "2022-01-03" (ISO date format)
             condition = filter_equality_condition(queryset_entity, field_props, date_match, field, subquery)
 
         else:

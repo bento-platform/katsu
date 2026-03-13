@@ -818,6 +818,36 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_numeric_full_access(self):
+        ltrv = "extra_properties__lab_test_result_value"
+
+        subtests = [
+            ("< 55.5", {f"{ltrv}__lt": 55.5}),
+            ("≤ 200", {f"{ltrv}__lte": 200}),
+            ("≤ 300", {f"{ltrv}__lte": 300}),
+            ("[50, 300]", {f"{ltrv}__gte": 50, f"{ltrv}__lte": 300}),
+            ("(100, 300]", {f"{ltrv}__gt": 100, f"{ltrv}__lte": 300}),
+        ]
+
+        for i in self.individual_objs[:10]:
+            iv = i.extra_properties["lab_test_result_value"]
+            subtests.extend((
+                (f"< {iv}", {f"{ltrv}__lt": iv}),
+                (f"≤ {iv}", {f"{ltrv}__lte": iv}),
+                (f"{iv}", {ltrv: iv}),
+            ))
+
+        for params in subtests:
+            with self.subTest(params=params):
+                # sex string search and extra_properties range search
+                response = self.dt_authz_full_get(f"/api/discovery?lab_test_result_value={params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                db_count = Individual.objects.filter(**params[1]).count()
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+                self._test_individual_counts(response_obj, db_count, full_access=True)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.dt_authz_counts_get(
