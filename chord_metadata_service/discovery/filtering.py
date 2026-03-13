@@ -102,11 +102,10 @@ async def discovery_filter_queryset(
 
     f_queryset = queryset
 
-    # right now, a user cannot be filtering based on more than one value for the same field
-    if (n_queried := len(query.filters)) > get_max_query_parameters(discovery, overall_permissions):
+    if (n_queried := query.n_filter_parameters()) > get_max_query_parameters(discovery, overall_permissions):
         raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
-    if not overall_permissions.bool_:
+    if not overall_permissions.bool_:  # TODO: require higher permissions for OR queries
         raise ValidationError(f"Insufficient permissions to access discovery ({scope_repr})")
 
     queried_entities: set[DiscoveryEntity] = set()

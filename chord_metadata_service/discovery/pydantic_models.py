@@ -247,6 +247,21 @@ class DiscoveryQuery(BaseModel):
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
 
+    def n_filter_parameters(self) -> int:
+        """
+        Returns the number of filter parameters in the query; more than one query to the same field in an OR fashion
+        counts as multiple parameters.
+        """
+        n = 0
+        for f in self.filters:
+            if isinstance(f, DiscoveryQueryFilterOneOf):
+                n += len(f.values)
+            elif isinstance(f, str):
+                n += 1
+            else:  # pragma: no cover
+                raise NotImplementedError()
+        return n
+
     def is_empty(self) -> bool:
         """
         Returns whether the query instance is equivalent to an empty query.
