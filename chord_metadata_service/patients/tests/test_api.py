@@ -823,17 +823,32 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
         subtests = [
             ("< 55.5", {f"{ltrv}__lt": 55.5}),
+            ("<55.5", {f"{ltrv}__lt": 55.5}),
             ("≤ 200", {f"{ltrv}__lte": 200}),
+            ("≤200", {f"{ltrv}__lte": 200}),
             ("≤ 300", {f"{ltrv}__lte": 300}),
+            ("≤300", {f"{ltrv}__lte": 300}),
+            ("> 100", {f"{ltrv}__gt": 100}),
+            (">100", {f"{ltrv}__gt": 100}),
+            ("≥ 100", {f"{ltrv}__gte": 100}),
+            ("≥100", {f"{ltrv}__gte": 100}),
             ("[50, 300]", {f"{ltrv}__gte": 50, f"{ltrv}__lte": 300}),
+            ("[50,300]", {f"{ltrv}__gte": 50, f"{ltrv}__lte": 300}),
             ("(100, 300]", {f"{ltrv}__gt": 100, f"{ltrv}__lte": 300}),
+            ("(100,300]", {f"{ltrv}__gt": 100, f"{ltrv}__lte": 300}),
         ]
 
         for i in self.individual_objs[:10]:
             iv = i.extra_properties["lab_test_result_value"]
             subtests.extend((
                 (f"< {iv}", {f"{ltrv}__lt": iv}),
+                (f"<{iv}", {f"{ltrv}__lt": iv}),
                 (f"≤ {iv}", {f"{ltrv}__lte": iv}),
+                (f"≤{iv}", {f"{ltrv}__lte": iv}),
+                (f"> {iv}", {f"{ltrv}__gt": iv}),
+                (f">{iv}", {f"{ltrv}__gt": iv}),
+                (f"≥ {iv}", {f"{ltrv}__gte": iv}),
+                (f"≥{iv}", {f"{ltrv}__gte": iv}),
                 (f"{iv}", {ltrv: iv}),
             ))
 
@@ -904,17 +919,28 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
         subtest_params = [
             ("Mar 2021", {f"{doc}__startswith": "2021-03"}),
+            ("> 2021-01", {f"{doc}__gt": "2021-01"}),
             ("[2021-01, 2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
+            ("[2021-01,2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
             ("[2021-01, 2021-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2021-04"}),
+            ("[2021-01,2021-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2021-04"}),
             ("[2021-01, 2024-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2024-04"}),
+            ("[2021-01,2024-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2024-04"}),
             ("[2020-01-01, 2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
+            ("[2020-01-01,2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
             ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
+            ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
         ]
 
         for i in self.individual_objs[:10]:
             ic = i.extra_properties["date_of_consent"]
             subtest_params.append((ic, {doc: ic}))
+            subtest_params.append((f"≤ {ic}", {f"{doc}__lte": ic}))
+            subtest_params.append((f"≤{ic}", {f"{doc}__lte": ic}))
+            subtest_params.append((f"≥ {ic}", {f"{doc}__gte": ic}))
+            subtest_params.append((f"≥{ic}", {f"{doc}__gte": ic}))
             subtest_params.append((f"[{ic}, {ic}]", {doc: ic}))
+            subtest_params.append((f"[{ic},{ic}]", {doc: ic}))
 
         for params in subtest_params:
             with self.subTest(params=params):
