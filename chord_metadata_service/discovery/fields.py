@@ -36,9 +36,9 @@ P_DATE_EXACT = r"\d{4}-\d{2}-\d{2}"
 
 # Number range patterns
 #  - Number range patterns
-P_NUMBER_MAX_VALUE = re.compile(rf"{P_MAX_SYM} (?P<val>{P_NUMBER})")
-P_NUMBER_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_NUMBER}), (?P<end>{P_NUMBER}){P_END_SYM}")
-P_NUMBER_MIN_VALUE = re.compile(rf"{P_MIN_SYM} (?P<val>-?\d+(\.\d+)?)")
+P_NUMBER_MAX_VALUE = re.compile(rf"{P_MAX_SYM} ?(?P<val>{P_NUMBER})")
+P_NUMBER_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_NUMBER}), ?(?P<end>{P_NUMBER}){P_END_SYM}")
+P_NUMBER_MIN_VALUE = re.compile(rf"{P_MIN_SYM} ?(?P<val>-?\d+(\.\d+)?)")
 #  - Exact number pattern
 P_NUMBER_EXACT_VALUE = re.compile(rf"(?P<val>{P_NUMBER})")
 
@@ -46,9 +46,9 @@ P_NUMBER_EXACT_VALUE = re.compile(rf"(?P<val>{P_NUMBER})")
 #  - Date bin pattern
 P_DATE_BIN = re.compile(rf"({'|'.join(month_abbr[i] for i in range(1, 13))}) \d{{4}}")
 #  - Date range patterns
-P_DATE_MAX_VALUE = re.compile(rf"{P_MAX_SYM} (?P<val>{P_DATE})")
-P_DATE_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_DATE}), (?P<end>{P_DATE}){P_END_SYM}")
-P_DATE_MIN_VALUE = re.compile(rf"{P_MIN_SYM} (?P<val>{P_DATE})")
+P_DATE_MAX_VALUE = re.compile(rf"{P_MAX_SYM} ?(?P<val>{P_DATE})")
+P_DATE_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_DATE}), ?(?P<end>{P_DATE}){P_END_SYM}")
+P_DATE_MIN_VALUE = re.compile(rf"{P_MIN_SYM} ?(?P<val>{P_DATE})")
 #  - Exact date patterns (Y-M-D)
 P_DATE_EXACT_VALUE = re.compile(rf"(?P<val>{P_DATE_EXACT})")
 
