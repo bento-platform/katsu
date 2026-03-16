@@ -1,6 +1,7 @@
 from bento_lib.discovery import NumberFieldDefinition, DiscoveryEntity
 from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig
-from typing import Any, Iterator
+from typing import Any, Iterator, Literal
+from calendar import month_abbr
 from django.db.models import Q, Func, BooleanField, F, Value, JSONField
 
 from .field_paths.django_field_query import get_field_django_mapping
@@ -11,15 +12,22 @@ __all__ = [
     "JSON_PATH_ACCESSOR",
     "get_jsonb_path_query",
     "parse_individual_age",
-    "labelled_range_generator",
-    "monthly_generator",
+    "labelled_number_range_generator",
+    "labelled_date_range_generator_by_month",
     "get_nested_json_condition",
+    "get_json_op_condition",
     "get_json_range_condition",
     "str_to_numeric",
 ]
 
 MAPPING_SEPARATOR = "/"
 JSON_PATH_ACCESSOR = "."
+
+OP_GTE: Literal[">="] = ">="
+OP_GT: Literal[">"] = ">"
+OP_EQ: Literal["="] = "="
+OP_LT: Literal["<"] = "<"
+OP_LTE: Literal["<="] = "<="
 
 
 class JSONBPathFilter(Func):
@@ -62,12 +70,11 @@ def parse_individual_age(age_obj: dict) -> int:
     raise ValueError(f"Error: {age_obj} format not supported")
 
 
-def labelled_range_generator(
+def labelled_number_range_generator(
     field_props: NumberFieldDefinition
 ) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
-    Returns a generator yielding floor, ceil and label value for each bin from
-    a numeric field configuration
+    Returns a generator yielding floor, ceil and label value for each bin from a numeric field configuration.
     """
 
     cfg = field_props.config
@@ -142,18 +149,35 @@ def auto_binning_generator(c: AutoBinsNumberFieldConfig) -> Iterator[tuple[int, 
         yield c.taper_right, c.maximum, f"≥ {c.taper_right}"
 
 
-def monthly_generator(start: str, end: str) -> Iterator[tuple[int, int]]:
+def _year_month_from_month_offset(start_year: int, month_offset: int) -> tuple[int, int]:
     """
-    generator of tuples (year nb, month nb) from a start date to an end date
-    as ISO formated strings `yyyy-mm`
+    Given a starting year and a 0-indexed month offset from the starting year, return a year and a (1-indexed) month.
     """
-    [start_year, start_month] = [int(k) for k in start.split("-")]
-    [end_year, end_month] = [int(k) for k in end.split("-")]
+    return start_year + month_offset // 12, (month_offset + 1) % 12 or 12
+
+
+def _month_label(year: int, month: int) -> str:
+    """Given a year and a 1-indexed month, return the label for the month bin."""
+    return f"{month_abbr[month].capitalize()} {year}"  # convert key as yyyy-mm to `abbreviated month yyyy`
+
+
+def labelled_date_range_generator_by_month(start: str | None, end: str | None) -> Iterator[tuple[str, str, str]]:
+    """
+    Returns a generator yielding floor, ceil and label value for each bin from a date field configuration,
+    binning by month given starting/ending months.
+    """
+
+    if start is None or end is None:
+        yield from ()
+        return
+
+    [start_year, start_month] = [int(k) for k in start.split("-")][:2]
+    [end_year, end_month] = [int(k) for k in end.split("-")][:2]
     last_month_nb = (end_year - start_year) * 12 + end_month
-    for month_nb in range(start_month, last_month_nb + 1):
-        year = start_year + (month_nb - 1) // 12
-        month = month_nb % 12 or 12
-        yield year, month
+    for month_offset in range(start_month - 1, last_month_nb):
+        gte_year, gte_month = _year_month_from_month_offset(start_year, month_offset)
+        lt_year, lt_month = _year_month_from_month_offset(start_year, month_offset + 1)
+        yield f"{gte_year}-{gte_month:02d}", f"{lt_year}-{lt_month:02d}", _month_label(gte_year, gte_month)
 
 
 def mapping_to_json_path(mapping: str) -> str:
@@ -178,14 +202,55 @@ def get_nested_json_condition(path: str, value: Any) -> dict[str, Any]:
     return condition
 
 
+def get_json_op_condition(
+    filtering_entity: DiscoveryEntity,
+    field_props: AnyFieldDefinition,
+    op: Literal["<=", "<", "=", ">", ">="],
+    value: str | int | float,
+) -> Q:
+    """
+    Takes field props for a field contained in a JSONField array, and returns a query expression for the provided
+    comparison operator and value.
+
+    Note: since Django doesn't support index-agnostic lookups for JSONField array elements,
+    we rely on the 'jsonb_path_exists' PostgreSQL function to perform element-wise filtering
+    on array elements that satisfy the range and 'group_by_value' field prop condition.
+
+    e.g. To get measurements where assay.id == "NCIT:C16358" AND value.quantity.value < 20 (BMIs bellow 20),
+    the JSON path with conditions would be:
+        '$[*] ? (@.value.quantity.value < 20 && @.assay.id == "NCIT:C16358")'
+    """
+
+    group_by = field_props.group_by
+    group_by_value = field_props.group_by_value
+    value_mapping = field_props.value_mapping
+
+    if not group_by or not group_by_value or not value_mapping:
+        return Q()
+
+    field = get_field_django_mapping(filtering_entity, field_props)
+    group_by_json_path = mapping_to_json_path(group_by)
+    value_json_path = mapping_to_json_path(value_mapping)
+
+    return Q(JSONBPathFilter(
+        # Points to the JSONField
+        F(field),
+        # JSON path expression with operator on field we're interested in and group_by_value condition
+        Value(f'$[*] ? (@.{value_json_path} {op} {value} && @.{group_by_json_path} == "{group_by_value}")')
+    ))
+
+
 def get_json_range_condition(
     filtering_entity: DiscoveryEntity,
     field_props: AnyFieldDefinition,
-    min_value: int | float | None = None,
-    max_value: int | float | None = None,
+    *,
+    min_value: int | float | str | None = None,
+    min_inclusive: bool = True,
+    max_value: int | float | str | None = None,
+    max_inclusive: bool = True,
 ) -> Q:
     """
-    Takes field props for a 'number' data type contained in a JSONField array,
+    Takes field props for a 'number' or 'date' data type contained in a JSONField array,
     and returns a query expression for the provided 'min' and 'max' values.
 
     Note: since Django doesn't support index-agnostic lookups for JSONField array elements,
@@ -204,25 +269,14 @@ def get_json_range_condition(
     range_condition = Q()
 
     if group_by and group_by_value and value_mapping:
-        field = get_field_django_mapping(filtering_entity, field_props)
-        group_by_json_path = mapping_to_json_path(group_by)
-        value_json_path = mapping_to_json_path(value_mapping)
         if min_value is not None:
-            min_condition = Q(JSONBPathFilter(
-                # Points to the JSONField
-                F(field),
-                # JSON path expression with GTE and group_by_value condition
-                Value(f'$[*] ? (@.{value_json_path} >= {min_value} && @.{group_by_json_path} == "{group_by_value}")')
-            ))
-            range_condition.add(min_condition, conn_type=Q.AND)
+            range_condition &= get_json_op_condition(
+                filtering_entity, field_props, op=OP_GTE if min_inclusive else OP_GT, value=min_value
+            )
         if max_value is not None:
-            max_condition = Q(JSONBPathFilter(
-                # Points to the JSONField
-                F(field),
-                # JSON path expression with LT and group_by_value condition
-                Value(f'$[*] ? (@.{value_json_path} < {max_value} && @.{group_by_json_path} == "{group_by_value}")')
-            ))
-            range_condition.add(max_condition, Q.AND)
+            range_condition &= get_json_op_condition(
+                filtering_entity, field_props, op=OP_LTE if max_inclusive else OP_LT, value=max_value
+            )
 
     return range_condition
 
