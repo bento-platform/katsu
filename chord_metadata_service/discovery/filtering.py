@@ -5,12 +5,11 @@ from django.db.models import QuerySet
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
-from .censorship import get_max_query_parameters
 from .exceptions import DiscoveryEmptyException
-from .fields import get_field_options, filter_queryset_field_value
+from .fields import is_number_query_format, is_date_query_format, get_field_options, filter_queryset_field_value
 from .pydantic_models import DiscoveryQueryFilterOneOf, DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
-from .utils import get_discovery_field_set_permissions, empty_discovery
+from .utils import empty_discovery
 
 __all__ = [
     "discovery_filter_queryset",
@@ -27,7 +26,6 @@ def _in_case_insensitive(val: str, i: Iterable[str]) -> bool:
 
 async def validate_field_query_value(
     queryset_entity: DiscoveryEntity,
-    queryset: QuerySet,
     scope: ValidatedDiscoveryScope,
     field_id: str,
     value: str | DiscoveryQueryFilterOneOf,
@@ -40,9 +38,14 @@ async def validate_field_query_value(
 
     field_props = scope.discovery.fields[field_id]
 
-    # Ensure the passed value is in our pre-determined array of options (or, if an {enum: null} string field, check that
-    # the passed value is in the database [above the censorship threshold as needed]):
-    options = await get_field_options(queryset_entity, queryset, field_id, scope, field_permissions)
+    # Validation for the field filter value:
+    #  - check it is in our pre-determined array of options
+    #  - or, if an {enum: null} string field, check that the passed value is in the database
+    #    [above the censorship threshold as needed]
+    #  - or, if the requester has query:data permissions, check that the passed value matches a valid format for the
+    #    field (a range query for a number or date)
+
+    options = await get_field_options(queryset_entity, field_id, scope, field_permissions)
     if (
         value not in options
         and not (
@@ -56,6 +59,14 @@ async def validate_field_query_value(
         and not (
             # no restriction when enum is not set for categories
             field_props.datatype == "string" and field_props.config.enum is None  # narrowed type via datatype ==
+        )
+        and not (
+            # with query:data permissions, we can query ANY range of numbers
+            field_permissions.data and field_props.datatype == "number" and is_number_query_format(value)
+        )
+        and not (
+            # with query:data permissions, we can query ANY range of dates
+            field_permissions.data and field_props.datatype == "date" and is_date_query_format(value)
         )
     ):
         raise ValidationError(f"Invalid value used in field query: {field_id}={value} ({repr(scope)})")
@@ -94,26 +105,17 @@ async def discovery_filter_queryset(
 
     searchable_fields = set(discovery.get_searchable_field_ids())
 
-    queried_fields = query.queried_filter_fields()  # fields for determining field permissions
-    overall_permissions, qf_permissions = get_discovery_field_set_permissions(discovery, queried_fields, dt_permissions)
-
-    # TODO: in the future, scope repr passing to exceptions should be structured data:
-    scope_repr = repr(discovery_scope)
+    # get individual field permissions needed for our query and validate overall permissions
+    _, qf_permissions = query.get_and_validate_permissions(discovery_scope, dt_permissions)
 
     f_queryset = queryset
-
-    if (n_queried := query.n_filter_parameters()) > get_max_query_parameters(discovery, overall_permissions):
-        raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
-
-    if not overall_permissions.bool_:  # TODO: require higher permissions for OR queries
-        raise ValidationError(f"Insufficient permissions to access discovery ({scope_repr})")
 
     queried_entities: set[DiscoveryEntity] = set()
     field_queried_entities: dict[str, DiscoveryEntity] = {}
 
     for field, value in query.filters.items():
         if field not in searchable_fields:
-            raise ValidationError(f"Unsupported field used in query: {field} ({scope_repr})")
+            raise ValidationError(f"Unsupported field used in query: {field} ({repr(discovery_scope)})")
 
         # Ensure the passed value is in our allowed options:
         #  - pass original queryset in for determining valid filter values
@@ -121,7 +123,7 @@ async def discovery_filter_queryset(
         #    queryset model
         if validate_field:
             await validate_field_query_value(
-                queryset_entity, queryset, discovery_scope, field, value, qf_permissions[field]
+                queryset_entity, discovery_scope, field, value, qf_permissions[field]
             )
 
         # Update queryset to include the Django ORM filter for this query field/value

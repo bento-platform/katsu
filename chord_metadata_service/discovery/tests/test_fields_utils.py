@@ -7,7 +7,7 @@ from .constants import DISCOVERY_CONFIG_TEST
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
-    labelled_range_generator,
+    labelled_number_range_generator,
     get_nested_json_condition,
     str_to_numeric,
 )
@@ -30,7 +30,7 @@ class TestLabelledRangeGenerator(TestCase):
         })
 
     def test_config_with_tapers(self):
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         c = self.fp.config
         self.assertEqual(rg[0], (c.minimum, c.taper_left, f"< {c.taper_left}"))
         self.assertEqual(rg[-1], (c.taper_right, c.maximum, f"≥ {c.taper_right}"))
@@ -42,7 +42,7 @@ class TestLabelledRangeGenerator(TestCase):
     def test_config_without_tapers(self):
         self.fp.config.taper_left = 0
         self.fp.config.taper_right = 1000
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
 
@@ -62,7 +62,7 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         })
 
     def test_custom_bins_config(self):
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         self.assertEqual(rg[0], (0, 5.5, "< 5.5"))
         self.assertEqual(rg[-1], (2000, None, "≥ 2000"))
         self.assertEqual(rg[1], (5.5, 200, "[5.5, 200)"))
@@ -71,7 +71,7 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         self.fp.config.minimum = 0
         self.fp.config.bins.insert(0, 0)
         self.fp.config.maximum = 2000
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
 

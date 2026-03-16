@@ -1,6 +1,5 @@
 from bento_lib.discovery import DiscoveryConfig
 from django.db.models import Count, F, QuerySet
-from typing import Mapping
 
 from chord_metadata_service.authz.types import DataPermissions
 
@@ -12,7 +11,6 @@ __all__ = [
     "individual_experiment_type_stats",
     "individual_biosample_tissue_stats",
     "bento_public_format_count_and_stats_list",
-    "stats_for_field",
     "queryset_stats_for_field",
 ]
 
@@ -82,32 +80,10 @@ async def bento_public_format_count_and_stats_list(
     return thresholded_count(total, discovery, field_permissions), stats_list
 
 
-async def stats_for_field(
-    qs: QuerySet,
-    discovery: DiscoveryConfig,
-    field: str,
-    field_permissions: DataPermissions,
-    add_missing: bool = False,
-    group_by: str | None = None,
-) -> Mapping[str, int]:
+def _queryset_key_and_values_for_field(queryset: QuerySet, field: str, group_by: str | None) -> tuple[str, QuerySet]:
     """
-    Computes counts of distinct values for a given field. Mainly applicable to
-    char fields representing categories
-    """
-    return await queryset_stats_for_field(
-        qs, field, discovery, field_permissions, add_missing=add_missing, group_by=group_by)
-
-
-async def queryset_stats_for_field(
-    queryset: QuerySet,
-    field: str,
-    discovery: DiscoveryConfig,
-    field_permissions: DataPermissions,
-    add_missing: bool = False,
-    group_by: str | None = None
-) -> Mapping[str, int]:
-    """
-    Computes counts of distinct values for a queryset.
+    Helper function to rename the field we want (if possibly nested) to something that won't conflict with a real key on
+    the queryset, especially if we're digging into some JSONB object.
     """
 
     # to prevent a JSONB path query from conflicting with a potentially real key on the queryset, we cannot use just the
@@ -119,15 +95,33 @@ async def queryset_stats_for_field(
     queryset_key = f"_jsonb_{field}_{group_by.replace(MAPPING_SEPARATOR, '_')}" if group_by is not None else field
 
     # values() restrict the table of results to this COLUMN
+    if group_by is not None:
+        return queryset_key, queryset.values(**{queryset_key: get_jsonb_path_query(field, group_by)})
+    else:
+        return queryset_key, queryset.values(field)
+
+
+async def queryset_stats_for_field(
+    queryset: QuerySet,
+    field: str,
+    discovery: DiscoveryConfig | None,
+    field_permissions: DataPermissions | None,
+    add_missing: bool = False,
+    group_by: str | None = None,
+    should_censor: bool = True,
+) -> dict[str, int]:
+    """
+    Computes counts of distinct values for a queryset and a given field. Mainly applicable to
+    fields representing categorical values.
+    """
+
+    if (discovery is None or field_permissions is None) and should_censor:
+        raise Exception("cannot censor without discovery config")
+
+    queryset_key, queryset_values = _queryset_key_and_values_for_field(queryset, field, group_by)
+
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
-    if group_by is not None:
-        queryset_values = queryset.values(
-            **{queryset_key: get_jsonb_path_query(field, group_by)},
-        )
-    else:
-        queryset_values = queryset.values(field)
-
     # this empty order_by() clears any previous ordering set, which can interfere with annotations
     #  - see https://docs.djangoproject.com/en/5.2/topics/db/aggregation/#interaction-with-order-by
     annotated_queryset = queryset_values.annotate(total=Count("*")).order_by()
@@ -147,12 +141,14 @@ async def queryset_stats_for_field(
 
         # Censor low cell counts if necessary - we don't want to betray that the value even exists in the database if
         # we have a low count for it.
-        if thresholded_count(item["total"], discovery, field_permissions) == 0:
+        if should_censor and thresholded_count(item["total"], discovery, field_permissions) == 0:
             continue
 
         stats[key] = item["total"]
 
     if add_missing:
-        stats["missing"] = thresholded_count(num_missing, discovery, field_permissions)
+        stats["missing"] = (
+            thresholded_count(num_missing, discovery, field_permissions) if should_censor else num_missing
+        )
 
     return stats
