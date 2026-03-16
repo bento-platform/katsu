@@ -3,6 +3,7 @@ import abc
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection, DiscoveryConfig
 from bento_lib.ontologies.models import OntologyClass
 from django.core.exceptions import ValidationError
+from django.http import QueryDict
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import Literal, Self
@@ -340,14 +341,17 @@ class DiscoveryQuery(BaseModel):
         if request.method not in ("GET", "POST"):
             raise NotImplementedError("from_drf_request implemented for GET|POST only")
 
-        params = request.query_params if request.method == "GET" else request.data
+        params: QueryDict | dict = request.query_params if request.method == "GET" else request.data
 
         # TODO: post JSON - directly validate with Pydantic
 
         # Process query parameters and check validity
         filters: dict[str, str | DiscoveryQueryFilterOneOf] = {}
         for k in filter(cls._filter_query_param, params.keys()):
-            match len(v := params.getlist(k)):
+            v = params.getlist(k) if isinstance(params, QueryDict) else params.get(k, [])
+            if not isinstance(v, list):
+                v = [v]
+            match len(v):
                 case 0:
                     pass  # ignore empty lists if these somehow occur
                 case 1:
@@ -356,7 +360,11 @@ class DiscoveryQuery(BaseModel):
                     # TODO: will we be able to support AllOf queries with GET, or just OneOf?
                     filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
 
-        return cls(fts=params.get("_fts", ""), fts_type=params.get("_fts_type") or "plain", filters=filters)
+        return cls.model_validate({
+            "fts": params.get("_fts", ""),
+            "fts_type": params.get("_fts_type") or "plain",
+            "filters": filters,
+        })
 
 
 class DiscoveryUIHintsResponse(BaseModel):
