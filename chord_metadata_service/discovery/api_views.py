@@ -396,7 +396,7 @@ async def discovery_search_fields(
     """
 
     discovery = scope.discovery
-    _, field_permissions = get_discovery_field_set_permissions(discovery, None, dt_permissions)
+    _, field_permissions = get_discovery_field_set_permissions(discovery, None, False, dt_permissions)
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -790,6 +790,6 @@ async def discovery_rules(
     """
 
     # TODO: allow filtering by fields accessed?
-    fs_permissions, _ = get_discovery_field_set_permissions(scope, None, dt_permissions)
+    fs_permissions, _ = get_discovery_field_set_permissions(scope, None, False, dt_permissions)
 
     return Response(get_rules(scope, data_permissions=fs_permissions), status=status.HTTP_200_OK)

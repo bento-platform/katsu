@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.test import TransactionTestCase, override_settings
 from structlog.stdlib import get_logger
 
@@ -34,10 +35,21 @@ class QueryHelperTest(TransactionTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_empty_querying_fts(self):
         # nothing here
-        qh = QueryHelper(self.fts_query, self.scope, self.dt_permissions, self.logger)
+        qh = QueryHelper(self.fts_query, self.scope, self.dt_permissions_full, self.logger)
         qs, qe = await qh.get_query_queryset_and_queried_entities("phenopacket")
         # TODO: queried entities for FTS?
         self.assertEqual(qe, frozenset({}))
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    async def test_empty_querying_fts_forbidden(self):
+        # not enough permissions
+        qh = QueryHelper(self.fts_query, self.scope, self.dt_permissions, self.logger)
+        with self.assertRaises(ValidationError) as e:
+            await qh.get_query_queryset_and_queried_entities("phenopacket")
+        self.assertEqual(
+            str(e.exception),
+            "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None dataset=None>)']",
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_querying_filters_full_perms(self):
