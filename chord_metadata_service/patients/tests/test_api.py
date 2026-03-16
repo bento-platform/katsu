@@ -519,10 +519,10 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             c.generate_valid_individual(date_of_consent_range=(2020, 2023)) for _ in range(self.num_individuals)
         ]
 
-        individual_objs = [Individual.objects.create(**individual) for individual in self.individuals]
-        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(individual_objs[0]))
+        self.individual_objs = [Individual.objects.create(**individual) for individual in self.individuals]
+        biosample = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_objs[0]))
 
-        for idx, individual in enumerate(individual_objs, 1):
+        for idx, individual in enumerate(self.individual_objs, 1):
             meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
             phenopacket = ph_m.Phenopacket.objects.create(
                 id=f"phenopacket_id:{idx}",
@@ -608,8 +608,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         # TODO: assert full empty response
         self.assertDictEqual(response.json()["counts"], DISCOVERY_ZERO_COUNTS)
 
-    def _test_individual_counts(self, response_obj: dict, individual_db_count: int):
-        if individual_db_count <= self.response_threshold:
+    def _test_individual_counts(self, response_obj: dict, individual_db_count: int, full_access: bool = False):
+        if individual_db_count <= self.response_threshold and not full_access:
             self.assertEqual(response_obj["counts"], DISCOVERY_ZERO_COUNTS)
             self.assertEqual(response_obj["message"], dres.INSUFFICIENT_DATA_AVAILABLE_MSG)
         else:
@@ -842,6 +842,51 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_numeric_full_access(self):
+        ltrv = "extra_properties__lab_test_result_value"
+
+        subtests = [
+            ("< 55.5", {f"{ltrv}__lt": 55.5}),
+            ("<55.5", {f"{ltrv}__lt": 55.5}),
+            ("≤ 200", {f"{ltrv}__lte": 200}),
+            ("≤200", {f"{ltrv}__lte": 200}),
+            ("≤ 300", {f"{ltrv}__lte": 300}),
+            ("≤300", {f"{ltrv}__lte": 300}),
+            ("> 100", {f"{ltrv}__gt": 100}),
+            (">100", {f"{ltrv}__gt": 100}),
+            ("≥ 100", {f"{ltrv}__gte": 100}),
+            ("≥100", {f"{ltrv}__gte": 100}),
+            ("[50, 300]", {f"{ltrv}__gte": 50, f"{ltrv}__lte": 300}),
+            ("[50,300]", {f"{ltrv}__gte": 50, f"{ltrv}__lte": 300}),
+            ("(100, 300]", {f"{ltrv}__gt": 100, f"{ltrv}__lte": 300}),
+            ("(100,300]", {f"{ltrv}__gt": 100, f"{ltrv}__lte": 300}),
+        ]
+
+        for i in self.individual_objs[:10]:
+            iv = i.extra_properties["lab_test_result_value"]
+            subtests.extend((
+                (f"< {iv}", {f"{ltrv}__lt": iv}),
+                (f"<{iv}", {f"{ltrv}__lt": iv}),
+                (f"≤ {iv}", {f"{ltrv}__lte": iv}),
+                (f"≤{iv}", {f"{ltrv}__lte": iv}),
+                (f"> {iv}", {f"{ltrv}__gt": iv}),
+                (f">{iv}", {f"{ltrv}__gt": iv}),
+                (f"≥ {iv}", {f"{ltrv}__gte": iv}),
+                (f"≥{iv}", {f"{ltrv}__gte": iv}),
+                (f"{iv}", {ltrv: iv}),
+            ))
+
+        for params in subtests:
+            with self.subTest(params=params):
+                # sex string search and extra_properties range search
+                response = self.dt_authz_full_get(f"/api/discovery?lab_test_result_value={params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                response_obj = response.json()
+                db_count = Individual.objects.filter(**params[1]).count()
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+                self._test_individual_counts(response_obj, db_count, full_access=True)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_multiple_ranges_1(self):
         # extra_properties range search (both min and max range, multiple values)
         response = self.dt_authz_counts_get(
@@ -860,32 +905,98 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_date_range_no_bins(self):
+        # data not in this range, so we won't have this bin available
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 1997")
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(
+            "Invalid value used in field query: date_of_consent=Mar 1997",
+            response.json()["errors"][0]["message"][0],
+            # TODO: message not supposed to be array of str but can't break API for beacon
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_1(self):
         # extra_properties date range search (only after or before, single value)
-        # Testing with a date of consent from 1 year ago
         response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        range_parameters = {"extra_properties__date_of_consent__startswith": "2021-03"}
-        db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        self._test_individual_counts(response_obj, db_count)
+        if "SmallCellCount" in str(type(self)):
+            # no bins available due to low counts, should be 400 as we don't want to leak start/end
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(
+                "Invalid value used in field query: date_of_consent=Mar 2021",
+                response.json()["errors"][0]["message"][0],
+                # TODO: message not supposed to be array of str but can't break API for beacon
+            )
+        else:
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response_obj = response.json()
+            db_count = Individual.objects.filter(extra_properties__date_of_consent__startswith="2021-03").count()
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+            self._test_individual_counts(response_obj, db_count)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_date_range_full_access(self):
+        # extra_properties date range search with full access, so no small cell count bin elimination + full range
+        # queries are possible.
+
+        doc = "extra_properties__date_of_consent"
+
+        subtest_params = [
+            ("Mar 2021", {f"{doc}__startswith": "2021-03"}),
+            ("> 2021-01", {f"{doc}__gt": "2021-01"}),
+            ("[2021-01, 2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
+            ("[2021-01,2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
+            ("[2021-01, 2021-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2021-04"}),
+            ("[2021-01,2021-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2021-04"}),
+            ("[2021-01, 2024-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2024-04"}),
+            ("[2021-01,2024-04)", {f"{doc}__gte": "2021-01", f"{doc}__lt": "2024-04"}),
+            ("[2020-01-01, 2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
+            ("[2020-01-01,2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
+            ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
+            ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
+        ]
+
+        for i in self.individual_objs[:10]:
+            ic = i.extra_properties["date_of_consent"]
+            subtest_params.append((ic, {doc: ic}))
+            subtest_params.append((f"≤ {ic}", {f"{doc}__lte": ic}))
+            subtest_params.append((f"≤{ic}", {f"{doc}__lte": ic}))
+            subtest_params.append((f"≥ {ic}", {f"{doc}__gte": ic}))
+            subtest_params.append((f"≥{ic}", {f"{doc}__gte": ic}))
+            subtest_params.append((f"[{ic}, {ic}]", {doc: ic}))
+            subtest_params.append((f"[{ic},{ic}]", {doc: ic}))
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                response = self.dt_authz_full_get(f"/api/discovery?date_of_consent={params[0]}")
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                db_count = Individual.objects.filter(**params[1]).count()
+                self._test_individual_counts(response.json(), db_count, full_access=True)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
         response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response_obj = response.json()
-        range_parameters = {
-            "extra_properties__date_of_consent__startswith": "2021-03",
-            "extra_properties__lab_test_result_value__gte": 0,
-            "extra_properties__lab_test_result_value__lt": 55.5,
-        }
-        db_count = Individual.objects.filter(**range_parameters).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        self._test_individual_counts(response_obj, db_count)
+        if "SmallCellCount" in str(type(self)):
+            # no bins available due to low counts, should be 400 as we don't want to leak start/end
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn(
+                "Invalid value used in field query: date_of_consent=Mar 2021",
+                response.json()["errors"][0]["message"][0],
+                # TODO: message not supposed to be array of str but can't break API for beacon
+            )
+        else:
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            response_obj = response.json()
+            range_parameters = {
+                "extra_properties__date_of_consent__startswith": "2021-03",
+                "extra_properties__lab_test_result_value__gte": 0,
+                "extra_properties__lab_test_result_value__lt": 55.5,
+            }
+            db_count = Individual.objects.filter(**range_parameters).count()
+            self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+            self._test_individual_counts(response_obj, db_count)
 
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
     def test_discovery_filtering_mapping_for_search_filter(self):

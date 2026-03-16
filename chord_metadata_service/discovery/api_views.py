@@ -33,7 +33,7 @@ from .censorship import get_rules, censor_entity_counts
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryScopeException
 from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
-from .fields import get_field_options, get_range_stats, get_categorical_stats, get_date_stats
+from .fields import get_field_options, get_range_stats, get_categorical_stats
 from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import trigram_similarity_search, normal_full_text_search
@@ -401,7 +401,6 @@ async def discovery_search_fields(
     # ------------------------------------------------------------------------------------------------------------------
 
     queryset_entity: DiscoveryEntity = "phenopacket"
-    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -418,7 +417,7 @@ async def discovery_search_fields(
         return DiscoveryFieldAndOptions(
             id=field,
             definition=field_props,
-            options=await get_field_options(queryset_entity, queryset, field, scope, field_permissions[field]),
+            options=await get_field_options(queryset_entity, field, scope, field_permissions[field]),
         )
 
     async def _get_section_response(section: SearchSection) -> DiscoverySearchSectionWithOptions | None:
@@ -477,13 +476,11 @@ async def discovery_field_response(
     try:
         if field_props.datatype == "string":
             stats = await get_categorical_stats(scope, field_entity, queryset, field_props.root, field_perms)
-        elif field_props.datatype == "number":
+        elif field_props.datatype in ("number", "date"):  # can use similar range logic for both numbers and dates
             stats = await get_range_stats(scope, field_entity, queryset, field_props.root, field_perms)
-        elif field_props.datatype == "date":
-            stats = await get_date_stats(scope, field_entity, queryset, field_props.root, field_perms)
         else:  # pragma: no cover
             # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
-            # validate the data_type value.
+            # validate the `datatype` value (unless a new possible value is added to FieldDefinition).
             raise NotImplementedError()
     except FieldError as e:
         await lg.aexception("discovery_field_response field error", exc_info=e)

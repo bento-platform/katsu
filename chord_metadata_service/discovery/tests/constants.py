@@ -49,6 +49,15 @@ DISCOVERY_CONFIG_TEST_DICT = {
                 "maximum": 100
             }
         },
+        "date_of_birth": {
+            "mapping": "individual/date_of_birth",
+            "title": "Date of Birth",
+            "description": "Date of Birth",
+            "datatype": "date",
+            "config": {
+                "bin_by": "month",
+            },
+        },
         "tissues": {
             "mapping": "biosample/sampled_tissue/label",
             "title": "Tissue",
