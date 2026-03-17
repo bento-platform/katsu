@@ -163,6 +163,6 @@ def aggregate_counts_from_censored_by_dataset(
             aggregated[entity] = any(bool(v) for v in values)
         else:
             # All numeric: sum them
-            aggregated[entity] = sum(int(v) for v in values)
+            aggregated[entity] = sum(values)
 
     return aggregated
