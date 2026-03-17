@@ -145,26 +145,19 @@ async def censor_entity_counts_by_dataset(
 
 def aggregate_counts_from_censored_by_dataset(
     counts_by_dataset: dict[str, EntityCountOrBoolResponse],
-    base_counts: EntityCountOrBoolResponse,
 ) -> EntityCountOrBoolResponse:
 
-    aggregated: EntityCountOrBoolResponse = dict(base_counts)
-
-    # Collect entities in base_counts or any per-dataset mapping
-    all_entities: set[DiscoveryEntity] = set(aggregated.keys())
+    all_entities: set[DiscoveryEntity] = set()
     for ds_counts in counts_by_dataset.values():
         all_entities.update(ds_counts.keys())
 
+    aggregated: EntityCountOrBoolResponse = {}
     for entity in all_entities:
-        # All dataset-level values for this entity (int | bool)
         values: list[int | bool] = [
             ds_counts[entity]
             for ds_counts in counts_by_dataset.values()
             if entity in ds_counts
         ]
-        if not values:
-            continue
-
         # If any dataset-level value is boolean, treat the aggregated value as boolean (OR)
         if any(isinstance(v, bool) for v in values):
             aggregated[entity] = any(bool(v) for v in values)

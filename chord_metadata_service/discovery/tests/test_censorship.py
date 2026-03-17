@@ -170,16 +170,12 @@ class CensorshipCensorEntityCountsByDatasetTest(TestCase):
 
 class CensorshipAggregateCountsFromCensoredByDatasetTest(TestCase):
 
-    BASE_COUNTS: EntityCountOrBoolResponse = {
-        "phenopacket": 100, "individual": 100, "biosample": 100, "experiment": 100, "experiment_result": 100,
-    }
-
     def test_aggregate_integers(self):
         counts_by_dataset: dict[str, EntityCountOrBoolResponse] = {
             "ds-1": {"phenopacket": 60, "individual": 60},
             "ds-2": {"phenopacket": 40, "individual": 40},
         }
-        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset, self.BASE_COUNTS)
+        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset)
         self.assertEqual(result["phenopacket"], 100)
         self.assertEqual(result["individual"], 100)
 
@@ -189,7 +185,7 @@ class CensorshipAggregateCountsFromCensoredByDatasetTest(TestCase):
             "ds-1": {"phenopacket": True, "individual": True},
             "ds-2": {"phenopacket": False, "individual": False},
         }
-        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset, self.BASE_COUNTS)
+        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset)
         # OR across datasets: True | False = True
         self.assertIs(result["phenopacket"], True)
         self.assertIs(result["individual"], True)
@@ -198,15 +194,5 @@ class CensorshipAggregateCountsFromCensoredByDatasetTest(TestCase):
         counts_by_dataset: dict[str, EntityCountOrBoolResponse] = {
             "ds-1": {"phenopacket": False},
         }
-        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset, self.BASE_COUNTS)
+        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset)
         self.assertIs(result["phenopacket"], False)
-
-    def test_entity_not_in_any_dataset_keeps_base_value(self):
-        # experiment_result is in base_counts but absent from all per-dataset counts -> keep base value
-        counts_by_dataset: dict[str, EntityCountOrBoolResponse] = {
-            "ds-1": {"phenopacket": 50},
-        }
-        base: EntityCountOrBoolResponse = {"phenopacket": 100, "experiment_result": 7}
-        result = aggregate_counts_from_censored_by_dataset(counts_by_dataset, base)
-        self.assertEqual(result["experiment_result"], 7)  # unchanged (if not values: continue)
-        self.assertEqual(result["phenopacket"], 50)

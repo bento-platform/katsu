@@ -601,7 +601,7 @@ async def discovery_endpoint(
                 counts_by_dataset_res = censored
             # Recompute top-level counts from the censored per-dataset view to avoid residual disclosure
             # (total - sum(others) would reveal censored dataset counts).
-            count_or_bools_res = aggregate_counts_from_censored_by_dataset(censored, count_or_bools_res)
+            count_or_bools_res = aggregate_counts_from_censored_by_dataset(censored)
 
     if (
         not count_or_bools_res[queryset_entity]
