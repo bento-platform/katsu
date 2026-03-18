@@ -15,13 +15,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dataset',
             name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='datasets_old', to='chord.project'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='datasets_old', to='chord.project'),  # noqa: E501
         ),
         migrations.CreateModel(
             name='DatasetV2',
             fields=[
                 ('schema_version', models.CharField(default='1.0', max_length=8)),
-                ('id', models.CharField(db_index=True, help_text='If from PCGL, inherit. Otherwise created in Katsu.', max_length=128, primary_key=True, serialize=False, unique=True)),
+                ('id', models.CharField(db_index=True, help_text='If from PCGL, inherit. Otherwise created in Katsu.', max_length=128, primary_key=True, serialize=False, unique=True)),  # noqa: E501
                 ('title', models.CharField(max_length=512)),
                 ('description', models.TextField()),
                 ('release_date', models.DateField(db_index=True)),
@@ -33,10 +33,10 @@ class Migration(migrations.Migration):
                 ('data', models.JSONField(help_text='Full DatasetModel payload validated by Pydantic before saving.')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='datasets', to='chord.project')),
+                ('project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='datasets', to='chord.project')),  # noqa: E501
             ],
             options={
-                'indexes': [models.Index(fields=['id'], name='chord_datas_id_327358_idx'), models.Index(fields=['release_date'], name='chord_datas_release_8ef27a_idx'), models.Index(fields=['last_modified'], name='chord_datas_last_mo_2b6d24_idx'), models.Index(fields=['study_status', 'study_context'], name='chord_datas_study_s_675827_idx')],
+                'indexes': [models.Index(fields=['id'], name='chord_datas_id_327358_idx'), models.Index(fields=['release_date'], name='chord_datas_release_8ef27a_idx'), models.Index(fields=['last_modified'], name='chord_datas_last_mo_2b6d24_idx'), models.Index(fields=['study_status', 'study_context'], name='chord_datas_study_s_675827_idx')],  # noqa: E501
             },
             bases=(chord_metadata_service.common.mixins.pydantic_mixin.PydanticJSONBModelMixin, models.Model),
         ),

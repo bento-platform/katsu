@@ -11,13 +11,13 @@ from django.db import models
 class PydanticJSONBModelMixin(models.Model):
     """
     Mixin for models that store some Pydantic fields in a JSONB column.
-    
+
     Requires:
         - COLUMN_FIELDS: set of field names stored as actual columns
         - JSONB_FIELD: name of the JSONField (default: 'other_data')
         - SCHEMA_CLASS: the Pydantic model class
     """
-    _meta: Options # for pylance
+    _meta: Options  # for pylance
 
     COLUMN_FIELDS: Set[str] = set()
     JSONB_FIELD: str = 'other_data'
@@ -25,11 +25,11 @@ class PydanticJSONBModelMixin(models.Model):
 
     class Meta:
         abstract = True
-    
+
     @classmethod
     def from_schema(cls, schema: BaseModel, **extra_column_kwargs):
         data = schema.model_dump(exclude_unset=True, mode='json')
-        
+
         # Translation to model fields (1 to 1 schema to column name match required)
         column_data = {}
         for k, v in data.items():
@@ -37,22 +37,22 @@ class PydanticJSONBModelMixin(models.Model):
                 continue
 
             model_field = cls._meta.get_field(k)
-            if model_field.is_relation: # Handling Foreign Keys by providing ids
+            if model_field.is_relation:  # Handling Foreign Keys by providing ids
                 column_data[f"{k}_id"] = v
             else:
                 column_data[k] = v
-        
+
         column_data.update(extra_column_kwargs)
-        
+
         # Data to be put in JSONB_FIELD
         jsonb_data = {
-            k: v for k, v in data.items() 
+            k: v for k, v in data.items()
             if k not in cls.COLUMN_FIELDS
-        }        
+        }
         instance = cls(**column_data, **{cls.JSONB_FIELD: jsonb_data})
 
         return instance
-    
+
     def to_schema(self) -> BaseModel:
         data = {}
         for field in self.COLUMN_FIELDS:
@@ -63,13 +63,13 @@ class PydanticJSONBModelMixin(models.Model):
                 data[field] = getattr(self, f"{field}_id")
             else:
                 data[field] = getattr(self, field)
-        
+
         jsonb_data = getattr(self, self.JSONB_FIELD, {})
         data.update(jsonb_data)
 
         if self.SCHEMA_CLASS is None:
             raise NotImplementedError(f"{self.__class__.__name__} must define SCHEMA_CLASS")
-        
+
         return self.SCHEMA_CLASS(**data)
 
     def update_from_schema(self, schema: BaseModel):
@@ -88,7 +88,7 @@ class PydanticJSONBModelMixin(models.Model):
 class PydanticJSONBSerializer(serializers.ModelSerializer):
     """
     Generic serializer mixin for models using PydanticJSONBMixin.
-    
+
     Subclasses must define Meta.model (which should use PydanticJSONBMixin)
     and may set `schema_class` if it differs from model.SCHEMA_CLASS.
     """

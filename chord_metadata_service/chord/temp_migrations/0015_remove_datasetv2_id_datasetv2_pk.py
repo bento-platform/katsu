@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='datasetv2',
             name='pk',
-            field=models.CompositePrimaryKey('identifier', 'language', blank=True, editable=False, primary_key=True, serialize=False),
+            field=models.CompositePrimaryKey('identifier', 'language', blank=True, editable=False, primary_key=True, serialize=False),  # noqa: E501
         ),
     ]

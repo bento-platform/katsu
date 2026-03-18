@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='datasetv2',
             name='identifier',
-            field=models.CharField(db_index=True, default='temp', help_text='If from PCGL, inherit. Otherwise created in Katsu.', max_length=128),
+            field=models.CharField(db_index=True, default='temp', help_text='If from PCGL, inherit. Otherwise created in Katsu.', max_length=128),  # noqa: E501
             preserve_default=False,
         ),
         migrations.AddField(
@@ -42,15 +42,15 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dataset',
             name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='datasets', to='chord.project'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='datasets', to='chord.project'),  # noqa: E501
         ),
         migrations.AlterField(
             model_name='datasetv2',
             name='project',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='dv2', to='chord.project'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='dv2', to='chord.project'),  # noqa: E501
         ),
         migrations.AddConstraint(
             model_name='datasetv2',
-            constraint=models.UniqueConstraint(fields=('identifier', 'language'), name='unique_dataset_identifier_per_language'),
+            constraint=models.UniqueConstraint(fields=('identifier', 'language'), name='unique_dataset_identifier_per_language'),  # noqa: E501
         ),
     ]

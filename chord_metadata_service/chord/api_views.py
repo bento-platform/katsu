@@ -265,11 +265,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
 #     def get_queryset(self):
 #         queryset = super().get_queryset()
-        
+#
 #         project_id = self.request.query_params.get('project_id')
 #         if project_id:
 #             queryset = queryset.filter(project_id=project_id)
-        
+#
 #         return queryset
 
 #     def perform_create(self, serializer):
@@ -308,7 +308,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         return obj
 
     async def get_obj_async(self):
-        language = self.request.query_params.get("lang", self.DEFAULT_LANGUAGE) # type: ignore
+        language = self.request.query_params.get("lang", self.DEFAULT_LANGUAGE)  # type: ignore
         try:
             return await DatasetV2.objects.aget(
                 identifier=self.kwargs["identifier"],
@@ -320,7 +320,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
     def list(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
         return super().list(request, *args, **kwargs)
-    
+
     def retrieve(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
         return super().retrieve(request, *args, **kwargs)
@@ -388,6 +388,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
 
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
+
 
 class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
     """

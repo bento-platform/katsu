@@ -169,6 +169,7 @@ class DatasetSerializer(GenericSerializer):
         model = Dataset
         fields = '__all__'
 
+
 class DatasetV2Serializer(PydanticJSONBSerializer):
     schema_class = ProjectScopedDatasetModel
 
