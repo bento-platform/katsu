@@ -8,30 +8,30 @@ CONTEXT = [
         "Dataset": "sdo:Dataset",
         "title": {
             "@id": "sdo:name",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "description": {
             "@id": "sdo:description",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "DatasetDistribution": "sdo:DataDownload",
         "distributions": {
             "@id": "sdo:distribution",
-            "@type": "sdo:DataDownload"
+            "@type": "sdo:DataDownload",
         },
         "formats": "sdo:fileFormat",
         "unit": "sdo:unitCode",
         "access": {
             "@id": "sdo:accessMode",
-            "@type": "sdo:EntryPoint"
+            "@type": "sdo:EntryPoint",
         },
         "landing_page": {
             "@id": "sdo:url",
-            "@type": "sdo:URL"
+            "@type": "sdo:URL",
         },
         "size": {
             "@id": "sdo:contentSize",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "primary_publications": "sdo:citation",
         "Publication": "sdo:ScholarlyArticle",
@@ -39,47 +39,47 @@ CONTEXT = [
         "produced_by": "sdo:producer",
         "creators": {
             "@id": "sdo:creator",
-            "@type": "sdo:Thing"
+            "@type": "sdo:Thing",
         },
         "licenses": "sdo:license",
         "is_about": "sdo:about",
         "has_part": {
             "@id": "sdo:hasPart",
-            "@type": "sdo:Dataset"
+            "@type": "sdo:Dataset",
         },
         "acknowledges": "sdo:funder",
         "keywords": "sdo:keywords",
         "dates": "sdo:temporalCoverage",
         "stored_in": {
             "@id": "sdo:includedInDataCatalog",
-            "@type": "sdo:DataCatalog"
+            "@type": "sdo:DataCatalog",
         },
         "version": "sdo:version",
         "identifier": {
             "@id": "sdo:identifier",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "DataType": "sdo:Thing",
         "information": {
-            "@id": "sdo:Property"
+            "@id": "sdo:Property",
         },
         "Annotation": "sdo:Thing",
         "TaxonomicInformation": "sdo:Thing",
         "Identifier": "sdo:Thing",
         "identifier_source": {
             "@id": "sdo:Property",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "AlternateIdentifier": "sdo:Thing",
         "RelatedIdentifier": "sdo:Thing",
         "CategoryValuesPair": "sdo:PropertyValue",
         "category": {
             "@id": "sdo:value",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "category_iri": {
             "@id": "sdo:url",
-            "@type": "sdo:URL"
+            "@type": "sdo:URL",
         },
         "Organization": "sdo:Organization",
         "Person": "sdo:Person",
@@ -89,29 +89,29 @@ CONTEXT = [
         "affiliation": "sdo:affiliation",
         "value": {
             "@id": "sdo:value",
-            "@type": "sdo:DataType"
+            "@type": "sdo:DataType",
         },
         "types": "sdo:contentType",
         "value_iri": {
             "@id": "sdo:url",
-            "@type": "sdo:URL"
+            "@type": "sdo:URL",
         },
         "name": {
             "@id": "sdo:name",
-            "@type": "sdo:Text"
+            "@type": "sdo:Text",
         },
         "Date": "sdo:DateTime",
         "date": {
-            "@id": "sdo:Property"
+            "@id": "sdo:Property",
         },
         "type": {
-            "@id": "sdo:Property"
+            "@id": "sdo:Property",
         },
         "Disease": "sdo:MedicalCondition",
         "MolecularEntity": "sdo:Thing",
         "characteristics": {
             "@id": "sdo:additionalProperty",
-            "@type": "sdo:Thing"
+            "@type": "sdo:Thing",
         },
         "disease_status": "sdo:status",
         "Material": "sdo:Thing",
@@ -125,75 +125,75 @@ CONTEXT = [
         "extra_properties": "sdo:additionalProperty",
         "Place": "sdo:Place",
         "Dimension": "sdo:Thing",
-        "dimensions": "sdo:additionalProperty"
+        "dimensions": "sdo:additionalProperty",
     }
 ]
 
 
 # context types according to dats schema
 CONTEXT_TYPES = {
-    'dataset': {
-        'schema': 'https://w3id.org/dats/schema/dataset_schema.json',
-        'type': 'Dataset'
+    "dataset": {
+        "schema": "https://w3id.org/dats/schema/dataset_schema.json",
+        "type": "Dataset",
     },
-    'dates': {
-        'schema': 'https://w3id.org/dats/schema/date_info_schema.json',
-        'type': 'Date'
+    "dates": {
+        "schema": "https://w3id.org/dats/schema/date_info_schema.json",
+        "type": "Date",
     },
-    'licenses': {
-        'schema': 'https://w3id.org/dats/schema/license_schema.json',
-        'type': 'License'
+    "licenses": {
+        "schema": "https://w3id.org/dats/schema/license_schema.json",
+        "type": "License",
     },
-    'distributions': {
-        'schema': 'https://w3id.org/dats/schema/dataset_distribution_schema.json',
-        'type': 'DatasetDistribution'
+    "distributions": {
+        "schema": "https://w3id.org/dats/schema/dataset_distribution_schema.json",
+        "type": "DatasetDistribution",
     },
-    'dimensions': {
-        'schema': 'https://w3id.org/dats/schema/dimension_schema.json',
-        'type': 'Dimension'
+    "dimensions": {
+        "schema": "https://w3id.org/dats/schema/dimension_schema.json",
+        "type": "Dimension",
     },
-    'types': {
-        'schema': 'https://w3id.org/dats/schema/data_type_schema.json',
-        'type': 'DataType'
+    "types": {
+        "schema": "https://w3id.org/dats/schema/data_type_schema.json",
+        "type": "DataType",
     },
-    'stored_in': {
-        'schema': 'https://w3id.org/dats/schema/data_repository_schema.json',
-        'type': 'DataRepository'
+    "stored_in": {
+        "schema": "https://w3id.org/dats/schema/data_repository_schema.json",
+        "type": "DataRepository",
     },
-    'spatial_coverage': {
-        'schema': 'https://w3id.org/dats/schema/place_schema.json',
-        'type': 'Place'
+    "spatial_coverage": {
+        "schema": "https://w3id.org/dats/schema/place_schema.json",
+        "type": "Place",
     },
-    'organization': {
-        'schema': 'https://w3id.org/dats/schema/organization_schema.json',
-        'type': 'Organization'
+    "organization": {
+        "schema": "https://w3id.org/dats/schema/organization_schema.json",
+        "type": "Organization",
     },
-    'person': {
-        'schema': 'https://w3id.org/dats/schema/person_schema.json',
-        'type': 'Person'
+    "person": {
+        "schema": "https://w3id.org/dats/schema/person_schema.json",
+        "type": "Person",
     },
-    'identifier': {
-        'schema': 'https://w3id.org/dats/schema/identifier_info_schema.json',
-        'type': 'Identifier'
+    "identifier": {
+        "schema": "https://w3id.org/dats/schema/identifier_info_schema.json",
+        "type": "Identifier",
     },
-    'primary_publications': {
-        'schema': 'https://w3id.org/dats/schema/publication_schema.json',
-        'type': 'Publication'
+    "primary_publications": {
+        "schema": "https://w3id.org/dats/schema/publication_schema.json",
+        "type": "Publication",
     },
-    'alternate_identifiers': {
-        'schema': 'https://w3id.org/dats/schema/alternate_identifier_info_schema.json',
-        'type': 'AlternateIdentifier'
+    "alternate_identifiers": {
+        "schema": "https://w3id.org/dats/schema/alternate_identifier_info_schema.json",
+        "type": "AlternateIdentifier",
     },
-    'related_identifiers': {
-        'schema': 'https://w3id.org/dats/schema/related_identifier_info_schema.json',
-        'type': 'RelatedIdentifier'
+    "related_identifiers": {
+        "schema": "https://w3id.org/dats/schema/related_identifier_info_schema.json",
+        "type": "RelatedIdentifier",
     },
-    'annotation': {
-        'schema': 'https://w3id.org/dats/schema/annotation_schema.json',
-        'type': 'Annotation'
+    "annotation": {
+        "schema": "https://w3id.org/dats/schema/annotation_schema.json",
+        "type": "Annotation",
     },
-    'extra_properties': {
-        'schema': 'https://w3id.org/dats/schema/category_values_pair_schema.json',
-        'type': 'CategoryValuesPair'
-    }
+    "extra_properties": {
+        "schema": "https://w3id.org/dats/schema/category_values_pair_schema.json",
+        "type": "CategoryValuesPair",
+    },
 }

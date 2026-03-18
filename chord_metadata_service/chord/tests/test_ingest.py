@@ -322,6 +322,16 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         )
 
 
+class IngestMultipleTest(ProjectTestCase):
+    def test_ingesting_multiple_phenopackets(self):
+        ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier, logger
+        )
+        self.assertIsInstance(ingested_phenopackets, list)
+        for phenopacket in ingested_phenopackets:
+            self.assertTrue(phenopacket.extra_properties["root_level"])
+
+
 class IngestISOAgeToNumberTest(ProjectTestCase):
 
     def test_ingesting_phenopackets_json(self):

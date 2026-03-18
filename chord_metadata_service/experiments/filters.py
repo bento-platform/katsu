@@ -1,4 +1,6 @@
 import django_filters
+from django.db.models import Q
+
 from chord_metadata_service.phenopackets.filters import filter_datasets
 from .models import Experiment, ExperimentResult
 
@@ -33,6 +35,12 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     description = django_filters.CharFilter(lookup_expr='icontains')
     filename = django_filters.CharFilter(lookup_expr='icontains')
     url = django_filters.CharFilter(lookup_expr='icontains')
+    # special filter used for the experiment_results_drs.wdl association workflow to find experiment results which may
+    # be missing a DRS URL or indices
+    drs_association_candidate = django_filters.BooleanFilter(
+        method="filter_drs_association_candidate", label="DRS association candidate"
+    )
+
     indices = django_filters.CharFilter(method="filter_indices", label="Indices")
     genome_assembly_id = django_filters.CharFilter(lookup_expr='iexact')
     file_format = django_filters.CharFilter(lookup_expr='iexact')
@@ -50,6 +58,12 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = ExperimentResult
         exclude = ["creation_date", "created", "updated", "fts_extra"]
+
+    def filter_drs_association_candidate(self, qs, name, value):
+        q = Q(url__isnull=True) | Q(file_format__in=("BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTA", "FASTQ"), indices=[])
+        if not value:
+            q = ~q
+        return qs.filter(q)
 
     def filter_indices(self, qs, name, value):
         return qs.filter(indices__icontains=value)

@@ -49,6 +49,15 @@ DISCOVERY_CONFIG_TEST_DICT = {
                 "maximum": 100
             }
         },
+        "date_of_birth": {
+            "mapping": "individual/date_of_birth",
+            "title": "Date of Birth",
+            "description": "Date of Birth",
+            "datatype": "date",
+            "config": {
+                "bin_by": "month",
+            },
+        },
         "tissues": {
             "mapping": "biosample/sampled_tissue/label",
             "title": "Tissue",
@@ -151,7 +160,7 @@ DISCOVERY_CONFIG_EXTRA_PROPERTIES_DICT["fields"].update({
         "description": "This acts as a placeholder for numeric values",
         "datatype": "number",
         "config": {
-            "bins": [200, 300, 500, 1000, 1500, 2000],
+            "bins": [55.5, 200, 300, 500, 1000, 1255.5, 1500, 2000],
             "minimum": 0,
             "units": "mg/L"
         }

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "chord_metadata_service"  # can be renamed to katsu if inner module directory is renamed too
-version = "12.1.0"
+version = "13.1.0"
 description = "An implementation of a clin/pheno metadata store for the Bento platform."
 authors = [
     "Ksenia Zaytseva",
@@ -40,7 +40,7 @@ django-filter = "~25.2"
 djangorestframework = "~3.16.1"
 djangorestframework-camel-case = "^1.4.1"
 drf-spectacular = "^0.29.0"
-jsonschema = {version = "~4.25.1", extras = ["format"]}
+jsonschema = {version = "~4.26.0", extras = ["format"]}
 psycopg2-binary = "~2.9.11"
 PyJWT = {extras = ["crypto"], version = "^2.10.1"}
 python-dateutil = "^2.9.0.post0"
@@ -61,7 +61,12 @@ pydantic = "^2.12.3"
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.11.0"
 flake8 = "^7.3.0"
+ruff = "^0.15.0"
 tox = "^4.31.0"
 debugpy = "^1.8.17"
 daphne = "^4.2.1"
 aioresponses = "^0.7.8"
+
+[tool.ruff]
+line-length = 120
+extend-exclude = ["chord_metadata_service/*/migrations"]

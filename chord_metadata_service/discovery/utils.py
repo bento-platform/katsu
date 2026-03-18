@@ -8,7 +8,7 @@ from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.types import (
     DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 )
-from chord_metadata_service.chord.data_types import KatsuDataType
+from chord_metadata_service.chord.data_types import KatsuDataType, DATA_TYPES
 
 from .field_paths.normalize import normalize_field_path_true_model
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
@@ -48,6 +48,7 @@ async def get_discovery_data_type_permissions(
 def get_discovery_field_set_permissions(
     discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScope,
     fields_accessed: Iterable[str] | None,
+    has_fts: bool,
     dt_permissions: DataTypeDiscoveryPermissions,
 ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
     """
@@ -67,7 +68,7 @@ def get_discovery_field_set_permissions(
         # If no fields configured, default safe: fall back to no permissions
         return DataPermissions(bool_=False, counts=False, data=False), {}
 
-    dts_accessed: set[KatsuDataType] = set()
+    dts_accessed: set[KatsuDataType] = set(DATA_TYPES.keys()) if has_fts else set()
     field_dts: dict[str, KatsuDataType] = {}
 
     # field_set here is a set of strings, which are the *discovery field IDs/keys* (rather than mappings another ID.)

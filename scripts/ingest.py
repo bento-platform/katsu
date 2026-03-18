@@ -31,9 +31,7 @@ def load_config():
         with open("ingest.conf.json") as f:
             return json.load(f)
     except FileNotFoundError:
-        print(
-            "The config file ingest.conf.json is missing. You must have it in the same dir as this script."
-        )
+        print("The config file ingest.conf.json is missing. You must have it in the same dir as this script.")
         sys.exit()
 
 
@@ -44,28 +42,17 @@ def create_project(katsu_server_url, project_title):
     Return the uuid of the newly-created project.
     """
 
-    project_request = {
-        "title": project_title,
-        "description": "A new project."
-    }
+    project_request = {"title": project_title, "description": "A new project."}
 
     try:
         r = requests.post(katsu_server_url + "/api/projects", json=project_request)
     except requests.exceptions.ConnectionError:
-        print(
-            "Connection to the API server {} cannot be established.".format(
-                katsu_server_url
-            )
-        )
+        print("Connection to the API server {} cannot be established.".format(katsu_server_url))
         sys.exit()
 
     if r.status_code == 201:
         project_uuid = r.json()["identifier"]
-        print(
-            "Project {} with uuid {} has been created!".format(
-                project_title, project_uuid
-            )
-        )
+        print("Project {} with uuid {} has been created!".format(project_title, project_uuid))
         return project_uuid
     elif r.status_code == 400:
         print(
@@ -101,11 +88,7 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
 
     if r2.status_code == 201:
         dataset_uuid = r2.json()["identifier"]
-        print(
-            "Dataset {} with uuid {} has been created!".format(
-                dataset_title, dataset_uuid
-            )
-        )
+        print("Dataset {} with uuid {} has been created!".format(dataset_title, dataset_uuid))
         return dataset_uuid
     elif r2.status_code == 400:
         print(
@@ -126,11 +109,7 @@ def create_table(katsu_server_url, dataset_uuid, table_name):
     Return the uuid of the newly-created table.
     """
 
-    table_request = {
-        "name": table_name,
-        "data_type": "phenopacket",
-        "dataset": dataset_uuid
-    }
+    table_request = {"name": table_name, "data_type": "phenopacket", "dataset": dataset_uuid}
 
     r3 = requests.post(katsu_server_url + "/tables", json=table_request)
 
@@ -157,16 +136,10 @@ def ingest_phenopackets(katsu_server_url, table_id, phenopackets_json_location):
 
     print("Ingesting phenopackets, this may take a while...")
 
-    r4 = requests.post(
-        katsu_server_url + "/private/ingest", json=private_ingest_request
-    )
+    r4 = requests.post(katsu_server_url + "/private/ingest", json=private_ingest_request)
 
     if r4.status_code == 200 or r4.status_code == 201 or r4.status_code == 204:
-        print(
-            "Phenopackets have been ingested from source at {}".format(
-                phenopackets_json_location
-            )
-        )
+        print("Phenopackets have been ingested from source at {}".format(phenopackets_json_location))
     elif r4.status_code == 400:
         print(r4.text)
         sys.exit()
@@ -183,9 +156,7 @@ def main():
     config = load_config()
 
     print("Initializing...")
-    print(
-        "Warning: this script is only designed to handle the initial data ingestion of katsu service."
-    )
+    print("Warning: this script is only designed to handle the initial data ingestion of katsu service.")
 
     try:
         project_title = config["project_title"]

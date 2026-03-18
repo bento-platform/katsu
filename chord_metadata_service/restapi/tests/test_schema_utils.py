@@ -13,7 +13,7 @@ SCHEMA_1 = {
             "type": "array",
             "items": {
                 "type": "string",
-            }
+            },
         },
         "key2": {
             "type": "object",
@@ -21,7 +21,7 @@ SCHEMA_1 = {
                 "key1": {
                     "type": "string",
                 }
-            }
+            },
         },
     },
 }
@@ -31,19 +31,26 @@ class TestSchemaMerge(TestCase):
     def test_merge_1(self):
         self.assertDictEqual(
             merge_schema_dictionaries({"a": 1}, {"b": 2}),
-            {"a": 1, "b": 2})
+            {"a": 1, "b": 2},
+        )
 
     def test_merge_2(self):
         self.assertDictEqual(
-            merge_schema_dictionaries({"a": 1, "d": 4}, {"a": 2, "b": {"c": 3}}),
-            {"a": 2, "d": 4, "b": {"c": 3}})
+            merge_schema_dictionaries(
+                {"a": 1, "d": 4},
+                {"a": 2, "b": {"c": 3}},
+            ),
+            {"a": 2, "d": 4, "b": {"c": 3}},
+        )
 
     def test_merge_3(self):
         self.assertDictEqual(
             merge_schema_dictionaries(
                 {"a": {"b": 1}, "c": {"d": {"e": 1}, "f": 5}},
-                {"c": {"d": {"g": 8}}}),
-            {"a": {"b": 1}, "c": {"d": {"e": 1, "g": 8}, "f": 5}})
+                {"c": {"d": {"g": 8}}},
+            ),
+            {"a": {"b": 1}, "c": {"d": {"e": 1, "g": 8}, "f": 5}},
+        )
 
     def test_id_tag(self):
         tagged = tag_schema_with_nested_ids(SCHEMA_1)
@@ -59,15 +66,12 @@ class TestSchemaMerge(TestCase):
 
 
 class TestPatchSchema(SimpleTestCase):
-
     def test_ignored(self):
         # patch_project_schemas simply returns the base_schema if it has no "type" property
         base_schema = {"$schema": "https://json-schema.org/draft/2020-12/schema"}
         ext_schemas: dict[str, ExtensionSchemaDict] = {
             "phenopacket": {
-                "json_schema": {
-                    "type": "object"
-                },
+                "json_schema": {"type": "object"},
                 "required": False,
                 "schema_type": "phenopacket",
             }
@@ -82,10 +86,13 @@ class TestPatchSchema(SimpleTestCase):
         patched_schema = patch_project_schemas(base_schema=base_schema, extension_schemas=ext_schemas, logger=logger)
         self.assertDictEqual(
             patched_schema["properties"]["phenopacket"]["properties"]["extra_properties"],
-            ext_schemas["phenopacket"]["json_schema"]
+            ext_schemas["phenopacket"]["json_schema"],
         )
         self.assertDictEqual(
-            (patched_schema["properties"]["phenopacket"]["properties"]["biosamples"]["items"]
-                ["properties"]["extra_properties"]),
-            ext_schemas["biosample"]["json_schema"]
+            (
+                patched_schema["properties"]["phenopacket"]["properties"]["biosamples"]["items"]["properties"][
+                    "extra_properties"
+                ]
+            ),
+            ext_schemas["biosample"]["json_schema"],
         )

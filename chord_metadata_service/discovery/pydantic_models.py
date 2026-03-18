@@ -1,12 +1,20 @@
 import abc
 
-from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection
-from pydantic import BaseModel, Field, RootModel
+from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection, DiscoveryConfig
+from bento_lib.ontologies.models import OntologyClass
+from django.core.exceptions import ValidationError
+from pydantic import BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
-from typing import Literal
+from typing import Literal, Self
 
+from chord_metadata_service.authz.types import (
+    DataPermissionsLevel, DataTypeDiscoveryPermissions, DataPermissions, FieldDiscoveryPermissions
+)
 from chord_metadata_service.experiments.types import ExperimentResultFileFormat
+from .censorship import get_max_query_parameters
+from .scope import ValidatedDiscoveryScope
 from .types import EntityCountOrBoolResponse, FTSType
+from .utils import get_discovery_field_set_permissions
 
 __all__ = [
     "BinWithValue",
@@ -35,6 +43,8 @@ __all__ = [
 
 
 class BinWithValue(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     label: str
     value: int
 
@@ -52,6 +62,8 @@ class BaseDiscoveryResolvedField(BaseModel):
 
 
 class DiscoveryFieldAndOptions(BaseDiscoveryResolvedField):
+    model_config = ConfigDict(frozen=True)
+
     # field ID + field definition + field filter options
     options: list[str]
 
@@ -114,8 +126,12 @@ class MatchExperiment(BaseMatchModel):
     Compact representation of an experiment for returning/rendering search responses.
     """
     id: str = Field(..., title="Experiment ID")
+    description: str | None = Field(..., title="Description")
     experiment_type: str = Field(..., title="Experiment Type")
-    study_type: str = Field(..., title="Study Type")
+    experiment_ontology: OntologyClass | None = Field(..., title="Experiment Type (Ontology)")
+    study_type: str | None = Field(..., title="Study Type")
+    molecule: str | None = Field(..., title="Molecule")
+    molecule_ontology: OntologyClass | None = Field(..., title="Molecule (Ontology)")
     results: list[MatchExperimentResult]
     # backlinks:
     biosample: str | None = Field(..., title="Biosample ID")
@@ -165,6 +181,8 @@ class DiscoveryMatches(RootModel):
 
 
 class DiscoveryPagination(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     page: int
     page_size: int
     total: int  # total count of matches, whichever output format is chosen
@@ -186,6 +204,7 @@ class DiscoveryResponse(BaseModel):
         dict[str, EntityCountOrBoolResponse] |
         dict[str, dict[str, EntityCountOrBoolResponse]]
     )
+    counts_by_dataset: dict[str, EntityCountOrBoolResponse] = Field(default_factory=dict)
 
 
 class DiscoveryMatchesPaginatedResponse(BaseModel):
@@ -229,8 +248,56 @@ class DiscoveryQuery(BaseModel):
         """
         return not self.fts and len(self.filters) == 0
 
+    @property
+    def _required_global_permission_level(self) -> DataPermissionsLevel:
+        """
+        Get the "global" minimum required permission level required to execute this query, irrespective of field-level
+        permission information. If full-text search is specified, we need query:data permissions.
+        """
+        if self.fts:
+            return "data"
+        return "bool_"
+
+    def _get_field_set_permissions(
+        self,
+        discovery_or_scope: DiscoveryConfig | ValidatedDiscoveryScope,
+        dt_permissions: DataTypeDiscoveryPermissions,
+    ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
+        """
+        Returns a tuple of (
+            DataPermissions for running the query 'globally', i.e., every field + FTS,
+            {field id: DataPermissions},  (for filters)
+        ).
+        """
+        return get_discovery_field_set_permissions(
+            discovery_or_scope, self.queried_filter_fields(), bool(self.fts), dt_permissions
+        )
+
+    def get_and_validate_permissions(
+        self, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions
+    ) -> tuple[DataPermissions, FieldDiscoveryPermissions]:
+        """
+        Gets overall and field permissions for the query, and validate that we have the sufficient permissions to
+        execute the query at the same time
+        """
+
+        discovery = scope.discovery
+        scope_repr = repr(scope)  # TODO: in the future, scope repr passing to exceptions should be structured data:
+
+        # get permissions needed for our query
+        overall_permissions, qf_permissions = self._get_field_set_permissions(discovery, dt_permissions)
+
+        # right now, a user cannot be filtering based on more than one value for the same field
+        if (n_queried := len(self.filters)) > get_max_query_parameters(discovery, overall_permissions):
+            raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
+
+        if not overall_permissions.has_permissions_level(self._required_global_permission_level):
+            raise ValidationError(f"Insufficient permissions to access discovery ({scope_repr})")
+
+        return overall_permissions, qf_permissions
+
     @classmethod
-    def from_drf_request(cls, request: DrfRequest) -> "DiscoveryQuery":
+    def from_drf_request(cls, request: DrfRequest) -> Self:
         """
         Given a Django REST Framework request object from a discovery/discovery-matches request, return a validated
         DiscoveryQuery object.
@@ -259,6 +326,8 @@ class DiscoveryUIHintsResponse(BaseModel):
     Model representing the UI hints discovery response, which gives any API consumer some hints/suggestions on how to
     make the UI nicer by, e.g., selectively hiding parts.
     """
+
+    model_config = ConfigDict(frozen=True)
 
     entities_with_data: frozenset[DiscoveryEntity]
     # biosample_location_present: bool  TODO

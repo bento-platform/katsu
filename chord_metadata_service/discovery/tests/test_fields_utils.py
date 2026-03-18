@@ -7,8 +7,9 @@ from .constants import DISCOVERY_CONFIG_TEST
 from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
-    labelled_range_generator,
+    labelled_number_range_generator,
     get_nested_json_condition,
+    str_to_numeric,
 )
 
 
@@ -29,7 +30,7 @@ class TestLabelledRangeGenerator(TestCase):
         })
 
     def test_config_with_tapers(self):
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         c = self.fp.config
         self.assertEqual(rg[0], (c.minimum, c.taper_left, f"< {c.taper_left}"))
         self.assertEqual(rg[-1], (c.taper_right, c.maximum, f"≥ {c.taper_right}"))
@@ -41,7 +42,7 @@ class TestLabelledRangeGenerator(TestCase):
     def test_config_without_tapers(self):
         self.fp.config.taper_left = 0
         self.fp.config.taper_right = 1000
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
 
@@ -54,24 +55,37 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
             "title": "Test",
             "description": "A test field",
             "config": {
-                "bins": [200, 300, 500, 1000, 1500, 2000],
+                "bins": [5.5, 200, 300, 500, 1000, 1500, 2000],
                 "minimum": 0,
                 "units": "mg/L"
             }
         })
 
     def test_custom_bins_config(self):
-        rg = list(labelled_range_generator(self.fp))
-        self.assertEqual(rg[0], (0, 200, "< 200"))
+        rg = list(labelled_number_range_generator(self.fp))
+        self.assertEqual(rg[0], (0, 5.5, "< 5.5"))
         self.assertEqual(rg[-1], (2000, None, "≥ 2000"))
-        self.assertEqual(rg[1], (200, 300, "[200, 300)"))
+        self.assertEqual(rg[1], (5.5, 200, "[5.5, 200)"))
 
     def test_custom_bins_config_no_open_ended(self):
-        self.fp.config.minimum = 200
+        self.fp.config.minimum = 0
+        self.fp.config.bins.insert(0, 0)
         self.fp.config.maximum = 2000
-        rg = list(labelled_range_generator(self.fp))
+        rg = list(labelled_number_range_generator(self.fp))
         self.assertIn("[", rg[0][2])
         self.assertIn("[", rg[-1][2])
+
+    def test_str_to_numeric(self):
+        subtests = [
+            ("5.5", 5.5),
+            ("5.", 5.0),
+            ("5", 5),
+            (".5", 0.5),
+        ]
+
+        for params in subtests:
+            with self.subTest(params=params):
+                self.assertEqual(str_to_numeric(params[0]), params[1])
 
 
 class TestJsonFieldUtils(TestCase):
@@ -123,15 +137,17 @@ class TestJsonFieldUtils(TestCase):
         field_props = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
 
         # GTE 0 an LT 20
-        json_range_condition_0_20 = get_json_range_condition("phenopacket", field_props, min=0, max=20)
+        json_range_condition_0_20 = get_json_range_condition(
+            "phenopacket", field_props, min_value=0, max_value=20
+        )
         self.assertTrue(len(json_range_condition_0_20), 2)  # expect 2 conditions (GTE and LT)
 
         # GTE 0
-        json_range_condition_gte_0 = get_json_range_condition("phenopacket", field_props, min=0)
+        json_range_condition_gte_0 = get_json_range_condition("phenopacket", field_props, min_value=0)
         self.assertTrue(len(json_range_condition_gte_0), 1)
 
         # LT 20
-        json_range_condition_lt_20 = get_json_range_condition("phenopacket", field_props, max=20)
+        json_range_condition_lt_20 = get_json_range_condition("phenopacket", field_props, max_value=20)
         self.assertTrue(len(json_range_condition_lt_20), 1)
 
         # Combined Q object
@@ -139,6 +155,14 @@ class TestJsonFieldUtils(TestCase):
         combined.add(json_range_condition_gte_0, Q.AND)
         combined.add(json_range_condition_lt_20, Q.AND)
         self.assertEqual(json_range_condition_0_20, combined)
+
+        # GTE 0.5
+        json_range_condition_gte_0_5 = get_json_range_condition("phenopacket", field_props, min_value=0.5)
+        self.assertTrue(len(json_range_condition_gte_0_5), 1)
+
+        # LT 20.5
+        json_range_condition_lt_20_5 = get_json_range_condition("phenopacket", field_props, max_value=20.5)
+        self.assertTrue(len(json_range_condition_lt_20_5), 1)
 
     def test_jsonb_path_query_empty(self):
         assay_ids_query = get_jsonb_path_query("measurements", "assay/id")

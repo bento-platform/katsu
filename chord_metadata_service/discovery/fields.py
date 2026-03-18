@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from bento_lib.discovery import (
     DiscoveryConfig, DateFieldDefinition, FieldDefinition, NumberFieldDefinition, StringFieldDefinition, DiscoveryEntity
@@ -10,7 +11,7 @@ from chord_metadata_service.discovery.censorship import get_threshold
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q, Exists, OuterRef
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
-from typing import Any, Mapping
+from typing import Any
 
 from chord_metadata_service.authz.types import DataPermissions
 
@@ -19,9 +20,65 @@ from .censorship import censor_count, thresholded_count
 from .field_paths.django_field_query import DiscoveryFieldSubquery, get_field_django_mapping_and_queried_entity
 from .scope import ValidatedDiscoveryScope
 from .pydantic_models import BinWithValue, BinList
-from .stats import stats_for_field
+from .stats import queryset_stats_for_field
+from .utils import get_discovery_entity_model_scoped_queryset
 
 LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+
+# Re-usable regex components
+P_MAX_SYM = r"(?P<sym>[<≤])"
+P_MIN_SYM = r"(?P<sym>[>≥])"
+P_START_SYM = r"(?P<start_sym>[\[(>≥])"
+P_END_SYM = r"(?P<end_sym>[])<≤])"
+P_NUMBER = r"-?\d+(\.\d+)?"
+P_DATE = r"\d{4}(-\d{2}(-\d{2})?)?"
+P_DATE_EXACT = r"\d{4}-\d{2}-\d{2}"
+
+# Number range patterns
+#  - Number range patterns
+P_NUMBER_MAX_VALUE = re.compile(rf"{P_MAX_SYM} ?(?P<val>{P_NUMBER})")
+P_NUMBER_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_NUMBER}), ?(?P<end>{P_NUMBER}){P_END_SYM}")
+P_NUMBER_MIN_VALUE = re.compile(rf"{P_MIN_SYM} ?(?P<val>-?\d+(\.\d+)?)")
+#  - Exact number pattern
+P_NUMBER_EXACT_VALUE = re.compile(rf"(?P<val>{P_NUMBER})")
+
+# Date patterns
+#  - Date bin pattern
+P_DATE_BIN = re.compile(rf"({'|'.join(month_abbr[i] for i in range(1, 13))}) \d{{4}}")
+#  - Date range patterns
+P_DATE_MAX_VALUE = re.compile(rf"{P_MAX_SYM} ?(?P<val>{P_DATE})")
+P_DATE_RANGE = re.compile(rf"{P_START_SYM}(?P<start>{P_DATE}), ?(?P<end>{P_DATE}){P_END_SYM}")
+P_DATE_MIN_VALUE = re.compile(rf"{P_MIN_SYM} ?(?P<val>{P_DATE})")
+#  - Exact date patterns (Y-M-D)
+P_DATE_EXACT_VALUE = re.compile(rf"(?P<val>{P_DATE_EXACT})")
+
+
+def is_number_query_format(value: str) -> bool:
+    """
+    Whether a filter value matches any possible number field query.
+    Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*.
+    """
+    return bool(
+        P_NUMBER_MAX_VALUE.match(value)
+        or P_NUMBER_RANGE.match(value)
+        or P_NUMBER_MIN_VALUE.match(value)
+        or P_NUMBER_EXACT_VALUE.match(value)
+    )
+
+
+def is_date_query_format(value: str) -> bool:
+    """
+    Whether a filter value matches any possible date field query.
+    Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*; for example,
+    arbitrary ranges shouldn't be allowed with censored discovery.
+    """
+    return bool(
+        P_DATE_BIN.match(value)
+        or P_DATE_MAX_VALUE.match(value)
+        or P_DATE_RANGE.match(value)
+        or P_DATE_MIN_VALUE.match(value)
+        or P_DATE_EXACT_VALUE.match(value)
+    )
 
 
 async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
@@ -41,15 +98,19 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
 
 async def get_field_options(
     queryset_entity: DiscoveryEntity,
-    queryset: QuerySet,
     field_id: str,
     scope: ValidatedDiscoveryScope,
     field_permissions: DataPermissions,
 ) -> list[Any]:
     """
-    Given properties for a public field, return the list of authorized options for
+    Given properties for a discovery field, return the list of authorized options for
     querying this field.
     """
+
+    # Rather than accepting a queryset as a parameter, we use the whole-scope queryset for the entity to calculate field
+    # options. We don't want to apply any filtering to the queryset used to determine field options, to avoid filters on
+    # the queryset accidentally eliminating valid options.
+    queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
     field_props = scope.discovery.fields[field_id]
     threshold = get_threshold(scope, field_permissions)
@@ -63,15 +124,10 @@ async def get_field_options(
             #   should be treated as if the field isn't in the database at all.
             options = await get_distinct_field_values(queryset_entity, queryset, field_props, threshold)
     elif field_props.datatype == "number":
-        options = [label for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
+        options = [label for _floor, _ceil, label in f_utils.labelled_number_range_generator(field_props)]
     elif field_props.datatype == "date":
-        # Assumes the field is in extra_properties, thus can not be aggregated
-        # using SQL MIN/MAX functions
         start, end = await get_month_date_range(queryset_entity, queryset, field_props, threshold)
-        options = [
-            # TODO: need to pass a threshold to monthly range generator
-            f"{month_abbr[m].capitalize()} {y}" for y, m in f_utils.monthly_generator(start, end)
-        ] if start else []
+        options = [label for _floor, _ceil, label in f_utils.labelled_date_range_generator_by_month(start, end)]
     else:  # pragma: no cover
         # Can't actually occur with Pydantic implementation of the discovery configuration model, which will validate
         # the data_type value.
@@ -82,7 +138,7 @@ async def get_field_options(
 
 async def get_distinct_field_values(
     queryset_entity: DiscoveryEntity, queryset: QuerySet, field_props: FieldDefinition, threshold: int
-) -> list[Any]:
+) -> list[str]:
     # We must be careful here not to leak 'small cell' values as options
     # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
     #   should be treated as if the field isn't in the database at all.
@@ -97,11 +153,18 @@ async def get_distinct_field_values(
 
     values_with_counts = queryset.values_list(field_query).annotate(count=Count(mapping_field))
 
-    return [
-        val
+    res = [
+        str(val)  # should already be a string, since get_distinct_field_values is only used by string discovery fields
         async for val, count in values_with_counts
         if censor_count(count, threshold)
     ]
+
+    # Ensure options have a consistent sort order. For now, sort alphabetically, but in the future we may wish to sort
+    # by count or something like that. PyCharm gets angry about passing str.casefold directly, but it works fine.
+    # noinspection PyTypeChecker
+    res.sort(key=str.casefold)
+
+    return res
 
 
 async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> list[int]:
@@ -154,55 +217,55 @@ async def get_age_numeric_binned(
     }
 
 
+def _month_start_end_from_stats(stats: dict[str, int], threshold: int) -> tuple[str | None, str | None]:
+    """
+    Given ISO date stats of format {YYYY-MM-...: count}, truncates and groups keys based on month and finds the
+    starting and ending months which exceed the censorship threshold.
+    """
+
+    # Key the counts on yyyy-mm combination (aggregate same month counts)
+    grouped_stats = defaultdict(int)
+    for sk, sv in stats.items():
+        grouped_stats[sk[:LENGTH_Y_M]] += sv
+
+    # filter + sort grouped stats to find start/end dates that exceed censorship threshold
+    if items := sorted(filter(lambda item: bool(censor_count(item[1], threshold)), grouped_stats.items())):
+        return items[0][0], items[-1][0]
+
+    return None, None
+
+
 async def get_month_date_range(
     queryset_entity: DiscoveryEntity, queryset: QuerySet, field_props: DateFieldDefinition, threshold: int
 ) -> tuple[str | None, str | None]:
     """
-    Get start date and end date from the database
+    Get start date and end date for a field from the database.
     Note that dates within a JSON are stored as strings, not instances of datetime.
-    TODO: for now, only dates in extra_properties are handled. Aggregate functions
-     are not available for data in JSON fields.
-    Implement handling dates as regular fields when needed.
     TODO: for now only dates binned by month are handled.
     """
 
     # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
     # need to check for it here.
 
-    field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
-
-    if "extra_properties" not in field_name:
-        raise NotImplementedError("Binning date-like fields that are not in extra_properties is not implemented")
-
-    is_not_null_filter = {f"{field_name}__isnull": False}   # property may be missing: avoid handling "None"
-
-    # Note: lexicographic sort is correct with date strings like `2021-03-09`
-    # TODO: this can leak months that have below threshold count!
-    # TODO: should this be passed a queryset?
-    query_set = (
-        queryset
-        .filter(**is_not_null_filter)
-        .values(field_name)
-        .distinct()
-        .order_by(field_name)
+    field = f_utils.get_field_django_mapping(queryset_entity, field_props)
+    stats = await queryset_stats_for_field(
+        queryset, field, None, None, group_by=field_props.group_by, should_censor=False
     )
-
-    if (await query_set.acount()) == 0:
-        return None, None
-
-    start = (await query_set.afirst())[field_name][:LENGTH_Y_M]
-    end = (await query_set.alast())[field_name][:LENGTH_Y_M]
-
-    return start, end
+    return _month_start_end_from_stats(stats, threshold)
 
 
 async def get_range_stats(
     scope: ValidatedDiscoveryScope,
     queryset_entity: DiscoveryEntity,
     queryset: QuerySet,
-    field_props: NumberFieldDefinition,
+    field_props: NumberFieldDefinition | DateFieldDefinition,
     field_permissions: DataPermissions,
 ) -> BinList:
+    """
+    Get binned statistics for a continuous-ish-valued field (number or date). Used for calculating valid options with
+    censored discovery or for rendering a histogram.
+    """
+
     field_mapping = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
     # JSONField array specific field props
@@ -210,16 +273,25 @@ async def get_range_stats(
     group_by_value = getattr(field_props, "group_by_value", None)
     value_mapping = getattr(field_props, "value_mapping", None)
 
+    if isinstance(field_props, NumberFieldDefinition):
+        bin_ranges = tuple(f_utils.labelled_number_range_generator(field_props))
+    else:
+        threshold = get_threshold(scope, field_permissions)
+        start, end = await get_month_date_range(queryset_entity, queryset, field_props, threshold)
+        bin_ranges = tuple(f_utils.labelled_date_range_generator_by_month(start, end))
+
     # Generate a list of When conditions that return a label for the given bin.
     # This is equivalent to an SQL CASE statement.
     if group_by and group_by_value and value_mapping:
         # group_by, group_by_value and value_mapping are required field props to get range stats on a JSONField array.
         whens = [When(
-            # Django's gte and lte lookups cannot span multiple JSON array indexes,
+            # Django's gte and lt lookups cannot span multiple JSON array indexes,
             # so we use the jsonb_path_exists function instead.
-            f_utils.get_json_range_condition(queryset_entity, field_props, floor, ceil),
+            f_utils.get_json_range_condition(
+                queryset_entity, field_props, min_value=floor, max_value=ceil, max_inclusive=False
+            ),
             then=Value(label)
-        ) for floor, ceil, label in f_utils.labelled_range_generator(field_props)]
+        ) for floor, ceil, label in bin_ranges]
     else:
         whens = [
             When(
@@ -227,24 +299,27 @@ async def get_range_stats(
                 **{f"{field_mapping}__lt": ceil} if ceil is not None else {},
                 then=Value(label),
             )
-            for floor, ceil, label in f_utils.labelled_range_generator(field_props)
+            for floor, ceil, label in bin_ranges
         ]
 
-    queryset = (
-        queryset
+    # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the search
+    # queryset directly).
+    # TODO: cache IDs from search queryset?
+    stats_queryset = (
+        get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
 
     # Maximum number of entries needed to round a count from its true value down to 0 (censored discovery)
     stats: dict[str, int] = dict()
-    async for item in queryset:
+    async for item in stats_queryset:
         stats[item["label"]] = thresholded_count(item["total"], scope, field_permissions)
 
     # All the bins between start and end must be represented and ordered
     bins: BinList = BinList(root=[
         BinWithValue(label=label, value=stats.get(label, 0))
-        for floor, ceil, label in f_utils.labelled_range_generator(field_props)
+        for floor, ceil, label in bin_ranges
     ])
 
     if "missing" in stats:
@@ -265,18 +340,22 @@ async def get_categorical_stats(
     """
     field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
 
+    # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the search
+    # queryset directly).
+    # TODO: cache IDs from search queryset?
+    stats_queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset)
+
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: Mapping[str, int] = await stats_for_field(
-        queryset, scope.discovery, field_name, field_permissions, add_missing=True, group_by=field_props.group_by
+    stats: dict[str, int] = await queryset_stats_for_field(
+        stats_queryset, field_name, scope.discovery, field_permissions, add_missing=True, group_by=field_props.group_by
     )
 
     # Enforce values order from config and apply policies
     labels: list[str] | None = getattr(field_props.config, "enum")
-    derived_labels: bool = labels is None
 
     # Special case: for some fields, values are based on what's present in the
     # dataset (enum is null in the public JSON).
@@ -285,7 +364,7 @@ async def get_categorical_stats(
     # - Note that in this situation, we explictly MUST HAVE remove rounded-down 0-counts (below the threshold) below,
     #   otherwise we LEAK that there is 1 <= x <= threshold matching entries in the DB. However, since
     #   stats_for_field(...) has already handled not adding these keys, these labels don't make it into this list.
-    if derived_labels:
+    if labels is None:
         labels = sorted(
             [k for k in stats.keys() if k != "missing"],
             key=lambda x: x.lower()
@@ -299,80 +378,9 @@ async def get_categorical_stats(
     ])
 
 
-async def get_date_stats(
-    scope: ValidatedDiscoveryScope,
-    queryset_entity: DiscoveryEntity,
-    queryset: QuerySet,
-    field_props: DateFieldDefinition,
-    field_permissions: DataPermissions,
-) -> BinList:
-    """
-    Fetches statistics for a given date field, fill the gaps in the date range
-    and apply privacy policies.
-    Note that dates within a JSON are stored as strings, not instances of datetime.
-    TODO: for now, only dates in extra_properties are handled. Handle dates as
-     regular fields when needed.
-    TODO: for now only dates binned by month are handled
-    """
-
-    # As mentioned above, currently only bin_by=month is supported. This is validated by the Pydantic model, so we don't
-    # need to check for it here.
-
-    field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
-
-    if "extra_properties" not in field_name:
-        msg = "Binning date-like fields that are not in extra-properties is not implemented"
-        raise NotImplementedError(msg)
-
-    # Note: lexical sort works on ISO dates
-    queryset = (
-        queryset
-        .values(field_name)
-        .order_by(field_name)
-        .annotate(total=Count(field_name))
-    )
-
-    stats = defaultdict(int)
-    start: str | None = None
-    end: str | None = None
-    # Key the counts on yyyy-mm combination (aggregate same month counts)
-    async for item in queryset:
-        key = "missing" if item[field_name] is None else item[field_name][:LENGTH_Y_M]
-        stats[key] += item["total"]
-
-        if key == "missing":
-            continue
-
-        # start is set to the first non-missing key processed; end is set to the last one.
-        if start:
-            end = key
-        else:
-            start = key
-
-    # All the bins between start and end date must be represented
-    bins: BinList = BinList(root=[])
-    if start:   # at least one month
-        for year, month in f_utils.monthly_generator(start, end or start):
-            key = f"{year}-{month:02d}"
-            label = f"{month_abbr[month].capitalize()} {year}"    # convert key as yyyy-mm to `abbreviated month yyyy`
-            bins.append(BinWithValue(
-                label=label,
-                value=thresholded_count(stats.get(key, 0), scope.discovery, field_permissions),
-            ))
-
-    # Append missing items at the end if any
-    if "missing" in stats:
-        bins.append(BinWithValue(
-            label="missing",
-            value=thresholded_count(stats["missing"], scope.discovery, field_permissions),
-        ))
-
-    return bins
-
-
 def get_condition_for_non_jsonb_field(
     field: str,
-    ops: tuple[tuple[str, int | str], ...],
+    ops: tuple[tuple[str | None, int | str], ...],
     subquery: DiscoveryFieldSubquery | None,
 ):
     if subquery:
@@ -385,11 +393,116 @@ def get_condition_for_non_jsonb_field(
         return Q(Exists(
             subquery.queryset.filter(**{
                 subquery.related_field: OuterRef("pk"),
-                **{f"{subquery.inner_field}__{op}": value for op, value in ops}
+                **{f"{subquery.inner_field}{'__' + op if op is not None else ''}": value for op, value in ops}
             })
         ))
     else:
-        return Q(**{f"{field}__{op}": value for op, value in ops})
+        return Q(**{f"{field}{'__' + op if op is not None else ''}": value for op, value in ops})
+
+
+def symbol_django_op(sym: str) -> str:
+    match sym:
+        case "<" | ")":
+            return "lt"
+        case "≤" | "]":
+            return "lte"
+        case ">" | "(":
+            return "gt"
+        case "≥" | "[":
+            return "gte"
+        case _:  # pragma: no cover
+            # Shouldn't occur, as the regex check should prevent these queries from being made
+            raise NotImplementedError()
+
+
+def _cast_field_value(field_props: FieldDefinition, value: str) -> str | int | float:
+    """Given a field and a string value, cast the value to the field type if needed (right now, just numbers)."""
+    return f_utils.str_to_numeric(value) if field_props.datatype == "number" else value
+
+
+def filter_range_condition(
+    queryset_entity: DiscoveryEntity,
+    field_props: FieldDefinition,
+    match: re.Match,
+    field: str,
+    subquery: DiscoveryFieldSubquery | None,
+) -> Q:
+    # full value looks like "[50, 60)", "< 50", or "≥ 60" if we're validating bins line up with censored
+    # discovery (validated elsewhere).
+    # with full discovery access (query:data), we can accept the following other forms:
+    #   "(50, 60)", "[50, 60)", "[50, 60]", "≥50, <60", "≤ 50", "> 60"
+    # with full discovery access, we can also accept date ranges.
+
+    start_op = symbol_django_op(match["start_sym"])
+    end_op = symbol_django_op(match["end_sym"])
+    start = _cast_field_value(field_props, match["start"])
+    end = _cast_field_value(field_props, match["end"])
+
+    if json_range_condition := f_utils.get_json_range_condition(
+        queryset_entity,
+        field_props,
+        min_value=start,
+        min_inclusive=start_op == "gte",
+        max_value=end,
+        max_inclusive=end_op == "lte",
+    ):
+        # JSONField array range stats must use 'jsonb_path_exists' conditions
+        return json_range_condition
+    else:
+        return get_condition_for_non_jsonb_field(field, ((start_op, start), (end_op, end)), subquery)
+
+
+def filter_minimum_condition(
+    queryset_entity: DiscoveryEntity,
+    field_props: FieldDefinition,
+    match: re.Match,
+    field: str,
+    subquery: DiscoveryFieldSubquery | None,
+) -> Q:
+    # full value looks like "> 50" or "≥ 50", where 50 is the minimum value either exclusively or inclusively.
+    # only the latter is valid for censored discovery.
+    val = _cast_field_value(field_props, match["val"])
+    op = symbol_django_op(match["sym"])
+    if json_range_condition := f_utils.get_json_range_condition(
+        queryset_entity, field_props, min_value=val, min_inclusive=op == "gte"
+    ):
+        return json_range_condition
+    else:
+        return get_condition_for_non_jsonb_field(field, ((op, val),), subquery)
+
+
+def filter_maximum_condition(
+    queryset_entity: DiscoveryEntity,
+    field_props: FieldDefinition,
+    match: re.Match,
+    field: str,
+    subquery: DiscoveryFieldSubquery | None,
+) -> Q:
+    # full value looks like "< 50" or "≤ 50", where 50 is the maximum either exclusively or inclusively.
+    # only the former is valid for censored discovery.
+    val = _cast_field_value(field_props, match["val"])
+    op = symbol_django_op(match["sym"])
+    if json_range_condition := f_utils.get_json_range_condition(
+        queryset_entity, field_props, max_value=val, max_inclusive=op == "lte"
+    ):
+        return json_range_condition
+    else:
+        return get_condition_for_non_jsonb_field(field, ((op, val),), subquery)
+
+
+def filter_equality_condition(
+    queryset_entity: DiscoveryEntity,
+    field_props: FieldDefinition,
+    match: re.Match,
+    field: str,
+    subquery: DiscoveryFieldSubquery | None,
+) -> Q:
+    # basic equality condition using provided value
+    val = _cast_field_value(field_props, match["val"])
+    if json_range_condition := f_utils.get_json_op_condition(queryset_entity, field_props, f_utils.OP_EQ, val):
+        return json_range_condition
+    else:
+        return get_condition_for_non_jsonb_field(field, ((None, val),), subquery)
 
 
 async def filter_queryset_field_value(
@@ -420,41 +533,62 @@ async def filter_queryset_field_value(
             condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
 
     elif field_props.datatype == "number":
-        # values are of the form "[50, 150)", "< 50" or "≥ 800"
+        # values are of the form "[50, 150)", "< 50" or "≥ 800".
+        # important: custom bins can have decimals in them!
 
-        if value.startswith("["):
-            [start, end] = [int(v) for v in value.lstrip("[").rstrip(")").split(", ")]
-            if json_range_condition := f_utils.get_json_range_condition(queryset_entity, field_props, start, end):
-                # JSONField array range stats must use 'jsonb_path_exists' conditions
-                condition = json_range_condition
-            else:
-                condition = get_condition_for_non_jsonb_field(field, (("gte", start), ("lt", end)), subquery)
+        if mrp_match := P_NUMBER_RANGE.match(value):
+            # full value looks like "[50, 60)", "< 50", or "≥ 60" if we're validating bins line up with censored
+            # discovery (validated elsewhere).
+            # with full discovery access (query:data), we can accept the following other forms:
+            #   "(50, 60)", "[50, 60)", "[50, 60]", "≥50, <60", "≤ 50", "> 60"
+            condition = filter_range_condition(queryset_entity, field_props, mrp_match, field, subquery)
+
+        elif min_match := P_NUMBER_MIN_VALUE.match(value):
+            # full value looks like "> 50" or "≥ 50", where 50 is the minimum value either exclusively or inclusively.
+            # only the latter is valid for censored discovery.
+            condition = filter_minimum_condition(queryset_entity, field_props, min_match, field, subquery)
+
+        elif max_match := P_NUMBER_MAX_VALUE.match(value):
+            # full value looks like "< 50" or "≤ 50", where 50 is the maximum either exclusively or inclusively.
+            # only the former is valid for censored discovery.
+            condition = filter_maximum_condition(queryset_entity, field_props, max_match, field, subquery)
+
+        elif exact_match := P_NUMBER_EXACT_VALUE.match(value):
+            # full value looks like a number ("50.0", "50", "-5"). not valid for censored discovery.
+            condition = filter_equality_condition(queryset_entity, field_props, exact_match, field, subquery)
+
         else:
-            [sym, val] = value.split(" ")
-            if sym == "≥":
-                if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, min=int(val)
-                ):
-                    condition = json_range_condition
-                else:
-                    condition = get_condition_for_non_jsonb_field(field, (("gte", int(val)),), subquery)
-            elif sym == "<":
-                if json_range_condition := f_utils.get_json_range_condition(
-                    queryset_entity, field_props, max=int(val)
-                ):
-                    condition = json_range_condition
-                else:
-                    condition = get_condition_for_non_jsonb_field(field, (("lt", int(val)),), subquery)
-            else:
-                raise NotImplementedError()
+            raise NotImplementedError(f"Could not handle number value: '{value}'")
+
     elif field_props.datatype == "date":
-        # For now, limited to date expressed as month/year such as "May 2022"
-        d = datetime.datetime.strptime(value, "%b %Y")
-        val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
-        condition = get_condition_for_non_jsonb_field(field, (("startswith", val),), subquery)
+        if P_DATE_BIN.match(value):
+            # Date expressed as month/year such as "May 2022", as available in censored discovery
+            d = datetime.datetime.strptime(value, "%b %Y")
+            val = d.strftime("%Y-%m")   # convert to "yyyy-mm" format to search for dates as "2022-05-03"
+            condition = get_condition_for_non_jsonb_field(field, (("startswith", val),), subquery)
+
+        elif mrp_match := P_DATE_RANGE.match(value):
+            # full value looks like [2022, 2023) or [2022, 2024] or [2022-02, 2023-01) or ...
+            condition = filter_range_condition(queryset_entity, field_props, mrp_match, field, subquery)
+
+        elif min_match := P_DATE_MIN_VALUE.match(value):
+            # full value looks like "≥ 2022-01" or "> 2023" (uses lexicographic ordering)
+            condition = filter_minimum_condition(queryset_entity, field_props, min_match, field, subquery)
+
+        elif max_match := P_DATE_MAX_VALUE.match(value):
+            # full value looks like "≤ 2022-01" or "< 2023" (uses lexicographic ordering)
+            condition = filter_maximum_condition(queryset_entity, field_props, max_match, field, subquery)
+
+        elif date_match := P_DATE_EXACT_VALUE.match(value):
+            # full value looks like "2022-01-03" (ISO date format)
+            condition = filter_equality_condition(queryset_entity, field_props, date_match, field, subquery)
+
+        else:
+            raise NotImplementedError(f"Could not handle date value: '{value}'")
+
     else:  # pragma: no cover
         # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
-        # values of `datatype` to the cases above.
+        # values of `datatype` to the cases above (unless a new possible value is added to FieldDefinition).
         raise NotImplementedError()
 
     await logger.adebug(

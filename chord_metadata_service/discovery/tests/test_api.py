@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 import uuid
 
+from aioresponses import aioresponses
 from bento_lib.discovery import DiscoveryConfig, RULES_NO_PERMISSIONS
 from datetime import datetime
 from django.conf import settings
@@ -430,6 +431,45 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         self.assertIsInstance(response_obj, dict)
         self.assertEqual(response_obj, dres.NO_PUBLIC_DATA_AVAILABLE)
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_counts_by_dataset_ds_level_permissions(self):
+        # Both project-level and dataset-level counts permissions: counts_by_dataset should be exposed.
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)  # project-level counts
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)  # dataset-level counts
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res_json = response.json()
+        counts_by_dataset = res_json["counts_by_dataset"]
+        # all data lives in dataset_a, so it should appear in the breakdown
+        self.assertIn(str(self.id_ds_a), counts_by_dataset)
+        ds_counts = counts_by_dataset[str(self.id_ds_a)]
+        # 8 phenopackets and individuals are above the threshold (5), biosamples/experiments are not
+        self.assertEqual(ds_counts["phenopacket"], 8)
+        self.assertEqual(ds_counts["individual"], 8)
+        self.assertEqual(ds_counts["biosample"], 0)
+        self.assertEqual(ds_counts["experiment"], 0)
+        # top-level counts should match the per-dataset aggregation
+        self.assertDictEqual(res_json["counts"], ds_counts)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_counts_by_dataset_proj_level_only(self):
+        # Project-level counts but no dataset-level counts: counts_by_dataset must not be exposed,
+        # but top-level counts should still be computed correctly via internal per-dataset aggregation.
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, self.dt_counts_eval_res)  # project-level counts
+            self.mock_authz_eval_result(m, self.dt_bool_eval_res)    # dataset-level bool only
+            response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        res_json = response.json()
+        # per-dataset breakdown must not be exposed
+        self.assertDictEqual(res_json["counts_by_dataset"], {})
+        # top-level counts must still reflect per-dataset censorship
+        self.assertEqual(res_json["counts"]["phenopacket"], 8)
+        self.assertEqual(res_json["counts"]["individual"], 8)
+        self.assertEqual(res_json["counts"]["biosample"], 0)
+        self.assertEqual(res_json["counts"]["experiment"], 0)
+
 
 class DiscoveryOverviewTest2(AuthzAPITestCase):
 
@@ -583,8 +623,12 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def exp_match_dict(biosample, phenopacket, num: int):
         return {
             "id": biosample.experiments.first().id,
+            "description": f"Experimental design description for {num}",
             "experiment_type": "DNA Methylation",
+            "experiment_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
             "study_type": "Whole genome Sequencing",
+            "molecule": "total RNA",  # doesn't make sense haha
+            "molecule_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
             "results": [DiscoveryMatchesTest.exp_res_match_dict(biosample, phenopacket, num)],
             "biosample": str(biosample.id),
             "phenopacket": str(phenopacket.id),

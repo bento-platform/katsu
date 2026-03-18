@@ -3,7 +3,7 @@ from django.core.cache import cache
 
 
 class Command(BaseCommand):
-    """ A management command which clears the site-wide cache. """
+    """A management command which clears the site-wide cache."""
 
     def handle(self, *args, **kwargs):
         cache.clear()

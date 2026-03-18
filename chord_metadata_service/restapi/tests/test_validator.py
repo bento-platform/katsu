@@ -41,14 +41,14 @@ class TestJsonSchemaValidator(SimpleTestCase):
         validator = JsonSchemaValidator(schema_ref=SCHEMA_REF_ENUM)
         deconstruct = validator.deconstruct()
 
-        self.assertEqual(deconstruct[0], 'chord_metadata_service.restapi.validators.JsonSchemaValidator')
+        self.assertEqual(deconstruct[0], "chord_metadata_service.restapi.validators.JsonSchemaValidator")
         self.assertEqual(deconstruct[1], [])
-        self.assertEqual(deconstruct[2], {'schema_ref': 'AGE_OR_AGE_RANGE', 'formats': None})
+        self.assertEqual(deconstruct[2], {"schema_ref": "AGE_OR_AGE_RANGE", "formats": None})
 
     def test_deconstruct_schema(self):
         validator = JsonSchemaValidator(schema=SCHEMA)
         deconstruct = validator.deconstruct()
 
-        self.assertEqual(deconstruct[0], 'chord_metadata_service.restapi.validators.JsonSchemaValidator')
+        self.assertEqual(deconstruct[0], "chord_metadata_service.restapi.validators.JsonSchemaValidator")
         self.assertEqual(deconstruct[1], [SCHEMA])
-        self.assertEqual(deconstruct[2], {'formats': None})
+        self.assertEqual(deconstruct[2], {"formats": None})
