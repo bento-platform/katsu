@@ -28,6 +28,8 @@ workflow experiment_results_drs {
 
     output {
         File experiment_result_updates = associate_experiment_results_with_drs_objects.experiment_result_updates
+        File experiment_result_updates_stdout = associate_experiment_results_with_drs_objects.task_stdout
+        File experiment_result_updates_stderr = associate_experiment_results_with_drs_objects.task_stderr
     }
 }
 
@@ -64,6 +66,8 @@ task associate_experiment_results_with_drs_objects {
     python3 -c "
 import json
 import requests
+import sys
+import time
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -99,7 +103,12 @@ verify_ssl = ~{true="True" false="False" validate_ssl}
 
 while er_url is not None:
     print('fetching experiment results page', er_url)
-    experiment_results = requests.get(er_url, headers=auth_headers, verify=verify_ssl).json()
+    experiment_results_res = requests.get(er_url, headers=auth_headers, verify=verify_ssl)
+
+    if experiment_results_res.status_code !== 200:
+        print('[error] could not fetch experiment results page:', experiment_results_res.content)
+
+    experiment_results = experiment_results_res.json()
 
     for er in experiment_results['results']:
         f = er.get('filename')
@@ -126,18 +135,29 @@ while er_url is not None:
             update['indices'] = indices_to_add
 
         if update:
-            print('----------------------------------------------------------------------------------------')
-            er_id = er['id']
-            print('updating experiment result', er_id, update)
-            print(json.dumps(er, indent=2), end='')
-            print('update:', json.dumps(update))
-            requests.patch(
-                f'~{katsu_url}/api/experimentresults/{er_id}',
-                json=update,
-                headers=auth_headers,
-                verify=verify_ssl,
-            )
-            print('========================================================================================')
+            n_attempts = 0
+            while n_attempts < 2:
+                print('----------------------------------------------------------------------------------------')
+                er_id = er['id']
+                print('updating experiment result', er_id, update)
+                print(json.dumps(er, indent=2), end='')
+                print('update:', json.dumps(update))
+                res = requests.patch(
+                    f'~{katsu_url}/api/experimentresults/{er_id}',
+                    json=update,
+                    headers=auth_headers,
+                    verify=verify_ssl,
+                )
+                if res.status_code != 200:
+                    print(f'[error] update to {er.id} failed:', res,content, file=sys.stderr)
+                    time.sleep(1)
+                    n_attempts += 1
+                else:
+                    print(f'success for {er.id}')
+                    break
+                print('========================================================================================')
+
+            time.sleep(0.2)  # cooldown to avoid bouncing off the rate-limiter
 
             updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update})
 
