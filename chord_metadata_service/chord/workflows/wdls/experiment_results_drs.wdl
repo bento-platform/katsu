@@ -146,9 +146,8 @@ while er_url is not None:
                 print('----------------------------------------------------------------------------------------')
                 try:
                     er_id = er['id']
-                    print('updating experiment result', er_id, update)
-                    print(json.dumps(er, indent=2), end='')
-                    print('update:', json.dumps(update))
+                    print('updating experiment result', er_id, update, end='')
+                    print(json.dumps(er, indent=2))
                     res = requests.patch(
                         f'~{katsu_url}/api/experimentresults/{er_id}',
                         json=update,
