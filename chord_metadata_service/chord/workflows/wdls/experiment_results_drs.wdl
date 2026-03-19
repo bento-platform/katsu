@@ -105,7 +105,7 @@ while er_url is not None:
     print('fetching experiment results page', er_url)
     experiment_results_res = requests.get(er_url, headers=auth_headers, verify=verify_ssl)
 
-    if experiment_results_res.status_code !== 200:
+    if experiment_results_res.status_code != 200:
         print('[error] could not fetch experiment results page:', experiment_results_res.content)
 
     experiment_results = experiment_results_res.json()
