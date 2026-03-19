@@ -68,6 +68,7 @@ import json
 import requests
 import sys
 import time
+import traceback
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -139,30 +140,36 @@ while er_url is not None:
 
         if update:
             n_attempts = 0
+            success = False
             while n_attempts < 2:
                 print('----------------------------------------------------------------------------------------')
-                er_id = er['id']
-                print('updating experiment result', er_id, update)
-                print(json.dumps(er, indent=2), end='')
-                print('update:', json.dumps(update))
-                res = requests.patch(
-                    f'~{katsu_url}/api/experimentresults/{er_id}',
-                    json=update,
-                    headers=auth_headers,
-                    verify=verify_ssl,
-                )
-                if res.status_code != 200:
-                    print(f'[error] update to {er.id} failed:', res,content, file=sys.stderr)
-                    time.sleep(1)
-                    n_attempts += 1
-                else:
-                    print(f'success for {er.id}')
-                    break
+                try:
+                    er_id = er['id']
+                    print('updating experiment result', er_id, update)
+                    print(json.dumps(er, indent=2), end='')
+                    print('update:', json.dumps(update))
+                    res = requests.patch(
+                        f'~{katsu_url}/api/experimentresults/{er_id}',
+                        json=update,
+                        headers=auth_headers,
+                        verify=verify_ssl,
+                    )
+                    if res.status_code != 200:
+                        print(f'[error] update to {er.id} failed:', res,content, file=sys.stderr)
+                        time.sleep(1)
+                        n_attempts += 1
+                    else:
+                        print(f'success for {er.id}')
+                        success = True
+                        break
+                except Exception as e:
+                    print('[error] updating experiment result failed:', er, file=sys.stderr)
+                    print(traceback.format_exc(), file=sys.stderr)
                 print('========================================================================================')
 
             time.sleep(0.2)  # cooldown to avoid bouncing off the rate-limiter
 
-            updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update})
+            updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update, 'success': success})
 
     # go to next page of results:
     er_url = experiment_results['next']
