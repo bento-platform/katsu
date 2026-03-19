@@ -156,11 +156,11 @@ while er_url is not None:
                         verify=verify_ssl,
                     )
                     if res.status_code != 200:
-                        err = f'[error] update to {er.id} failed (attempt {n_attempts+1}/{max_attempts}):'
+                        err = f'[error] update to {er_id} failed (attempt {n_attempts+1}/{max_attempts}):'
                         print(err, res.content, file=sys.stderr)
                         raise Exception(err)
                     else:
-                        print(f'success for {er.id} on attempt {n_attempts+1}')
+                        print(f'success for {er_id} on attempt {n_attempts+1}')
                         success = True
                 except Exception as e:
                     print('[error] updating experiment result failed:', er, file=sys.stderr)
