@@ -140,8 +140,9 @@ while er_url is not None:
 
         if update:
             n_attempts = 0
+            max_attempts = 3
             success = False
-            while n_attempts < 2:
+            while n_attempts < max_attempts and not success:
                 print('----------------------------------------------------------------------------------------')
                 try:
                     er_id = er['id']
@@ -155,24 +156,34 @@ while er_url is not None:
                         verify=verify_ssl,
                     )
                     if res.status_code != 200:
-                        print(f'[error] update to {er.id} failed:', res,content, file=sys.stderr)
-                        time.sleep(1)
-                        n_attempts += 1
+                        err = f'[error] update to {er.id} failed (attempt {n_attempts+1}/{max_attempts}):'
+                        print(err, res.content, file=sys.stderr)
+                        raise Exception(err)
                     else:
-                        print(f'success for {er.id}')
+                        print(f'success for {er.id} on attempt {n_attempts+1}')
                         success = True
-                        break
                 except Exception as e:
                     print('[error] updating experiment result failed:', er, file=sys.stderr)
                     print(traceback.format_exc(), file=sys.stderr)
+                    n_attempts += 1
+                time.sleep(0.1)  # cooldown to avoid bouncing off the rate-limiter
                 print('========================================================================================')
-
-            time.sleep(0.2)  # cooldown to avoid bouncing off the rate-limiter
 
             updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update, 'success': success})
 
     # go to next page of results:
     er_url = experiment_results['next']
+
+# If any experiment update failed, fail the whole workflow
+failed_updates = []
+for update in updates:
+    if not update['success']:
+        failed_updates.append(update)
+if failed_updates:
+    print('at least one update did not succeed, exiting...', file=sys.stderr)
+    for u in failed_updates:
+        print('   ', str(u), file=sys.stderr)
+    exit(1)
 
 with open('./experiment_result_updates.json', 'w') as fh:
     json.dump(updates, fh)
