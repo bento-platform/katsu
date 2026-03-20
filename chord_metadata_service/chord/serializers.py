@@ -178,6 +178,12 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         fields = "__all__"
         read_only_fields = ['created_at', 'updated_at']
 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['created_at'] = instance.created_at
+        data['updated_at'] = instance.updated_at
+        return data
+
 
 class ProjectJsonSchemaSerializer(GenericSerializer):
     id = serializers.CharField(read_only=True)
