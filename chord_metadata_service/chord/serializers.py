@@ -199,6 +199,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     discovery = DiscoveryConfigField(required=False, allow_null=True)
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
+    datasets_v2 = DatasetV2Serializer(source="dv2", read_only=True, many=True)
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
     counts = serializers.SerializerMethodField()

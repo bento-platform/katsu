@@ -76,7 +76,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.all().order_by("identifier")
+    queryset = Project.objects.prefetch_related("dv2").order_by("identifier")
     serializer_class = ProjectSerializer
 
     @async_to_sync
