@@ -3,10 +3,11 @@ from io import BytesIO
 
 from django.http import HttpRequest
 from django.test import SimpleTestCase
+from pydantic import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework.request import Request as DrfRequest
 
-from ..pydantic_models import DiscoveryQuery
+from ..pydantic_models import DiscoveryQuery, DiscoveryQueryFilterOneOf
 
 
 class TestDiscoveryQueryModel(SimpleTestCase):
@@ -36,6 +37,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         self.assertEqual(fts_q.fts, "text")
         self.assertEqual(fts_q.fts_type, "plain")  # default
         self.assertDictEqual(fts_q.filters, {})
+        self.assertEqual(fts_q.n_filter_parameters(), 0)
 
         dr = HttpRequest()
         dr.method = "GET"
@@ -46,6 +48,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         self.assertEqual(fts_q.fts_type, "websearch")
         self.assertDictEqual(fts_q.filters, {})
         self.assertFalse(fts_q.is_empty())
+        self.assertEqual(fts_q.n_filter_parameters(), 0)
 
         dr = HttpRequest()
         dr.method = "GET"
@@ -55,6 +58,16 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         self.assertEqual(filter_q.fts, "")  # no FTS
         self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
         self.assertFalse(filter_q.is_empty())
+        self.assertEqual(filter_q.n_filter_parameters(), 2)
+
+        dr = HttpRequest()
+        dr.method = "GET"
+        dr.GET.setlist("age", [])
+        filter_q = DiscoveryQuery.from_drf_request(DrfRequest(dr))
+        self.assertEqual(filter_q.fts, "")  # no FTS
+        self.assertDictEqual(filter_q.filters, {})  # empty array shouldn't be picked up
+        self.assertTrue(filter_q.is_empty())
+        self.assertEqual(filter_q.n_filter_parameters(), 0)
 
     @staticmethod
     def _mock_json_post(content: dict | list):
@@ -70,10 +83,27 @@ class TestDiscoveryQueryModel(SimpleTestCase):
         return r
 
     def test_construction_from_post_request(self):
-        filter_q = DiscoveryQuery.from_drf_request(self._mock_json_post({"sex": "MALE", "age": "< 10"}))
-        self.assertEqual(filter_q.fts, "")  # no FTS
-        self.assertEqual(filter_q.fts_type, "plain")  # default
-        self.assertDictEqual(filter_q.filters, {"sex": "MALE", "age": "< 10"})
+        filter_params = [
+            ({"sex": "MALE", "age": "< 10"}, {"sex": "MALE", "age": "< 10"}, 2),
+            (
+                {"sex": "MALE", "age": ["< 10", "[20, 30)"]},
+                {"sex": "MALE", "age": DiscoveryQueryFilterOneOf(filter_type="one_of", values=["< 10", "[20, 30)"])},
+                3,
+            ),
+            (
+                {"sex": "MALE", "age": {"filter_type": "one_of", "values": ["< 10", "[20, 30)"]}},
+                {"sex": "MALE", "age": DiscoveryQueryFilterOneOf(filter_type="one_of", values=["< 10", "[20, 30)"])},
+                3,
+            ),
+        ]
+
+        for params in filter_params:
+            with self.subTest(params=params):
+                filter_q = DiscoveryQuery.from_drf_request(self._mock_json_post(params[0]))
+                self.assertEqual(filter_q.fts, "")  # no FTS
+                self.assertEqual(filter_q.fts_type, "plain")  # default
+                self.assertDictEqual(filter_q.filters, params[1])
+                self.assertEqual(filter_q.n_filter_parameters(), params[2])
 
         fts_params = [
             ({"_fts": "abc"}, "abc", "plain"),
@@ -87,6 +117,13 @@ class TestDiscoveryQueryModel(SimpleTestCase):
                 self.assertEqual(q.fts, params[1])
                 self.assertEqual(q.fts_type, params[2])  # default: plain
                 self.assertDictEqual(q.filters, {})
+
+    def test_construction_from_bad_post_request(self):
+        with self.assertRaises(ValidationError):
+            DiscoveryQuery.from_drf_request(
+                # should be values not vals
+                self._mock_json_post({"sex": "MALE", "age": {"filter_type": "one_of", "vals": ["< 10", "[20, 30)"]}})
+            )
 
     def test_construction_bad_method_raise(self):
         with self.assertRaises(NotImplementedError):
