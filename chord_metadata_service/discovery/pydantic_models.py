@@ -262,7 +262,7 @@ class DiscoveryQuery(BaseModel):
         counts as multiple parameters.
         """
         n = 0
-        for f in self.filters:
+        for f in self.filters.values():
             if isinstance(f, DiscoveryQueryFilterOneOf):
                 n += len(f.values)
             elif isinstance(f, str):
@@ -350,16 +350,20 @@ class DiscoveryQuery(BaseModel):
         filters: dict[str, str | DiscoveryQueryFilterOneOf] = {}
         for k in filter(cls._filter_query_param, params.keys()):
             v = params.getlist(k) if isinstance(params, QueryDict) else params.get(k, [])
-            if not isinstance(v, list):
-                v = [v]
-            match len(v):
-                case 0:
-                    pass  # ignore empty lists if these somehow occur
-                case 1:
-                    filters[k] = v[0]
-                case _:
-                    # TODO: will we be able to support AllOf queries with GET, or just OneOf?
-                    filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
+            if isinstance(v, dict):
+                # dictionary (so passed in via JSON)
+                filters[k] = DiscoveryQueryFilterOneOf.model_validate(v)
+            else:
+                if not isinstance(v, list):
+                    v = [v]
+                match len(v):
+                    case 0:
+                        pass  # ignore empty lists if these somehow occur
+                    case 1:
+                        filters[k] = v[0]
+                    case _:
+                        # TODO: will we be able to support AllOf queries with GET, or just OneOf?
+                        filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
 
         return cls.model_validate({
             "fts": params.get("_fts", ""),
