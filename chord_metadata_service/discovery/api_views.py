@@ -7,7 +7,7 @@ from bento_lib.discovery import SearchSection, DiscoveryEntity
 from bento_lib.responses import errors
 from collections import defaultdict
 from django.core.exceptions import FieldError, ValidationError
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet, Q, Count
 from drf_spectacular.utils import extend_schema, inline_serializer
 from functools import partial, wraps
 from operator import is_not
@@ -19,6 +19,7 @@ from rest_framework.response import Response
 from structlog.stdlib import BoundLogger
 from typing import Any, Awaitable, Callable, Literal, overload
 
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions
@@ -29,7 +30,12 @@ from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT
 from chord_metadata_service.utils import build_id_set
 
 from . import responses as dres
-from .censorship import get_rules, censor_entity_counts
+from .censorship import (
+    get_rules,
+    censor_entity_counts,
+    censor_entity_counts_by_dataset,
+    aggregate_counts_from_censored_by_dataset,
+)
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryScopeException
 from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
@@ -38,7 +44,7 @@ from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import trigram_similarity_search, normal_full_text_search
 from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
-from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE
+from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import (
     DiscoveryFieldResponse,
     DiscoveryFieldResponses,
@@ -491,6 +497,39 @@ async def discovery_field_response(
     return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
 
 
+async def discovery_queryset_entity_counts_by_dataset(
+    qqs: QueryHelper,
+) -> dict[str, EntityCounts]:
+    """
+    Returns a dictionary of discovery entity counts grouped by dataset identifier for a given scope/query context.
+    """
+    async def _get_entity_counts_by_dataset(ee: DiscoveryEntity) -> dict[str, int]:
+        qs, _ = await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False)
+        group_by = DISCOVERY_ENTITY_NAMES_TO_MODEL[ee].get_scope_filters()["dataset"]["filter"]
+        res = await sync_to_async(list)(
+            qs.values(group_by).annotate(count=Count("id", distinct=True))
+        )
+        return {str(r[group_by]): r["count"] for r in res if r[group_by] is not None}
+
+    entity_counts_per_entity = await asyncio.gather(
+        *(_get_entity_counts_by_dataset(e) for e in DISCOVERY_ENTITIES)
+    )
+
+    all_datasets: set[str] = set()
+    for ec in entity_counts_per_entity:
+        all_datasets.update(ec.keys())
+
+    res: dict[str, EntityCounts] = {}
+
+    for ds in all_datasets:
+        res[ds] = {
+            entity: entity_counts_per_entity[i].get(ds, 0)
+            for i, entity in enumerate(DISCOVERY_ENTITIES)
+        }
+
+    return res
+
+
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
 @inject_discovery_deps(empty_404=True)
@@ -528,11 +567,50 @@ async def discovery_endpoint(
         lg = lg.bind(queried_entity=queryset_entity, query=query.model_dump(mode="json"))
         qh = QueryHelper(query, scope, dt_permissions, lg)
         queryset, queried_entities = await qh.get_query_queryset_and_queried_entities(queryset_entity)
-        censored_counts = await qh.get_censored_entity_counts()  # to be used for censoring field responses!
+        # Get both raw counts (for logging) and censored counts; also pre-caches all entity querysets so that
+        # any ValidationError from an invalid query is caught here.
+        counts, count_or_bools_res = await qh.get_censored_entity_counts(return_raw_counts=True)
     except ValidationError as e:
         return await dres.django_validation_error(request, e, lg, "discovery endpoint encountered validation error")
 
+    # -- Per-dataset counts (permissions-dependent) -------------------------------------------------------------------
+
+    message: str = ""
+    counts_by_dataset_res: dict[str, EntityCountOrBoolResponse] = {}
+
+    ds_level_permissions = (
+        dt_permissions
+        if scope.dataset_id
+        else await get_data_type_query_permissions(
+            request,
+            list(DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE.values()),
+            dataset_level=True,
+        )
+    )
+    has_ds_level_counts_permission = any(p.counts for p in ds_level_permissions.values())
+
+    if has_ds_level_counts_permission or any(p.counts for p in dt_permissions.values()):
+        # Raw per-dataset counts: dataset_id -> {entity -> count}
+        counts_by_dataset_raw: dict[str, EntityCounts] = await discovery_queryset_entity_counts_by_dataset(qh)
+
+        perms = ds_level_permissions if has_ds_level_counts_permission else dt_permissions
+        censored = await censor_entity_counts_by_dataset(scope, counts_by_dataset_raw, perms, lg)
+        if censored:
+            if has_ds_level_counts_permission:
+                # Expose the per-dataset breakdown when we have dataset-level counts permission.
+                counts_by_dataset_res = censored
+            # Recompute top-level counts from the censored per-dataset view to avoid residual disclosure
+            # (total - sum(others) would reveal censored dataset counts).
+            count_or_bools_res = aggregate_counts_from_censored_by_dataset(censored)
+
+    if (
+        not count_or_bools_res[queryset_entity]
+        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
+    ):
+        message = dres.INSUFFICIENT_DATA_AVAILABLE_MSG
+
     # -- Field responses -----------------------------------------------------------------------------------------------
+    # Computed after count_or_bools_res is finalized so field visibility reflects per-dataset censorship.
 
     discovery = scope.discovery
     fields: tuple[str, ...] = discovery.get_chart_field_ids()
@@ -541,25 +619,11 @@ async def discovery_endpoint(
         field: field_res
         for field, field_res in zip(
             fields,
-            await asyncio.gather(*(discovery_field_response(qh, field, censored_counts, lg) for field in fields))
+            await asyncio.gather(*(discovery_field_response(qh, field, count_or_bools_res, lg) for field in fields))
         )
         if field_res is not None
         # Parallel async collection of field responses for public overview
     })
-
-    # -- Counts processing ---------------------------------------------------------------------------------------------
-
-    message: str = ""
-
-    # Get both raw counts (for logging) and censored counts (for response)
-    # Uses the same shared implementation as Project/Dataset serializers
-    counts, count_or_bools_res = await qh.get_censored_entity_counts(return_raw_counts=True)
-
-    if (
-        not count_or_bools_res[queryset_entity]
-        and not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queryset_entity]].data
-    ):
-        message = dres.INSUFFICIENT_DATA_AVAILABLE_MSG
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
@@ -576,6 +640,7 @@ async def discovery_endpoint(
             message=message,
             # permissions-dependent: dictionary of {entity: counts or True if above threshold, 0/False otherwise}:
             counts=count_or_bools_res,
+            counts_by_dataset=counts_by_dataset_res,
         )
     )
 

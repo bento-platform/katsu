@@ -28,6 +28,8 @@ workflow experiment_results_drs {
 
     output {
         File experiment_result_updates = associate_experiment_results_with_drs_objects.experiment_result_updates
+        File experiment_result_updates_stdout = associate_experiment_results_with_drs_objects.task_stdout
+        File experiment_result_updates_stderr = associate_experiment_results_with_drs_objects.task_stderr
     }
 }
 
@@ -64,6 +66,9 @@ task associate_experiment_results_with_drs_objects {
     python3 -c "
 import json
 import requests
+import sys
+import time
+import traceback
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -99,7 +104,15 @@ verify_ssl = ~{true="True" false="False" validate_ssl}
 
 while er_url is not None:
     print('fetching experiment results page', er_url)
-    experiment_results = requests.get(er_url, headers=auth_headers, verify=verify_ssl).json()
+    experiment_results_res = requests.get(er_url, headers=auth_headers, verify=verify_ssl)
+
+    if experiment_results_res.status_code != 200:
+        print(
+            '[error] could not fetch experiment results page:', er_url, experiment_results_res.content, file=sys.stderr
+        )
+        exit(1)
+
+    experiment_results = experiment_results_res.json()
 
     for er in experiment_results['results']:
         f = er.get('filename')
@@ -126,23 +139,50 @@ while er_url is not None:
             update['indices'] = indices_to_add
 
         if update:
-            print('----------------------------------------------------------------------------------------')
-            er_id = er['id']
-            print('updating experiment result', er_id, update)
-            print(json.dumps(er, indent=2), end='')
-            print('update:', json.dumps(update))
-            requests.patch(
-                f'~{katsu_url}/api/experimentresults/{er_id}',
-                json=update,
-                headers=auth_headers,
-                verify=verify_ssl,
-            )
-            print('========================================================================================')
+            n_attempts = 0
+            max_attempts = 3
+            success = False
+            while n_attempts < max_attempts and not success:
+                print('----------------------------------------------------------------------------------------')
+                try:
+                    er_id = er['id']
+                    print('updating experiment result', er_id, update, end='')
+                    print(json.dumps(er, indent=2))
+                    res = requests.patch(
+                        f'~{katsu_url}/api/experimentresults/{er_id}',
+                        json=update,
+                        headers=auth_headers,
+                        verify=verify_ssl,
+                    )
+                    if res.status_code != 200:
+                        err = f'[error] update to {er_id} failed (attempt {n_attempts+1}/{max_attempts}):'
+                        print(err, res.content, file=sys.stderr)
+                        raise Exception(err)
+                    else:
+                        print(f'success for {er_id} on attempt {n_attempts+1}')
+                        success = True
+                except Exception as e:
+                    print('[error] updating experiment result failed:', er, file=sys.stderr)
+                    print(traceback.format_exc(), file=sys.stderr)
+                    n_attempts += 1
+                time.sleep(0.1)  # cooldown to avoid bouncing off the rate-limiter
+                print('========================================================================================')
 
-            updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update})
+            updates.append({'id': er_id, 'filename': er.get('filename'), 'patch': update, 'success': success})
 
     # go to next page of results:
     er_url = experiment_results['next']
+
+# If any experiment update failed, fail the whole workflow
+failed_updates = []
+for update in updates:
+    if not update['success']:
+        failed_updates.append(update)
+if failed_updates:
+    print('at least one update did not succeed, exiting...', file=sys.stderr)
+    for u in failed_updates:
+        print('   ', str(u), file=sys.stderr)
+    exit(1)
 
 with open('./experiment_result_updates.json', 'w') as fh:
     json.dump(updates, fh)

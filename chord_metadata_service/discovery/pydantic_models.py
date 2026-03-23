@@ -206,6 +206,7 @@ class DiscoveryResponse(BaseModel):
         dict[str, EntityCountOrBoolResponse] |
         dict[str, dict[str, EntityCountOrBoolResponse]]
     )
+    counts_by_dataset: dict[str, EntityCountOrBoolResponse] = Field(default_factory=dict)
 
 
 class DiscoveryMatchesPaginatedResponse(BaseModel):
