@@ -673,10 +673,31 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 response_obj = response.json()
                 db_count = Individual.objects.filter(p[1]).count()
-                self.assertIn(
-                    self.response_threshold_check(response_obj),
-                    [db_count, dres.INSUFFICIENT_DATA_AVAILABLE],
-                )
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+                self._test_individual_counts(response_obj, db_count, full_access=True)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_one_of(self):
+        # test GET query string search for OneOf (OR) queries
+        params = [
+             ("sex=MALE&sex=FEMALE", Q(sex="MALE") | Q(sex="FEMALE")),
+             ("sex=MALE&sex=UNKNOWN_SEX", Q(sex="MALE") | Q(sex="UNKNOWN_SEX")),
+             (
+                 "smoking=Smoker&smoking=Former smoker",
+                 Q(extra_properties__smoking="Smoker") | Q(extra_properties__smoking="Former smoker"),
+             ),
+        ]
+        for p in params:
+            with self.subTest(params=p):
+                q = f"/api/discovery?{p[0]}"
+
+                # response = self.dt_authz_counts_get(q)
+                # TODO
+
+                response = self.dt_authz_full_get(q)
+                response_obj = response.json()
+                db_count = Individual.objects.filter(p[1]).count()
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
                 self._test_individual_counts(response_obj, db_count, full_access=True)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
