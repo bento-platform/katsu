@@ -625,16 +625,19 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         self._test_individual_counts(response_obj, db_count, full_access=True)
 
-    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-    def test_discovery_filtering_sex_via_fts_forbidden(self):
-        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field:
-        response = self.dt_authz_counts_get("/api/discovery?_fts=FEMALE")
+    def assert_insufficient_discovery_permissions(self, response):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(
             str(response_obj["errors"][0]["message"]),
             "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None dataset=None>)']"
         )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_sex_via_fts_forbidden(self):
+        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field:
+        response = self.dt_authz_counts_get("/api/discovery?_fts=FEMALE")
+        self.assert_insufficient_discovery_permissions(response)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_sex_via_fts_trigram(self):
@@ -659,15 +662,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 q = f"/api/discovery?_fts={p[0].upper()}&_fts_type=trigram"
 
                 response = self.dt_authz_counts_get(q)
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-                response_obj = response.json()
-                self.assertEqual(
-                    str(response_obj["errors"][0]["message"]),
-                    (
-                        "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None "
-                        "dataset=None>)']"
-                    )
-                )
+                self.assert_insufficient_discovery_permissions(response)
 
                 response = self.dt_authz_full_get(q)
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -691,8 +686,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             with self.subTest(params=p):
                 q = f"/api/discovery?{p[0]}"
 
-                # response = self.dt_authz_counts_get(q)
-                # TODO
+                response = self.dt_authz_counts_get(q)
+                self.assert_insufficient_discovery_permissions(response)
 
                 response = self.dt_authz_full_get(q)
                 response_obj = response.json()

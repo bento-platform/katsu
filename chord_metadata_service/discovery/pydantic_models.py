@@ -1,4 +1,5 @@
 import abc
+import sys
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection, DiscoveryConfig
 from bento_lib.ontologies.models import OntologyClass
@@ -224,11 +225,15 @@ class DiscoverySearchFieldsResponse(BaseModel):
 
 
 class DiscoveryQueryFilterBase(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
     filter_type: Literal["one_of"]
     negated: bool = False
 
 
 class DiscoveryQueryFilterOneOf(DiscoveryQueryFilterBase):
+    model_config = ConfigDict(frozen=True)
+
     filter_type: Literal["one_of"]  # really more like "one or more of" - essentially Boolean Or for filter values
     values: list[str] = Field(..., min_length=1)  # must have at least one value specified
 
@@ -264,7 +269,8 @@ class DiscoveryQuery(BaseModel):
         n = 0
         for f in self.filters.values():
             if isinstance(f, DiscoveryQueryFilterOneOf):
-                n += len(f.values)
+                n = sys.maxsize  # cannot be used in a censored discovery context
+                break
             elif isinstance(f, str):
                 n += 1
             else:  # pragma: no cover
@@ -288,9 +294,10 @@ class DiscoveryQuery(BaseModel):
     def _required_global_permission_level(self) -> DataPermissionsLevel:
         """
         Get the "global" minimum required permission level required to execute this query, irrespective of field-level
-        permission information. If full-text search is specified, we need query:data permissions.
+        permission information. If full-text search is specified, or we're using an advanced filter (OR/AND/etc...)
+        we need query:data permissions.
         """
-        if self.fts:
+        if self.fts or any(not isinstance(f, str) for f in self.filters.values()):
             return "data"
         return "bool_"
 
@@ -323,12 +330,13 @@ class DiscoveryQuery(BaseModel):
         # get permissions needed for our query
         overall_permissions, qf_permissions = self._get_field_set_permissions(discovery, dt_permissions)
 
-        # right now, a user cannot be filtering based on more than one value for the same field
-        if (n_queried := self.n_filter_parameters()) > get_max_query_parameters(discovery, overall_permissions):
-            raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
-
         if not overall_permissions.has_permissions_level(self._required_global_permission_level):
             raise ValidationError(f"Insufficient permissions to access discovery ({scope_repr})")
+
+        # TODO: advanced per-field permissions could go here
+
+        if (n_queried := self.n_filter_parameters()) > get_max_query_parameters(discovery, overall_permissions):
+            raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
         return overall_permissions, qf_permissions
 

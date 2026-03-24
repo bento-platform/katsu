@@ -1,4 +1,5 @@
 import json
+import sys
 from io import BytesIO
 
 from django.http import HttpRequest
@@ -88,12 +89,12 @@ class TestDiscoveryQueryModel(SimpleTestCase):
             (
                 {"sex": "MALE", "age": ["< 10", "[20, 30)"]},
                 {"sex": "MALE", "age": DiscoveryQueryFilterOneOf(filter_type="one_of", values=["< 10", "[20, 30)"])},
-                3,
+                sys.maxsize,
             ),
             (
                 {"sex": "MALE", "age": {"filter_type": "one_of", "values": ["< 10", "[20, 30)"]}},
                 {"sex": "MALE", "age": DiscoveryQueryFilterOneOf(filter_type="one_of", values=["< 10", "[20, 30)"])},
-                3,
+                sys.maxsize,
             ),
         ]
 
