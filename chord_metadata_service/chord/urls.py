@@ -4,7 +4,7 @@ from . import views_data_types, views_search
 from .export import views as views_export
 from .ingest import views as views_ingest
 from .workflows import views as views_workflow
-from chord_metadata_service.chord.api_views import DatasetViewSet
+from chord_metadata_service.chord.api_views import DatasetViewSet, DatasetV2ViewSet
 
 urlpatterns = [
     path('workflows', views_workflow.workflow_list, name="workflows"),
@@ -29,6 +29,10 @@ urlpatterns = [
     path('datasets', DatasetViewSet.as_view({'get': 'list'}), name="chord-dataset-list"),
     path('datasets/<str:dataset_id>', DatasetViewSet.as_view({'get': 'retrieve', 'delete': 'destroy'}),
          name="chord-dataset-detail"),
+
+    path('datasets_v2', DatasetV2ViewSet.as_view({'get': 'list', 'post': 'create'}), name="chord-dataset-v2-list"),
+    path('datasets_v2/<str:identifier>', DatasetV2ViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}),
+         name="chord-dataset-v2-detail"),
     path('datasets/<str:dataset_id>/summary', views_search.dataset_summary, name="chord-dataset-summary"),
     path('datasets/<str:dataset_id>/data-types/<str:data_type>', views_data_types.dataset_data_type,
          name="chord-dataset-data-type"),

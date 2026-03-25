@@ -238,6 +238,8 @@ class DatasetV2(PydanticJSONBModelMixin):
     language = models.CharField(
         max_length=8,
         db_index=True,
+        default="en",
+        blank=True,
     )
 
     pk = models.CompositePrimaryKey("identifier", "language")
