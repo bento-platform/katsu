@@ -11,7 +11,7 @@ from chord_metadata_service.discovery.censorship import get_threshold
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q, Exists, OuterRef
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
-from typing import Any
+from typing import Literal
 
 from chord_metadata_service.authz.types import DataPermissions
 
@@ -53,11 +53,29 @@ P_DATE_MIN_VALUE = re.compile(rf"{P_MIN_SYM} ?(?P<val>{P_DATE})")
 P_DATE_EXACT_VALUE = re.compile(rf"(?P<val>{P_DATE_EXACT})")
 
 
-def is_number_query_format(value: str) -> bool:
+def field_value_is_in_options(
+    value: str | DiscoveryQueryFilterOneOf,
+    options: frozenset[str],
+    ft: Literal["string", "number", "date"],
+) -> bool:
+    """
+    Whether a field value matches any of the pre-determined options (usually for censored discovery). If the field type
+    is a string, the comparison is case-insensitive.
+    """
+    if isinstance(value, DiscoveryQueryFilterOneOf):
+        return all(map(lambda v: field_value_is_in_options(v, options, ft), value.values))
+    if ft == "string":
+        return any(value.casefold() == o.casefold() for o in options)
+    return value in options
+
+
+def is_number_query_format(value: str | DiscoveryQueryFilterOneOf) -> bool:
     """
     Whether a filter value matches any possible number field query.
     Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*.
     """
+    if isinstance(value, DiscoveryQueryFilterOneOf):
+        return all(map(is_number_query_format, value.values))
     return bool(
         P_NUMBER_MAX_VALUE.match(value)
         or P_NUMBER_RANGE.match(value)
@@ -66,12 +84,14 @@ def is_number_query_format(value: str) -> bool:
     )
 
 
-def is_date_query_format(value: str) -> bool:
+def is_date_query_format(value: str | DiscoveryQueryFilterOneOf) -> bool:
     """
     Whether a filter value matches any possible date field query.
     Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*; for example,
     arbitrary ranges shouldn't be allowed with censored discovery.
     """
+    if isinstance(value, DiscoveryQueryFilterOneOf):
+        return all(map(is_date_query_format, value.values))
     return bool(
         P_DATE_BIN.match(value)
         or P_DATE_MAX_VALUE.match(value)
@@ -101,7 +121,7 @@ async def get_field_options(
     field_id: str,
     scope: ValidatedDiscoveryScope,
     field_permissions: DataPermissions,
-) -> list[Any]:
+) -> list[str]:
     """
     Given properties for a discovery field, return the list of authorized options for
     querying this field.

@@ -1,12 +1,17 @@
 from bento_lib.discovery import DiscoveryEntity
-from collections.abc import Iterable
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 from structlog.stdlib import BoundLogger
 
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .exceptions import DiscoveryEmptyException
-from .fields import is_number_query_format, is_date_query_format, get_field_options, filter_queryset_field_value
+from .fields import (
+    is_number_query_format,
+    is_date_query_format, 
+    get_field_options,
+    filter_queryset_field_value,
+    field_value_is_in_options,
+)
 from .pydantic_models import DiscoveryQueryFilterOneOf, DiscoveryQuery
 from .scope import ValidatedDiscoveryScope
 from .utils import empty_discovery
@@ -14,14 +19,6 @@ from .utils import empty_discovery
 __all__ = [
     "discovery_filter_queryset",
 ]
-
-
-def _in_case_insensitive(val: str, i: Iterable[str]) -> bool:
-    """
-    Case-insensitive version of `in` operator for strings.
-    """
-    val_lower = val.lower()
-    return any(val_lower == o.lower() for o in i)
 
 
 async def validate_field_query_value(
@@ -47,15 +44,7 @@ async def validate_field_query_value(
 
     options = await get_field_options(queryset_entity, field_id, scope, field_permissions)
     if (
-        value not in options
-        and not (
-            # case-insensitive search on categories
-            field_props.datatype == "string" and (
-                _in_case_insensitive(value, options)
-                if isinstance(value, str)
-                else all(_in_case_insensitive(v, options) for v in value.values)
-            )
-        )
+        not field_value_is_in_options(value, frozenset(options), field_props.datatype)
         and not (
             # no restriction when enum is not set for categories
             field_props.datatype == "string" and field_props.config.enum is None  # narrowed type via datatype ==
