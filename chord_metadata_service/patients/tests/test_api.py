@@ -6,7 +6,7 @@ import uuid
 from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
 
-from django.db.models import Q
+from django.db.models import Q, F, Value
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
@@ -15,6 +15,7 @@ from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
+from chord_metadata_service.discovery.fields_utils import JSONBPathFilter
 from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_EXTRA_PROPERTIES,
     DISCOVERY_CONFIG_TEST,
@@ -507,6 +508,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         return response["count"] if "count" in response else dres.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
+        random.seed(self.random_seed)
+
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
         self.dataset_2 = cm.Dataset.objects.create(
             title="Dataset 2",
@@ -527,6 +530,9 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             phenopacket = ph_m.Phenopacket.objects.create(
                 id=f"phenopacket_id:{idx}",
                 subject=individual,
+                measurements=[
+                    ph_c.valid_measurement_tumor_length(random.randint(1, 199))
+                ],
                 meta_data=meta_data,
                 dataset=self.dataset,
             )
@@ -549,8 +555,6 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
         ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
         ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 2))
-
-        random.seed(self.random_seed)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_sex(self):
@@ -681,6 +685,19 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                  "smoking=Smoker&smoking=Former smoker",
                  Q(extra_properties__smoking="Smoker") | Q(extra_properties__smoking="Former smoker"),
              ),
+             (
+                 "measurement_tumor_length=[0, 50)&measurement_tumor_length=(100, 150]",  # custom bins + OR query
+                 Q(
+                     JSONBPathFilter(
+                         F("phenopackets__measurements"),
+                         Value(
+                             '$[*] ? (((@.value.quantity.value >= 0 && @.value.quantity.value < 50) '
+                             '          || (@.value.quantity.value > 100 && @.value.quantity.value <= 150)) '
+                             '&& @.assay.id == "NCIT:C200479")'
+                         )
+                     )
+                 ),
+             )
         ]
         for p in params:
             with self.subTest(params=p):

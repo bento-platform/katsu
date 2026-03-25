@@ -22,7 +22,7 @@ DISCOVERY_CONFIG_TEST_DICT = {
     "search": [
         {
             "section_title": "First Section",
-            "fields": ["sex", "age", "tissues", "extraction_protocol"]
+            "fields": ["sex", "age", "tissues", "extraction_protocol", "measurement_tumor_length"]
         }
     ],
     "fields": {
@@ -68,7 +68,7 @@ DISCOVERY_CONFIG_TEST_DICT = {
             }
         },
         "diagnostic_markers": {
-            "mapping": "individual/phenopackets/biosamples/diagnostic_markers",
+            "mapping": "biosample/diagnostic_markers",
             "group_by": "label",
             "title": "Diagnostic Markers",
             "description": "Markers used for diagnosis",
@@ -78,7 +78,7 @@ DISCOVERY_CONFIG_TEST_DICT = {
             }
         },
         "measurement_tumor_length": {
-            "mapping": "individual/phenopackets/measurements",
+            "mapping": "phenopacket/measurements",
             "group_by": "assay/id",
             "group_by_value": "NCIT:C200479",
             "value_mapping": "value/quantity/value",

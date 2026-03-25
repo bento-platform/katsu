@@ -7,7 +7,7 @@ from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, Dat
 from .exceptions import DiscoveryEmptyException
 from .fields import (
     is_number_query_format,
-    is_date_query_format, 
+    is_date_query_format,
     get_field_options,
     filter_queryset_field_value,
     field_value_is_in_options,
