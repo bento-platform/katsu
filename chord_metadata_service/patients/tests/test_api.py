@@ -987,6 +987,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             ("[2020-01-01,2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
             ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
+            (("Mar 2021", "Apr 2021"), Q(**{f"{doc}__startswith": "2021-03"}) | Q(**{f"{doc}__startswith": "2021-04"}))
         ]
 
         for i in self.individual_objs[:10]:
@@ -1001,9 +1002,13 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
         for params in subtest_params:
             with self.subTest(params=params):
-                response = self.dt_authz_full_get(f"/api/discovery?date_of_consent={params[0]}")
+                ps = params[0] if isinstance(params[0], tuple) else (params[0],)
+                q = "&".join(f"date_of_consent={p}" for p in ps)
+                response = self.dt_authz_full_get(f"/api/discovery?{q}")
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
-                db_count = Individual.objects.filter(**params[1]).count()
+                db_count = Individual.objects.filter(
+                    Q(**params[1]) if isinstance(params[1], dict) else params[1]
+                ).count()
                 self._test_individual_counts(response.json(), db_count, full_access=True)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
