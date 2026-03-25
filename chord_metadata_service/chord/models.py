@@ -230,6 +230,8 @@ class DatasetV2(PydanticJSONBModelMixin):
     identifier = models.CharField(
         max_length=128,
         db_index=True,
+        default=uuid.uuid4,
+        blank=True,
         help_text="If from PCGL, inherit. Otherwise created in Katsu.",
     )
 

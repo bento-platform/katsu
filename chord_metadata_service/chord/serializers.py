@@ -1,3 +1,4 @@
+import uuid
 from pydantic import ValidationError as PydValidationError
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
@@ -177,6 +178,11 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         model = DatasetV2
         fields = "__all__"
         read_only_fields = ['created_at', 'updated_at']
+
+    def to_internal_value(self, data):
+        if not data.get("identifier"):
+            data = {**data, "identifier": str(uuid.uuid4())}
+        return super().to_internal_value(data)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
