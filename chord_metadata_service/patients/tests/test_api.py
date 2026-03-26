@@ -987,7 +987,20 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             ("[2020-01-01,2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
             ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
-            (("Mar 2021", "Apr 2021"), Q(**{f"{doc}__startswith": "2021-03"}) | Q(**{f"{doc}__startswith": "2021-04"}))
+            (
+                ("Mar 2021", "Apr 2021", "May 2021", "Jun 2021"),
+                Q(**{f"{doc}__startswith": "2021-03"})
+                | Q(**{f"{doc}__startswith": "2021-04"})
+                | Q(**{f"{doc}__startswith": "2021-05"})
+                | Q(**{f"{doc}__startswith": "2021-06"})
+            ),
+            (
+                ("[2021-03, 2021-04)", "[2021-04, 2021-05)", "[2021-05, 2021-06)", "[2021-06, 2021-07)"),
+                Q(**{f"{doc}__startswith": "2021-03"})
+                | Q(**{f"{doc}__startswith": "2021-04"})
+                | Q(**{f"{doc}__startswith": "2021-05"})
+                | Q(**{f"{doc}__startswith": "2021-06"})
+            ),
         ]
 
         for i in self.individual_objs[:10]:
