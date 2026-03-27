@@ -33,6 +33,7 @@ urlpatterns = [
     path('datasets_v2', DatasetV2ViewSet.as_view({'get': 'list', 'post': 'create'}), name="chord-dataset-v2-list"),
     path('datasets_v2/<str:identifier>', DatasetV2ViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}),
          name="chord-dataset-v2-detail"),
+    path('datasets_v2/<str:identifier>/summary', views_search.dataset_v2_summary, name="chord-dataset-v2-summary"),
     path('datasets/<str:dataset_id>/summary', views_search.dataset_summary, name="chord-dataset-summary"),
     path('datasets/<str:dataset_id>/data-types/<str:data_type>', views_data_types.dataset_data_type,
          name="chord-dataset-data-type"),
