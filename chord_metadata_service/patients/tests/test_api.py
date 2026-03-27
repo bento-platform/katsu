@@ -1025,6 +1025,24 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 self._test_individual_counts(response.json(), db_count, full_access=True)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_date_range_full_access_errors(self):
+        subtest_params = [
+            (("Mar 2021", "April 2021"),),
+            (("[2021-03, 2021-045)", "[2021-04, 2021-05)"),),
+        ]
+        for params in subtest_params:
+            with self.subTest(params=params):
+                q = "&".join(f"date_of_consent={p}" for p in params[0])
+                response = self.dt_authz_full_get(f"/api/discovery?{q}")
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(
+                    # first part of error message
+                    "Invalid value used in field query: date_of_consent=filter_type='one_of'",
+                    response.json()["errors"][0]["message"][0],
+                    # TODO: message not supposed to be array of str but can't break API for beacon
+                )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
