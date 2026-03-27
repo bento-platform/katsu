@@ -6,12 +6,13 @@ from bento_lib.discovery import (
 )
 from calendar import month_abbr
 from collections import Counter, defaultdict
+from functools import wraps
 
 from chord_metadata_service.discovery.censorship import get_threshold
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q, Exists, OuterRef
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
-from typing import Literal
+from typing import Literal, Callable
 
 from chord_metadata_service.authz.types import DataPermissions
 
@@ -69,13 +70,25 @@ def field_value_is_in_options(
     return value in options
 
 
-def is_number_query_format(value: str | DiscoveryQueryFilterOneOf) -> bool:
+def map_if_multi_value_filter(func: Callable[[str], bool]) -> Callable[[str | DiscoveryQueryFilterOneOf], bool]:
+    """
+    Decorator for filter format checker functions. If the value is a DiscoveryQueryFilterOneOf, the inner function will
+    be mapped over the inner values; otherwise, it'll transparently check the format of a single value string.
+    """
+    @wraps(func)
+    def inner(value: str | DiscoveryQueryFilterOneOf) -> bool:
+        if isinstance(value, DiscoveryQueryFilterOneOf):
+            return all(map(func, value.values))
+        return func(value)
+    return inner
+
+
+@map_if_multi_value_filter
+def is_number_query_format(value: str) -> bool:
     """
     Whether a filter value matches any possible number field query.
     Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*.
     """
-    if isinstance(value, DiscoveryQueryFilterOneOf):
-        return all(map(is_number_query_format, value.values))
     return bool(
         P_NUMBER_MAX_VALUE.match(value)
         or P_NUMBER_RANGE.match(value)
@@ -84,14 +97,13 @@ def is_number_query_format(value: str | DiscoveryQueryFilterOneOf) -> bool:
     )
 
 
-def is_date_query_format(value: str | DiscoveryQueryFilterOneOf) -> bool:
+@map_if_multi_value_filter
+def is_date_query_format(value: str) -> bool:
     """
     Whether a filter value matches any possible date field query.
     Note that this function DOES NOT do any permissions checks for if the query is actually *allowed*; for example,
     arbitrary ranges shouldn't be allowed with censored discovery.
     """
-    if isinstance(value, DiscoveryQueryFilterOneOf):
-        return all(map(is_date_query_format, value.values))
     return bool(
         P_DATE_BIN.match(value)
         or P_DATE_MAX_VALUE.match(value)
