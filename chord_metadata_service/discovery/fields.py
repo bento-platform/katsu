@@ -147,7 +147,7 @@ async def get_field_options(
     field_props = scope.discovery.fields[field_id]
     threshold = get_threshold(scope, field_permissions)
 
-    if field_props.datatype == "string":
+    if field_props.datatype in ("string", "ontology-class"):
         options = getattr(field_props.config, "enum", None)
         # Special case: no list of values specified
         if options is None:
@@ -544,7 +544,7 @@ def queryset_field_single_value_condition(
     value: str,
     subquery: DiscoveryFieldSubquery | None,
 ):
-    if field_props.datatype == "string":
+    if field_props.datatype in ("string", "ontology-class"):
         if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(gb, value)
