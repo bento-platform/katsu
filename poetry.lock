@@ -352,22 +352,20 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "14.1.2"
+version = "15.0.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
-python-versions = "<4.0,>=3.12"
+python-versions = "^3.12"
 groups = ["main"]
-files = [
-    {file = "bento_lib-14.1.2-py3-none-any.whl", hash = "sha256:e686bd29321026c1282ee08a3fd64b6d04f2f210e8b67520b2b6381b70f11f6b"},
-    {file = "bento_lib-14.1.2.tar.gz", hash = "sha256:e6dca97e9b855579372e20f0c8ee8111c10898b4e907753c39760dbb64efbee7"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 aiofiles = ">=24.1.0,<26"
 aiohttp = ">=3.10.10,<4"
-django = {version = ">=5.1.8,<5.3", optional = true, markers = "extra == \"django\""}
-djangorestframework = {version = ">=3.16.0,<3.17", optional = true, markers = "extra == \"django\""}
-geojson-pydantic = ">=2.0.0,<3.0.0"
+django = {version = ">=5.1.8,<6.1", optional = true}
+djangorestframework = {version = ">=3.16.0,<3.17", optional = true}
+geojson-pydantic = "^2.0.0"
 jsonschema = ">=4.23.0,<5"
 psycopg2-binary = ">=2.9.9,<3.0"
 pydantic = ">=2.11.3,<3"
@@ -380,9 +378,15 @@ werkzeug = ">=3.0.6,<4"
 
 [package.extras]
 asyncpg = ["asyncpg (>=0.29.0,<0.32.0)"]
-django = ["django (>=5.1.8,<5.3)", "djangorestframework (>=3.16.0,<3.17)"]
-fastapi = ["fastapi (>=0.115.12,<0.129)", "uvicorn"]
+django = ["django (>=5.1.8,<6.1)", "djangorestframework (>=3.16.0,<3.17)"]
+fastapi = ["fastapi (>=0.129.0,<0.136)", "uvicorn"]
 flask = ["flask (>=3.0.3,<4)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/bento-platform/bento_lib.git"
+reference = "master"
+resolved_reference = "44de60b4c27ca4c57b82bbb616f02d4d2a5df38b"
 
 [[package]]
 name = "cachetools"
@@ -3519,4 +3523,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "471554add7d0714a7fe5fa756635c44087370708ba4cf843a0f7ab2d5e6947a8"
+content-hash = "7bbd44aa19db2bf84b418539068e25dbe8b945df41b5d9e7c0d9523edb6adf63"

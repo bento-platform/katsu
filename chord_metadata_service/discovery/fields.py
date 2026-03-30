@@ -2,7 +2,13 @@ import datetime
 import re
 
 from bento_lib.discovery import (
-    DiscoveryConfig, DateFieldDefinition, FieldDefinition, NumberFieldDefinition, StringFieldDefinition, DiscoveryEntity
+    DiscoveryConfig,
+    DateFieldDefinition,
+    FieldDefinition,
+    NumberFieldDefinition,
+    StringFieldDefinition,
+    OntologyClassFieldDefinition,
+    DiscoveryEntity,
 )
 from calendar import month_abbr
 from collections import Counter, defaultdict
@@ -350,12 +356,12 @@ async def get_range_stats(
 
     # All the bins between start and end must be represented and ordered
     bins: BinList = BinList(root=[
-        BinWithValue(label=label, value=stats.get(label, 0))
+        BinWithValue(key=label, label=label, value=stats.get(label, 0))
         for floor, ceil, label in bin_ranges
     ])
 
     if "missing" in stats:
-        bins.append(BinWithValue(label="missing", value=stats["missing"]))
+        bins.append(BinWithValue(key="missing", label="missing", value=stats["missing"]))
 
     return bins
 
@@ -364,7 +370,7 @@ async def get_categorical_stats(
     scope: ValidatedDiscoveryScope,
     queryset_entity: DiscoveryEntity,
     queryset: QuerySet,
-    field_props: StringFieldDefinition,
+    field_props: StringFieldDefinition | OntologyClassFieldDefinition,
     field_permissions: DataPermissions,
 ) -> BinList:
     """
@@ -405,8 +411,9 @@ async def get_categorical_stats(
     # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
     return BinList(root=[
         # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
-        *(BinWithValue(label=category, value=stats.get(category, 0)) for category in labels),
-        BinWithValue(label="missing", value=stats["missing"]),
+        # TODO: ontology fields: separate key vs label
+        *(BinWithValue(key=category, label=category, value=stats.get(category, 0)) for category in labels),
+        BinWithValue(key="missing", label="missing", value=stats["missing"]),
     ])
 
 

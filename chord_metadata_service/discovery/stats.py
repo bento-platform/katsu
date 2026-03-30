@@ -61,6 +61,8 @@ async def bento_public_format_count_and_stats_list(
     discovery: DiscoveryConfig,
     field_permissions: DataPermissions,
 ) -> tuple[int, BinList]:
+    # only used for legacy stats calculations above
+
     stats_list: BinList = BinList(root=[])
     total: int = 0
 
@@ -75,7 +77,7 @@ async def bento_public_format_count_and_stats_list(
 
         # Be careful not to leak values if they're in the database but below threshold
         if label is not None and thresholded_value > 0:
-            stats_list.append(BinWithValue(label=label, value=thresholded_value))
+            stats_list.append(BinWithValue(key=label, label=label, value=thresholded_value))
 
     return thresholded_count(total, discovery, field_permissions), stats_list
 

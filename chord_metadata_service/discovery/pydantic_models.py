@@ -48,8 +48,9 @@ __all__ = [
 class BinWithValue(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    label: str
-    value: int
+    key: str  # Unique key for bin, for use by search/charts/etc.
+    label: str  # User interface label
+    value: int  # Bin count
 
 
 class BinList(RootModel):

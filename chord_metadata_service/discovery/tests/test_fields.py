@@ -73,7 +73,8 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             field_permissions=self.permissions_full,
         )
         self.assertListEqual(
-            res.root, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)]
+            res.root,
+            [BinWithValue(key="MALE", label="MALE", value=1), BinWithValue(key="missing", label="missing", value=0)]
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -85,7 +86,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             DISCOVERY_CONFIG_TEST.fields["sex"],
             field_permissions=self.permissions_counts,
         )
-        self.assertListEqual(res.root, [BinWithValue(label="missing", value=0)])
+        self.assertListEqual(res.root, [BinWithValue(key="missing", label="missing", value=0)])
 
 
 class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
@@ -118,12 +119,11 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             self.dm_fp,
             field_permissions=self.permissions_full,
         )
-        ground_truth = [
-            BinWithValue(label="Genetic Testing", value=1),
-            BinWithValue(label="Hematology Test", value=1),
-            BinWithValue(label="missing", value=0),
-        ]
-        self.assertListEqual(res.root, ground_truth)
+        self.assertListEqual(res.root, [
+            BinWithValue(key="Genetic Testing", label="Genetic Testing", value=1),
+            BinWithValue(key="Hematology Test", label="Hematology Test", value=1),
+            BinWithValue(key="missing", label="missing", value=0),
+        ])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
@@ -134,10 +134,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             self.dm_fp,
             field_permissions=self.permissions_counts,
         )
-        ground_truth = [
-            BinWithValue(label="missing", value=0),
-        ]
-        self.assertListEqual(res.root, ground_truth)
+        self.assertListEqual(res.root, [BinWithValue(key="missing", label="missing", value=0)])
 
     async def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()
