@@ -10,6 +10,7 @@ from bento_lib.discovery import (
     OntologyClassFieldDefinition,
     DiscoveryEntity,
 )
+from bento_lib.ontologies.models import CURIE_PATTERN
 from calendar import month_abbr
 from collections import Counter, defaultdict
 from functools import wraps
@@ -40,6 +41,9 @@ P_END_SYM = r"(?P<end_sym>[])<≤])"
 P_NUMBER = r"-?\d+(\.\d+)?"
 P_DATE = r"\d{4}(-\d{2}(-\d{2})?)?"
 P_DATE_EXACT = r"\d{4}-\d{2}-\d{2}"
+
+# CURIE compiled pattern
+P_CURIE = re.compile(CURIE_PATTERN)
 
 # Number range patterns
 #  - Number range patterns
@@ -87,6 +91,14 @@ def map_if_multi_value_filter(func: Callable[[str], bool]) -> Callable[[str | Di
             return all(map(func, value.values))
         return func(value)
     return inner
+
+
+@map_if_multi_value_filter
+def is_curie_format(value: str) -> bool:
+    """
+    Whether a filter value matches the CURIE (compact URI) format. In our case, for ontology class.
+    """
+    return bool(P_CURIE.match(value))
 
 
 @map_if_multi_value_filter
