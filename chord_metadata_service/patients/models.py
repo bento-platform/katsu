@@ -13,6 +13,11 @@ from .values import PatientStatus, Sex, KaryotypicSex
 
 
 class VitalStatus(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
+    class Meta:
+        indexes = [
+            GinIndex(name="vs_cause_of_death_idx", fields=["cause_of_death"]),
+        ]
+
     VITAL_STATUS = PatientStatus.as_django_values()
     status = models.CharField(choices=VITAL_STATUS, max_length=200, blank=True, null=False)
     time_of_death = models.JSONField(
