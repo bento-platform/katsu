@@ -12,6 +12,7 @@ from django.db.models import (
     Subquery,
 )
 from ninja import Query
+from ninja.responses import Status
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
@@ -95,7 +96,7 @@ def require_donor_by_program(func):
     def wrapper(request, filters):
         if filters.submitter_donor_id and not filters.program_id:
             error_message = {"error": "filter missing program_id"}
-            return HTTPStatus.BAD_REQUEST, error_message
+            return Status(HTTPStatus.BAD_REQUEST, error_message)
 
         return func(request, filters)
 
@@ -152,9 +153,10 @@ def get_donor_with_clinical_data(request, program_id: str, donor_id: str):
         ).get()
         return donor
     except Donor.DoesNotExist:
-        return HTTPStatus.NOT_FOUND, {
-            "error": "Donor matching query does not exist or inaccessible"
-        }
+        return Status(
+            HTTPStatus.NOT_FOUND,
+            {"error": "Donor matching query does not exist or inaccessible"},
+        )
 
 
 ##########################################
@@ -245,7 +247,7 @@ def query_donors(request, filters: DonorExplorerFilterSchema = Query(...)):
 def check_filter_donor_with_program(filters):
     if filters.submitter_donor_id and not filters.program_id:
         error_message = {"error": "submitter_donor_id filter requires program_id"}
-        return HTTPStatus.BAD_REQUEST, error_message
+        return Status(HTTPStatus.BAD_REQUEST, error_message)
     return filters
 
 
