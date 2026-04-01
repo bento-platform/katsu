@@ -12,7 +12,7 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, ProjectJsonSchema, DatasetV2
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 from .utils import get_censored_counts_for_serializer
 
@@ -20,7 +20,8 @@ __all__ = [
     "ProjectSerializer",
     "ProjectJsonSchemaSerializer",
     "DatasetSerializer",
-    "DatasetV2Serializer"
+    "DatasetV2Serializer",
+    "DatasetV2TranslationSerializer",
 ]
 
 
@@ -183,6 +184,21 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         if not data.get("identifier"):
             data = {**data, "identifier": str(uuid.uuid4())}
         return super().to_internal_value(data)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['created_at'] = instance.created_at
+        data['updated_at'] = instance.updated_at
+        return data
+
+
+class DatasetV2TranslationSerializer(PydanticJSONBSerializer):
+    schema_class = ProjectScopedDatasetModel
+
+    class Meta:
+        model = DatasetV2Translation
+        fields = "__all__"
+        read_only_fields = ['created_at', 'updated_at', 'dataset']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

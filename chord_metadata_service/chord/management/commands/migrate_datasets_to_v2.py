@@ -2,8 +2,9 @@
 Management command to migrate legacy Dataset records into the DatasetV2 table.
 
 The DatasetV2 table stores a full ProjectScopedDatasetModel payload split across
-dedicated columns (identifier, language, project, title, release_date,
-last_modified) and a JSONB `data` column for the remaining fields.
+dedicated columns (identifier, project, title, release_date, last_modified) and
+a JSONB `data` column for the remaining fields. Records are always created as the
+English (default) canonical entry. Translations can be added via the API.
 
 Old Dataset fields are DATS-style; this command performs a best-effort mapping
 to the new Pydantic schema. Required Pydantic fields that cannot be derived
@@ -12,7 +13,6 @@ warning) unless --force-placeholder is supplied.
 
 Usage:
     python manage.py migrate_datasets_to_v2
-    python manage.py migrate_datasets_to_v2 --language fr
     python manage.py migrate_datasets_to_v2 --dry-run
     python manage.py migrate_datasets_to_v2 --skip-existing
     python manage.py migrate_datasets_to_v2 --force-placeholder
@@ -284,11 +284,6 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--language",
-            default="en",
-            help="Language tag to assign to every migrated record (default: en).",
-        )
-        parser.add_argument(
             "--dry-run",
             action="store_true",
             default=False,
@@ -317,7 +312,6 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        language: str = options["language"]
         dry_run: bool = options["dry_run"]
         skip_existing: bool = options["skip_existing"]
         force_placeholder: bool = options["force_placeholder"]
@@ -332,7 +326,7 @@ class Command(BaseCommand):
 
         if skip_existing:
             existing_ids = set(
-                DatasetV2.objects.filter(language=language).values_list("identifier", flat=True)
+                DatasetV2.objects.values_list("identifier", flat=True)
             )
         else:
             existing_ids = set()
@@ -348,7 +342,7 @@ class Command(BaseCommand):
             identifier = str(dataset.identifier)
 
             if identifier in existing_ids:
-                self.stdout.write(f"  SKIP  {identifier} — already exists in DatasetV2 (language={language})")
+                self.stdout.write(f"  SKIP  {identifier} — already exists in DatasetV2")
                 skipped_count += 1
                 continue
 
@@ -372,7 +366,7 @@ class Command(BaseCommand):
 
             try:
                 with transaction.atomic():
-                    instance = DatasetV2.from_schema(schema, language=language)
+                    instance = DatasetV2.from_schema(schema)
                     instance.save()
                 self.stdout.write(
                     self.style.SUCCESS(f"  OK    {identifier} ({dataset.title!r}) → DatasetV2 created")

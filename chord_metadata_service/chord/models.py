@@ -14,7 +14,7 @@ from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBModelMixin
 
 
-__all__ = ["Project", "Dataset", "ProjectJsonSchema"]
+__all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation"]
 
 
 def version_default():
@@ -211,7 +211,6 @@ class DatasetV2(PydanticJSONBModelMixin):
     # --- Mixin configuration ---
     COLUMN_FIELDS = {
         'identifier',
-        'language',
         'project',
         'title',
         'release_date',
@@ -228,35 +227,55 @@ class DatasetV2(PydanticJSONBModelMixin):
     )
 
     identifier = models.CharField(
+        primary_key=True,
         max_length=128,
-        db_index=True,
         default=uuid.uuid4,
         blank=True,
         help_text="If from PCGL, inherit. Otherwise created in Katsu.",
     )
-
-    language = models.CharField(
-        max_length=8,
-        db_index=True,
-        default="en",
-        blank=True,
-    )
-
-    pk = models.CompositePrimaryKey("identifier", "language")
 
     title = models.CharField(max_length=512)
 
     release_date = models.DateField(db_index=True)
     last_modified = models.DateField(db_index=True)
 
-    # Store the whole validated payload (everything in your Pydantic DatasetModel)
+    # Store the whole validated payload (English default, validated by Pydantic before saving)
     data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"{self.identifier}: {self.title} ({self.language})"
+        return f"{self.identifier}: {self.title}"
+
+
+class DatasetV2Translation(PydanticJSONBModelMixin):
+    """Stores a translated Pydantic payload for a DatasetV2 in a non-default language."""
+
+    # --- Mixin configuration ---
+    # 'dataset' is NOT in COLUMN_FIELDS — it has no matching field in ProjectScopedDatasetModel.
+    # Callers pass dataset_id=<pk> as extra_column_kwargs to from_schema().
+    COLUMN_FIELDS = {'language'}
+    JSONB_FIELD = 'data'
+    SCHEMA_CLASS = ProjectScopedDatasetModel
+
+    # --- Django fields ---
+    dataset = models.ForeignKey(
+        DatasetV2,
+        on_delete=models.CASCADE,
+        related_name='translations',
+    )
+    language = models.CharField(max_length=8, db_index=True)
+    data = models.JSONField(help_text="Full ProjectScopedDatasetModel payload for this language.")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [('dataset', 'language')]
+
+    def __str__(self) -> str:
+        return f"{self.dataset_id}: {self.language}"
 
 
 class ProjectJsonSchema(models.Model):
