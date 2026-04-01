@@ -1,6 +1,7 @@
 from typing import Optional
 
 from ninja import Field
+from pydantic import ConfigDict
 
 from chord_metadata_service.mohpackets.schemas.base import (
     BaseBiomarkerSchema,
@@ -39,115 +40,91 @@ class ProgramIngestSchema(BaseProgramSchema):
 
 
 class DonorIngestSchema(BaseDonorSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     uuid: Optional[str] = None
-
-    class Config(BaseDonorSchema.Config):
-        use_enum_values = True
 
 
 class PrimaryDiagnosisIngestSchema(BasePrimaryDiagnosisSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     uuid: Optional[str] = None
-
-    class Config(BasePrimaryDiagnosisSchema.Config):
-        use_enum_values = True
 
 
 class BiomarkerIngestSchema(BaseBiomarkerSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseBiomarkerSchema.Config):
-        use_enum_values = True
-
 
 class SystemicTherapyIngestSchema(BaseSystemicTherapySchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseSystemicTherapySchema.Config):
-        use_enum_values = True
-
 
 class ComorbidityIngestSchema(BaseComorbiditySchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     uuid: Optional[str] = None
-
-    class Config(BaseComorbiditySchema.Config):
-        use_enum_values = True
 
 
 class ExposureIngestSchema(BaseExposureSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseExposureSchema.Config):
-        use_enum_values = True
-
 
 class FollowUpIngestSchema(BaseFollowUpSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_primary_diagnosis_id: Optional[str] = None
     submitter_treatment_id: Optional[str] = None
     uuid: Optional[str] = None
 
-    class Config(BaseFollowUpSchema.Config):
-        use_enum_values = True
-
 
 class RadiationIngestSchema(BaseRadiationSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseRadiationSchema.Config):
-        use_enum_values = True
-
 
 class SampleRegistrationIngestSchema(BaseSampleRegistrationSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_specimen_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseSampleRegistrationSchema.Config):
-        use_enum_values = True
-
 
 class SpecimenIngestSchema(BaseSpecimenSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_primary_diagnosis_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseSpecimenSchema.Config):
-        use_enum_values = True
-
 
 class SurgeryIngestSchema(BaseSurgerySchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_treatment_id: str
     uuid: Optional[str] = None
 
-    class Config(BaseSurgerySchema.Config):
-        use_enum_values = True
-
 
 class TreatmentIngestSchema(BaseTreatmentSchema):
+    model_config = ConfigDict(use_enum_values=True)
     program_id_id: str = Field(..., alias="program_id")
     submitter_donor_id: str
     submitter_primary_diagnosis_id: str
     uuid: Optional[str] = None
-
-    class Config(BaseTreatmentSchema.Config):
-        use_enum_values = True
