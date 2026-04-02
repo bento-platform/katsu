@@ -3,6 +3,7 @@ from typing import Dict, List, Type
 
 from django.http import HttpResponse, JsonResponse
 from ninja import Router
+from ninja.responses import Status
 
 from chord_metadata_service.mohpackets.models import (
     Biomarker,
@@ -187,6 +188,9 @@ def delete_program(request, program_id: str):
     try:
         dataset = Program.objects.get(pk=program_id)
         dataset.delete()
-        return HTTPStatus.NO_CONTENT, None
+        return Status(HTTPStatus.NO_CONTENT, None)
     except Program.DoesNotExist:
-        return HTTPStatus.NOT_FOUND, {"error": "Program matching query does not exist"}
+        return Status(
+            HTTPStatus.NOT_FOUND,
+            {"error": "Program matching query does not exist"},
+        )

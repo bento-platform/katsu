@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+from django.http import JsonResponse
 from django.db.models import Q
 from ninja import Router
 
@@ -75,8 +76,9 @@ def search_clinical_data(request, filters: DownloadFilterSchema):
                 sample_ids.append(sample_id)
             except ValueError:
                 error_message = {"error": f"Invalid format for biosample_id: {bio}"}
-                return router.api.create_response(
-                    request, error_message, status=HTTPStatus.BAD_REQUEST
+                return JsonResponse(
+                    error_message,
+                    status=HTTPStatus.BAD_REQUEST,
                 )
 
         if program_ids and sample_ids:

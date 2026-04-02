@@ -57,7 +57,11 @@ class Donor(models.Model):
     date_resolution = models.CharField(max_length=32, null=True, blank=True)
 
     class Meta:
-        unique_together = ["program_id", "submitter_donor_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program_id", "submitter_donor_id"], name="unique_donor"
+            )
+        ]
         ordering = ["submitter_donor_id"]
 
     def __str__(self):
@@ -97,7 +101,12 @@ class PrimaryDiagnosis(models.Model):
     pathological_stage_group = models.CharField(max_length=64, null=True, blank=True)
 
     class Meta:
-        unique_together = ["program_id", "submitter_primary_diagnosis_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program_id", "submitter_primary_diagnosis_id"],
+                name="unique_primary_diagnosis",
+            )
+        ]
         ordering = ["submitter_primary_diagnosis_id"]
 
     def __str__(self):
@@ -143,7 +152,11 @@ class Specimen(models.Model):
     )
 
     class Meta:
-        unique_together = ["program_id", "submitter_specimen_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program_id", "submitter_specimen_id"], name="unique_specimen"
+            )
+        ]
         ordering = ["submitter_specimen_id"]
 
     def __str__(self):
@@ -170,7 +183,12 @@ class SampleRegistration(models.Model):
     sample_type = models.CharField(max_length=128, null=True, blank=True)
 
     class Meta:
-        unique_together = ["program_id", "submitter_sample_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program_id", "submitter_sample_id"],
+                name="unique_sample_registration",
+            )
+        ]
         ordering = ["submitter_sample_id"]
 
     def __str__(self):
@@ -205,7 +223,11 @@ class Treatment(models.Model):
     status_of_treatment = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        unique_together = ["program_id", "submitter_treatment_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program_id", "submitter_treatment_id"], name="unique_treatment"
+            )
+        ]
         ordering = ["submitter_treatment_id"]
 
     def __str__(self):
@@ -363,7 +385,11 @@ class FollowUp(models.Model):
     )
 
     class Meta:
-        unique_together = ["program_id", "submitter_follow_up_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["program_id", "submitter_follow_up_id"], name="unique_follow_up"
+            )
+        ]
         ordering = ["submitter_follow_up_id"]
 
     def __str__(self):
