@@ -39,6 +39,7 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
 
     class Meta:
         indexes = [
+            # FTS indices:
             GinIndex(name="exp_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="exp_desc_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="exp_study_type_trgm_idx", fields=["study_type"], opclasses=["gin_trgm_ops"]),

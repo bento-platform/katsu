@@ -270,7 +270,11 @@ class DiscoveryQuery(BaseModel):
         n = 0
         for f in self.filters.values():
             if isinstance(f, DiscoveryQueryFilterOneOf):
-                n = sys.maxsize  # cannot be used in a censored discovery context
+                # this branch shouldn't happen in real use since _required_global_permission_level will block OneOf
+                # filters with before this function can be called.
+                # the subtraction is to prevent us going over our stated filter limit in the censorship rules even with
+                # uncensored search (where the maximum number of filters is set to sys.maxsize).
+                n = sys.maxsize - len(self.filters)  # cannot be used in a censored discovery context
                 break
             elif isinstance(f, str):
                 n += 1
