@@ -542,13 +542,14 @@ def queryset_field_single_value_condition(
     subquery: DiscoveryFieldSubquery | None,
 ):
     if field_props.datatype in ("string", "ontology-class"):
+        is_ontology_class = field_props.datatype == "ontology-class"
         if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
-            nested_condition = f_utils.get_nested_json_condition(gb, value)
+            nested_condition = f_utils.get_nested_json_condition(gb + ("/id" if is_ontology_class else ""), value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
             condition = get_condition_for_non_jsonb_field(
-                field + ("__id" if field_props.datatype == "ontology-class" else ""),
+                field + ("__id" if is_ontology_class else ""),
                 (("iexact", value),),
                 subquery,
             )
