@@ -89,12 +89,12 @@ class TestDiscoveryQueryModel(SimpleTestCase):
             (
                 {"sex": "MALE", "age": ["< 10", "[20, 30)"]},
                 {"sex": "MALE", "age": DiscoveryQueryFilterOneOf(filter_type="one_of", values=["< 10", "[20, 30)"])},
-                sys.maxsize,
+                sys.maxsize - 2,  # subtracted len(filters) to avoid going over an "infinite" cap on # filters
             ),
             (
                 {"sex": "MALE", "age": {"filter_type": "one_of", "values": ["< 10", "[20, 30)"]}},
                 {"sex": "MALE", "age": DiscoveryQueryFilterOneOf(filter_type="one_of", values=["< 10", "[20, 30)"])},
-                sys.maxsize,
+                sys.maxsize - 2,  # subtracted len(filters) to avoid going over an "infinite" cap on # filters
             ),
         ]
 
