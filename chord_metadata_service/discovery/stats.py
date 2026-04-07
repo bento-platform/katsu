@@ -1,4 +1,5 @@
-from bento_lib.discovery import DiscoveryConfig, FieldDefinition
+from bento_lib.discovery import DiscoveryConfig, FieldDefinition, StringFieldDefinition, OntologyClassFieldDefinition
+from bento_lib.ontologies.models import OntologyClass
 from django.db.models import Count, F, QuerySet
 
 from chord_metadata_service.authz.types import DataPermissions
@@ -12,7 +13,11 @@ __all__ = [
     "individual_biosample_tissue_stats",
     "bento_public_format_count_and_stats_list",
     "queryset_stats_for_field",
+    "to_legacy_stats",
 ]
+
+
+type FieldStats = dict[str, tuple[str, int]]
 
 
 async def individual_experiment_type_stats(
@@ -123,17 +128,20 @@ def _queryset_key_and_values_for_field(
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
-    field_props: FieldDefinition,
+    # None for legacy data type summaries --> no group_by or ontology classes:
+    field_props: FieldDefinition | StringFieldDefinition | OntologyClassFieldDefinition | None,
     discovery: DiscoveryConfig | None,
     field_permissions: DataPermissions | None,
     add_missing: bool = False,
     should_censor: bool = True,
-) -> dict[str, tuple[str, int]]:
+) -> FieldStats:
     """
     Computes counts of distinct values for a queryset and a given field. Mainly applicable to
     fields representing categorical values.
     :return: dictionary of [key, (label, count)]
     """
+
+    # TODO: when we get rid of legacy data type summaries, enforce field_props to not be None
 
     if (discovery is None or field_permissions is None) and should_censor:
         raise Exception("cannot censor without discovery config")
@@ -141,8 +149,8 @@ async def queryset_stats_for_field(
     queryset_key, queryset_label_key, queryset_values = _queryset_key_and_values_for_field(
         queryset,
         field,
-        field_props.group_by,
-        is_ontology_class=field_props.datatype == "ontology-class"
+        field_props.group_by if field_props else None,
+        is_ontology_class=field_props.datatype == "ontology-class" if field_props else False,
     )
 
     # annotate() creates a `total` column for the aggregation
@@ -152,7 +160,7 @@ async def queryset_stats_for_field(
     annotated_queryset = queryset_values.annotate(total=Count("*")).order_by()
     num_missing = 0
 
-    stats: dict[str, tuple[str, int]] = {}
+    stats: FieldStats = {}
 
     async for item in annotated_queryset:
         key = item[queryset_key]
@@ -181,4 +189,30 @@ async def queryset_stats_for_field(
             thresholded_count(num_missing, discovery, field_permissions) if should_censor else num_missing
         )
 
+    # ------------------------------------------------------------------------------------------------------------------
+
+    enum_config: list[str | OntologyClass] | None
+    if (enum_config := getattr(field_props.config, "enum", None) if field_props else None) is not None:
+        # Enforce values order and presence from config
+
+        enum_ids_and_labels = {}
+        for e in enum_config:
+            if isinstance(e, OntologyClass):
+                # field datatype is 'ontology-class' and we have a predefined list of classes
+                enum_ids_and_labels[e.id] = e.label
+            else:
+                enum_ids_and_labels[e] = e
+        if add_missing:
+            enum_ids_and_labels["missing"] = "missing"
+
+        stats = {ei: (elab, stats.get(ei, (elab, 0))[1]) for ei, elab in enum_ids_and_labels.items()}
+
+    # Otherwise (enum_config is None): values are based on what's present in the dataset.
+
+    # ------------------------------------------------------------------------------------------------------------------
+
     return stats
+
+
+def to_legacy_stats(stats: FieldStats) -> dict[str, int]:
+    return {k: v[1] for k, v in stats.items()}

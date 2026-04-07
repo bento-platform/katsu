@@ -235,7 +235,8 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
         # "uncensored": 0-threshold
         dm_values = await get_distinct_field_values(
-            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 0
+            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"],
+            self.permissions_full
         )
         self.assertEqual(len(dm_values), 2)
         self.assertTrue("Genetic Testing" in dm_values)
@@ -243,6 +244,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
         # censored: 5-threshold eliminates all options
         dm_values_censored = await get_distinct_field_values(
-            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 5
+            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"],
+            self.permissions_counts
         )
         self.assertListEqual(dm_values_censored, [])

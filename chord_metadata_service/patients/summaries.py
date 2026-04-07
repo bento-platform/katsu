@@ -28,18 +28,20 @@ async def individual_summary(
         individuals.acount(),
         #  - Sex related fields stats are precomputed here and post processed later
         #    to include missing values inferred from the schema
-        queryset_stats_for_field(individuals, "sex", discovery, phenopacket_permissions),
-        queryset_stats_for_field(individuals, "karyotypic_sex", discovery, phenopacket_permissions),
+        queryset_stats_for_field(individuals, "sex", None, discovery, phenopacket_permissions),
+        queryset_stats_for_field(individuals, "karyotypic_sex", None, discovery, phenopacket_permissions),
         #  - Age
         get_age_numeric_binned(individuals, OVERVIEW_AGE_BIN_SIZE, discovery, phenopacket_permissions),
         #  - Taxonomy
-        queryset_stats_for_field(individuals, "taxonomy__label", discovery, phenopacket_permissions),
+        queryset_stats_for_field(individuals, "taxonomy__label", None, discovery, phenopacket_permissions),
     )
 
     return {
         "count": thresholded_count(individual_count, discovery, phenopacket_permissions),
-        "sex": {k: individual_sex.get(k, 0) for k in (s[0] for s in models.Individual.SEX)},
-        "karyotypic_sex": {k: individual_k_sex.get(k, 0) for k in (s[0] for s in models.Individual.KARYOTYPIC_SEX)},
+        "sex": {k: individual_sex.get(k, (k, 0))[1] for k in (s[0] for s in models.Individual.SEX)},
+        "karyotypic_sex": {
+            k: individual_k_sex.get(k, (k, 0))[1] for k in (s[0] for s in models.Individual.KARYOTYPIC_SEX)
+        },
         "age": individual_age,
         "taxonomy": individual_taxonomy,
     }

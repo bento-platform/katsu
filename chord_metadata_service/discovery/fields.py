@@ -383,12 +383,6 @@ async def get_categorical_stats(
     """
     Fetches statistics for a given categorical field and apply privacy policies
     """
-    field_name = f_utils.get_field_django_mapping(queryset_entity, field_props)
-
-    # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the search
-    # queryset directly).
-    # TODO: cache IDs from search queryset?
-    stats_queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset)
 
     # Collect stats for the field, censoring low cell counts along the way
     # - We cannot append 0-counts for derived labels, since that indicates there is a non-0 count for this label in the
@@ -396,36 +390,19 @@ async def get_categorical_stats(
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
     stats: dict[str, tuple[str, int]] = await queryset_stats_for_field(
-        stats_queryset, field_name, field_props, scope.discovery, field_permissions, add_missing=True
+        # use pk__in the search queryset for annotating our bins+counts, otherwise we get weird counts (vs. using the
+        # search queryset directly).
+        # TODO: cache IDs from search queryset?
+        queryset=get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset),
+        field=f_utils.get_field_django_mapping(queryset_entity, field_props),
+        field_props=field_props,
+        discovery=scope.discovery,
+        field_permissions=field_permissions,
+        add_missing=True
     )
 
-    # Enforce values order from config and apply policies
-    enum_config: list[str | OntologyClass] | None = getattr(field_props.config, "enum")
-
-    if enum_config is not None:
-        # Enforce values order and presence from config
-
-        enum_ids_and_labels = {}
-        for e in enum_config:
-            if isinstance(e, OntologyClass):
-                enum_ids_and_labels[e.id] = e.label
-            else:
-                enum_ids_and_labels[e] = e
-        enum_ids_and_labels["missing"] = "missing"
-
-        stats = {ei: (elab, stats.get(ei, (elab, 0))[1]) for ei, elab in enum_ids_and_labels.items()}
-
-    # If enum_config is None: values are based on what's present in the dataset.
-    # - Here, we maintain the lexically-sorted original order of `stats`, and exclude the "missing" value which will
-    #   be appended at the end if it is set.
-    # - stats_for_field(...) has already handled censorship.
-
-    # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
-    return BinList(root=[
-        # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
-        *(BinWithValue(key=k, label=lab, value=v) for k, (lab, v) in stats.items()),
-        BinWithValue(key="missing", label="missing", value=stats["missing"][1]),
-    ])
+    # Create bin structures for each entry of {key: (label, value)}
+    return BinList(root=[BinWithValue(key=k, label=lab, value=v) for k, (lab, v) in stats.items()])
 
 
 def get_condition_for_non_jsonb_field(
