@@ -66,17 +66,19 @@ P_DATE_EXACT_VALUE = re.compile(rf"(?P<val>{P_DATE_EXACT})")
 
 def field_value_is_in_options(
     value: str | DiscoveryQueryFilterOneOf,
-    options: frozenset[str],
-    ft: Literal["string", "number", "date"],
+    options: frozenset[str] | frozenset[OntologyClass],
+    ft: Literal["string", "ontology-class", "number", "date"],
 ) -> bool:
     """
     Whether a field value matches any of the pre-determined options (usually for censored discovery). If the field type
     is a string, the comparison is case-insensitive.
     """
     if isinstance(value, DiscoveryQueryFilterOneOf):
-        return all(map(lambda v: field_value_is_in_options(v, options, ft), value.values))
+        return all(field_value_is_in_options(v, options, ft) for v in value.values)
     if ft == "string":
         return any(value.casefold() == o.casefold() for o in options)
+    elif ft == "ontology-class":
+        return any(value.casefold() == (o.id if isinstance(o, OntologyClass) else o).casefold() for o in options)
     return value in options
 
 
@@ -398,7 +400,7 @@ async def get_categorical_stats(
         field_props=field_props,
         discovery=scope.discovery,
         field_permissions=field_permissions,
-        add_missing=True
+        add_missing=True,
     )
 
     # Create bin structures for each entry of {key: (label, value)}

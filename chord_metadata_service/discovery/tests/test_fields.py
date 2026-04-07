@@ -55,6 +55,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     def setUp(self):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1.id))
         self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket = ph_m.Phenopacket.objects.create(
             id="phenopacket_id:1",
@@ -62,20 +63,37 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             dataset=self.dataset,
             meta_data=self.meta_data,
         )
+        self.phenopacket.biosamples.set([self.biosample_1])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lcf(self):
-        res = await get_categorical_stats(
-            self.scope,
-            "phenopacket",
-            ph_m.Phenopacket.objects.all(),
-            DISCOVERY_CONFIG_TEST.fields["sex"],
-            field_permissions=self.permissions_full,
-        )
-        self.assertListEqual(
-            res.root,
-            [BinWithValue(key="MALE", label="MALE", value=1), BinWithValue(key="missing", label="missing", value=0)]
-        )
+        subtest_params = [
+            (
+                "sex",
+                [
+                    BinWithValue(key="MALE", label="MALE", value=1),
+                    BinWithValue(key="missing", label="missing", value=0),
+                ],
+            ),
+            (
+                "tissues",
+                [
+                    BinWithValue(key="UBERON:0001256", label="wall of urinary bladder", value=1),
+                    BinWithValue(key="missing", label="missing", value=0),
+                ],
+            ),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                res = await get_categorical_stats(
+                    self.scope,
+                    "phenopacket",
+                    ph_m.Phenopacket.objects.all(),
+                    DISCOVERY_CONFIG_TEST.fields[params[0]],
+                    field_permissions=self.permissions_full,
+                )
+                self.assertListEqual(res.root, params[1])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):

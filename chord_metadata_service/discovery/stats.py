@@ -1,4 +1,10 @@
-from bento_lib.discovery import DiscoveryConfig, FieldDefinition, StringFieldDefinition, OntologyClassFieldDefinition
+from bento_lib.discovery import (
+    DiscoveryConfig,
+    FieldDefinition,
+    StringFieldDefinition,
+    OntologyClassFieldDefinition,
+    DateFieldDefinition,
+)
 from bento_lib.ontologies.models import OntologyClass
 from django.db.models import Count, F, QuerySet
 
@@ -129,7 +135,8 @@ async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
     # None for legacy data type summaries --> no group_by or ontology classes:
-    field_props: FieldDefinition | StringFieldDefinition | OntologyClassFieldDefinition | None,
+    # TODO: better typing
+    field_props: FieldDefinition | DateFieldDefinition | StringFieldDefinition | OntologyClassFieldDefinition | None,
     discovery: DiscoveryConfig | None,
     field_permissions: DataPermissions | None,
     add_missing: bool = False,

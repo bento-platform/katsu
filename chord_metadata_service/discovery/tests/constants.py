@@ -59,10 +59,10 @@ DISCOVERY_CONFIG_TEST_DICT = {
             },
         },
         "tissues": {
-            "mapping": "biosample/sampled_tissue/label",
+            "mapping": "biosample/sampled_tissue",
             "title": "Tissue",
             "description": "Tissue from which the biosample was extracted",
-            "datatype": "string",
+            "datatype": "ontology-class",
             "config": {
                 "enum": None
             }

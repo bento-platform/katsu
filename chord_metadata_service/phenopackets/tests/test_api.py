@@ -32,7 +32,7 @@ class CreateBiosampleTest(AuthzAPITestCase):
             "procedure": self.procedure,
             "description": "This is a test description.",
             "sampled_tissue": {
-                "id": "UBERON_0001256"
+                "id": "UBERON:0001256"
             },
             "histological_diagnosis": {
                 "id": "NCIT:C39853",
