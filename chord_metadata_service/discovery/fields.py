@@ -547,7 +547,11 @@ def queryset_field_single_value_condition(
             nested_condition = f_utils.get_nested_json_condition(gb, value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
         else:
-            condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
+            condition = get_condition_for_non_jsonb_field(
+                field + ("__id" if field_props.datatype == "ontology-class" else ""),
+                (("iexact", value),),
+                subquery,
+            )
 
     elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800".
