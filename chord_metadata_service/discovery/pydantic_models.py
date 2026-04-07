@@ -68,12 +68,10 @@ class BaseDiscoveryResolvedField(BaseModel):
 class DiscoveryFieldAndOptions(BaseDiscoveryResolvedField):
     model_config = ConfigDict(frozen=True)
 
-    # field ID + field definition + field filter options
-    options: list[str]
+    options: list[str] | list[OntologyClass]
 
 
 class DiscoveryFieldResponse(BaseDiscoveryResolvedField):
-    # field ID + field definition + field data
     data: BinList
 
 

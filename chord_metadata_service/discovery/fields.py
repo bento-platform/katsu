@@ -10,7 +10,7 @@ from bento_lib.discovery import (
     OntologyClassFieldDefinition,
     DiscoveryEntity,
 )
-from bento_lib.ontologies.models import CURIE_PATTERN
+from bento_lib.ontologies.models import CURIE_PATTERN, OntologyClass
 from calendar import month_abbr
 from collections import Counter, defaultdict
 from functools import wraps
@@ -151,7 +151,7 @@ async def get_field_options(
     field_id: str,
     scope: ValidatedDiscoveryScope,
     field_permissions: DataPermissions,
-) -> list[str]:
+) -> list[str] | list[OntologyClass]:
     """
     Given properties for a discovery field, return the list of authorized options for
     querying this field.
@@ -163,20 +163,17 @@ async def get_field_options(
     queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
     field_props = scope.discovery.fields[field_id]
-    threshold = get_threshold(scope, field_permissions)
 
     if field_props.datatype in ("string", "ontology-class"):
-        options = getattr(field_props.config, "enum", None)
-        # Special case: no list of values specified
-        if options is None:
-            # We must be careful here not to leak 'small cell' values as options
-            # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
-            #   should be treated as if the field isn't in the database at all.
-            options = await get_distinct_field_values(queryset_entity, queryset, field_props, threshold)
+        options = await get_distinct_field_values(
+            queryset_entity, queryset, scope.discovery, field_props, field_permissions
+        )
     elif field_props.datatype == "number":
         options = [label for _floor, _ceil, label in f_utils.labelled_number_range_generator(field_props)]
     elif field_props.datatype == "date":
-        start, end = await get_month_date_range(queryset_entity, queryset, field_props, threshold)
+        start, end = await get_month_date_range(
+            queryset_entity, queryset, field_props, threshold=get_threshold(scope, field_permissions)
+        )
         options = [label for _floor, _ceil, label in f_utils.labelled_date_range_generator_by_month(start, end)]
     else:  # pragma: no cover
         # Can't actually occur with Pydantic implementation of the discovery configuration model, which will validate
@@ -187,32 +184,30 @@ async def get_field_options(
 
 
 async def get_distinct_field_values(
-    queryset_entity: DiscoveryEntity, queryset: QuerySet, field_props: FieldDefinition, threshold: int
-) -> list[str]:
+    queryset_entity: DiscoveryEntity,
+    queryset: QuerySet,
+    discovery: DiscoveryConfig,
+    field_props: FieldDefinition,
+    field_permissions: DataPermissions,
+) -> list[str] | list[OntologyClass]:
+    # get_distinct_field_values can be used by either string or ontology-class fields
+
     # We must be careful here not to leak 'small cell' values as options
-    # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this
-    #   should be treated as if the field isn't in the database at all.
+    # - e.g., if there are three individuals with sex=UNKNOWN_SEX, this should be treated as if the field isn't in the
+    #   database at all.
+    # Thankfully, queryset_stats_for_field handles this for us.
 
     mapping_field = f_utils.get_field_django_mapping(queryset_entity, field_props)
+    field_stats = await queryset_stats_for_field(queryset, mapping_field, field_props, discovery, field_permissions)
 
-    field_query = mapping_field
-    if gb := field_props.group_by:
-        # JSONField containing an array
-        # use jsonb_path_query field expression
-        field_query = f_utils.get_jsonb_path_query(mapping_field, gb)
-
-    values_with_counts = queryset.values_list(field_query).annotate(count=Count(mapping_field))
-
-    res = [
-        str(val)  # should already be a string, since get_distinct_field_values is only used by string discovery fields
-        async for val, count in values_with_counts
-        if censor_count(count, threshold)
-    ]
-
-    # Ensure options have a consistent sort order. For now, sort alphabetically, but in the future we may wish to sort
-    # by count or something like that. PyCharm gets angry about passing str.casefold directly, but it works fine.
-    # noinspection PyTypeChecker
-    res.sort(key=str.casefold)
+    if field_props.datatype == "ontology-class":
+        res = [OntologyClass(id=k, label=v[0]) for k, v in field_stats.items()]
+        # Ensure options have a consistent sort order. For now, sort alphabetically, but in the future we may wish to
+        # sort by count or something like that.
+        res.sort(key=lambda t: t.label.casefold())
+    else:
+        # field_stats keys are already sorted alphabetically
+        res = list(field_stats.keys())
 
     return res
 
@@ -267,7 +262,7 @@ async def get_age_numeric_binned(
     }
 
 
-def _month_start_end_from_stats(stats: dict[str, int], threshold: int) -> tuple[str | None, str | None]:
+def _month_start_end_from_stats(stats: dict[str, tuple[str, int]], threshold: int) -> tuple[str | None, str | None]:
     """
     Given ISO date stats of format {YYYY-MM-...: count}, truncates and groups keys based on month and finds the
     starting and ending months which exceed the censorship threshold.
@@ -276,7 +271,7 @@ def _month_start_end_from_stats(stats: dict[str, int], threshold: int) -> tuple[
     # Key the counts on yyyy-mm combination (aggregate same month counts)
     grouped_stats = defaultdict(int)
     for sk, sv in stats.items():
-        grouped_stats[sk[:LENGTH_Y_M]] += sv
+        grouped_stats[sk[:LENGTH_Y_M]] += sv[1]
 
     # filter + sort grouped stats to find start/end dates that exceed censorship threshold
     if items := sorted(filter(lambda item: bool(censor_count(item[1], threshold)), grouped_stats.items())):
@@ -299,7 +294,7 @@ async def get_month_date_range(
 
     field = f_utils.get_field_django_mapping(queryset_entity, field_props)
     stats = await queryset_stats_for_field(
-        queryset, field, None, None, group_by=field_props.group_by, should_censor=False
+        queryset, field, field_props, None, None, should_censor=False
     )
     return _month_start_end_from_stats(stats, threshold)
 
@@ -400,32 +395,36 @@ async def get_categorical_stats(
     #   database - i.e., if the label is pulled from the values in the database, someone could otherwise learn
     #   1 <= this field <= threshold given it being present at all.
     # - stats_for_field(...) handles this!
-    stats: dict[str, int] = await queryset_stats_for_field(
-        stats_queryset, field_name, scope.discovery, field_permissions, add_missing=True, group_by=field_props.group_by
+    stats: dict[str, tuple[str, int]] = await queryset_stats_for_field(
+        stats_queryset, field_name, field_props, scope.discovery, field_permissions, add_missing=True
     )
 
     # Enforce values order from config and apply policies
-    labels: list[str] | None = getattr(field_props.config, "enum")
+    enum_config: list[str | OntologyClass] | None = getattr(field_props.config, "enum")
 
-    # Special case: for some fields, values are based on what's present in the
-    # dataset (enum is null in the public JSON).
-    # - Here, apply lexical sort, and exclude the "missing" value which will
+    if enum_config is not None:
+        # Enforce values order and presence from config
+
+        enum_ids_and_labels = {}
+        for e in enum_config:
+            if isinstance(e, OntologyClass):
+                enum_ids_and_labels[e.id] = e.label
+            else:
+                enum_ids_and_labels[e] = e
+        enum_ids_and_labels["missing"] = "missing"
+
+        stats = {ei: (elab, stats.get(ei, (elab, 0))[1]) for ei, elab in enum_ids_and_labels.items()}
+
+    # If enum_config is None: values are based on what's present in the dataset.
+    # - Here, we maintain the lexically-sorted original order of `stats`, and exclude the "missing" value which will
     #   be appended at the end if it is set.
-    # - Note that in this situation, we explictly MUST HAVE remove rounded-down 0-counts (below the threshold) below,
-    #   otherwise we LEAK that there is 1 <= x <= threshold matching entries in the DB. However, since
-    #   stats_for_field(...) has already handled not adding these keys, these labels don't make it into this list.
-    if labels is None:
-        labels = sorted(
-            [k for k in stats.keys() if k != "missing"],
-            key=lambda x: x.lower()
-        )
+    # - stats_for_field(...) has already handled censorship.
 
     # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
     return BinList(root=[
         # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
-        # TODO: ontology fields: separate key vs label
-        *(BinWithValue(key=category, label=category, value=stats.get(category, 0)) for category in labels),
-        BinWithValue(key="missing", label="missing", value=stats["missing"]),
+        *(BinWithValue(key=k, label=lab, value=v) for k, (lab, v) in stats.items()),
+        BinWithValue(key="missing", label="missing", value=stats["missing"][1]),
     ])
 
 

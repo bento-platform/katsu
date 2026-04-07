@@ -45,8 +45,6 @@ def get_field_django_mapping_and_queried_entity(
     """
 
     entity_name, field_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
-    if field_props.datatype == "ontology-class":
-        field_path = (*field_path, "id")
 
     model: Type[BaseScopeableModel] | None = DISCOVERY_ENTITY_NAMES_TO_MODEL.get(entity_name)
     if model is None:

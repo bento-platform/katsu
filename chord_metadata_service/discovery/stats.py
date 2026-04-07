@@ -1,4 +1,4 @@
-from bento_lib.discovery import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig, FieldDefinition
 from django.db.models import Count, F, QuerySet
 
 from chord_metadata_service.authz.types import DataPermissions
@@ -82,7 +82,9 @@ async def bento_public_format_count_and_stats_list(
     return thresholded_count(total, discovery, field_permissions), stats_list
 
 
-def _queryset_key_and_values_for_field(queryset: QuerySet, field: str, group_by: str | None) -> tuple[str, QuerySet]:
+def _queryset_key_and_values_for_field(
+    queryset: QuerySet, field: str, group_by: str | None, is_ontology_class: bool
+) -> tuple[str, str | None, QuerySet]:
     """
     Helper function to rename the field we want (if possibly nested) to something that won't conflict with a real key on
     the queryset, especially if we're digging into some JSONB object.
@@ -94,33 +96,54 @@ def _queryset_key_and_values_for_field(queryset: QuerySet, field: str, group_by:
     #  with mapping=individual/phenopackets/medical_actions, group_by=procedure/code/label, just using mapping (field)
     #  as the unique key would collide with the real medical_actions field on phenopackets after we normalize mapping.
     #  By instead using _jsonb_medical_actions_procedure_code_label as the annotation key, we have something unique.
-    queryset_key = f"_jsonb_{field}_{group_by.replace(MAPPING_SEPARATOR, '_')}" if group_by is not None else field
+    queryset_key = (
+        f"_jsonb_{field}_{(group_by + '/id').replace(MAPPING_SEPARATOR, '_')}"
+        if group_by is not None else f"{field}{"__id" if is_ontology_class else ""}"
+    )
+    queryset_label_key: str | None = (
+        f"_jsonb_{field}_{(group_by + '/label').replace(MAPPING_SEPARATOR, '_')}"
+        if group_by is not None else f"{field}__label"
+    ) if is_ontology_class else None
 
     # values() restrict the table of results to this COLUMN
     if group_by is not None:
-        return queryset_key, queryset.values(**{queryset_key: get_jsonb_path_query(field, group_by)})
+        return (
+            queryset_key,
+            queryset_label_key,
+            queryset.values(**{queryset_key: get_jsonb_path_query(field, group_by)}),
+        )
     else:
-        return queryset_key, queryset.values(field)
+        return (
+            queryset_key,
+            queryset_label_key,
+            queryset.values(*((queryset_key, queryset_label_key) if queryset_label_key else (queryset_key,))),
+        )
 
 
 async def queryset_stats_for_field(
     queryset: QuerySet,
     field: str,
+    field_props: FieldDefinition,
     discovery: DiscoveryConfig | None,
     field_permissions: DataPermissions | None,
     add_missing: bool = False,
-    group_by: str | None = None,
     should_censor: bool = True,
-) -> dict[str, int]:
+) -> dict[str, tuple[str, int]]:
     """
     Computes counts of distinct values for a queryset and a given field. Mainly applicable to
     fields representing categorical values.
+    :return: dictionary of [key, (label, count)]
     """
 
     if (discovery is None or field_permissions is None) and should_censor:
         raise Exception("cannot censor without discovery config")
 
-    queryset_key, queryset_values = _queryset_key_and_values_for_field(queryset, field, group_by)
+    queryset_key, queryset_label_key, queryset_values = _queryset_key_and_values_for_field(
+        queryset,
+        field,
+        field_props.group_by,
+        is_ontology_class=field_props.datatype == "ontology-class"
+    )
 
     # annotate() creates a `total` column for the aggregation
     # Count("*") aggregates results including nulls
@@ -129,7 +152,7 @@ async def queryset_stats_for_field(
     annotated_queryset = queryset_values.annotate(total=Count("*")).order_by()
     num_missing = 0
 
-    stats: dict[str, int] = {}
+    stats: dict[str, tuple[str, int]] = {}
 
     async for item in annotated_queryset:
         key = item[queryset_key]
@@ -146,10 +169,15 @@ async def queryset_stats_for_field(
         if should_censor and thresholded_count(item["total"], discovery, field_permissions) == 0:
             continue
 
-        stats[key] = item["total"]
+        label = str(item[queryset_label_key]).strip() if queryset_label_key is not None else key
+        stats[key] = (label, item["total"])
+
+    # Sort statistics dictionary in order of lowercase label
+    stats = dict(sorted(stats.items(), key=lambda s: s[1][0].lower()))
 
     if add_missing:
         stats["missing"] = (
+            "missing",
             thresholded_count(num_missing, discovery, field_permissions) if should_censor else num_missing
         )
 
