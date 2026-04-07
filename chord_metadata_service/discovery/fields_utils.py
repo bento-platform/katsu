@@ -10,6 +10,7 @@ from .types import AnyFieldDefinition
 __all__ = [
     "MAPPING_SEPARATOR",
     "JSON_PATH_ACCESSOR",
+    "JSONBPathFilter",
     "get_jsonb_path_query",
     "parse_individual_age",
     "labelled_number_range_generator",

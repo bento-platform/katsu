@@ -6,7 +6,7 @@ import uuid
 from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
 
-from django.db.models import Q
+from django.db.models import Q, F, Value
 from django.urls import reverse
 from django.test import TestCase, override_settings
 from rest_framework import status
@@ -15,6 +15,7 @@ from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
+from chord_metadata_service.discovery.fields_utils import JSONBPathFilter
 from chord_metadata_service.discovery.tests.constants import (
     DISCOVERY_CONFIG_EXTRA_PROPERTIES,
     DISCOVERY_CONFIG_TEST,
@@ -507,6 +508,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         return response["count"] if "count" in response else dres.INSUFFICIENT_DATA_AVAILABLE
 
     def setUp(self):
+        random.seed(self.random_seed)
+
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
         self.dataset_2 = cm.Dataset.objects.create(
             title="Dataset 2",
@@ -527,6 +530,9 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             phenopacket = ph_m.Phenopacket.objects.create(
                 id=f"phenopacket_id:{idx}",
                 subject=individual,
+                measurements=[
+                    ph_c.valid_measurement_tumor_length(random.randint(1, 199))
+                ],
                 meta_data=meta_data,
                 dataset=self.dataset,
             )
@@ -549,8 +555,6 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
         ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
         ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 2))
-
-        random.seed(self.random_seed)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_sex(self):
@@ -625,16 +629,19 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
         self._test_individual_counts(response_obj, db_count, full_access=True)
 
-    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
-    def test_discovery_filtering_sex_via_fts_forbidden(self):
-        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field:
-        response = self.dt_authz_counts_get("/api/discovery?_fts=FEMALE")
+    def assert_insufficient_discovery_permissions(self, response):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         response_obj = response.json()
         self.assertEqual(
             str(response_obj["errors"][0]["message"]),
             "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None dataset=None>)']"
         )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_sex_via_fts_forbidden(self):
+        # sex string search using full-text search as a proxy for the unique keyword we have in the sex field:
+        response = self.dt_authz_counts_get("/api/discovery?_fts=FEMALE")
+        self.assert_insufficient_discovery_permissions(response)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_sex_via_fts_trigram(self):
@@ -659,24 +666,50 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 q = f"/api/discovery?_fts={p[0].upper()}&_fts_type=trigram"
 
                 response = self.dt_authz_counts_get(q)
-                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-                response_obj = response.json()
-                self.assertEqual(
-                    str(response_obj["errors"][0]["message"]),
-                    (
-                        "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None "
-                        "dataset=None>)']"
-                    )
-                )
+                self.assert_insufficient_discovery_permissions(response)
 
                 response = self.dt_authz_full_get(q)
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
                 response_obj = response.json()
                 db_count = Individual.objects.filter(p[1]).count()
-                self.assertIn(
-                    self.response_threshold_check(response_obj),
-                    [db_count, dres.INSUFFICIENT_DATA_AVAILABLE],
-                )
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
+                self._test_individual_counts(response_obj, db_count, full_access=True)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_one_of(self):
+        # test GET query string search for OneOf (OR) queries
+        params = [
+             ("sex=MALE&sex=FEMALE", Q(sex="MALE") | Q(sex="FEMALE")),
+             ("sex=MALE&sex=UNKNOWN_SEX", Q(sex="MALE") | Q(sex="UNKNOWN_SEX")),
+             (
+                 "smoking=Smoker&smoking=Former smoker",
+                 Q(extra_properties__smoking="Smoker") | Q(extra_properties__smoking="Former smoker"),
+             ),
+             (
+                 "measurement_tumor_length=[0, 50)&measurement_tumor_length=(100, 150]",  # custom bins + OR query
+                 Q(
+                     JSONBPathFilter(
+                         F("phenopackets__measurements"),
+                         Value(
+                             '$[*] ? (((@.value.quantity.value >= 0 && @.value.quantity.value < 50) '
+                             '          || (@.value.quantity.value > 100 && @.value.quantity.value <= 150)) '
+                             '&& @.assay.id == "NCIT:C200479")'
+                         )
+                     )
+                 ),
+             )
+        ]
+        for p in params:
+            with self.subTest(params=p):
+                q = f"/api/discovery?{p[0]}"
+
+                response = self.dt_authz_counts_get(q)
+                self.assert_insufficient_discovery_permissions(response)
+
+                response = self.dt_authz_full_get(q)
+                response_obj = response.json()
+                db_count = Individual.objects.filter(p[1]).count()
+                self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
                 self._test_individual_counts(response_obj, db_count, full_access=True)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
@@ -954,6 +987,20 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             ("[2020-01-01,2021-04-01)", {f"{doc}__gte": "2020-01-01", f"{doc}__lt": "2021-04-01"}),
             ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
+            (
+                ("Mar 2021", "Apr 2021", "May 2021", "Jun 2021"),
+                Q(**{f"{doc}__startswith": "2021-03"})
+                | Q(**{f"{doc}__startswith": "2021-04"})
+                | Q(**{f"{doc}__startswith": "2021-05"})
+                | Q(**{f"{doc}__startswith": "2021-06"})
+            ),
+            (
+                ("[2021-03, 2021-04)", "[2021-04, 2021-05)", "[2021-05, 2021-06)", "[2021-06, 2021-07)"),
+                Q(**{f"{doc}__startswith": "2021-03"})
+                | Q(**{f"{doc}__startswith": "2021-04"})
+                | Q(**{f"{doc}__startswith": "2021-05"})
+                | Q(**{f"{doc}__startswith": "2021-06"})
+            ),
         ]
 
         for i in self.individual_objs[:10]:
@@ -968,10 +1015,32 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
         for params in subtest_params:
             with self.subTest(params=params):
-                response = self.dt_authz_full_get(f"/api/discovery?date_of_consent={params[0]}")
+                ps = params[0] if isinstance(params[0], tuple) else (params[0],)
+                q = "&".join(f"date_of_consent={p}" for p in ps)
+                response = self.dt_authz_full_get(f"/api/discovery?{q}")
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
-                db_count = Individual.objects.filter(**params[1]).count()
+                db_count = Individual.objects.filter(
+                    Q(**params[1]) if isinstance(params[1], dict) else params[1]
+                ).count()
                 self._test_individual_counts(response.json(), db_count, full_access=True)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
+    def test_discovery_filtering_extra_properties_date_range_full_access_errors(self):
+        subtest_params = [
+            (("Mar 2021", "April 2021"),),
+            (("[2021-03, 2021-045)", "[2021-04, 2021-05)"),),
+        ]
+        for params in subtest_params:
+            with self.subTest(params=params):
+                q = "&".join(f"date_of_consent={p}" for p in params[0])
+                response = self.dt_authz_full_get(f"/api/discovery?{q}")
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn(
+                    # first part of error message
+                    "Invalid value used in field query: date_of_consent=filter_type='one_of'",
+                    response.json()["errors"][0]["message"][0],
+                    # TODO: message not supposed to be array of str but can't break API for beacon
+                )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_and_other_range(self):

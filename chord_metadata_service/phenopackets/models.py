@@ -127,6 +127,11 @@ class Disease(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
     FHIR: Condition
     """
 
+    class Meta:
+        indexes = [
+            GinIndex(name="disease_term_idx", fields=["term"]),
+        ]
+
     term = JSONField(validators=[ontology_validator], help_text=rec_help(d.DISEASE, "term"))
     excluded = models.BooleanField(default=False)
     onset = JSONField(blank=True, null=True,
@@ -545,6 +550,10 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
             models.UniqueConstraint(fields=["id", "dataset_id"], name="unique_pheno_dataset")
         ]
         indexes = [
+            # JSON indices:
+            GinIndex(name="pheno_measurements_idx", fields=["measurements"]),
+            GinIndex(name="pheno_medical_actions_idx", fields=["medical_actions"]),
+            # FTS indices:
             GinIndex(name="pheno_id_trgm_idx", fields=["id"], opclasses=["gin_trgm_ops"]),
             BaseFTSModel.get_fts_extra_trgm_index("pheno"),
         ]

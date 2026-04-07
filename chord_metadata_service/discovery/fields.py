@@ -6,12 +6,13 @@ from bento_lib.discovery import (
 )
 from calendar import month_abbr
 from collections import Counter, defaultdict
+from functools import wraps
 
 from chord_metadata_service.discovery.censorship import get_threshold
 from django.db.models import Case, CharField, Count, F, Func, IntegerField, QuerySet, When, Value, Q, Exists, OuterRef
 from django.db.models.functions import Cast
 from structlog.stdlib import BoundLogger
-from typing import Any
+from typing import Literal, Callable
 
 from chord_metadata_service.authz.types import DataPermissions
 
@@ -19,7 +20,7 @@ from . import fields_utils as f_utils
 from .censorship import censor_count, thresholded_count
 from .field_paths.django_field_query import DiscoveryFieldSubquery, get_field_django_mapping_and_queried_entity
 from .scope import ValidatedDiscoveryScope
-from .pydantic_models import BinWithValue, BinList
+from .pydantic_models import BinWithValue, BinList, DiscoveryQueryFilterOneOf
 from .stats import queryset_stats_for_field
 from .utils import get_discovery_entity_model_scoped_queryset
 
@@ -53,6 +54,36 @@ P_DATE_MIN_VALUE = re.compile(rf"{P_MIN_SYM} ?(?P<val>{P_DATE})")
 P_DATE_EXACT_VALUE = re.compile(rf"(?P<val>{P_DATE_EXACT})")
 
 
+def field_value_is_in_options(
+    value: str | DiscoveryQueryFilterOneOf,
+    options: frozenset[str],
+    ft: Literal["string", "number", "date"],
+) -> bool:
+    """
+    Whether a field value matches any of the pre-determined options (usually for censored discovery). If the field type
+    is a string, the comparison is case-insensitive.
+    """
+    if isinstance(value, DiscoveryQueryFilterOneOf):
+        return all(map(lambda v: field_value_is_in_options(v, options, ft), value.values))
+    if ft == "string":
+        return any(value.casefold() == o.casefold() for o in options)
+    return value in options
+
+
+def map_if_multi_value_filter(func: Callable[[str], bool]) -> Callable[[str | DiscoveryQueryFilterOneOf], bool]:
+    """
+    Decorator for filter format checker functions. If the value is a DiscoveryQueryFilterOneOf, the inner function will
+    be mapped over the inner values; otherwise, it'll transparently check the format of a single value string.
+    """
+    @wraps(func)
+    def inner(value: str | DiscoveryQueryFilterOneOf) -> bool:
+        if isinstance(value, DiscoveryQueryFilterOneOf):
+            return all(map(func, value.values))
+        return func(value)
+    return inner
+
+
+@map_if_multi_value_filter
 def is_number_query_format(value: str) -> bool:
     """
     Whether a filter value matches any possible number field query.
@@ -66,6 +97,7 @@ def is_number_query_format(value: str) -> bool:
     )
 
 
+@map_if_multi_value_filter
 def is_date_query_format(value: str) -> bool:
     """
     Whether a filter value matches any possible date field query.
@@ -101,7 +133,7 @@ async def get_field_options(
     field_id: str,
     scope: ValidatedDiscoveryScope,
     field_permissions: DataPermissions,
-) -> list[Any]:
+) -> list[str]:
     """
     Given properties for a discovery field, return the list of authorized options for
     querying this field.
@@ -505,25 +537,13 @@ def filter_equality_condition(
         return get_condition_for_non_jsonb_field(field, ((None, val),), subquery)
 
 
-async def filter_queryset_field_value(
-    queryset_entity: DiscoveryEntity, qs: QuerySet, field_props: FieldDefinition, value: str, logger: BoundLogger
-) -> tuple[QuerySet, DiscoveryEntity]:
-    """
-    Further filter a queryset using the field defined by field_props and the
-    given value.
-    It is a prerequisite that the field mapping defined in field_props is represented
-    in the queryset object.
-    `mapping_for_search_filter` is an optional property that gets precedence over `mapping`
-    for the necessity of filtering. It is not necessary to specify this when
-    the `mapping` value is based on the same model as the queryset.
-    """
-
-    # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
-    #   model
-    field, subquery, queried_entity = get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
-
-    # TODO: resolve schema including extra properties
-
+def queryset_field_single_value_condition(
+    queryset_entity: DiscoveryEntity,
+    field: str,
+    field_props: FieldDefinition,
+    value: str,
+    subquery: DiscoveryFieldSubquery | None,
+):
     if field_props.datatype == "string":
         if gb := field_props.group_by:
             # JSONField array string check must use 'contains' lookup
@@ -590,6 +610,42 @@ async def filter_queryset_field_value(
         # This isn't possible to reach by normal means, since the FieldDefinition Pydantic model limits the possible
         # values of `datatype` to the cases above (unless a new possible value is added to FieldDefinition).
         raise NotImplementedError()
+
+    return condition
+
+
+async def filter_queryset_field_value(
+    queryset_entity: DiscoveryEntity,
+    qs: QuerySet,
+    field_props: FieldDefinition,
+    value: str | DiscoveryQueryFilterOneOf,
+    logger: BoundLogger
+) -> tuple[QuerySet, DiscoveryEntity]:
+    """
+    Further filter a queryset using the field defined by field_props and the
+    given value.
+    It is a prerequisite that the field mapping defined in field_props is represented
+    in the queryset object.
+    `mapping_for_search_filter` is an optional property that gets precedence over `mapping`
+    for the necessity of filtering. It is not necessary to specify this when
+    the `mapping` value is based on the same model as the queryset.
+    """
+
+    # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
+    #   model
+    field, subq, queried_entity = get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
+
+    # TODO: resolve schema including extra properties
+
+    if isinstance(value, DiscoveryQueryFilterOneOf):
+        # build the OR query if our filter value is DiscoveryQueryFilterOneOf
+        condition = queryset_field_single_value_condition(queryset_entity, field, field_props, value.values[0], subq)
+        for v in value.values[1:]:
+            condition |= queryset_field_single_value_condition(queryset_entity, field, field_props, v, subq)
+        if value.negated:
+            condition = ~condition
+    else:
+        condition = queryset_field_single_value_condition(queryset_entity, field, field_props, value, subq)
 
     await logger.adebug(
         "filtering entity field with condition", entity=queried_entity, field=field, condition=condition
