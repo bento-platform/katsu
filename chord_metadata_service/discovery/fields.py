@@ -150,7 +150,7 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
 
 async def get_field_options(
     queryset_entity: DiscoveryEntity,
-    field_id: str,
+    field_def: FieldDefinition,
     scope: ValidatedDiscoveryScope,
     field_permissions: DataPermissions,
 ) -> list[str] | list[OntologyClass]:
@@ -164,17 +164,15 @@ async def get_field_options(
     # the queryset accidentally eliminating valid options.
     queryset = get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
 
-    field_props = scope.discovery.fields[field_id]
-
-    if field_props.datatype in ("string", "ontology-class"):
+    if field_def.datatype in ("string", "ontology-class"):
         options = await get_distinct_field_values(
-            queryset_entity, queryset, scope.discovery, field_props, field_permissions
+            queryset_entity, queryset, scope.discovery, field_def, field_permissions
         )
-    elif field_props.datatype == "number":
-        options = [label for _floor, _ceil, label in f_utils.labelled_number_range_generator(field_props)]
-    elif field_props.datatype == "date":
+    elif field_def.datatype == "number":
+        options = [label for _floor, _ceil, label in f_utils.labelled_number_range_generator(field_def.root)]
+    elif field_def.datatype == "date":
         start, end = await get_month_date_range(
-            queryset_entity, queryset, field_props, threshold=get_threshold(scope, field_permissions)
+            queryset_entity, queryset, field_def.root, threshold=get_threshold(scope, field_permissions)
         )
         options = [label for _floor, _ceil, label in f_utils.labelled_date_range_generator_by_month(start, end)]
     else:  # pragma: no cover

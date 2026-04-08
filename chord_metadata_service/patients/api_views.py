@@ -24,6 +24,7 @@ from chord_metadata_service.chord import data_types as dts
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.censorship import get_threshold, thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
+from chord_metadata_service.discovery.field_definition_provider import FieldDefinitionProvider
 from chord_metadata_service.discovery.filtering import discovery_filter_queryset
 from chord_metadata_service.discovery.pydantic_models import DiscoveryQuery
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
@@ -252,10 +253,19 @@ class PublicListIndividuals(APIView):
 
         query = DiscoveryQuery.from_drf_request(request)
         queried_fields = query.queried_filter_fields()
+        field_definition_provider = FieldDefinitionProvider(discovery, query.definitions)
 
         try:
             filtered_qs = (
-                await discovery_filter_queryset(discovery_scope, query, "individual", base_qs, dt_permissions, logger)
+                await discovery_filter_queryset(
+                    discovery_scope,
+                    field_definition_provider,
+                    query,
+                    "individual",
+                    base_qs,
+                    dt_permissions,
+                    logger,
+                )
             )[0]
         except DiscoveryEmptyException:
             authz_middleware.mark_authz_done(request)

@@ -257,6 +257,9 @@ class DiscoveryQuery(BaseModel):
     #  - Values can be either a string, or (with query:data permissions) a more advanced filter structure.
     filters: dict[str, str | DiscoveryQueryFilterOneOf] = Field(default_factory=dict, title="Filters")
 
+    # Arbitrary additional filterable field definitions for the specific query (only for authorized [query:data] users)
+    definitions: dict[str, FieldDefinition] = Field(default_factory=dict, title="Additional filter field definitions")
+
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
 
@@ -300,7 +303,7 @@ class DiscoveryQuery(BaseModel):
         permission information. If full-text search is specified, or we're using an advanced filter (OR/AND/etc...)
         we need query:data permissions.
         """
-        if self.fts or any(not isinstance(f, str) for f in self.filters.values()):
+        if self.fts or any(not isinstance(f, str) for f in self.filters.values()) or len(self.definitions) > 0:
             return "data"
         return "bool_"
 
