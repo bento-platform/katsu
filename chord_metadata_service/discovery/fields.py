@@ -547,12 +547,9 @@ def queryset_field_single_value_condition(
             # JSONField array string check must use 'contains' lookup
             nested_condition = f_utils.get_nested_json_condition(gb + ("/id" if is_ontology_class else ""), value)
             condition = Q(**{f"{field}__contains": [nested_condition]})
+            # TODO: not properly defined for ontology-class fields
         else:
-            condition = get_condition_for_non_jsonb_field(
-                field + ("__id" if is_ontology_class else ""),
-                (("iexact", value),),
-                subquery,
-            )
+            condition = get_condition_for_non_jsonb_field(field, (("iexact", value),), subquery)
 
     elif field_props.datatype == "number":
         # values are of the form "[50, 150)", "< 50" or "≥ 800".
@@ -635,7 +632,9 @@ async def filter_queryset_field_value(
 
     # - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the queryset
     #   model
-    field, subq, queried_entity = get_field_django_mapping_and_queried_entity(queryset_entity, field_props)
+    field, subq, queried_entity = get_field_django_mapping_and_queried_entity(
+        queryset_entity, field_props, resolve_ontology_class=True
+    )
 
     # TODO: resolve schema including extra properties
 

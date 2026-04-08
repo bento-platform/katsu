@@ -444,7 +444,7 @@ def valid_biosample_2(individual, procedure=VALID_PROCEDURE_2, **kwargs):
         sampled_tissue = kwargs["sampled_tissue"]
     else:
         sampled_tissue = {
-            "id": "UBERON:0001256",
+            "id": "UBERON:0001255",
             "label": "urinary bladder"
         }
 

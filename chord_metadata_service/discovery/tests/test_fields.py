@@ -64,6 +64,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             meta_data=self.meta_data,
         )
         self.phenopacket.biosamples.set([self.biosample_1])
+        self.phenopacket.save()
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lcf(self):

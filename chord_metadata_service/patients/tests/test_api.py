@@ -1079,7 +1079,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             {
                 "phenopacket": 1,
                 "individual": 1,
-                "biosample": 1,  # biosample 2 does not match "wall of urinary bladder"
+                "biosample": 1,  # biosample 2 does not match "wall of urinary bladder" (UBERON:0001256)
                 "experiment": 2,  # both experiments are on biosample 1
                 "experiment_result": 0,
             },
