@@ -38,6 +38,7 @@ from .censorship import (
 )
 from .constants import DISCOVERY_ENTITIES
 from .exceptions import DiscoveryScopeException
+from .field_definition_provider import FieldDefinitionProvider
 from .field_paths.resolve import resolve_filter_mapping_to_queryset_model
 from .fields import get_field_options, get_range_stats, get_categorical_stats
 from .field_paths.normalize import normalize_field_path_true_model
@@ -102,6 +103,9 @@ class QueryHelper:
         self._scope: ValidatedDiscoveryScope = scope
         self._dt_permissions: DataTypeDiscoveryPermissions = dt_permissions
 
+        # Provider for field definitions for executing the query
+        self._field_definition_provider = FieldDefinitionProvider(self._scope.discovery, self._query.definitions)
+
         # Cache dictionary for constructed querysets for executed queries
         # + corresponding locks for accessing/cache manipulation:
         self._queryset_cache: dict[DiscoveryEntity, QueryExecutionResult] = {}
@@ -129,6 +133,10 @@ class QueryHelper:
     @property
     def dt_permissions(self) -> DataTypeDiscoveryPermissions:
         return self._dt_permissions
+
+    @property
+    def field_definition_provider(self) -> FieldDefinitionProvider:
+        return self._field_definition_provider
 
     async def _get_fts_ids(self, fts_entity: DiscoveryEntity, query: str, fts_type: FTSType) -> set:
         """
@@ -185,6 +193,7 @@ class QueryHelper:
         #  - ValidationError
         filtered_queryset, filter_queried_entities = await discovery_filter_queryset(
             self._scope,
+            self._field_definition_provider,
             self._query,
             queryset_entity,
             queryset,
@@ -407,6 +416,7 @@ async def discovery_search_fields(
     # ------------------------------------------------------------------------------------------------------------------
 
     queryset_entity: DiscoveryEntity = "phenopacket"
+    field_definition_provider = FieldDefinitionProvider(discovery)
 
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -414,7 +424,7 @@ async def discovery_search_fields(
     # processing by some services.
 
     async def _get_field_response(field: str) -> DiscoveryFieldAndOptions | None:
-        field_props = discovery.fields.get(field, {})
+        field_def = field_definition_provider[field]
         field_perms = field_permissions[field]
 
         if not field_perms.counts:  # Cannot even see counts, skip this field  TODO: incorporate booleans
@@ -422,8 +432,8 @@ async def discovery_search_fields(
 
         return DiscoveryFieldAndOptions(
             id=field,
-            definition=field_props,
-            options=await get_field_options(queryset_entity, field, scope, field_permissions[field]),
+            definition=field_def,
+            options=await get_field_options(queryset_entity, field_def, scope, field_permissions[field]),
         )
 
     async def _get_section_response(section: SearchSection) -> DiscoverySearchSectionWithOptions | None:
@@ -451,8 +461,8 @@ async def discovery_field_response(
 
     scope = qh.scope
 
-    field_props = scope.discovery.fields[field]
-    field_entity, field_entity_path = normalize_field_path_true_model(*field_props.get_entity_and_field_path())
+    field_def = qh.field_definition_provider[field]
+    field_entity, field_entity_path = normalize_field_path_true_model(*field_def.get_entity_and_field_path())
     field_perms: DataPermissions = qh.dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[field_entity]]
 
     if not field_perms.counts:
@@ -480,10 +490,10 @@ async def discovery_field_response(
     stats: BinList
 
     try:
-        if field_props.datatype in ("string", "ontology-class"):
-            stats = await get_categorical_stats(scope, field_entity, queryset, field_props.root, field_perms)
-        elif field_props.datatype in ("number", "date"):  # can use similar range logic for both numbers and dates
-            stats = await get_range_stats(scope, field_entity, queryset, field_props.root, field_perms)
+        if field_def.datatype in ("string", "ontology-class"):
+            stats = await get_categorical_stats(scope, field_entity, queryset, field_def.root, field_perms)
+        elif field_def.datatype in ("number", "date"):  # can use similar range logic for both numbers and dates
+            stats = await get_range_stats(scope, field_entity, queryset, field_def.root, field_perms)
         else:  # pragma: no cover
             # Can't actually occur with Pydantic implementation of the discovery configuration model, which will
             # validate the `datatype` value (unless a new possible value is added to FieldDefinition).
@@ -494,7 +504,7 @@ async def discovery_field_response(
         # TODO: some type of field response error we can return to the front-end - a DiscoveryFieldResponse error prop?
         return None
 
-    return DiscoveryFieldResponse(id=field, definition=field_props, data=stats)
+    return DiscoveryFieldResponse(id=field, definition=field_def, data=stats)
 
 
 async def discovery_queryset_entity_counts_by_dataset(
