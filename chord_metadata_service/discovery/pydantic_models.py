@@ -356,11 +356,12 @@ class DiscoveryQuery(BaseModel):
         if request.method not in ("GET", "POST"):
             raise NotImplementedError("from_drf_request implemented for GET|POST only")
 
-        params: QueryDict | dict = request.query_params if request.method == "GET" else request.data
+        if request.method == "POST":
+            # If we have a POST request, build the model directly from the JSON content
+            return cls.model_validate(request.data)
 
-        # TODO: post JSON - directly validate with Pydantic
-
-        # Process query parameters and check validity
+        # Otherwise, process query parameters and check validity
+        params: QueryDict = request.query_params
         filters: dict[str, str | DiscoveryQueryFilterOneOf] = {}
         for k in filter(cls._filter_query_param, params.keys()):
             v = params.getlist(k) if isinstance(params, QueryDict) else params.get(k, [])
@@ -378,7 +379,7 @@ class DiscoveryQuery(BaseModel):
                     case _:
                         # TODO: will we be able to support AllOf queries with GET, or just OneOf?
                         filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
-
+        # Validate and build the query object
         return cls.model_validate({
             "fts": params.get("_fts", ""),
             "fts_type": params.get("_fts_type") or "plain",
