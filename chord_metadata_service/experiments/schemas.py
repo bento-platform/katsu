@@ -144,34 +144,50 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "study_type": {
             "type": "string",
             "enum": ["Genomics", "Epigenomics", "Metagenomics", "Transcriptomics",
-                     "Serology", "Metabolomics", "Proteomics", "Other"]
+                     "Serology", "Metabolomics", "Proteomics",
+                     "3D Genomics", "Multi-Omics", "Other"]
         },
         "experiment_type": {
             "type": "string",
-            "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES",
-                     "WGS", "Genotyping", "Proteomic profiling",
-                     "Neutralizing antibody titers", "Metabolite profiling",
-                     "Antibody measurement", "Viral WGS", "Other"]
+            "enum": [
+                # Genomics
+                "WGS", "WES", "Genotyping", "Viral WGS", "DNA metabarcoding",
+                # Transcriptomics
+                "mRNA-Seq", "RNA-Seq", "smRNA-Seq", "miRNA-Seq", "scRNA-Seq", "snRNA-Seq",
+                # Epigenomics
+                "DNA Methylation Array", "WGBS", "ChIP-Seq", "CUT&RUN", "CUT&TAG", "ATAC-Seq", "scATAC-Seq",
+                # 3D Genomics
+                "Hi-C", "scHiC-Seq",
+                # Multi-Omics
+                "Multiome",
+                # Other omics
+                "Proteomic profiling", "Neutralizing antibody titers", "Metabolite profiling",
+                "Antibody measurement", "Other",
+            ]
         },
         "experiment_ontology": ONTOLOGY_CLASS,
         "molecule": {
             "type": "string",
             "enum": ["total RNA", "polyA RNA", "cytoplasmic RNA", "nuclear RNA",
-                     "small RNA", "genomic DNA", "protein", "Other"]
+                     "small RNA", "genomic DNA", "protein", "chromatin", "Other"]
         },
         "molecule_ontology": ONTOLOGY_CLASS,
         "library_strategy": {
             "type": "string",
-            "enum": ["Bisulfite-Seq", "RNA-Seq", "ChIP-Seq", "WES", "WGS", "RAD-Seq", "AMPLICON", "Other"]
+            "enum": ["WGS", "WES", "RNA-Seq", "Bisulfite-Seq", "ChIP-Seq", "ATAC-Seq",
+                     "Hi-C", "RAD-Seq", "ddRAD-Seq", "GT-Seq", "AMPLICON", "Other"]
         },
         "library_source": {
             "type": "string",
             "enum": ["Genomic", "Genomic Single Cell", "Transcriptomic", "Transcriptomic Single Cell",
-                     "Metagenomic", "Metatranscriptomic", "Synthetic", "Viral RNA", "Other"]
+                     "Metagenomic", "Metatranscriptomic", "Environmental DNA", "Environmental RNA",
+                     "Synthetic", "Viral RNA", "Other"]
         },
         "library_selection": {
             "type": "string",
-            "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture", "Other"]
+            "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture",
+                     "ChIP", "CUT&RUN", "CUT&TAG", "ATAC", "Proximity ligation",
+                     "Bisulfite conversion", "Restriction Digest", "Hybridization", "Other"]
         },
         "library_layout": {
             "type": "string",
