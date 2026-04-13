@@ -27,10 +27,13 @@ def valid_experiment(biosample, instrument=None, dataset=None, num_experiment=1)
 
 
 def valid_experiment_result(num_exp_res=1):
+    filename = f"0{num_exp_res}.vcf.gz"
     return {
         "identifier": f"experiment_result:{num_exp_res}",
         "description": f"Test Experiment result {num_exp_res}",
-        "filename": f"0{num_exp_res}.vcf.gz",
+        "filename": filename,
+        "storage_uri": f"file:///lustre06/project/def-bourqueg/{filename}",
+        "storage_server": "narval.alliancecan.ca",
         "file_format": "VCF",
         "data_output_type": "Derived data",
         "usage": "download",

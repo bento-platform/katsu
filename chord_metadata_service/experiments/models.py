@@ -212,6 +212,8 @@ class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
             GinIndex(name="expres_description_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_filename_trgm_idx", fields=["filename"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_url_trgm_idx", fields=["url"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_storage_uri_trgm_idx", fields=["storage_uri"], opclasses=["gin_trgm_ops"]),
+            GinIndex(name="expres_storage_server_trgm_idx", fields=["storage_server"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_asm_id_trgm_idx", fields=["genome_assembly_id"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_file_format_trgm_idx", fields=["file_format"], opclasses=["gin_trgm_ops"]),
             GinIndex(name="expres_data_output_trgm_idx", fields=["data_output_type"], opclasses=["gin_trgm_ops"]),
@@ -269,7 +271,15 @@ class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         validators=[file_index_list_validator],
         help_text=rec_help(d.EXPERIMENT_RESULT, "indices"),
     )
-
+    # Storage location (on a server of some kind) for record-keeping, rather than for access (which would be done via
+    # the experiment_result.url field defined above.)
+    storage_uri = models.TextField(blank=True, null=True, help_text=rec_help(d.EXPERIMENT_RESULT, "storage_uri"))
+    storage_server = CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text=rec_help(d.EXPERIMENT_RESULT, "storage_server"),
+    )
     genome_assembly_id = CharField(
         max_length=50,
         blank=True,

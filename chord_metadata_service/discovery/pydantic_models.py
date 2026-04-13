@@ -5,7 +5,7 @@ from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntit
 from bento_lib.ontologies.models import OntologyClass
 from django.core.exceptions import ValidationError
 from django.http import QueryDict
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import Literal, Self
 
@@ -109,6 +109,8 @@ class MatchExperimentResult(BaseMatchModel):
     filename: str | None = Field(..., title="File name")
     url: str | None = Field(..., title="URL")
     indices: ExperimentResultIndices = Field(..., title="Indices")
+    storage_uri: AnyUrl | None = Field(..., title="Storage URI")
+    storage_server: str | None = Field(..., title="Storage server")
     file_format: ExperimentResultFileFormat | None = Field(..., title="File format")
     data_output_type: Literal["Raw data", "Derived data"] | None = Field(..., title="Data output type")
     usage: str | None = Field(..., title="Usage")

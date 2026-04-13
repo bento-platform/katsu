@@ -50,6 +50,8 @@
           "identifier": "sample1_02",
           "description": "test2",
           "filename": "sample1_02.cram",
+          "storage_uri": "file:///lustre06/project/def-bourqueg/sample1_02.cram",
+          "storage_server": "narval.alliancecan.ca",
           "file_format": "CRAM",
           "data_output_type": "Raw data",
           "usage": "Visualized",

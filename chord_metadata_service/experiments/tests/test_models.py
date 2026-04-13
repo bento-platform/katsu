@@ -74,7 +74,8 @@ class ExperimentResultTest(TestCase):
     """ Test module for ExperimentResult model """
 
     def setUp(self):
-        self.exp_res = ExperimentResult.objects.create(**valid_experiment_result())
+        self.exp_res_dict = valid_experiment_result()
+        self.exp_res = ExperimentResult.objects.create(**self.exp_res_dict)
 
     @staticmethod
     def create(**kwargs):
@@ -85,6 +86,10 @@ class ExperimentResultTest(TestCase):
     # TODO: Fix the mess
     # def test_str_rep(self):
     #     self.assertEqual(str(self.exp_res), self.exp_res.id)
+
+    def test_storage_field(self):
+        self.assertEqual(self.exp_res.storage_uri, self.exp_res_dict["storage_uri"])
+        self.assertEqual(self.exp_res.storage_server, self.exp_res_dict["storage_server"])
 
     def test_validation(self):
         self.assertEqual(ExperimentResult.objects.count(), 1)
