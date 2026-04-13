@@ -321,7 +321,7 @@ class SearchTest(AuthzAPITestCase):
             self.assertIn(str(self.dataset.identifier), c["results"])
             self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_type"],
-                             "DNA Methylation")
+                             "DNA Methylation Array")
 
     def test_private_dataset_search_12(self):
         # Valid query to search for subject id

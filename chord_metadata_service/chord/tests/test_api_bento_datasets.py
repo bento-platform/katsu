@@ -114,7 +114,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                     },
                     "experiments": {
                         "count": 1,
-                        "experiment_type": {"DNA Methylation": 1},
+                        "experiment_type": {"DNA Methylation Array": 1},
                         "extraction_protocol": {"NGS": 1},
                         "library_layout": {"Single": 1},
                         "library_selection": {"PCR": 1},

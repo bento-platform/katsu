@@ -40,4 +40,4 @@ class IndividualPublicStatsTest(TransactionTestCase, PermissionsTestCaseMixin):
         count, res = await individual_experiment_type_stats(
             pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
-        self.assertListEqual(res.root, [BinWithValue(label="DNA Methylation", value=1)])
+        self.assertListEqual(res.root, [BinWithValue(label="DNA Methylation Array", value=1)])

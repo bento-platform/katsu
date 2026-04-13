@@ -58,7 +58,7 @@
             "description": "Types of experiments performed on a sample",
             "datatype": "string",
             "config": {
-                "enum": ["DNA Methylation", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES", "Other"]
+                "enum": ["DNA Methylation Array", "mRNA-Seq", "smRNA-Seq", "RNA-Seq", "WES", "Other"]
             }
         },
         "date_of_consent": {
