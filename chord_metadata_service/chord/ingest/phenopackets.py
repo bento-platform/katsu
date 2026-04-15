@@ -111,7 +111,10 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
     vital_status: VitalStatus | None = None
     if vital_status_data := subject.get("vital_status"):
-        vital_status, _ = VitalStatus.objects.get_or_create(**vital_status_data)
+        vs_query = {"status": vital_status_data.get("status", "")}
+        for k in ("time_of_death", "cause_of_death", "survival_time_in_days"):
+            vs_query.update(query_and_check_nulls(vital_status_data, k))
+        vital_status, _ = VitalStatus.objects.get_or_create(**vs_query)
 
     # Check if subject already exists
     existing_extra_properties: dict[str, Any]
