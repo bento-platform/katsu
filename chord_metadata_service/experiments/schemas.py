@@ -149,6 +149,8 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         },
         "experiment_type": {
             "type": "string",
+            # experiment_type values are aligned with NCBI SRA, ENCODE, and common omics conventions.
+            # Terms added based on experiment types used in BQC19 and iChange datasets.
             "enum": [
                 # Genomics
                 "WGS", "WES", "Genotyping", "Viral WGS", "DNA metabarcoding",
