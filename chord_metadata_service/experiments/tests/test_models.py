@@ -28,7 +28,7 @@ class ExperimentTest(ExperimentTestCase):
             serializers.ValidationError,
             self.create,
             library_strategy="Bisulfite-Seq",
-            experiment_type="DNA Methylation Array",
+            experiment_type="DNA Methylation",
             experiment_ontology=["invalid_value"],
             biosample=self.biosample
         )
@@ -45,7 +45,7 @@ class ExperimentTest(ExperimentTestCase):
             serializers.ValidationError,
             self.create,
             library_strategy="Bisulfite-Seq",
-            experiment_type="DNA Methylation Array",
+            experiment_type="DNA Methylation",
             molecule_ontology=[{"id": "some_id"}],
             biosample=self.biosample
         )
@@ -54,7 +54,7 @@ class ExperimentTest(ExperimentTestCase):
         try:
             self.create(
                 library_strategy="Bisulfite-Seq",
-                experiment_type="DNA Methylation Array",
+                experiment_type="DNA Methylation",
                 extra_properties={"some_field": "value", "invalid_value": 42},
                 biosample=self.biosample
             )
@@ -66,7 +66,7 @@ class ExperimentTest(ExperimentTestCase):
             ValidationError,
             self.create,
             library_strategy="Bisulfite-Seq",
-            experiment_type="DNA Methylation Array"
+            experiment_type="DNA Methylation"
         )
 
 

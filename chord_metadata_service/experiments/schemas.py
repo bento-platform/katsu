@@ -155,7 +155,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
                 # Transcriptomics
                 "mRNA-Seq", "RNA-Seq", "smRNA-Seq", "miRNA-Seq", "scRNA-Seq", "snRNA-Seq",
                 # Epigenomics
-                "DNA Methylation Array", "WGBS", "ChIP-Seq", "CUT&RUN", "CUT&TAG", "ATAC-Seq", "scATAC-Seq",
+                "DNA Methylation", "WGBS", "ChIP-Seq", "CUT&RUN", "CUT&Tag", "ATAC-Seq", "scATAC-Seq",
                 # 3D Genomics
                 "Hi-C", "scHiC-Seq",
                 # Multi-Omics
@@ -175,7 +175,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "library_strategy": {
             "type": "string",
             "enum": ["WGS", "WES", "RNA-Seq", "Bisulfite-Seq", "ChIP-Seq", "ATAC-Seq",
-                     "Hi-C", "RAD-Seq", "ddRAD-Seq", "GT-Seq", "AMPLICON", "Other"]
+                     "Hi-C", "RAD-Seq", "ddRAD-Seq", "GT-Seq", "AMPLICON", "GBS", "Other"]
         },
         "library_source": {
             "type": "string",
@@ -186,7 +186,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
         "library_selection": {
             "type": "string",
             "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture",
-                     "ChIP", "CUT&RUN", "CUT&TAG", "ATAC", "Proximity ligation",
+                     "ChIP", "CUT&RUN", "CUT&Tag", "ATAC", "Proximity ligation",
                      "Bisulfite conversion", "Restriction Digest", "Hybridization", "Other"]
         },
         "library_layout": {

@@ -624,7 +624,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         return {
             "id": biosample.experiments.first().id,
             "description": f"Experimental design description for {num}",
-            "experiment_type": "DNA Methylation Array",
+            "experiment_type": "DNA Methylation",
             "experiment_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
             "study_type": "Whole genome Sequencing",
             "molecule": "total RNA",  # doesn't make sense haha
@@ -1001,8 +1001,8 @@ ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.c
             res.content.decode("utf-8"),
             self._rn_newline(
                 f"""{hdr}
-experiment:0,Whole genome Sequencing,DNA Methylation Array,total RNA,Bisulfite-Seq,Genomic,PCR,Single,{cruds0}
-experiment:1,Whole genome Sequencing,DNA Methylation Array,total RNA,Bisulfite-Seq,Genomic,PCR,Single,{cruds1}
+experiment:0,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Genomic,PCR,Single,{cruds0}
+experiment:1,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Genomic,PCR,Single,{cruds1}
 """
             )  # CSVs use \r\n line endings here
         )
