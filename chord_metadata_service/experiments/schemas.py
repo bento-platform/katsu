@@ -188,7 +188,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
             "type": "string",
             "enum": ["Random", "PCR", "Random PCR", "RT-PCR", "MF", "Exome capture",
                      "ChIP", "CUT&RUN", "CUT&Tag", "ATAC", "Proximity ligation",
-                     "Bisulfite conversion", "Restriction Digest", "Hybridization", "Other"]
+                     "Bisulfite conversion", "Restriction Digest", "Other"]
         },
         "library_layout": {
             "type": "string",
