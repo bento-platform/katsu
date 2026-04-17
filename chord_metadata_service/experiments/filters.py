@@ -42,6 +42,8 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
     )
 
     indices = django_filters.CharFilter(method="filter_indices", label="Indices")
+    storage_uri = django_filters.CharFilter(lookup_expr="icontains")
+    storage_server = django_filters.CharFilter(lookup_expr="icontains")
     genome_assembly_id = django_filters.CharFilter(lookup_expr='iexact')
     file_format = django_filters.CharFilter(lookup_expr='iexact')
     data_output_type = django_filters.CharFilter(lookup_expr='icontains')

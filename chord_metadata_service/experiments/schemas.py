@@ -81,6 +81,18 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe({
         },
         "url": DATA_FILE_OR_RECORD_URL_SCHEMA,
         "indices": EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA,
+        "storage_uri": {
+            "type": "string",
+            "format": "uri",  # e.g., a file URI or an S3 uri
+        },
+        "storage_server": {
+            "type": "string",
+            # should be formatted as a fully-qualified domain name
+            # contextual use:
+            #   - for a file URI, this SHOULD be the server it's located on.
+            #   - for an S3 URI, this SHOULD be the S3 host (to allow specific regions, or alternate hosts like SD4H)
+            # for other uses, this may be specified or excluded as desired.
+        },
         "genome_assembly_id": {
             "type": "string",
         },

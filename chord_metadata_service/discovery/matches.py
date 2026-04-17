@@ -10,6 +10,7 @@ from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
 from bento_lib.ontologies.models import OntologyClass
 from django.db.models import QuerySet, Manager
+from pydantic import AnyUrl
 from typing import Awaitable, Callable, Type, TypeVar, TypedDict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -99,6 +100,8 @@ async def experiment_result_matches(
                 filename=er.filename,
                 url=er.url,
                 indices=ExperimentResultIndices.model_validate(er.indices),
+                storage_uri=AnyUrl(er.storage_uri) if er.storage_uri else None,
+                storage_server=er.storage_server,
                 genome_assembly_id=er.genome_assembly_id,
                 file_format=er.file_format,
                 data_output_type=er.data_output_type,

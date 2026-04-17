@@ -65,6 +65,8 @@ EXPERIMENT_RESULT = {
                 },
             },
         },
+        "storage_uri": "The URI of the file's storage location.",
+        "storage_server": "The server where the file is stored.",
         "genome_assembly_id": "Reference genome assembly ID.",
         "file_format": "(Controlled Vocabulary) File format.",
         "data_output_type": "The type of data output: Raw or Derived data."
