@@ -1,9 +1,11 @@
 import abc
+import sys
 
 from bento_lib.discovery import FieldDefinition, OverviewSection, DiscoveryEntity, SearchSection, DiscoveryConfig
 from bento_lib.ontologies.models import OntologyClass
 from django.core.exceptions import ValidationError
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from django.http import QueryDict
+from pydantic import AnyUrl, BaseModel, ConfigDict, Field, RootModel
 from rest_framework.request import Request as DrfRequest
 from typing import Literal, Self
 
@@ -37,6 +39,7 @@ __all__ = [
     "DiscoveryMatchesPaginatedResponse",
     "DiscoverySearchSectionWithOptions",
     "DiscoverySearchFieldsResponse",
+    "DiscoveryQueryFilterOneOf",
     "DiscoveryQuery",
     "DiscoveryUIHintsResponse",
 ]
@@ -106,6 +109,8 @@ class MatchExperimentResult(BaseMatchModel):
     filename: str | None = Field(..., title="File name")
     url: str | None = Field(..., title="URL")
     indices: ExperimentResultIndices = Field(..., title="Indices")
+    storage_uri: AnyUrl | None = Field(..., title="Storage URI")
+    storage_server: str | None = Field(..., title="Storage server")
     file_format: ExperimentResultFileFormat | None = Field(..., title="File format")
     data_output_type: Literal["Raw data", "Derived data"] | None = Field(..., title="Data output type")
     usage: str | None = Field(..., title="Usage")
@@ -221,6 +226,20 @@ class DiscoverySearchFieldsResponse(BaseModel):
     sections: list[DiscoverySearchSectionWithOptions]
 
 
+class DiscoveryQueryFilterBase(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    filter_type: Literal["one_of"]
+    negated: bool = False
+
+
+class DiscoveryQueryFilterOneOf(DiscoveryQueryFilterBase):
+    model_config = ConfigDict(frozen=True)
+
+    filter_type: Literal["one_of"]  # really more like "one or more of" - essentially Boolean Or for filter values
+    values: list[str] = Field(..., min_length=1)  # must have at least one value specified
+
+
 class DiscoveryQuery(BaseModel):
     """
     Model for discovery filtering queries. Right now, this is just a dictionary of {discovery field ID: value} extracted
@@ -236,11 +255,33 @@ class DiscoveryQuery(BaseModel):
     fts: str = Field(default="", title="Full-text search query", max_length=256)
     fts_type: FTSType = Field(default="plain", title="Full-text search query type")
 
-    # Filter query parameters. Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
-    filters: dict[str, str] = Field(default_factory=dict, title="Filters")
+    # Filter query parameters:
+    #  - Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
+    #  - Values can be either a string, or (with query:data permissions) a more advanced filter structure.
+    filters: dict[str, str | DiscoveryQueryFilterOneOf] = Field(default_factory=dict, title="Filters")
 
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
+
+    def n_filter_parameters(self) -> int:
+        """
+        Returns the number of filter parameters in the query; more than one query to the same field in an OR fashion
+        counts as multiple parameters.
+        """
+        n = 0
+        for f in self.filters.values():
+            if isinstance(f, DiscoveryQueryFilterOneOf):
+                # this branch shouldn't happen in real use since _required_global_permission_level will block OneOf
+                # filters with before this function can be called.
+                # the subtraction is to prevent us going over our stated filter limit in the censorship rules even with
+                # uncensored search (where the maximum number of filters is set to sys.maxsize).
+                n = sys.maxsize - len(self.filters)  # cannot be used in a censored discovery context
+                break
+            elif isinstance(f, str):
+                n += 1
+            else:  # pragma: no cover
+                raise NotImplementedError()
+        return n
 
     def is_empty(self) -> bool:
         """
@@ -248,13 +289,21 @@ class DiscoveryQuery(BaseModel):
         """
         return not self.fts and len(self.filters) == 0
 
+    @staticmethod
+    def _filter_query_param(qp: str):
+        # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and
+        #   the response yields an error, as they are (presumably) not queryable fields in the discovery config.
+        # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
+        return qp and qp not in ("project", "dataset") and qp[0] != "_"
+
     @property
     def _required_global_permission_level(self) -> DataPermissionsLevel:
         """
         Get the "global" minimum required permission level required to execute this query, irrespective of field-level
-        permission information. If full-text search is specified, we need query:data permissions.
+        permission information. If full-text search is specified, or we're using an advanced filter (OR/AND/etc...)
+        we need query:data permissions.
         """
-        if self.fts:
+        if self.fts or any(not isinstance(f, str) for f in self.filters.values()):
             return "data"
         return "bool_"
 
@@ -287,12 +336,13 @@ class DiscoveryQuery(BaseModel):
         # get permissions needed for our query
         overall_permissions, qf_permissions = self._get_field_set_permissions(discovery, dt_permissions)
 
-        # right now, a user cannot be filtering based on more than one value for the same field
-        if (n_queried := len(self.filters)) > get_max_query_parameters(discovery, overall_permissions):
-            raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
-
         if not overall_permissions.has_permissions_level(self._required_global_permission_level):
             raise ValidationError(f"Insufficient permissions to access discovery ({scope_repr})")
+
+        # TODO: advanced per-field permissions could go here
+
+        if (n_queried := self.n_filter_parameters()) > get_max_query_parameters(discovery, overall_permissions):
+            raise ValidationError(f"Wrong number of fields: {n_queried} ({scope_repr})")
 
         return overall_permissions, qf_permissions
 
@@ -306,19 +356,34 @@ class DiscoveryQuery(BaseModel):
         if request.method not in ("GET", "POST"):
             raise NotImplementedError("from_drf_request implemented for GET|POST only")
 
-        params = request.query_params if request.method == "GET" else request.data
+        params: QueryDict | dict = request.query_params if request.method == "GET" else request.data
+
+        # TODO: post JSON - directly validate with Pydantic
 
         # Process query parameters and check validity
-        filters: dict[str, str] = {
-            k: v[0] if isinstance(v, list) else v
-            for k, v in params.items()
-            if k and k not in ("project", "dataset") and k[0] != "_"
-            # - remove project/dataset (i.e., scope) query parameters; otherwise, they get included in the fields and
-            #   the response yields an error, as they are (presumably) not queryable fields in the discovery config.
-            # - remove "special" query parameters, which start with "_" (for pagination or other non-filter uses)
-        }
+        filters: dict[str, str | DiscoveryQueryFilterOneOf] = {}
+        for k in filter(cls._filter_query_param, params.keys()):
+            v = params.getlist(k) if isinstance(params, QueryDict) else params.get(k, [])
+            if isinstance(v, dict):
+                # dictionary (so passed in via JSON)
+                filters[k] = DiscoveryQueryFilterOneOf.model_validate(v)
+            else:
+                if not isinstance(v, list):
+                    v = [v]
+                match len(v):
+                    case 0:
+                        pass  # ignore empty lists if these somehow occur
+                    case 1:
+                        filters[k] = v[0]
+                    case _:
+                        # TODO: will we be able to support AllOf queries with GET, or just OneOf?
+                        filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
 
-        return cls(fts=params.get("_fts", ""), fts_type=params.get("_fts_type") or "plain", filters=filters)
+        return cls.model_validate({
+            "fts": params.get("_fts", ""),
+            "fts_type": params.get("_fts_type") or "plain",
+            "filters": filters,
+        })
 
 
 class DiscoveryUIHintsResponse(BaseModel):

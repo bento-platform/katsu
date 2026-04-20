@@ -50,6 +50,8 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
         filename=er.get("filename"),
         url=er.get("url"),
         indices=er.get("indices", []),
+        storage_uri=er.get("storage_uri"),
+        storage_server=er.get("storage_server"),
         genome_assembly_id=er.get("genome_assembly_id"),
         file_format=er.get("file_format"),
         data_output_type=er.get("data_output_type"),
