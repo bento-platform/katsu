@@ -12,7 +12,7 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation, DatasetV2ScopeAdapter
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 from .utils import get_censored_counts_for_serializer
 
@@ -175,6 +175,8 @@ class DatasetSerializer(GenericSerializer):
 class DatasetV2Serializer(PydanticJSONBSerializer):
     schema_class = ProjectScopedDatasetModel
 
+    _counts = serializers.SerializerMethodField()
+
     class Meta:
         model = DatasetV2
         fields = "__all__"
@@ -189,7 +191,13 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         data = super().to_representation(instance)
         data['created_at'] = instance.created_at
         data['updated_at'] = instance.updated_at
+        data['_counts'] = self.get__counts(instance)
         return data
+
+    def get__counts(self, obj):
+        request = self.context.get("request")
+        scope = ValidatedDiscoveryScope(obj.project, DatasetV2ScopeAdapter(obj))
+        return get_censored_counts_for_serializer(request, scope, logger)
 
 
 class DatasetV2TranslationSerializer(PydanticJSONBSerializer):

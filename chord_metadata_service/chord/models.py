@@ -14,7 +14,7 @@ from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBModelMixin
 
 
-__all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation"]
+__all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation", "DatasetV2ScopeAdapter"]
 
 
 def version_default():
@@ -276,6 +276,15 @@ class DatasetV2Translation(PydanticJSONBModelMixin):
 
     def __str__(self) -> str:
         return f"{self.dataset_id}: {self.language}"
+
+
+class DatasetV2ScopeAdapter:
+    """Duck-type adapter so DatasetV2 satisfies the ValidatedDiscoveryScope dataset interface."""
+
+    def __init__(self, dataset: "DatasetV2"):
+        self.identifier = dataset.identifier
+        self.project_id = dataset.project_id
+        self.discovery = None  # falls back to project discovery config in ValidatedDiscoveryScope
 
 
 class ProjectJsonSchema(models.Model):
