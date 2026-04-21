@@ -1,5 +1,5 @@
 {
-  "id": "dataset-json-full-001",
+  "identifier": "dataset-json-full-001",
   "language": "en",
   "schema_version": "1.0",
   "title": "Full Test Dataset from JSON",
@@ -184,8 +184,8 @@
   ],
   "study_status": "ONGOING",
   "study_context": "RESEARCH",
-  "pcgl_domain": ["Genomics", "Cancer Research"],
-  "pcgl_program_name": "National Cancer Genomics Program",
+  "domain": ["Genomics", "Cancer Research"],
+  "program_name": "National Cancer Genomics Program",
   "extra_properties": {
     "institution_code": "TU-001",
     "ethics_approval": "IRB-2022-456",
