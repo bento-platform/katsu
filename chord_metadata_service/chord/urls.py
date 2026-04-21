@@ -31,7 +31,8 @@ urlpatterns = [
          name="chord-dataset-detail"),
 
     path('datasets_v2', DatasetV2ViewSet.as_view({'get': 'list', 'post': 'create'}), name="chord-dataset-v2-list"),
-    path('datasets_v2/<str:identifier>', DatasetV2ViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}),
+    path('datasets_v2/<str:identifier>',
+         DatasetV2ViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}),
          name="chord-dataset-v2-detail"),
     path('datasets_v2/<str:identifier>/summary', views_search.dataset_v2_summary, name="chord-dataset-v2-summary"),
     path('datasets_v2/<str:identifier>/data-types', views_data_types.dataset_v2_data_type_summary,
