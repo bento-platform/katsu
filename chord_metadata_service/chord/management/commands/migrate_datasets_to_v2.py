@@ -206,7 +206,7 @@ def build_v2_payload(dataset: Dataset, force_placeholder: bool) -> dict:
         if contact_org:
             stakeholders = [contact_org]
         elif force_placeholder:
-            stakeholders = [{"type": "organization", "name": dataset.title, "roles": [_FALLBACK_ROLE]}]
+            stakeholders = [{"type": "organization", "name": "placeholder (fill this)", "roles": [_FALLBACK_ROLE]}]
         else:
             raise ValueError(
                 "No stakeholders could be derived (no creators, no contact_info). "
