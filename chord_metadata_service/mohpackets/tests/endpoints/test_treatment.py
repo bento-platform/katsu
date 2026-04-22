@@ -128,6 +128,34 @@ class GETTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
+    def test_get_treatments_filter_by_multiple_treatment_types(self):
+        """
+        Test that filtering by multiple comma-separated treatment_types returns OR'd results.
+        """
+        t1 = self.treatments[0]
+        t1.treatment_type = ["Surgery"]
+        t1.save()
+
+        t2 = self.treatments[1]
+        t2.treatment_type = ["Radiation therapy", "Other"]
+        t2.save()
+
+        t3 = self.treatments[2]
+        t3.treatment_type = ["Systemic therapy"]
+        t3.save()
+
+        response = self.client.get(
+            f"{self.treatments_url}?treatment_type=Surgery,Radiation therapy",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        
+        data = response.json()["items"]
+        returned_ids = [t["submitter_treatment_id"] for t in data]
+        self.assertIn(t1.submitter_treatment_id, returned_ids)
+        self.assertIn(t2.submitter_treatment_id, returned_ids)
+        self.assertNotIn(t3.submitter_treatment_id, returned_ids)
+
 
 # OTHERS
 # ------
