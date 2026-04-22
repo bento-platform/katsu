@@ -425,7 +425,7 @@ class DatasetV2TranslationViewSet(CHORDPublicModelViewSet):
         instance = DatasetV2Translation.from_schema(
             serializer._validated_schema, dataset_id=str(dataset.identifier)
         )
-        instance.save()
+        await instance.asave()
         return Response(serializer.to_representation(instance), status=status.HTTP_201_CREATED)
 
     @async_to_sync
