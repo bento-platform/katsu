@@ -1516,7 +1516,7 @@ Used by the query service to return donors along with their sample IDs, treatmen
 |program_id|query|any|false|none|
 |submitter_donor_id|query|any|false|none|
 |submitter_primary_diagnosis_id|query|any|false|none|
-|treatment_type|query|array[string]|false|none|
+|treatment_type|query|any|false|none|
 |is_primary_treatment|query|any|false|none|
 |treatment_intent|query|any|false|none|
 |response_to_treatment_criteria_method|query|any|false|none|
@@ -16701,9 +16701,7 @@ continued
   "program_id": "string",
   "submitter_donor_id": "string",
   "submitter_primary_diagnosis_id": "string",
-  "treatment_type": [
-    "string"
-  ],
+  "treatment_type": "string",
   "is_primary_treatment": "string",
   "treatment_intent": "string",
   "response_to_treatment_criteria_method": "string",
@@ -16791,7 +16789,24 @@ continued
 
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
-|treatment_type|[string]|false|none|none|
+|treatment_type|any|false|none|none|
+
+anyOf
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|string|false|none|none|
+
+or
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|» *anonymous*|null|false|none|none|
+
+continued
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
 |is_primary_treatment|any|false|none|none|
 
 anyOf
