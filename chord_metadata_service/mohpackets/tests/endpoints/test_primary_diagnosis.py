@@ -124,6 +124,34 @@ class GETTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
+    def test_get_primary_diagnoses_filter_by_multiple_primary_sites(self):
+        """
+        Test that filtering by multiple comma-separated primary_sites returns OR'd results.
+        """
+        p1 = self.primary_diagnoses[0]
+        p1.primary_site = "Breast"
+        p1.save()
+
+        p2 = self.primary_diagnoses[1]
+        p2.primary_site = "Kidney"
+        p2.save()
+
+        p3 = self.primary_diagnoses[2]
+        p3.primary_site = "Colon"
+        p3.save()
+
+        response = self.client.get(
+            f"{self.primary_diagnosis_url}?primary_site=Breast,Kidney",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        data = response.json()["items"]
+        returned_ids = [p["submitter_primary_diagnosis_id"] for p in data]
+        self.assertIn(p1.submitter_primary_diagnosis_id, returned_ids)
+        self.assertIn(p2.submitter_primary_diagnosis_id, returned_ids)
+        self.assertNotIn(p3.submitter_primary_diagnosis_id, returned_ids)
+
 
 # OTHERS
 # ------

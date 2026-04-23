@@ -3697,12 +3697,15 @@
                         "in": "query",
                         "name": "treatment_type",
                         "schema": {
-                            "items": {
-                                "type": "string"
-                            },
-                            "q": "treatment_type__overlap",
-                            "title": "Treatment Type",
-                            "type": "array"
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "null"
+                                }
+                            ],
+                            "title": "Treatment Type"
                         },
                         "required": false
                     },
@@ -12621,12 +12624,15 @@
                         "title": "Submitter Primary Diagnosis Id"
                     },
                     "treatment_type": {
-                        "items": {
-                            "type": "string"
-                        },
-                        "q": "treatment_type__overlap",
-                        "title": "Treatment Type",
-                        "type": "array"
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Treatment Type"
                     },
                     "is_primary_treatment": {
                         "anyOf": [

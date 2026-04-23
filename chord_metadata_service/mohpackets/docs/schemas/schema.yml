@@ -4895,11 +4895,10 @@ components:
           - type: 'null'
           title: Treatment Intent
         treatment_type:
-          items:
-            type: string
-          q: treatment_type__overlap
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Treatment Type
-          type: array
       title: TreatmentFilterSchema
       type: object
     TreatmentIngestSchema:
@@ -6785,11 +6784,10 @@ paths:
         name: treatment_type
         required: false
         schema:
-          items:
-            type: string
-          q: treatment_type__overlap
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Treatment Type
-          type: array
       - in: query
         name: is_primary_treatment
         required: false

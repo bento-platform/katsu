@@ -130,6 +130,34 @@ class GETTestCase(BaseTestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.MOVED_PERMANENTLY)
 
+    def test_get_systemic_therapies_filter_by_multiple_drug_names(self):
+        """
+        Test that filtering by multiple comma-separated drug_names returns OR'd results.
+        """
+        st1 = self.systemic_therapies[0]
+        st1.drug_name = "DrugA"
+        st1.save()
+
+        st2 = self.systemic_therapies[1]
+        st2.drug_name = "DrugB"
+        st2.save()
+
+        st3 = self.systemic_therapies[2]
+        st3.drug_name = "DrugC"
+        st3.save()
+
+        response = self.client.get(
+            f"{self.systemic_therapy_url}?drug_name=DrugA,DrugB",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_2.token}",
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+        data = response.json()["items"]
+        returned_drug_names = [st["drug_name"] for st in data]
+        self.assertIn(st1.drug_name, returned_drug_names)
+        self.assertIn(st2.drug_name, returned_drug_names)
+        self.assertNotIn(st3.drug_name, returned_drug_names)
+
 
 # OTHERS
 # ------

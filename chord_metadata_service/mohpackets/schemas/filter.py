@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+from django.db.models import Q
 from ninja import Field, FilterSchema
 
 """
@@ -48,6 +49,12 @@ class PrimaryDiagnosisFilterSchema(FilterSchema):
     pathological_m_category: Optional[str] = Field(None)
     pathological_stage_group: Optional[str] = Field(None)
 
+    def filter_primary_site(self, value: str) -> Q:
+        if value:
+            values = [v.strip() for v in value.split(',') if v.strip()]
+            return Q(primary_site__in=values)
+        return Q()
+
 
 class SpecimenFilterSchema(FilterSchema):
     submitter_specimen_id: Optional[str] = Field(None)
@@ -84,12 +91,18 @@ class TreatmentFilterSchema(FilterSchema):
     program_id: Optional[str] = Field(None)
     submitter_donor_id: Optional[str] = Field(None)
     submitter_primary_diagnosis_id: Optional[str] = Field(None)
-    treatment_type: List[str] = Field(None, q="treatment_type__overlap")
+    treatment_type: Optional[str] = Field(None)
     is_primary_treatment: Optional[str] = Field(None)
     treatment_intent: Optional[str] = Field(None)
     response_to_treatment_criteria_method: Optional[str] = Field(None)
     response_to_treatment: Optional[str] = Field(None)
     status_of_treatment: Optional[str] = Field(None)
+
+    def filter_treatment_type(self, value: str) -> Q:
+        if value:
+            values = [v.strip() for v in value.split(',') if v.strip()]
+            return Q(treatment_type__overlap=values)
+        return Q()
 
 
 class SystemicTherapyFilterSchema(FilterSchema):
@@ -105,6 +118,12 @@ class SystemicTherapyFilterSchema(FilterSchema):
     days_per_cycle: Optional[int] = Field(None)
     number_of_cycles: Optional[int] = Field(None)
     systemic_therapy_type: Optional[str] = Field(None)
+
+    def filter_drug_name(self, value: str) -> Q:
+        if value:
+            values = [v.strip() for v in value.split(',') if v.strip()]
+            return Q(drug_name__in=values)
+        return Q()
 
 
 class RadiationFilterSchema(FilterSchema):
