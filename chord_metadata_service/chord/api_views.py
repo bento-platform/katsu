@@ -43,6 +43,15 @@ from .serializers import (
 __all__ = ["ProjectViewSet", "DatasetViewSet"]
 
 
+def _get_preferred_language(request: DrfRequest) -> str:
+    """Normalize the primary language tag from the Accept-Language header."""
+    header = request.META.get("HTTP_ACCEPT_LANGUAGE", "")
+    if not header:
+        return "en"
+    primary = header.split(",")[0].split(";")[0].strip()
+    return primary.split("-")[0].lower() or "en"
+
+
 def bad_request(request: DrfRequest, *args):
     authz.mark_authz_done(request)
     return Response(errors.bad_request_error(*args), status=status.HTTP_400_BAD_REQUEST)
@@ -78,6 +87,21 @@ class ProjectViewSet(CHORDPublicModelViewSet):
 
     queryset = Project.objects.prefetch_related("dv2").order_by("identifier")
     serializer_class = ProjectSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["language"] = _get_preferred_language(self.request)
+        return context
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        response["Content-Language"] = _get_preferred_language(request)
+        return response
+
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        response["Content-Language"] = _get_preferred_language(request)
+        return response
 
     @async_to_sync
     async def create(self, request, *args, **kwargs):
@@ -298,13 +322,25 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         except DatasetV2.DoesNotExist:
             raise Http404
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["language"] = _get_preferred_language(self.request)
+        return context
+
     def list(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
-        return super().list(request, *args, **kwargs)
+        response = super().list(request, *args, **kwargs)
+        response["Content-Language"] = _get_preferred_language(request)
+        return response
 
     def retrieve(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
-        return super().retrieve(request, *args, **kwargs)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data  # triggers to_representation, sets _content_language in context
+        response = Response(data)
+        response["Content-Language"] = serializer.context.get("_content_language", "en")
+        return response
 
     @async_to_sync
     async def create(self, request, *args, **kwargs):

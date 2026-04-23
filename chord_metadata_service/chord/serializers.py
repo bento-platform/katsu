@@ -188,7 +188,22 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         return super().to_internal_value(data)
 
     def to_representation(self, instance):
-        data = super().to_representation(instance)
+        language = self.context.get("language", "en")
+
+        if language != "en":
+            try:
+                translation = DatasetV2Translation.objects.get(
+                    dataset_id=instance.identifier, language=language
+                )
+                data = translation.to_schema().model_dump(mode="json")
+                self.context["_content_language"] = language
+            except DatasetV2Translation.DoesNotExist:
+                data = super().to_representation(instance)
+                self.context.setdefault("_content_language", "en")
+        else:
+            data = super().to_representation(instance)
+            self.context.setdefault("_content_language", "en")
+
         data['created_at'] = instance.created_at
         data['updated_at'] = instance.updated_at
         data['_counts'] = self.get__counts(instance)
