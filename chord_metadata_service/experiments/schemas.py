@@ -170,7 +170,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe({
                 # Epigenomics
                 "DNA Methylation", "WGBS", "ChIP-Seq", "CUT&RUN", "CUT&Tag", "ATAC-Seq", "scATAC-Seq",
                 # 3D Genomics
-                "Hi-C", "scHiC-Seq",
+                "Hi-C", "scHi-C",
                 # Multi-Omics
                 "Multiome",
                 # Other omics
