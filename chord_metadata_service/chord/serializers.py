@@ -211,6 +211,8 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
 
     def get__counts(self, obj):
         request = self.context.get("request")
+        if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
+            return {}
         scope = ValidatedDiscoveryScope(obj.project, DatasetV2ScopeAdapter(obj))
         return get_censored_counts_for_serializer(request, scope, logger)
 
