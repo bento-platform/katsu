@@ -237,7 +237,7 @@ class DatasetV2(PydanticJSONBModelMixin):
     title = models.CharField(max_length=512)
 
     release_date = models.DateField(db_index=True, null=True, blank=True)
-    last_modified = models.DateField(db_index=True)
+    last_modified = models.DateField(db_index=True, null=True, blank=True)
 
     # Store the whole validated payload (English default, validated by Pydantic before saving)
     data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
