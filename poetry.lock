@@ -365,6 +365,8 @@ files = [
 [package.dependencies]
 aiofiles = ">=24.1.0,<26"
 aiohttp = ">=3.10.10,<4"
+django = {version = ">=5.1.8,<6.1", optional = true, markers = "extra == \"django\""}
+djangorestframework = {version = ">=3.16.0,<3.18", optional = true, markers = "extra == \"django\""}
 geojson-pydantic = ">=2.0.0,<3.0.0"
 jsonschema = ">=4.23.0,<5"
 psycopg2-binary = ">=2.9.9,<3.0"
@@ -3578,4 +3580,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "e1b261c336c83fd2c37a708b27ec84d14726fcf532ced3a5f5931a7067c75b81"
+content-hash = "e934277f4a09aada840be90009d8882f7868a48f931139ff112467f3e63b97e2"
