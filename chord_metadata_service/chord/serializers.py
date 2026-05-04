@@ -175,7 +175,7 @@ class DatasetSerializer(GenericSerializer):
 class DatasetV2Serializer(PydanticJSONBSerializer):
     schema_class = ProjectScopedDatasetModel
 
-    countsByEntity = serializers.SerializerMethodField()
+    counts_by_entity = serializers.SerializerMethodField()
 
     class Meta:
         model = DatasetV2
@@ -206,10 +206,10 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
 
         data['created_at'] = instance.created_at
         data['updated_at'] = instance.updated_at
-        data['countsByEntity'] = self.get_countsByEntity(instance)
+        data['counts_by_entity'] = self.get_counts_by_entity(instance)
         return data
 
-    def get_countsByEntity(self, obj):
+    def get_counts_by_entity(self, obj):
         request = self.context.get("request")
         if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
             return {}
