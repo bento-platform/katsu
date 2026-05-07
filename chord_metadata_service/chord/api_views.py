@@ -400,9 +400,9 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
 
+    @async_to_sync
     @action(detail=True, methods=["get"], url_path="summary", url_name="summary",
             permission_classes=[BentoAllowAny])
-    @async_to_sync
     async def summary(self, request):
         identifier = self.kwargs["identifier"]
         dataset = await DatasetV2.objects.filter(identifier=identifier).afirst()
@@ -412,9 +412,9 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         authz.mark_authz_done(request)
         return Response({"counts": dataset.data.get("counts") or []})
 
+    @async_to_sync
     @action(detail=True, methods=["get"], url_path="data-types", url_name="data-types",
             permission_classes=[BentoAllowAny])
-    @async_to_sync
     async def data_types(self, request):
         identifier = self.kwargs["identifier"]
         try:
@@ -433,10 +433,10 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         )
         return Response(dt_response)
 
+    @async_to_sync
     @action(detail=True, methods=["get", "delete"],
             url_path=r"data-types/(?P<data_type>[^/.]+)", url_name="data-type",
             permission_classes=[BentoDeferToHandler])
-    @async_to_sync
     async def data_type_detail(self, request, data_type):
         identifier = self.kwargs["identifier"]
         try:
@@ -477,8 +477,8 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         authz.mark_authz_done(request)
         return Response(response_object)
 
-    @action(detail=True, methods=["get", "post"], url_path="translations", url_name="translations")
     @async_to_sync
+    @action(detail=True, methods=["get", "post"], url_path="translations", url_name="translations")
     async def translations(self, request):
         identifier = self.kwargs["identifier"]
         if request.method == "GET":
@@ -513,9 +513,9 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         await instance.asave()
         return Response(serializer.to_representation(instance), status=status.HTTP_201_CREATED)
 
+    @async_to_sync
     @action(detail=True, methods=["get", "put", "delete"],
             url_path=r"translations/(?P<language>[^/.]+)", url_name="translation")
-    @async_to_sync
     async def translation_detail(self, request, language):
         identifier = self.kwargs["identifier"]
         try:
