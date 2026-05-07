@@ -282,28 +282,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         return await sync_to_async(super().update)(request, *args, **kwargs)  # TODO: handle invalid
 
 
-# class DatasetV2ViewSet(CHORDPublicModelViewSet):
-#     queryset = DatasetV2.objects.all()
-#     serializer_class = DatasetV2Serializer
-#     lookup_field = 'id'
-
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#
-#         project_id = self.request.query_params.get('project_id')
-#         if project_id:
-#             queryset = queryset.filter(project_id=project_id)
-#
-#         return queryset
-
-#     def perform_create(self, serializer):
-#         instance = serializer.save()
-#         instance.save()
-
-#     def perform_update(self, serializer):
-#         instance = serializer.save()
-#         instance.save()
-
 class DatasetV2ViewSet(CHORDPublicModelViewSet):
     queryset = DatasetV2.objects.all()
     serializer_class = DatasetV2Serializer
