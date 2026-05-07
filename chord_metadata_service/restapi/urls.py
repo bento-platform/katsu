@@ -2,8 +2,6 @@ from django.urls import path, include
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
-from chord_metadata_service.chord import views_data_types as chord_dt_views
-from chord_metadata_service.chord import views_search as chord_search_views
 from chord_metadata_service.discovery.api_views import (
     discovery_endpoint,
     discovery_matches,
@@ -52,19 +50,6 @@ router.register(r"resources", resources_views.ResourceViewSet, basename="resourc
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(batch_router.urls)),
-    # datasets_v2 sub-routes (nested under api/)
-    path("datasets_v2/<str:identifier>/summary", chord_search_views.dataset_v2_summary,
-         name="dataset-v2-summary"),
-    path("datasets_v2/<str:identifier>/data-types", chord_dt_views.dataset_v2_data_type_summary,
-         name="dataset-v2-data-type-summary"),
-    path("datasets_v2/<str:identifier>/data-types/<str:data_type>", chord_dt_views.dataset_v2_data_type,
-         name="dataset-v2-data-type"),
-    path("datasets_v2/<str:identifier>/translations",
-         chord_views.DatasetV2TranslationViewSet.as_view({'get': 'list', 'post': 'create'}),
-         name="dataset-v2-translation-list"),
-    path("datasets_v2/<str:identifier>/translations/<str:language>",
-         chord_views.DatasetV2TranslationViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}),
-         name="dataset-v2-translation-detail"),
     # apps schemas
     path("schemas/phenopacket", phenopacket_views.get_chord_phenopacket_schema, name="chord-phenopacket-schema"),
     path(

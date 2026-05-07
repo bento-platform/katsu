@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 from asgiref.sync import async_to_sync, sync_to_async
@@ -8,6 +9,7 @@ from bento_lib.auth.permissions import (
     P_CREATE_DATASET,
     P_EDIT_DATASET,
     P_DELETE_DATASET,
+    P_DELETE_DATA,
 )
 from bento_lib.auth.resources import RESOURCE_EVERYTHING, build_resource
 from bento_lib.responses import errors
@@ -23,15 +25,19 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
 from chord_metadata_service.authz.middleware import authz_middleware as authz
-from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.logger import logger
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.restapi.utils import response_optionally_as_attachment
 
-from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from . import data_types as dt
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2ScopeAdapter, DatasetV2Translation
+from .views_data_types import make_data_type_response_object, QUERYSET_FN
 from .serializers import (
     ProjectJsonSchemaSerializer,
     ProjectSerializer,
@@ -393,6 +399,159 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
 
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
+
+    @action(detail=True, methods=["get"], url_path="summary", url_name="summary",
+            permission_classes=[BentoAllowAny])
+    @async_to_sync
+    async def summary(self, request):
+        identifier = self.kwargs["identifier"]
+        dataset = await DatasetV2.objects.filter(identifier=identifier).afirst()
+        if dataset is None:
+            authz.mark_authz_done(request)
+            return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
+        authz.mark_authz_done(request)
+        return Response({"counts": dataset.data.get("counts") or []})
+
+    @action(detail=True, methods=["get"], url_path="data-types", url_name="data-types",
+            permission_classes=[BentoAllowAny])
+    @async_to_sync
+    async def data_types(self, request):
+        identifier = self.kwargs["identifier"]
+        try:
+            dataset = await DatasetV2.objects.aget(identifier=identifier)
+        except DatasetV2.DoesNotExist:
+            return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
+        project = await Project.objects.aget(identifier=dataset.project_id)
+        discovery_scope = ValidatedDiscoveryScope(project, DatasetV2ScopeAdapter(dataset))
+        dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+        dt_response = sorted(
+            await asyncio.gather(*(
+                make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
+                for dt_id, dt_d in dt.DATA_TYPES.items()
+            )),
+            key=lambda d: d["id"],
+        )
+        return Response(dt_response)
+
+    @action(detail=True, methods=["get", "delete"],
+            url_path=r"data-types/(?P<data_type>[^/.]+)", url_name="data-type",
+            permission_classes=[BentoDeferToHandler])
+    @async_to_sync
+    async def data_type_detail(self, request, data_type):
+        identifier = self.kwargs["identifier"]
+        try:
+            dataset = await DatasetV2.objects.aget(identifier=identifier)
+        except DatasetV2.DoesNotExist:
+            authz.mark_authz_done(request)
+            return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
+        project = await Project.objects.aget(identifier=dataset.project_id)
+        project_id = str(project.identifier)
+
+        if data_type not in QUERYSET_FN:
+            authz.mark_authz_done(request)
+            return Response(errors.not_found_error(f"Data type {data_type} doesn't exist"),
+                            status=status.HTTP_404_NOT_FOUND)
+
+        qs = QUERYSET_FN[data_type](identifier)
+
+        if request.method == "DELETE":
+            if not (
+                await authz.async_evaluate_one(
+                    request, build_resource(project_id, identifier, data_type), P_DELETE_DATA
+                )
+            ):
+                authz.mark_authz_done(request)
+                return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+            authz.mark_authz_done(request)
+            await qs.adelete()
+            lg = logger.bind(dataset_id=identifier, data_type=data_type)
+            n_removed = await run_all_cleanup(lg)
+            await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        discovery_scope = ValidatedDiscoveryScope(project, DatasetV2ScopeAdapter(dataset))
+        dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+        response_object = await make_data_type_response_object(
+            data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],
+        )
+        authz.mark_authz_done(request)
+        return Response(response_object)
+
+    @action(detail=True, methods=["get", "post"], url_path="translations", url_name="translations")
+    @async_to_sync
+    async def translations(self, request):
+        identifier = self.kwargs["identifier"]
+        if request.method == "GET":
+            authz.mark_authz_done(request)
+            serializer = DatasetV2TranslationSerializer(
+                [t async for t in DatasetV2Translation.objects.filter(dataset_id=identifier)],
+                many=True,
+                context=self.get_serializer_context(),
+            )
+            return Response(serializer.data)
+
+        try:
+            dataset = await DatasetV2.objects.aget(identifier=identifier)
+        except DatasetV2.DoesNotExist:
+            return not_found(request)
+
+        if not (
+            await authz.async_evaluate_one(
+                request,
+                build_resource(project=str(dataset.project_id), dataset=str(dataset.identifier)),
+                P_EDIT_DATASET,
+            )
+        ):
+            return forbidden(request)
+
+        authz.mark_authz_done(request)
+        serializer = DatasetV2TranslationSerializer(data=request.data, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        instance = DatasetV2Translation.from_schema(
+            serializer._validated_schema, dataset_id=str(dataset.identifier)
+        )
+        await instance.asave()
+        return Response(serializer.to_representation(instance), status=status.HTTP_201_CREATED)
+
+    @action(detail=True, methods=["get", "put", "delete"],
+            url_path=r"translations/(?P<language>[^/.]+)", url_name="translation")
+    @async_to_sync
+    async def translation_detail(self, request, language):
+        identifier = self.kwargs["identifier"]
+        try:
+            translation = await DatasetV2Translation.objects.aget(dataset_id=identifier, language=language)
+        except DatasetV2Translation.DoesNotExist:
+            return not_found(request)
+
+        if request.method == "GET":
+            authz.mark_authz_done(request)
+            serializer = DatasetV2TranslationSerializer(translation, context=self.get_serializer_context())
+            return Response(serializer.data)
+
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
+
+        if not (
+            await authz.async_evaluate_one(
+                request,
+                build_resource(project=str(dataset.project_id), dataset=str(dataset.identifier)),
+                P_EDIT_DATASET,
+            )
+        ):
+            return forbidden(request)
+
+        if request.method == "DELETE":
+            await translation.adelete()
+            authz.mark_authz_done(request)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        # PUT
+        authz.mark_authz_done(request)
+        serializer = DatasetV2TranslationSerializer(
+            translation, data=request.data, context=self.get_serializer_context()
+        )
+        serializer.is_valid(raise_exception=True)
+        await sync_to_async(serializer.save)()
+        return Response(serializer.data)
 
 
 class DatasetV2TranslationViewSet(CHORDPublicModelViewSet):

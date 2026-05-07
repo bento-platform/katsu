@@ -34,43 +34,11 @@ logger = logging.getLogger(__name__)
 # DATS → new-schema helpers
 # ---------------------------------------------------------------------------
 
-# Roles available in the new schema that might appear in DATS data
-_KNOWN_ROLES = {
-    "pi": "Principal Investigator",
-    "principal investigator": "Principal Investigator",
-    "co-investigator": "Co-Investigator",
-    "co investigator": "Co-Investigator",
-    "researcher": "Researcher",
-    "data provider": "Data Provider",
-    "data controller": "Data Controller",
-    "data contributor": "Data Contributor",
-    "collaborating organization": "Collaborating Organization",
-    "sponsor": "Sponsor",
-    "funder": "Funder",
-    "publisher": "Publisher",
-    "institution": "Institution",
-    "consortium": "Consortium",
-}
-
 _FALLBACK_ROLE = "Data Provider"
 
 
-def _normalize_role(raw: object) -> str:
-    """Try to map a DATS role object or string to a known schema role."""
-    if isinstance(raw, dict):
-        raw = raw.get("value", raw.get("label", ""))
-    if not isinstance(raw, str):
-        return _FALLBACK_ROLE
-    return _KNOWN_ROLES.get(raw.strip().lower(), _FALLBACK_ROLE)
-
-
 def _map_creators_to_stakeholders(creators: list) -> list[dict]:
-    """
-    Convert DATS-style creator objects to PersonOrOrganization dicts.
-
-    DATS creators are typically organisations like:
-        {"name": "...", "roles": [{"value": "PI"}, ...]}
-    """
+    """Convert DATS-style creator objects to PersonOrOrganization dicts."""
     stakeholders = []
     for c in creators:
         if not isinstance(c, dict):
@@ -79,8 +47,7 @@ def _map_creators_to_stakeholders(creators: list) -> list[dict]:
         if not name:
             continue
 
-        roles_raw = c.get("roles", [])
-        roles = [_normalize_role(r) for r in roles_raw] if roles_raw else [_FALLBACK_ROLE]
+        roles = [_FALLBACK_ROLE]
 
         stakeholders.append({
             "type": "organization",
