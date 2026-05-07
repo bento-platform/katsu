@@ -191,13 +191,21 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         language = self.context.get("language", "en")
 
         if language != "en":
-            try:
-                translation = DatasetV2Translation.objects.get(
-                    dataset_id=instance.identifier, language=language
-                )
+            prefetched = getattr(instance, "prefetched_translations", None)
+            if prefetched is not None:
+                translation = prefetched[0] if prefetched else None
+            else:
+                try:
+                    translation = DatasetV2Translation.objects.get(
+                        dataset_id=instance.identifier, language=language
+                    )
+                except DatasetV2Translation.DoesNotExist:
+                    translation = None
+
+            if translation is not None:
                 data = translation.to_schema().model_dump(mode="json")
                 self.context["_content_language"] = language
-            except DatasetV2Translation.DoesNotExist:
+            else:
                 data = super().to_representation(instance)
                 self.context.setdefault("_content_language", "en")
         else:

@@ -12,6 +12,7 @@ from bento_lib.auth.permissions import (
 from bento_lib.auth.resources import RESOURCE_EVERYTHING, build_resource
 from bento_lib.responses import errors
 
+from django.db.models import Prefetch
 from django.http import Http404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -292,6 +293,15 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
+        language = _get_preferred_language(self.request)
+        if language != "en":
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    "translations",
+                    queryset=DatasetV2Translation.objects.filter(language=language),
+                    to_attr="prefetched_translations",
+                )
+            )
         return queryset
 
     async def get_obj_async(self):
