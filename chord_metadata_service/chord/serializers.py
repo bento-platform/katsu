@@ -183,7 +183,9 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         read_only_fields = ['created_at', 'updated_at']
 
     def to_internal_value(self, data):
-        if not data.get("identifier"):
+        if self.instance:
+            data = {**data, "identifier": str(self.instance.identifier)}
+        elif not data.get("identifier"):
             data = {**data, "identifier": str(uuid.uuid4())}
         return super().to_internal_value(data)
 

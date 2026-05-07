@@ -74,8 +74,9 @@ class PydanticJSONBModelMixin(models.Model):
 
     def update_from_schema(self, schema: BaseModel):
         data = schema.model_dump(exclude_unset=True, mode='json')
+        pk_name = self._meta.pk.name
         for k, v in data.items():
-            if k in self.COLUMN_FIELDS and k != 'id':
+            if k in self.COLUMN_FIELDS and k != pk_name:
                 model_field = self._meta.get_field(k)
                 if model_field.is_relation:
                     setattr(self, f"{k}_id", v)
