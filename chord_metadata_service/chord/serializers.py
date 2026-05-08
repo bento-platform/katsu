@@ -2,6 +2,7 @@ import uuid
 from pydantic import ValidationError as PydValidationError
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
 from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBSerializer
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
@@ -173,7 +174,7 @@ class DatasetSerializer(GenericSerializer):
 
 
 class DatasetV2Serializer(PydanticJSONBSerializer):
-    schema_class = ProjectScopedDatasetModel
+    schema_class = KatsuDatasetModel
 
     counts_by_entity = serializers.SerializerMethodField()
 

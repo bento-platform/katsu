@@ -2,6 +2,7 @@ import collections
 import uuid
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -217,7 +218,7 @@ class DatasetV2(PydanticJSONBModelMixin):
         'last_modified',
     }
     JSONB_FIELD = 'data'
-    SCHEMA_CLASS = ProjectScopedDatasetModel
+    SCHEMA_CLASS = KatsuDatasetModel
 
     # --- Django fields ---
     project = models.ForeignKey(

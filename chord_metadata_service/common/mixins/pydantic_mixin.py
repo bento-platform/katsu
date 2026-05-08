@@ -113,6 +113,9 @@ class PydanticJSONBSerializer(serializers.ModelSerializer):
     @override
     def to_internal_value(self, data):
         try:
+            if self.partial and self.instance is not None:
+                existing = self.instance.to_schema().model_dump(mode='json')
+                data = {**existing, **data}
             schema = self.get_schema_class().model_validate(data)
             self._validated_schema = schema
             return schema.model_dump(mode='json')
