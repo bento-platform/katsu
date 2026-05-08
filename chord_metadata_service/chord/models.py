@@ -243,6 +243,12 @@ class DatasetV2(PydanticJSONBModelMixin):
     # Store the whole validated payload (English default, validated by Pydantic before saving)
     data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
 
+    additional_resources = models.ManyToManyField(
+        Resource,
+        blank=True,
+        help_text="Resource objects linked to this dataset that aren't specified by a phenopacket.",
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from structlog.stdlib import BoundLogger
 
-from chord_metadata_service.chord.models import Dataset
+from chord_metadata_service.chord.models import DatasetV2
 from chord_metadata_service.experiments import models as em
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA, EXPERIMENT_RESULT_SCHEMA
 from chord_metadata_service.phenopackets import models as pm
@@ -155,7 +155,7 @@ def ingest_experiment(
         biosample=biosample,
         instrument=instrument_db,
         extra_properties=extra_properties,
-        dataset=Dataset.objects.get(identifier=dataset_id)
+        dataset=DatasetV2.objects.get(identifier=dataset_id)
     )
 
     # create m2m relationships
@@ -165,7 +165,7 @@ def ingest_experiment(
 
 
 def ingest_experiments_workflow(json_data, dataset_id: str, lg: BoundLogger) -> list[em.Experiment]:
-    dataset = Dataset.objects.get(identifier=dataset_id)
+    dataset = DatasetV2.objects.get(identifier=dataset_id)
     lg = lg.bind(project_id=str(dataset.project_id), dataset_id=dataset_id)
 
     for rs in json_data.get("resources", []):

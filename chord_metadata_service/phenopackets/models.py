@@ -616,7 +616,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    dataset = models.ForeignKey("chord.Dataset", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
+    dataset = models.ForeignKey("chord.DatasetV2", on_delete=models.CASCADE, blank=True, null=True)  # TODO: Help text
     extra_properties = JSONField(blank=True, null=True, help_text=rec_help(d.PHENOPACKET, "extra_properties"))
 
     # ------------------------------------------------------------------------------------------------------------------

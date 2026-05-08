@@ -30,7 +30,7 @@ class ValidatedDiscoveryScope:
     result in this becoming invalid.
     """
 
-    def __init__(self, project: cm.Project | None, dataset: cm.Dataset | None):
+    def __init__(self, project: cm.Project | None, dataset: cm.Dataset | cm.DatasetV2ScopeAdapter | None):
         """
         Constructor for an already-validated discovery scope - i.e., since we are getting fed project/dataset instances
         rather than just string IDs, we know these objects exist at the time of construction.
@@ -124,7 +124,7 @@ async def _get_project_by_id(project_id: str) -> cm.Project:
 
 async def get_discovery_scope(project_id: str | None, dataset_id: str | None) -> ValidatedDiscoveryScope:
     project: cm.Project | None = None
-    dataset: cm.Dataset | None = None
+    dataset: cm.DatasetV2ScopeAdapter | None = None
 
     try:
         if project_id:
@@ -137,13 +137,13 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
 
     try:
         if dataset_id:
-            qs = cm.Dataset.objects.filter(identifier=dataset_id)
+            qs = cm.DatasetV2.objects.filter(identifier=dataset_id)
             if project_id:
                 # check if the dataset exists and belongs to the specified project if project ID is specified;
                 # otherwise, infer the project from the dataset.
                 qs = qs.filter(project_id=project_id)
 
-            dataset = await qs.aget()
+            dataset = cm.DatasetV2ScopeAdapter(await qs.aget())
             project = await _get_project_by_id(dataset.project_id)
 
         elif project_id:
