@@ -24,11 +24,14 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
+from chord_metadata_service.experiments.summaries import dt_experiment_summary
+from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.logger import logger
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer, JSONLDDatasetRenderer, RDFDatasetRenderer
@@ -36,6 +39,7 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from chord_metadata_service.restapi.utils import response_optionally_as_attachment
 
 from . import data_types as dt
+from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2ScopeAdapter, DatasetV2Translation
 from .views_data_types import make_data_type_response_object, QUERYSET_FN
 from .serializers import (
@@ -403,14 +407,33 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
     @async_to_sync
     @action(detail=True, methods=["get"], url_path="summary", url_name="summary",
             permission_classes=[BentoAllowAny])
-    async def summary(self, request):
+    async def summary(self, request, **kwargs):
         identifier = self.kwargs["identifier"]
-        dataset = await DatasetV2.objects.filter(identifier=identifier).afirst()
-        if dataset is None:
-            authz.mark_authz_done(request)
+        try:
+            dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=identifier))
+        except DatasetV2.DoesNotExist:
             return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
-        authz.mark_authz_done(request)
-        return Response({"counts": dataset.data.get("counts") or []})
+
+        project = await Project.objects.aget(identifier=dataset.project_id)
+        discovery_scope = ValidatedDiscoveryScope(project, dataset)
+
+        summary_functions = {
+            DATA_TYPE_PHENOPACKET: dt_phenopacket_summary,
+            DATA_TYPE_EXPERIMENT: dt_experiment_summary,
+        }
+
+        dt_permissions = await get_data_type_query_permissions(
+            request,
+            data_types=list(summary_functions.keys()),
+            resource=discovery_scope.as_authz_resource(),
+        )
+
+        summaries = await asyncio.gather(
+            *[summary_functions[data_type](discovery_scope, dt_permissions[data_type])
+              for data_type in summary_functions]
+        )
+
+        return Response(dict(zip(summary_functions.keys(), summaries)))
 
     @async_to_sync
     @action(detail=True, methods=["get"], url_path="data-types", url_name="data-types",
