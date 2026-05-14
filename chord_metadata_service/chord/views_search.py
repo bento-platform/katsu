@@ -379,9 +379,9 @@ async def chord_dataset_search(
 
 @async_api_view(["GET", "POST"])
 @permission_classes([BentoDeferToHandler])
-async def private_dataset_search(request: DrfRequest, dataset_id: str):
+async def private_dataset_search(request: DrfRequest, identifier: str):
     try:
-        dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=dataset_id))
+        dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=identifier))
     except (DatasetV2.DoesNotExist, ValidationError) as e:
         authz_middleware.mark_authz_done(request)
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
@@ -401,7 +401,7 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     # perform search: --------------------------------------------------------------------------------------------------
 
     start = datetime.now()
-    logger = katsu_logger.bind(project_id=str(project.identifier), dataset_id=dataset_id, start=start)
+    logger = katsu_logger.bind(project_id=str(project.identifier), dataset_id=identifier, start=start)
 
     search_params, err = get_chord_search_parameters(request, logger)
     if err:
@@ -425,9 +425,9 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 
 @async_api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def dataset_summary(request: DrfRequest, dataset_id: str):
+async def dataset_summary(request: DrfRequest, identifier: str):
     try:
-        dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=dataset_id))
+        dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=identifier))
     except (DatasetV2.DoesNotExist, ValidationError) as e:
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 
