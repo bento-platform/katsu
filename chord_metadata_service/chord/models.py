@@ -252,6 +252,19 @@ class DatasetV2(PydanticJSONBModelMixin):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def resources(self):
+        return Resource.objects.filter(id__in={
+            *(r.id for r in self.additional_resources.all()),
+            *(
+                r.id
+                for p in Phenopacket.objects.filter(
+                    dataset_id=self.identifier
+                ).prefetch_related("meta_data", "meta_data__resources")
+                for r in p.meta_data.resources.all()
+            ),
+        })
+
     def __str__(self) -> str:
         return f"{self.identifier}: {self.title}"
 

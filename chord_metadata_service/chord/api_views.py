@@ -404,6 +404,15 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         authz.mark_authz_done(request)
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
 
+    @action(detail=True, methods=["get"], url_path="resources", url_name="resources")
+    def resources(self, request, *_args, **_kwargs):
+        try:
+            dataset = self.get_object()
+        except Http404:
+            return not_found(request)
+        authz.mark_authz_done(request)
+        return Response(ResourceSerializer(dataset.resources, many=True).data)
+
     @async_to_sync
     @action(detail=True, methods=["get"], url_path="summary", url_name="summary",
             permission_classes=[BentoAllowAny])
