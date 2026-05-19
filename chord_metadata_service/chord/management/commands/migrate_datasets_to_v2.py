@@ -25,7 +25,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from pydantic import ValidationError
 
-from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Dataset, DatasetV2
 
 logger = logging.getLogger(__name__)
@@ -236,6 +236,9 @@ def build_v2_payload(dataset: Dataset, force_placeholder: bool) -> dict:
         if filtered_ep:
             payload["extra_properties"] = filtered_ep
 
+    if dataset.linked_field_sets:
+        payload["linked_field_sets"] = dataset.linked_field_sets
+
     return payload
 
 
@@ -316,7 +319,7 @@ class Command(BaseCommand):
             # Build and validate Pydantic model
             try:
                 payload = build_v2_payload(dataset, force_placeholder=force_placeholder)
-                schema = ProjectScopedDatasetModel.model_validate(payload)
+                schema = KatsuDatasetModel.model_validate(payload)
             except (ValueError, ValidationError) as exc:
                 self.stderr.write(
                     self.style.ERROR(f"  ERROR {identifier} ({dataset.title!r}): {exc}")
