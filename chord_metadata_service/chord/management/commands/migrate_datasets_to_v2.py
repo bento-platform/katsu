@@ -15,7 +15,7 @@ Usage:
     python manage.py migrate_datasets_to_v2
     python manage.py migrate_datasets_to_v2 --dry-run
     python manage.py migrate_datasets_to_v2 --skip-existing
-    python manage.py migrate_datasets_to_v2 --force-placeholder
+    python manage.py migrate_datasets_to_v2 --no-force-placeholder
 """
 
 import logging
@@ -266,13 +266,14 @@ class Command(BaseCommand):
             help="Skip Dataset records that already have a matching DatasetV2 entry.",
         )
         parser.add_argument(
-            "--force-placeholder",
-            action="store_true",
-            default=False,
+            "--no-force-placeholder",
+            action="store_false",
+            dest="force_placeholder",
+            default=True,
             help=(
                 "If required Pydantic fields (stakeholders, primary_contact) cannot be "
-                "derived from old data, insert synthetic placeholder values so the record "
-                "can still be migrated."
+                "derived from old data, fail the record instead of inserting synthetic "
+                "placeholder values."
             ),
         )
         parser.add_argument(
