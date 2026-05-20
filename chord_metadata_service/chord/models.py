@@ -12,7 +12,7 @@ from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
-from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBModelMixin
+from chord_metadata_service.common.mixins.pydantic_mixin import AbstractPydanticJSONBModel
 
 
 __all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation", "DatasetV2ScopeAdapter"]
@@ -207,7 +207,7 @@ class Dataset(BaseProjectOrDataset):
 
 
 # Model, inherted from Mixin
-class DatasetV2(PydanticJSONBModelMixin):
+class DatasetV2(AbstractPydanticJSONBModel):
 
     # --- Mixin configuration ---
     COLUMN_FIELDS = {
@@ -269,7 +269,7 @@ class DatasetV2(PydanticJSONBModelMixin):
         return f"{self.identifier}: {self.title}"
 
 
-class DatasetV2Translation(PydanticJSONBModelMixin):
+class DatasetV2Translation(AbstractPydanticJSONBModel):
     """Stores a translated Pydantic payload for a DatasetV2 in a non-default language."""
 
     # --- Mixin configuration ---

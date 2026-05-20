@@ -8,7 +8,7 @@ from rest_framework.settings import api_settings
 from django.db import models
 
 
-class PydanticJSONBModelMixin(models.Model):
+class AbstractPydanticJSONBModel(models.Model):
     """
     Mixin for models that store some Pydantic fields in a JSONB column.
 
@@ -95,7 +95,7 @@ class PydanticJSONBSerializer(serializers.ModelSerializer):
     """
 
     class Meta:
-        model: type[PydanticJSONBModelMixin]
+        model: type[AbstractPydanticJSONBModel]
         fields: str | list[str]
         read_only_fields: list[str]
 
