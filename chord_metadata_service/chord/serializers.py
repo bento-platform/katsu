@@ -4,7 +4,7 @@ from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
-from chord_metadata_service.common.mixins.pydantic_mixin import PydanticJSONBSerializer
+from chord_metadata_service.common.base_pydantic_jsonb import PydanticJSONBSerializer
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
