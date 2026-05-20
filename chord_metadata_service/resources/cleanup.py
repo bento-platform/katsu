@@ -20,7 +20,6 @@ async def clean_resources(logger: BoundLogger) -> int:
 
     resources_referenced = set()
 
-    resources_referenced |= await build_id_set_from_model(cm.Dataset, "additional_resources__id")
     resources_referenced |= await build_id_set_from_model(cm.DatasetV2, "additional_resources__id")
     resources_referenced |= await build_id_set_from_model(pm.MetaData, "resources__id")
 
