@@ -104,15 +104,6 @@ class ProjectViewSet(CHORDPublicModelViewSet):
         context["language"] = _get_preferred_language(self.request)
         return context
 
-    def retrieve(self, request, *args, **kwargs):
-        response = super().retrieve(request, *args, **kwargs)
-        response["Content-Language"] = _get_preferred_language(request)
-        return response
-
-    def list(self, request, *args, **kwargs):
-        response = super().list(request, *args, **kwargs)
-        response["Content-Language"] = _get_preferred_language(request)
-        return response
 
     @async_to_sync
     async def create(self, request, *args, **kwargs):
@@ -327,9 +318,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
 
     def list(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
-        response = super().list(request, *args, **kwargs)
-        response["Content-Language"] = _get_preferred_language(request)
-        return response
+        return super().list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
         authz.mark_authz_done(request)
