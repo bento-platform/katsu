@@ -38,7 +38,7 @@ ALTER TABLE experiments_experiment
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("chord", "0018_datasetv2_additional_resources"),
+        ("chord", "0012_datasetv2"),
         ("experiments", "0016_v13_2_0"),
     ]
 
