@@ -299,7 +299,6 @@ class DatasetV2Translation(AbstractPydanticJSONBModel):
         return f"{self.dataset_id}: {self.language}"
 
 
-
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")

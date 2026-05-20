@@ -104,7 +104,6 @@ class ProjectViewSet(CHORDPublicModelViewSet):
         context["language"] = _get_preferred_language(self.request)
         return context
 
-
     @async_to_sync
     async def create(self, request, *args, **kwargs):
         if not (await authz.async_evaluate_one(request, RESOURCE_EVERYTHING, P_CREATE_PROJECT)):
