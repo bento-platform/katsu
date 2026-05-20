@@ -15,7 +15,7 @@ from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 from chord_metadata_service.common.base_pydantic_jsonb import AbstractPydanticJSONBModel
 
 
-__all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation", "DatasetV2ScopeAdapter"]
+__all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation"]
 
 
 def version_default():
@@ -206,16 +206,16 @@ class Dataset(BaseProjectOrDataset):
         return f"{self.title} (ID: {self.identifier})"
 
 
-# Model, inherted from Mixin
 class DatasetV2(AbstractPydanticJSONBModel):
 
-    # --- Mixin configuration ---
+    # --- AbstractPydanticJSONBModel configuration ---
     COLUMN_FIELDS = {
         'identifier',
         'project',
         'title',
         'release_date',
         'last_modified',
+        'discovery',
     }
     JSONB_FIELD = 'data'
     SCHEMA_CLASS = KatsuDatasetModel
@@ -239,6 +239,7 @@ class DatasetV2(AbstractPydanticJSONBModel):
 
     release_date = models.DateField(db_index=True, null=True, blank=True)
     last_modified = models.DateField(db_index=True, null=True, blank=True)
+    discovery = DiscoveryJSONField(blank=True, null=True, help_text="Dataset-level discovery configuration.")
 
     # Store the whole validated payload (English default, validated by Pydantic before saving)
     data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
@@ -297,15 +298,6 @@ class DatasetV2Translation(AbstractPydanticJSONBModel):
     def __str__(self) -> str:
         return f"{self.dataset_id}: {self.language}"
 
-
-class DatasetV2ScopeAdapter:
-    """Duck-type adapter so DatasetV2 satisfies the ValidatedDiscoveryScope dataset interface."""
-
-    def __init__(self, dataset: "DatasetV2"):
-        self.identifier = dataset.identifier
-        self.project_id = dataset.project_id
-        raw = dataset.data.get("discovery") if isinstance(dataset.data, dict) else None
-        self.discovery = DiscoveryConfig.model_validate(raw) if raw is not None else None
 
 
 class ProjectJsonSchema(models.Model):

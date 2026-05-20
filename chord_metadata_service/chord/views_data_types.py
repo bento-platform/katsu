@@ -27,7 +27,7 @@ from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
-from .models import Dataset, DatasetV2, DatasetV2ScopeAdapter, Project
+from .models import Dataset, DatasetV2, Project
 
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
@@ -254,7 +254,7 @@ async def dataset_v2_data_type_summary(request: DrfRequest, identifier: str):
         return not_found_response(f"Dataset {identifier} not found")
 
     project = await Project.objects.aget(identifier=dataset.project_id)
-    discovery_scope = ValidatedDiscoveryScope(project, DatasetV2ScopeAdapter(dataset))
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     dt_response = sorted(
@@ -299,7 +299,7 @@ async def dataset_v2_data_type(request: DrfRequest, identifier: str, data_type: 
         await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    discovery_scope = ValidatedDiscoveryScope(project, DatasetV2ScopeAdapter(dataset))
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     response_object = await make_data_type_response_object(
         data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],

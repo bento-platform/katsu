@@ -42,7 +42,7 @@ from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import DatasetV2, DatasetV2ScopeAdapter, Project
+from .models import DatasetV2, Project
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -381,7 +381,7 @@ async def chord_dataset_search(
 @permission_classes([BentoDeferToHandler])
 async def private_dataset_search(request: DrfRequest, identifier: str):
     try:
-        dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=identifier))
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
     except (DatasetV2.DoesNotExist, ValidationError) as e:
         authz_middleware.mark_authz_done(request)
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
@@ -427,7 +427,7 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 @permission_classes([BentoAllowAny])
 async def dataset_summary(request: DrfRequest, identifier: str):
     try:
-        dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=identifier))
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
     except (DatasetV2.DoesNotExist, ValidationError) as e:
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 

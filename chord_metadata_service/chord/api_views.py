@@ -40,7 +40,7 @@ from chord_metadata_service.restapi.utils import response_optionally_as_attachme
 
 from . import data_types as dt
 from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2ScopeAdapter, DatasetV2Translation
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
 from .views_data_types import make_data_type_response_object, QUERYSET_FN
 from .serializers import (
     ProjectJsonSchemaSerializer,
@@ -419,7 +419,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
     async def summary(self, request, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
-            dataset = DatasetV2ScopeAdapter(await DatasetV2.objects.aget(identifier=identifier))
+            dataset = await DatasetV2.objects.aget(identifier=identifier)
         except DatasetV2.DoesNotExist:
             return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
 
@@ -454,7 +454,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         except DatasetV2.DoesNotExist:
             return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
         project = await Project.objects.aget(identifier=dataset.project_id)
-        discovery_scope = ValidatedDiscoveryScope(project, DatasetV2ScopeAdapter(dataset))
+        discovery_scope = ValidatedDiscoveryScope(project, dataset)
         dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
         dt_response = sorted(
             await asyncio.gather(*(
@@ -501,7 +501,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
             await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-        discovery_scope = ValidatedDiscoveryScope(project, DatasetV2ScopeAdapter(dataset))
+        discovery_scope = ValidatedDiscoveryScope(project, dataset)
         dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
         response_object = await make_data_type_response_object(
             data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],

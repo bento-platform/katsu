@@ -13,7 +13,7 @@ from rest_framework import serializers
 from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
 from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation, DatasetV2ScopeAdapter
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
 from .schemas import LINKED_FIELD_SETS_SCHEMA
 from .utils import get_censored_counts_for_serializer
 
@@ -224,7 +224,7 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         request = self.context.get("request")
         if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
             return {}
-        scope = ValidatedDiscoveryScope(obj.project, DatasetV2ScopeAdapter(obj))
+        scope = ValidatedDiscoveryScope(obj.project, obj)
         return get_censored_counts_for_serializer(request, scope, logger)
 
 
