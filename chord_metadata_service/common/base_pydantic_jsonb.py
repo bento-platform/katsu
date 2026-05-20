@@ -1,4 +1,4 @@
-from typing import Set, Type, override
+from typing import override
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.options import Options
@@ -19,9 +19,9 @@ class AbstractPydanticJSONBModel(models.Model):
     """
     _meta: Options  # for pylance
 
-    COLUMN_FIELDS: Set[str] = set()
+    COLUMN_FIELDS: set[str] = set()
     JSONB_FIELD: str = 'other_data'
-    SCHEMA_CLASS: Type[BaseModel] | None = None
+    SCHEMA_CLASS: type[BaseModel] | None = None
 
     class Meta:
         abstract = True
