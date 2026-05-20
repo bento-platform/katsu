@@ -88,10 +88,9 @@ class AbstractPydanticJSONBModel(models.Model):
 
 class PydanticJSONBSerializer(serializers.ModelSerializer):
     """
-    Generic serializer for models using AbstractPydanticJSONBModel.
+    Generic serializer for models extending AbstractPydanticJSONBModel.
 
-    Subclasses must define Meta.model (which should extend AbstractPydanticJSONBModel)
-    and may set `schema_class` if it differs from model.SCHEMA_CLASS.
+    Subclasses must define Meta.model and may set `schema_class` if it differs from model.SCHEMA_CLASS.
     """
 
     class Meta:
