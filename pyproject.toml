@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "chord_metadata_service"  # can be renamed to katsu if inner module directory is renamed too
-version = "13.2.0"
+version = "14.0.0"
 description = "An implementation of a clin/pheno metadata store for the Bento platform."
 authors = [
     "Ksenia Zaytseva",
@@ -32,7 +32,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.12.0"
-bento-lib = {version = "^15.0.0", extras = ["django"]}
+bento-lib = {version = "^15.1.1", extras = ["django"]}
 Django = "~6.0.4"
 django-autocomplete-light = "^3.12.1"
 django-cors-headers = "^4.9.0"
