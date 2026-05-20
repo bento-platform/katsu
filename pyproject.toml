@@ -57,7 +57,6 @@ django-structlog = "^10.0.0"
 pycountry = "^26.2.16"
 structlog = "^25.4.0"
 pydantic = "^2.12.3"
-bento-lib = {version = "^15.1.1", extras = ["django"]}
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.11.0"
