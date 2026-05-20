@@ -304,7 +304,8 @@ class DatasetV2ScopeAdapter:
     def __init__(self, dataset: "DatasetV2"):
         self.identifier = dataset.identifier
         self.project_id = dataset.project_id
-        self.discovery = None  # falls back to project discovery config in ValidatedDiscoveryScope
+        raw = dataset.data.get("discovery") if isinstance(dataset.data, dict) else None
+        self.discovery = DiscoveryConfig.model_validate(raw) if raw is not None else None
 
 
 class ProjectJsonSchema(models.Model):
