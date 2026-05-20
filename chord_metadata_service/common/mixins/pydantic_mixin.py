@@ -10,7 +10,7 @@ from django.db import models
 
 class AbstractPydanticJSONBModel(models.Model):
     """
-    Mixin for models that store some Pydantic fields in a JSONB column.
+    Abstract base model for Django models that store some Pydantic fields in a JSONB column.
 
     Requires:
         - COLUMN_FIELDS: set of field names stored as actual columns
