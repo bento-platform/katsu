@@ -43,7 +43,9 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         self.url_with_proj = f"{self.url}?project={self.project['identifier']}"
 
         # dataset for project 1
-        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_v2(self.project["identifier"], title="Dataset 1"))
+        r = self.one_authz_post(
+            reverse("dataset-list"), json=valid_dataset_v2(self.project["identifier"], title="Dataset 1")
+        )
         self.dataset = r.json()
         self.url_with_proj_ds = f"{self.url}?project={self.project['identifier']}&dataset={self.dataset['identifier']}"
 
@@ -52,7 +54,9 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         self.project_2 = r.json()
 
         #  - dataset for project 2
-        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_v2(self.project_2["identifier"], title="Dataset 2"))
+        r = self.one_authz_post(
+            reverse("dataset-list"), json=valid_dataset_v2(self.project_2["identifier"], title="Dataset 2")
+        )
         self.dataset_2 = r.json()
 
     def test_list_resources_basic(self):
