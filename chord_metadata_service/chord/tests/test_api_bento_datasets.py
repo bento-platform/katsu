@@ -5,7 +5,9 @@ from django.urls import reverse
 from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
-from chord_metadata_service.chord.models import DatasetV2
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.models import DatasetV2, DatasetV2Translation
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_V2_PRIMARY_CONTACT, valid_dataset_v2
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from chord_metadata_service.chord.data_types import DATA_TYPES, DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
@@ -246,3 +248,74 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.dataset_v2.refresh_from_db()
         self.assertEqual(self.dataset_v2.title, payload["title"])
+
+    def test_create_dataset_v2_auto_identifier(self):
+        # DatasetV2Serializer.to_internal_value: no identifier in payload → auto-generates UUID
+        r = self.one_authz_post(
+            reverse("chord-dataset-list"),
+            json=valid_dataset_v2(str(self.project.identifier), title="New Dataset"),
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        data = r.json()
+        self.assertIn("identifier", data)
+        self.assertTrue(len(data["identifier"]) > 0)
+
+    def test_get_dataset_v2_language_fallback(self):
+        # DatasetV2Serializer.to_representation: language != "en", no translation → fallback "en"
+        r = self.client.get(
+            reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
+            HTTP_ACCEPT_LANGUAGE="fr",
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r["Content-Language"], "en")
+
+    def test_get_dataset_v2_with_translation(self):
+        # DatasetV2Serializer.to_representation: language != "en", translation found → uses translation
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Jeu de données fr",
+            description="Description française",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            identifier=str(self.dataset_v2.identifier),
+            project=str(self.project.identifier),
+        )
+        translation = DatasetV2Translation.from_schema(
+            schema, dataset_id=self.dataset_v2.identifier, language="fr"
+        )
+        translation.save()
+        self.addCleanup(translation.delete)
+
+        r = self.client.get(
+            reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
+            HTTP_ACCEPT_LANGUAGE="fr",
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r["Content-Language"], "fr")
+        self.assertEqual(r.json()["title"], "Jeu de données fr")
+
+    def test_get_translation_has_timestamps(self):
+        # DatasetV2TranslationSerializer.to_representation: adds created_at and updated_at
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset Translation",
+            description="Test",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            identifier=str(self.dataset_v2.identifier),
+            project=str(self.project.identifier),
+        )
+        translation = DatasetV2Translation.from_schema(
+            schema, dataset_id=self.dataset_v2.identifier, language="de"
+        )
+        translation.save()
+        self.addCleanup(translation.delete)
+
+        r = self.client.get(
+            reverse("chord-dataset-v2-translation-detail", kwargs={
+                "identifier": self.dataset_v2.identifier,
+                "language": "de",
+            })
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+        self.assertIn("created_at", data)
+        self.assertIn("updated_at", data)
