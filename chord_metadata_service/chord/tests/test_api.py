@@ -6,15 +6,12 @@ from django.test import override_settings
 from rest_framework import status
 from .constants import (
     VALID_PROJECT_1,
-    valid_dataset_1,
-    dats_dataset,
-    VALID_DATS_CREATORS,
-    INVALID_DATS_CREATORS,
+    valid_dataset_v2,
     PROJECT_JSON_SCHEMA_MISSING_PROJECT,
     valid_project_json_schema,
 )
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
-from ..models import Project, Dataset, ProjectJsonSchema
+from ..models import Project, DatasetV2, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST_DICT
 
@@ -194,70 +191,33 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         super().setUp()
 
         self.valid_payloads = [
-            valid_dataset_1(self.project["identifier"]),
-            {
-                **valid_dataset_1(self.project["identifier"]),
-                "title": "Dataset 2",
-                "dats_file": {},  # Valid dats_file JSON object
-                "conditions_of_access": "",
-            },
-            {
-                **valid_dataset_1(self.project["identifier"]),
-                "title": "Dataset 3",
-                "dats_file": "{}",  # Valid dats_file JSON string
-                "conditions_of_access": "somewebsite.ca",
-            },
-            {
-                **valid_dataset_1(self.project["identifier"]),
-                "title": "Dataset 4",
-                "dats_file": "{}",  # Valid dats_file JSON string
-                "discovery": DISCOVERY_CONFIG_TEST_DICT,
-            },
+            valid_dataset_v2(self.project["identifier"]),
+            valid_dataset_v2(self.project["identifier"], title="Dataset V2 2"),
+            valid_dataset_v2(self.project["identifier"], title="Dataset V2 3",
+                             discovery=DISCOVERY_CONFIG_TEST_DICT),
         ]
 
-        self.dats_valid_payload = dats_dataset(self.project["identifier"], VALID_DATS_CREATORS)
-        self.dats_invalid_payload = dats_dataset(self.project["identifier"], INVALID_DATS_CREATORS)
-
-        self.invalid_dataset_coa = {
-            **valid_dataset_1(self.project["identifier"]),
-            "title": "Dataset 5",
-            "conditions_of_access": None,  # Invalid condition of access; must be a string
-        }
-
+        _pc = {"type": "person", "name": "X", "roles": []}
         self.invalid_payloads = [
-            self.invalid_dataset_coa,
-            {
-                "title": "aa",
-                "description": "Test Dataset",
-                "project": self.project["identifier"],
-            },
-            {
-                "title": "Dataset 1",
-                "description": "Test Dataset",
-                "project": None,
-            },
-            {
-                **valid_dataset_1(self.project["identifier"]),
-                "title": "Dataset 4",
-                "dats_file": "INVALID_JSON_STRING",
-            },
-            {
-                **valid_dataset_1(self.project["identifier"]),
-                "title": "Dataset 2",
-                "data_use": {},  # Invalid data use object
-            },
+            # Missing schema_version
+            {"title": "Dataset V2 Bad", "description": "Test",
+             "primary_contact": _pc, "project": self.project["identifier"]},
+            # Missing project
+            {"schema_version": "1.0", "title": "Dataset V2 Bad",
+             "description": "Test", "primary_contact": _pc},
+            # Missing primary_contact
+            {"schema_version": "1.0", "title": "Dataset V2 Bad",
+             "description": "Test", "project": self.project["identifier"]},
         ]
 
     def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
             r = self.one_authz_post("/api/datasets", json=d)
-
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(Dataset.objects.count(), i)
-            self.assertEqual(Dataset.objects.get(title=d["title"]).description, d["description"])
-            self.assertDictEqual(Dataset.objects.get(title=d["title"]).data_use, d["data_use"])
+            self.assertEqual(DatasetV2.objects.count(), i)
+            self.assertEqual(DatasetV2.objects.filter(title=d["title"]).first().title, d["title"])
 
-        self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
+        self.assertEqual(DatasetV2.objects.count(), len(self.valid_payloads))
 
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
@@ -268,21 +228,8 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_conditions_of_access(self):
-        for d in self.valid_payloads:
-            r = self.one_authz_post("/api/datasets", json=d)
-
-            self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(Dataset.objects.get(title=d["title"]).conditions_of_access,
-                             d.get("conditions_of_access", ""))
-
-    def test_invalid_conditions_of_access(self):
-        d = self.invalid_dataset_coa
-        r = self.one_authz_post("/api/datasets", json=d)
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_dataset_discovery_put_get(self):
-        r = self.one_authz_post("/api/datasets", json=valid_dataset_1(self.project["identifier"]))
+        r = self.one_authz_post("/api/datasets", json=valid_dataset_v2(self.project["identifier"]))
         d = r.json()
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
@@ -291,93 +238,6 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
         r = self.one_authz_get(f"/api/datasets/{d['identifier']}")
         self.assertDictEqual(r.json()["discovery"], DISCOVERY_CONFIG_TEST.model_dump(mode="json"))
-
-    def test_dats(self):
-        payload = {**self.dats_valid_payload, 'dats_file': {}}
-
-        r = self.one_authz_post('/api/datasets', json=payload)
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-
-        r_invalid = self.one_authz_post("/api/datasets", json=self.dats_invalid_payload)
-        self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
-
-        self.assertEqual(Dataset.objects.count(), 1)
-
-        dataset_id = Dataset.objects.first().identifier
-
-        # no auth needed for this
-        response = self.client.get(f"/api/datasets/{dataset_id}/dats")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(response.data, payload['dats_file'])
-
-        # non-existant dataset
-        response = self.client.get(f"/api/datasets/{uuid.uuid4()}/dats")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-        # non-existant dataset (non-UUID)
-        response = self.client.get("/api/datasets/does-not-exist/dats")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
-    def test_dats_as_attachment(self):
-        payload = {**self.dats_valid_payload, 'dats_file': {}}
-
-        r = self.one_authz_post('/api/datasets', json=payload)
-
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-        dataset_id = Dataset.objects.first().identifier
-
-        subtest_params = [
-            ("?attachment=true", True),
-            ("?attachment=false", False),
-            ("?attachment=", False),
-            ("", False),
-        ]
-
-        for params in subtest_params:
-            with self.subTest(params=params):
-                response = self.client.get(f"/api/datasets/{dataset_id}/dats{params[0]}")
-                self.assertEqual(response.status_code, status.HTTP_200_OK)
-                self.assertDictEqual(response.data, payload['dats_file'])
-                if params[1]:
-                    self.assertEqual(
-                        response.headers["Content-Disposition"],
-                        f"attachment; filename=\"{dataset_id}_dats.json\""
-                    )
-                else:
-                    self.assertNotIn("Content-Disposition", response.headers)
-
-    def test_resources(self):
-        resource = {
-            "id": "NCBITaxon:2023-09-14",
-            "name": "NCBI Taxonomy OBO Edition",
-            "version": "2023-09-14",
-            "namespace_prefix": "NCBITaxon",
-            "url": "http://purl.obolibrary.org/obo/ncbitaxon/2023-09-14/ncbitaxon.owl",
-            "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_",
-        }
-
-        r = self.one_authz_post("/api/resources", json=resource)
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-
-        r = self.one_authz_post(
-            "/api/datasets",
-            json={
-                **valid_dataset_1(self.project["identifier"]),
-                "additional_resources": [resource["id"]],
-            },
-        )
-
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-
-        dataset_id = Dataset.objects.first().identifier
-        r = self.client.get(f"/api/datasets/{dataset_id}/resources")
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(r.data), 1)
-        self.assertEqual(r.data[0]["id"], resource["id"])
-
-        # non-existant dataset
-        r = self.client.get(f"/api/datasets/{uuid.uuid4()}/resources")
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
 class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
@@ -393,15 +253,15 @@ class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
             res = r.json()
             self.assertEqual(len(res["results"]), 1)
 
-            # Verify counts field exists
+            # Verify counts_by_entity field exists
             dataset = res["results"][0]
-            self.assertIn("counts", dataset)
-            self.assertIsInstance(dataset["counts"], dict)
+            self.assertIn("counts_by_entity", dataset)
+            self.assertIsInstance(dataset["counts_by_entity"], dict)
 
-            # Verify all expected entity types are in counts
+            # Verify all expected entity types are in counts_by_entity
             expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
             for entity in expected_entities:
-                self.assertIn(entity, dataset["counts"])
+                self.assertIn(entity, dataset["counts_by_entity"])
 
 
 class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
@@ -413,20 +273,20 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+            r = self.client.get(f"/api/datasets/{self.dataset_v2.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
-            # Verify counts field exists
-            self.assertIn("counts", dataset)
-            self.assertIsInstance(dataset["counts"], dict)
+            # Verify counts_by_entity field exists
+            self.assertIn("counts_by_entity", dataset)
+            self.assertIsInstance(dataset["counts_by_entity"], dict)
 
-            # Verify all expected entity types are in counts
+            # Verify all expected entity types are in counts_by_entity
             expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
             for entity in expected_entities:
-                self.assertIn(entity, dataset["counts"])
+                self.assertIn(entity, dataset["counts_by_entity"])
                 # Since there's no data, counts should be 0
-                self.assertEqual(dataset["counts"][entity], 0)
+                self.assertEqual(dataset["counts_by_entity"][entity], 0)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_dataset_detail_with_bool_permissions(self):
@@ -435,19 +295,19 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+            r = self.client.get(f"/api/datasets/{self.dataset_v2.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
-            # Verify counts field exists
-            self.assertIn("counts", dataset)
+            # Verify counts_by_entity field exists
+            self.assertIn("counts_by_entity", dataset)
 
             # With boolean permissions, counts should be booleans
             for entity in ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]:
-                self.assertIn(entity, dataset["counts"])
-                self.assertIsInstance(dataset["counts"][entity], bool)
+                self.assertIn(entity, dataset["counts_by_entity"])
+                self.assertIsInstance(dataset["counts_by_entity"][entity], bool)
                 # Since there's no data, should be False
-                self.assertFalse(dataset["counts"][entity])
+                self.assertFalse(dataset["counts_by_entity"][entity])
 
 
 class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
@@ -455,34 +315,33 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
     def setUp(self):
         super().setUp()
 
-        self.dats_invalid_payload = dats_dataset(str(self.project.identifier), INVALID_DATS_CREATORS)
-
         self.project_2 = Project.objects.create(title="Project 2", description="")
 
         self.valid_update = {
-            "title": self.dataset.title + "!",
-            "description": self.dataset.description,
-            "data_use": self.dataset.data_use,
-            "project": str(self.dataset.project.identifier),
+            "schema_version": "1.0",
+            "title": self.dataset_v2.title + "!",
+            "description": "Updated description",
+            "primary_contact": {"type": "person", "name": "Test Contact", "roles": []},
+            "project": str(self.dataset_v2.project_id),
         }
 
     def test_update_dataset(self):
-        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
+        r = self.one_authz_put(f"/api/datasets/{self.dataset_v2.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset.refresh_from_db()
-        self.assertEqual(self.dataset.title, self.valid_update["title"])
+        self.dataset_v2.refresh_from_db()
+        self.assertEqual(self.dataset_v2.title, self.valid_update["title"])
 
     def test_update_dataset_partial(self):
         r = self.one_authz_patch(
-            f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]}
+            f"/api/datasets/{self.dataset_v2.identifier}", json={"title": self.valid_update["title"]}
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset.refresh_from_db()
-        self.assertEqual(self.dataset.title, self.valid_update["title"])
+        self.dataset_v2.refresh_from_db()
+        self.assertEqual(self.dataset_v2.title, self.valid_update["title"])
 
     def test_update_dataset_changed_project(self):
         r = self.one_authz_put(
-            f"/api/datasets/{self.dataset.identifier}",
+            f"/api/datasets/{self.dataset_v2.identifier}",
             json={
                 **self.valid_update,
                 "project": str(self.project_2.identifier),
@@ -493,24 +352,8 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(res["message"], "Bad Request")
         self.assertEqual(res["errors"][0]["message"], "Dataset project ID cannot change")
 
-    def test_update_dataset_bad_dats_json(self):
-        r = self.one_authz_put(
-            f"/api/datasets/{self.dataset.identifier}",
-            json={**self.valid_update, "dats_file": "asdf"},  # asdf is not JSON
-        )
-        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
-        res = r.json()
-        self.assertEqual(res["message"], "Bad Request")
-        self.assertEqual(
-            res["errors"][0]["message"],
-            (
-                "Submitted dataset.dats_file data is not a valid JSON string. Make sure the string value is JSON "
-                "compatible, or submit dats_file as a JSON object."
-            )
-        )
-
     def test_update_dataset_forbidden(self):
-        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
+        r = self.one_no_authz_put(f"/api/datasets/{self.dataset_v2.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_dataset_not_found(self):
@@ -521,16 +364,16 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_delete_dataset(self):
-        r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
+        r = self.one_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
-        with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
-            self.dataset.refresh_from_db()
+        with self.assertRaises(DatasetV2.DoesNotExist):  # must not exist in DB anymore
+            self.dataset_v2.refresh_from_db()
 
     def test_delete_dataset_forbidden(self):
-        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
+        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
-        self.dataset.refresh_from_db()  # must not raise DoesNotExist
+        self.dataset_v2.refresh_from_db()  # must not raise DoesNotExist
 
     def test_delete_dataset_not_found(self):
         r = self.client.delete(f"/api/datasets/{uuid.uuid4()}")

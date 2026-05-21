@@ -12,7 +12,8 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as cm
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_V2_PRIMARY_CONTACT
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.fields_utils import JSONBPathFilter
@@ -187,24 +188,30 @@ class IndividualListFilterTest(TestWithTwoIndividuals):
         # ----
 
         self.project_1 = cm.Project.objects.create(title="Project 1", description="p1")
-        self.dataset_1 = cm.Dataset.objects.create(
-            **{
-                "title": "Dataset 1",
-                "description": "Test Dataset 1",
-                "data_use": VALID_DATA_USE_1,
-                "project": self.project_1,
-            }
+        schema_1 = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset 1",
+            description="Test Dataset 1",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            project=str(self.project_1.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        self.dataset_1 = cm.DatasetV2.from_schema(schema_1)
+        self.dataset_1.save()
+        self.dataset_1.refresh_from_db()
 
         self.project_2 = cm.Project.objects.create(title="Project 2", description="p2")
-        self.dataset_2 = cm.Dataset.objects.create(
-            **{
-                "title": "Dataset 2",
-                "description": "Test Dataset 2",
-                "data_use": VALID_DATA_USE_1,
-                "project": self.project_2,
-            }
+        schema_2 = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset 2",
+            description="Test Dataset 2",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            project=str(self.project_2.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        self.dataset_2 = cm.DatasetV2.from_schema(schema_2)
+        self.dataset_2.save()
+        self.dataset_2.refresh_from_db()
 
         # ----
 
@@ -511,12 +518,17 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         random.seed(self.random_seed)
 
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
-        self.dataset_2 = cm.Dataset.objects.create(
+        schema_2 = KatsuDatasetModel(
+            schema_version="1.0",
             title="Dataset 2",
             description="Some dataset",
-            data_use=VALID_DATA_USE_1,
-            project=self.project_2,
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            project=str(self.project_2.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        self.dataset_2 = cm.DatasetV2.from_schema(schema_2)
+        self.dataset_2.save()
+        self.dataset_2.refresh_from_db()
 
         self.individuals = [
             c.generate_valid_individual(date_of_consent_range=(2020, 2023)) for _ in range(self.num_individuals)
@@ -534,7 +546,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                     ph_c.valid_measurement_tumor_length(random.randint(1, 199))
                 ],
                 meta_data=meta_data,
-                dataset=self.dataset,
+                dataset=self.dataset_v2,
             )
             if idx == 1:
                 phenopacket.biosamples.add(biosample)
@@ -544,7 +556,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                     id=f"phenopacket_id:{idx}-2",
                     subject=individual,
                     meta_data=meta_data,
-                    dataset=self.dataset,
+                    dataset=self.dataset_v2,
                 )
                 biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(individual))
                 phenopacket_2.biosamples.add(biosample_2)
@@ -553,8 +565,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 phenopacket.save()
 
         instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
-        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
-        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 2))
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset_v2, 1))
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset_v2, 2))
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_sex(self):

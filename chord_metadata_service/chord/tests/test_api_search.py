@@ -20,7 +20,7 @@ from chord_metadata_service.experiments.tests.constants import (
 
 from .constants import (
     VALID_PROJECT_1,
-    valid_dataset_1,
+    VALID_DATASET_V2_PRIMARY_CONTACT,
     valid_phenotypic_feature,
     TEST_SEARCH_QUERY_1,
     TEST_SEARCH_QUERY_2,
@@ -33,7 +33,8 @@ from .constants import (
     TEST_SEARCH_QUERY_9,
     TEST_SEARCH_QUERY_10,
 )
-from ..models import Project, Dataset
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from ..models import Project, DatasetV2
 from ..data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_PHENOPACKET
@@ -56,7 +57,17 @@ SQ3_DATA = {
 class SearchTest(AuthzAPITestCase):
     def setUp(self) -> None:
         self.project = Project.objects.create(**VALID_PROJECT_1)
-        self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset 1",
+            description="Test Dataset",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            project=str(self.project.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.dataset = DatasetV2.from_schema(schema)
+        self.dataset.save()
+        self.dataset.refresh_from_db()
 
         # Set up a dummy phenopacket
 

@@ -1,6 +1,6 @@
 from typing import override
 
-from django.core.exceptions import ImproperlyConfigured
+from django.core.exceptions import FieldDoesNotExist, ImproperlyConfigured
 from django.db.models.options import Options
 from pydantic import BaseModel, ValidationError as PydanticValidationError
 from rest_framework import serializers
@@ -56,9 +56,10 @@ class AbstractPydanticJSONBModel(models.Model):
     def to_schema(self) -> BaseModel:
         data = {}
         for field in self.COLUMN_FIELDS:
-            if not hasattr(self, field):
+            try:
+                model_field = self._meta.get_field(field)
+            except FieldDoesNotExist:
                 continue
-            model_field = self._meta.get_field(field)
             if model_field.is_relation:
                 data[field] = getattr(self, f"{field}_id")
             else:

@@ -389,8 +389,15 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         ):
             return forbidden(request)
 
+        dataset_id = str(dataset.identifier)
+        await dataset.adelete()
+
+        lg = logger.bind(dataset_id=dataset_id)
+        n_removed = await run_all_cleanup(lg)
+        await lg.ainfo("ran cleanup after deleting dataset via DRF API", n_removed=n_removed)
+
         authz.mark_authz_done(request)
-        return await sync_to_async(super().destroy)(request, *args, **kwargs)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["get"], url_path="resources", url_name="resources")
     def resources(self, request, *_args, **_kwargs):

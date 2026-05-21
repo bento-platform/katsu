@@ -569,7 +569,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
     def get_project_id(self) -> str | None:
         if self.dataset is None:
             return None
-        return str(self.dataset.project_id)
+        return self.dataset.project_id
 
     # ------------------------------------------------------------------------------------------------------------------
 
