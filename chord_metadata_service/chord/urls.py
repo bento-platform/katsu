@@ -45,6 +45,8 @@ urlpatterns = [
     path('datasets_v2/<str:identifier>/summary',
          DatasetV2ViewSet.as_view({'get': 'summary'}),
          name="chord-dataset-v2-summary"),
+    path('datasets_v2/<str:identifier>/counts', views_search.dataset_v2_summary,
+         name="chord-dataset-v2-counts"),
     path('datasets_v2/<str:identifier>/data-types', views_data_types.dataset_v2_data_type_summary,
          name="chord-dataset-v2-data-type-summary"),
     path('datasets_v2/<str:identifier>/data-types/<str:data_type>', views_data_types.dataset_v2_data_type,
