@@ -279,4 +279,3 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         r = self.client.get(reverse("chord-dataset-list") + f"?project_id={self.project.identifier}")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.data["count"], 1)
-
