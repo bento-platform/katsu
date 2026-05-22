@@ -117,6 +117,15 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json()["count"], 0)
 
+    def test_create_translation(self):
+        # DatasetV2TranslationViewSet.create: happy path → 201, translation saved to DB
+        payload = self._translation_payload()
+        payload["language"] = "fr"
+        r = self.one_authz_post(self._translation_url(), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.addCleanup(lambda: DatasetV2Translation.objects.filter(
+            dataset=self.dataset_v2, language="fr").delete())
+
     def test_create_translation_dataset_not_found(self):
         # DatasetV2TranslationViewSet.create: dataset DoesNotExist → 404
         url = reverse("chord-dataset-v2-translation-list", kwargs={"identifier": str(uuid.uuid4())})
