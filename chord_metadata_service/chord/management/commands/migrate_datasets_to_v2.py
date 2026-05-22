@@ -263,10 +263,10 @@ class Command(BaseCommand):
             help="Validate and print what would be created without writing to the DB.",
         )
         parser.add_argument(
-            "--skip-existing",
+            "--overwrite",
             action="store_true",
             default=False,
-            help="Skip Dataset records that already have a matching DatasetV2 entry.",
+            help="Overwrite Dataset records that already have a matching DatasetV2 entry.",
         )
         parser.add_argument(
             "--no-force-placeholder",
@@ -287,7 +287,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dry_run: bool = options["dry_run"]
-        skip_existing: bool = options["skip_existing"]
+        overwrite: bool = options["overwrite"]
         force_placeholder: bool = options["force_placeholder"]
         dataset_id: str | None = options["dataset_id"]
 
@@ -298,7 +298,7 @@ class Command(BaseCommand):
         if dataset_id:
             qs = qs.filter(identifier=dataset_id)
 
-        if skip_existing:
+        if not overwrite:
             existing_ids = set(
                 DatasetV2.objects.values_list("identifier", flat=True)
             )
@@ -340,10 +340,16 @@ class Command(BaseCommand):
 
             try:
                 with transaction.atomic():
-                    instance = DatasetV2.from_schema(schema)
-                    instance.save()
+                    try:
+                        existing = DatasetV2.objects.get(identifier=identifier)
+                        existing.update_from_schema(schema)
+                        existing.save()
+                        action_label = "updated"
+                    except DatasetV2.DoesNotExist:
+                        DatasetV2.from_schema(schema).save()
+                        action_label = "created"
                 self.stdout.write(
-                    self.style.SUCCESS(f"  OK    {identifier} ({dataset.title!r}) → DatasetV2 created")
+                    self.style.SUCCESS(f"  OK    {identifier} ({dataset.title!r}) → DatasetV2 {action_label}")
                 )
                 created_count += 1
             except Exception as exc:
