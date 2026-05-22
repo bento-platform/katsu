@@ -259,6 +259,39 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertIn("identifier", data)
         self.assertTrue(len(data["identifier"]) > 0)
 
+    def test_create_dataset_v2_explicit_identifier(self):
+        # DatasetV2Serializer.to_internal_value: identifier provided in payload → no auto-generate
+        explicit_id = str(uuid.uuid4())
+        r = self.one_authz_post(
+            reverse("chord-dataset-list"),
+            json={**valid_dataset_v2(str(self.project.identifier), title="Explicit ID Dataset"),
+                  "identifier": explicit_id},
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.json()["identifier"], explicit_id)
+
+    # ---- ProjectSerializer: DatasetSerializer.get_counts and DatasetV2Serializer.to_representation (no prefetch) ----
+
+    def test_project_get_serializes_legacy_dataset_counts(self):
+        # DatasetSerializer.get_counts: project GET serializes legacy Dataset, calling get_counts
+        r = self.client.get(reverse("project-detail", kwargs={"pk": self.project.identifier}))
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+        self.assertIn("datasets", data)
+        self.assertEqual(len(data["datasets"]), 1)
+
+    def test_project_get_with_language_no_prefetch(self):
+        # DatasetV2Serializer.to_representation: instances nested in ProjectSerializer have no
+        # prefetched_translations → falls through to DB lookup (DoesNotExist → None → English fallback)
+        r = self.client.get(
+            reverse("project-detail", kwargs={"pk": self.project.identifier}),
+            HTTP_ACCEPT_LANGUAGE="fr",
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+        self.assertIn("datasets_v2", data)
+        self.assertEqual(len(data["datasets_v2"]), 1)
+
     # ---- DatasetV2ViewSet.resources ----
 
     def test_get_dataset_resources(self):
