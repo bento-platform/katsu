@@ -206,7 +206,10 @@ def build_v2_payload(dataset: Dataset, force_placeholder: bool) -> dict:
     }
 
     # Optional field mappings
-    keywords = _map_keywords(dataset.keywords)
+    dats_keywords = []
+    if isinstance(dataset.dats_file, dict):
+        dats_keywords = dataset.dats_file.get("keywords") or []
+    keywords = _map_keywords((dataset.keywords or []) + dats_keywords)
     if keywords:
         payload["keywords"] = keywords
 
