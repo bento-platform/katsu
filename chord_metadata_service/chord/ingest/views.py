@@ -49,7 +49,7 @@ def call_ingest_function_and_handle(
         validation_errors = tuple(e.error_list if hasattr(e, "error_list") else e.error_dict.items())
         err = "encountered validation errors during ingestion"
         lg.exception(err, exc_info=e)
-        return Response(errors.bad_request_error(err, *validation_errors))
+        return Response(errors.bad_request_error(err, *validation_errors), status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message

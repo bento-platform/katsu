@@ -1,5 +1,7 @@
 import uuid
+from unittest.mock import patch
 
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
@@ -119,6 +121,30 @@ class IngestTest(APITestCaseWithDataset):
             json=load_local_json("example_phenopacket_v2.json"),
         )
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_ingest_validation_error_returns_400(self):
+        def _raise(*_):
+            raise DjangoValidationError("invalid")
+
+        with patch.dict("chord_metadata_service.chord.ingest.views.WORKFLOW_INGEST_FUNCTION_MAP",
+                        {WORKFLOW_PHENOPACKETS_JSON: _raise}):
+            r = self.one_authz_post(
+                reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
+                json={},
+            )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_ingest_unexpected_exception_returns_500(self):
+        def _raise(*_):
+            raise RuntimeError("unexpected")
+
+        with patch.dict("chord_metadata_service.chord.ingest.views.WORKFLOW_INGEST_FUNCTION_MAP",
+                        {WORKFLOW_PHENOPACKETS_JSON: _raise}):
+            r = self.one_authz_post(
+                reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
+                json={},
+            )
+        self.assertEqual(r.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class IngestDerivedExperimentResultsTest(APITestCaseWithDataset):
