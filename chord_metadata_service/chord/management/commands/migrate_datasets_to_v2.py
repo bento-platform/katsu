@@ -165,22 +165,24 @@ def build_v2_payload(dataset: Dataset, force_placeholder: bool) -> dict:
     Raises ValueError if required fields cannot be satisfied and
     force_placeholder is False.
     """
-    # --- stakeholders & primary_contact ---
+    # --- primary_contact & stakeholders ---
+    # stakeholders is optional in the schema; primary_contact is required.
+    # Derive primary_contact from creators or contact_info; only populate
+    # stakeholders when real creator data is available.
     stakeholders = _map_creators_to_stakeholders(dataset.creators or [])
 
-    if not stakeholders:
-        contact_org = _contact_from_text(dataset.contact_info)
-        if contact_org:
-            stakeholders = [contact_org]
-        elif force_placeholder:
-            stakeholders = [{"type": "organization", "name": "placeholder (fill this)", "roles": [_FALLBACK_ROLE]}]
-        else:
-            raise ValueError(
-                "No stakeholders could be derived (no creators, no contact_info). "
-                "Use --force-placeholder to insert a synthetic entry."
-            )
-
-    primary_contact = stakeholders[0]
+    if stakeholders:
+        primary_contact = stakeholders[0]
+    else:
+        primary_contact = _contact_from_text(dataset.contact_info)
+        if primary_contact is None:
+            if force_placeholder:
+                primary_contact = {"type": "organization", "name": "placeholder (fill this)", "roles": [_FALLBACK_ROLE]}
+            else:
+                raise ValueError(
+                    "No primary_contact could be derived (no creators, no contact_info). "
+                    "Use --force-placeholder to insert a synthetic entry."
+                )
 
     # --- description ---
     description = (dataset.description or "").strip() or dataset.title
@@ -199,11 +201,13 @@ def build_v2_payload(dataset: Dataset, force_placeholder: bool) -> dict:
         "project": str(dataset.project_id),
         "title": dataset.title,
         "description": description,
-        "stakeholders": stakeholders,
         "primary_contact": primary_contact,
         "release_date": str(release_date),
         "last_modified": str(last_modified),
     }
+
+    if stakeholders:
+        payload["stakeholders"] = stakeholders
 
     # Optional field mappings
     dats_keywords = []
@@ -274,9 +278,8 @@ class Command(BaseCommand):
             dest="force_placeholder",
             default=True,
             help=(
-                "If required Pydantic fields (stakeholders, primary_contact) cannot be "
-                "derived from old data, fail the record instead of inserting synthetic "
-                "placeholder values."
+                "If the required primary_contact field cannot be derived from old data, "
+                "fail the record instead of inserting a synthetic placeholder value."
             ),
         )
         parser.add_argument(
