@@ -2,12 +2,14 @@ import io
 import uuid
 from typing import TextIO
 from os import walk, path
+from unittest.mock import MagicMock
 
 from asgiref.sync import async_to_sync
 from django.db.models import F
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from chord_metadata_service.chord.export import cbioportal as exp
+from chord_metadata_service.chord.export.cbioportal import CbioportalClinicalHeaderGenerator
 from chord_metadata_service.chord.export.cbioportal import (
     CBIO_FILES_SET,
     MUTATION_DATA_FILENAME,
@@ -262,3 +264,57 @@ class ExportCBioTest(TestCase):
             set(content["case_list_ids"].split("\t")),
             set([exp.sanitize_id(e.biosample_id) for e in exp_res])
         )
+
+
+async def _agen(*items):
+    for item in items:
+        yield item
+
+
+class CbioportalUnitTest(SimpleTestCase):
+    def test_study_meta_exports_citation_when_publications_present(self):
+        mock_dataset = MagicMock()
+        mock_dataset.identifier = uuid.uuid4()
+        mock_dataset.title = "Test Dataset"
+        mock_schema = MagicMock()
+        mock_schema.description = ""
+        mock_schema.publications = ["doi:10.1234/test"]
+        mock_dataset.to_schema.return_value = mock_schema
+        with io.StringIO() as output:
+            exp.study_export_meta(mock_dataset, output)
+            output.seek(0)
+            content = output.read()
+        self.assertIn("citation", content)
+
+    def test_sample_export_skips_null_individual_id(self):
+        null_sample = MagicMock()
+        null_sample.individual_id = None
+        valid_sample = MagicMock()
+        valid_sample.individual_id = "ind1"
+        valid_sample.id = "samp1"
+        valid_sample.sampled_tissue = None
+        with io.StringIO() as output:
+            async_to_sync(exp.sample_export)(_agen(null_sample, valid_sample), output)
+            output.seek(0)
+            non_header_lines = [ln for ln in output if not ln.startswith("#") and ln.strip()]
+        # column header row + 1 data row (null_sample skipped)
+        self.assertEqual(len(non_header_lines), 2)
+
+    def test_sample_export_no_sampled_tissue_skips_tissue_column(self):
+        sample = MagicMock()
+        sample.individual_id = "ind1"
+        sample.id = "samp1"
+        sample.sampled_tissue = None
+        with io.StringIO() as output:
+            async_to_sync(exp.sample_export)(_agen(sample), output)
+            output.seek(0)
+            content = output.read()
+        self.assertNotIn("TISSUE_LABEL", content)
+
+    def test_make_header_generates_default_for_unmapped_field(self):
+        header = CbioportalClinicalHeaderGenerator().make_header(["my_custom_field"])
+        self.assertEqual(len(header), 5)
+        self.assertIn("MY_CUSTOM_FIELD", header[4])
+
+    def test_sanitize_id_replaces_invalid_chars(self):
+        self.assertEqual(exp.sanitize_id("bad id!"), "bad_id_")
