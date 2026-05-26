@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import uuid
-
 from adrf.decorators import api_view
 from asgiref.sync import sync_to_async
 from bento_lib.auth.permissions import P_INGEST_DATA
@@ -115,7 +113,6 @@ async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id:
 
     workflow = workflow_set.get_workflow(workflow_id)
 
-    dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
     if not (
         await authz_middleware.async_evaluate_one(
             request,
