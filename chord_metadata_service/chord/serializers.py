@@ -4,6 +4,7 @@ from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.common.base_pydantic_jsonb import PydanticJSONBSerializer
+from chord_metadata_service.resources.ingest import ingest_resource
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
@@ -124,6 +125,33 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
             return {}
         scope = ValidatedDiscoveryScope(obj.project, obj)
         return get_censored_counts_for_serializer(request, scope, logger)
+
+    def _sync_schema_resources(self, instance: DatasetV2) -> None:
+        schema: KatsuDatasetModel = self._validated_schema
+        if not schema.resources:
+            return
+        for vr in schema.resources:
+            r = ingest_resource(
+                {
+                    "namespace_prefix": vr.namespace_prefix,
+                    "version": vr.version,
+                    "name": vr.name,
+                    "url": str(vr.url),
+                    "iri_prefix": str(vr.iri_prefix),
+                },
+                logger,
+            )
+            instance.additional_resources.add(r)
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        self._sync_schema_resources(instance)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        self._sync_schema_resources(instance)
+        return instance
 
 
 class DatasetV2TranslationSerializer(PydanticJSONBSerializer):

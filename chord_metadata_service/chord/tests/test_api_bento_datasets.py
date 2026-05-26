@@ -11,6 +11,25 @@ from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from chord_metadata_service.chord.data_types import DATA_TYPES, DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.experiments.models import Experiment
+from chord_metadata_service.resources.models import Resource
+
+VALID_RESOURCE_HPO = {
+    "id": "hp",
+    "name": "Human Phenotype Ontology",
+    "url": "http://purl.obolibrary.org/obo/hp.owl",
+    "version": "2024-04-26",
+    "namespace_prefix": "HP",
+    "iri_prefix": "http://purl.obolibrary.org/obo/HP_",
+}
+
+VALID_RESOURCE_MONDO = {
+    "id": "mondo",
+    "name": "Mondo Disease Ontology",
+    "url": "http://purl.obolibrary.org/obo/mondo.owl",
+    "version": "2024-05-08",
+    "namespace_prefix": "MONDO",
+    "iri_prefix": "http://purl.obolibrary.org/obo/MONDO_",
+}
 
 
 class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
@@ -329,3 +348,59 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
             reverse("chord-dataset-v2-summary", kwargs={"identifier": str(uuid.uuid4())})
         )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    # ---- DatasetV2Serializer._sync_schema_resources ----
+
+    def test_create_dataset_with_resources_syncs_additional_resources(self):
+        # Resources in the KatsuDatasetModel payload are upserted into additional_resources on create.
+        r = self.one_authz_post(
+            reverse("chord-dataset-list"),
+            json={
+                **valid_dataset_v2(str(self.project.identifier), title="Dataset with resources"),
+                "resources": [VALID_RESOURCE_HPO, VALID_RESOURCE_MONDO],
+            },
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        ds = DatasetV2.objects.get(identifier=r.json()["identifier"])
+        additional = list(ds.additional_resources.values_list("id", flat=True))
+        self.assertIn("HP:2024-04-26", additional)
+        self.assertIn("MONDO:2024-05-08", additional)
+        self.assertEqual(len(additional), 2)
+
+        # Resources are also created in the Resource table.
+        self.assertTrue(Resource.objects.filter(id="HP:2024-04-26").exists())
+        self.assertTrue(Resource.objects.filter(id="MONDO:2024-05-08").exists())
+
+    def test_create_dataset_without_resources_leaves_additional_resources_empty(self):
+        r = self.one_authz_post(
+            reverse("chord-dataset-list"),
+            json=valid_dataset_v2(str(self.project.identifier), title="Dataset no resources"),
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        ds = DatasetV2.objects.get(identifier=r.json()["identifier"])
+        self.assertEqual(ds.additional_resources.count(), 0)
+
+    def test_update_dataset_with_resources_syncs_additional_resources(self):
+        # Create without resources first, then update with resources.
+        r = self.one_authz_post(
+            reverse("chord-dataset-list"),
+            json=valid_dataset_v2(str(self.project.identifier), title="Dataset update test"),
+        )
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        ds_id = r.json()["identifier"]
+
+        r = self.one_authz_put(
+            f"/api/datasets/{ds_id}",
+            json={
+                **valid_dataset_v2(str(self.project.identifier), title="Dataset update test"),
+                "identifier": ds_id,
+                "resources": [VALID_RESOURCE_HPO],
+            },
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        ds = DatasetV2.objects.get(identifier=ds_id)
+        additional = list(ds.additional_resources.values_list("id", flat=True))
+        self.assertIn("HP:2024-04-26", additional)
