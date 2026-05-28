@@ -21,6 +21,17 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
+
+def _serializer_error_messages(errs: dict) -> list[str]:
+    msgs = []
+    for field, field_errors in errs.items():
+        prefix = "" if field == api_settings.NON_FIELD_ERRORS_KEY else f"{field}: "
+        if isinstance(field_errors, list):
+            msgs.extend(f"{prefix}{e}" for e in field_errors)
+        else:
+            msgs.append(f"{prefix}{field_errors}")
+    return msgs
+
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoAllowAnyReadOnly, BentoDeferToHandler
@@ -196,10 +207,22 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
             return forbidden(request)
 
         authz.mark_authz_done(request)
-        return await sync_to_async(super().create)(request, *args, **kwargs)
+
+        def _do():
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                return Response(
+                    errors.bad_request_error(*_serializer_error_messages(serializer.errors)),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED,
+                            headers=self.get_success_headers(serializer.data))
+
+        return await sync_to_async(_do)()
 
     @async_to_sync
-    async def update(self, request, *args, **kwargs):
+    async def update(self, request, **kwargs):
         try:
             dataset = await self.get_obj_async()
         except Http404:
@@ -223,7 +246,20 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
             return bad_request(request, "Dataset project ID cannot change")
 
         authz.mark_authz_done(request)
-        return await sync_to_async(super().update)(request, *args, **kwargs)
+
+        partial = kwargs.get("partial", False)
+
+        def _do():
+            serializer = self.get_serializer(dataset, data=request.data, partial=partial)
+            if not serializer.is_valid():
+                return Response(
+                    errors.bad_request_error(*_serializer_error_messages(serializer.errors)),
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            serializer.save()
+            return Response(serializer.data)
+
+        return await sync_to_async(_do)()
 
     @async_to_sync
     async def destroy(self, request, *args, **kwargs):
