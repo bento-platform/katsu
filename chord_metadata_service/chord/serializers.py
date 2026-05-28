@@ -79,7 +79,7 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
 
     class Meta:
         model = DatasetV2
-        fields = "__all__"
+        exclude = ['additional_resources']
         read_only_fields = ['created_at', 'updated_at']
 
     def to_internal_value(self, data):
@@ -114,6 +114,7 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
             data = super().to_representation(instance)
             self.context.setdefault("_content_language", "en")
 
+        data.pop('resources', None)
         data['created_at'] = instance.created_at
         data['updated_at'] = instance.updated_at
         data['counts_by_entity'] = self.get_counts_by_entity(instance)
