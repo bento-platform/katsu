@@ -21,17 +21,6 @@ from rest_framework.response import Response
 from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
-
-def _serializer_error_messages(errs: dict) -> list[str]:
-    msgs = []
-    for field, field_errors in errs.items():
-        prefix = "" if field == api_settings.NON_FIELD_ERRORS_KEY else f"{field}: "
-        if isinstance(field_errors, list):
-            msgs.extend(f"{prefix}{e}" for e in field_errors)
-        else:
-            msgs.append(f"{prefix}{field_errors}")
-    return msgs
-
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoAllowAnyReadOnly, BentoDeferToHandler
@@ -55,6 +44,17 @@ from .serializers import (
 
 
 __all__ = ["ProjectViewSet", "DatasetV2ViewSet"]
+
+
+def _serializer_error_messages(errs: dict) -> list[str]:
+    msgs = []
+    for field, field_errors in errs.items():
+        prefix = "" if field == api_settings.NON_FIELD_ERRORS_KEY else f"{field}: "
+        if isinstance(field_errors, list):
+            msgs.extend(f"{prefix}{e}" for e in field_errors)
+        else:
+            msgs.append(f"{prefix}{field_errors}")
+    return msgs
 
 
 def _get_preferred_language(request: DrfRequest) -> str:
