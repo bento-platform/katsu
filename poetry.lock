@@ -352,14 +352,14 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "15.1.1"
+version = "15.2.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "bento_lib-15.1.1-py3-none-any.whl", hash = "sha256:05b57ae4f2c24aba634307883fddda8e6d0a22be5b7f6b324c3a202cdc85d64d"},
-    {file = "bento_lib-15.1.1.tar.gz", hash = "sha256:fab34dc38a6841726380eae45edd94a45187c7b407a52e206bef4fb3d9d0d533"},
+    {file = "bento_lib-15.2.0-py3-none-any.whl", hash = "sha256:0604d86d2d5aaf451ff2acdb3bf79e1c579919b6ac0e899d329ac6c979d5989c"},
+    {file = "bento_lib-15.2.0.tar.gz", hash = "sha256:05a6aa44d91f34c8cec797bd38a2a1758f259c9a7b8e31edf8d9ecf9c109fb05"},
 ]
 
 [package.dependencies]
@@ -3556,4 +3556,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "3dfe246822d993682f780dfe13a3877da20969fa6c1371bc89ae09d1246310b4"
+content-hash = "2a9c04fa54168e1083e440d22a138ff5f07721b9a47248438618fa0bfc7ff6c7"

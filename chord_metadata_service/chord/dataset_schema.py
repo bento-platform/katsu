@@ -1,7 +1,6 @@
 __all__ = ["LinkedFieldSet", "KatsuDatasetModel"]
 
 from pydantic import BaseModel, Field
-from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
 
 
@@ -33,8 +32,4 @@ class KatsuDatasetModel(ProjectScopedDatasetModel):
     linked_field_sets: list[LinkedFieldSet] = Field(
         default_factory=list,
         description="Data type fields which are linked together for cross-table joins.",
-    )
-    discovery: DiscoveryConfig | None = Field(
-        default=None,
-        description="Dataset-level discovery configuration; falls back to project config if not set.",
     )
