@@ -38,7 +38,7 @@ ALTER TABLE phenopackets_phenopacket
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("chord", "0012_datasetv2"),
+        ("chord", "0013_migrate_datasets_to_v2"),
         ("phenopackets", "0018_v13_2_0"),
     ]
 
