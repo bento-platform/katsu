@@ -77,20 +77,20 @@ class Command(BaseCommand):
                     "DELETE FROM django_migrations WHERE app=%s AND name=%s",
                     list(_MIGRATION_0017),
                 )
-                self.stdout.write(f"  Removed experiments.0017 from django_migrations")
+                self.stdout.write("  Removed experiments.0017 from django_migrations")
 
             if applied_0019:
                 cursor.execute(
                     "DELETE FROM django_migrations WHERE app=%s AND name=%s",
                     list(_MIGRATION_0019),
                 )
-                self.stdout.write(f"  Removed phenopackets.0019 from django_migrations")
+                self.stdout.write("  Removed phenopackets.0019 from django_migrations")
 
             cursor.execute(
                 "INSERT INTO django_migrations (app, name, applied) VALUES (%s, %s, %s)",
                 [_MIGRATION_0013[0], _MIGRATION_0013[1], timezone.now()],
             )
-            self.stdout.write(f"  Inserted chord.0013 into django_migrations")
+            self.stdout.write("  Inserted chord.0013 into django_migrations")
 
         if applied_0017:
             call_command("migrate", "experiments", "0017_experiment_dataset_v2", fake=True, verbosity=0)
