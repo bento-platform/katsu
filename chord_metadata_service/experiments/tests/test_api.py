@@ -9,8 +9,13 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
-from chord_metadata_service.chord.models import Project, Dataset
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID_PROJECT_2, VALID_PROJECT_1
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.models import Project, DatasetV2
+from chord_metadata_service.chord.tests.constants import (
+    VALID_DATASET_V2_PRIMARY_CONTACT,
+    VALID_PROJECT_1,
+    VALID_PROJECT_2,
+)
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
@@ -33,11 +38,23 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         Create two datasets but ingest phenopackets and experiments in just one dataset
         """
         self.p = Project.objects.create(**VALID_PROJECT_1)
-        self.d1 = Dataset.objects.create(title="dataset_1", description="Some dataset 1", data_use=VALID_DATA_USE_1,
-                                         project=self.p)
+        schema1 = KatsuDatasetModel(
+            schema_version="1.0", title="dataset_1", description="Some dataset 1",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.d1 = DatasetV2.from_schema(schema1)
+        self.d1.save()
+        self.d1.refresh_from_db()
         self.d1_id = self.d1.identifier
-        self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset 2", data_use=VALID_DATA_USE_1,
-                                         project=self.p)
+        schema2 = KatsuDatasetModel(
+            schema_version="1.0", title="dataset_2", description="Some dataset 2",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.d2 = DatasetV2.from_schema(schema2)
+        self.d2.save()
+        self.d2.refresh_from_db()
         self.d2_id = self.d2.identifier
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.d1_id, logger

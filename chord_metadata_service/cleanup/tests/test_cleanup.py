@@ -41,12 +41,15 @@ from chord_metadata_service.experiments.tests.constants import (
     valid_experiment_result,
     valid_experiment,
 )
+import uuid
+
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
-    valid_dataset_1,
+    VALID_DATASET_V2_PRIMARY_CONTACT,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.chord.models import Project, Dataset
+from chord_metadata_service.chord.models import Project, DatasetV2
 
 
 class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
@@ -54,7 +57,14 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
         # Copied from test_api_search
 
         self.project = Project.objects.create(**VALID_PROJECT_1)
-        self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
+        _schema = KatsuDatasetModel(
+            schema_version="1.0", title="Dataset 1", description="Test dataset",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.project.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.dataset = DatasetV2.from_schema(_schema)
+        self.dataset.save()
+        self.dataset.refresh_from_db()
 
         # Set up a dummy phenopacket
 
@@ -209,7 +219,14 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
         # Copied from test_api_search
 
         self.project = Project.objects.create(**VALID_PROJECT_1)
-        self.dataset = Dataset.objects.create(**valid_dataset_1(self.project))
+        _schema = KatsuDatasetModel(
+            schema_version="1.0", title="Dataset 1", description="Test dataset",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.project.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.dataset = DatasetV2.from_schema(_schema)
+        self.dataset.save()
+        self.dataset.refresh_from_db()
 
         # Set up a dummy phenopacket
 

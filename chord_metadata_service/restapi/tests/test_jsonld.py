@@ -1,25 +1,39 @@
-from rest_framework import status
-from chord_metadata_service.chord.tests.constants import VALID_DATS_CREATORS, dats_dataset
-from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
+from django.test import SimpleTestCase
+
+from chord_metadata_service.restapi import jsonld_utils as jlu
 
 
-class JSONLDDatasetTest(AuthzAPITestCaseWithProjectJSON):
-    def setUp(self) -> None:
-        super().setUp()
-        self.creators = VALID_DATS_CREATORS
-        self.dataset = dats_dataset(self.project["identifier"], self.creators)
-        self.one_authz_post("/api/datasets", json=self.dataset)
+class JsonLdUtilsTest(SimpleTestCase):
+    def test_dataset_to_jsonld_empty_dataset(self):
+        result = jlu.dataset_to_jsonld({})
+        self.assertIn("@context", result)
+        self.assertEqual(result["@type"], "Dataset")
 
-    def test_jsonld(self):
-        get_resp = self.client.get("/api/datasets?format=json-ld")
-        get_resp_obj = get_resp.json()
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        self.assertIsInstance(get_resp_obj["results"][0]["@context"], list)
-        self.assertIsNotNone(get_resp_obj["results"][0]["@context"], True)
-        self.assertEqual(get_resp_obj["results"][0]["@type"], "Dataset")
-
-    def test_rdf(self):
-        get_resp = self.client.get("/api/datasets?format=rdf")
-        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(get_resp.accepted_media_type, "application/rdf+xml")
-        self.assertIsInstance(get_resp.content, bytes)
+    def test_dataset_to_jsonld_full(self):
+        dataset = {
+            "dates": [{"type": {}}],
+            "stored_in": {},
+            "creators": [{"name": "Org"}, {}],
+            "types": [{"information": {}}, {}],
+            "licenses": [{}],
+            "extra_properties": [{"values": [{}]}, {"values": []}],
+            "alternate_identifiers": [{}],
+            "related_identifiers": [{}],
+            "spatial_coverage": [{
+                "identifier": {},
+                "alternate_identifiers": [{}],
+                "related_identifiers": [{}],
+            }],
+            "distributions": [
+                {"stored_in": {}, "dates": [{"type": {}}], "licenses": [{}]},
+                {},
+            ],
+            "dimensions": [{}],
+            "primary_publications": [
+                {"identifier": {}, "authors": [{"name": "Author"}, {}], "dates": [{"type": {}}]},
+                {},
+            ],
+        }
+        result = jlu.dataset_to_jsonld(dataset)
+        self.assertIn("@context", result)
+        self.assertEqual(result["@type"], "Dataset")

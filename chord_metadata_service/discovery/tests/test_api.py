@@ -15,6 +15,7 @@ from typing import Literal, TypedDict
 
 from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITestCase
 from chord_metadata_service.chord import models as ch_m
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
@@ -54,13 +55,18 @@ class ScopedDiscoveryTestCase(TestCase):
         )
         cls.id_proj_a = cls.project_a.identifier
         # use provided dataset discovery config
-        cls.dataset_a = ch_m.Dataset.objects.create(
+        schema_a = KatsuDatasetModel(
+            schema_version="1.0",
             title="Dataset 1",
             description="Test dataset",
-            data_use=ch_c.VALID_DATA_USE_1,
-            project=cls.project_a,
-            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
+            primary_contact=ch_c.VALID_DATASET_V2_PRIMARY_CONTACT,
+            project=str(cls.project_a.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        cls.dataset_a = ch_m.DatasetV2.from_schema(schema_a)
+        cls.dataset_a.discovery = DISCOVERY_CONFIG_EXTRA_PROPERTIES
+        cls.dataset_a.save()
+        cls.dataset_a.refresh_from_db()
         cls.id_ds_a = cls.dataset_a.identifier
 
         # use provided project discovery config
@@ -71,13 +77,17 @@ class ScopedDiscoveryTestCase(TestCase):
         )
         cls.id_proj_b = cls.project_b.identifier
         # Should fallback on project's discovery config
-        cls.dataset_b = ch_m.Dataset.objects.create(
+        schema_b = KatsuDatasetModel(
+            schema_version="1.0",
             title="Dataset 2",
             description="Test dataset 2",
-            data_use=ch_c.VALID_DATA_USE_1,
-            project=cls.project_b,
-            discovery=None,
+            primary_contact=ch_c.VALID_DATASET_V2_PRIMARY_CONTACT,
+            project=str(cls.project_b.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        cls.dataset_b = ch_m.DatasetV2.from_schema(schema_b)
+        cls.dataset_b.save()
+        cls.dataset_b.refresh_from_db()
         cls.id_ds_b = cls.dataset_b.identifier
 
 
@@ -281,6 +291,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         chart_fields = set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields
         self.assertSetEqual(response_fields, chart_fields)
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_empty_discovery(self):
         res = self.dt_authz_full_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -561,7 +572,14 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
 def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Individual], list[ph_m.Phenopacket]]:
     # create project + dataset
     p = ch_m.Project.objects.create(**ch_c.VALID_PROJECT_1)
-    d = ch_m.Dataset.objects.create(**ch_c.valid_dataset_1(p))
+    schema = KatsuDatasetModel(
+        schema_version="1.0", title="Dataset 1", description="Test dataset",
+        primary_contact=ch_c.VALID_DATASET_V2_PRIMARY_CONTACT, project=str(p.identifier),
+        identifier=str(uuid.uuid4()),
+    )
+    d = ch_m.DatasetV2.from_schema(schema)
+    d.save()
+    d.refresh_from_db()
 
     individuals = []
     phenopackets = []
@@ -638,6 +656,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def _rn_newline(x: str) -> str:
         return x.replace("\r\n", "\n").replace("\n", "\r\n")
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_empty_discovery(self):
         res = self.dt_authz_full_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)

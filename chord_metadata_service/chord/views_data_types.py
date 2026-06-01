@@ -3,7 +3,6 @@ import asyncio
 from bento_lib.auth.permissions import P_DELETE_DATA
 from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
-from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 
 from adrf.decorators import api_view
@@ -27,7 +26,7 @@ from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
-from .models import Dataset, Project
+from .models import DatasetV2, Project
 
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
@@ -169,69 +168,16 @@ async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])
 
 
-@api_view(["GET", "DELETE"])
-@permission_classes([BentoDeferToHandler])
-async def dataset_data_type(request: DrfRequest, dataset_id: str, data_type: str):
-    try:
-        dataset = await Dataset.objects.aget(identifier=dataset_id)
-    except (Dataset.DoesNotExist, ValidationError) as e:
-        authz.mark_authz_done(request)
-        return not_found_response(str(e))
-
-    project = await Project.objects.aget(datasets=dataset)
-    project_id = str(project.identifier)
-
-    if data_type not in QUERYSET_FN:
-        authz.mark_authz_done(request)
-        return not_found_response(f"Data type {data_type} doesn't exist")
-
-    qs = QUERYSET_FN[data_type](dataset_id)
-
-    if request.method == "DELETE":
-        if not (
-            await authz.async_evaluate_one(request, build_resource(project_id, dataset_id, data_type), P_DELETE_DATA)
-        ):
-            authz.mark_authz_done(request)
-            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
-
-        authz.mark_authz_done(request)
-
-        await qs.adelete()
-
-        lg = logger.bind(dataset_id=dataset_id, data_type=data_type)
-        n_removed = await run_all_cleanup(lg)
-        await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # we've already validated that the project and dataset exist above, so we are allowed to directly build a validated
-    # discovery scope.
-    discovery_scope = ValidatedDiscoveryScope(project, dataset)
-
-    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-
-    response_object = await make_data_type_response_object(
-        data_type,
-        dt.DATA_TYPES[data_type],
-        discovery_scope,
-        permissions=dt_permissions[data_type],
-    )
-
-    authz.mark_authz_done(request)
-    return Response(response_object)
-
-
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def dataset_data_type_summary(request: DrfRequest, dataset_id: str):
+async def dataset_v2_data_type_summary(request: DrfRequest, identifier: str):
     try:
-        dataset = await Dataset.objects.aget(identifier=dataset_id)
-    except (Dataset.DoesNotExist, ValidationError) as e:
-        return not_found_response(str(e))
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
+    except DatasetV2.DoesNotExist:
+        return not_found_response(f"Dataset {identifier} not found")
 
-    # we've already validated that the project and dataset exist above, so we can build an instance of
-    # ValidatedDiscoveryScope directly.
-    discovery_scope = ValidatedDiscoveryScope(await Project.objects.aget(datasets=dataset), dataset)
+    project = await Project.objects.aget(identifier=dataset.project_id)
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     dt_response = sorted(
@@ -239,7 +185,47 @@ async def dataset_data_type_summary(request: DrfRequest, dataset_id: str):
             make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
             for dt_id, dt_d in dt.DATA_TYPES.items()
         )),
-        key=lambda d: d["id"]
+        key=lambda d: d["id"],
     )
-
     return Response(dt_response)
+
+
+@api_view(["GET", "DELETE"])
+@permission_classes([BentoDeferToHandler])
+async def dataset_v2_data_type(request: DrfRequest, identifier: str, data_type: str):
+    try:
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
+    except DatasetV2.DoesNotExist:
+        authz.mark_authz_done(request)
+        return not_found_response(f"Dataset {identifier} not found")
+
+    project = await Project.objects.aget(identifier=dataset.project_id)
+    project_id = str(project.identifier)
+
+    if data_type not in QUERYSET_FN:
+        authz.mark_authz_done(request)
+        return not_found_response(f"Data type {data_type} doesn't exist")
+
+    qs = QUERYSET_FN[data_type](identifier)
+
+    if request.method == "DELETE":
+        if not (
+            await authz.async_evaluate_one(request, build_resource(project_id, identifier, data_type), P_DELETE_DATA)
+        ):
+            authz.mark_authz_done(request)
+            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+
+        authz.mark_authz_done(request)
+        await qs.adelete()
+        lg = logger.bind(dataset_id=identifier, data_type=data_type)
+        n_removed = await run_all_cleanup(lg)
+        await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
+    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
+    response_object = await make_data_type_response_object(
+        data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],
+    )
+    authz.mark_authz_done(request)
+    return Response(response_object)

@@ -42,7 +42,7 @@ from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import Dataset, Project
+from .models import DatasetV2, Project
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -379,10 +379,10 @@ async def chord_dataset_search(
 
 @async_api_view(["GET", "POST"])
 @permission_classes([BentoDeferToHandler])
-async def private_dataset_search(request: DrfRequest, dataset_id: str):
+async def private_dataset_search(request: DrfRequest, identifier: str):
     try:
-        dataset = await Dataset.objects.aget(identifier=dataset_id)
-    except (Dataset.DoesNotExist, ValidationError) as e:
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
+    except (DatasetV2.DoesNotExist, ValidationError) as e:
         authz_middleware.mark_authz_done(request)
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 
@@ -401,7 +401,7 @@ async def private_dataset_search(request: DrfRequest, dataset_id: str):
     # perform search: --------------------------------------------------------------------------------------------------
 
     start = datetime.now()
-    logger = katsu_logger.bind(project_id=str(project.identifier), dataset_id=dataset_id, start=start)
+    logger = katsu_logger.bind(project_id=str(project.identifier), dataset_id=identifier, start=start)
 
     search_params, err = get_chord_search_parameters(request, logger)
     if err:
@@ -425,10 +425,10 @@ DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
 
 @async_api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def dataset_summary(request: DrfRequest, dataset_id: str):
+async def dataset_summary(request: DrfRequest, identifier: str):
     try:
-        dataset = await Dataset.objects.aget(identifier=dataset_id)
-    except (Dataset.DoesNotExist, ValidationError) as e:
+        dataset = await DatasetV2.objects.aget(identifier=identifier)
+    except (DatasetV2.DoesNotExist, ValidationError) as e:
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 
     project = await Project.objects.aget(identifier=dataset.project_id)
@@ -447,3 +447,15 @@ async def dataset_summary(request: DrfRequest, dataset_id: str):
     )
 
     return Response({dt: s for dt, s in zip(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(), summaries)})
+
+
+@async_api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def dataset_v2_summary(request: DrfRequest, identifier: str):
+    dataset = await DatasetV2.objects.filter(identifier=identifier).afirst()
+    if dataset is None:
+        return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
+
+    authz_middleware.mark_authz_done(request)
+    counts = dataset.data.get("counts") or []
+    return Response({"counts": counts})

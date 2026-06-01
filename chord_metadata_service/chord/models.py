@@ -1,6 +1,8 @@
 import collections
 import uuid
 from bento_lib.discovery import DiscoveryConfig
+from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -10,9 +12,10 @@ from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
+from chord_metadata_service.common.base_pydantic_jsonb import AbstractPydanticJSONBModel
 
 
-__all__ = ["Project", "Dataset", "ProjectJsonSchema"]
+__all__ = ["Project", "Dataset", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation"]
 
 
 def version_default():
@@ -201,6 +204,99 @@ class Dataset(BaseProjectOrDataset):
 
     def __str__(self):
         return f"{self.title} (ID: {self.identifier})"
+
+
+class DatasetV2(AbstractPydanticJSONBModel):
+
+    # --- AbstractPydanticJSONBModel configuration ---
+    COLUMN_FIELDS = {
+        'identifier',
+        'project',
+        'title',
+        'release_date',
+        'last_modified',
+        'discovery',
+    }
+    JSONB_FIELD = 'data'
+    SCHEMA_CLASS = KatsuDatasetModel
+
+    # --- Django fields ---
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,  # Delete dataset upon project deletion
+        related_name="dv2"
+    )
+
+    identifier = models.CharField(
+        primary_key=True,
+        max_length=128,
+        default=uuid.uuid4,
+        blank=True,
+        help_text="If from PCGL, inherit. Otherwise created in Katsu.",
+    )
+
+    title = models.CharField(max_length=512)
+
+    release_date = models.DateField(db_index=True, null=True, blank=True)
+    last_modified = models.DateField(db_index=True, null=True, blank=True)
+    discovery = DiscoveryJSONField(blank=True, null=True, help_text="Dataset-level discovery configuration.")
+
+    # Store the whole validated payload (English default, validated by Pydantic before saving)
+    data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
+
+    additional_resources = models.ManyToManyField(
+        Resource,
+        blank=True,
+        help_text="Resource objects linked to this dataset that aren't specified by a phenopacket.",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def resources(self):
+        return Resource.objects.filter(id__in={
+            *(r.id for r in self.additional_resources.all()),
+            *(
+                r.id
+                for p in Phenopacket.objects.filter(
+                    dataset_id=self.identifier
+                ).prefetch_related("meta_data", "meta_data__resources")
+                for r in p.meta_data.resources.all()
+            ),
+        })
+
+    def __str__(self) -> str:
+        return f"{self.identifier}: {self.title}"
+
+
+class DatasetV2Translation(AbstractPydanticJSONBModel):
+    """Stores a translated Pydantic payload for a DatasetV2 in a non-default language."""
+
+    # --- Mixin configuration ---
+    # 'dataset' is NOT in COLUMN_FIELDS — it has no matching field in ProjectScopedDatasetModel.
+    # Callers pass dataset_id=<pk> as extra_column_kwargs to from_schema().
+    COLUMN_FIELDS = {'language'}
+    JSONB_FIELD = 'data'
+    SCHEMA_CLASS = ProjectScopedDatasetModel
+
+    # --- Django fields ---
+    dataset = models.ForeignKey(
+        DatasetV2,
+        on_delete=models.CASCADE,
+        related_name='translations',
+    )
+    language = models.CharField(max_length=8, db_index=True)
+    data = models.JSONField(help_text="Full ProjectScopedDatasetModel payload for this language.")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = [('dataset', 'language')]
+
+    def __str__(self) -> str:
+        return f"{self.dataset_id}: {self.language}"
 
 
 class ProjectJsonSchema(models.Model):

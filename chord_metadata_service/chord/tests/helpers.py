@@ -1,11 +1,18 @@
+import uuid
+
 from django.db.models import Model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
-from chord_metadata_service.chord.models import Dataset, Project
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1, VALID_PROJECT_1
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.models import Dataset, DatasetV2, Project
+from chord_metadata_service.chord.tests.constants import (
+    VALID_DATA_USE_1,
+    VALID_PROJECT_1,
+    VALID_DATASET_V2_PRIMARY_CONTACT,
+)
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.restapi.utils import remove_computed_properties
 
@@ -32,7 +39,18 @@ class ProjectTestCase(TestCase):
             data_use=VALID_DATA_USE_1,
             project=cls.project
         )
-        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset)
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset V2 1",
+            description="Some dataset v2",
+            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            identifier=str(uuid.uuid4()),
+            project=str(cls.project.identifier),
+        )
+        cls.dataset_v2 = DatasetV2.from_schema(schema)
+        cls.dataset_v2.save()
+        cls.dataset_v2.refresh_from_db()
+        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset_v2)
 
         return super().setUpTestData()
 

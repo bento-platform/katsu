@@ -25,7 +25,7 @@ class IndividualTest(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual_one,
             meta_data=self.meta_data,
-            dataset=self.dataset,
+            dataset=self.dataset_v2,
         )
         self.phenopacket.diseases.set(self.diseases)
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(

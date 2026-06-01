@@ -1,28 +1,25 @@
+import uuid
+from pydantic import ValidationError as PydValidationError
 from bento_lib.discovery import DiscoveryConfig
-from bento_lib.schemas.bento import BENTO_DATA_USE_SCHEMA
+from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.common.base_pydantic_jsonb import PydanticJSONBSerializer
+from chord_metadata_service.resources.ingest import ingest_resource
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
-from jsonschema import Draft7Validator, Draft4Validator
-from pydantic import ValidationError as PydValidationError
 from rest_framework import serializers
-from chord_metadata_service.restapi.dats_schemas import get_dats_schema, CREATORS
-from chord_metadata_service.restapi.utils import transform_keys
 
-from .models import Project, Dataset, ProjectJsonSchema
-from .schemas import LINKED_FIELD_SETS_SCHEMA
+from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
 from .utils import get_censored_counts_for_serializer
-
 
 __all__ = [
     "ProjectSerializer",
     "ProjectJsonSchemaSerializer",
     "DatasetSerializer",
+    "DatasetV2Serializer",
+    "DatasetV2TranslationSerializer",
 ]
-
-
-BENTO_DATA_USE_SCHEMA_VALIDATOR = Draft7Validator(BENTO_DATA_USE_SCHEMA)
-LINKED_FIELD_SETS_SCHEMA_VALIDATOR = Draft7Validator(LINKED_FIELD_SETS_SCHEMA)
 
 
 class DiscoveryConfigField(serializers.Field):
@@ -64,99 +61,6 @@ class DatasetSerializer(GenericSerializer):
 
     counts = serializers.SerializerMethodField()
 
-    # noinspection PyMethodMayBeStatic
-    def validate_title(self, value):
-        if len(value.strip()) < 3:
-            raise serializers.ValidationError("Name must be at least 3 characters")
-        return value.strip()
-
-    def validate_creators(self, value):
-        if isinstance(value, list):
-            transformed_value = [transform_keys(item) for item in value]
-            validation = self.jsonschema_validation(transformed_value, CREATORS)
-            if isinstance(validation, dict):
-                raise serializers.ValidationError(validation)
-        return value
-
-    # noinspection PyMethodMayBeStatic
-    def validate_data_use(self, value):
-        validation = BENTO_DATA_USE_SCHEMA_VALIDATOR.is_valid(value)
-        if not validation:
-            raise serializers.ValidationError("Data use is not valid")
-        return value
-
-    # noinspection PyMethodMayBeStatic
-    def validate_linked_field_sets(self, value):
-        validation = LINKED_FIELD_SETS_SCHEMA_VALIDATOR.is_valid(value)
-        if not validation:
-            raise serializers.ValidationError([
-                str(error.message) for error in LINKED_FIELD_SETS_SCHEMA_VALIDATOR.iter_errors(value)])
-        return value
-
-    def validate(self, data):
-        """ Validate all fields against DATS schemas. """
-
-        dataset_dats_fields = (
-            "alternate_identifiers",
-            "related_identifiers",
-            "dates",
-            "stored_in",
-            "spatial_coverage",
-            "types",
-            "distributions",
-            "dimensions",
-            "primary_publications",
-            "citations",
-            "produced_by",
-            "licenses",
-            "acknowledges",
-            "keywords",
-        )
-
-        errors = {}
-        for field in dataset_dats_fields:
-            if not data.get(field):
-                continue
-
-            if isinstance(data.get(field), list):
-                for item in data.get(field):
-                    call_validation = self.jsonschema_validation(
-                        value=transform_keys(item),
-                        schema=get_dats_schema(field),
-                        field_name=field
-                    )
-
-                    if isinstance(call_validation, dict):
-                        errors.update(call_validation)
-
-            else:
-                call_validation = self.jsonschema_validation(
-                    value=data.get(field),
-                    schema=get_dats_schema(field),
-                    field_name=field
-                )
-
-                if isinstance(call_validation, dict):
-                    errors.update(call_validation)
-        if errors:
-            raise serializers.ValidationError(errors)
-
-        return data
-
-    @staticmethod
-    def jsonschema_validation(value, schema, field_name=None):
-        """ Generic validation. Returns errors dict if validation is False. """
-
-        errors = {}
-
-        v = Draft4Validator(schema)
-        validation = v.is_valid(value)
-        if not validation:
-            errors[field_name] = [str(error.message) for error in v.iter_errors(value)]
-            return errors
-
-        return validation
-
     def get_counts(self, obj):
         # TODO: with more datasets, refactor to batch queries (currently N queries for N datasets)
         request = self.context.get("request")
@@ -166,6 +70,103 @@ class DatasetSerializer(GenericSerializer):
     class Meta:
         model = Dataset
         fields = '__all__'
+
+
+class DatasetV2Serializer(PydanticJSONBSerializer):
+    schema_class = KatsuDatasetModel
+
+    counts_by_entity = serializers.SerializerMethodField()
+
+    class Meta:
+        model = DatasetV2
+        exclude = ['additional_resources']
+        read_only_fields = ['created_at', 'updated_at']
+
+    def to_internal_value(self, data):
+        if self.instance:
+            data = {**data, "identifier": str(self.instance.identifier)}
+        elif not data.get("identifier"):
+            data = {**data, "identifier": str(uuid.uuid4())}
+        return super().to_internal_value(data)
+
+    def to_representation(self, instance):
+        language = self.context.get("language", "en")
+
+        if language != "en":
+            prefetched = getattr(instance, "prefetched_translations", None)
+            if prefetched is not None:
+                translation = prefetched[0] if prefetched else None
+            else:
+                try:
+                    translation = DatasetV2Translation.objects.get(
+                        dataset_id=instance.identifier, language=language
+                    )
+                except DatasetV2Translation.DoesNotExist:
+                    translation = None
+
+            if translation is not None:
+                data = translation.to_schema().model_dump(mode="json")
+                self.context["_content_language"] = language
+            else:
+                data = super().to_representation(instance)
+                self.context.setdefault("_content_language", "en")
+        else:
+            data = super().to_representation(instance)
+            self.context.setdefault("_content_language", "en")
+
+        data['created_at'] = instance.created_at
+        data['updated_at'] = instance.updated_at
+        data['counts_by_entity'] = self.get_counts_by_entity(instance)
+        return data
+
+    def get_counts_by_entity(self, obj):
+        request = self.context.get("request")
+        if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
+            return {}
+        scope = ValidatedDiscoveryScope(obj.project, obj)
+        return get_censored_counts_for_serializer(request, scope, logger)
+
+    def _sync_schema_resources(self, instance: DatasetV2) -> None:
+        schema: KatsuDatasetModel = self._validated_schema
+        if not schema.resources:
+            return
+        for vr in schema.resources:
+            r = ingest_resource(
+                {
+                    "namespace_prefix": vr.namespace_prefix,
+                    "version": vr.version,
+                    "name": vr.name,
+                    "url": str(vr.url),
+                    "iri_prefix": str(vr.iri_prefix),
+                },
+                logger,
+            )
+            instance.additional_resources.add(r)
+
+    def create(self, validated_data):
+        instance = super().create(validated_data)
+        self._sync_schema_resources(instance)
+        return instance
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        self._sync_schema_resources(instance)
+        return instance
+
+
+class DatasetV2TranslationSerializer(PydanticJSONBSerializer):
+    schema_class = ProjectScopedDatasetModel
+
+    class Meta:
+        model = DatasetV2Translation
+        fields = "__all__"
+        read_only_fields = ['created_at', 'updated_at', 'dataset']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['created_at'] = instance.created_at
+        data['updated_at'] = instance.updated_at
+        return data
 
 
 class ProjectJsonSchemaSerializer(GenericSerializer):
@@ -188,6 +189,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     discovery = DiscoveryConfigField(required=False, allow_null=True)
     datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
+    datasets_v2 = DatasetV2Serializer(source="dv2", read_only=True, many=True)
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
     counts = serializers.SerializerMethodField()

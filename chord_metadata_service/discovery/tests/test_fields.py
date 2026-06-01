@@ -59,7 +59,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
         self.phenopacket = ph_m.Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=self.individual_1,
-            dataset=self.dataset,
+            dataset=self.dataset_v2,
             meta_data=self.meta_data,
         )
 
@@ -105,7 +105,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             subject=self.individual,
             measurements=self.tumors,
             meta_data=self.meta_data,
-            dataset=self.dataset,
+            dataset=self.dataset_v2,
         )
         self.phenopacket.biosamples.set([self.biosample])
 

@@ -23,7 +23,7 @@ class TestBaseExtraProperties(ProjectTestCase):
         self.biosample = Biosample.objects.create(**pheno_consts.valid_biosample_1(self.individual))
         meta_data = MetaData.objects.create(created_by="test", submitted_by="test")
         self.phenopacket = Phenopacket.objects.create(
-            id="phenopacket_id:1", subject=self.individual, meta_data=meta_data, dataset=self.dataset
+            id="phenopacket_id:1", subject=self.individual, meta_data=meta_data, dataset=self.dataset_v2
         )
         self.phenopacket.biosamples.set([self.biosample])
 

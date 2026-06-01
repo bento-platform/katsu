@@ -62,7 +62,7 @@ def distributions_to_jsonld(distributions) -> list:
         if "dates" in distribution.keys():
             dates_to_jsonld(distribution["dates"])
         if "licenses" in distribution:
-            for license_ in distribution["liceses"]:
+            for license_ in distribution["licenses"]:
                 obj_to_jsonld(license_, "licenses")
         # access
     return distributions
