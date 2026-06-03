@@ -500,14 +500,14 @@ class SearchTest(AuthzAPITestCase):
 
     def test_dataset_v2_summary_not_found(self):
         r = self.client.get(
-            reverse("chord-dataset-v2-counts", kwargs={"identifier": str(uuid.uuid4())})
+            reverse("dataset-counts", kwargs={"identifier": str(uuid.uuid4())})
         )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_dataset_v2_summary_empty_counts(self):
         # Dataset created in setUp has no counts field in its data blob
         r = self.client.get(
-            reverse("chord-dataset-v2-counts", kwargs={"identifier": self.dataset.identifier})
+            reverse("dataset-counts", kwargs={"identifier": self.dataset.identifier})
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), {"counts": []})
@@ -526,7 +526,7 @@ class SearchTest(AuthzAPITestCase):
         ds.save()
 
         r = self.client.get(
-            reverse("chord-dataset-v2-counts", kwargs={"identifier": ds.identifier})
+            reverse("dataset-counts", kwargs={"identifier": ds.identifier})
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()

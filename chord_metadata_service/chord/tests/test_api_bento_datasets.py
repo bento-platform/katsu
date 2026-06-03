@@ -48,32 +48,32 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         }
 
     def test_list_datasets(self):
-        r = self.client.get(reverse("chord-dataset-list"))
+        r = self.client.get(reverse("dataset-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(1, r.data["count"])
         self.assertEqual(self.dataset_v2.title, r.data["results"][0]["title"])
 
     def test_get_dataset(self):
-        r = self.client.get(reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.client.get(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(str(self.dataset_v2.identifier), r.data["identifier"])
         self.assertEqual(self.dataset_v2.title, r.data["title"])
         self.assertEqual(str(self.project.identifier), str(r.data["project"]))
 
     def test_del_dataset(self):
-        r = self.one_authz_delete(reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.one_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(DatasetV2.DoesNotExist):
             self.dataset_v2.refresh_from_db()
 
     def test_del_dataset_forbidden(self):
-        r = self.one_no_authz_delete(reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.one_no_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.dataset_v2.refresh_from_db()  # confirm this still exists in database, otherwise it'll raise DoesNotExist
 
     def test_dataset_summary(self):
         self.maxDiff = None  # allow full assertDictEqual diff if something goes awry
-        r = self.dt_authz_full_get(reverse("chord-dataset-summary", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.dt_authz_full_get(reverse("dataset-summary", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
         self.assertEqual(type(data), dict)
@@ -151,28 +151,28 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         })
 
     def test_dataset_summary_not_a_uuid(self):
-        r = self.dt_authz_full_get(reverse("chord-dataset-summary", kwargs={"identifier": "not-a-uuid"}))
+        r = self.dt_authz_full_get(reverse("dataset-summary", kwargs={"identifier": "not-a-uuid"}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_dataset_summary_not_found(self):
-        r = self.dt_authz_full_get(reverse("chord-dataset-summary", kwargs={"identifier": str(uuid.uuid4())}))
+        r = self.dt_authz_full_get(reverse("dataset-summary", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_dataset_data_type_summary(self):
         r = self.dt_authz_full_get(
-            reverse("chord-dataset-data-type-summary", kwargs={"identifier": self.dataset_v2.identifier}))
+            reverse("dataset-data-types", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
         r = self.dt_authz_full_get(
-            reverse("chord-dataset-data-type-summary", kwargs={"identifier": str(uuid.uuid4())}))
+            reverse("dataset-data-types", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
         r = self.dt_authz_full_get(
-            reverse("chord-dataset-data-type-summary", kwargs={"identifier": "not-a-uuid"}))
+            reverse("dataset-data-types", kwargs={"identifier": "not-a-uuid"}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def _dataset_data_type_url(self, dt: str, ds_id: str = ""):
-        return reverse("chord-dataset-data-type", kwargs={
+        return reverse("dataset-data-type-detail", kwargs={
             "identifier": ds_id or self.dataset_v2.identifier,
             "data_type": dt
         })
@@ -270,7 +270,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
     def test_create_dataset_v2_auto_identifier(self):
         # DatasetV2Serializer.to_internal_value: no identifier in payload → auto-generates UUID
         r = self.one_authz_post(
-            reverse("chord-dataset-list"),
+            reverse("dataset-list"),
             json=valid_dataset_v2(str(self.project.identifier), title="New Dataset"),
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
@@ -282,7 +282,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         # DatasetV2Serializer.to_internal_value: identifier provided in payload → no auto-generate
         explicit_id = str(uuid.uuid4())
         r = self.one_authz_post(
-            reverse("chord-dataset-list"),
+            reverse("dataset-list"),
             json={**valid_dataset_v2(str(self.project.identifier), title="Explicit ID Dataset"),
                   "identifier": explicit_id},
         )
@@ -315,20 +315,20 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_get_dataset_resources(self):
         # DatasetV2ViewSet.resources: success path returns empty resource list
-        r = self.client.get(reverse("chord-dataset-resources", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.client.get(reverse("dataset-resources", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), [])
 
     def test_get_dataset_resources_not_found(self):
         # DatasetV2ViewSet.resources: Http404 branch → 404
-        r = self.client.get(reverse("chord-dataset-resources", kwargs={"identifier": str(uuid.uuid4())}))
+        r = self.client.get(reverse("dataset-resources", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     # ---- DatasetV2ViewSet.get_queryset project_id filter ----
 
     def test_list_datasets_project_filter(self):
         # DatasetV2ViewSet.get_queryset: project_id query param filters results
-        r = self.client.get(reverse("chord-dataset-list") + f"?project_id={self.project.identifier}")
+        r = self.client.get(reverse("dataset-list") + f"?project_id={self.project.identifier}")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.data["count"], 1)
 
@@ -336,7 +336,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_dataset_v2_summary(self):
         r = self.dt_authz_full_get(
-            reverse("chord-dataset-v2-summary", kwargs={"identifier": self.dataset_v2.identifier})
+            reverse("dataset-summary", kwargs={"identifier": self.dataset_v2.identifier})
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
@@ -345,7 +345,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_dataset_v2_summary_not_found(self):
         r = self.dt_authz_full_get(
-            reverse("chord-dataset-v2-summary", kwargs={"identifier": str(uuid.uuid4())})
+            reverse("dataset-summary", kwargs={"identifier": str(uuid.uuid4())})
         )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
@@ -354,7 +354,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
     def test_create_dataset_with_resources_syncs_additional_resources(self):
         # Resources in the KatsuDatasetModel payload are upserted into additional_resources on create.
         r = self.one_authz_post(
-            reverse("chord-dataset-list"),
+            reverse("dataset-list"),
             json={
                 **valid_dataset_v2(str(self.project.identifier), title="Dataset with resources"),
                 "resources": [VALID_RESOURCE_HPO, VALID_RESOURCE_MONDO],
@@ -374,7 +374,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_create_dataset_without_resources_leaves_additional_resources_empty(self):
         r = self.one_authz_post(
-            reverse("chord-dataset-list"),
+            reverse("dataset-list"),
             json=valid_dataset_v2(str(self.project.identifier), title="Dataset no resources"),
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
@@ -385,7 +385,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
     def test_update_dataset_with_resources_syncs_additional_resources(self):
         # Create without resources first, then update with resources.
         r = self.one_authz_post(
-            reverse("chord-dataset-list"),
+            reverse("dataset-list"),
             json=valid_dataset_v2(str(self.project.identifier), title="Dataset update test"),
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)

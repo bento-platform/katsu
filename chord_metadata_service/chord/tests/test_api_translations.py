@@ -16,11 +16,11 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
 
     def _translation_url(self, language: str = "") -> str:
         if language:
-            return reverse("chord-dataset-v2-translation-detail", kwargs={
+            return reverse("dataset-translations-detail", kwargs={
                 "identifier": self.dataset_v2.identifier,
                 "language": language,
             })
-        return reverse("chord-dataset-v2-translation-list", kwargs={"identifier": self.dataset_v2.identifier})
+        return reverse("dataset-translations-list", kwargs={"identifier": self.dataset_v2.identifier})
 
     def _translation_payload(self, title: str = "Test Translation") -> dict:
         return {
@@ -52,7 +52,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
     def test_get_dataset_v2_language_fallback(self):
         # DatasetV2Serializer.to_representation: language != "en", no translation → fallback "en"
         r = self.client.get(
-            reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
+            reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
             HTTP_ACCEPT_LANGUAGE="fr",
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -75,7 +75,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self.addCleanup(translation.delete)
 
         r = self.client.get(
-            reverse("chord-dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
+            reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
             HTTP_ACCEPT_LANGUAGE="fr",
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -99,7 +99,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self.addCleanup(translation.delete)
 
         r = self.client.get(
-            reverse("chord-dataset-v2-translation-detail", kwargs={
+            reverse("dataset-translations-detail", kwargs={
                 "identifier": self.dataset_v2.identifier,
                 "language": "de",
             })
@@ -128,7 +128,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_create_translation_dataset_not_found(self):
         # DatasetV2TranslationViewSet.create: dataset DoesNotExist → 404
-        url = reverse("chord-dataset-v2-translation-list", kwargs={"identifier": str(uuid.uuid4())})
+        url = reverse("dataset-translations-list", kwargs={"identifier": str(uuid.uuid4())})
         r = self.one_authz_post(url, json=self._translation_payload())
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 

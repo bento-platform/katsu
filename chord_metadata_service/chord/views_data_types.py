@@ -1,7 +1,5 @@
 import asyncio
 
-from bento_lib.auth.permissions import P_DELETE_DATA
-from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
 from django.db.models import QuerySet
 
@@ -14,9 +12,8 @@ from rest_framework.response import Response
 from typing import Callable
 
 from chord_metadata_service.authz.middleware import authz_middleware as authz
-from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
+from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.authz.types import DataPermissions
-from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
@@ -168,64 +165,3 @@ async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])
 
 
-@api_view(["GET"])
-@permission_classes([BentoAllowAny])
-async def dataset_v2_data_type_summary(request: DrfRequest, identifier: str):
-    try:
-        dataset = await DatasetV2.objects.aget(identifier=identifier)
-    except DatasetV2.DoesNotExist:
-        return not_found_response(f"Dataset {identifier} not found")
-
-    project = await Project.objects.aget(identifier=dataset.project_id)
-    discovery_scope = ValidatedDiscoveryScope(project, dataset)
-    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-
-    dt_response = sorted(
-        await asyncio.gather(*(
-            make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
-            for dt_id, dt_d in dt.DATA_TYPES.items()
-        )),
-        key=lambda d: d["id"],
-    )
-    return Response(dt_response)
-
-
-@api_view(["GET", "DELETE"])
-@permission_classes([BentoDeferToHandler])
-async def dataset_v2_data_type(request: DrfRequest, identifier: str, data_type: str):
-    try:
-        dataset = await DatasetV2.objects.aget(identifier=identifier)
-    except DatasetV2.DoesNotExist:
-        authz.mark_authz_done(request)
-        return not_found_response(f"Dataset {identifier} not found")
-
-    project = await Project.objects.aget(identifier=dataset.project_id)
-    project_id = str(project.identifier)
-
-    if data_type not in QUERYSET_FN:
-        authz.mark_authz_done(request)
-        return not_found_response(f"Data type {data_type} doesn't exist")
-
-    qs = QUERYSET_FN[data_type](identifier)
-
-    if request.method == "DELETE":
-        if not (
-            await authz.async_evaluate_one(request, build_resource(project_id, identifier, data_type), P_DELETE_DATA)
-        ):
-            authz.mark_authz_done(request)
-            return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
-
-        authz.mark_authz_done(request)
-        await qs.adelete()
-        lg = logger.bind(dataset_id=identifier, data_type=data_type)
-        n_removed = await run_all_cleanup(lg)
-        await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    discovery_scope = ValidatedDiscoveryScope(project, dataset)
-    dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-    response_object = await make_data_type_response_object(
-        data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],
-    )
-    authz.mark_authz_done(request)
-    return Response(response_object)
