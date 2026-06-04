@@ -308,8 +308,8 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
-        self.assertIn("datasets_v2", data)
-        self.assertEqual(len(data["datasets_v2"]), 1)
+        self.assertIn("datasets", data)
+        self.assertEqual(len(data["datasets"]), 1)
 
     # ---- DatasetV2ViewSet.resources ----
 

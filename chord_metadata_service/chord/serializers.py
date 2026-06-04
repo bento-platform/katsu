@@ -10,13 +10,12 @@ from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from rest_framework import serializers
 
-from .models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from .models import Project, ProjectJsonSchema, DatasetV2, DatasetV2Translation
 from .utils import get_censored_counts_for_serializer
 
 __all__ = [
     "ProjectSerializer",
     "ProjectJsonSchemaSerializer",
-    "DatasetSerializer",
     "DatasetV2Serializer",
     "DatasetV2TranslationSerializer",
 ]
@@ -43,33 +42,6 @@ class DiscoveryConfigField(serializers.Field):
 #              Project Management  Serializers              #
 #                                                           #
 #############################################################
-
-
-class DatasetSerializer(GenericSerializer):
-    discovery = DiscoveryConfigField(required=False, allow_null=True)
-
-    always_include = (
-        "description",
-        "contact_info",
-        "linked_field_sets",
-        "dats_file",
-        "project",
-        "discovery",
-        "conditions_of_access",
-        "counts",
-    )
-
-    counts = serializers.SerializerMethodField()
-
-    def get_counts(self, obj):
-        # TODO: with more datasets, refactor to batch queries (currently N queries for N datasets)
-        request = self.context.get("request")
-        scope = ValidatedDiscoveryScope(obj.project, obj)
-        return get_censored_counts_for_serializer(request, scope, logger)
-
-    class Meta:
-        model = Dataset
-        fields = '__all__'
 
 
 class DatasetV2Serializer(PydanticJSONBSerializer):
@@ -188,8 +160,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     )
 
     discovery = DiscoveryConfigField(required=False, allow_null=True)
-    datasets = DatasetSerializer(read_only=True, many=True, exclude_when_nested=["project"])
-    datasets_v2 = DatasetV2Serializer(source="dv2", read_only=True, many=True)
+    datasets = DatasetV2Serializer(read_only=True, many=True)
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
     counts = serializers.SerializerMethodField()

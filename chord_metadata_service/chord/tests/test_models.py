@@ -13,8 +13,8 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType
-from ..models import Project, Dataset, ProjectJsonSchema, DatasetV2, DatasetV2Translation
-from .constants import VALID_DATA_USE_1, VALID_DATASET_V2_PRIMARY_CONTACT
+from ..models import Project, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from .constants import VALID_DATASET_V2_PRIMARY_CONTACT
 
 
 P2_DESC = "This is a good project..."
@@ -44,28 +44,6 @@ class ProjectTest(TestCase):
         p = Project.objects.create(title="Project 3", description="", discovery=cfg)
         reloaded = Project.objects.get(pk=p.pk)
         self.assertIsInstance(reloaded.discovery, DiscoveryConfig)
-
-
-class DatasetTest(TestCase):
-    def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="")
-        Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1, project=p)
-
-    def test_dataset(self):
-        p = Project.objects.get(title="Project 1")
-        d = Dataset.objects.get(title="Dataset 1")
-
-        self.assertEqual(d.description, "Some dataset")
-        self.assertDictEqual(d.data_use, VALID_DATA_USE_1)
-        self.assertEqual(d.project, p)
-
-        self.assertEqual(str(d), f"Dataset 1 (ID: {str(d.identifier)})")
-
-        self.assertIn(d.identifier, set(d2.identifier for d2 in p.datasets.all()))
-
-    def test_dataset_resources_empty(self):
-        d = Dataset.objects.get(title="Dataset 1")
-        self.assertEqual(d.resources.count(), 0)
 
 
 TABLE_ID = str(uuid4())

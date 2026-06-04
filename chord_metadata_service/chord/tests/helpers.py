@@ -7,9 +7,8 @@ from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Dataset, DatasetV2, Project
+from chord_metadata_service.chord.models import DatasetV2, Project
 from chord_metadata_service.chord.tests.constants import (
-    VALID_DATA_USE_1,
     VALID_PROJECT_1,
     VALID_DATASET_V2_PRIMARY_CONTACT,
 )
@@ -26,19 +25,13 @@ __all__ = [
 
 class ProjectTestCase(TestCase):
     """
-    Helper TransactionTestCase class that creates a Project, Dataset.
+    Helper TransactionTestCase class that creates a Project and DatasetV2.
     Data is created once for the whole test case at the class level
     """
 
     @classmethod
     def setUpTestData(cls) -> None:
         cls.project = Project.objects.create(title="Project 1", description="")
-        cls.dataset = Dataset.objects.create(
-            title="Dataset 1",
-            description="Some dataset",
-            data_use=VALID_DATA_USE_1,
-            project=cls.project
-        )
         schema = KatsuDatasetModel(
             schema_version="1.0",
             title="Dataset V2 1",

@@ -30,7 +30,7 @@ class ValidatedDiscoveryScope:
     result in this becoming invalid.
     """
 
-    def __init__(self, project: cm.Project | None, dataset: cm.Dataset | cm.DatasetV2 | None):
+    def __init__(self, project: cm.Project | None, dataset: cm.DatasetV2 | None):
         """
         Constructor for an already-validated discovery scope - i.e., since we are getting fed project/dataset instances
         rather than just string IDs, we know these objects exist at the time of construction.

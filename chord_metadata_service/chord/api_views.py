@@ -104,7 +104,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.prefetch_related("dv2").order_by("identifier")
+    queryset = Project.objects.prefetch_related("datasets").order_by("identifier")
     serializer_class = ProjectSerializer
 
     def get_serializer_context(self):
@@ -350,6 +350,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         try:
             dataset = await DatasetV2.objects.aget(identifier=identifier)
         except DatasetV2.DoesNotExist:
+            authz.mark_authz_done(request)
             return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
         project = await Project.objects.aget(identifier=dataset.project_id)
         discovery_scope = ValidatedDiscoveryScope(project, dataset)
@@ -361,6 +362,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
             )),
             key=lambda d: d["id"],
         )
+        authz.mark_authz_done(request)
         return Response(dt_response)
 
     @async_to_sync

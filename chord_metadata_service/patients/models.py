@@ -74,7 +74,7 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTS
             return None
         model = apps.get_model("chord.Project")
         try:
-            project = model.objects.get(dv2=self.phenopackets.first().dataset_id)
+            project = model.objects.get(datasets=self.phenopackets.first().dataset_id)
         except model.DoesNotExist:
             return None
         return project.identifier
