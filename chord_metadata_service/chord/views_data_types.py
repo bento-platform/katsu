@@ -11,7 +11,6 @@ from rest_framework.response import Response
 
 from typing import Callable
 
-from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.censorship import thresholded_count
@@ -19,11 +18,9 @@ from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.experiments.models import Experiment
-from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
-from .models import DatasetV2, Project
 
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),

@@ -1,4 +1,3 @@
-import asyncio
 import itertools
 import json
 
@@ -23,7 +22,7 @@ from structlog.stdlib import BoundLogger
 from typing import Awaitable, Callable
 
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
+from chord_metadata_service.authz.permissions import BentoDeferToHandler
 
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 
