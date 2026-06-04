@@ -311,28 +311,28 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertIn("datasets", data)
         self.assertEqual(len(data["datasets"]), 1)
 
-    # ---- DatasetV2ViewSet.resources ----
+    # ---- DatasetViewSet.resources ----
 
     def test_get_dataset_resources(self):
-        # DatasetV2ViewSet.resources: success path returns empty resource list
+        # DatasetViewSet.resources: success path returns empty resource list
         r = self.client.get(reverse("dataset-resources", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), [])
 
     def test_get_dataset_resources_not_found(self):
-        # DatasetV2ViewSet.resources: Http404 branch → 404
+        # DatasetViewSet.resources: Http404 branch → 404
         r = self.client.get(reverse("dataset-resources", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    # ---- DatasetV2ViewSet.get_queryset project_id filter ----
+    # ---- DatasetViewSet.get_queryset project_id filter ----
 
     def test_list_datasets_project_filter(self):
-        # DatasetV2ViewSet.get_queryset: project_id query param filters results
+        # DatasetViewSet.get_queryset: project_id query param filters results
         r = self.client.get(reverse("dataset-list") + f"?project_id={self.project.identifier}")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.data["count"], 1)
 
-    # ---- DatasetV2ViewSet.summary ----
+    # ---- DatasetViewSet.summary ----
 
     def test_dataset_v2_summary(self):
         r = self.dt_authz_full_get(

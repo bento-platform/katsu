@@ -48,7 +48,7 @@ from .serializers import (
 )
 
 
-__all__ = ["ProjectViewSet", "DatasetV2ViewSet"]
+__all__ = ["ProjectViewSet", "DatasetViewSet"]
 
 
 def _serializer_error_messages(errs: dict) -> list[str]:
@@ -151,7 +151,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
         return await sync_to_async(super().destroy)(request, *args, **kwargs)
 
 
-class DatasetV2ViewSet(CHORDPublicModelViewSet):
+class DatasetViewSet(CHORDPublicModelViewSet):
     queryset = DatasetV2.objects.all()
     serializer_class = DatasetV2Serializer
     lookup_field = "identifier"
@@ -470,7 +470,7 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         return await sync_to_async(_update)()
 
 
-class DatasetV2TranslationViewSet(CHORDPublicModelViewSet):
+class DatasetTranslationViewSet(CHORDPublicModelViewSet):
     serializer_class = DatasetV2TranslationSerializer
     lookup_field = "language"
 
