@@ -194,7 +194,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             valid_dataset(self.project["identifier"]),
             valid_dataset(self.project["identifier"], title="Dataset 2"),
             valid_dataset(self.project["identifier"], title="Dataset 3",
-                             discovery=DISCOVERY_CONFIG_TEST_DICT),
+                          discovery=DISCOVERY_CONFIG_TEST_DICT),
         ]
 
         _pc = {"type": "person", "name": "X", "roles": []}

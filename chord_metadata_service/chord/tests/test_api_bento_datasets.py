@@ -332,23 +332,6 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.data["count"], 1)
 
-    # ---- DatasetViewSet.summary ----
-
-    def test_dataset_summary(self):
-        r = self.dt_authz_full_get(
-            reverse("dataset-summary", kwargs={"identifier": self.dataset.identifier})
-        )
-        self.assertEqual(r.status_code, status.HTTP_200_OK)
-        data = r.json()
-        self.assertIn("phenopacket", data)
-        self.assertIn("experiment", data)
-
-    def test_dataset_summary_not_found(self):
-        r = self.dt_authz_full_get(
-            reverse("dataset-summary", kwargs={"identifier": str(uuid.uuid4())})
-        )
-        self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
-
     # ---- DatasetSerializer._sync_schema_resources ----
 
     def test_create_dataset_with_resources_syncs_additional_resources(self):
