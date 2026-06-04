@@ -378,7 +378,8 @@ class DatasetV2ViewSet(CHORDPublicModelViewSet):
         project = await Project.objects.aget(identifier=dataset.project_id)
         if data_type not in QUERYSET_FN:
             authz.mark_authz_done(request)
-            return Response(errors.not_found_error(f"Data type {data_type} doesn't exist"), status=status.HTTP_404_NOT_FOUND)
+            return Response(errors.not_found_error(f"Data type {data_type} doesn't exist"),
+                            status=status.HTTP_404_NOT_FOUND)
         if request.method == "DELETE":
             if not (await authz.async_evaluate_one(
                 request, build_resource(str(project.identifier), identifier, data_type), P_DELETE_DATA

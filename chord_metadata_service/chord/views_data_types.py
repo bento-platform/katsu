@@ -160,5 +160,3 @@ async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
         return not_found_response(errors.not_found_error(f"Data type {data_type} not found"))
 
     return Response(dt.DATA_TYPES[data_type]["metadata_schema"])
-
-

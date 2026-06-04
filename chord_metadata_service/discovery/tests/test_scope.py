@@ -36,7 +36,10 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
     def test_scope_hash(self):
         self.assertEqual(hash(self.instance_scope), hash("|"))
         self.assertEqual(hash(self.project_scope), hash(f"{self.project.identifier}|"))
-        self.assertEqual(hash(self.project_dataset_scope), hash(f"{self.project.identifier}|{self.dataset_v2.identifier}"))
+        self.assertEqual(
+            hash(self.project_dataset_scope),
+            hash(f"{self.project.identifier}|{self.dataset_v2.identifier}"),
+        )
 
     def test_scope_init_fail_no_project(self):
         with self.assertRaises(DiscoveryScopeException):

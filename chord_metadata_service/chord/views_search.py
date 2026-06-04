@@ -411,5 +411,3 @@ async def private_dataset_search(request: DrfRequest, identifier: str):
         return bad_request_response(err)
 
     return Response(build_search_response(data, start))
-
-
