@@ -14,7 +14,7 @@ from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 from chord_metadata_service.common.base_pydantic_jsonb import AbstractPydanticJSONBModel
 
 
-__all__ = ["Project", "ProjectJsonSchema", "DatasetV2", "DatasetV2Translation"]
+__all__ = ["Project", "ProjectJsonSchema", "Dataset", "DatasetTranslation"]
 
 
 # Referenced by chord/migrations/0001_v1_0_0.py — must remain for migration import compatibility.
@@ -76,7 +76,7 @@ class Project(BaseProjectOrDataset):
         return f"{self.title} (ID: {self.identifier})"
 
 
-class DatasetV2(AbstractPydanticJSONBModel):
+class Dataset(AbstractPydanticJSONBModel):
 
     # --- AbstractPydanticJSONBModel configuration ---
     COLUMN_FIELDS = {
@@ -140,8 +140,8 @@ class DatasetV2(AbstractPydanticJSONBModel):
         return f"{self.identifier}: {self.title}"
 
 
-class DatasetV2Translation(AbstractPydanticJSONBModel):
-    """Stores a translated Pydantic payload for a DatasetV2 in a non-default language."""
+class DatasetTranslation(AbstractPydanticJSONBModel):
+    """Stores a translated Pydantic payload for a Dataset in a non-default language."""
 
     # --- Mixin configuration ---
     # 'dataset' is NOT in COLUMN_FIELDS — it has no matching field in ProjectScopedDatasetModel.
@@ -152,7 +152,7 @@ class DatasetV2Translation(AbstractPydanticJSONBModel):
 
     # --- Django fields ---
     dataset = models.ForeignKey(
-        DatasetV2,
+        Dataset,
         on_delete=models.CASCADE,
         related_name='translations',
     )

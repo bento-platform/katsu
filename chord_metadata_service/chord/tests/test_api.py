@@ -11,7 +11,7 @@ from .constants import (
     valid_project_json_schema,
 )
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
-from ..models import Project, DatasetV2, ProjectJsonSchema
+from ..models import Project, Dataset, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST_DICT
 
@@ -214,10 +214,10 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         for i, d in enumerate(self.valid_payloads, 1):
             r = self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(DatasetV2.objects.count(), i)
-            self.assertEqual(DatasetV2.objects.filter(title=d["title"]).first().title, d["title"])
+            self.assertEqual(Dataset.objects.count(), i)
+            self.assertEqual(Dataset.objects.filter(title=d["title"]).first().title, d["title"])
 
-        self.assertEqual(DatasetV2.objects.count(), len(self.valid_payloads))
+        self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
@@ -367,7 +367,7 @@ class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
         r = self.one_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
-        with self.assertRaises(DatasetV2.DoesNotExist):  # must not exist in DB anymore
+        with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
             self.dataset_v2.refresh_from_db()
 
     def test_delete_dataset_forbidden(self):

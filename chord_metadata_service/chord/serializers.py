@@ -10,14 +10,14 @@ from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from rest_framework import serializers
 
-from .models import Project, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from .models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
 from .utils import get_censored_counts_for_serializer
 
 __all__ = [
     "ProjectSerializer",
     "ProjectJsonSchemaSerializer",
-    "DatasetV2Serializer",
-    "DatasetV2TranslationSerializer",
+    "DatasetSerializer",
+    "DatasetTranslationSerializer",
 ]
 
 
@@ -44,13 +44,13 @@ class DiscoveryConfigField(serializers.Field):
 #############################################################
 
 
-class DatasetV2Serializer(PydanticJSONBSerializer):
+class DatasetSerializer(PydanticJSONBSerializer):
     schema_class = KatsuDatasetModel
 
     counts_by_entity = serializers.SerializerMethodField()
 
     class Meta:
-        model = DatasetV2
+        model = Dataset
         exclude = ['additional_resources']
         read_only_fields = ['created_at', 'updated_at']
 
@@ -70,10 +70,10 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
                 translation = prefetched[0] if prefetched else None
             else:
                 try:
-                    translation = DatasetV2Translation.objects.get(
+                    translation = DatasetTranslation.objects.get(
                         dataset_id=instance.identifier, language=language
                     )
-                except DatasetV2Translation.DoesNotExist:
+                except DatasetTranslation.DoesNotExist:
                     translation = None
 
             if translation is not None:
@@ -98,7 +98,7 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         scope = ValidatedDiscoveryScope(obj.project, obj)
         return get_censored_counts_for_serializer(request, scope, logger)
 
-    def _sync_schema_resources(self, instance: DatasetV2) -> None:
+    def _sync_schema_resources(self, instance: Dataset) -> None:
         schema: KatsuDatasetModel = self._validated_schema
         if not schema.resources:
             return
@@ -126,11 +126,11 @@ class DatasetV2Serializer(PydanticJSONBSerializer):
         return instance
 
 
-class DatasetV2TranslationSerializer(PydanticJSONBSerializer):
+class DatasetTranslationSerializer(PydanticJSONBSerializer):
     schema_class = ProjectScopedDatasetModel
 
     class Meta:
-        model = DatasetV2Translation
+        model = DatasetTranslation
         fields = "__all__"
         read_only_fields = ['created_at', 'updated_at', 'dataset']
 
@@ -160,7 +160,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     )
 
     discovery = DiscoveryConfigField(required=False, allow_null=True)
-    datasets = DatasetV2Serializer(read_only=True, many=True)
+    datasets = DatasetSerializer(read_only=True, many=True)
     project_schemas = ProjectJsonSchemaSerializer(read_only=True, many=True)
 
     counts = serializers.SerializerMethodField()

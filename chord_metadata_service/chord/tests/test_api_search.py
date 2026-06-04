@@ -35,7 +35,7 @@ from .constants import (
     TEST_SEARCH_QUERY_10,
 )
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from ..models import Project, DatasetV2
+from ..models import Project, Dataset
 from ..data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_PHENOPACKET
@@ -66,7 +66,7 @@ class SearchTest(AuthzAPITestCase):
             project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset = DatasetV2.from_schema(schema)
+        self.dataset = Dataset.from_schema(schema)
         self.dataset.save()
         self.dataset.refresh_from_db()
 
@@ -522,7 +522,7 @@ class SearchTest(AuthzAPITestCase):
             identifier=str(uuid.uuid4()),
             counts=[Count(count_entity="participants", value=42, description="Participant count")],
         )
-        ds = DatasetV2.from_schema(schema)
+        ds = Dataset.from_schema(schema)
         ds.save()
 
         r = self.client.get(

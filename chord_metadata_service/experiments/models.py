@@ -154,7 +154,7 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         help_text=rec_help(d.EXPERIMENT, "biosample"),
     )
     dataset = models.ForeignKey(
-        "chord.DatasetV2",
+        "chord.Dataset",
         on_delete=models.CASCADE,
         blank=True,
         null=True,

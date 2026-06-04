@@ -45,7 +45,7 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
             identifier=str(uuid.uuid4()),
             project=str(self.empty_project.identifier),
         )
-        self.empty_dataset = cm.DatasetV2.from_schema(schema)
+        self.empty_dataset = cm.Dataset.from_schema(schema)
         self.empty_dataset.save()
         self.empty_dataset.refresh_from_db()
 

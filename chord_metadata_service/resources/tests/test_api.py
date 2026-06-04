@@ -5,7 +5,7 @@ from rest_framework.reverse import reverse
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
-from chord_metadata_service.chord.models import DatasetV2
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.chord.tests.constants import valid_dataset_v2, VALID_PROJECT_2
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
@@ -92,7 +92,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         r = Resource.objects.create(**VALID_RESOURCE_1)
         Resource.objects.create(**VALID_RESOURCE_2)  # r2
 
-        ds = DatasetV2.objects.get(identifier=self.dataset["identifier"])
+        ds = Dataset.objects.get(identifier=self.dataset["identifier"])
         ds.additional_resources.add(r)
 
         subtests = [
@@ -112,7 +112,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
     def test_list_resources_dataset_and_phenopacket(self):
         r = Resource.objects.create(**VALID_RESOURCE_1)
 
-        ds = DatasetV2.objects.get(identifier=self.dataset["identifier"])
+        ds = Dataset.objects.get(identifier=self.dataset["identifier"])
         ds.additional_resources.add(r)
 
         pd = {

@@ -17,7 +17,7 @@ from bento_lib.responses import errors
 
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoDeferToHandler
-from chord_metadata_service.chord.models import DatasetV2
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.logger import logger
 from . import experiments
 from . import WORKFLOW_INGEST_FUNCTION_MAP
@@ -64,7 +64,7 @@ def call_ingest_function_and_handle(
 async def ingest_derived_experiment_results(request: DrfRequest, dataset_id: str):
     lg = logger.bind(dataset_id=dataset_id)
 
-    dataset = await DatasetV2.objects.filter(identifier=dataset_id).afirst()
+    dataset = await Dataset.objects.filter(identifier=dataset_id).afirst()
 
     if not dataset:
         lg.error(f"error encountered while ingesting derived experiment results: {DATASET_DNE}")
@@ -101,7 +101,7 @@ async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id:
         authz_middleware.mark_authz_done(request)
         return Response(errors.bad_request_error(err), status=status.HTTP_400_BAD_REQUEST)
 
-    dataset = await DatasetV2.objects.filter(identifier=dataset_id).afirst()
+    dataset = await Dataset.objects.filter(identifier=dataset_id).afirst()
 
     if not dataset:
         # for logging, make it a bit more clear where this error is coming from

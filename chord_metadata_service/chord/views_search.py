@@ -38,7 +38,7 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
-from .models import DatasetV2, Project
+from .models import Dataset, Project
 
 OUTPUT_FORMAT_VALUES_LIST = "values_list"
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -377,8 +377,8 @@ async def chord_dataset_search(
 @permission_classes([BentoDeferToHandler])
 async def private_dataset_search(request: DrfRequest, identifier: str):
     try:
-        dataset = await DatasetV2.objects.aget(identifier=identifier)
-    except (DatasetV2.DoesNotExist, ValidationError) as e:
+        dataset = await Dataset.objects.aget(identifier=identifier)
+    except (Dataset.DoesNotExist, ValidationError) as e:
         authz_middleware.mark_authz_done(request)
         return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
 

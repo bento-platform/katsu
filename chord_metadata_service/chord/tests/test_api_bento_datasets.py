@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
-from chord_metadata_service.chord.models import DatasetV2
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.chord.tests.constants import valid_dataset_v2
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
@@ -63,7 +63,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
     def test_del_dataset(self):
         r = self.one_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
-        with self.assertRaises(DatasetV2.DoesNotExist):
+        with self.assertRaises(Dataset.DoesNotExist):
             self.dataset_v2.refresh_from_db()
 
     def test_del_dataset_forbidden(self):
@@ -268,7 +268,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(self.dataset_v2.title, payload["title"])
 
     def test_create_dataset_v2_auto_identifier(self):
-        # DatasetV2Serializer.to_internal_value: no identifier in payload → auto-generates UUID
+        # DatasetSerializer.to_internal_value: no identifier in payload → auto-generates UUID
         r = self.one_authz_post(
             reverse("dataset-list"),
             json=valid_dataset_v2(str(self.project.identifier), title="New Dataset"),
@@ -279,7 +279,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertTrue(len(data["identifier"]) > 0)
 
     def test_create_dataset_v2_explicit_identifier(self):
-        # DatasetV2Serializer.to_internal_value: identifier provided in payload → no auto-generate
+        # DatasetSerializer.to_internal_value: identifier provided in payload → no auto-generate
         explicit_id = str(uuid.uuid4())
         r = self.one_authz_post(
             reverse("dataset-list"),
@@ -289,7 +289,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r.json()["identifier"], explicit_id)
 
-    # ---- ProjectSerializer: DatasetSerializer.get_counts and DatasetV2Serializer.to_representation (no prefetch) ----
+    # ---- ProjectSerializer: DatasetSerializer.get_counts and DatasetSerializer.to_representation (no prefetch) ----
 
     def test_project_get_serializes_legacy_dataset_counts(self):
         # DatasetSerializer.get_counts: project GET serializes legacy Dataset, calling get_counts
@@ -300,7 +300,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(len(data["datasets"]), 1)
 
     def test_project_get_with_language_no_prefetch(self):
-        # DatasetV2Serializer.to_representation: instances nested in ProjectSerializer have no
+        # DatasetSerializer.to_representation: instances nested in ProjectSerializer have no
         # prefetched_translations → falls through to DB lookup (DoesNotExist → None → English fallback)
         r = self.client.get(
             reverse("project-detail", kwargs={"pk": self.project.identifier}),
@@ -349,7 +349,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    # ---- DatasetV2Serializer._sync_schema_resources ----
+    # ---- DatasetSerializer._sync_schema_resources ----
 
     def test_create_dataset_with_resources_syncs_additional_resources(self):
         # Resources in the KatsuDatasetModel payload are upserted into additional_resources on create.
@@ -362,7 +362,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        ds = DatasetV2.objects.get(identifier=r.json()["identifier"])
+        ds = Dataset.objects.get(identifier=r.json()["identifier"])
         additional = list(ds.additional_resources.values_list("id", flat=True))
         self.assertIn("HP:2024-04-26", additional)
         self.assertIn("MONDO:2024-05-08", additional)
@@ -379,7 +379,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        ds = DatasetV2.objects.get(identifier=r.json()["identifier"])
+        ds = Dataset.objects.get(identifier=r.json()["identifier"])
         self.assertEqual(ds.additional_resources.count(), 0)
 
     def test_update_dataset_with_resources_syncs_additional_resources(self):
@@ -401,6 +401,6 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
-        ds = DatasetV2.objects.get(identifier=ds_id)
+        ds = Dataset.objects.get(identifier=ds_id)
         additional = list(ds.additional_resources.values_list("id", flat=True))
         self.assertIn("HP:2024-04-26", additional)

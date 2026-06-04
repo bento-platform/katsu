@@ -63,7 +63,7 @@ class ScopedDiscoveryTestCase(TestCase):
             project=str(cls.project_a.identifier),
             identifier=str(uuid.uuid4()),
         )
-        cls.dataset_a = ch_m.DatasetV2.from_schema(schema_a)
+        cls.dataset_a = ch_m.Dataset.from_schema(schema_a)
         cls.dataset_a.discovery = DISCOVERY_CONFIG_EXTRA_PROPERTIES
         cls.dataset_a.save()
         cls.dataset_a.refresh_from_db()
@@ -85,7 +85,7 @@ class ScopedDiscoveryTestCase(TestCase):
             project=str(cls.project_b.identifier),
             identifier=str(uuid.uuid4()),
         )
-        cls.dataset_b = ch_m.DatasetV2.from_schema(schema_b)
+        cls.dataset_b = ch_m.Dataset.from_schema(schema_b)
         cls.dataset_b.save()
         cls.dataset_b.refresh_from_db()
         cls.id_ds_b = cls.dataset_b.identifier
@@ -577,7 +577,7 @@ def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Indivi
         primary_contact=ch_c.VALID_DATASET_V2_PRIMARY_CONTACT, project=str(p.identifier),
         identifier=str(uuid.uuid4()),
     )
-    d = ch_m.DatasetV2.from_schema(schema)
+    d = ch_m.Dataset.from_schema(schema)
     d.save()
     d.refresh_from_db()
 

@@ -10,7 +10,7 @@ from rest_framework.test import APITestCase
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Project, DatasetV2
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.tests.constants import (
     VALID_DATASET_V2_PRIMARY_CONTACT,
     VALID_PROJECT_1,
@@ -43,7 +43,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
             primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.d1 = DatasetV2.from_schema(schema1)
+        self.d1 = Dataset.from_schema(schema1)
         self.d1.save()
         self.d1.refresh_from_db()
         self.d1_id = self.d1.identifier
@@ -52,7 +52,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
             primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.d2 = DatasetV2.from_schema(schema2)
+        self.d2 = Dataset.from_schema(schema2)
         self.d2.save()
         self.d2.refresh_from_db()
         self.d2_id = self.d2.identifier

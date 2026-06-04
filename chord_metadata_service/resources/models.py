@@ -26,15 +26,15 @@ class Resource(BaseScopeableModel):
     def get_scope_filters() -> ModelScopeFilters:
         return {
             "base_prefetch_related": (
-                "datasetv2_set",
+                "dataset_set",
                 "metadata_set__phenopacket_set",
                 "metadata_set__phenopacket_set__dataset",
             ),
             "project": {
-                "filter": ("datasetv2__project_id", "metadata__phenopacket__dataset__project_id"),
+                "filter": ("dataset__project_id", "metadata__phenopacket__dataset__project_id"),
             },
             "dataset": {
-                "filter": ("datasetv2__identifier", "metadata__phenopacket__dataset_id"),
+                "filter": ("dataset__identifier", "metadata__phenopacket__dataset_id"),
             },
         }
 

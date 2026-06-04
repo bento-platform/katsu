@@ -6,7 +6,7 @@ from django.db.models import F
 
 from .utils import ExportError
 
-from chord_metadata_service.chord.models import DatasetV2
+from chord_metadata_service.chord.models import Dataset
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.experiments.models import ExperimentResult
@@ -74,8 +74,8 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
     # TODO: a Dataset is a Study (associated with a publication), not a Project!
 
     try:
-        dataset = await DatasetV2.objects.aget(identifier=dataset_id)
-    except DatasetV2.DoesNotExist:
+        dataset = await Dataset.objects.aget(identifier=dataset_id)
+    except Dataset.DoesNotExist:
         raise ExportError(f"no dataset exists with ID {dataset_id}")
 
     cbio_study_id = str(dataset.identifier)
@@ -127,7 +127,7 @@ def write_dict_in_cbioportal_format(lines: dict, file_handle: TextIO) -> None:
         file_handle.write(f"{field}: {value}\n")
 
 
-def study_export_meta(dataset: DatasetV2, file_handle: TextIO) -> None:
+def study_export_meta(dataset: Dataset, file_handle: TextIO) -> None:
     """
     Study meta data file generation
     """
@@ -147,7 +147,7 @@ def study_export_meta(dataset: DatasetV2, file_handle: TextIO) -> None:
         "reference_genome": "hg38",  # TODO: should not be hard-coded...
     }
 
-    # optional fields — use publications list from schema (no primary_publications distinction in DatasetV2)
+    # optional fields — use publications list from schema (no primary_publications distinction in Dataset)
     if schema.publications:
         lines["citation"] = schema.publications[0]
 

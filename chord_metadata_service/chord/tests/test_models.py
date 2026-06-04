@@ -13,7 +13,7 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType
-from ..models import Project, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from ..models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
 from .constants import VALID_DATASET_V2_PRIMARY_CONTACT
 
 
@@ -127,7 +127,7 @@ class ProjectJsonSchemaTest(ProjectTestCase):
             invalid_pjs_biosample.save()
 
 
-class DatasetV2Test(ProjectTestCase):
+class DatasetTest(ProjectTestCase):
     def test_str(self):
         self.assertEqual(str(self.dataset_v2), f"{self.dataset_v2.identifier}: {self.dataset_v2.title}")
 
@@ -149,14 +149,14 @@ class DatasetV2Test(ProjectTestCase):
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )
-        dv2 = DatasetV2.objects.get(pk=self.dataset_v2.identifier)
+        dv2 = Dataset.objects.get(pk=self.dataset_v2.identifier)
         dv2.update_from_schema(updated_schema)
         dv2.save()
-        reloaded = DatasetV2.objects.get(pk=self.dataset_v2.identifier)
+        reloaded = Dataset.objects.get(pk=self.dataset_v2.identifier)
         self.assertEqual(reloaded.title, new_title)
 
 
-class DatasetV2TranslationTest(ProjectTestCase):
+class DatasetTranslationTest(ProjectTestCase):
     def setUp(self):
         schema = KatsuDatasetModel(
             schema_version="1.0",
@@ -166,7 +166,7 @@ class DatasetV2TranslationTest(ProjectTestCase):
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )
-        self.translation = DatasetV2Translation.from_schema(
+        self.translation = DatasetTranslation.from_schema(
             schema, dataset_id=self.dataset_v2.identifier, language='fr'
         )
         self.translation.save()
@@ -175,7 +175,7 @@ class DatasetV2TranslationTest(ProjectTestCase):
         self.assertEqual(str(self.translation), f"{self.dataset_v2.identifier}: fr")
 
     def test_unique_together(self):
-        dup = DatasetV2Translation(
+        dup = DatasetTranslation(
             dataset=self.dataset_v2,
             language='fr',
             data=self.translation.data,
@@ -184,6 +184,6 @@ class DatasetV2TranslationTest(ProjectTestCase):
             dup.save()
 
     def test_translation_data_stored(self):
-        reloaded = DatasetV2Translation.objects.get(pk=self.translation.pk)
+        reloaded = DatasetTranslation.objects.get(pk=self.translation.pk)
         self.assertEqual(reloaded.language, 'fr')
         self.assertEqual(reloaded.dataset_id, self.dataset_v2.identifier)

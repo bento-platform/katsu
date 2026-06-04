@@ -49,7 +49,7 @@ from chord_metadata_service.chord.tests.constants import (
     VALID_DATASET_V2_PRIMARY_CONTACT,
     valid_phenotypic_feature,
 )
-from chord_metadata_service.chord.models import Project, DatasetV2
+from chord_metadata_service.chord.models import Project, Dataset
 
 
 class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
@@ -62,7 +62,7 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
             primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset = DatasetV2.from_schema(_schema)
+        self.dataset = Dataset.from_schema(_schema)
         self.dataset.save()
         self.dataset.refresh_from_db()
 
@@ -224,7 +224,7 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
             primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset = DatasetV2.from_schema(_schema)
+        self.dataset = Dataset.from_schema(_schema)
         self.dataset.save()
         self.dataset.refresh_from_db()
 

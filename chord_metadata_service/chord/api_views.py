@@ -39,12 +39,12 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from . import data_types as dt
 from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from .views_data_types import QUERYSET_FN, make_data_type_response_object
-from .models import Project, ProjectJsonSchema, DatasetV2, DatasetV2Translation
+from .models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
 from .serializers import (
     ProjectJsonSchemaSerializer,
     ProjectSerializer,
-    DatasetV2Serializer,
-    DatasetV2TranslationSerializer,
+    DatasetSerializer,
+    DatasetTranslationSerializer,
 )
 
 
@@ -152,8 +152,8 @@ class ProjectViewSet(CHORDPublicModelViewSet):
 
 
 class DatasetViewSet(CHORDPublicModelViewSet):
-    queryset = DatasetV2.objects.all()
-    serializer_class = DatasetV2Serializer
+    queryset = Dataset.objects.all()
+    serializer_class = DatasetSerializer
     lookup_field = "identifier"
 
     def get_queryset(self):
@@ -166,7 +166,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             queryset = queryset.prefetch_related(
                 Prefetch(
                     "translations",
-                    queryset=DatasetV2Translation.objects.filter(language=language),
+                    queryset=DatasetTranslation.objects.filter(language=language),
                     to_attr="prefetched_translations",
                 )
             )
@@ -174,8 +174,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
     async def get_obj_async(self):
         try:
-            return await DatasetV2.objects.aget(identifier=self.kwargs["identifier"])
-        except DatasetV2.DoesNotExist:
+            return await Dataset.objects.aget(identifier=self.kwargs["identifier"])
+        except Dataset.DoesNotExist:
             raise Http404
 
     def get_serializer_context(self):
@@ -307,8 +307,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     async def summary(self, request, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
-            dataset = await DatasetV2.objects.aget(identifier=identifier)
-        except (DatasetV2.DoesNotExist, DjangoValidationError):
+            dataset = await Dataset.objects.aget(identifier=identifier)
+        except (Dataset.DoesNotExist, DjangoValidationError):
             return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
 
         project = await Project.objects.aget(identifier=dataset.project_id)
@@ -336,7 +336,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     @action(detail=True, methods=["get"], url_path="counts", url_name="counts",
             permission_classes=[BentoAllowAny])
     async def counts(self, request, **kwargs):
-        dataset = await DatasetV2.objects.filter(identifier=self.kwargs["identifier"]).afirst()
+        dataset = await Dataset.objects.filter(identifier=self.kwargs["identifier"]).afirst()
         if dataset is None:
             return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
         authz.mark_authz_done(request)
@@ -348,8 +348,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     async def data_types(self, request, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
-            dataset = await DatasetV2.objects.aget(identifier=identifier)
-        except DatasetV2.DoesNotExist:
+            dataset = await Dataset.objects.aget(identifier=identifier)
+        except Dataset.DoesNotExist:
             authz.mark_authz_done(request)
             return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
         project = await Project.objects.aget(identifier=dataset.project_id)
@@ -371,8 +371,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     async def data_type_detail(self, request, data_type, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
-            dataset = await DatasetV2.objects.aget(identifier=identifier)
-        except DatasetV2.DoesNotExist:
+            dataset = await Dataset.objects.aget(identifier=identifier)
+        except Dataset.DoesNotExist:
             authz.mark_authz_done(request)
             return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
         project = await Project.objects.aget(identifier=dataset.project_id)
@@ -407,30 +407,30 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         identifier = self.kwargs["identifier"]
         if request.method == "GET":
             authz.mark_authz_done(request)
-            qs = DatasetV2Translation.objects.filter(dataset_id=identifier)
+            qs = DatasetTranslation.objects.filter(dataset_id=identifier)
 
             def _list():
                 items = list(qs)
                 page = self.paginate_queryset(items)
                 if page is not None:
-                    return self.get_paginated_response(DatasetV2TranslationSerializer(page, many=True).data)
-                return Response(DatasetV2TranslationSerializer(items, many=True).data)
+                    return self.get_paginated_response(DatasetTranslationSerializer(page, many=True).data)
+                return Response(DatasetTranslationSerializer(items, many=True).data)
 
             return await sync_to_async(_list)()
         try:
-            dataset = await DatasetV2.objects.aget(identifier=identifier)
-        except DatasetV2.DoesNotExist:
+            dataset = await Dataset.objects.aget(identifier=identifier)
+        except Dataset.DoesNotExist:
             return not_found(request)
         if not (await authz.async_evaluate_one(
             request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
         )):
             return forbidden(request)
         authz.mark_authz_done(request)
-        serializer = DatasetV2TranslationSerializer(data=request.data)
+        serializer = DatasetTranslationSerializer(data=request.data)
 
         def _create():
             serializer.is_valid(raise_exception=True)
-            instance = DatasetV2Translation.from_schema(serializer._validated_schema, dataset_id=identifier)
+            instance = DatasetTranslation.from_schema(serializer._validated_schema, dataset_id=identifier)
             instance.save()
             return Response(serializer.to_representation(instance), status=status.HTTP_201_CREATED)
 
@@ -442,15 +442,15 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     async def translation_detail(self, request, language, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
-            translation = await DatasetV2Translation.objects.aget(dataset_id=identifier, language=language)
-        except DatasetV2Translation.DoesNotExist:
+            translation = await DatasetTranslation.objects.aget(dataset_id=identifier, language=language)
+        except DatasetTranslation.DoesNotExist:
             return not_found(request)
         if request.method == "GET":
             authz.mark_authz_done(request)
-            return Response(DatasetV2TranslationSerializer(translation).to_representation(translation))
+            return Response(DatasetTranslationSerializer(translation).to_representation(translation))
         try:
-            dataset = await DatasetV2.objects.aget(identifier=identifier)
-        except DatasetV2.DoesNotExist:
+            dataset = await Dataset.objects.aget(identifier=identifier)
+        except Dataset.DoesNotExist:
             return not_found(request)
         if not (await authz.async_evaluate_one(
             request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
@@ -460,7 +460,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         if request.method == "DELETE":
             await translation.adelete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        serializer = DatasetV2TranslationSerializer(translation, data=request.data)
+        serializer = DatasetTranslationSerializer(translation, data=request.data)
 
         def _update():
             serializer.is_valid(raise_exception=True)
@@ -471,25 +471,25 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
 
 class DatasetTranslationViewSet(CHORDPublicModelViewSet):
-    serializer_class = DatasetV2TranslationSerializer
+    serializer_class = DatasetTranslationSerializer
     lookup_field = "language"
 
     def get_queryset(self):
-        return DatasetV2Translation.objects.filter(dataset_id=self.kwargs["identifier"])
+        return DatasetTranslation.objects.filter(dataset_id=self.kwargs["identifier"])
 
-    async def get_dataset_async(self) -> DatasetV2:
+    async def get_dataset_async(self) -> Dataset:
         try:
-            return await DatasetV2.objects.aget(identifier=self.kwargs["identifier"])
-        except DatasetV2.DoesNotExist:
+            return await Dataset.objects.aget(identifier=self.kwargs["identifier"])
+        except Dataset.DoesNotExist:
             raise Http404
 
     async def get_obj_async(self):
         try:
-            return await DatasetV2Translation.objects.aget(
+            return await DatasetTranslation.objects.aget(
                 dataset_id=self.kwargs["identifier"],
                 language=self.kwargs["language"],
             )
-        except DatasetV2Translation.DoesNotExist:
+        except DatasetTranslation.DoesNotExist:
             raise Http404
 
     def list(self, request, *args, **kwargs):
@@ -521,7 +521,7 @@ class DatasetTranslationViewSet(CHORDPublicModelViewSet):
         # PydanticJSONBSerializer.create() ignores validated_data, so call from_schema directly
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = DatasetV2Translation.from_schema(
+        instance = DatasetTranslation.from_schema(
             serializer._validated_schema, dataset_id=str(dataset.identifier)
         )
         await instance.asave()

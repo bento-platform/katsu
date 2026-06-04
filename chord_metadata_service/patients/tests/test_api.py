@@ -196,7 +196,7 @@ class IndividualListFilterTest(TestWithTwoIndividuals):
             project=str(self.project_1.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset_1 = cm.DatasetV2.from_schema(schema_1)
+        self.dataset_1 = cm.Dataset.from_schema(schema_1)
         self.dataset_1.save()
         self.dataset_1.refresh_from_db()
 
@@ -209,7 +209,7 @@ class IndividualListFilterTest(TestWithTwoIndividuals):
             project=str(self.project_2.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset_2 = cm.DatasetV2.from_schema(schema_2)
+        self.dataset_2 = cm.Dataset.from_schema(schema_2)
         self.dataset_2.save()
         self.dataset_2.refresh_from_db()
 
@@ -526,7 +526,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             project=str(self.project_2.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset_2 = cm.DatasetV2.from_schema(schema_2)
+        self.dataset_2 = cm.Dataset.from_schema(schema_2)
         self.dataset_2.save()
         self.dataset_2.refresh_from_db()
 
