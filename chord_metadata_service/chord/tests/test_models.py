@@ -149,9 +149,9 @@ class DatasetTest(ProjectTestCase):
             identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
-        dv2 = Dataset.objects.get(pk=self.dataset.identifier)
-        dv2.update_from_schema(updated_schema)
-        dv2.save()
+        ds = Dataset.objects.get(pk=self.dataset.identifier)
+        ds.update_from_schema(updated_schema)
+        ds.save()
         reloaded = Dataset.objects.get(pk=self.dataset.identifier)
         self.assertEqual(reloaded.title, new_title)
 
