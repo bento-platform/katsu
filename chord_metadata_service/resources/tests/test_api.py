@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.models import Dataset
-from chord_metadata_service.chord.tests.constants import valid_dataset_v2, VALID_PROJECT_2
+from chord_metadata_service.chord.tests.constants import valid_dataset, VALID_PROJECT_2
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.logger import logger
@@ -44,7 +44,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
 
         # dataset for project 1
         r = self.one_authz_post(
-            reverse("dataset-list"), json=valid_dataset_v2(self.project["identifier"], title="Dataset 1")
+            reverse("dataset-list"), json=valid_dataset(self.project["identifier"], title="Dataset 1")
         )
         self.dataset = r.json()
         self.url_with_proj_ds = f"{self.url}?project={self.project['identifier']}&dataset={self.dataset['identifier']}"
@@ -55,7 +55,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
 
         #  - dataset for project 2
         r = self.one_authz_post(
-            reverse("dataset-list"), json=valid_dataset_v2(self.project_2["identifier"], title="Dataset 2")
+            reverse("dataset-list"), json=valid_dataset(self.project_2["identifier"], title="Dataset 2")
         )
         self.dataset_2 = r.json()
 

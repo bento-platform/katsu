@@ -10,7 +10,7 @@ from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
-    VALID_DATASET_V2_PRIMARY_CONTACT,
+    VALID_DATASET_PRIMARY_CONTACT,
 )
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.restapi.utils import remove_computed_properties
@@ -34,9 +34,9 @@ class ProjectTestCase(TestCase):
         cls.project = Project.objects.create(title="Project 1", description="")
         schema = KatsuDatasetModel(
             schema_version="1.0",
-            title="Dataset V2 1",
+            title="Dataset 1",
             description="Some dataset v2",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(uuid.uuid4()),
             project=str(cls.project.identifier),
         )

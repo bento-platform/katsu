@@ -14,7 +14,7 @@ from chord_metadata_service.phenopackets.tests.constants import (
 )
 from chord_metadata_service.restapi.models import SchemaType
 from ..models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
-from .constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from .constants import VALID_DATASET_PRIMARY_CONTACT
 
 
 P2_DESC = "This is a good project..."
@@ -145,7 +145,7 @@ class DatasetTest(ProjectTestCase):
             schema_version="1.0",
             title=new_title,
             description="Updated description",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )
@@ -160,9 +160,9 @@ class DatasetTranslationTest(ProjectTestCase):
     def setUp(self):
         schema = KatsuDatasetModel(
             schema_version="1.0",
-            title="Dataset V2 Translation Test",
+            title="Dataset Translation Test",
             description="Test translation",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )

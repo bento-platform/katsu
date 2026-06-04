@@ -6,7 +6,7 @@ from django.test import override_settings
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.tests.constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE
 from ..summaries import dt_experiment_summary
 from .helpers import ExperimentTestCase
@@ -41,7 +41,7 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
             schema_version="1.0",
             title="Empty Dataset",
             description="Empty Dataset description",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(uuid.uuid4()),
             project=str(self.empty_project.identifier),
         )

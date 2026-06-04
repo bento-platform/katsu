@@ -6,7 +6,7 @@ from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.models import Dataset
-from chord_metadata_service.chord.tests.constants import valid_dataset_v2
+from chord_metadata_service.chord.tests.constants import valid_dataset
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 from chord_metadata_service.chord.data_types import DATA_TYPES, DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
@@ -271,7 +271,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         # DatasetSerializer.to_internal_value: no identifier in payload → auto-generates UUID
         r = self.one_authz_post(
             reverse("dataset-list"),
-            json=valid_dataset_v2(str(self.project.identifier), title="New Dataset"),
+            json=valid_dataset(str(self.project.identifier), title="New Dataset"),
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         data = r.json()
@@ -283,7 +283,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         explicit_id = str(uuid.uuid4())
         r = self.one_authz_post(
             reverse("dataset-list"),
-            json={**valid_dataset_v2(str(self.project.identifier), title="Explicit ID Dataset"),
+            json={**valid_dataset(str(self.project.identifier), title="Explicit ID Dataset"),
                   "identifier": explicit_id},
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
@@ -356,7 +356,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_authz_post(
             reverse("dataset-list"),
             json={
-                **valid_dataset_v2(str(self.project.identifier), title="Dataset with resources"),
+                **valid_dataset(str(self.project.identifier), title="Dataset with resources"),
                 "resources": [VALID_RESOURCE_HPO, VALID_RESOURCE_MONDO],
             },
         )
@@ -375,7 +375,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
     def test_create_dataset_without_resources_leaves_additional_resources_empty(self):
         r = self.one_authz_post(
             reverse("dataset-list"),
-            json=valid_dataset_v2(str(self.project.identifier), title="Dataset no resources"),
+            json=valid_dataset(str(self.project.identifier), title="Dataset no resources"),
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
@@ -386,7 +386,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         # Create without resources first, then update with resources.
         r = self.one_authz_post(
             reverse("dataset-list"),
-            json=valid_dataset_v2(str(self.project.identifier), title="Dataset update test"),
+            json=valid_dataset(str(self.project.identifier), title="Dataset update test"),
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         ds_id = r.json()["identifier"]
@@ -394,7 +394,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_authz_put(
             f"/api/datasets/{ds_id}",
             json={
-                **valid_dataset_v2(str(self.project.identifier), title="Dataset update test"),
+                **valid_dataset(str(self.project.identifier), title="Dataset update test"),
                 "identifier": ds_id,
                 "resources": [VALID_RESOURCE_HPO],
             },

@@ -12,7 +12,7 @@ from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.tests.constants import (
-    VALID_DATASET_V2_PRIMARY_CONTACT,
+    VALID_DATASET_PRIMARY_CONTACT,
     VALID_PROJECT_1,
     VALID_PROJECT_2,
 )
@@ -40,7 +40,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.p = Project.objects.create(**VALID_PROJECT_1)
         schema1 = KatsuDatasetModel(
             schema_version="1.0", title="dataset_1", description="Some dataset 1",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
         self.d1 = Dataset.from_schema(schema1)
@@ -49,7 +49,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.d1_id = self.d1.identifier
         schema2 = KatsuDatasetModel(
             schema_version="1.0", title="dataset_2", description="Some dataset 2",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
         self.d2 = Dataset.from_schema(schema2)

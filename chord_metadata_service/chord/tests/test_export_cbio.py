@@ -34,7 +34,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 
 
-from .constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from .constants import VALID_DATASET_PRIMARY_CONTACT
 from .example_ingest import (
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_EXPERIMENT_RESULT,
@@ -51,7 +51,7 @@ class ExportCBioTest(TestCase):
             schema_version="1.0",
             title="Dataset 1",
             description="Some dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(p.identifier),
             identifier=str(uuid.uuid4()),
         )

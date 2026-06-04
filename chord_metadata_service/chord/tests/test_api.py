@@ -6,7 +6,7 @@ from django.test import override_settings
 from rest_framework import status
 from .constants import (
     VALID_PROJECT_1,
-    valid_dataset_v2,
+    valid_dataset,
     PROJECT_JSON_SCHEMA_MISSING_PROJECT,
     valid_project_json_schema,
 )
@@ -191,22 +191,22 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         super().setUp()
 
         self.valid_payloads = [
-            valid_dataset_v2(self.project["identifier"]),
-            valid_dataset_v2(self.project["identifier"], title="Dataset V2 2"),
-            valid_dataset_v2(self.project["identifier"], title="Dataset V2 3",
+            valid_dataset(self.project["identifier"]),
+            valid_dataset(self.project["identifier"], title="Dataset 2"),
+            valid_dataset(self.project["identifier"], title="Dataset 3",
                              discovery=DISCOVERY_CONFIG_TEST_DICT),
         ]
 
         _pc = {"type": "person", "name": "X", "roles": []}
         self.invalid_payloads = [
             # Missing schema_version
-            {"title": "Dataset V2 Bad", "description": "Test",
+            {"title": "Dataset Bad", "description": "Test",
              "primary_contact": _pc, "project": self.project["identifier"]},
             # Missing project
-            {"schema_version": "1.0", "title": "Dataset V2 Bad",
+            {"schema_version": "1.0", "title": "Dataset Bad",
              "description": "Test", "primary_contact": _pc},
             # Missing primary_contact
-            {"schema_version": "1.0", "title": "Dataset V2 Bad",
+            {"schema_version": "1.0", "title": "Dataset Bad",
              "description": "Test", "project": self.project["identifier"]},
         ]
 
@@ -229,7 +229,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_dataset_discovery_put_get(self):
-        r = self.one_authz_post("/api/datasets", json=valid_dataset_v2(self.project["identifier"]))
+        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"]))
         d = r.json()
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 

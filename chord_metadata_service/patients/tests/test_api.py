@@ -13,7 +13,7 @@ from rest_framework import status
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.tests.constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.fields_utils import JSONBPathFilter
@@ -192,7 +192,7 @@ class IndividualListFilterTest(TestWithTwoIndividuals):
             schema_version="1.0",
             title="Dataset 1",
             description="Test Dataset 1",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(self.project_1.identifier),
             identifier=str(uuid.uuid4()),
         )
@@ -205,7 +205,7 @@ class IndividualListFilterTest(TestWithTwoIndividuals):
             schema_version="1.0",
             title="Dataset 2",
             description="Test Dataset 2",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(self.project_2.identifier),
             identifier=str(uuid.uuid4()),
         )
@@ -522,7 +522,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             schema_version="1.0",
             title="Dataset 2",
             description="Some dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(self.project_2.identifier),
             identifier=str(uuid.uuid4()),
         )

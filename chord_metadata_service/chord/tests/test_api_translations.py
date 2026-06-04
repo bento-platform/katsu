@@ -6,7 +6,7 @@ from rest_framework import status
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import DatasetTranslation
-from chord_metadata_service.chord.tests.constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 
 
@@ -27,7 +27,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             "schema_version": "1.0",
             "title": title,
             "description": "Test translation description",
-            "primary_contact": VALID_DATASET_V2_PRIMARY_CONTACT,
+            "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
             "identifier": str(self.dataset_v2.identifier),
             "project": str(self.project.identifier),
         }
@@ -37,7 +37,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             schema_version="1.0",
             title=f"Translation {language}",
             description="Test",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )
@@ -64,7 +64,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             schema_version="1.0",
             title="Jeu de données fr",
             description="Description française",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )
@@ -88,7 +88,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             schema_version="1.0",
             title="Dataset Translation",
             description="Test",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(self.dataset_v2.identifier),
             project=str(self.project.identifier),
         )

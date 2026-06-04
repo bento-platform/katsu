@@ -4,8 +4,8 @@ __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",
     "VALID_PROJECT_2",
-    "VALID_DATASET_V2_PRIMARY_CONTACT",
-    "valid_dataset_v2",
+    "VALID_DATASET_PRIMARY_CONTACT",
+    "valid_dataset",
     "PROJECT_JSON_SCHEMA_MISSING_PROJECT",
     "valid_project_json_schema",
     "valid_phenotypic_feature",
@@ -56,15 +56,15 @@ DEFAULT_PROJECT_JSON_SCHEMA = {
 }
 
 
-VALID_DATASET_V2_PRIMARY_CONTACT = {"type": "person", "name": "Test Contact", "roles": []}
+VALID_DATASET_PRIMARY_CONTACT = {"type": "person", "name": "Test Contact", "roles": []}
 
 
-def valid_dataset_v2(project_id, title="Dataset V2 1", **kwargs):
+def valid_dataset(project_id, title="Dataset 1", **kwargs):
     return {
         "schema_version": "1.0",
         "title": title,
-        "description": "Test Dataset V2",
-        "primary_contact": VALID_DATASET_V2_PRIMARY_CONTACT,
+        "description": "Test Dataset",
+        "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
         "project": str(project_id),
         **kwargs,
     }
