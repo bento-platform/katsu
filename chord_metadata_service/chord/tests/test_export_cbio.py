@@ -176,7 +176,7 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = pm.Biosample.objects.filter(phenopackets=self.p)
+        samples = pm.Biosample.objects.filter(phenopackets=self.p).order_by("id")
 
         with io.StringIO() as output:
             async_to_sync(exp.sample_export)(samples, output)
