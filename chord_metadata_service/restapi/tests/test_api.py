@@ -50,7 +50,7 @@ class OverviewTest(AuthzAPITestCase, ProjectTestCase):
         self.metadata_2 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_2)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
             **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
         )
         self.phenopacket_2 = ph_m.Phenopacket.objects.create(
             id="phenopacket:2", subject=self.individual_2, meta_data=self.metadata_2

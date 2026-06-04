@@ -498,13 +498,13 @@ class SearchTest(AuthzAPITestCase):
         })
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_dataset_v2_summary_not_found(self):
+    def test_dataset_summary_not_found(self):
         r = self.client.get(
             reverse("dataset-counts", kwargs={"identifier": str(uuid.uuid4())})
         )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_dataset_v2_summary_empty_counts(self):
+    def test_dataset_summary_empty_counts(self):
         # Dataset created in setUp has no counts field in its data blob
         r = self.client.get(
             reverse("dataset-counts", kwargs={"identifier": self.dataset.identifier})
@@ -512,7 +512,7 @@ class SearchTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), {"counts": []})
 
-    def test_dataset_v2_summary_with_counts(self):
+    def test_dataset_summary_with_counts(self):
         schema = KatsuDatasetModel(
             schema_version="1.0",
             title="Dataset With Counts",

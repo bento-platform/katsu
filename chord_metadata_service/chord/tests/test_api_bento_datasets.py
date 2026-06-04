@@ -51,29 +51,29 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         r = self.client.get(reverse("dataset-list"))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(1, r.data["count"])
-        self.assertEqual(self.dataset_v2.title, r.data["results"][0]["title"])
+        self.assertEqual(self.dataset.title, r.data["results"][0]["title"])
 
     def test_get_dataset(self):
-        r = self.client.get(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.client.get(reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(str(self.dataset_v2.identifier), r.data["identifier"])
-        self.assertEqual(self.dataset_v2.title, r.data["title"])
+        self.assertEqual(str(self.dataset.identifier), r.data["identifier"])
+        self.assertEqual(self.dataset.title, r.data["title"])
         self.assertEqual(str(self.project.identifier), str(r.data["project"]))
 
     def test_del_dataset(self):
-        r = self.one_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.one_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(Dataset.DoesNotExist):
-            self.dataset_v2.refresh_from_db()
+            self.dataset.refresh_from_db()
 
     def test_del_dataset_forbidden(self):
-        r = self.one_no_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.one_no_authz_delete(reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
-        self.dataset_v2.refresh_from_db()  # confirm this still exists in database, otherwise it'll raise DoesNotExist
+        self.dataset.refresh_from_db()  # confirm this still exists in database, otherwise it'll raise DoesNotExist
 
     def test_dataset_summary(self):
         self.maxDiff = None  # allow full assertDictEqual diff if something goes awry
-        r = self.dt_authz_full_get(reverse("dataset-summary", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.dt_authz_full_get(reverse("dataset-summary", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
         self.assertEqual(type(data), dict)
@@ -160,7 +160,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_dataset_data_type_summary(self):
         r = self.dt_authz_full_get(
-            reverse("dataset-data-types", kwargs={"identifier": self.dataset_v2.identifier}))
+            reverse("dataset-data-types", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
         r = self.dt_authz_full_get(
@@ -173,7 +173,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def _dataset_data_type_url(self, dt: str, ds_id: str = ""):
         return reverse("dataset-data-type-detail", kwargs={
-            "identifier": ds_id or self.dataset_v2.identifier,
+            "identifier": ds_id or self.dataset.identifier,
             "data_type": dt
         })
 
@@ -253,7 +253,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 self.entities_by_data_type[dt]["entity"].refresh_from_db()  # Should NOT raise DoesNotExist
 
     def test_dataset_update(self):
-        url = f"/api/datasets/{self.dataset_v2.identifier}"
+        url = f"/api/datasets/{self.dataset.identifier}"
         payload = {
             "schema_version": "1.0",
             "title": "Updated title",
@@ -264,10 +264,10 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
         r = self.one_authz_put(url, json=payload)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset_v2.refresh_from_db()
-        self.assertEqual(self.dataset_v2.title, payload["title"])
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.title, payload["title"])
 
-    def test_create_dataset_v2_auto_identifier(self):
+    def test_create_dataset_auto_identifier(self):
         # DatasetSerializer.to_internal_value: no identifier in payload → auto-generates UUID
         r = self.one_authz_post(
             reverse("dataset-list"),
@@ -278,7 +278,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertIn("identifier", data)
         self.assertTrue(len(data["identifier"]) > 0)
 
-    def test_create_dataset_v2_explicit_identifier(self):
+    def test_create_dataset_explicit_identifier(self):
         # DatasetSerializer.to_internal_value: identifier provided in payload → no auto-generate
         explicit_id = str(uuid.uuid4())
         r = self.one_authz_post(
@@ -315,7 +315,7 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_get_dataset_resources(self):
         # DatasetViewSet.resources: success path returns empty resource list
-        r = self.client.get(reverse("dataset-resources", kwargs={"identifier": self.dataset_v2.identifier}))
+        r = self.client.get(reverse("dataset-resources", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), [])
 
@@ -334,16 +334,16 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     # ---- DatasetViewSet.summary ----
 
-    def test_dataset_v2_summary(self):
+    def test_dataset_summary(self):
         r = self.dt_authz_full_get(
-            reverse("dataset-summary", kwargs={"identifier": self.dataset_v2.identifier})
+            reverse("dataset-summary", kwargs={"identifier": self.dataset.identifier})
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
         self.assertIn("phenopacket", data)
         self.assertIn("experiment", data)
 
-    def test_dataset_v2_summary_not_found(self):
+    def test_dataset_summary_not_found(self):
         r = self.dt_authz_full_get(
             reverse("dataset-summary", kwargs={"identifier": str(uuid.uuid4())})
         )

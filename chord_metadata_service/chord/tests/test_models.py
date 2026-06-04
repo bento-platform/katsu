@@ -96,7 +96,7 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=individual,
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
             extra_properties={
                 "prop_a": "extra property text"
             },
@@ -129,15 +129,15 @@ class ProjectJsonSchemaTest(ProjectTestCase):
 
 class DatasetTest(ProjectTestCase):
     def test_str(self):
-        self.assertEqual(str(self.dataset_v2), f"{self.dataset_v2.identifier}: {self.dataset_v2.title}")
+        self.assertEqual(str(self.dataset), f"{self.dataset.identifier}: {self.dataset.title}")
 
     def test_resources_empty(self):
-        self.assertEqual(self.dataset_v2.resources.count(), 0)
+        self.assertEqual(self.dataset.resources.count(), 0)
 
     def test_to_schema(self):
-        schema = self.dataset_v2.to_schema()
+        schema = self.dataset.to_schema()
         self.assertIsInstance(schema, KatsuDatasetModel)
-        self.assertEqual(schema.title, self.dataset_v2.title)
+        self.assertEqual(schema.title, self.dataset.title)
 
     def test_update_from_schema(self):
         new_title = "Updated Title"
@@ -146,13 +146,13 @@ class DatasetTest(ProjectTestCase):
             title=new_title,
             description="Updated description",
             primary_contact=VALID_DATASET_PRIMARY_CONTACT,
-            identifier=str(self.dataset_v2.identifier),
+            identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
-        dv2 = Dataset.objects.get(pk=self.dataset_v2.identifier)
+        dv2 = Dataset.objects.get(pk=self.dataset.identifier)
         dv2.update_from_schema(updated_schema)
         dv2.save()
-        reloaded = Dataset.objects.get(pk=self.dataset_v2.identifier)
+        reloaded = Dataset.objects.get(pk=self.dataset.identifier)
         self.assertEqual(reloaded.title, new_title)
 
 
@@ -163,20 +163,20 @@ class DatasetTranslationTest(ProjectTestCase):
             title="Dataset Translation Test",
             description="Test translation",
             primary_contact=VALID_DATASET_PRIMARY_CONTACT,
-            identifier=str(self.dataset_v2.identifier),
+            identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
         self.translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset_v2.identifier, language='fr'
+            schema, dataset_id=self.dataset.identifier, language='fr'
         )
         self.translation.save()
 
     def test_str(self):
-        self.assertEqual(str(self.translation), f"{self.dataset_v2.identifier}: fr")
+        self.assertEqual(str(self.translation), f"{self.dataset.identifier}: fr")
 
     def test_unique_together(self):
         dup = DatasetTranslation(
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
             language='fr',
             data=self.translation.data,
         )
@@ -186,4 +186,4 @@ class DatasetTranslationTest(ProjectTestCase):
     def test_translation_data_stored(self):
         reloaded = DatasetTranslation.objects.get(pk=self.translation.pk)
         self.assertEqual(reloaded.language, 'fr')
-        self.assertEqual(reloaded.dataset_id, self.dataset_v2.identifier)
+        self.assertEqual(reloaded.dataset_id, self.dataset.identifier)

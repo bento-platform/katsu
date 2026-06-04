@@ -10,7 +10,7 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
     def setUp(self):
         self.instance_scope = INSTANCE_SCOPE
         self.project_scope = ValidatedDiscoveryScope(self.project, None)
-        self.project_dataset_scope = ValidatedDiscoveryScope(self.project, self.dataset_v2)
+        self.project_dataset_scope = ValidatedDiscoveryScope(self.project, self.dataset)
 
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
 
@@ -22,13 +22,13 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
         self.assertIsNone(self.project_scope.dataset_id)
 
         self.assertEqual(self.project_dataset_scope.project_id, str(self.project.identifier))
-        self.assertEqual(self.project_dataset_scope.dataset_id, str(self.dataset_v2.identifier))
+        self.assertEqual(self.project_dataset_scope.dataset_id, str(self.dataset.identifier))
 
     def test_scope_eq(self):
         self.assertEqual(self.project_scope, ValidatedDiscoveryScope(self.project, None))
         self.assertEqual(INSTANCE_SCOPE, ValidatedDiscoveryScope(None, None))
         self.assertEqual(ValidatedDiscoveryScope(None, None), ValidatedDiscoveryScope(None, None))
-        self.assertEqual(self.project_dataset_scope, ValidatedDiscoveryScope(self.project, self.dataset_v2))
+        self.assertEqual(self.project_dataset_scope, ValidatedDiscoveryScope(self.project, self.dataset))
         self.assertNotEqual(INSTANCE_SCOPE, self.project_scope)
         self.assertNotEqual(INSTANCE_SCOPE, self.project_dataset_scope)
         self.assertNotEqual(self.project_scope, ValidatedDiscoveryScope(self.project_2, None))
@@ -38,16 +38,16 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
         self.assertEqual(hash(self.project_scope), hash(f"{self.project.identifier}|"))
         self.assertEqual(
             hash(self.project_dataset_scope),
-            hash(f"{self.project.identifier}|{self.dataset_v2.identifier}"),
+            hash(f"{self.project.identifier}|{self.dataset.identifier}"),
         )
 
     def test_scope_init_fail_no_project(self):
         with self.assertRaises(DiscoveryScopeException):
-            ValidatedDiscoveryScope(None, self.dataset_v2)
+            ValidatedDiscoveryScope(None, self.dataset)
 
     def test_scope_init_fail_wrong_parent_project(self):
         with self.assertRaises(DiscoveryScopeException):
-            ValidatedDiscoveryScope(self.project_2, self.dataset_v2)
+            ValidatedDiscoveryScope(self.project_2, self.dataset)
 
     def test_scope_repr(self):
         subtest_params = [
@@ -61,7 +61,7 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
             ),
             (
                 self.project_dataset_scope,
-                f"<ValidatedDiscoveryScope project={self.project.identifier} dataset={self.dataset_v2.identifier}>",
+                f"<ValidatedDiscoveryScope project={self.project.identifier} dataset={self.dataset.identifier}>",
             ),
         ]
 
@@ -80,14 +80,14 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
             ),
             (
                 self.project_dataset_scope,
-                {"project": str(self.project.identifier), "dataset": str(self.dataset_v2.identifier)},
+                {"project": str(self.project.identifier), "dataset": str(self.dataset.identifier)},
                 None,
             ),
             (
                 self.project_dataset_scope,
                 {
                     "project": str(self.project.identifier),
-                    "dataset": str(self.dataset_v2.identifier),
+                    "dataset": str(self.dataset.identifier),
                     "data_type": DATA_TYPE_PHENOPACKET,
                 },
                 DATA_TYPE_PHENOPACKET,

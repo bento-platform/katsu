@@ -35,15 +35,15 @@ class ProjectTestCase(TestCase):
         schema = KatsuDatasetModel(
             schema_version="1.0",
             title="Dataset 1",
-            description="Some dataset v2",
+            description="Some dataset",
             primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(uuid.uuid4()),
             project=str(cls.project.identifier),
         )
-        cls.dataset_v2 = Dataset.from_schema(schema)
-        cls.dataset_v2.save()
-        cls.dataset_v2.refresh_from_db()
-        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset_v2)
+        cls.dataset = Dataset.from_schema(schema)
+        cls.dataset.save()
+        cls.dataset.refresh_from_db()
+        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset)
 
         return super().setUpTestData()
 

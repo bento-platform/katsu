@@ -546,7 +546,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                     ph_c.valid_measurement_tumor_length(random.randint(1, 199))
                 ],
                 meta_data=meta_data,
-                dataset=self.dataset_v2,
+                dataset=self.dataset,
             )
             if idx == 1:
                 phenopacket.biosamples.add(biosample)
@@ -556,7 +556,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                     id=f"phenopacket_id:{idx}-2",
                     subject=individual,
                     meta_data=meta_data,
-                    dataset=self.dataset_v2,
+                    dataset=self.dataset,
                 )
                 biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(individual))
                 phenopacket_2.biosamples.add(biosample_2)
@@ -565,8 +565,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 phenopacket.save()
 
         instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
-        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset_v2, 1))
-        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset_v2, 2))
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 1))
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(biosample, instrument, self.dataset, 2))
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_sex(self):

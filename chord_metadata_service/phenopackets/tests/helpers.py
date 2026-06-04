@@ -20,7 +20,7 @@ class PhenoTestCase(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
         )
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(phenopacket=self.phenopacket)
@@ -36,6 +36,6 @@ class PhenoTestCase(ProjectTestCase):
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
             **c.valid_phenotypic_feature(biosample=self.biosample_2, phenopacket=self.phenopacket))
         self.experiment = Experiment.objects.create(
-            **exp_consts.valid_experiment(self.biosample_1, dataset=self.dataset_v2),
+            **exp_consts.valid_experiment(self.biosample_1, dataset=self.dataset),
         )
         return super().setUp()

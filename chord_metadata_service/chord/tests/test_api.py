@@ -273,7 +273,7 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset_v2.identifier}")
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
@@ -295,7 +295,7 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset_v2.identifier}")
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
@@ -319,29 +319,29 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
         self.valid_update = {
             "schema_version": "1.0",
-            "title": self.dataset_v2.title + "!",
+            "title": self.dataset.title + "!",
             "description": "Updated description",
             "primary_contact": {"type": "person", "name": "Test Contact", "roles": []},
-            "project": str(self.dataset_v2.project_id),
+            "project": str(self.dataset.project_id),
         }
 
     def test_update_dataset(self):
-        r = self.one_authz_put(f"/api/datasets/{self.dataset_v2.identifier}", json=self.valid_update)
+        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset_v2.refresh_from_db()
-        self.assertEqual(self.dataset_v2.title, self.valid_update["title"])
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.title, self.valid_update["title"])
 
     def test_update_dataset_partial(self):
         r = self.one_authz_patch(
-            f"/api/datasets/{self.dataset_v2.identifier}", json={"title": self.valid_update["title"]}
+            f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]}
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset_v2.refresh_from_db()
-        self.assertEqual(self.dataset_v2.title, self.valid_update["title"])
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.title, self.valid_update["title"])
 
     def test_update_dataset_changed_project(self):
         r = self.one_authz_put(
-            f"/api/datasets/{self.dataset_v2.identifier}",
+            f"/api/datasets/{self.dataset.identifier}",
             json={
                 **self.valid_update,
                 "project": str(self.project_2.identifier),
@@ -353,7 +353,7 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(res["errors"][0]["message"], "Dataset project ID cannot change")
 
     def test_update_dataset_forbidden(self):
-        r = self.one_no_authz_put(f"/api/datasets/{self.dataset_v2.identifier}", json=self.valid_update)
+        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_dataset_not_found(self):
@@ -364,16 +364,16 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_delete_dataset(self):
-        r = self.one_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
+        r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
-            self.dataset_v2.refresh_from_db()
+            self.dataset.refresh_from_db()
 
     def test_delete_dataset_forbidden(self):
-        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
+        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
-        self.dataset_v2.refresh_from_db()  # must not raise DoesNotExist
+        self.dataset.refresh_from_db()  # must not raise DoesNotExist
 
     def test_delete_dataset_not_found(self):
         r = self.client.delete(f"/api/datasets/{uuid.uuid4()}")

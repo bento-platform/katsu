@@ -17,10 +17,10 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
     def _translation_url(self, language: str = "") -> str:
         if language:
             return reverse("dataset-translations-detail", kwargs={
-                "identifier": self.dataset_v2.identifier,
+                "identifier": self.dataset.identifier,
                 "language": language,
             })
-        return reverse("dataset-translations-list", kwargs={"identifier": self.dataset_v2.identifier})
+        return reverse("dataset-translations-list", kwargs={"identifier": self.dataset.identifier})
 
     def _translation_payload(self, title: str = "Test Translation") -> dict:
         return {
@@ -28,7 +28,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             "title": title,
             "description": "Test translation description",
             "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
-            "identifier": str(self.dataset_v2.identifier),
+            "identifier": str(self.dataset.identifier),
             "project": str(self.project.identifier),
         }
 
@@ -38,44 +38,44 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             title=f"Translation {language}",
             description="Test",
             primary_contact=VALID_DATASET_PRIMARY_CONTACT,
-            identifier=str(self.dataset_v2.identifier),
+            identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
         translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset_v2.identifier, language=language
+            schema, dataset_id=self.dataset.identifier, language=language
         )
         translation.save()
         return translation
 
     # ---- DatasetSerializer language/translation behavior ----
 
-    def test_get_dataset_v2_language_fallback(self):
+    def test_get_dataset_language_fallback(self):
         # DatasetSerializer.to_representation: language != "en", no translation → fallback "en"
         r = self.client.get(
-            reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
+            reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}),
             HTTP_ACCEPT_LANGUAGE="fr",
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r["Content-Language"], "en")
 
-    def test_get_dataset_v2_with_translation(self):
+    def test_get_dataset_with_translation(self):
         # DatasetSerializer.to_representation: language != "en", translation found → uses translation
         schema = KatsuDatasetModel(
             schema_version="1.0",
             title="Jeu de données fr",
             description="Description française",
             primary_contact=VALID_DATASET_PRIMARY_CONTACT,
-            identifier=str(self.dataset_v2.identifier),
+            identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
         translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset_v2.identifier, language="fr"
+            schema, dataset_id=self.dataset.identifier, language="fr"
         )
         translation.save()
         self.addCleanup(translation.delete)
 
         r = self.client.get(
-            reverse("dataset-detail", kwargs={"identifier": self.dataset_v2.identifier}),
+            reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}),
             HTTP_ACCEPT_LANGUAGE="fr",
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -89,18 +89,18 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             title="Dataset Translation",
             description="Test",
             primary_contact=VALID_DATASET_PRIMARY_CONTACT,
-            identifier=str(self.dataset_v2.identifier),
+            identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
         translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset_v2.identifier, language="de"
+            schema, dataset_id=self.dataset.identifier, language="de"
         )
         translation.save()
         self.addCleanup(translation.delete)
 
         r = self.client.get(
             reverse("dataset-translations-detail", kwargs={
-                "identifier": self.dataset_v2.identifier,
+                "identifier": self.dataset.identifier,
                 "language": "de",
             })
         )
@@ -124,7 +124,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_authz_post(self._translation_url(), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.addCleanup(lambda: DatasetTranslation.objects.filter(
-            dataset=self.dataset_v2, language="fr").delete())
+            dataset=self.dataset, language="fr").delete())
 
     def test_create_translation_dataset_not_found(self):
         # DatasetTranslationViewSet.create: dataset DoesNotExist → 404
@@ -160,7 +160,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_authz_delete(self._translation_url("pt"))
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
         with self.assertRaises(DatasetTranslation.DoesNotExist):
-            DatasetTranslation.objects.get(dataset=self.dataset_v2, language="pt")
+            DatasetTranslation.objects.get(dataset=self.dataset, language="pt")
 
     def test_del_translation_not_found(self):
         # DatasetTranslationViewSet.destroy: translation DoesNotExist → 404
@@ -172,4 +172,4 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self._make_translation("ja")
         r = self.one_no_authz_delete(self._translation_url("ja"))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertTrue(DatasetTranslation.objects.filter(dataset=self.dataset_v2, language="ja").exists())
+        self.assertTrue(DatasetTranslation.objects.filter(dataset=self.dataset, language="ja").exists())
