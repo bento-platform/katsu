@@ -188,7 +188,22 @@ class DatasetTranslationSerializer(PydanticJSONBSerializer):
         fields = "__all__"
         read_only_fields = ['created_at', 'updated_at', 'dataset']
 
+    def _resolve_dataset_id(self) -> str | None:
+        if self.instance is not None:
+            return str(self.instance.dataset_id)
+        view = self.context.get("view")
+        if view is not None:
+            return view.kwargs.get("identifier")
+        return None
+
     def to_internal_value(self, data):
+        dataset_id = self._resolve_dataset_id()
+        if dataset_id is not None:
+            try:
+                dataset = Dataset.objects.get(identifier=dataset_id)
+                data = {**data, "identifier": dataset_id, "project": str(dataset.project_id)}
+            except Dataset.DoesNotExist:
+                pass  # view handles 404
         result = super().to_internal_value(data)
         _check_translation_constraints(self._validated_schema)
         return result

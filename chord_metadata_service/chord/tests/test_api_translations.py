@@ -28,8 +28,6 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             "title": title,
             "description": "Test translation description",
             "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
-            "identifier": str(self.dataset.identifier),
-            "project": str(self.project.identifier),
         }
 
     def _make_translation(self, language: str) -> DatasetTranslation:
@@ -207,14 +205,12 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
             "language": language,
         })
 
-    def _payload(self, dataset: Dataset, primary_contact=None, **kwargs) -> dict:
+    def _payload(self, primary_contact=None, **kwargs) -> dict:
         return {
             "schema_version": "1.0",
             "title": "Translated Title",
             "description": "Translated description",
             "primary_contact": primary_contact or VALID_DATASET_PRIMARY_CONTACT,
-            "identifier": str(dataset.identifier),
-            "project": str(self.project.identifier),
             **kwargs,
         }
 
@@ -241,7 +237,7 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         # canonical has ROLE_PI; translation sends empty roles → 400
         contact_with_role = {"type": "person", "name": "Test Contact", "roles": [ROLE_PI]}
         ds = self._make_dataset(primary_contact=contact_with_role)
-        payload = self._payload(ds, language="fr")
+        payload = self._payload(language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("primary_contact", r.json())
@@ -250,7 +246,6 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         # canonical has empty roles; translation adds ROLE_PI → 400
         ds = self._make_dataset()
         payload = self._payload(
-            ds,
             primary_contact={"type": "person", "name": "Test Contact", "roles": [ROLE_PI]},
             language="fr",
         )
@@ -263,7 +258,6 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         stakeholder = {"type": "person", "name": "Stakeholder", "roles": [ROLE_PI]}
         ds = self._make_dataset(stakeholders=[stakeholder])
         payload = self._payload(
-            ds,
             stakeholders=[{"type": "person", "name": "Stakeholder FR", "roles": [ROLE_RESEARCHER]}],
             language="fr",
         )
@@ -276,7 +270,7 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         contact_with_role = {"type": "person", "name": "Test Contact", "roles": [ROLE_PI]}
         ds = self._make_dataset(primary_contact=contact_with_role)
         self._make_translation_in_db(ds, "es", primary_contact=contact_with_role)
-        payload = self._payload(ds, language="es")  # roles=[] differs from canonical ROLE_PI
+        payload = self._payload(language="es")  # roles=[] differs from canonical ROLE_PI
         r = self.one_authz_put(self._detail_url(ds, "es"), json=payload)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("primary_contact", r.json())
@@ -285,7 +279,7 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         # same roles → 201
         contact_with_role = {"type": "person", "name": "Test Contact", "roles": [ROLE_PI]}
         ds = self._make_dataset(primary_contact=contact_with_role)
-        payload = self._payload(ds, primary_contact=contact_with_role, language="fr")
+        payload = self._payload(primary_contact=contact_with_role, language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
@@ -294,7 +288,7 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
     def test_create_translation_keywords_grow_rejected(self):
         # canonical has 1 keyword; translation sends 2 → 400
         ds = self._make_dataset(keywords=["cancer"])
-        payload = self._payload(ds, keywords=["cancer", "genomics"], language="fr")
+        payload = self._payload(keywords=["cancer", "genomics"], language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("keywords", r.json())
@@ -304,7 +298,6 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         stakeholder = {"type": "person", "name": "A", "roles": [ROLE_PI]}
         ds = self._make_dataset(stakeholders=[stakeholder])
         payload = self._payload(
-            ds,
             stakeholders=[
                 {"type": "person", "name": "A FR", "roles": [ROLE_PI]},
                 {"type": "person", "name": "B FR", "roles": [ROLE_RESEARCHER]},
@@ -319,7 +312,7 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         # existing translation, PUT adds keyword → 400
         ds = self._make_dataset(keywords=["cancer"])
         self._make_translation_in_db(ds, "de", keywords=["Krebs"])
-        payload = self._payload(ds, keywords=["Krebs", "Genomik"], language="de")
+        payload = self._payload(keywords=["Krebs", "Genomik"], language="de")
         r = self.one_authz_put(self._detail_url(ds, "de"), json=payload)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("keywords", r.json())
@@ -327,20 +320,20 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
     def test_create_translation_array_same_size_ok(self):
         # same number of keywords → 201
         ds = self._make_dataset(keywords=["cancer"])
-        payload = self._payload(ds, keywords=["cancer FR"], language="fr")
+        payload = self._payload(keywords=["cancer FR"], language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
     def test_create_translation_array_shrinks_ok(self):
         # fewer keywords than canonical → 201
         ds = self._make_dataset(keywords=["cancer", "genomics"])
-        payload = self._payload(ds, keywords=["cancer FR"], language="fr")
+        payload = self._payload(keywords=["cancer FR"], language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
     def test_create_translation_no_arrays_ok(self):
         # canonical has keywords, translation omits them entirely → 201
         ds = self._make_dataset(keywords=["cancer"])
-        payload = self._payload(ds, language="fr")
+        payload = self._payload(language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
