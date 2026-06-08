@@ -218,7 +218,9 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
             **kwargs,
         }
 
-    def _make_translation_in_db(self, dataset: Dataset, language: str, primary_contact=None, **kwargs) -> DatasetTranslation:
+    def _make_translation_in_db(
+        self, dataset: Dataset, language: str, primary_contact=None, **kwargs
+    ) -> DatasetTranslation:
         schema = KatsuDatasetModel(
             schema_version="1.0",
             title=f"Translation {language}",
