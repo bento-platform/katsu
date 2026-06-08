@@ -8,7 +8,6 @@ from bento_lib.auth.permissions import (
     P_CREATE_DATASET,
     P_EDIT_DATASET,
     P_DELETE_DATASET,
-    P_DELETE_DATA,
 )
 from bento_lib.auth.resources import RESOURCE_EVERYTHING, build_resource
 from bento_lib.responses import errors
@@ -24,7 +23,6 @@ from rest_framework.settings import api_settings
 from rest_framework.viewsets import ModelViewSet
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
-from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.cleanup.run_all import run_all_cleanup
@@ -36,9 +34,7 @@ from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
-from . import data_types as dt
 from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
-from .views_data_types import QUERYSET_FN, make_data_type_response_object
 from .models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
 from .serializers import (
     ProjectJsonSchemaSerializer,
@@ -331,74 +327,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         )
 
         return Response(dict(zip(summary_functions.keys(), summaries)))
-
-    @async_to_sync
-    @action(detail=True, methods=["get"], url_path="counts", url_name="counts",
-            permission_classes=[BentoAllowAny])
-    async def counts(self, request, **kwargs):
-        dataset = await Dataset.objects.filter(identifier=self.kwargs["identifier"]).afirst()
-        if dataset is None:
-            return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
-        authz.mark_authz_done(request)
-        return Response({"counts": dataset.data.get("counts") or []})
-
-    @async_to_sync
-    @action(detail=True, methods=["get"], url_path="data-types", url_name="data-types",
-            permission_classes=[BentoDeferToHandler])
-    async def data_types(self, request, **kwargs):
-        identifier = self.kwargs["identifier"]
-        try:
-            dataset = await Dataset.objects.aget(identifier=identifier)
-        except Dataset.DoesNotExist:
-            authz.mark_authz_done(request)
-            return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
-        project = await Project.objects.aget(identifier=dataset.project_id)
-        discovery_scope = ValidatedDiscoveryScope(project, dataset)
-        dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-        dt_response = sorted(
-            await asyncio.gather(*(
-                make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
-                for dt_id, dt_d in dt.DATA_TYPES.items()
-            )),
-            key=lambda d: d["id"],
-        )
-        authz.mark_authz_done(request)
-        return Response(dt_response)
-
-    @async_to_sync
-    @action(detail=True, methods=["get", "delete"], url_path=r"data-types/(?P<data_type>[^/.]+)",
-            url_name="data-type-detail", permission_classes=[BentoDeferToHandler])
-    async def data_type_detail(self, request, data_type, **kwargs):
-        identifier = self.kwargs["identifier"]
-        try:
-            dataset = await Dataset.objects.aget(identifier=identifier)
-        except Dataset.DoesNotExist:
-            authz.mark_authz_done(request)
-            return Response(errors.not_found_error(f"Dataset {identifier} not found"), status=status.HTTP_404_NOT_FOUND)
-        project = await Project.objects.aget(identifier=dataset.project_id)
-        if data_type not in QUERYSET_FN:
-            authz.mark_authz_done(request)
-            return Response(errors.not_found_error(f"Data type {data_type} doesn't exist"),
-                            status=status.HTTP_404_NOT_FOUND)
-        if request.method == "DELETE":
-            if not (await authz.async_evaluate_one(
-                request, build_resource(str(project.identifier), identifier, data_type), P_DELETE_DATA
-            )):
-                authz.mark_authz_done(request)
-                return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
-            authz.mark_authz_done(request)
-            await QUERYSET_FN[data_type](identifier).adelete()
-            lg = logger.bind(dataset_id=identifier, data_type=data_type)
-            n_removed = await run_all_cleanup(lg)
-            await lg.ainfo("ran cleanup after clearing data type via API", n_removed=n_removed)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        discovery_scope = ValidatedDiscoveryScope(project, dataset)
-        dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-        response_object = await make_data_type_response_object(
-            data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],
-        )
-        authz.mark_authz_done(request)
-        return Response(response_object)
 
     @async_to_sync
     @action(detail=True, methods=["get", "post"], url_path="translations", url_name="translations-list",
