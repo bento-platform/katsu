@@ -126,6 +126,60 @@ class DatasetSerializer(PydanticJSONBSerializer):
         return instance
 
 
+def _roles_for(contact) -> list:
+    return getattr(contact, "roles", []) or []
+
+
+def _check_translation_constraints(translation: ProjectScopedDatasetModel):
+    """
+    Validate two invariants that translations must respect vs. the canonical (English) dataset:
+      1. roles on primary_contact and each stakeholder cannot change.
+      2. no list field may gain items (translations can omit or keep, not add).
+    """
+    try:
+        dataset = Dataset.objects.get(identifier=str(translation.identifier))
+    except Dataset.DoesNotExist:
+        return
+
+    canonical = dataset.to_schema()
+    errors = {}
+
+    # Rule 1: roles immutable
+    c_roles = _roles_for(canonical.primary_contact)
+    t_roles = _roles_for(translation.primary_contact)
+    if c_roles != t_roles:
+        errors["primary_contact"] = ["Roles cannot change in a translation."]
+
+    c_stakeholders = canonical.stakeholders or []
+    t_stakeholders = translation.stakeholders or []
+    for i, (c_sh, t_sh) in enumerate(zip(c_stakeholders, t_stakeholders)):
+        if _roles_for(c_sh) != _roles_for(t_sh):
+            errors.setdefault("stakeholders", []).append(
+                f"Stakeholder at index {i}: roles cannot change in a translation."
+            )
+
+    # Rule 2: arrays cannot grow
+    _LIST_FIELDS = (
+        "taxa", "keywords", "resources", "stakeholders", "counts",
+        "links", "publications", "logos", "participant_criteria", "domain",
+    )
+    for field in _LIST_FIELDS:
+        c_val = getattr(canonical, field, None) or []
+        t_val = getattr(translation, field, None) or []
+        if isinstance(c_val, list) and isinstance(t_val, list) and len(t_val) > len(c_val):
+            errors[field] = [f"Translation cannot add items to '{field}' (canonical has {len(c_val)})."]
+
+    c_fs = canonical.funding_sources
+    t_fs = translation.funding_sources
+    if isinstance(c_fs, list) and isinstance(t_fs, list) and len(t_fs) > len(c_fs):
+        errors["funding_sources"] = [
+            f"Translation cannot add items to 'funding_sources' (canonical has {len(c_fs)})."
+        ]
+
+    if errors:
+        raise serializers.ValidationError(errors)
+
+
 class DatasetTranslationSerializer(PydanticJSONBSerializer):
     schema_class = ProjectScopedDatasetModel
 
@@ -133,6 +187,11 @@ class DatasetTranslationSerializer(PydanticJSONBSerializer):
         model = DatasetTranslation
         fields = "__all__"
         read_only_fields = ['created_at', 'updated_at', 'dataset']
+
+    def to_internal_value(self, data):
+        result = super().to_internal_value(data)
+        _check_translation_constraints(self._validated_schema)
+        return result
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
