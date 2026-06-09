@@ -324,16 +324,16 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-    def test_create_translation_array_shrinks_ok(self):
-        # fewer keywords than canonical → 201
+    def test_create_translation_array_shrinks_rejected(self):
+        # fewer keywords than canonical → 400
         ds = self._make_dataset(keywords=["cancer", "genomics"])
         payload = self._payload(keywords=["cancer FR"], language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_translation_no_arrays_ok(self):
-        # canonical has keywords, translation omits them entirely → 201
+    def test_create_translation_omits_arrays_rejected(self):
+        # canonical has keywords, translation omits them entirely → 400
         ds = self._make_dataset(keywords=["cancer"])
         payload = self._payload(language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)

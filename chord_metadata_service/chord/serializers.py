@@ -135,7 +135,8 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
     """
     Validate two invariants that translations must respect vs. the canonical (English) dataset:
       1. roles on primary_contact and each stakeholder cannot change.
-      2. no list field may gain items (translations can omit or keep, not add).
+      2. no field present in canonical may be removed (set to None) in a translation;
+         for list fields, lengths must also match exactly.
     """
     try:
         dataset = Dataset.objects.get(identifier=str(translation.identifier))
@@ -159,23 +160,24 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
                 f"Stakeholder at index {i}: roles cannot change in a translation."
             )
 
-    # Rule 2: arrays cannot grow
-    _LIST_FIELDS = (
-        "taxa", "keywords", "resources", "stakeholders", "counts",
-        "links", "publications", "logos", "participant_criteria", "domain",
-    )
-    for field in _LIST_FIELDS:
-        c_val = getattr(canonical, field, None) or []
-        t_val = getattr(translation, field, None) or []
-        if isinstance(c_val, list) and isinstance(t_val, list) and len(t_val) > len(c_val):
-            errors[field] = [f"Translation cannot add items to '{field}' (canonical has {len(c_val)})."]
+    # Rule 2: translations cannot remove or add data to any shared field
+    shared_fields = canonical.model_fields.keys() & translation.model_fields.keys()
+    for field in shared_fields:
+        c_val = getattr(canonical, field, None)
+        t_val = getattr(translation, field, None)
 
-    c_fs = canonical.funding_sources
-    t_fs = translation.funding_sources
-    if isinstance(c_fs, list) and isinstance(t_fs, list) and len(t_fs) > len(c_fs):
-        errors["funding_sources"] = [
-            f"Translation cannot add items to 'funding_sources' (canonical has {len(c_fs)})."
-        ]
+        if c_val is None or (isinstance(c_val, list) and len(c_val) == 0):
+            continue  # canonical has nothing here; translation free to omit too
+
+        if t_val is None:
+            errors[field] = [f"Translation cannot remove '{field}' (present in canonical)."]
+        elif isinstance(c_val, list):
+            t_len = len(t_val) if isinstance(t_val, list) else 0
+            if t_len != len(c_val):
+                errors[field] = [
+                    f"Translation must have the same number of items in '{field}' as canonical "
+                    f"(canonical has {len(c_val)}, translation has {t_len})."
+                ]
 
     if errors:
         raise serializers.ValidationError(errors)
