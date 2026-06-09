@@ -89,6 +89,7 @@ class DatasetSerializer(PydanticJSONBSerializer):
         data['created_at'] = instance.created_at
         data['updated_at'] = instance.updated_at
         data['counts_by_entity'] = self.get_counts_by_entity(instance)
+        data['translations'] = [t.language for t in instance.translations.all()]
         return data
 
     def get_counts_by_entity(self, obj):

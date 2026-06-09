@@ -161,6 +161,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
+        queryset = queryset.prefetch_related("translations")
         language = _get_preferred_language(self.request)
         if language != "en":
             queryset = queryset.prefetch_related(
