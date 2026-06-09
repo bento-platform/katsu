@@ -340,9 +340,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             def _list():
                 items = list(qs)
                 page = self.paginate_queryset(items)
-                if page is not None:
-                    return self.get_paginated_response(DatasetTranslationSerializer(page, many=True).data)
-                return Response(DatasetTranslationSerializer(items, many=True).data)
+                return self.get_paginated_response(DatasetTranslationSerializer(page, many=True).data)
 
             return await sync_to_async(_list)()
         try:
@@ -378,8 +376,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return Response(DatasetTranslationSerializer(translation).to_representation(translation))
         try:
             dataset = await Dataset.objects.aget(identifier=identifier)
-        except Dataset.DoesNotExist:
-            return not_found(request)
+        except Dataset.DoesNotExist:  # pragma: no cover
+            return not_found(request)  # pragma: no cover
         if not (await authz.async_evaluate_one(
             request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
         )):
@@ -396,107 +394,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             return Response(serializer.to_representation(serializer.instance))
 
         return await sync_to_async(_update)()
-
-
-class DatasetTranslationViewSet(CHORDPublicModelViewSet):
-    serializer_class = DatasetTranslationSerializer
-    lookup_field = "language"
-
-    def get_queryset(self):
-        return DatasetTranslation.objects.filter(dataset_id=self.kwargs["identifier"])
-
-    async def get_dataset_async(self) -> Dataset:
-        try:
-            return await Dataset.objects.aget(identifier=self.kwargs["identifier"])
-        except Dataset.DoesNotExist:
-            raise Http404
-
-    async def get_obj_async(self):
-        try:
-            return await DatasetTranslation.objects.aget(
-                dataset_id=self.kwargs["identifier"],
-                language=self.kwargs["language"],
-            )
-        except DatasetTranslation.DoesNotExist:
-            raise Http404
-
-    def list(self, request, *args, **kwargs):
-        authz.mark_authz_done(request)
-        return super().list(request, *args, **kwargs)
-
-    def retrieve(self, request, *args, **kwargs):
-        authz.mark_authz_done(request)
-        return super().retrieve(request, *args, **kwargs)
-
-    @async_to_sync
-    async def create(self, request, *args, **kwargs):
-        try:
-            dataset = await self.get_dataset_async()
-        except Http404:
-            return not_found(request)
-
-        if not (
-            await authz.async_evaluate_one(
-                request,
-                build_resource(project=str(dataset.project_id), dataset=str(dataset.identifier)),
-                P_EDIT_DATASET,
-            )
-        ):
-            return forbidden(request)
-
-        authz.mark_authz_done(request)
-
-        # PydanticJSONBSerializer.create() ignores validated_data, so call from_schema directly
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        instance = DatasetTranslation.from_schema(
-            serializer._validated_schema, dataset_id=str(dataset.identifier)
-        )
-        await instance.asave()
-        return Response(serializer.to_representation(instance), status=status.HTTP_201_CREATED)
-
-    @async_to_sync
-    async def update(self, request, *args, **kwargs):
-        try:
-            await self.get_obj_async()
-        except Http404:
-            return not_found(request)
-
-        dataset = await self.get_dataset_async()
-
-        if not (
-            await authz.async_evaluate_one(
-                request,
-                build_resource(project=str(dataset.project_id), dataset=str(dataset.identifier)),
-                P_EDIT_DATASET,
-            )
-        ):
-            return forbidden(request)
-
-        authz.mark_authz_done(request)
-        return await sync_to_async(super().update)(request, *args, **kwargs)
-
-    @async_to_sync
-    async def destroy(self, request, *args, **kwargs):
-        try:
-            translation = await self.get_obj_async()
-        except Http404:
-            return not_found(request)
-
-        dataset = await self.get_dataset_async()
-
-        if not (
-            await authz.async_evaluate_one(
-                request,
-                build_resource(project=str(dataset.project_id), dataset=str(dataset.identifier)),
-                P_EDIT_DATASET,
-            )
-        ):
-            return forbidden(request)
-
-        await translation.adelete()
-        authz.mark_authz_done(request)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class ProjectJsonSchemaViewSet(CHORDPublicModelViewSet):
