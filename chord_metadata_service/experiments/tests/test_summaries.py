@@ -1,9 +1,12 @@
+import uuid
+
 from bento_lib.discovery import DiscoveryConfig
 from django.test import override_settings
 
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord import models as cm
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE
 from ..summaries import dt_experiment_summary
 from .helpers import ExperimentTestCase
@@ -34,9 +37,17 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
         super().setUp()
 
         self.empty_project = cm.Project.objects.create(title="Empty Project", description="")
-        self.empty_dataset = cm.Dataset.objects.create(
-            title="Empty Dataset", description="", data_use=VALID_DATA_USE_1, project=self.empty_project
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Empty Dataset",
+            description="Empty Dataset description",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            identifier=str(uuid.uuid4()),
+            project=str(self.empty_project.identifier),
         )
+        self.empty_dataset = cm.Dataset.from_schema(schema)
+        self.empty_dataset.save()
+        self.empty_dataset.refresh_from_db()
 
     @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     async def test_summary_1_exp_no_perms_whole_instance(self):

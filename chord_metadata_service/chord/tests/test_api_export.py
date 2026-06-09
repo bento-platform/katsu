@@ -10,12 +10,12 @@ from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.export.cbioportal import CBIO_FILES_SET
 from chord_metadata_service.chord.export.utils import EXPORT_DIR
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Project, DatasetV2
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.logger import logger
 
-from .constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from .constants import VALID_DATASET_PRIMARY_CONTACT
 from .example_ingest import EXAMPLE_INGEST_PHENOPACKET
 
 
@@ -28,11 +28,11 @@ class ExportTest(AuthzAPITestCase):
             schema_version="1.0",
             title="Dataset 1",
             description="Some dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(project.identifier),
             identifier=str(uuid.uuid4()),
         )
-        dataset = DatasetV2.from_schema(schema)
+        dataset = Dataset.from_schema(schema)
         dataset.save()
         dataset.refresh_from_db()
         self.project_id = str(project.identifier)

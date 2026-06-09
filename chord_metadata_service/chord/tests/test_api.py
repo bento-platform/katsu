@@ -1,17 +1,18 @@
 import uuid
 
 from aioresponses import aioresponses
+from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.test import override_settings
 from rest_framework import status
 from .constants import (
     VALID_PROJECT_1,
-    valid_dataset_v2,
+    valid_dataset,
     PROJECT_JSON_SCHEMA_MISSING_PROJECT,
     valid_project_json_schema,
 )
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
-from ..models import Project, DatasetV2, ProjectJsonSchema
+from ..api_views import _serializer_error_messages
+from ..models import Project, Dataset, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST_DICT
 
@@ -191,22 +192,22 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         super().setUp()
 
         self.valid_payloads = [
-            valid_dataset_v2(self.project["identifier"]),
-            valid_dataset_v2(self.project["identifier"], title="Dataset V2 2"),
-            valid_dataset_v2(self.project["identifier"], title="Dataset V2 3",
-                             discovery=DISCOVERY_CONFIG_TEST_DICT),
+            valid_dataset(self.project["identifier"]),
+            valid_dataset(self.project["identifier"], title="Dataset 2"),
+            valid_dataset(self.project["identifier"], title="Dataset 3",
+                          discovery=DISCOVERY_CONFIG_TEST_DICT),
         ]
 
         _pc = {"type": "person", "name": "X", "roles": []}
         self.invalid_payloads = [
             # Missing schema_version
-            {"title": "Dataset V2 Bad", "description": "Test",
+            {"title": "Dataset Bad", "description": "Test",
              "primary_contact": _pc, "project": self.project["identifier"]},
             # Missing project
-            {"schema_version": "1.0", "title": "Dataset V2 Bad",
+            {"schema_version": "1.0", "title": "Dataset Bad",
              "description": "Test", "primary_contact": _pc},
             # Missing primary_contact
-            {"schema_version": "1.0", "title": "Dataset V2 Bad",
+            {"schema_version": "1.0", "title": "Dataset Bad",
              "description": "Test", "project": self.project["identifier"]},
         ]
 
@@ -214,10 +215,10 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         for i, d in enumerate(self.valid_payloads, 1):
             r = self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(DatasetV2.objects.count(), i)
-            self.assertEqual(DatasetV2.objects.filter(title=d["title"]).first().title, d["title"])
+            self.assertEqual(Dataset.objects.count(), i)
+            self.assertEqual(Dataset.objects.filter(title=d["title"]).first().title, d["title"])
 
-        self.assertEqual(DatasetV2.objects.count(), len(self.valid_payloads))
+        self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
     def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
@@ -229,7 +230,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_dataset_discovery_put_get(self):
-        r = self.one_authz_post("/api/datasets", json=valid_dataset_v2(self.project["identifier"]))
+        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"]))
         d = r.json()
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
@@ -273,7 +274,7 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset_v2.identifier}")
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
@@ -295,7 +296,7 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset_v2.identifier}")
+            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
@@ -319,29 +320,29 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
         self.valid_update = {
             "schema_version": "1.0",
-            "title": self.dataset_v2.title + "!",
+            "title": self.dataset.title + "!",
             "description": "Updated description",
             "primary_contact": {"type": "person", "name": "Test Contact", "roles": []},
-            "project": str(self.dataset_v2.project_id),
+            "project": str(self.dataset.project_id),
         }
 
     def test_update_dataset(self):
-        r = self.one_authz_put(f"/api/datasets/{self.dataset_v2.identifier}", json=self.valid_update)
+        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset_v2.refresh_from_db()
-        self.assertEqual(self.dataset_v2.title, self.valid_update["title"])
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.title, self.valid_update["title"])
 
     def test_update_dataset_partial(self):
         r = self.one_authz_patch(
-            f"/api/datasets/{self.dataset_v2.identifier}", json={"title": self.valid_update["title"]}
+            f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]}
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.dataset_v2.refresh_from_db()
-        self.assertEqual(self.dataset_v2.title, self.valid_update["title"])
+        self.dataset.refresh_from_db()
+        self.assertEqual(self.dataset.title, self.valid_update["title"])
 
     def test_update_dataset_changed_project(self):
         r = self.one_authz_put(
-            f"/api/datasets/{self.dataset_v2.identifier}",
+            f"/api/datasets/{self.dataset.identifier}",
             json={
                 **self.valid_update,
                 "project": str(self.project_2.identifier),
@@ -353,27 +354,51 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(res["errors"][0]["message"], "Dataset project ID cannot change")
 
     def test_update_dataset_forbidden(self):
-        r = self.one_no_authz_put(f"/api/datasets/{self.dataset_v2.identifier}", json=self.valid_update)
+        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_dataset_not_found(self):
         r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_update_dataset_invalid_body(self):
+        # Serializer validation failure path: correct project, but missing required Pydantic fields
+        r = self.one_authz_put(
+            f"/api/datasets/{self.dataset.identifier}",
+            json={"project": str(self.dataset.project_id)},
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class SerializerErrorMessagesTest(TestCase):
+    def test_list_errors(self):
+        # Both list and non-list branches of _serializer_error_messages
+        from rest_framework.settings import api_settings
+        result = _serializer_error_messages({
+            "title": ["too short"],
+            api_settings.NON_FIELD_ERRORS_KEY: ["global error"],
+        })
+        self.assertIn("title: too short", result)
+        self.assertIn("global error", result)
+
+    def test_non_list_error(self):
+        result = _serializer_error_messages({"field": {"nested": "err"}})
+        self.assertEqual(result, ["field: {'nested': 'err'}"])
+
 
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
     def test_delete_dataset(self):
-        r = self.one_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
+        r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
-        with self.assertRaises(DatasetV2.DoesNotExist):  # must not exist in DB anymore
-            self.dataset_v2.refresh_from_db()
+        with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
+            self.dataset.refresh_from_db()
 
     def test_delete_dataset_forbidden(self):
-        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset_v2.identifier}")
+        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
-        self.dataset_v2.refresh_from_db()  # must not raise DoesNotExist
+        self.dataset.refresh_from_db()  # must not raise DoesNotExist
 
     def test_delete_dataset_not_found(self):
         r = self.client.delete(f"/api/datasets/{uuid.uuid4()}")

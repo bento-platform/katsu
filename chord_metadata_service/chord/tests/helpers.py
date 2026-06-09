@@ -7,11 +7,10 @@ from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Dataset, DatasetV2, Project
+from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import (
-    VALID_DATA_USE_1,
     VALID_PROJECT_1,
-    VALID_DATASET_V2_PRIMARY_CONTACT,
+    VALID_DATASET_PRIMARY_CONTACT,
 )
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.restapi.utils import remove_computed_properties
@@ -26,31 +25,25 @@ __all__ = [
 
 class ProjectTestCase(TestCase):
     """
-    Helper TransactionTestCase class that creates a Project, Dataset.
+    Helper TransactionTestCase class that creates a Project and Dataset.
     Data is created once for the whole test case at the class level
     """
 
     @classmethod
     def setUpTestData(cls) -> None:
         cls.project = Project.objects.create(title="Project 1", description="")
-        cls.dataset = Dataset.objects.create(
-            title="Dataset 1",
-            description="Some dataset",
-            data_use=VALID_DATA_USE_1,
-            project=cls.project
-        )
         schema = KatsuDatasetModel(
             schema_version="1.0",
-            title="Dataset V2 1",
-            description="Some dataset v2",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            title="Dataset 1",
+            description="Some dataset",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             identifier=str(uuid.uuid4()),
             project=str(cls.project.identifier),
         )
-        cls.dataset_v2 = DatasetV2.from_schema(schema)
-        cls.dataset_v2.save()
-        cls.dataset_v2.refresh_from_db()
-        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset_v2)
+        cls.dataset = Dataset.from_schema(schema)
+        cls.dataset.save()
+        cls.dataset.refresh_from_db()
+        cls.scope = ValidatedDiscoveryScope(cls.project, cls.dataset)
 
         return super().setUpTestData()
 

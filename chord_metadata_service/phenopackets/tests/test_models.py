@@ -35,7 +35,7 @@ class BiosampleTest(ProjectTestCase):
             id="phenopacket_id:1",
             subject=self.individual,
             meta_data=self.meta_data,
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
         )
         # biosample_3 is not added to the phenopacket
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
@@ -353,7 +353,7 @@ class PhenopacketTest(ProjectTestCase):
             meta_data=self.meta_data,
             measurements=[c.VALID_MEASUREMENT_1, c.VALID_MEASUREMENT_2],
             medical_actions=c.VALID_MEDICAL_ACTIONS,
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
         )
         self.phenopacket.diseases.set([self.disease])
         self.phenopacket.interpretations.set([self.interpretation])
@@ -371,7 +371,7 @@ class PhenopacketTest(ProjectTestCase):
         obj = m.Phenopacket.objects.create(
             id="phenopacket_id:2",
             meta_data=self.meta_data,
-            dataset=self.dataset_v2,
+            dataset=self.dataset,
         )
 
         # should be populated with metadata stuff

@@ -21,7 +21,7 @@ from chord_metadata_service.chord.export.cbioportal import (
 )
 from chord_metadata_service.chord.export.utils import ExportError, ExportFileContext
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Project, DatasetV2
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.ingest.experiments import ingest_derived_experiment_results
@@ -34,7 +34,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 
 
-from .constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from .constants import VALID_DATASET_PRIMARY_CONTACT
 from .example_ingest import (
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_EXPERIMENT_RESULT,
@@ -51,11 +51,11 @@ class ExportCBioTest(TestCase):
             schema_version="1.0",
             title="Dataset 1",
             description="Some dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(p.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.d = DatasetV2.from_schema(schema)
+        self.d = Dataset.from_schema(schema)
         self.d.save()
         self.d.refresh_from_db()
         self.study_id = str(self.d.identifier)
@@ -176,7 +176,7 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = pm.Biosample.objects.filter(phenopackets=self.p)
+        samples = pm.Biosample.objects.filter(phenopackets=self.p).order_by("id")
 
         with io.StringIO() as output:
             async_to_sync(exp.sample_export)(samples, output)

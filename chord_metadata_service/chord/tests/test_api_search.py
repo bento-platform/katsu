@@ -21,7 +21,7 @@ from chord_metadata_service.experiments.tests.constants import (
 
 from .constants import (
     VALID_PROJECT_1,
-    VALID_DATASET_V2_PRIMARY_CONTACT,
+    VALID_DATASET_PRIMARY_CONTACT,
     valid_phenotypic_feature,
     TEST_SEARCH_QUERY_1,
     TEST_SEARCH_QUERY_2,
@@ -35,7 +35,7 @@ from .constants import (
     TEST_SEARCH_QUERY_10,
 )
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from ..models import Project, DatasetV2
+from ..models import Project, Dataset
 from ..data_types import (
     DATA_TYPE_EXPERIMENT,
     DATA_TYPE_PHENOPACKET
@@ -62,11 +62,11 @@ class SearchTest(AuthzAPITestCase):
             schema_version="1.0",
             title="Dataset 1",
             description="Test Dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.dataset = DatasetV2.from_schema(schema)
+        self.dataset = Dataset.from_schema(schema)
         self.dataset.save()
         self.dataset.refresh_from_db()
 
@@ -498,35 +498,35 @@ class SearchTest(AuthzAPITestCase):
         })
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_dataset_v2_summary_not_found(self):
+    def test_dataset_summary_not_found(self):
         r = self.client.get(
-            reverse("chord-dataset-v2-counts", kwargs={"identifier": str(uuid.uuid4())})
+            reverse("chord-dataset-counts", kwargs={"identifier": str(uuid.uuid4())})
         )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_dataset_v2_summary_empty_counts(self):
+    def test_dataset_summary_empty_counts(self):
         # Dataset created in setUp has no counts field in its data blob
         r = self.client.get(
-            reverse("chord-dataset-v2-counts", kwargs={"identifier": self.dataset.identifier})
+            reverse("chord-dataset-counts", kwargs={"identifier": self.dataset.identifier})
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), {"counts": []})
 
-    def test_dataset_v2_summary_with_counts(self):
+    def test_dataset_summary_with_counts(self):
         schema = KatsuDatasetModel(
             schema_version="1.0",
             title="Dataset With Counts",
             description="Test",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
             project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
             counts=[Count(count_entity="participants", value=42, description="Participant count")],
         )
-        ds = DatasetV2.from_schema(schema)
+        ds = Dataset.from_schema(schema)
         ds.save()
 
         r = self.client.get(
-            reverse("chord-dataset-v2-counts", kwargs={"identifier": ds.identifier})
+            reverse("chord-dataset-counts", kwargs={"identifier": ds.identifier})
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()

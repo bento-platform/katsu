@@ -7,7 +7,7 @@ from decimal import Decimal
 from humps import decamelize
 from structlog.stdlib import BoundLogger
 
-from chord_metadata_service.chord.models import Project, ProjectJsonSchema, DatasetV2
+from chord_metadata_service.chord.models import Project, ProjectJsonSchema, Dataset
 from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
@@ -454,7 +454,7 @@ def ingest_phenopacket(
         measurements=measurements,
         medical_actions=medical_actions,
         meta_data=meta_data_obj,
-        dataset=DatasetV2.objects.get(identifier=dataset_id),
+        dataset=Dataset.objects.get(identifier=dataset_id),
         extra_properties=extra_properties,
     )
 
@@ -474,7 +474,7 @@ def ingest_phenopacket(
 
 
 def ingest_phenopacket_workflow(json_data, dataset_id, lg: BoundLogger) -> list[pm.Phenopacket] | pm.Phenopacket:
-    project = Project.objects.get(identifier=DatasetV2.objects.get(identifier=dataset_id).project_id)
+    project = Project.objects.get(identifier=Dataset.objects.get(identifier=dataset_id).project_id)
     lg = lg.bind(project_id=str(project.identifier), dataset_id=dataset_id)
 
     project_schemas: Iterable[ExtensionSchemaDict] = (

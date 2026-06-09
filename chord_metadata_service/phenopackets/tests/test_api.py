@@ -8,10 +8,10 @@ from rest_framework.test import APITestCase
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Project, DatasetV2
+from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
-from chord_metadata_service.chord.tests.constants import VALID_DATASET_V2_PRIMARY_CONTACT
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.geo.tests.constants import KINGSTON_GEOM_JSON
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests import constants as restapi_c
@@ -262,18 +262,18 @@ class GetPhenopacketsApiTest(AuthzAPITestCase):
         self.p = Project.objects.create(title="Project 1", description="")
         schema1 = KatsuDatasetModel(
             schema_version="1.0", title="dataset_1", description="Some dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.d = DatasetV2.from_schema(schema1)
+        self.d = Dataset.from_schema(schema1)
         self.d.save()
         self.d.refresh_from_db()
         schema2 = KatsuDatasetModel(
             schema_version="1.0", title="dataset_2", description="Some dataset",
-            primary_contact=VALID_DATASET_V2_PRIMARY_CONTACT, project=str(self.p.identifier),
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
-        self.d2 = DatasetV2.from_schema(schema2)
+        self.d2 = Dataset.from_schema(schema2)
         self.d2.save()
         self.d2.refresh_from_db()
 

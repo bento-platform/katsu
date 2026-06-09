@@ -111,7 +111,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
     def test_ingesting_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         self.assertEqual(p.id, pm.Phenopacket.objects.get(id=p.id).id)
 
@@ -203,10 +203,10 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 
     def test_reingesting_updating_phenopackets_json(self):
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         p2 = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET_UPDATE, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_PHENOPACKET_UPDATE, self.dataset.identifier, logger
         )
 
         self.assertNotEqual(p.id, p2.id)
@@ -253,13 +253,13 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
     def test_ingesting_experiments_json(self):
         # ingest phenopackets data in order to match to biosample ids
         p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         self.assertEqual(p.id, pm.Phenopacket.objects.get(id=p.id).id)
 
         # ingest list of experiments
         experiments = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier, logger
         )
 
         # experiments
@@ -281,7 +281,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         # try ingesting the file with an invalid biosample ID
         with self.assertRaises(pm.Biosample.DoesNotExist):
             WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.dataset_v2.identifier, logger
+                EXAMPLE_INGEST_EXPERIMENT_BAD_BIOSAMPLE, self.dataset.identifier, logger
             )
 
     def test_ingesting_invalid_experiment_json(self):
@@ -302,14 +302,14 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
     def test_ingesting_experiment_results_json(self):
         # ingest list of experiments
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_PHENOPACKET, self.dataset.identifier, logger
         )
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
-            EXAMPLE_INGEST_EXPERIMENT, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_EXPERIMENT, self.dataset.identifier, logger
         )
         # ingest list of experiment results
         experiment_results = ingest_derived_experiment_results(
-            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_EXPERIMENT_RESULT, self.dataset.identifier, logger
         )
         self.assertEqual(len(experiment_results), len(EXAMPLE_INGEST_EXPERIMENT_RESULT))
         # check that it has been linked to the same experiment as the file it
@@ -325,7 +325,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
 class IngestMultipleTest(ProjectTestCase):
     def test_ingesting_multiple_phenopackets(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier, logger
         )
         self.assertIsInstance(ingested_phenopackets, list)
         for phenopacket in ingested_phenopackets:
@@ -336,7 +336,7 @@ class IngestISOAgeToNumberTest(ProjectTestCase):
 
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset_v2.identifier, logger
+            EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier, logger
         )
         self.assertIsInstance(ingested_phenopackets, list)
         # test for a single individual ind:NA20509001

@@ -15,7 +15,7 @@ from chord_metadata_service.chord.workflows.metadata import (
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
-from .constants import valid_dataset_v2
+from .constants import valid_dataset
 from .example_ingest import (
     EXAMPLE_INGEST_PHENOPACKET,
     EXAMPLE_INGEST_EXPERIMENT,
@@ -64,7 +64,7 @@ class WorkflowTest(APITestCase):
 class APITestCaseWithDataset(AuthzAPITestCaseWithProjectJSON):
     def setUp(self) -> None:
         super().setUp()
-        r = self.one_authz_post("/api/datasets", json=valid_dataset_v2(self.project["identifier"]))
+        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"]))
         self.dataset = r.json()
         self.dataset_id = self.dataset["identifier"]
 

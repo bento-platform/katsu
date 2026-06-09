@@ -3,6 +3,7 @@ import asyncio
 from bento_lib.auth.permissions import P_DELETE_DATA
 from bento_lib.auth.resources import build_resource
 from bento_lib.responses import errors
+from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
 
 from adrf.decorators import api_view
@@ -16,17 +17,17 @@ from typing import Callable
 from chord_metadata_service.authz.middleware import authz_middleware as authz
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 from chord_metadata_service.authz.types import DataPermissions
-from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
+from chord_metadata_service.cleanup.run_all import run_all_cleanup
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from . import data_types as dt
-from .models import DatasetV2, Project
+from .models import Dataset, Project
 
 QUERYSET_FN: dict[str, Callable] = {
     dt.DATA_TYPE_EXPERIMENT: lambda dataset_id: Experiment.objects.filter(dataset_id=dataset_id),
@@ -170,16 +171,15 @@ async def data_type_metadata_schema(_request: DrfRequest, data_type: str):
 
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
-async def dataset_v2_data_type_summary(request: DrfRequest, identifier: str):
+async def dataset_data_type_summary(request: DrfRequest, identifier: str):
     try:
-        dataset = await DatasetV2.objects.aget(identifier=identifier)
-    except DatasetV2.DoesNotExist:
+        dataset = await Dataset.objects.aget(identifier=identifier)
+    except (Dataset.DoesNotExist, ValidationError):
         return not_found_response(f"Dataset {identifier} not found")
 
     project = await Project.objects.aget(identifier=dataset.project_id)
     discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
-
     dt_response = sorted(
         await asyncio.gather(*(
             make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
@@ -192,10 +192,10 @@ async def dataset_v2_data_type_summary(request: DrfRequest, identifier: str):
 
 @api_view(["GET", "DELETE"])
 @permission_classes([BentoDeferToHandler])
-async def dataset_v2_data_type(request: DrfRequest, identifier: str, data_type: str):
+async def dataset_data_type(request: DrfRequest, identifier: str, data_type: str):
     try:
-        dataset = await DatasetV2.objects.aget(identifier=identifier)
-    except DatasetV2.DoesNotExist:
+        dataset = await Dataset.objects.aget(identifier=identifier)
+    except (Dataset.DoesNotExist, ValidationError):
         authz.mark_authz_done(request)
         return not_found_response(f"Dataset {identifier} not found")
 

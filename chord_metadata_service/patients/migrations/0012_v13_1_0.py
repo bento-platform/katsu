@@ -7,6 +7,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('chord', '0011_v13_1_0'),
         ('patients', '0011_individual_fts_extra'),
     ]
 
