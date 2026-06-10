@@ -131,7 +131,8 @@ def _roles_for(contact) -> list:
     return getattr(contact, "roles", []) or []
 
 
-_IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context"})
+_IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context",
+                               "discovery", "dac_id"})
 
 
 def _check_translation_constraints(translation: ProjectScopedDatasetModel):
@@ -141,7 +142,8 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
       2. no field present in canonical may be removed (set to None) in a translation;
          for list fields, lengths must also match exactly.
       3. non-translatable fields (version, release_date, last_modified, study_status,
-         study_context) must equal the canonical value exactly.
+         study_context, discovery, dac_id) must equal the canonical value exactly if
+         provided; omitting them is allowed.
     """
     try:
         dataset = Dataset.objects.get(identifier=str(translation.identifier))
