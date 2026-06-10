@@ -132,7 +132,7 @@ def _roles_for(contact) -> list:
 
 
 _IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context",
-                               "discovery", "dac_id"})
+                               "discovery", "pcgl_dac_id"})
 
 
 def _check_translation_constraints(translation: ProjectScopedDatasetModel):
