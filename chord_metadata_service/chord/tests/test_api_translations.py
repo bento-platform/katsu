@@ -337,3 +337,77 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         payload = self._payload(language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_translation_with_discovery_rejected(self):
+        # translations cannot include a discovery config → 400
+        ds = self._make_dataset()
+        payload = self._payload(language="fr", discovery={"rules": {}})
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("discovery", r.json())
+
+    def test_update_translation_with_discovery_rejected(self):
+        # PUT with discovery config on existing translation → 400
+        ds = self._make_dataset()
+        self._make_translation_in_db(ds, "fr")
+        payload = self._payload(language="fr", discovery={"rules": {}})
+        r = self.one_authz_put(self._detail_url(ds, "fr"), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("discovery", r.json())
+
+    # ---- Rule 3: non-translatable fields must match canonical ----
+
+    def test_create_translation_version_change_rejected(self):
+        # canonical version "1.0", translation sends "2.0" → 400
+        ds = self._make_dataset(version="1.0")
+        payload = self._payload(version="2.0", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("version", r.json())
+
+    def test_create_translation_version_same_ok(self):
+        # same version → 201
+        ds = self._make_dataset(version="1.0")
+        payload = self._payload(version="1.0", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    def test_create_translation_study_status_change_rejected(self):
+        # canonical study_status "ONGOING", translation sends "COMPLETED" → 400
+        ds = self._make_dataset(study_status="ONGOING")
+        payload = self._payload(study_status="COMPLETED", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("study_status", r.json())
+
+    def test_create_translation_study_context_change_rejected(self):
+        # canonical study_context "CLINICAL", translation sends "RESEARCH" → 400
+        ds = self._make_dataset(study_context="CLINICAL")
+        payload = self._payload(study_context="RESEARCH", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("study_context", r.json())
+
+    def test_create_translation_release_date_change_rejected(self):
+        # canonical release_date "2024-01-01", translation sends different date → 400
+        ds = self._make_dataset(release_date="2024-01-01")
+        payload = self._payload(release_date="2025-06-01", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("release_date", r.json())
+
+    def test_create_translation_last_modified_change_rejected(self):
+        # canonical last_modified "2024-01-01", translation sends different date → 400
+        ds = self._make_dataset(last_modified="2024-01-01")
+        payload = self._payload(last_modified="2025-06-01", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("last_modified", r.json())
+
+    def test_create_translation_adds_immutable_field_rejected(self):
+        # canonical has no study_status; translation provides one → 400
+        ds = self._make_dataset()
+        payload = self._payload(study_status="ONGOING", language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("study_status", r.json())

@@ -131,12 +131,17 @@ def _roles_for(contact) -> list:
     return getattr(contact, "roles", []) or []
 
 
+_IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context"})
+
+
 def _check_translation_constraints(translation: ProjectScopedDatasetModel):
     """
-    Validate two invariants that translations must respect vs. the canonical (English) dataset:
+    Validate three invariants that translations must respect vs. the canonical (English) dataset:
       1. roles on primary_contact and each stakeholder cannot change.
       2. no field present in canonical may be removed (set to None) in a translation;
          for list fields, lengths must also match exactly.
+      3. non-translatable fields (version, release_date, last_modified, study_status,
+         study_context) must equal the canonical value exactly.
     """
     try:
         dataset = Dataset.objects.get(identifier=str(translation.identifier))
@@ -179,6 +184,16 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
                     f"(canonical has {len(c_val)}, translation has {t_len})."
                 ]
 
+    # Rule 3: non-translatable fields must be identical to canonical
+    for field in _IMMUTABLE_FIELDS:
+        c_val = getattr(canonical, field, None)
+        t_val = getattr(translation, field, None)
+        if c_val != t_val:
+            errors[field] = [
+                f"'{field}' cannot change in a translation "
+                f"(expected {c_val!r}, got {t_val!r})."
+            ]
+
     if errors:
         raise serializers.ValidationError(errors)
 
@@ -200,6 +215,8 @@ class DatasetTranslationSerializer(PydanticJSONBSerializer):
         return None
 
     def to_internal_value(self, data):
+        if "discovery" in data:
+            raise serializers.ValidationError({"discovery": ["Translations cannot include a discovery configuration."]})
         dataset_id = self._resolve_dataset_id()
         if dataset_id is not None:
             try:
