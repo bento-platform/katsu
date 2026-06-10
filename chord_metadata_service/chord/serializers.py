@@ -166,8 +166,12 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
             )
 
     # Rule 2: translations cannot remove or add data to any shared field
+    # (immutable fields are exempt — omitting them is always allowed)
     shared_fields = canonical.model_fields.keys() & translation.model_fields.keys()
     for field in shared_fields:
+        if field in _IMMUTABLE_FIELDS:
+            continue
+
         c_val = getattr(canonical, field, None)
         t_val = getattr(translation, field, None)
 
@@ -184,11 +188,11 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
                     f"(canonical has {len(c_val)}, translation has {t_len})."
                 ]
 
-    # Rule 3: non-translatable fields must be identical to canonical
+    # Rule 3: if an immutable field is present in the translation it must match canonical exactly
     for field in _IMMUTABLE_FIELDS:
         c_val = getattr(canonical, field, None)
         t_val = getattr(translation, field, None)
-        if c_val != t_val:
+        if t_val is not None and t_val != c_val:
             errors[field] = [
                 f"'{field}' cannot change in a translation "
                 f"(expected {c_val!r}, got {t_val!r})."

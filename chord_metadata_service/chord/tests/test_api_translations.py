@@ -411,3 +411,10 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("study_status", r.json())
+
+    def test_create_translation_omits_immutable_field_ok(self):
+        # canonical has version; translation omits it entirely → 201
+        ds = self._make_dataset(version="1.0")
+        payload = self._payload(language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
