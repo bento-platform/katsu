@@ -25,6 +25,13 @@ urlpatterns = [
 
     path('private/search', views_search.chord_private_search, name="private-search"),
 
+    path('datasets/<str:identifier>/summary', views_search.dataset_summary, name="chord-dataset-summary"),
+    path('datasets/<str:identifier>/counts', views_search.dataset_counts, name="chord-dataset-counts"),
+    path('datasets/<str:identifier>/data-types', views_data_types.dataset_data_type_summary,
+         name="chord-dataset-data-type-summary"),
+    path('datasets/<str:identifier>/data-types/<str:data_type>', views_data_types.dataset_data_type,
+         name="chord-dataset-data-type"),
+
     path('private/datasets/<str:identifier>/search', views_search.private_dataset_search,
          name="private-dataset-search"),
 ]

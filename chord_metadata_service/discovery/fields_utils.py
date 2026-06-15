@@ -136,17 +136,17 @@ def auto_binning_generator(c: AutoBinsNumberFieldConfig) -> Iterator[tuple[int, 
 
     # Error checking / validation is handled by Pydantic in bento_lib.
     # We have the following guarantees:
-    #  * c.minimum <= c.maximum
+    #  * c.minimum <= c.maximum where both exist
     #  * none of the following: c.taper_right < c.taper_left or c.minimum > c.taper_left or c.taper_right > c.maximum
     #  * (c.taper_right - c.taper_left) % c.bin_size == 0
 
-    if c.minimum != c.taper_left:
+    if c.minimum is None or c.minimum != c.taper_left:
         yield c.minimum, c.taper_left, f"< {c.taper_left}"
 
     for v in range(c.taper_left, c.taper_right, c.bin_size):
         yield v, v + c.bin_size, f"[{v}, {v + c.bin_size})"
 
-    if c.maximum != c.taper_right:
+    if c.maximum is None or c.maximum != c.taper_right:
         yield c.taper_right, c.maximum, f"≥ {c.taper_right}"
 
 

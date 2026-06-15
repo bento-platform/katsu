@@ -160,19 +160,19 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_dataset_data_type_summary(self):
         r = self.dt_authz_full_get(
-            reverse("dataset-data-types", kwargs={"identifier": self.dataset.identifier}))
+            reverse("chord-dataset-data-type-summary", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
         r = self.dt_authz_full_get(
-            reverse("dataset-data-types", kwargs={"identifier": str(uuid.uuid4())}))
+            reverse("chord-dataset-data-type-summary", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
         r = self.dt_authz_full_get(
-            reverse("dataset-data-types", kwargs={"identifier": "not-a-uuid"}))
+            reverse("chord-dataset-data-type-summary", kwargs={"identifier": "not-a-uuid"}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def _dataset_data_type_url(self, dt: str, ds_id: str = ""):
-        return reverse("dataset-data-type-detail", kwargs={
+        return reverse("chord-dataset-data-type", kwargs={
             "identifier": ds_id or self.dataset.identifier,
             "data_type": dt
         })

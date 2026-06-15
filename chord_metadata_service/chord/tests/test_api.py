@@ -1,8 +1,8 @@
 import uuid
 
 from aioresponses import aioresponses
+from django.test import TestCase, override_settings
 from django.urls import reverse
-from django.test import override_settings
 from rest_framework import status
 from .constants import (
     VALID_PROJECT_1,
@@ -11,6 +11,7 @@ from .constants import (
     valid_project_json_schema,
 )
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
+from ..api_views import _serializer_error_messages
 from ..models import Project, Dataset, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST_DICT
@@ -359,6 +360,30 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
     def test_update_dataset_not_found(self):
         r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_dataset_invalid_body(self):
+        # Serializer validation failure path: correct project, but missing required Pydantic fields
+        r = self.one_authz_put(
+            f"/api/datasets/{self.dataset.identifier}",
+            json={"project": str(self.dataset.project_id)},
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class SerializerErrorMessagesTest(TestCase):
+    def test_list_errors(self):
+        # Both list and non-list branches of _serializer_error_messages
+        from rest_framework.settings import api_settings
+        result = _serializer_error_messages({
+            "title": ["too short"],
+            api_settings.NON_FIELD_ERRORS_KEY: ["global error"],
+        })
+        self.assertIn("title: too short", result)
+        self.assertIn("global error", result)
+
+    def test_non_list_error(self):
+        result = _serializer_error_messages({"field": {"nested": "err"}})
+        self.assertEqual(result, ["field: {'nested': 'err'}"])
 
 
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):

@@ -1,3 +1,4 @@
+import asyncio
 import itertools
 import json
 
@@ -21,20 +22,23 @@ from structlog.stdlib import BoundLogger
 
 from typing import Awaitable, Callable
 
+from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
-from chord_metadata_service.authz.permissions import BentoDeferToHandler
+from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
 
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 
 from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
+from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
 from chord_metadata_service.logger import logger as katsu_logger
 
 from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
+from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.utils import build_experiments_by_subject, get_biosamples_with_experiment_details
 
 from .data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET, DATA_TYPES
@@ -411,3 +415,41 @@ async def private_dataset_search(request: DrfRequest, identifier: str):
         return bad_request_response(err)
 
     return Response(build_search_response(data, start))
+
+
+DATASET_DATA_TYPE_SUMMARY_FUNCTIONS = {
+    DATA_TYPE_PHENOPACKET: dt_phenopacket_summary,
+    DATA_TYPE_EXPERIMENT: dt_experiment_summary,
+}
+
+
+@async_api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def dataset_summary(request: DrfRequest, identifier: str):
+    try:
+        dataset = await Dataset.objects.aget(identifier=identifier)
+    except (Dataset.DoesNotExist, ValidationError) as e:
+        return Response(errors.not_found_error(str(e)), status=status.HTTP_404_NOT_FOUND)
+
+    project = await Project.objects.aget(identifier=dataset.project_id)
+    discovery_scope = ValidatedDiscoveryScope(project, dataset)
+    dt_permissions = await get_data_type_query_permissions(
+        request,
+        data_types=list(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys()),
+        resource=discovery_scope.as_authz_resource(),
+    )
+    summaries = await asyncio.gather(
+        *map(lambda d: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[d](discovery_scope, dt_permissions[d]),
+             DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
+    )
+    return Response({d: s for d, s in zip(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(), summaries)})
+
+
+@async_api_view(["GET"])
+@permission_classes([BentoAllowAny])
+async def dataset_counts(request: DrfRequest, identifier: str):
+    dataset = await Dataset.objects.filter(identifier=identifier).afirst()
+    if dataset is None:
+        return Response(errors.not_found_error("Dataset not found"), status=status.HTTP_404_NOT_FOUND)
+    authz_middleware.mark_authz_done(request)
+    return Response({"counts": dataset.data.get("counts") or []})
