@@ -1,6 +1,7 @@
 import uuid
 
-from aioresponses import aioresponses
+from aiointercept import aiointercept
+from asgiref.sync import async_to_sync
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
@@ -49,34 +50,34 @@ class CreateProjectAPITest(AuthzAPITestCase):
             }
         ]
 
-    def test_create_project(self):
+    async def test_create_project(self):
         for i, p in enumerate(self.valid_payloads, 1):
-            r = self.one_authz_post(reverse("project-list"), json=p)
+            r = await self.one_authz_post(reverse("project-list"), json=p)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-            self.assertEqual(Project.objects.count(), i)
-            self.assertEqual(Project.objects.get(title=p["title"]).description, p["description"])
+            self.assertEqual(await Project.objects.acount(), i)
+            self.assertEqual((await Project.objects.aget(title=p["title"])).description, p["description"])
 
-        self.assertEqual(Project.objects.count(), len(self.valid_payloads))
+        self.assertEqual(await Project.objects.acount(), len(self.valid_payloads))
 
-    def test_create_project_invalid(self):
+    async def test_create_project_invalid(self):
         for p in self.invalid_payloads:
-            r = self.one_authz_post(reverse("project-list"), json=p)
+            r = await self.one_authz_post(reverse("project-list"), json=p)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_project_forbidden(self):
-        r = self.one_no_authz_post(reverse("project-list"), json=self.valid_payloads[0])
+    async def test_create_project_forbidden(self):
+        r = await self.one_no_authz_post(reverse("project-list"), json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_list_projects(self):
-        with aioresponses() as m:
+    async def test_list_projects(self):
+        async with aiointercept(mock_external_urls=True) as m:
             # Mock authorization for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get("/api/projects")
+            r = await self.async_client.get("/api/projects")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             res = r.json()
             self.assertEqual(len(res["results"]), 1)
@@ -95,13 +96,13 @@ class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
 class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_project_detail_with_counts(self):
-        with aioresponses() as m:
+    async def test_project_detail_with_counts(self):
+        async with aiointercept(mock_external_urls=True) as m:
             # Mock authorization for the main request AND for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get(f"/api/projects/{self.project['identifier']}")
+            r = await self.async_client.get(f"/api/projects/{self.project['identifier']}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             project = r.json()
 
@@ -117,13 +118,13 @@ class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
                 self.assertEqual(project["counts"][entity], 0)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_project_detail_with_bool_permissions(self):
-        with aioresponses() as m:
+    async def test_project_detail_with_bool_permissions(self):
+        async with aiointercept(mock_external_urls=True) as m:
             # Mock authorization with boolean-only permissions
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
 
-            r = self.client.get(f"/api/projects/{self.project['identifier']}")
+            r = await self.async_client.get(f"/api/projects/{self.project['identifier']}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             project = r.json()
 
@@ -147,43 +148,43 @@ class UpdateProjectTest(AuthzAPITestCaseWithProjectJSON):
     def without_times(d: dict) -> dict:
         return {k: v for k, v in d.items() if k not in ("updated", "created")}
 
-    def test_project_update(self):
-        r = self.one_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
+    async def test_project_update(self):
+        r = await self.one_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertDictEqual(self.without_times(r.json()), self.without_times(self.update_body))
 
-    def test_project_update_not_found(self):
-        r = self.one_authz_put("/api/projects/not-found", json=self.update_body)
+    async def test_project_update_not_found(self):
+        r = await self.one_authz_put("/api/projects/not-found", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_project_update_forbidden(self):
-        r = self.one_no_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
+    async def test_project_update_forbidden(self):
+        r = await self.one_no_authz_put(f"/api/projects/{self.project['identifier']}", json=self.update_body)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_project_discovery_put_get(self):
+    async def test_project_discovery_put_get(self):
         # starting from VALID_PROJECT_1, which is a very basic project without a discovery configuration.
 
-        r = self.one_authz_put(
+        r = await self.one_authz_put(
             f"/api/projects/{self.project['identifier']}",
             json={**self.without_times(self.project), "discovery": DISCOVERY_CONFIG_TEST_DICT},
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
-        r = self.one_authz_get(f"/api/projects/{self.project['identifier']}")
+        r = await self.one_authz_get(f"/api/projects/{self.project['identifier']}")
         self.assertDictEqual(r.json()["discovery"], DISCOVERY_CONFIG_TEST.model_dump(mode="json"))
 
 
 class DeleteProjectTest(AuthzAPITestCaseWithProjectJSON):
-    def test_delete_project(self):
-        r = self.one_authz_delete(f"/api/projects/{self.project['identifier']}")
+    async def test_delete_project(self):
+        r = await self.one_authz_delete(f"/api/projects/{self.project['identifier']}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_delete_project_not_found(self):
-        r = self.one_authz_delete("/api/projects/not-found")
+    async def test_delete_project_not_found(self):
+        r = await self.one_authz_delete("/api/projects/not-found")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_delete_project_forbidden(self):
-        r = self.one_no_authz_delete(f"/api/projects/{self.project['identifier']}")
+    async def test_delete_project_forbidden(self):
+        r = await self.one_no_authz_delete(f"/api/projects/{self.project['identifier']}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -211,45 +212,45 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
              "description": "Test", "project": self.project["identifier"]},
         ]
 
-    def test_create_dataset(self):
+    async def test_create_dataset(self):
         for i, d in enumerate(self.valid_payloads, 1):
-            r = self.one_authz_post("/api/datasets", json=d)
+            r = await self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_201_CREATED)
             self.assertEqual(Dataset.objects.count(), i)
             self.assertEqual(Dataset.objects.filter(title=d["title"]).first().title, d["title"])
 
         self.assertEqual(Dataset.objects.count(), len(self.valid_payloads))
 
-    def test_create_dataset_invalid(self):
+    async def test_create_dataset_invalid(self):
         for d in self.invalid_payloads:
-            r = self.one_authz_post("/api/datasets", json=d)
+            r = await self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_dataset_forbidden(self):
-        r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
+    async def test_create_dataset_forbidden(self):
+        r = await self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_dataset_discovery_put_get(self):
-        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"]))
+    async def test_dataset_discovery_put_get(self):
+        r = await self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"]))
         d = r.json()
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        r = self.one_authz_put(f"/api/datasets/{d['identifier']}", json={**d, "discovery": DISCOVERY_CONFIG_TEST_DICT})
+        r = await self.one_authz_put(f"/api/datasets/{d['identifier']}", json={**d, "discovery": DISCOVERY_CONFIG_TEST_DICT})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
-        r = self.one_authz_get(f"/api/datasets/{d['identifier']}")
+        r = await self.one_authz_get(f"/api/datasets/{d['identifier']}")
         self.assertDictEqual(r.json()["discovery"], DISCOVERY_CONFIG_TEST.model_dump(mode="json"))
 
 
 class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_list_datasets(self):
-        with aioresponses() as m:
+    async def test_list_datasets(self):
+        async with aiointercept(mock_external_urls=True) as m:
             # Mock authorization for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get("/api/datasets")
+            r = await self.async_client.get("/api/datasets")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             res = r.json()
             self.assertEqual(len(res["results"]), 1)
@@ -268,13 +269,13 @@ class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
 class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_dataset_detail_with_counts(self):
-        with aioresponses() as m:
+    async def test_dataset_detail_with_counts(self):
+        async with aiointercept(mock_external_urls=True) as m:
             # Mock authorization for the main request AND for counts computation
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)
 
-            r = self.client.get(f"/api/datasets/{self.dataset.identifier}")
+            r = await self.async_client.get(f"/api/datasets/{self.dataset.identifier}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             dataset = r.json()
 
@@ -290,8 +291,8 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
                 self.assertEqual(dataset["counts_by_entity"][entity], 0)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
-    def test_dataset_detail_with_bool_permissions(self):
-        with aioresponses() as m:
+    async def test_dataset_detail_with_bool_permissions(self):
+        async with aiointercept(mock_external_urls=True) as m:
             # Mock authorization with boolean-only permissions
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
             self.mock_authz_eval_result(m, self.dt_bool_eval_res)
@@ -326,22 +327,22 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
             "project": str(self.dataset.project_id),
         }
 
-    def test_update_dataset(self):
-        r = self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
+    async def test_update_dataset(self):
+        r = await self.one_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
         self.assertEqual(self.dataset.title, self.valid_update["title"])
 
-    def test_update_dataset_partial(self):
-        r = self.one_authz_patch(
+    async def test_update_dataset_partial(self):
+        r = await self.one_authz_patch(
             f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]}
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
         self.assertEqual(self.dataset.title, self.valid_update["title"])
 
-    def test_update_dataset_changed_project(self):
-        r = self.one_authz_put(
+    async def test_update_dataset_changed_project(self):
+        r = await self.one_authz_put(
             f"/api/datasets/{self.dataset.identifier}",
             json={
                 **self.valid_update,
@@ -353,17 +354,17 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(res["message"], "Bad Request")
         self.assertEqual(res["errors"][0]["message"], "Dataset project ID cannot change")
 
-    def test_update_dataset_forbidden(self):
-        r = self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
+    async def test_update_dataset_forbidden(self):
+        r = await self.one_no_authz_put(f"/api/datasets/{self.dataset.identifier}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_update_dataset_not_found(self):
-        r = self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", json=self.valid_update)
+    async def test_update_dataset_not_found(self):
+        r = await self.one_authz_put(f"/api/datasets/{uuid.uuid4()}", json=self.valid_update)
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_dataset_invalid_body(self):
+    async def test_update_dataset_invalid_body(self):
         # Serializer validation failure path: correct project, but missing required Pydantic fields
-        r = self.one_authz_put(
+        r = await self.one_authz_put(
             f"/api/datasets/{self.dataset.identifier}",
             json={"project": str(self.dataset.project_id)},
         )
@@ -388,20 +389,20 @@ class SerializerErrorMessagesTest(TestCase):
 
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
-    def test_delete_dataset(self):
-        r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
+    async def test_delete_dataset(self):
+        r = await self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
         with self.assertRaises(Dataset.DoesNotExist):  # must not exist in DB anymore
             self.dataset.refresh_from_db()
 
-    def test_delete_dataset_forbidden(self):
-        r = self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
+    async def test_delete_dataset_forbidden(self):
+        r = await self.one_no_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.dataset.refresh_from_db()  # must not raise DoesNotExist
 
-    def test_delete_dataset_not_found(self):
-        r = self.client.delete(f"/api/datasets/{uuid.uuid4()}")
+    async def test_delete_dataset_not_found(self):
+        r = await self.async_client.delete(f"/api/datasets/{uuid.uuid4()}")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -415,76 +416,80 @@ class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
         # Invalid project_id
         self.project_json_schema_invalid_payload = valid_project_json_schema(project_id="an-id-that-does-not-exist")
 
-    def test_create_project_json_schema(self):
-        r = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
-        r_invalid = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_invalid_payload)
+    async def test_create_project_json_schema(self):
+        r = await self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
+        r_invalid = await self.one_authz_post(
+            "/api/project_json_schemas", json=self.project_json_schema_invalid_payload
+        )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r_invalid.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(ProjectJsonSchema.objects.count(), 1)
 
-    def test_create_project_json_schema_missing_project(self):
-        r = self.one_authz_post("/api/project_json_schemas", json=PROJECT_JSON_SCHEMA_MISSING_PROJECT)
+    async def test_create_project_json_schema_missing_project(self):
+        r = await self.one_authz_post("/api/project_json_schemas", json=PROJECT_JSON_SCHEMA_MISSING_PROJECT)
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_project_json_schema_forbidden(self):
-        r = self.one_no_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
+    async def test_create_project_json_schema_forbidden(self):
+        r = await self.one_no_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_create_constraint(self):
-        r = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
+    async def test_create_constraint(self):
+        r = await self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
-        r_duplicate = self.one_authz_post("/api/project_json_schemas", json=self.project_json_schema_valid_payload)
+        r_duplicate = await self.one_authz_post(
+            "/api/project_json_schemas", json=self.project_json_schema_valid_payload
+        )
         # used to be an IntegrityError raised; upgrade to DRF 3.15 made this a 400:
         self.assertEqual(r_duplicate.status_code, status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
-
-    def setUp(self) -> None:
+    @async_to_sync
+    async def setUp(self) -> None:
         super().setUp()
 
-        self.pjs = self.one_authz_post(
+        self.pjs = (await self.one_authz_post(
             "/api/project_json_schemas", json=valid_project_json_schema(project_id=self.project["identifier"])
-        ).json()
+        )).json()
 
         upd = valid_project_json_schema(project_id=self.project["identifier"], )
         upd["required"] = True
         self.upd = upd
 
-    def test_update_project_json_schema(self):
+    async def test_update_project_json_schema(self):
         self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs['id']).required, False)
-        r = self.one_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
+        r = await self.one_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs['id']).required, True)
 
-    def test_update_project_json_schema_not_found(self):
+    async def test_update_project_json_schema_not_found(self):
         # don't need auth
-        r = self.client.put("/api/project_json_schemas/does-not-exist", json=self.upd)
+        r = await self.async_client.put("/api/project_json_schemas/does-not-exist", json=self.upd)
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_update_project_json_schema_forbidden(self):
-        r = self.one_no_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
+    async def test_update_project_json_schema_forbidden(self):
+        r = await self.one_no_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
 
 class DeleteProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
-
-    def setUp(self) -> None:
+    @async_to_sync
+    async def setUp(self) -> None:
         super().setUp()
 
-        self.pjs = self.one_authz_post(
+        self.pjs = (await self.one_authz_post(
             "/api/project_json_schemas", json=valid_project_json_schema(project_id=self.project["identifier"])
-        ).json()
+        )).json()
 
-    def test_delete_project_json_schema(self):
-        r = self.one_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
+    async def test_delete_project_json_schema(self):
+        r = await self.one_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_delete_project_json_schema_not_found(self):
-        r = self.one_authz_delete("/api/project_json_schemas/does-not-exist")
+    async def test_delete_project_json_schema_not_found(self):
+        r = await self.one_authz_delete("/api/project_json_schemas/does-not-exist")
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_delete_project_json_schema_forbidden(self):
-        r = self.one_no_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
+    async def test_delete_project_json_schema_forbidden(self):
+        r = await self.one_no_authz_delete(f"/api/project_json_schemas/{self.pjs['id']}")
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)

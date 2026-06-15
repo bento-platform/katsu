@@ -155,25 +155,25 @@ class IngestDerivedExperimentResultsTest(APITestCaseWithDataset):
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, self.dataset_id, logger)
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](EXAMPLE_INGEST_EXPERIMENT, self.dataset_id, logger)
 
-    def test_ingest_derived_experiment_results(self):
+    async def test_ingest_derived_experiment_results(self):
         # ingest list of experiment results
-        r = self.one_authz_post(
+        r = await self.one_authz_post(
             reverse("ingest-derived-experiment-results", args=(self.dataset_id,)),
             json=EXAMPLE_INGEST_EXPERIMENT_RESULT,
         )
 
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
 
-    def test_ingest_derived_experiment_results_forbidden(self):
+    async def test_ingest_derived_experiment_results_forbidden(self):
         # forbidden
-        r = self.one_no_authz_post(
+        r = await self.one_no_authz_post(
             reverse("ingest-derived-experiment-results", args=(self.dataset_id,)),
             json=EXAMPLE_INGEST_EXPERIMENT_RESULT,
         )
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_ingest_derived_experiment_results_dataset_dne(self):
-        r = self.one_authz_post(
+    async def test_ingest_derived_experiment_results_dataset_dne(self):
+        r = await self.one_authz_post(
             reverse("ingest-derived-experiment-results", args=(str(uuid.uuid4()),)),
             json=EXAMPLE_INGEST_EXPERIMENT_RESULT,
         )

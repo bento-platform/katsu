@@ -49,35 +49,35 @@ class ExportTest(AuthzAPITestCase):
             "object_id": self.study_id,
         }
 
-    def test_export_cbio_no_body(self):
+    async def test_export_cbio_no_body(self):
         # Test with no export body
-        r = self.one_authz_post(reverse("export"), content_type="application/json")
+        r = await self.one_authz_post(reverse("export"), content_type="application/json")
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_export_cbio_no_path(self):
+    async def test_export_cbio_no_path(self):
         # Test with no output_path: expect a tar archive to be returned
-        r = self.one_authz_post(reverse("export"), json=self.base_export_payload)
+        r = await self.one_authz_post(reverse("export"), json=self.base_export_payload)
         self.assertEqual(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
 
-    def test_export_cbio_object_dne(self):
-        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "object_id": str(uuid.uuid4())})
+    async def test_export_cbio_object_dne(self):
+        r = await self.one_authz_post(reverse("export"), json={**self.base_export_payload, "object_id": str(uuid.uuid4())})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_export_cbio_format_dne(self):
-        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "format": "does-not-exist"})
+    async def test_export_cbio_format_dne(self):
+        r = await self.one_authz_post(reverse("export"), json={**self.base_export_payload, "format": "does-not-exist"})
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_export_cbio_dne_for_project(self):
-        r = self.one_authz_post(
+    async def test_export_cbio_dne_for_project(self):
+        r = await self.one_authz_post(
             reverse("export"), json={**self.base_export_payload, "object_type": "project", "object_id": self.project_id}
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_export_cbio_with_path(self):
+    async def test_export_cbio_with_path(self):
         tmp_dir = tempfile.mkdtemp()
         try:
             # Test with output_path provided: expect files created in this directory
-            r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "output_path": tmp_dir})
+            r = await self.one_authz_post(reverse("export"), json={**self.base_export_payload, "output_path": tmp_dir})
             self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
             # TODO: just write within the directory that has been provided
             export_path = os.path.join(tmp_dir, EXPORT_DIR, self.study_id)
@@ -90,11 +90,13 @@ class ExportTest(AuthzAPITestCase):
 
         # TODO: More
 
-    def test_export_cbio_with_path_dne(self):
+    async def test_export_cbio_with_path_dne(self):
         # Test with output_path provided (but it does not exist!)
-        r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "output_path": "does_not_exist"})
+        r = await self.one_authz_post(
+            reverse("export"), json={**self.base_export_payload, "output_path": "does_not_exist"}
+        )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_export_cbio_forbidden(self):
-        r = self.one_no_authz_post(reverse("export"), json=self.base_export_payload)
+    async def test_export_cbio_forbidden(self):
+        r = await self.one_no_authz_post(reverse("export"), json=self.base_export_payload)
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
