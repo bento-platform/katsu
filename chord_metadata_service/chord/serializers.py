@@ -128,6 +128,7 @@ class DatasetSerializer(PydanticJSONBSerializer):
 
 
 def _roles_for(contact) -> list:
+    """Return roles list for a contact, defaulting to empty list."""
     return getattr(contact, "roles", []) or []
 
 
