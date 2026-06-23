@@ -142,8 +142,8 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
     """
     Validate three invariants that translations must respect vs. the canonical (English) dataset:
       1. roles on primary_contact and each stakeholder cannot change.
-      2. no field present in canonical may be removed (set to None) in a translation;
-         for list fields, lengths must also match exactly.
+      2. no field present in canonical may be removed (set to None) in a translation, and
+         no field absent in canonical may be introduced; for list fields, lengths must also match exactly.
       3. non-translatable fields (version, release_date, last_modified, study_status,
          study_context, discovery, dac_id) must equal the canonical value exactly if
          provided; omitting them is allowed.
@@ -180,8 +180,12 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
         c_val = getattr(canonical, field, None)
         t_val = getattr(translation, field, None)
 
-        if c_val is None or (isinstance(c_val, list) and len(c_val) == 0):
-            continue  # canonical has nothing here; translation free to omit too
+        c_empty = c_val is None or (isinstance(c_val, list) and len(c_val) == 0)
+        t_empty = t_val is None or (isinstance(t_val, list) and len(t_val) == 0)
+        if c_empty:
+            if not t_empty:
+                errors[field] = [f"Translation cannot introduce '{field}' (not present in canonical)."]
+            continue
 
         if t_val is None:
             errors[field] = [f"Translation cannot remove '{field}' (present in canonical)."]
