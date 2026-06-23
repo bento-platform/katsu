@@ -132,8 +132,10 @@ def _roles_for(contact) -> list:
     return getattr(contact, "roles", []) or []
 
 
+# 'discovery' is also explicitly blocked in DatasetTranslationSerializer.to_internal_value,
+# but must be immutable here too so Rule 2 doesn't fire when it's omitted.
 _IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context",
-                               "pcgl_dac_id"})
+                               "discovery", "pcgl_dac_id"})
 
 
 def _check_translation_constraints(translation: ProjectScopedDatasetModel):
