@@ -157,6 +157,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
+        queryset = queryset.prefetch_related("translations")
         language = _get_preferred_language(self.request)
         if language != "en":
             queryset = queryset.prefetch_related(
@@ -352,7 +353,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         )):
             return forbidden(request)
         authz.mark_authz_done(request)
-        serializer = DatasetTranslationSerializer(data=request.data)
+        serializer = DatasetTranslationSerializer(data=request.data, context=self.get_serializer_context())
 
         def _create():
             serializer.is_valid(raise_exception=True)
@@ -386,7 +387,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         if request.method == "DELETE":
             await translation.adelete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        serializer = DatasetTranslationSerializer(translation, data=request.data)
+        serializer = DatasetTranslationSerializer(translation, data=request.data, context=self.get_serializer_context())
 
         def _update():
             serializer.is_valid(raise_exception=True)

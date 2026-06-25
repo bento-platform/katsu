@@ -89,6 +89,7 @@ class DatasetSerializer(PydanticJSONBSerializer):
         data['created_at'] = instance.created_at
         data['updated_at'] = instance.updated_at
         data['counts_by_entity'] = self.get_counts_by_entity(instance)
+        data['translations'] = [t.language for t in instance.translations.all()]
         return data
 
     def get_counts_by_entity(self, obj):
@@ -126,6 +127,90 @@ class DatasetSerializer(PydanticJSONBSerializer):
         return instance
 
 
+def _roles_for(contact) -> list:
+    """Return roles list for a contact, defaulting to empty list."""
+    return getattr(contact, "roles", []) or []
+
+
+# 'discovery' is also explicitly blocked in DatasetTranslationSerializer.to_internal_value,
+# but must be immutable here too so Rule 2 doesn't fire when it's omitted.
+_IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context",
+                               "discovery", "pcgl_dac_id"})
+
+
+def _check_translation_constraints(translation: ProjectScopedDatasetModel):
+    """
+    Validate three invariants that translations must respect vs. the canonical (English) dataset:
+      1. roles on primary_contact and each stakeholder cannot change.
+      2. no field present in canonical may be removed (set to None) in a translation, and
+         no field absent in canonical may be introduced; for list fields, lengths must also match exactly.
+      3. non-translatable fields (version, release_date, last_modified, study_status,
+         study_context, discovery, dac_id) must equal the canonical value exactly if
+         provided; omitting them is allowed.
+    """
+    try:
+        dataset = Dataset.objects.get(identifier=str(translation.identifier))
+    except Dataset.DoesNotExist:
+        return
+
+    canonical = dataset.to_schema()
+    errors = {}
+
+    # Rule 1: roles immutable
+    c_roles = _roles_for(canonical.primary_contact)
+    t_roles = _roles_for(translation.primary_contact)
+    if c_roles != t_roles:
+        errors["primary_contact"] = ["Roles cannot change in a translation."]
+
+    c_stakeholders = canonical.stakeholders or []
+    t_stakeholders = translation.stakeholders or []
+    for i, (c_sh, t_sh) in enumerate(zip(c_stakeholders, t_stakeholders)):
+        if _roles_for(c_sh) != _roles_for(t_sh):
+            errors.setdefault("stakeholders", []).append(
+                f"Stakeholder at index {i}: roles cannot change in a translation."
+            )
+
+    # Rule 2: translations cannot remove or add data to any shared field
+    # (immutable fields are exempt — omitting them is always allowed)
+    shared_fields = canonical.model_fields.keys() & translation.model_fields.keys()
+    for field in shared_fields:
+        if field in _IMMUTABLE_FIELDS:
+            continue
+
+        c_val = getattr(canonical, field, None)
+        t_val = getattr(translation, field, None)
+
+        c_empty = c_val is None or (isinstance(c_val, list) and len(c_val) == 0)
+        t_empty = t_val is None or (isinstance(t_val, list) and len(t_val) == 0)
+        if c_empty:
+            if not t_empty:
+                errors[field] = [f"Translation cannot introduce '{field}' (not present in canonical)."]
+            continue
+
+        if t_val is None:
+            errors[field] = [f"Translation cannot remove '{field}' (present in canonical)."]
+        elif isinstance(c_val, list):
+            t_len = len(t_val) if isinstance(t_val, list) else 0
+            if t_len != len(c_val):
+                errors[field] = [
+                    f"Translation must have the same number of items in '{field}' as canonical "
+                    f"(canonical has {len(c_val)}, translation has {t_len})."
+                ]
+
+    # Rule 3: if an immutable field is present in the translation it must match canonical exactly
+    for field in _IMMUTABLE_FIELDS:
+        c_val = getattr(canonical, field, None)
+        t_val = getattr(translation, field, None)
+        if t_val is not None and t_val != c_val:
+            errors[field] = [
+                f"'{field}' cannot change in a translation "
+                f"(expected {c_val!r}, got {t_val!r})."
+            ]
+
+    if errors:
+        raise serializers.ValidationError(errors)
+
+
 class DatasetTranslationSerializer(PydanticJSONBSerializer):
     schema_class = ProjectScopedDatasetModel
 
@@ -133,6 +218,28 @@ class DatasetTranslationSerializer(PydanticJSONBSerializer):
         model = DatasetTranslation
         fields = "__all__"
         read_only_fields = ['created_at', 'updated_at', 'dataset']
+
+    def _resolve_dataset_id(self) -> str | None:
+        if self.instance is not None:
+            return str(self.instance.dataset_id)
+        view = self.context.get("view")
+        if view is not None:
+            return view.kwargs.get("identifier")
+        return None
+
+    def to_internal_value(self, data):
+        if "discovery" in data:
+            raise serializers.ValidationError({"discovery": ["Translations cannot include a discovery configuration."]})
+        dataset_id = self._resolve_dataset_id()
+        if dataset_id is not None:
+            try:
+                dataset = Dataset.objects.get(identifier=dataset_id)
+                data = {**data, "identifier": dataset_id, "project": str(dataset.project_id)}
+            except Dataset.DoesNotExist:
+                pass  # view handles 404
+        result = super().to_internal_value(data)
+        _check_translation_constraints(self._validated_schema)
+        return result
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
