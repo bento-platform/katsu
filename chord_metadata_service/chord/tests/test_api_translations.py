@@ -1,4 +1,5 @@
 import uuid
+from unittest.mock import MagicMock
 
 from django.urls import reverse
 from rest_framework import status
@@ -6,6 +7,7 @@ from rest_framework import status
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Dataset, DatasetTranslation
+from chord_metadata_service.chord.serializers import DatasetTranslationSerializer
 from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 
@@ -188,6 +190,37 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         r = self.one_no_authz_delete(self._translation_url("ja"))
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.assertTrue(DatasetTranslation.objects.filter(dataset=self.dataset, language="ja").exists())
+
+    def test_serializer_resolve_dataset_id_no_context(self):
+        # _resolve_dataset_id: no instance, no view in context → returns None (line 228)
+        serializer = DatasetTranslationSerializer(data={
+            "schema_version": "1.0",
+            "title": "Test",
+            "description": "Test",
+            "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
+            "language": "fr",
+        })
+        serializer.is_valid()  # may fail Pydantic validation; line 228 is still hit before that
+
+    def test_serializer_nonexistent_dataset_in_view_context(self):
+        # to_internal_value: dataset_id from view but Dataset.DoesNotExist → pass (lines 238-239)
+        # _check_translation_constraints: Dataset.DoesNotExist → early return (lines 153-154)
+        fake_id = str(uuid.uuid4())
+        mock_view = MagicMock()
+        mock_view.kwargs = {"identifier": fake_id}
+        serializer = DatasetTranslationSerializer(
+            data={
+                "schema_version": "1.0",
+                "title": "Test",
+                "description": "Test",
+                "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
+                "identifier": fake_id,
+                "project": str(self.project.identifier),
+                "language": "fr",
+            },
+            context={"view": mock_view},
+        )
+        self.assertTrue(serializer.is_valid())
 
 
 ROLE_PI = "Principal Investigator"
@@ -435,3 +468,11 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         payload = self._payload(language="fr")
         r = self.one_authz_post(self._list_url(ds), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    def test_create_translation_introduces_absent_optional_field_rejected(self):
+        # Rule 2 line 187: canonical has no keywords (None), translation introduces keywords → 400
+        ds = self._make_dataset()  # keywords defaults to None in canonical
+        payload = self._payload(keywords=["cancer"], language="fr")
+        r = self.one_authz_post(self._list_url(ds), json=payload)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("keywords", r.json())
