@@ -128,11 +128,17 @@ class FieldSpec:
 
 
 def get_path(row: dict, *path: str, default: Any = None) -> Any:
-    """Walk a chain of dict keys, short-circuiting to `default` if any step is missing or not a dict."""
+    """
+    Walk a chain of dict keys, short-circuiting to `default` if a step is missing/None. Raises TypeError if a step
+    resolves to a non-None, non-dict value while path segments remain - that means the field registry's path
+    doesn't match the actual row shape, which is a bug, not a normal absent-value case.
+    """
     val: Any = row
     for key in path:
-        if not isinstance(val, dict):
+        if val is None:
             return default
+        if not isinstance(val, dict):
+            raise TypeError(f"get_path: expected dict while resolving {key!r}, got {type(val).__name__}")
         val = val.get(key)
     return default if val is None else val
 
