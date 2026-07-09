@@ -296,6 +296,36 @@ class IndividualCSVRendererTest(TestWithIndividual):
         get_resp = self.one_no_authz_get("/api/individuals?format=csv")
         self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_csv_export_selected_fields(self):
+        get_resp = self.one_authz_get("/api/individuals?format=csv&fields=id,sex")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        content = get_resp.content.decode("utf-8")
+        reader = csv.reader(io.StringIO(content))
+        body = list(reader)
+        self.assertEqual(body[0], ["Id", "Sex"])
+        self.assertEqual(body[1], ["patient:1", c.VALID_INDIVIDUAL["sex"]])
+
+    def test_csv_export_selected_fields_unknown_field_error(self):
+        get_resp = self.one_authz_get("/api/individuals?format=csv&fields=id,not_a_real_field")
+        self.assertEqual(get_resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("not_a_real_field", get_resp.json()["errors"][0]["message"])
+
+    def test_export_fields_action(self):
+        get_resp = self.one_authz_get(reverse("individuals-export-fields"))
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        choices = get_resp.json()
+        self.assertEqual(
+            choices,
+            [{"key": k, "label": v} for k, v in zip(
+                ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"],
+                ["Id", "Sex", "Date of birth", "Taxonomy", "Karyotypic sex", "Age", "Diseases", "Created", "Updated"],
+            )],
+        )
+
+    def test_export_fields_action_forbidden(self):
+        get_resp = self.one_no_authz_get(reverse("individuals-export-fields"))
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class IndividualWithPhenopacketSearchTest(TestWithTwoIndividuals):
     """Test for api/individuals?search="""
@@ -384,6 +414,33 @@ class BatchIndividualsCSVTest(TestWithTwoIndividuals):
     def test_batch_individuals_csv_forbidden(self):
         response = self.one_no_authz_post(reverse("batch/individuals"), json={"format": "csv"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_batch_individuals_csv_selected_fields(self):
+        response = self.one_authz_post(
+            reverse("batch/individuals"), json={"format": "csv", "fields": ["id", "sex"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        headers = next(csv.reader(io.StringIO(response.content.decode("utf-8"))))
+        self.assertEqual(headers, ["Id", "Sex"])
+
+    def test_batch_individuals_export_fields_action(self):
+        response = self.one_authz_get(reverse("batch/individuals-export-fields"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        keys = [f["key"] for f in response.json()]
+        self.assertEqual(
+            keys, ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+        )
+
+    def test_batch_individuals_export_fields_action_forbidden(self):
+        response = self.one_no_authz_get(reverse("batch/individuals-export-fields"))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_batch_individuals_csv_unknown_field_error(self):
+        response = self.one_authz_post(
+            reverse("batch/individuals"), json={"format": "csv", "fields": ["id", "not_a_real_field"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
 
 
 class BatchIndividualsCSVTest1(TestWithTwoIndividuals):
