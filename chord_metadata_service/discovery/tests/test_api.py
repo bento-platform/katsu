@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 import uuid
 
+import openpyxl
 from aioresponses import aioresponses
 from bento_lib.discovery import DiscoveryConfig, RULES_NO_PERMISSIONS
 from datetime import datetime
@@ -959,6 +960,48 @@ phe-1,ind:HG00096
     def test_a_few_csv_responses_phenopackets_unknown_field(self):
         make_two_individuals_with_phenopackets()
         res = self.dt_authz_full_get(f"{self.url}?_format=csv&_fields=id,not_a_real_field")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_xlsx_responses_phenopackets(self):
+        p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=xlsx")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        sp = "Homo sapiens"
+        wb = openpyxl.load_workbook(io.BytesIO(res.content))
+        ws = wb.active
+        rows = [[c.value for c in row] for row in ws.iter_rows()]
+        self.assertEqual(
+            rows,
+            [
+                ["Id", "Subject id", "Subject sex", "Subject taxonomy", "Biosamples", "Diseases", "Created by",
+                 "Submitted by", "Dataset"],
+                ["phe-0", "ind:NA19648", "FEMALE", sp, "katsu.biosample_id:1 [wall of urinary bladder]",
+                 self.csv_disease, "David Lougheed", "David Lougheed", d],
+                ["phe-1", "ind:HG00096", "MALE", sp, "biosample_id:2 [urinary bladder]", None, "David Lougheed",
+                 "David Lougheed", d],
+            ],
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_xlsx_responses_phenopackets_selected_fields(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=xlsx&_fields=id,subject_id")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        wb = openpyxl.load_workbook(io.BytesIO(res.content))
+        ws = wb.active
+        rows = [[c.value for c in row] for row in ws.iter_rows()]
+        self.assertEqual(
+            rows, [["Id", "Subject id"], ["phe-0", "ind:NA19648"], ["phe-1", "ind:HG00096"]]
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_xlsx_responses_phenopackets_unknown_field(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=xlsx&_fields=id,not_a_real_field")
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)

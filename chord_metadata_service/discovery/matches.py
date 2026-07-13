@@ -39,6 +39,7 @@ __all__ = [
     "individual_matches",
     "DISCOVERY_ENTITY_TO_MATCH_FN",
     "DISCOVERY_ENTITY_TO_CSV_RENDERER",
+    "DISCOVERY_ENTITY_TO_XLSX_RENDERER",
 ]
 
 T = TypeVar("T")
@@ -319,4 +320,12 @@ DISCOVERY_ENTITY_TO_CSV_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuCSVRender
     "biosample": apir.BiosamplesCSVRenderer,
     "experiment": apir.ExperimentCSVRenderer,
     "experiment_result": apir.ExperimentResultCSVRenderer,
+}
+
+DISCOVERY_ENTITY_TO_XLSX_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuXLSXRenderer]] = {
+    "phenopacket": apir.PhenopacketXLSXRenderer,
+    "individual": apir.IndividualXLSXRenderer,
+    "biosample": apir.BiosamplesXLSXRenderer,
+    "experiment": apir.ExperimentXLSXRenderer,
+    "experiment_result": apir.ExperimentResultXLSXRenderer,
 }
