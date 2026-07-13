@@ -664,6 +664,8 @@ async def discovery_matches(
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
       _format:    Response format ("json" or "csv"; must match request Accept header[s])
+      _fields:    (CSV only) comma-separated subset of export columns to return; see discovery_matches_export_fields
+                  for the available {key, label} choices per entity. Omit to get every registered column.
       project:    Discovery scope - project ID (if not set, the global scope is used)
       dataset:    Discovery scope - dataset ID (if not set, the project or global scope is used)
 
@@ -727,6 +729,17 @@ async def discovery_matches(
 
     authz_middleware.mark_authz_done(request)
 
+    # -- CSV field selection validation ---------------------------------------------------------------------------------
+
+    if response_format == "csv":
+        unknown_fields = DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity].unknown_requested_fields(request)
+        if unknown_fields:
+            return dres.csv_or_json_error_response(
+                request,
+                errors.bad_request_error(f"unknown export field(s): {', '.join(unknown_fields)}"),
+                accepted_formats,
+            )
+
     # -- Query execution -----------------------------------------------------------------------------------------------
 
     try:
@@ -784,7 +797,10 @@ async def discovery_matches(
         @sync_to_async
         def _get_csv():
             renderer = DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity]()
-            return renderer.render(renderer.get_model_serializer()(matches_page, many=True).data)
+            return renderer.render(
+                renderer.get_model_serializer()(matches_page, many=True).data,
+                renderer_context={"request": request},
+            )
 
         return await _get_csv()
 
@@ -798,6 +814,42 @@ async def discovery_matches(
             pagination=pagination,
         ).model_dump(mode="json", exclude_unset=True)
     )
+
+
+@extend_schema(
+    description="Exportable CSV columns for a discovery_matches entity, for a UI export column picker",
+    responses={
+        status.HTTP_200_OK: inline_serializer(
+            name="discovery_matches_export_fields_response",
+            fields={"key": serializers.CharField(), "label": serializers.CharField()},
+        ),
+    },
+)
+@api_view(["GET"])
+@permission_classes([BentoDeferToHandler])
+@inject_discovery_deps(empty_404=True)
+async def discovery_matches_export_fields(
+    request: DrfRequest, _scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, _lg: BoundLogger
+):
+    """
+    Returns the CSV columns discovery_matches can export for a given entity, so a UI can build a column picker
+    before calling discovery_matches?_format=csv&_entity=...&_fields=....
+
+    Query parameters:
+      _entity: Entity to list export columns for. phenopacket|individual|biosample|experiment|experiment_result
+               (default: phenopacket)
+    """
+    queried_entity: DiscoveryEntity = request.query_params.get("_entity", "phenopacket")
+    if queried_entity not in DISCOVERY_ENTITIES:
+        authz_middleware.mark_authz_done(request)
+        return Response(errors.bad_request_error("invalid entity"), status=status.HTTP_400_BAD_REQUEST)
+
+    if not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queried_entity]].data:
+        # Same permission requirement as discovery_matches' CSV/data export - we need full data permissions.
+        return dres.insufficient_privileges(request)
+
+    authz_middleware.mark_authz_done(request)
+    return Response(DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity].field_choices())
 
 
 # TODO: extend this implementation for Bento v20+

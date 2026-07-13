@@ -164,7 +164,9 @@ def parse_requested_fields(request) -> Optional[list[str]]:
     if request is None:
         return None
 
-    requested = request.query_params.get("fields")
+    # discovery_matches namespaces its query params (anything not starting with "_" is read as a discovery filter
+    # field), so it needs the "_fields" spelling; other endpoints accept plain "fields".
+    requested = request.query_params.get("fields") or request.query_params.get("_fields")
     if requested is None and isinstance(getattr(request, "data", None), dict):
         requested = request.data.get("fields")
 
@@ -233,14 +235,16 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
         if not data:
             return self._generate_csv_response([], columns)
 
-        if renderer_context and renderer_context["response"].status_code != status.HTTP_200_OK:
-            # Error response: render as JSON instead of CSV. This is invoked either directly (renderer_context is
-            # None - see discovery_matches, which never hits this branch) or via a DRF Response's own rendering
+        response_obj = renderer_context.get("response") if renderer_context else None
+        if response_obj is not None and response_obj.status_code != status.HTTP_200_OK:
+            # Error response: render as JSON instead of CSV. This is invoked either directly (renderer_context has
+            # no "response" - see discovery_matches, which never hits this branch: it only reaches render() on the
+            # success path, errors having already been returned earlier) or via a DRF Response's own rendering
             # (renderer_context["response"] is that same Response, headers already fixed to text/csv by
             # finalize_response before render() runs) - so we mutate its Content-Type in place and hand back raw
             # bytes for DRF to assign as the body, rather than building a whole separate HttpResponse that DRF
             # would just discard the headers of.
-            renderer_context["response"]["Content-Type"] = "application/json; charset=utf-8"
+            response_obj["Content-Type"] = "application/json; charset=utf-8"
             return json.dumps(data).encode("utf-8")
 
         # paginated DRF responses arrive as {"count": ..., "results": [...]}; batch/discovery endpoints already

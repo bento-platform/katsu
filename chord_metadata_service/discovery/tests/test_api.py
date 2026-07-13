@@ -941,6 +941,59 @@ phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses_phenopackets_selected_fields(self):
+        p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_fields=id,subject_id")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res.content.decode("utf-8"),
+            self._rn_newline(
+                """Id,Subject id
+phe-0,ind:NA19648
+phe-1,ind:HG00096
+"""
+            )  # CSVs use \r\n line endings here
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses_phenopackets_unknown_field(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_fields=id,not_a_real_field")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get("/api/discovery_matches_export_fields")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        keys = [f["key"] for f in res.json()]
+        self.assertEqual(
+            keys,
+            ["id", "subject_id", "subject_sex", "subject_taxonomy", "biosamples", "diseases", "created_by",
+             "submitted_by", "dataset"],
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields_entity(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get("/api/discovery_matches_export_fields?_entity=individual")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        keys = [f["key"] for f in res.json()]
+        self.assertEqual(
+            keys, ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields_invalid_entity(self):
+        res = self.dt_authz_full_get("/api/discovery_matches_export_fields?_entity=does-not-exist")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields_forbidden(self):
+        res = self.dt_authz_counts_get("/api/discovery_matches_export_fields")
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_csv_responses_phenopackets_pagination(self):
         p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
         # also (at the same time) test that accept works with unspecified format:
