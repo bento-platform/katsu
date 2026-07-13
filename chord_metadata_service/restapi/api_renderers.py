@@ -1,8 +1,9 @@
 import json
 import csv
 from abc import ABCMeta, abstractmethod
+from dataclasses import dataclass
 from uuid import UUID
-from typing import Dict, Optional, Any, Type
+from typing import Callable, ClassVar, Dict, Optional, Any, Type
 
 from pydantic import BaseModel
 from rdflib import Graph
@@ -119,24 +120,55 @@ class PassThruCSVRenderer(BaseRenderer):
         return HttpResponse(data, content_type="text/csv")  # CSV should already be rendered as bytes here
 
 
+@dataclass(frozen=True)
+class FieldSpec:
+    """Declares how to pull one exportable column's value out of a serialized row (a dict, from a DRF serializer)."""
+
+    getter: Callable[[dict], Any]
+
+
+def get_path(row: dict, *path: str, default: Any = None) -> Any:
+    """
+    Walk a chain of dict keys, short-circuiting to `default` if a step is missing/None. Raises TypeError if a step
+    resolves to a non-None, non-dict value while path segments remain - that means the field registry's path
+    doesn't match the actual row shape, which is a bug, not a normal absent-value case.
+    """
+    val: Any = row
+    for key in path:
+        if val is None:
+            return default
+        if not isinstance(val, dict):
+            raise TypeError(f"get_path: expected dict while resolving {key!r}, got {type(val).__name__}")
+        val = val.get(key)
+    return default if val is None else val
+
+
+def simple_field(*path: str, default: Any = None) -> FieldSpec:
+    """A FieldSpec that just reads a (possibly nested) path out of the row, e.g. simple_field("taxonomy", "label")."""
+    return FieldSpec(lambda row: get_path(row, *path, default=default))
+
+
 class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
     media_type = "text/csv"
     format = "csv"
 
     file_name: str = "data.csv"
 
+    # Ordered registry of every column this renderer can produce, column key -> FieldSpec; subclasses set this
+    # instead of implementing get_columns()/get_dicts() by hand. The dict key IS the CSV column key everywhere
+    # (get_columns() and get_dicts() both derive from it), so there's exactly one place a column is named.
+    field_registry: ClassVar[dict[str, FieldSpec]]
+
     @staticmethod
     @abstractmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         pass
 
-    @abstractmethod
-    def get_columns(self) -> list[str]:  # pragma: no cover
-        raise NotImplementedError("get_columns() not implemented")
+    def get_columns(self) -> list[str]:
+        return list(self.field_registry.keys())
 
-    @abstractmethod
-    def get_dicts(self, data, renderer_context) -> list[dict[str, str]]:  # pragma: no cover
-        raise NotImplementedError("get_dicts() not implemented")
+    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
+        return [{key: spec.getter(row) for key, spec in self.field_registry.items()} for row in data]
 
     def _generate_csv_response(self, data: list[dict[str, str]]):
         columns = self.get_columns()
@@ -165,6 +197,11 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
                 content_type="application/json; charset=utf-8",
             )
 
+        # paginated DRF responses arrive as {"count": ..., "results": [...]}; batch/discovery endpoints already
+        # pass a plain list.
+        if isinstance(data, dict):
+            data = data["results"]
+
         return self._generate_csv_response(self.get_dicts(data, renderer_context))
 
 
@@ -178,208 +215,140 @@ def _render_csv_diseases(diseases: list[dict]) -> str:
     )
 
 
+def _individual_diseases(individual: dict) -> Optional[str]:
+    if "phenopackets" not in individual:
+        return None
+    all_diseases = [
+        _render_csv_diseases(phenopacket["diseases"])
+        for phenopacket in individual["phenopackets"]
+        if "diseases" in phenopacket
+    ]
+    return "; ".join(all_diseases) if all_diseases else None
+
+
+INDIVIDUAL_FIELDS: dict[str, FieldSpec] = {
+    "id": simple_field("id"),
+    "sex": simple_field("sex"),
+    "date_of_birth": simple_field("date_of_birth"),
+    "taxonomy": simple_field("taxonomy", "label"),
+    "karyotypic_sex": FieldSpec(lambda row: row["karyotypic_sex"]),
+    "age": FieldSpec(lambda row: render_age(row, "time_at_last_encounter")),
+    "diseases": FieldSpec(_individual_diseases),
+    "created": FieldSpec(lambda row: row["created"]),
+    "updated": FieldSpec(lambda row: row["updated"]),
+}
+
+
 class IndividualCSVRenderer(KatsuCSVRenderer):
     file_name = "individuals.csv"
+    field_registry = INDIVIDUAL_FIELDS
 
     @staticmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         return pa_s.IndividualSerializer
 
-    def get_columns(self) -> list[str]:
-        return ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        individuals = []
+def _phenopacket_biosamples(phe: dict) -> Optional[str]:
+    if not phe.get("biosamples"):
+        return None
+    return "; ".join(
+        (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
+        for b in phe["biosamples"]
+    )
 
-        if isinstance(data, dict):
-            data = data["results"]
 
-        for individual in data:
-            ind_obj = {
-                "id": individual["id"],
-                "sex": individual.get("sex", None),
-                "date_of_birth": individual.get("date_of_birth", None),
-                "taxonomy": individual.get("taxonomy", {}).get("label", None),
-                "karyotypic_sex": individual["karyotypic_sex"],
-                "age": render_age(individual, "time_at_last_encounter"),
-                "diseases": None,
-                "created": individual["created"],
-                "updated": individual["updated"],
-            }
-            if "phenopackets" in individual:
-                all_diseases = []
-                for phenopacket in individual["phenopackets"]:
-                    if "diseases" in phenopacket:
-                        single_phenopacket_diseases = _render_csv_diseases(phenopacket["diseases"])
-                        all_diseases.append(single_phenopacket_diseases)
-                if all_diseases:
-                    ind_obj["diseases"] = "; ".join(all_diseases)
-            individuals.append(ind_obj)
-
-        return individuals
+PHENOPACKET_FIELDS: dict[str, FieldSpec] = {
+    "id": FieldSpec(lambda row: row["id"]),
+    "subject_id": simple_field("subject", "id"),
+    "subject_sex": simple_field("subject", "sex"),
+    "subject_taxonomy": simple_field("subject", "taxonomy", "label"),
+    "biosamples": FieldSpec(_phenopacket_biosamples),
+    "diseases": FieldSpec(lambda row: _render_csv_diseases(row["diseases"]) if row.get("diseases") else None),
+    "created_by": FieldSpec(lambda row: row["meta_data"].get("created_by")),
+    "submitted_by": FieldSpec(lambda row: row["meta_data"].get("submitted_by")),
+    "dataset": simple_field("dataset"),
+}
 
 
 class PhenopacketCSVRenderer(KatsuCSVRenderer):
     file_name = "phenopackets.csv"
+    field_registry = PHENOPACKET_FIELDS
 
     @staticmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         return phe_s.PhenopacketSerializer
 
-    def get_columns(self) -> list[str]:
-        return [
-            "id",
-            "subject_id",
-            "subject_sex",
-            "subject_taxonomy",
-            "biosamples",
-            "diseases",
-            "created_by",
-            "submitted_by",
-            "dataset",
-        ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        return [
-            {
-                "id": phe["id"],
-                "subject_id": phe["subject"]["id"] if phe.get("subject") else None,
-                "subject_sex": phe["subject"]["sex"] if phe.get("subject") else None,
-                "subject_taxonomy": phe["subject"]["taxonomy"]["label"] if phe.get("subject") else None,
-                "biosamples": (
-                    "; ".join(
-                        (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
-                        for b in phe["biosamples"]
-                    )
-                    if phe.get("biosamples")
-                    else None
-                ),
-                "diseases": _render_csv_diseases(phe["diseases"]) if phe.get("diseases") else None,
-                "created_by": phe["meta_data"].get("created_by"),
-                "submitted_by": phe["meta_data"].get("submitted_by"),
-                "dataset": phe.get("dataset"),
-            }
-            for phe in data
-        ]
+BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
+    "id": FieldSpec(lambda row: row["id"]),
+    "description": simple_field("description", default="NA"),
+    "sampled_tissue": simple_field("sampled_tissue", "label", default="NA"),
+    "time_of_collection": FieldSpec(lambda row: render_age(row, "time_of_collection")),
+    "histological_diagnosis": simple_field("histological_diagnosis", "label", default="NA"),
+    "extra_properties": FieldSpec(
+        lambda row: f"Material: {get_path(row, 'extra_properties', 'material', default='NA')}",
+    ),
+    "created": FieldSpec(lambda row: row["created"]),
+    "updated": FieldSpec(lambda row: row["updated"]),
+    "individual": simple_field("individual"),
+}
 
 
 class BiosamplesCSVRenderer(KatsuCSVRenderer):
     file_name = "biosamples.csv"
+    field_registry = BIOSAMPLE_FIELDS
 
     @staticmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         return phe_s.BiosampleSerializer
 
-    def get_columns(self) -> list[str]:
-        return [
-            "id",
-            "description",
-            "sampled_tissue",
-            "time_of_collection",
-            "histological_diagnosis",
-            "extra_properties",
-            "created",
-            "updated",
-            "individual",
-        ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        return [
-            {
-                "id": biosample["id"],
-                "description": biosample.get("description", "NA"),
-                "sampled_tissue": biosample.get("sampled_tissue", {}).get("label", "NA"),
-                "time_of_collection": render_age(biosample, "time_of_collection"),
-                "histological_diagnosis": biosample.get("histological_diagnosis", {}).get("label", "NA"),
-                "extra_properties": f"Material: {biosample.get('extra_properties', {}).get('material', 'NA')}",
-                "created": biosample["created"],
-                "updated": biosample["updated"],
-                "individual": biosample.get("individual"),
-            }
-            for biosample in data
-        ]
+EXPERIMENT_FIELDS: dict[str, FieldSpec] = {
+    "id": simple_field("id"),
+    "study_type": simple_field("study_type"),
+    "experiment_type": simple_field("experiment_type", default="NA"),
+    "molecule": simple_field("molecule"),
+    "library_strategy": simple_field("library_strategy"),
+    "library_source": simple_field("library_source", default="NA"),
+    "library_selection": simple_field("library_selection"),
+    "library_layout": simple_field("library_layout"),
+    "created": simple_field("created"),
+    "updated": simple_field("updated"),
+    "biosample": simple_field("biosample"),
+    "individual": simple_field("biosample_individual", "id", default="NA"),
+}
 
 
 class ExperimentCSVRenderer(KatsuCSVRenderer):
     file_name = "experiments.csv"
+    field_registry = EXPERIMENT_FIELDS
 
     @staticmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         return exp_s.ExperimentSerializer
 
-    def get_columns(self) -> list[str]:
-        return [
-            "id",
-            "study_type",
-            "experiment_type",
-            "molecule",
-            "library_strategy",
-            "library_source",
-            "library_selection",
-            "library_layout",
-            "created",
-            "updated",
-            "biosample",
-            "individual",
-        ]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        return [
-            {
-                "id": experiment.get("id"),
-                "study_type": experiment.get("study_type"),
-                "experiment_type": experiment.get("experiment_type", "NA"),
-                "molecule": experiment.get("molecule"),
-                "library_strategy": experiment.get("library_strategy"),
-                "library_source": experiment.get("library_source", "NA"),
-                "library_selection": experiment.get("library_selection"),
-                "library_layout": experiment.get("library_layout"),
-                "created": experiment.get("created"),
-                "updated": experiment.get("updated"),
-                "biosample": experiment.get("biosample"),
-                "individual": experiment.get("biosample_individual", {}).get("id", "NA"),
-            }
-            for experiment in data
-        ]
+EXPERIMENT_RESULT_FIELDS: dict[str, FieldSpec] = {
+    "id": simple_field("id"),
+    "description": simple_field("description"),
+    "filename": simple_field("filename"),
+    "url": simple_field("url"),
+    "genome_assembly_id": simple_field("genome_assembly_id"),
+    "file_format": simple_field("file_format"),
+    "data_output_type": simple_field("data_output_type"),
+    "usage": simple_field("usage"),
+    "creation_date": simple_field("creation_date"),
+    "created_by": simple_field("created_by"),
+}
 
 
 class ExperimentResultCSVRenderer(KatsuCSVRenderer):
     file_name = "experiment_results.csv"
+    field_registry = EXPERIMENT_RESULT_FIELDS
 
     @staticmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         return exp_s.ExperimentResultSerializer
-
-    def get_columns(self) -> list[str]:
-        return [
-            "id",
-            "description",
-            "filename",
-            "url",
-            "genome_assembly_id",
-            "file_format",
-            "data_output_type",
-            "usage",
-            "creation_date",
-            "created_by",
-        ]
-
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        return [
-            {
-                "id": er.get("id"),
-                "description": er.get("description"),
-                "filename": er.get("filename"),
-                "url": er.get("url"),
-                "genome_assembly_id": er.get("genome_assembly_id"),
-                "file_format": er.get("file_format"),
-                "data_output_type": er.get("data_output_type"),
-                "usage": er.get("usage"),
-                "creation_date": er.get("creation_date"),
-                "created_by": er.get("created_by"),
-            }
-            for er in data
-        ]
 
 
 class IndividualBentoSearchRenderer(JSONRenderer):
