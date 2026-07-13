@@ -729,7 +729,7 @@ async def discovery_matches(
 
     authz_middleware.mark_authz_done(request)
 
-    # -- CSV field selection validation ---------------------------------------------------------------------------------
+    # -- CSV field selection validation ----------------------------------------------------------------------------
 
     if response_format == "csv":
         unknown_fields = DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity].unknown_requested_fields(request)
