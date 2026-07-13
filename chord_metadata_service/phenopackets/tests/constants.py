@@ -401,7 +401,7 @@ def valid_biosample_1(individual, procedure=VALID_PROCEDURE_1):
         individual_id=individual,
         description='This is a test biosample.',
         sampled_tissue={
-            "id": "UBERON_0001256",
+            "id": "UBERON:0001256",
             "label": "wall of urinary bladder"
         },
         taxonomy={
@@ -444,7 +444,7 @@ def valid_biosample_2(individual, procedure=VALID_PROCEDURE_2, **kwargs):
         sampled_tissue = kwargs["sampled_tissue"]
     else:
         sampled_tissue = {
-            "id": "UBERON_0001256",
+            "id": "UBERON:0001256",
             "label": "urinary bladder"
         }
 
