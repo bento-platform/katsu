@@ -916,14 +916,14 @@ ssh = ["bcrypt (>=3.1.5)"]
 
 [[package]]
 name = "daphne"
-version = "4.2.1"
+version = "4.2.2"
 description = "Django ASGI (HTTP/WebSocket) server"
 optional = false
 python-versions = ">=3.9"
 groups = ["dev"]
 files = [
-    {file = "daphne-4.2.1-py3-none-any.whl", hash = "sha256:881e96b387b95b35ad85acd855f229d7f5b79073d6649089c8a33f661885e055"},
-    {file = "daphne-4.2.1.tar.gz", hash = "sha256:5f898e700a1fda7addf1541d7c328606415e96a7bd768405f0463c312fcb31b3"},
+    {file = "daphne-4.2.2-py3-none-any.whl", hash = "sha256:466ba8a7c31c5b758953095b451dbad9dc23e5783c68a3716e5fc7aa5f26d168"},
+    {file = "daphne-4.2.2.tar.gz", hash = "sha256:6c3527d4ce32630ae054dfb0ef5578e9a35d2f39f0ebcd02ef4f9129a121ce8d"},
 ]
 
 [package.dependencies]
@@ -1679,6 +1679,7 @@ description = "MessagePack serializer"
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
+markers = "platform_python_implementation == \"CPython\""
 files = [
     {file = "msgpack-1.2.1-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:8c7b398c56ff125feae96c2737abfec5595f1fa0aa186df60c56040b8accb95c"},
     {file = "msgpack-1.2.1-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:1548006a91aa93c5da81f3bdcebc1a0d10cea2d25969754fbe848da622b2b895"},
