@@ -952,10 +952,10 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_no_bins(self):
         # data not in this range, so we won't have this bin available
-        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 1997")
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=1997-03")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(
-            "Invalid value used in field query: date_of_consent=Mar 1997",
+            "Invalid value used in field query: date_of_consent=1997-03",
             response.json()["errors"][0]["message"][0],
             # TODO: message not supposed to be array of str but can't break API for beacon
         )
@@ -963,12 +963,12 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_1(self):
         # extra_properties date range search (only after or before, single value)
-        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021")
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=2021-03")
         if "SmallCellCount" in str(type(self)):
             # no bins available due to low counts, should be 400 as we don't want to leak start/end
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn(
-                "Invalid value used in field query: date_of_consent=Mar 2021",
+                "Invalid value used in field query: date_of_consent=2021-03",
                 response.json()["errors"][0]["message"][0],
                 # TODO: message not supposed to be array of str but can't break API for beacon
             )
@@ -987,7 +987,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         doc = "extra_properties__date_of_consent"
 
         subtest_params = [
-            ("Mar 2021", {f"{doc}__startswith": "2021-03"}),
+            ("2021-03", {f"{doc}__startswith": "2021-03"}),
             ("> 2021-01", {f"{doc}__gt": "2021-01"}),
             ("[2021-01, 2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
             ("[2021-01,2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
@@ -1000,7 +1000,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             (
-                ("Mar 2021", "Apr 2021", "May 2021", "Jun 2021"),
+                ("2021-03", "2021-04", "2021-05", "2021-06"),
                 Q(**{f"{doc}__startswith": "2021-03"})
                 | Q(**{f"{doc}__startswith": "2021-04"})
                 | Q(**{f"{doc}__startswith": "2021-05"})
@@ -1039,7 +1039,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_full_access_errors(self):
         subtest_params = [
-            (("Mar 2021", "April 2021"),),
+            (("2021-03", "2021-3"),),
             (("[2021-03, 2021-045)", "[2021-04, 2021-05)"),),
         ]
         for params in subtest_params:
@@ -1058,12 +1058,12 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
-        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5")
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=2021-03&lab_test_result_value=< 55.5")
         if "SmallCellCount" in str(type(self)):
             # no bins available due to low counts, should be 400 as we don't want to leak start/end
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn(
-                "Invalid value used in field query: date_of_consent=Mar 2021",
+                "Invalid value used in field query: date_of_consent=2021-03",
                 response.json()["errors"][0]["message"][0],
                 # TODO: message not supposed to be array of str but can't break API for beacon
             )
