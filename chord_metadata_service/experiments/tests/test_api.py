@@ -2,6 +2,7 @@ import csv
 import io
 import uuid
 
+import openpyxl
 from django.test import TestCase
 from django.urls import reverse
 from jsonschema.validators import Draft7Validator
@@ -290,6 +291,31 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         headers = next(csv.reader(io.StringIO(response.content.decode('utf-8'))))
         self.assertEqual(headers, ['Id', 'File format'])
+
+    def test_post_experiment_result_batch_xlsx_selected_fields(self):
+        response = self.one_authz_post(
+            '/api/batch/experimentresults', {'format': 'xlsx', 'fields': ['id', 'file_format']}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        headers = [c.value for c in next(ws.iter_rows())]
+        self.assertEqual(headers, ['Id', 'File format'])
+
+    def test_get_experiment_result_batch_xlsx(self):
+        response = self.one_authz_get('/api/batch/experimentresults?format=xlsx')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        headers = [c.value for c in next(ws.iter_rows())]
+        self.assertEqual(
+            headers,
+            ['Id', 'Description', 'Filename', 'Url', 'Genome assembly id', 'File format', 'Data output type',
+             'Usage', 'Creation date', 'Created by'],
+        )
 
     def test_experiment_result_export_fields_action(self):
         response = self.one_authz_get('/api/batch/experimentresults/export_fields')

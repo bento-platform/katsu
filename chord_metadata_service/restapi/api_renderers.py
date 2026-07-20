@@ -141,6 +141,7 @@ class PassThruXLSXRenderer(BaseRenderer):
 
     media_type = XLSX_MEDIA_TYPE
     format = "xlsx"
+    charset = None  # binary format - avoid DRF appending "; charset=utf-8" to the Content-Type header
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return HttpResponse(data, content_type=XLSX_MEDIA_TYPE)  # XLSX should already be rendered as bytes here
@@ -241,38 +242,23 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
     def get_dicts(self, data, columns: list[str]) -> list[dict[str, str]]:
         return [{key: self.field_registry[key].getter(row) for key in columns} for row in data]
 
-
-class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
-    media_type = "text/csv"
-    format = "csv"
-
-    file_name: str = "data.csv"
-
-    def _generate_csv_response(self, data: list[dict[str, str]], columns: list[str]):
-        headers = {key: _column_label(key) for key in columns}
-
-        response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
-
-        dict_writer = csv.DictWriter(response, fieldnames=columns)
-        dict_writer.writerow(headers)
-        dict_writer.writerows(data)
-
-        return response
+    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
+        """Subclasses turn selected rows/columns into the actual format-specific response body."""
+        raise NotImplementedError
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         columns = self.get_columns(renderer_context)
 
         if not data:
-            return self._generate_csv_response([], columns)
+            return self._build_response([], columns)
 
         response_obj = renderer_context.get("response") if renderer_context else None
         if response_obj is not None and response_obj.status_code != status.HTTP_200_OK:
-            # Error response: render as JSON instead of CSV. This is invoked either directly (renderer_context has
-            # no "response" - see discovery_matches, which never hits this branch: it only reaches render() on the
-            # success path, errors having already been returned earlier) or via a DRF Response's own rendering
-            # (renderer_context["response"] is that same Response, headers already fixed to text/csv by
-            # finalize_response before render() runs) - so we mutate its Content-Type in place and hand back raw
+            # Error response: render as JSON instead of CSV/XLSX. This is invoked either directly (renderer_context
+            # has no "response" - see discovery_matches, which never hits this branch: it only reaches render() on
+            # the success path, errors having already been returned earlier) or via a DRF Response's own rendering
+            # (renderer_context["response"] is that same Response, headers already fixed to the export content type
+            # by finalize_response before render() runs) - so we mutate its Content-Type in place and hand back raw
             # bytes for DRF to assign as the body, rather than building a whole separate HttpResponse that DRF
             # would just discard the headers of.
             response_obj["Content-Type"] = "application/json; charset=utf-8"
@@ -283,25 +269,41 @@ class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
         if isinstance(data, dict):
             data = data["results"]
 
-        return self._generate_csv_response(self.get_dicts(data, columns), columns)
+        return self._build_response(self.get_dicts(data, columns), columns)
+
+
+class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
+    media_type = "text/csv"
+    format = "csv"
+
+    file_name: str = "data.csv"
+
+    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
+        headers = {key: _column_label(key) for key in columns}
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
+
+        dict_writer = csv.DictWriter(response, fieldnames=columns)
+        dict_writer.writerow(headers)
+        dict_writer.writerows(rows)
+
+        return response
 
 
 class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
     """
     Renders a serialized queryset (via field_registry) as a single-sheet XLSX workbook - same columns/values/
-    ordering as the equivalent KatsuCSVRenderer. Used directly by discovery_matches; not wired into any DRF
-    viewset's renderer_classes.
+    ordering as the equivalent KatsuCSVRenderer.
     """
 
     media_type = XLSX_MEDIA_TYPE
     format = "xlsx"
+    charset = None  # binary format - avoid DRF appending "; charset=utf-8" to the Content-Type header
 
     file_name: str = "data.xlsx"
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        columns = self.get_columns(renderer_context)
-        rows = self.get_dicts(data, columns) if data else []
-
+    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
         wb = Workbook()
         ws = wb.active
         ws.title = "Export"

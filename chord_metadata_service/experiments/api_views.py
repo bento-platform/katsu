@@ -16,6 +16,7 @@ from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     ExperimentCSVRenderer,
     ExperimentResultCSVRenderer,
+    ExperimentResultXLSXRenderer,
     csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
@@ -178,7 +179,12 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
     serializer_class = ExperimentResultSerializer
     pagination_class = BatchResultsSetPagination
-    renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer, ExperimentResultCSVRenderer)
+    renderer_classes = (
+        *api_settings.DEFAULT_RENDERER_CLASSES,
+        PhenopacketsRenderer,
+        ExperimentResultCSVRenderer,
+        ExperimentResultXLSXRenderer,
+    )
     content_negotiation_class = FormatInPostContentNegotiation
 
     data_type = DATA_TYPE_EXPERIMENT
