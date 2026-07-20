@@ -18,6 +18,7 @@ from chord_metadata_service.chord.tests.constants import (
 )
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
+from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
@@ -244,6 +245,75 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
 
     def test_get_experiment_batch_csv_unknown_field_error(self):
         response = self.one_authz_get('/api/batch/experiments?format=csv&fields=not_a_real_field')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+
+    def test_get_experiment_result_batch(self):
+        response = self.one_authz_get('/api/batch/experimentresults')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 4)
+        self.assertEqual(len(response_data['results']), 4)
+
+    def test_get_experiment_result_batch_forbidden(self):
+        response = self.one_no_authz_get('/api/batch/experimentresults')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_experiment_result_batch_no_data(self):
+        response = self.one_authz_post('/api/batch/experimentresults', format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 4)
+
+    def test_post_experiment_result_batch_with_ids(self):
+        er_id = ExperimentResult.objects.first().id
+        response = self.one_authz_post('/api/batch/experimentresults', {'id': [er_id]}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(len(response_data), 1)
+        self.assertEqual(response_data[0]['id'], er_id)
+
+    def test_post_experiment_result_batch_with_unknown_ids(self):
+        # ExperimentResult uses an integer PK, so an out-of-range int (not a malformed non-numeric string) is the
+        # realistic "doesn't exist" case here.
+        response = self.one_authz_post('/api/batch/experimentresults', {'id': [999999]}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.json()), 0)
+
+    def test_post_experiment_result_batch_forbidden(self):
+        response = self.one_no_authz_post('/api/batch/experimentresults', format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_experiment_result_batch_csv_selected_fields(self):
+        response = self.one_authz_post(
+            '/api/batch/experimentresults', {'format': 'csv', 'fields': ['id', 'file_format']}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        headers = next(csv.reader(io.StringIO(response.content.decode('utf-8'))))
+        self.assertEqual(headers, ['Id', 'File format'])
+
+    def test_experiment_result_export_fields_action(self):
+        response = self.one_authz_get('/api/batch/experimentresults/export_fields')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        keys = [f['key'] for f in response.json()]
+        self.assertEqual(
+            keys,
+            ['id', 'description', 'filename', 'url', 'genome_assembly_id', 'file_format', 'data_output_type',
+             'usage', 'creation_date', 'created_by'],
+        )
+
+    def test_experiment_result_export_fields_action_forbidden(self):
+        response = self.one_no_authz_get('/api/batch/experimentresults/export_fields')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_post_experiment_result_batch_csv_unknown_field_error(self):
+        response = self.one_authz_post(
+            '/api/batch/experimentresults', {'format': 'csv', 'fields': ['id', 'not_a_real_field']}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+
+    def test_get_experiment_result_batch_csv_unknown_field_error(self):
+        response = self.one_authz_get('/api/batch/experimentresults?format=csv&fields=not_a_real_field')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
 

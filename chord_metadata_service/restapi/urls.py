@@ -32,6 +32,9 @@ router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
 router.register(r"experiments", experiment_views.ExperimentViewSet, basename="experiments")
 router.register(r"experimentresults", experiment_views.ExperimentResultViewSet, basename="experimentresults")
 router.register(r"batch/experiments", experiment_views.ExperimentBatchViewSet, basename="batch/experiments")
+router.register(
+    r"batch/experimentresults", experiment_views.ExperimentResultBatchViewSet, basename="batch/experimentresults"
+)
 
 # Patients app urls
 router.register(r"individuals", individual_views.IndividualViewSet, basename="individuals")
