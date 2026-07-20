@@ -23,6 +23,7 @@ from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
+from chord_metadata_service.restapi.api_renderers import XLSX_MEDIA_TYPE
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 
@@ -739,6 +740,14 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     code=status.HTTP_406_NOT_ACCEPTABLE,
                     message="Not Acceptable",
                 )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_default_format_falls_back_to_xlsx(self):
+        # No _format param, and Accept header only allows XLSX --> should default to xlsx response format.
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(self.url, headers={"Accept": XLSX_MEDIA_TYPE})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res["Content-Type"], XLSX_MEDIA_TYPE)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_phenopackets(self):
