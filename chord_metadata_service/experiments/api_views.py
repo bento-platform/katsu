@@ -89,8 +89,7 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
     data_type = DATA_TYPE_EXPERIMENT
 
-    @async_to_sync
-    async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
+    async def _filtered_queryset(self, ids_list: list[str] | None = None):
         # We pre-filter experiments to the scope. This way, if they specify an ID outside the scope, it's just ignored
         #  - the requester won't even know if it exists.
         queryset = Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
@@ -101,8 +100,15 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH).order_by("id")
 
     @async_to_sync
+    async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
+        return await self._filtered_queryset(ids_list)
+
+    @async_to_sync
     async def get_queryset(self):
-        return self._get_filtered_queryset(self.request.data.get("id", None))
+        # Note: cannot call self._get_filtered_queryset(...) here - it is itself wrapped in async_to_sync, and calling
+        # an async_to_sync-wrapped callable from within an already-running event loop (as we are here) raises a
+        # RuntimeError, so we call the underlying async method directly instead.
+        return await self._filtered_queryset(self.request.data.get("id", None))
 
     def permission_from_request(self, request: DrfRequest):
         if self.action in ("list", "create", "export_fields"):

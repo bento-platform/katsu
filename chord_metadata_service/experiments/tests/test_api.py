@@ -194,6 +194,13 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id}&file_format=vcf')
         self.assert_response_200_and_length(response, 0)
 
+    def test_get_experiment_batch(self):
+        response = self.one_authz_get('/api/batch/experiments')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response_data = response.json()
+        self.assertEqual(response_data['count'], 2)
+        self.assertEqual(len(response_data['results']), 2)
+
     def test_post_experiment_batch_no_data(self):
         response = self.one_authz_post('/api/batch/experiments', format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
