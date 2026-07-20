@@ -1,3 +1,4 @@
+from bento_lib.ontologies.models import CURIE_PATTERN
 from django.conf import settings
 from . import descriptions
 from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
@@ -6,6 +7,7 @@ from .schema_utils import (
     DRAFT_07,
     SchemaTypes,
     base_type,
+    string_with_pattern,
     tag_ids_and_describe,
     named_one_of,
     sub_schema_uri,
@@ -40,7 +42,10 @@ ONTOLOGY_CLASS = tag_ids_and_describe(
         "$id": sub_schema_uri(phenopacket_base_uri, "ontology_class"),
         "title": "Ontology class schema",
         "type": "object",
-        "properties": {"id": base_type(SchemaTypes.STRING), "label": base_type(SchemaTypes.STRING)},
+        "properties": {
+            "id": string_with_pattern(CURIE_PATTERN, description="A CURIE-formatted ontology term ID."),
+            "label": base_type(SchemaTypes.STRING),
+        },
         "additionalProperties": False,
         "required": ["id", "label"],
     },
@@ -65,7 +70,7 @@ CURIE_SCHEMA = {
         "A CURIE string has the structure ``prefix``:``reference``, as defined by the W3C syntax."
     ),
     "type": "string",
-    "pattern": "^\\w[^:]*:.+$",
+    "pattern": CURIE_PATTERN,
     "additionalProperties": False,
 }
 
