@@ -70,7 +70,7 @@ class BiosampleTest(ProjectTestCase):
 
     def test_get_sample_tissue_data(self):
         data = self.biosample_1.get_sample_tissue_data
-        self.assertEqual(data["reference"]["reference"], "UBERON_0001256")
+        self.assertEqual(data["reference"]["reference"], "UBERON:0001256")
         self.assertEqual(data["reference"]["display"], "wall of urinary bladder")
 
 
