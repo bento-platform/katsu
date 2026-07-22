@@ -297,6 +297,7 @@ class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
     format = "xlsx"
 
     file_name: str = "data.xlsx"
+    sheet_name: str = "Export"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         columns = self.get_columns(renderer_context)
@@ -304,7 +305,7 @@ class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
 
         wb = Workbook()
         ws = wb.active
-        ws.title = "Export"
+        ws.title = self.sheet_name
         ws.append([_column_label(key) for key in columns])
         for row in rows:
             ws.append([row.get(key) for key in columns])
@@ -376,6 +377,7 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
 
 class IndividualXLSXRenderer(KatsuXLSXRenderer):
     file_name = "individuals.xlsx"
+    sheet_name = "Individuals"
     field_registry = INDIVIDUAL_FIELDS
 
     @staticmethod
@@ -416,6 +418,7 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
 
 class PhenopacketXLSXRenderer(KatsuXLSXRenderer):
     file_name = "phenopackets.xlsx"
+    sheet_name = "Phenopackets"
     field_registry = PHENOPACKET_FIELDS
 
     @staticmethod
@@ -449,6 +452,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
 
 class BiosamplesXLSXRenderer(KatsuXLSXRenderer):
     file_name = "biosamples.xlsx"
+    sheet_name = "Biosamples"
     field_registry = BIOSAMPLE_FIELDS
 
     @staticmethod
@@ -483,6 +487,7 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
 
 class ExperimentXLSXRenderer(KatsuXLSXRenderer):
     file_name = "experiments.xlsx"
+    sheet_name = "Experiments"
     field_registry = EXPERIMENT_FIELDS
 
     @staticmethod
@@ -515,6 +520,7 @@ class ExperimentResultCSVRenderer(KatsuCSVRenderer):
 
 class ExperimentResultXLSXRenderer(KatsuXLSXRenderer):
     file_name = "experiment_results.xlsx"
+    sheet_name = "Experiment Results"
     field_registry = EXPERIMENT_RESULT_FIELDS
 
     @staticmethod
