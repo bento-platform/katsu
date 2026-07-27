@@ -22,8 +22,10 @@ jobs:
           python-version: "3.12"
       - name: Install Poetry
         run: python -m pip install poetry
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: poetry install
+      - name: Install GeoDjango Apt dependencies
+        run: sudo apt-get update -y && sudo apt-get install -y binutils gdal-bin libproj-dev gdal-bin
       - name: Make release artifacts
         run: |
           mkdir -p ./dist/schemas
