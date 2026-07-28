@@ -1,10 +1,13 @@
 import json
 import csv
+import io
 from abc import ABCMeta, abstractmethod
 from dataclasses import dataclass
 from uuid import UUID
 from typing import Callable, ClassVar, Dict, Optional, Any, Type
 
+from bento_lib.responses import errors
+from openpyxl import Workbook
 from pydantic import BaseModel
 from rdflib import Graph
 from rdflib.plugin import register
@@ -12,6 +15,7 @@ from rdflib.serializer import Serializer
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer, BaseRenderer
+from rest_framework.response import Response
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 from chord_metadata_service.experiments import serializers as exp_s
@@ -27,13 +31,19 @@ __all__ = [
     "RDFDatasetRenderer",
     "render_age",
     "PassThruCSVRenderer",
+    "PassThruXLSXRenderer",
     "KatsuCSVRenderer",
+    "KatsuXLSXRenderer",
     "IndividualCSVRenderer",
+    "IndividualXLSXRenderer",
     "BiosamplesCSVRenderer",
+    "BiosamplesXLSXRenderer",
     "ExperimentCSVRenderer",
+    "ExperimentXLSXRenderer",
     "IndividualBentoSearchRenderer",
     "PydanticJSONRenderer",
     "PydanticBrowsableAPIRenderer",
+    "csv_fields_error_response",
 ]
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
@@ -120,6 +130,22 @@ class PassThruCSVRenderer(BaseRenderer):
         return HttpResponse(data, content_type="text/csv")  # CSV should already be rendered as bytes here
 
 
+XLSX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+
+class PassThruXLSXRenderer(BaseRenderer):
+    """
+    A sort-of skeleton XLSX renderer, which assumes data are already a rendered XLSX response and just handles
+    negotiation and response content type.
+    """
+
+    media_type = XLSX_MEDIA_TYPE
+    format = "xlsx"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return HttpResponse(data, content_type=XLSX_MEDIA_TYPE)  # XLSX should already be rendered as bytes here
+
+
 @dataclass(frozen=True)
 class FieldSpec:
     """Declares how to pull one exportable column's value out of a serialized row (a dict, from a DRF serializer)."""
@@ -148,15 +174,41 @@ def simple_field(*path: str, default: Any = None) -> FieldSpec:
     return FieldSpec(lambda row: get_path(row, *path, default=default))
 
 
-class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
-    media_type = "text/csv"
-    format = "csv"
+def _column_label(key: str) -> str:
+    return key.replace("_", " ").capitalize()
 
-    file_name: str = "data.csv"
 
-    # Ordered registry of every column this renderer can produce, column key -> FieldSpec; subclasses set this
-    # instead of implementing get_columns()/get_dicts() by hand. The dict key IS the CSV column key everywhere
-    # (get_columns() and get_dicts() both derive from it), so there's exactly one place a column is named.
+def parse_requested_fields(request) -> Optional[list[str]]:
+    """
+    The caller's selected-fields list, if any: a comma-separated `fields` query param, or a `fields` list in a
+    POST body (batch export endpoints negotiate format from the body, so fields can travel the same way).
+    Returns None if the caller didn't ask for a subset (i.e. every registered column should be returned).
+    """
+    if request is None:
+        return None
+
+    # discovery_matches namespaces its query params (anything not starting with "_" is read as a discovery filter
+    # field), so it needs the "_fields" spelling; other endpoints accept plain "fields".
+    requested = request.query_params.get("fields") or request.query_params.get("_fields")
+    if requested is None and isinstance(getattr(request, "data", None), dict):
+        requested = request.data.get("fields")
+
+    if not requested:
+        return None
+
+    return [f.strip() for f in requested.split(",")] if isinstance(requested, str) else list(requested)
+
+
+class FieldRegistryRenderer(metaclass=ABCMeta):
+    """
+    Shared plumbing for renderers that export a serialized queryset via a declarative field_registry: dict[str,
+    FieldSpec]. Subclasses (one per output format, e.g. KatsuCSVRenderer/KatsuXLSXRenderer) supply the actual
+    serialization to bytes; concrete per-entity renderers just set field_registry and get_model_serializer().
+    """
+
+    # Ordered registry of every column this renderer can produce, column key -> FieldSpec. The dict key IS the
+    # export column key everywhere (get_columns() and get_dicts() both derive from it), so there's exactly one
+    # place a column is named.
     field_registry: ClassVar[dict[str, FieldSpec]]
 
     @staticmethod
@@ -164,17 +216,40 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
     def get_model_serializer() -> Type[GenericSerializer]:
         pass
 
-    def get_columns(self) -> list[str]:
-        return list(self.field_registry.keys())
+    @classmethod
+    def field_choices(cls) -> list[dict[str, str]]:
+        """Every column this renderer can produce, as {key, label} pairs - for a UI column picker."""
+        return [{"key": key, "label": _column_label(key)} for key in cls.field_registry]
 
-    def get_dicts(self, data, _renderer_context) -> list[dict[str, str]]:
-        return [{key: spec.getter(row) for key, spec in self.field_registry.items()} for row in data]
+    @classmethod
+    def unknown_requested_fields(cls, request) -> list[str]:
+        """Any `fields` the caller asked for that aren't in this renderer's registry - [] if none/not applicable."""
+        requested = parse_requested_fields(request)
+        if requested is None:
+            return []
+        return [f for f in requested if f not in cls.field_registry]
 
-    def _generate_csv_response(self, data: list[dict[str, str]]):
-        columns = self.get_columns()
+    def get_columns(self, renderer_context) -> list[str]:
+        request = renderer_context.get("request") if renderer_context else None
+        requested = parse_requested_fields(request)
+        if requested is None:
+            return list(self.field_registry.keys())
+        # keep registry order regardless of the order fields were requested in; drop unrecognized keys
+        selected = set(requested)
+        return [key for key in self.field_registry if key in selected]
 
-        # remove underscore and capitalize column names
-        headers = {key: key.replace("_", " ").capitalize() for key in columns}
+    def get_dicts(self, data, columns: list[str]) -> list[dict[str, str]]:
+        return [{key: self.field_registry[key].getter(row) for key in columns} for row in data]
+
+
+class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
+    media_type = "text/csv"
+    format = "csv"
+
+    file_name: str = "data.csv"
+
+    def _generate_csv_response(self, data: list[dict[str, str]], columns: list[str]):
+        headers = {key: _column_label(key) for key in columns}
 
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
@@ -186,23 +261,75 @@ class KatsuCSVRenderer(JSONRenderer, metaclass=ABCMeta):
         return response
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        if not data:
-            return self._generate_csv_response([])
+        columns = self.get_columns(renderer_context)
 
-        if renderer_context and (res_status := renderer_context["response"].status_code) != status.HTTP_200_OK:
-            # error response as JSON instead of CSV
-            return HttpResponse(
-                json.dumps(data).encode("utf-8"),
-                status=res_status,
-                content_type="application/json; charset=utf-8",
-            )
+        if not data:
+            return self._generate_csv_response([], columns)
+
+        response_obj = renderer_context.get("response") if renderer_context else None
+        if response_obj is not None and response_obj.status_code != status.HTTP_200_OK:
+            # Error response: render as JSON instead of CSV. This is invoked either directly (renderer_context has
+            # no "response" - see discovery_matches, which never hits this branch: it only reaches render() on the
+            # success path, errors having already been returned earlier) or via a DRF Response's own rendering
+            # (renderer_context["response"] is that same Response, headers already fixed to text/csv by
+            # finalize_response before render() runs) - so we mutate its Content-Type in place and hand back raw
+            # bytes for DRF to assign as the body, rather than building a whole separate HttpResponse that DRF
+            # would just discard the headers of.
+            response_obj["Content-Type"] = "application/json; charset=utf-8"
+            return json.dumps(data).encode("utf-8")
 
         # paginated DRF responses arrive as {"count": ..., "results": [...]}; batch/discovery endpoints already
         # pass a plain list.
         if isinstance(data, dict):
             data = data["results"]
 
-        return self._generate_csv_response(self.get_dicts(data, renderer_context))
+        return self._generate_csv_response(self.get_dicts(data, columns), columns)
+
+
+class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
+    """
+    Renders a serialized queryset (via field_registry) as a single-sheet XLSX workbook - same columns/values/
+    ordering as the equivalent KatsuCSVRenderer. Used directly by discovery_matches; not wired into any DRF
+    viewset's renderer_classes.
+    """
+
+    media_type = XLSX_MEDIA_TYPE
+    format = "xlsx"
+
+    file_name: str = "data.xlsx"
+    sheet_name: str = "Export"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        columns = self.get_columns(renderer_context)
+        rows = self.get_dicts(data, columns) if data else []
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = self.sheet_name
+        ws.append([_column_label(key) for key in columns])
+        for row in rows:
+            ws.append([row.get(key) for key in columns])
+
+        buf = io.BytesIO()
+        wb.save(buf)
+
+        response = HttpResponse(buf.getvalue(), content_type=XLSX_MEDIA_TYPE)
+        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
+        return response
+
+
+def csv_fields_error_response(request, renderer_cls: Type["KatsuCSVRenderer"]) -> Optional[Response]:
+    """
+    If the request's `fields` selection names a column not in renderer_cls's registry, return a 400 in the standard
+    katsu/bento_lib error format; otherwise None (no `fields` param, or all requested keys are valid).
+    """
+    unknown = renderer_cls.unknown_requested_fields(request)
+    if not unknown:
+        return None
+    return Response(
+        errors.bad_request_error(f"unknown export field(s): {', '.join(unknown)}"),
+        status=status.HTTP_400_BAD_REQUEST,
+    )
 
 
 def _render_csv_diseases(diseases: list[dict]) -> str:
@@ -248,6 +375,16 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
         return pa_s.IndividualSerializer
 
 
+class IndividualXLSXRenderer(KatsuXLSXRenderer):
+    file_name = "individuals.xlsx"
+    sheet_name = "Individuals"
+    field_registry = INDIVIDUAL_FIELDS
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return pa_s.IndividualSerializer
+
+
 def _phenopacket_biosamples(phe: dict) -> Optional[str]:
     if not phe.get("biosamples"):
         return None
@@ -279,6 +416,16 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
         return phe_s.PhenopacketSerializer
 
 
+class PhenopacketXLSXRenderer(KatsuXLSXRenderer):
+    file_name = "phenopackets.xlsx"
+    sheet_name = "Phenopackets"
+    field_registry = PHENOPACKET_FIELDS
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return phe_s.PhenopacketSerializer
+
+
 BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
     "id": FieldSpec(lambda row: row["id"]),
     "description": simple_field("description", default="NA"),
@@ -296,6 +443,16 @@ BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
 
 class BiosamplesCSVRenderer(KatsuCSVRenderer):
     file_name = "biosamples.csv"
+    field_registry = BIOSAMPLE_FIELDS
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return phe_s.BiosampleSerializer
+
+
+class BiosamplesXLSXRenderer(KatsuXLSXRenderer):
+    file_name = "biosamples.xlsx"
+    sheet_name = "Biosamples"
     field_registry = BIOSAMPLE_FIELDS
 
     @staticmethod
@@ -328,6 +485,16 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
         return exp_s.ExperimentSerializer
 
 
+class ExperimentXLSXRenderer(KatsuXLSXRenderer):
+    file_name = "experiments.xlsx"
+    sheet_name = "Experiments"
+    field_registry = EXPERIMENT_FIELDS
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentSerializer
+
+
 EXPERIMENT_RESULT_FIELDS: dict[str, FieldSpec] = {
     "id": simple_field("id"),
     "description": simple_field("description"),
@@ -344,6 +511,16 @@ EXPERIMENT_RESULT_FIELDS: dict[str, FieldSpec] = {
 
 class ExperimentResultCSVRenderer(KatsuCSVRenderer):
     file_name = "experiment_results.csv"
+    field_registry = EXPERIMENT_RESULT_FIELDS
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentResultSerializer
+
+
+class ExperimentResultXLSXRenderer(KatsuXLSXRenderer):
+    file_name = "experiment_results.xlsx"
+    sheet_name = "Experiment Results"
     field_registry = EXPERIMENT_RESULT_FIELDS
 
     @staticmethod

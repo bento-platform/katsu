@@ -5,6 +5,7 @@ from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.discovery.api_views import (
     discovery_endpoint,
     discovery_matches,
+    discovery_matches_export_fields,
     discovery_rules,
     discovery_search_fields,
     discovery_schema,
@@ -66,6 +67,7 @@ urlpatterns = [
     # discovery endpoints
     path("discovery", discovery_endpoint, name="discovery"),
     path("discovery_matches", discovery_matches, name="discovery-matches"),
+    path("discovery_matches_export_fields", discovery_matches_export_fields, name="discovery-matches-export-fields"),
     path("discovery_search_fields", discovery_search_fields, name="discovery-search-fields"),
     path("discovery_ui_hints", discovery_ui_hints, name="discovery-ui-hints"),
     path("public", individual_views.PublicListIndividuals.as_view(), name="public"),

@@ -4,7 +4,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.settings import api_settings
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
@@ -15,6 +15,7 @@ from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     ExperimentCSVRenderer,
+    csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
@@ -88,8 +89,7 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
     data_type = DATA_TYPE_EXPERIMENT
 
-    @async_to_sync
-    async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
+    async def _filtered_queryset(self, ids_list: list[str] | None = None):
         # We pre-filter experiments to the scope. This way, if they specify an ID outside the scope, it's just ignored
         #  - the requester won't even know if it exists.
         queryset = Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
@@ -100,25 +100,44 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH).order_by("id")
 
     @async_to_sync
+    async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
+        return await self._filtered_queryset(ids_list)
+
+    @async_to_sync
     async def get_queryset(self):
-        return self._get_filtered_queryset(self.request.data.get("id", None))
+        # Note: cannot call self._get_filtered_queryset(...) here - it is itself wrapped in async_to_sync, and calling
+        # an async_to_sync-wrapped callable from within an already-running event loop (as we are here) raises a
+        # RuntimeError, so we call the underlying async method directly instead.
+        return await self._filtered_queryset(self.request.data.get("id", None))
 
     def permission_from_request(self, request: DrfRequest):
-        if self.action in ("list", "create"):
+        if self.action in ("list", "create", "export_fields"):
             # Here, "create" maps to the data query permission because we use create(..) (i.e., POST) as a way to run a
             # query with a large body.
             # TODO: distant future: replace with HTTP QUERY verb.
             return P_QUERY_DATA
         return None  # viewset not implemented for any other action
 
+    def list(self, request, *args, **kwargs):
+        if (err := csv_fields_error_response(request, ExperimentCSVRenderer)) is not None:
+            return err
+        return super().list(request, *args, **kwargs)
+
     def create(self, request, *_args, **_kwargs):
         """
         Despite the name, this is a POST request for returning a list of experiments. Since query parameters have a
         maximum size, POST requests can be used for large batches.
         """
+        if (err := csv_fields_error_response(request, ExperimentCSVRenderer)) is not None:
+            return err
+
         queryset = self._get_filtered_queryset(request.data.get("id", []))
         serializer = ExperimentSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["GET"])
+    def export_fields(self, _request: DrfRequest, *_args, **_kwargs):
+        return Response(ExperimentCSVRenderer.field_choices())
 
 
 class ExperimentResultViewSet(BentoAuthzScopedModelViewSet):

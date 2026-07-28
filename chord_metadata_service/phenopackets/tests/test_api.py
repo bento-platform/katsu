@@ -223,6 +223,40 @@ class BatchBiosamplesCSVTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # TODO: test content
 
+    def test_post_biosamples_with_selected_fields(self):
+        response = self.one_authz_post(
+            reverse(self.view), json={**self.post_biosamples_body, 'fields': ['id', 'description']}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        headers = next(csv.reader(io.StringIO(response.content.decode('utf-8'))))
+        self.assertEqual(headers, ['Id', 'Description'])
+
+    def test_post_biosamples_unknown_field_error(self):
+        response = self.one_authz_post(
+            reverse(self.view), json={**self.post_biosamples_body, 'fields': ['id', 'not_a_real_field']}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+
+    def test_get_biosamples_batch_unknown_field_error(self):
+        response = self.one_authz_get(reverse(self.view) + '?format=csv&fields=not_a_real_field')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+
+    def test_export_fields_action(self):
+        response = self.one_authz_get(reverse('batch/biosamples-export-fields'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        keys = [f['key'] for f in response.json()]
+        self.assertEqual(
+            keys,
+            ['id', 'description', 'sampled_tissue', 'time_of_collection', 'histological_diagnosis',
+             'extra_properties', 'created', 'updated', 'individual'],
+        )
+
+    def test_export_fields_action_forbidden(self):
+        response = self.one_no_authz_get(reverse('batch/biosamples-export-fields'))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class CreatePhenopacketTest(AuthzAPITestCase):
 
