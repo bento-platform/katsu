@@ -17,6 +17,7 @@ from chord_metadata_service.restapi.api_renderers import (
     ExperimentCSVRenderer,
     ExperimentResultCSVRenderer,
     ExperimentResultXLSXRenderer,
+    ExperimentResultManifestTSVRenderer,
     csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
@@ -42,6 +43,7 @@ EXPERIMENT_SELECT_REL = (
 
 EXPERIMENT_PREFETCH = (
     "experiment_results",
+    "experiment_results__experiments__dataset",
     "biosample__individual"
 )
 
@@ -184,6 +186,7 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         PhenopacketsRenderer,
         ExperimentResultCSVRenderer,
         ExperimentResultXLSXRenderer,
+        ExperimentResultManifestTSVRenderer,
     )
     content_negotiation_class = FormatInPostContentNegotiation
 

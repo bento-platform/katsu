@@ -33,7 +33,9 @@ __all__ = [
     "PassThruCSVRenderer",
     "PassThruXLSXRenderer",
     "KatsuCSVRenderer",
+    "KatsuTSVRenderer",
     "KatsuXLSXRenderer",
+    "ExperimentResultManifestTSVRenderer",
     "IndividualCSVRenderer",
     "IndividualXLSXRenderer",
     "BiosamplesCSVRenderer",
@@ -175,6 +177,11 @@ def simple_field(*path: str, default: Any = None) -> FieldSpec:
     return FieldSpec(lambda row: get_path(row, *path, default=default))
 
 
+def static_field(value: Any = None) -> FieldSpec:
+    """A FieldSpec that ignores the row and always returns the same value - e.g. a constant, or a blank column."""
+    return FieldSpec(lambda _row: value)
+
+
 def _column_label(key: str) -> str:
     return key.replace("_", " ").capitalize()
 
@@ -275,20 +282,43 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
 class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
     media_type = "text/csv"
     format = "csv"
+    delimiter = ","
 
     file_name: str = "data.csv"
 
-    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
-        headers = {key: _column_label(key) for key in columns}
+    @classmethod
+    def column_label(cls, key: str) -> str:
+        """Header text for a column key - override to bypass the default snake_case -> Title Case transform."""
+        return _column_label(key)
 
-        response = HttpResponse(content_type="text/csv")
+    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
+        headers = {key: self.column_label(key) for key in columns}
+
+        response = HttpResponse(content_type=self.media_type)
         response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
 
-        dict_writer = csv.DictWriter(response, fieldnames=columns)
+        dict_writer = csv.DictWriter(response, fieldnames=columns, delimiter=self.delimiter)
         dict_writer.writerow(headers)
         dict_writer.writerows(rows)
 
         return response
+
+
+class KatsuTSVRenderer(KatsuCSVRenderer, metaclass=ABCMeta):
+    """
+    Tab-separated variant of KatsuCSVRenderer, for exports (e.g. download manifests) whose column headers are a
+    fixed external contract rather than a human-readable label derived from the column key.
+    """
+
+    media_type = "text/tab-separated-values"
+    format = "tsv"
+    delimiter = "\t"
+
+    file_name: str = "data.tsv"
+
+    @classmethod
+    def column_label(cls, key: str) -> str:
+        return key
 
 
 class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
@@ -528,6 +558,39 @@ class ExperimentResultXLSXRenderer(KatsuXLSXRenderer):
     @staticmethod
     def get_model_serializer() -> Type[GenericSerializer]:
         return exp_s.ExperimentResultSerializer
+
+
+# Score-CLI-style download manifest: a fixed 11-column TSV shape (repoCode is hardcoded since katsu backs a single
+# file repository; fileId/indexFileUuid/donorId/projectId have no source in katsu's data model today and are always
+# blank - see the download-manifest ticket for the full column mapping/rationale).
+EXPERIMENT_RESULT_MANIFEST_FIELDS: dict[str, FieldSpec] = {
+    "repoCode": static_field("file-manager.pcgl"),
+    "fileId": static_field(),
+    "fileUuid": simple_field("identifier"),
+    "fileFormat": simple_field("file_format"),
+    "fileName": simple_field("filename"),
+    "fileSize": simple_field("extra_properties", "file_size"),
+    "fileMd5Sum": simple_field("extra_properties", "file_md5sum"),
+    "indexFileUuid": static_field(),
+    "donorId": static_field(),
+    "projectId": static_field(),
+    "study": simple_field("study"),
+}
+
+
+class ExperimentResultManifestTSVRenderer(KatsuTSVRenderer):
+    format = "manifest"
+    file_name = "manifest.tsv"
+    field_registry = EXPERIMENT_RESULT_MANIFEST_FIELDS
+
+    @staticmethod
+    def get_model_serializer() -> Type[GenericSerializer]:
+        return exp_s.ExperimentResultSerializer
+
+    def get_columns(self, renderer_context) -> list[str]:
+        # The manifest's columns are a fixed external contract: always all 11, in spec order, regardless of any
+        # `fields` selection (unlike the CSV/XLSX exports, which support column subsetting).
+        return list(self.field_registry.keys())
 
 
 class IndividualBentoSearchRenderer(JSONRenderer):

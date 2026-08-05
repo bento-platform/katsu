@@ -22,7 +22,7 @@ from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKET
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer
+from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer, ExperimentResultManifestTSVRenderer
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
 
@@ -343,6 +343,56 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
 
+    def test_get_experiment_result_batch_manifest(self):
+        response = self.one_authz_get('/api/batch/experimentresults?format=manifest')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response['Content-Type'], 'text/tab-separated-values')
+
+        er = ExperimentResult.objects.order_by('id').first()
+        rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter='\t'))
+        self.assertEqual(
+            rows[0],
+            ['repoCode', 'fileId', 'fileUuid', 'fileFormat', 'fileName', 'fileSize', 'fileMd5Sum', 'indexFileUuid',
+             'donorId', 'projectId', 'study'],
+        )
+        self.assertEqual(len(rows), 5)  # header + 4 experiment results
+        first_row = dict(zip(rows[0], rows[1]))
+        self.assertEqual(first_row['repoCode'], 'file-manager.pcgl')
+        self.assertEqual(first_row['fileUuid'], er.identifier)
+        self.assertEqual(first_row['fileFormat'], er.file_format)
+        self.assertEqual(first_row['fileName'], er.filename)
+        self.assertEqual(first_row['study'], str(self.d1_id))
+        # No source in katsu's data model today for these columns - always blank.
+        self.assertEqual(first_row['fileId'], '')
+        self.assertEqual(first_row['indexFileUuid'], '')
+        self.assertEqual(first_row['donorId'], '')
+        self.assertEqual(first_row['projectId'], '')
+
+    def test_post_experiment_result_batch_manifest_with_ids(self):
+        er = ExperimentResult.objects.order_by('id').first()
+        response = self.one_authz_post(
+            '/api/batch/experimentresults', {'format': 'manifest', 'id': [er.id]}, format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter='\t'))
+        self.assertEqual(len(rows), 2)  # header + 1 selected row
+        row = dict(zip(rows[0], rows[1]))
+        self.assertEqual(row['fileUuid'], er.identifier)
+
+    def test_experiment_result_batch_manifest_ignores_fields_param(self):
+        # Unlike CSV/XLSX, the manifest always emits all 11 columns regardless of a `fields` selection.
+        # NOTE: `fields` is still validated against the CSV renderer's registry regardless of `format` (existing
+        # shared behaviour in list()/create()), so the value here must be one of ExperimentResultCSVRenderer's
+        # fields, even though the manifest itself doesn't support column subsetting.
+        response = self.one_authz_get('/api/batch/experimentresults?format=manifest&fields=id')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter='\t'))
+        self.assertEqual(len(rows[0]), 11)
+
+    def test_get_experiment_result_batch_manifest_forbidden(self):
+        response = self.one_no_authz_get('/api/batch/experimentresults?format=manifest')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class TestExperimentCSVRenderer(TestCase):
     """
@@ -407,6 +457,58 @@ class TestExperimentCSVRenderer(TestCase):
         for row in reader:
             for key in row:
                 self.assertEqual(row[key], '')
+
+
+class TestExperimentResultManifestTSVRenderer(TestCase):
+    """
+    Test the download-manifest TSV renderer for the experiment result batch API.
+    """
+    def setUp(self):
+        self.renderer = ExperimentResultManifestTSVRenderer()
+        self.data = [{
+            'identifier': 'obj-uuid-1',
+            'file_format': 'VCF',
+            'filename': 'sample1_01.vcf.gz',
+            'extra_properties': {'file_size': '12345', 'file_md5sum': 'abcdef0123456789'},
+            'study': 'dataset-uuid-1',
+        }]
+
+    def test_manifest_headers_and_order(self):
+        response = self.renderer.render(self.data)
+        self.assertEqual(response['Content-Type'], 'text/tab-separated-values')
+        rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter='\t'))
+        self.assertEqual(
+            rows[0],
+            ['repoCode', 'fileId', 'fileUuid', 'fileFormat', 'fileName', 'fileSize', 'fileMd5Sum', 'indexFileUuid',
+             'donorId', 'projectId', 'study'],
+        )
+        row = dict(zip(rows[0], rows[1]))
+        self.assertEqual(row['repoCode'], 'file-manager.pcgl')
+        self.assertEqual(row['fileUuid'], 'obj-uuid-1')
+        self.assertEqual(row['fileFormat'], 'VCF')
+        self.assertEqual(row['fileName'], 'sample1_01.vcf.gz')
+        self.assertEqual(row['fileSize'], '12345')
+        self.assertEqual(row['fileMd5Sum'], 'abcdef0123456789')
+        self.assertEqual(row['study'], 'dataset-uuid-1')
+        self.assertEqual(row['fileId'], '')
+        self.assertEqual(row['indexFileUuid'], '')
+        self.assertEqual(row['donorId'], '')
+        self.assertEqual(row['projectId'], '')
+
+    def test_manifest_render_with_missing_fields(self):
+        # No extra_properties/study at all - every unmappable column should still be present, just blank.
+        data_with_missing_fields = [{'identifier': 'obj-uuid-2', 'file_format': 'CRAM', 'filename': 'x.cram'}]
+        response = self.renderer.render(data_with_missing_fields)
+        rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter='\t'))
+        row = dict(zip(rows[0], rows[1]))
+        self.assertEqual(row['fileSize'], '')
+        self.assertEqual(row['fileMd5Sum'], '')
+        self.assertEqual(row['study'], '')
+
+    def test_manifest_render_with_empty_data(self):
+        response = self.renderer.render([])
+        rows = list(csv.reader(io.StringIO(response.content.decode('utf-8')), delimiter='\t'))
+        self.assertEqual(len(rows), 1)  # header only
 
 
 class TestExperimentSchema(APITestCase):
