@@ -1,5 +1,6 @@
 import csv
 import io
+import openpyxl
 import random
 import uuid
 
@@ -441,6 +442,31 @@ class BatchIndividualsCSVTest(TestWithTwoIndividuals):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
+
+
+class BatchIndividualsXLSXTest(TestWithTwoIndividuals):
+    """Test for getting a batch of individuals as xlsx."""
+
+    def test_batch_individuals_xlsx_selected_fields(self):
+        response = self.one_authz_post(
+            reverse("batch/individuals"), json={"format": "xlsx", "fields": ["id", "sex"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        headers = [c.value for c in next(ws.iter_rows())]
+        self.assertEqual(headers, ["Id", "Sex"])
+
+    def test_post_batch_individuals_xlsx(self):
+        response = self.one_authz_post(reverse("batch/individuals"), json={"format": "xlsx"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        headers = [c.value for c in next(ws.iter_rows())]
+        self.assertEqual(headers, c.CSV_HEADER.split(","))
 
 
 class BatchIndividualsCSVTest1(TestWithTwoIndividuals):

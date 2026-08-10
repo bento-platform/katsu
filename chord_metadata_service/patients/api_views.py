@@ -41,6 +41,7 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     IndividualCSVRenderer,
+    IndividualXLSXRenderer,
     IndividualBentoSearchRenderer,
     csv_fields_error_response,
 )
@@ -189,6 +190,7 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         *api_settings.DEFAULT_RENDERER_CLASSES,
         PhenopacketsRenderer,
         IndividualCSVRenderer,
+        IndividualXLSXRenderer,
         IndividualBentoSearchRenderer,
     )
     # Override to infer the renderer based on a `format` argument from the POST request body
