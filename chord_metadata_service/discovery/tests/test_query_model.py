@@ -73,6 +73,7 @@ class TestDiscoveryQueryModel(SimpleTestCase):
     @staticmethod
     def _mock_json_post(content: dict | list):
         dr = HttpRequest()
+        dr._read_started = False
         dr.content_type = "application/json"
         dr.method = "POST"
         dr.META["CONTENT_TYPE"] = "application/json"
