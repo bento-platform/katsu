@@ -1,7 +1,6 @@
 from bento_lib.discovery import NumberFieldDefinition, DiscoveryEntity
 from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig
 from typing import Any, Iterator, Literal
-from calendar import month_abbr
 from django.db.models import Q, Func, BooleanField, F, Value, JSONField
 
 from .field_paths.django_field_query import get_field_django_mapping
@@ -157,15 +156,11 @@ def _year_month_from_month_offset(start_year: int, month_offset: int) -> tuple[i
     return start_year + month_offset // 12, (month_offset + 1) % 12 or 12
 
 
-def _month_label(year: int, month: int) -> str:
-    """Given a year and a 1-indexed month, return the label for the month bin."""
-    return f"{month_abbr[month].capitalize()} {year}"  # convert key as yyyy-mm to `abbreviated month yyyy`
-
-
 def labelled_date_range_generator_by_month(start: str | None, end: str | None) -> Iterator[tuple[str, str, str]]:
     """
     Returns a generator yielding floor, ceil and label value for each bin from a date field configuration,
-    binning by month given starting/ending months.
+    binning by month given starting/ending months. The label is the machine-readable "yyyy-mm" value of the bin
+    (equal to the floor) - it is up to the API consumer to format it for display (e.g., as "Jan 2021").
     """
 
     if start is None or end is None:
@@ -178,7 +173,9 @@ def labelled_date_range_generator_by_month(start: str | None, end: str | None) -
     for month_offset in range(start_month - 1, last_month_nb):
         gte_year, gte_month = _year_month_from_month_offset(start_year, month_offset)
         lt_year, lt_month = _year_month_from_month_offset(start_year, month_offset + 1)
-        yield f"{gte_year}-{gte_month:02d}", f"{lt_year}-{lt_month:02d}", _month_label(gte_year, gte_month)
+        floor = f"{gte_year}-{gte_month:02d}"
+        ceil = f"{lt_year}-{lt_month:02d}"
+        yield floor, ceil, floor
 
 
 def mapping_to_json_path(mapping: str) -> str:
