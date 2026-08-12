@@ -76,7 +76,6 @@ class TestDiscoveryQueryModel(SimpleTestCase):
 
         dr = rf.post("/mock", json.dumps(content), content_type="application/json")
         r = DrfRequest(dr, parsers=(JSONParser(),))
-        # r._stream = BytesIO(json.dumps(content).encode("utf-8"))
         r._load_data_and_files()
 
         return r
