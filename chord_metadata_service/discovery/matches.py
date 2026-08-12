@@ -161,15 +161,21 @@ async def experiment_matches(
                 molecule_ontology=(
                     OntologyClass.model_validate(exp.molecule_ontology) if exp.molecule_ontology else None
                 ),
+                extra_properties=exp.extra_properties,
+                # ------------------------------------------------------------------------------------------------------
                 results=experiment_results,
                 # ------------------------------------------------------------------------------------------------------
                 biosample=str(exp.biosample.id) if exp.biosample else None,
                 phenopacket=str(phenopacket.id) if phenopacket else None,
                 # ------------------------------------------------------------------------------------------------------
-                **(dict(
-                    project=scope.project_id or str(exp.dataset.project_id),
-                    dataset=scope.dataset_id or str(exp.dataset_id)
-                ) if root else dict()),
+                **(
+                    dict(
+                        project=scope.project_id or str(exp.dataset.project_id),
+                        dataset=scope.dataset_id or str(exp.dataset_id),
+                    )
+                    if root
+                    else dict()
+                ),
             )
         )
     return res
@@ -207,9 +213,16 @@ async def biosample_matches(
         res.append(
             MatchBiosample(
                 id=str(b.id),
+                description=b.description,
+                sampled_tissue=OntologyClass.model_validate(b.sampled_tissue) if b.sampled_tissue else None,
+                sample_type=OntologyClass.model_validate(b.sample_type) if b.sample_type else None,
+                taxonomy=OntologyClass.model_validate(b.taxonomy) if b.taxonomy else None,
+                extra_properties=b.extra_properties,
+                # ---
+                experiments=experiments,
+                # ---
                 individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
-                experiments=experiments,
                 **(dict(project=scope.project_id, dataset=ds) if root else dict()),
             )
         )
@@ -245,11 +258,14 @@ async def phenopacket_matches(
                 id=phe_id,
                 subject=s_id or None,
                 biosamples=biosamples,
+                extra_properties=phe.extra_properties,
                 **(
                     dict(
                         project=scope.project_id or (str(phe.dataset.project_id) if phe.dataset else None),
                         dataset=scope.dataset_id or (str(phe.dataset_id) if phe.dataset else None),
-                    ) if root else dict()
+                    )
+                    if root
+                    else dict()
                 ),
             )
         )
@@ -284,14 +300,16 @@ async def individual_matches(
             MatchIndividual(
                 id=ind_id,
                 phenopackets=phenopackets,
+                extra_properties=ind.extra_properties,
                 **(
                     dict(
                         # TODO: put this on Individual itself, i.e., link individual with project/dataset?
-                        project=scope.project_id or (
-                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None
-                        ),
+                        project=scope.project_id
+                        or (str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None),
                         dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
-                    ) if root else dict()
+                    )
+                    if root
+                    else dict()
                 ),
             )
         )

@@ -137,6 +137,8 @@ class MatchExperiment(BaseMatchModel):
     study_type: str | None = Field(..., title="Study Type")
     molecule: str | None = Field(..., title="Molecule")
     molecule_ontology: OntologyClass | None = Field(..., title="Molecule (Ontology)")
+    extra_properties: dict = Field(..., title="Extra properties")
+    # nested entities:
     results: list[MatchExperimentResult]
     # backlinks:
     biosample: str | None = Field(..., title="Biosample ID")
@@ -148,11 +150,16 @@ class MatchBiosample(BaseMatchModel):
     Compact representation of a biosample for returning/rendering search responses.
     """
     id: str = Field(..., title="Biosample ID")
-    # sampled_tissue: OntologyTerm | None
-    # sample_type: OntologyTerm | None
+    description: str = Field(..., title="Description")
+    sampled_tissue: OntologyClass | None = Field(..., title="Sampled Tissue")
+    sample_type: OntologyClass | None = Field(..., title="Sample Type")
+    taxonomy: OntologyClass | None = Field(..., title="Taxonomy")
+    extra_properties: dict = Field(..., title="Extra Properties")
+    # nested entities:
+    experiments: list[MatchExperiment] | None
+    # backlinks:
     individual_id: str | None = Field(..., title="Individual ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
-    experiments: list[MatchExperiment] | None
 
 
 class MatchPhenopacket(BaseMatchModel):
@@ -162,6 +169,7 @@ class MatchPhenopacket(BaseMatchModel):
     id: str = Field(..., title="Phenopacket ID")
     subject: str | None = Field(..., title="Subject ID")
     biosamples: list[MatchBiosample]
+    extra_properties: dict = Field(..., title="Extra Properties")
 
 
 class MatchIndividual(BaseMatchModel):
@@ -169,7 +177,10 @@ class MatchIndividual(BaseMatchModel):
     Compact representation of a subject for returning/rendering search responses.
     """
     id: str = Field(..., title="Subject ID")
+    sex: str | None = Field(..., title="Sex")
+    karyotypic_sex: str | None = Field(..., title="Karyotypic Sex")
     phenopackets: list[MatchPhenopacket]
+    extra_properties: dict = Field(..., title="Extra properties")
 
 
 type MatchObject = (
