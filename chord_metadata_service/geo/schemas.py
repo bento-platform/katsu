@@ -56,7 +56,7 @@ GEO_LOCATION_SCHEMA = tag_ids_and_describe(
                 "additionalProperties": True,  # Explicitly allow "extra properties"
             },
         },
-        "required": ["type", "geometry", "properties"],
+        "required": ["type", "geometry"],
     },
     descriptions.GEO_LOCATION,
 )
