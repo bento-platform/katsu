@@ -22,7 +22,8 @@ from .pydantic_models import BinWithValue, BinList, DiscoveryQueryFilterOneOf
 from .stats import queryset_stats_for_field
 from .utils import get_discovery_entity_model_scoped_queryset
 
-LENGTH_Y_M = 4 + 1 + 2  # dates stored as yyyy-mm-dd
+LENGTH_Y = 4  # dates stored as yyyy[-mm[-dd]]
+LENGTH_Y_M = LENGTH_Y + 1 + 2  # dates stored as yyyy[-mm[-dd]]
 
 # Re-usable regex components
 P_MAX_SYM = r"(?P<sym>[<≤])"
@@ -247,16 +248,16 @@ async def get_age_numeric_binned(
     }
 
 
-def _month_start_end_from_stats(stats: dict[str, int], threshold: int) -> tuple[str | None, str | None]:
+def _date_start_end_from_stats(stats: dict[str, int], threshold: int, prefix_size: int) -> tuple[str | None, str | None]:
     """
-    Given ISO date stats of format {YYYY-MM-...: count}, truncates and groups keys based on month and finds the
-    starting and ending months which exceed the censorship threshold.
+    Given ISO date stats of format {YYYY[-MM[-...]]: count}, truncates and groups keys based on date bin prefix size and
+    finds the starting and ending years/months which exceed the censorship threshold.
     """
 
     # Key the counts on yyyy-mm combination (aggregate same month counts)
     grouped_stats = defaultdict(int)
     for sk, sv in stats.items():
-        grouped_stats[sk[:LENGTH_Y_M]] += sv
+        grouped_stats[sk[:prefix_size]] += sv
 
     # filter + sort grouped stats to find start/end dates that exceed censorship threshold
     if items := sorted(filter(lambda item: bool(censor_count(item[1], threshold)), grouped_stats.items())):
@@ -281,7 +282,14 @@ async def get_month_date_range(
     stats = await queryset_stats_for_field(
         queryset, field, None, None, group_by=field_props.group_by, should_censor=False
     )
-    return _month_start_end_from_stats(stats, threshold)
+
+    match field_props.config.bin_by:
+        case "year":
+            return _date_start_end_from_stats(stats, threshold, LENGTH_Y)
+        case "month":
+            return _date_start_end_from_stats(stats, threshold, LENGTH_Y_M)
+        case _:
+            raise NotImplementedError(f"Cannot bin date by {field_props.config.bin_by}")
 
 
 async def get_range_stats(
