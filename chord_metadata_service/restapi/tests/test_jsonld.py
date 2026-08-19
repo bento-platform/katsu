@@ -19,11 +19,13 @@ class JsonLdUtilsTest(SimpleTestCase):
             "extra_properties": [{"values": [{}]}, {"values": []}],
             "alternate_identifiers": [{}],
             "related_identifiers": [{}],
-            "spatial_coverage": [{
-                "identifier": {},
-                "alternate_identifiers": [{}],
-                "related_identifiers": [{}],
-            }],
+            "spatial_coverage": [
+                {
+                    "identifier": {},
+                    "alternate_identifiers": [{}],
+                    "related_identifiers": [{}],
+                }
+            ],
             "distributions": [
                 {"stored_in": {}, "dates": [{"type": {}}], "licenses": [{}]},
                 {},

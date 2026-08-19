@@ -19,4 +19,4 @@ class FormatInPostContentNegotiation(DefaultContentNegotiation):
         if renderer:
             return (renderer, renderer.media_type)
 
-        return super(FormatInPostContentNegotiation, self).select_renderer(request, renderers, format_suffix)
+        return super().select_renderer(request, renderers, format_suffix)

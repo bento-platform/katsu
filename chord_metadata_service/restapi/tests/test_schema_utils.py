@@ -1,7 +1,8 @@
 from django.test import SimpleTestCase, TestCase
 
 from chord_metadata_service.logger import logger
-from ..schema_utils import merge_schema_dictionaries, tag_schema_with_nested_ids, patch_project_schemas
+
+from ..schema_utils import merge_schema_dictionaries, patch_project_schemas, tag_schema_with_nested_ids
 from ..types import ExtensionSchemaDict
 from . import constants as c
 

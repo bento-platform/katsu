@@ -1,18 +1,17 @@
 import json
-from asgiref.sync import async_to_sync
 
+from asgiref.sync import async_to_sync
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.experiments import models as exp_m
+from chord_metadata_service.experiments.tests import constants as exp_c
 from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
-from chord_metadata_service.experiments import models as exp_m
-from chord_metadata_service.experiments.tests import constants as exp_c
-
 
 sync_get_service_info = async_to_sync(get_service_info)
 

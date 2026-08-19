@@ -1,6 +1,7 @@
 import datetime
+from decimal import ROUND_HALF_EVEN, Decimal
+
 import isodate
-from decimal import Decimal, ROUND_HALF_EVEN
 
 __all__ = [
     "time_element_to_str",
@@ -71,10 +72,9 @@ def iso_duration_to_years(iso_age_duration: str | dict, unit: str = "years") -> 
         return _round_decimal_two_places(years), unit
 
     # if duration string contains only days then the instance is of type datetime.timedelta
-    if not isinstance(duration, isodate.Duration) and isinstance(duration, datetime.timedelta):
-        if duration.days is not None:
-            years = _days_to_years(duration.days)
-            return _round_decimal_two_places(years), unit
+    if isinstance(duration, datetime.timedelta) and duration.days is not None:
+        years = _days_to_years(duration.days)
+        return _round_decimal_two_places(years), unit
 
     return None, None
 
@@ -86,7 +86,7 @@ def time_element_to_years(time_element: dict, unit: str = "years") -> tuple[Deci
         return iso_duration_to_years(time_element["age"], unit=unit)
     elif "age_range" in time_element:
         start_value, start_unit = iso_duration_to_years(time_element["age_range"]["start"]["age"], unit=unit)
-        end_value, end_unit = iso_duration_to_years(time_element["age_range"]["end"]["age"], unit=unit)
+        end_value, _end_unit = iso_duration_to_years(time_element["age_range"]["end"]["age"], unit=unit)
         time_value = (start_value + end_value) / 2
         time_unit = start_unit
     return time_value, time_unit

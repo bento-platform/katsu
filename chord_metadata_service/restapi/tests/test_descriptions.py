@@ -1,6 +1,6 @@
 from django.test import TestCase
-from .. import description_utils as du
 
+from .. import description_utils as du
 
 TEST_SCHEMA_1 = {"type": "string"}
 TEST_SCHEMA_2 = {"type": "array", "items": {"type": "string"}}
