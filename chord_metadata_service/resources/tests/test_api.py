@@ -6,14 +6,15 @@ from rest_framework.reverse import reverse
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.models import Dataset
-from chord_metadata_service.chord.tests.constants import valid_dataset, VALID_PROJECT_2
+from chord_metadata_service.chord.tests.constants import VALID_PROJECT_2, valid_dataset
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests.constants import VALID_PHENOPACKET_1
+
 from ..models import Resource
 from ..serializers import ResourceSerializer
-from .constants import VALID_RESOURCE_1, VALID_RESOURCE_2, DUPLICATE_RESOURCE_3
+from .constants import DUPLICATE_RESOURCE_3, VALID_RESOURCE_1, VALID_RESOURCE_2
 
 
 class CreateResourceTest(AuthzAPITestCase):

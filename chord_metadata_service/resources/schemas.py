@@ -1,14 +1,15 @@
-from chord_metadata_service.restapi.schemas import EXTRA_PROPERTIES_SCHEMA
+from pathlib import Path
+
 from chord_metadata_service.restapi.schema_utils import (
-    tag_ids_and_describe,
-    base_type,
     SchemaTypes,
+    base_type,
     get_schema_app_id,
     sub_schema_uri,
+    tag_ids_and_describe,
 )
-from pathlib import Path
-from . import descriptions
+from chord_metadata_service.restapi.schemas import EXTRA_PROPERTIES_SCHEMA
 
+from . import descriptions
 
 __all__ = ["RESOURCE_SCHEMA"]
 
