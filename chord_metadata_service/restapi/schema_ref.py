@@ -55,7 +55,7 @@ class SchemaRefs(Enum):
     # Alias for experiments/migrations/0012_alter_experiment_experiment_ontology_and_more.py
     # Previously, the key-value object for experiment extra properties forced all dict values to be strings;
     # it should instead allow arbitrary value types.
-    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA
+    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA  # noqa: PIE796
     ONTOLOGY_CLASS = ONTOLOGY_CLASS
     ONTOLOGY_CLASS_LIST = ONTOLOGY_CLASS_LIST
     PHENOPACKET_EVIDENCE_SCHEMA = PHENOPACKET_EVIDENCE_SCHEMA
