@@ -6,29 +6,26 @@ from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.full_text_search import FTSHelpersMixin
 from chord_metadata_service.geo.models import GeoLocation
 from chord_metadata_service.geo.tests.constants import GEO_LOCATION_1
-from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.phenopackets.filters import (
-    filter_ontology,
-    filter_extra_properties_datatype,
     PhenopacketFilter,
+    filter_extra_properties_datatype,
+    filter_ontology,
 )
+from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1, VALID_RESOURCE_2
 from chord_metadata_service.restapi.models import SchemaType
 
-from . import constants as c
 from .. import models as m
+from . import constants as c
 
 
 class BiosampleTest(ProjectTestCase):
-    """ Test module for Biosample model """
+    """Test module for Biosample model"""
 
     def setUp(self):
         self.individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual))
         self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(None))
-        self.biosample_3 = m.Biosample.objects.create(**{
-            **c.valid_biosample_2(None),
-            "id": 'biosample_id:3'
-        })
+        self.biosample_3 = m.Biosample.objects.create(**{**c.valid_biosample_2(None), "id": "biosample_id:3"})
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
 
         self.phenopacket = m.Phenopacket.objects.create(
@@ -42,10 +39,9 @@ class BiosampleTest(ProjectTestCase):
 
     def test_biosample(self):
         biosample_one = m.Biosample.objects.get(
-            tumor_progression__label='Primary Malignant Neoplasm',
-            sampled_tissue__label__icontains='urinary bladder'
+            tumor_progression__label="Primary Malignant Neoplasm", sampled_tissue__label__icontains="urinary bladder"
         )
-        self.assertEqual(biosample_one.id, 'katsu.biosample_id:1')
+        self.assertEqual(biosample_one.id, "katsu.biosample_id:1")
         self.assertEqual(biosample_one.schema_type, SchemaType.BIOSAMPLE)
         self.assertEqual(biosample_one.get_project_id(), self.project.identifier)
 
@@ -75,34 +71,29 @@ class BiosampleTest(ProjectTestCase):
 
 
 class PhenotypicFeatureTest(TestCase):
-    """ Test module for PhenotypicFeature model. """
+    """Test module for PhenotypicFeature model."""
 
     def setUp(self):
         self.individual_1 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
         self.individual_2 = m.Individual.objects.create(**c.VALID_INDIVIDUAL_2)
-        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(
-            self.individual_1)
-        )
-        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(
-            self.individual_2)
-        )
+        self.biosample_1 = m.Biosample.objects.create(**c.valid_biosample_1(self.individual_1))
+        self.biosample_2 = m.Biosample.objects.create(**c.valid_biosample_2(self.individual_2))
         self.meta_data = m.MetaData.objects.create(**c.VALID_META_DATA_1)
         self.phenopacket = m.Phenopacket.objects.create(
-            id='phenopacket_id:1',
+            id="phenopacket_id:1",
             subject=self.individual_2,
             meta_data=self.meta_data,
         )
         self.phenotypic_feature_1 = m.PhenotypicFeature.objects.create(
-            **c.valid_phenotypic_feature(biosample=self.biosample_1))
+            **c.valid_phenotypic_feature(biosample=self.biosample_1)
+        )
         self.phenotypic_feature_2 = m.PhenotypicFeature.objects.create(
-            **c.valid_phenotypic_feature(biosample=self.biosample_2, phenopacket=self.phenopacket))
+            **c.valid_phenotypic_feature(biosample=self.biosample_2, phenopacket=self.phenopacket)
+        )
 
     def test_phenotypic_feature(self):
-        phenotypic_feature_query = m.PhenotypicFeature.objects.filter(
-            severity__label='Mild',
-            pftype__label='Proptosis'
-        )
-        phenotypic_feature_2 = m.PhenotypicFeature.objects.filter(phenopacket__id='phenopacket_id:1')
+        phenotypic_feature_query = m.PhenotypicFeature.objects.filter(severity__label="Mild", pftype__label="Proptosis")
+        phenotypic_feature_2 = m.PhenotypicFeature.objects.filter(phenopacket__id="phenopacket_id:1")
         self.assertEqual(m.PhenotypicFeature.objects.count(), 2)
         self.assertEqual(phenotypic_feature_query.count(), 2)
         self.assertEqual(phenotypic_feature_2.count(), 1)
@@ -136,7 +127,7 @@ class GeneDescriptorTest(TestCase):
 
 
 class GenomicInterpretationTest(TestCase):
-    """ Test module for GenomicInterpretation model. """
+    """Test module for GenomicInterpretation model."""
 
     def setUp(self):
         self.maxDiff = None  # for seeing long string diffs
@@ -165,9 +156,7 @@ class GenomicInterpretationTest(TestCase):
 
     def test_validation_no_subject_or_biosample(self):
         with self.assertRaises(ValidationError):
-            m.GenomicInterpretation.objects.create(
-                **c.valid_genomic_interpretation(self.gene_descriptor)
-            ).clean()
+            m.GenomicInterpretation.objects.create(**c.valid_genomic_interpretation(self.gene_descriptor)).clean()
 
     def test_clean_passes_with_gene_and_subject(self):
         individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
@@ -199,7 +188,7 @@ class GenomicInterpretationTest(TestCase):
 
 
 class DiagnosisTest(TestCase):
-    """ Test module for Diagnosis model. """
+    """Test module for Diagnosis model."""
 
     def setUp(self):
         self.maxDiff = None  # for seeing long string diffs
@@ -209,10 +198,11 @@ class DiagnosisTest(TestCase):
 
         # With VariantInterpretation
         self.variant_descriptor = m.VariationDescriptor.objects.create(
-            **c.valid_variant_descriptor(self.gene_descriptor))
-        self.variant_interpretation = m.VariantInterpretation.objects.create(**c.valid_variant_interpretation(
-            variant_descriptor=self.variant_descriptor
-        ))
+            **c.valid_variant_descriptor(self.gene_descriptor)
+        )
+        self.variant_interpretation = m.VariantInterpretation.objects.create(
+            **c.valid_variant_interpretation(variant_descriptor=self.variant_descriptor)
+        )
 
         self.genomic_interpretation_1 = m.GenomicInterpretation.objects.create(
             **c.valid_genomic_interpretation(self.gene_descriptor, self.variant_interpretation)
@@ -221,10 +211,7 @@ class DiagnosisTest(TestCase):
             **c.valid_genomic_interpretation(self.gene_descriptor)
         )
         self.diagnosis = m.Diagnosis.objects.create(**c.valid_diagnosis(c.VALID_DISEASE_ONTOLOGY))
-        self.diagnosis.genomic_interpretations.set([
-            self.genomic_interpretation_1,
-            self.genomic_interpretation_2
-        ])
+        self.diagnosis.genomic_interpretations.set([self.genomic_interpretation_1, self.genomic_interpretation_2])
 
     def test_diagnosis(self):
         self._test_disease_filter(Q(disease__id__icontains="omim"), 1)
@@ -255,7 +242,7 @@ class DiagnosisTest(TestCase):
 
 
 class InterpretationTest(TestCase):
-    """ Test module for Interpretation model. """
+    """Test module for Interpretation model."""
 
     def setUp(self):
         self.maxDiff = None  # for seeing long string diffs
@@ -274,9 +261,7 @@ class InterpretationTest(TestCase):
         self.interpretation = m.Interpretation.objects.create(**c.valid_interpretation(self.diagnosis))
 
     def test_interpretation(self):
-        interpretation_qs = m.Interpretation.objects.filter(
-            progress_status='IN_PROGRESS'
-        )
+        interpretation_qs = m.Interpretation.objects.filter(progress_status="IN_PROGRESS")
         self.assertEqual(interpretation_qs.count(), 1)
 
     def test_interpretation_fts_repr(self):
@@ -291,7 +276,7 @@ class InterpretationTest(TestCase):
 
 
 class MetaDataTest(TestCase):
-    """ Test module for MetaData model. """
+    """Test module for MetaData model."""
 
     def setUp(self):
         self.maxDiff = None  # for seeing long string diffs
@@ -315,7 +300,7 @@ class MetaDataTest(TestCase):
                 c.VALID_META_DATA_2["updates"],
                 c.VALID_META_DATA_2["external_references"],
                 None,
-            )
+            ),
         )
         self.assertEqual(
             FTSHelpersMixin.fts_repr_values_to_str(self.metadata),
@@ -323,7 +308,7 @@ class MetaDataTest(TestCase):
                 "Victor Rocheleau Victor Rocheleau timestamp 2018-06-10T10:59:06Z updated_by Julius J. comment added "
                 "phenotypic features to individual patient:1 DOI:10.1016/j.jaccas.2020.04.001 reference PMID:32292915 "
                 "The Imperfect Cytokine Storm: Severe COVID-19 With ARDS in a Patient on Durable LVAD Support"
-            )
+            ),
         )
 
     def test_metadata_str(self):
@@ -331,7 +316,7 @@ class MetaDataTest(TestCase):
 
 
 class PhenopacketTest(ProjectTestCase):
-    """ Test module for Phenopacket model """
+    """Test module for Phenopacket model"""
 
     def setUp(self):
         self.maxDiff = None  # for seeing long string diffs
@@ -341,10 +326,7 @@ class PhenopacketTest(ProjectTestCase):
         self.disease = m.Disease.objects.create(**c.VALID_DISEASE_1)
         self.interpretation = m.Interpretation.objects.create(
             **c.valid_interpretation(
-                diagnosis=m.Diagnosis.objects.create(
-                    **c.valid_diagnosis(
-                        disease=c.VALID_DISEASE_ONTOLOGY)
-                )
+                diagnosis=m.Diagnosis.objects.create(**c.valid_diagnosis(disease=c.VALID_DISEASE_ONTOLOGY))
             )
         )
         self.phenopacket = m.Phenopacket.objects.create(

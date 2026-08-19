@@ -74,4 +74,4 @@ line-length = 120
 extend-exclude = ["chord_metadata_service/*/migrations"]
 
 [tool.ruff.lint]
-ignore = ["RUF022"]
+ignore = ["PYI041", "RUF012", "RUF022"]

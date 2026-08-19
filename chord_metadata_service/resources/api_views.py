@@ -28,7 +28,7 @@ class ResourceViewSet(BentoAuthzScopedModelViewSet):
     serializer_class = ResourceSerializer
     renderer_classes = (*api_settings.DEFAULT_RENDERER_CLASSES, PhenopacketsRenderer)
     pagination_class = LargeResultsSetPagination
-    filter_backends = [DjangoFilterBackend]  # noqa: RUF012
+    filter_backends = [DjangoFilterBackend]
     filterset_class = ResourceFilter
 
     @async_to_sync

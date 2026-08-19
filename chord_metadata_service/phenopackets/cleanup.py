@@ -1,8 +1,7 @@
-import chord_metadata_service.experiments.models as em
-import chord_metadata_service.phenopackets.models as pm
-
 from structlog.stdlib import BoundLogger
 
+import chord_metadata_service.experiments.models as em
+import chord_metadata_service.phenopackets.models as pm
 from chord_metadata_service.cleanup.remove import remove_items, remove_not_referenced
 from chord_metadata_service.utils import build_id_set, build_id_set_from_model
 
@@ -71,9 +70,7 @@ async def clean_phenotypic_features(logger: BoundLogger) -> int:
 
 async def clean_interpretations(logger: BoundLogger) -> int:
     interpretations_referenced = await build_id_set_from_model(pm.Phenopacket, "interpretations__id")
-    return await remove_not_referenced(
-        pm.Interpretation, interpretations_referenced, "interpretations", logger
-    )
+    return await remove_not_referenced(pm.Interpretation, interpretations_referenced, "interpretations", logger)
 
 
 async def clean_diagnoses(logger: BoundLogger) -> int:
@@ -83,20 +80,14 @@ async def clean_diagnoses(logger: BoundLogger) -> int:
 
 async def clean_genomic_interpretations(logger: BoundLogger) -> int:
     gi_referenced = await build_id_set_from_model(pm.Diagnosis, "genomic_interpretations__id")
-    return await remove_not_referenced(
-        pm.GenomicInterpretation, gi_referenced, "genomic interpretations", logger
-    )
+    return await remove_not_referenced(pm.GenomicInterpretation, gi_referenced, "genomic interpretations", logger)
 
 
 async def clean_variant_interpretations(logger: BoundLogger) -> int:
     vis_referenced = await build_id_set_from_model(pm.GenomicInterpretation, "variant_interpretation")
-    return await remove_not_referenced(
-        pm.VariantInterpretation, vis_referenced, "variant interpretations", logger
-    )
+    return await remove_not_referenced(pm.VariantInterpretation, vis_referenced, "variant interpretations", logger)
 
 
 async def clean_variation_descriptors(logger: BoundLogger) -> int:
     vds_referenced = await build_id_set_from_model(pm.VariantInterpretation, "variation_descriptor")
-    return await remove_not_referenced(
-        pm.VariationDescriptor, vds_referenced, "variation descriptors", logger
-    )
+    return await remove_not_referenced(pm.VariationDescriptor, vds_referenced, "variation descriptors", logger)
