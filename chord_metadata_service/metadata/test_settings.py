@@ -1,5 +1,4 @@
-# noinspection unused-imports
-from .settings import *
+from .settings import *  # noqa: F401, F403
 
 # Tests are run locally with the Django dev server. Adding a sub-path which
 # is managed by the gateway in production, creates wrong references and breaks

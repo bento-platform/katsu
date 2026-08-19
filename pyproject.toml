@@ -74,4 +74,5 @@ line-length = 120
 extend-exclude = ["chord_metadata_service/*/migrations"]
 
 [tool.ruff.lint]
-ignore = ["PYI041", "RUF012", "RUF022", "T100"]
+# TODO: remove RUF100 when flake8 gets unplugged
+ignore = ["PYI041", "RUF012", "RUF022", "RUF100", "T100"]
