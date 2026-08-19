@@ -1,33 +1,34 @@
-import json
 import csv
 import io
+import json
 from abc import ABCMeta, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any, ClassVar
 from uuid import UUID
-from typing import Callable, ClassVar, Dict, Optional, Any, Type
 
 from bento_lib.responses import errors
+from django.http import HttpResponse
+from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from openpyxl import Workbook
 from pydantic import BaseModel
 from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
-from django.http import HttpResponse
 from rest_framework import status
-from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer, BaseRenderer
+from rest_framework.renderers import BaseRenderer, BrowsableAPIRenderer, JSONRenderer
 from rest_framework.response import Response
-from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 
 from chord_metadata_service.experiments import serializers as exp_s
 from chord_metadata_service.patients import serializers as pa_s
 from chord_metadata_service.phenopackets import serializers as phe_s
 from chord_metadata_service.phenopackets.utils import time_element_to_str
+
 from .jsonld_utils import dataset_to_jsonld
 from .serializers import GenericSerializer
 
 __all__ = [
     "PhenopacketsRenderer",
-    "JSONLDDatasetRenderer",
     "RDFDatasetRenderer",
     "render_age",
     "PassThruCSVRenderer",
@@ -102,7 +103,7 @@ class RDFDatasetRenderer(PhenopacketsRenderer):
         return rdf_data
 
 
-def render_age(item: Dict[str, Any], time_key: str) -> Optional[str]:
+def render_age(item: dict[str, Any], time_key: str) -> str | None:
     if time_key not in item:
         return None
     time_to_render = item[time_key]
@@ -179,7 +180,7 @@ def _column_label(key: str) -> str:
     return key.replace("_", " ").capitalize()
 
 
-def parse_requested_fields(request) -> Optional[list[str]]:
+def parse_requested_fields(request) -> list[str] | None:
     """
     The caller's selected-fields list, if any: a comma-separated `fields` query param, or a `fields` list in a
     POST body (batch export endpoints negotiate format from the body, so fields can travel the same way).
@@ -214,7 +215,7 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         pass
 
     @classmethod
@@ -320,7 +321,7 @@ class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
         return response
 
 
-def csv_fields_error_response(request, renderer_cls: Type["KatsuCSVRenderer"]) -> Optional[Response]:
+def csv_fields_error_response(request, renderer_cls: type["KatsuCSVRenderer"]) -> Response | None:
     """
     If the request's `fields` selection names a column not in renderer_cls's registry, return a 400 in the standard
     katsu/bento_lib error format; otherwise None (no `fields` param, or all requested keys are valid).
@@ -344,7 +345,7 @@ def _render_csv_diseases(diseases: list[dict]) -> str:
     )
 
 
-def _individual_diseases(individual: dict) -> Optional[str]:
+def _individual_diseases(individual: dict) -> str | None:
     if "phenopackets" not in individual:
         return None
     all_diseases = [
@@ -373,7 +374,7 @@ class IndividualCSVRenderer(KatsuCSVRenderer):
     field_registry = INDIVIDUAL_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return pa_s.IndividualSerializer
 
 
@@ -383,11 +384,11 @@ class IndividualXLSXRenderer(KatsuXLSXRenderer):
     field_registry = INDIVIDUAL_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return pa_s.IndividualSerializer
 
 
-def _phenopacket_biosamples(phe: dict) -> Optional[str]:
+def _phenopacket_biosamples(phe: dict) -> str | None:
     if not phe.get("biosamples"):
         return None
     return "; ".join(
@@ -414,7 +415,7 @@ class PhenopacketCSVRenderer(KatsuCSVRenderer):
     field_registry = PHENOPACKET_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return phe_s.PhenopacketSerializer
 
 
@@ -424,7 +425,7 @@ class PhenopacketXLSXRenderer(KatsuXLSXRenderer):
     field_registry = PHENOPACKET_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return phe_s.PhenopacketSerializer
 
 
@@ -448,7 +449,7 @@ class BiosamplesCSVRenderer(KatsuCSVRenderer):
     field_registry = BIOSAMPLE_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return phe_s.BiosampleSerializer
 
 
@@ -458,7 +459,7 @@ class BiosamplesXLSXRenderer(KatsuXLSXRenderer):
     field_registry = BIOSAMPLE_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return phe_s.BiosampleSerializer
 
 
@@ -483,7 +484,7 @@ class ExperimentCSVRenderer(KatsuCSVRenderer):
     field_registry = EXPERIMENT_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return exp_s.ExperimentSerializer
 
 
@@ -493,7 +494,7 @@ class ExperimentXLSXRenderer(KatsuXLSXRenderer):
     field_registry = EXPERIMENT_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return exp_s.ExperimentSerializer
 
 
@@ -516,7 +517,7 @@ class ExperimentResultCSVRenderer(KatsuCSVRenderer):
     field_registry = EXPERIMENT_RESULT_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return exp_s.ExperimentResultSerializer
 
 
@@ -526,7 +527,7 @@ class ExperimentResultXLSXRenderer(KatsuXLSXRenderer):
     field_registry = EXPERIMENT_RESULT_FIELDS
 
     @staticmethod
-    def get_model_serializer() -> Type[GenericSerializer]:
+    def get_model_serializer() -> type[GenericSerializer]:
         return exp_s.ExperimentResultSerializer
 
 
