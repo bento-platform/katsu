@@ -1,6 +1,5 @@
 from copy import deepcopy
 
-
 TAXONOMY_HOMO_SAPIENS = {
     "id": "NCBITaxon:9606",
     "label": "Homo sapiens",

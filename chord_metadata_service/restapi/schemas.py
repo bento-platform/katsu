@@ -1,16 +1,18 @@
 from bento_lib.ontologies.models import CURIE_PATTERN
 from django.conf import settings
+
 from . import descriptions
-from .description_utils import EXTRA_PROPERTIES, ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
+from .description_utils import EXTRA_PROPERTIES
+from .description_utils import ONTOLOGY_CLASS as ONTOLOGY_CLASS_DESC
 from .schema_utils import (
     DATE_TIME,
     DRAFT_07,
     SchemaTypes,
     base_type,
-    string_with_pattern,
-    tag_ids_and_describe,
     named_one_of,
+    string_with_pattern,
     sub_schema_uri,
+    tag_ids_and_describe,
 )
 
 # Individual schemas for validation of JSONField values
