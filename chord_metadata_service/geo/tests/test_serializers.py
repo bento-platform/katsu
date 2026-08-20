@@ -1,6 +1,5 @@
-from .constants import KINGSTON_GEOM_JSON, GeoLocationTestCase
 from ..serializers import GeoLocationSerializer
-
+from .constants import KINGSTON_GEOM_JSON, GeoLocationTestCase
 
 VALID_GEO_LOCATION_PROPERTIES = (
     {},
@@ -44,6 +43,14 @@ INVALID_GEO_LOCATIONS = (
 
 
 class GeoLocationSerializersTest(GeoLocationTestCase):
+    def test_valid_geo_location_no_props(self):
+        GeoLocationSerializer(
+            data={
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+            }
+        ).is_valid(raise_exception=True)
+
     def test_valid_geo_location(self):
         for props in VALID_GEO_LOCATION_PROPERTIES:
             with self.subTest(params=(props,)):
