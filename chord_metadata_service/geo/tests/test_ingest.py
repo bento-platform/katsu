@@ -46,3 +46,15 @@ class GeoLocationIngestTest(TestCase):
                 "my_cool_prop_2": "abc",
             },
         )
+
+    def test_ingest_no_props(self):
+        gl = get_or_create_geo_location(
+            {
+                "type": "Feature",
+                "geometry": KINGSTON_GEOM_JSON,
+            }
+        )
+
+        self.assertEqual(gl.label, "")
+        self.assertEqual(gl.country, "")
+        self.assertDictEqual(gl.extra_properties, {})
