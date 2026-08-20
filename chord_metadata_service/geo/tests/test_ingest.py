@@ -1,6 +1,7 @@
 from django.test import TestCase
-from .constants import KINGSTON_GEOM_JSON
+
 from ..ingest import get_or_create_geo_location
+from .constants import KINGSTON_GEOM_JSON
 
 
 class GeoLocationIngestTest(TestCase):

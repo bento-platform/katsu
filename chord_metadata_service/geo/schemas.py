@@ -1,6 +1,5 @@
 from django.conf import settings
 
-from . import constants, descriptions
 from chord_metadata_service.restapi.schema_utils import (
     DRAFT_07,
     SchemaTypes,
@@ -9,6 +8,8 @@ from chord_metadata_service.restapi.schema_utils import (
     sub_schema_uri,
     tag_ids_and_describe,
 )
+
+from . import constants, descriptions
 
 __all__ = ["GEO_LOCATION_SCHEMA"]
 

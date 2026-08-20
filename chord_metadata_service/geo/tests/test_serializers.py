@@ -1,6 +1,5 @@
-from .constants import KINGSTON_GEOM_JSON, GeoLocationTestCase
 from ..serializers import GeoLocationSerializer
-
+from .constants import KINGSTON_GEOM_JSON, GeoLocationTestCase
 
 VALID_GEO_LOCATION_PROPERTIES = (
     {},
