@@ -103,6 +103,12 @@ if ADDITIONAL_ALLOWED_HOSTS:
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
 
+# POST body size maximum - increase from default of 2.5 MB to 12 MiB
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 12000000
+
+# Turns off redirect to path with slash
+
 APPEND_SLASH = False
 
 # Bento misc. settings
