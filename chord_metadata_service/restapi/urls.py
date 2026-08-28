@@ -1,6 +1,7 @@
 from django.urls import include, path
 from rest_framework import routers
 
+from chord_metadata_service.beacon import urls as beacon_urls
 from chord_metadata_service.chord import api_views as chord_views
 from chord_metadata_service.discovery.api_views import (
     discovery_endpoint,
@@ -53,6 +54,7 @@ router.register(r"resources", resources_views.ResourceViewSet, basename="resourc
 urlpatterns = [
     path("", include(router.urls)),
     path("", include(batch_router.urls)),
+    path("beacon/", include(beacon_urls)),
     # apps schemas
     path("schemas/phenopacket", phenopacket_views.get_chord_phenopacket_schema, name="chord-phenopacket-schema"),
     path(

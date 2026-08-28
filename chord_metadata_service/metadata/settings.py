@@ -131,6 +131,7 @@ INSTALLED_APPS = (["daphne"] if os.environ.get("BENTO_CONTAINER_LOCAL") else [])
     "django.contrib.postgres",
     # --- katsu apps ------------------------------------------------------------------------------
     "chord_metadata_service.chord.apps.ChordConfig",
+    "chord_metadata_service.beacon.apps.BeaconConfig",
     "chord_metadata_service.experiments.apps.ExperimentsConfig",
     "chord_metadata_service.geo.apps.GeoConfig",
     "chord_metadata_service.patients.apps.PatientsConfig",
