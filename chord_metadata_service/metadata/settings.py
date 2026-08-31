@@ -103,9 +103,9 @@ if ADDITIONAL_ALLOWED_HOSTS:
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
 
-# POST body size maximum - increase from default of 2.5 MB to 12 MiB
+# POST body size maximum - increase from default of 2.5 MB to 50 MiB
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 12000000
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("KATSU_DATA_UPLOAD_MAX_MEMORY_SIZE", "50000000"))
 
 # Turns off redirect to path with slash
 
