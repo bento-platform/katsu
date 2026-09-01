@@ -1,4 +1,5 @@
 from pathlib import Path
+
 from bento_lib.workflows import models as wm
 from bento_lib.workflows.workflow_set import WorkflowSet
 
@@ -72,7 +73,9 @@ workflow_set.add_workflow(
     wm.WorkflowDefinition(
         type="ingestion",
         name="Bento Experiments JSON",
-        description="This ingestion workflow will validate and import a Bento Experiments schema-compatible JSON document.",
+        description=(
+            "This ingestion workflow will validate and import a Bento Experiments schema-compatible JSON document."
+        ),
         data_type=DATA_TYPE_EXPERIMENT,  # for permissions
         tags=frozenset({DATA_TYPE_EXPERIMENT}),
         file="experiments_json.wdl",
@@ -141,8 +144,8 @@ workflow_set.add_workflow(
         type="analysis",
         name="Associate experiment results with DRS objects",
         description=(
-            "This workflow will associate existing experiment results with existing DRS objects in the same project/dataset"
-            "which match based on filename."
+            "This workflow will associate existing experiment results with existing DRS objects in the same "
+            "project/dataset which match based on filename."
         ),
         file="experiment_results_drs.wdl",
         tags=frozenset({DATA_TYPE_EXPERIMENT, "experiment_result", "drs"}),
