@@ -20,7 +20,7 @@ from chord_metadata_service.restapi.utils import remove_computed_properties
 
 from .exceptions import IngestError
 from .resources import ingest_resource
-from .schema import schema_validation
+from .schema import schema_validation, extract_error_msg
 from .utils import map_if_list, query_and_check_nulls
 from typing import Any, Callable, Iterable, TypeVar
 from django.db.models import Model
@@ -82,13 +82,21 @@ def validate_phenopacket(
     schema: dict = PHENOPACKET_SCHEMA,
     idx: int | None = None
 ) -> None:
+    errors = []
     # Validate phenopacket data against phenopackets schema.
-    validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY, obj_idx=idx, logger=lg)
+    validation = schema_validation(
+        phenopacket_data,
+        schema,
+        registry=VRS_REF_REGISTRY,
+        obj_idx=idx,
+        logger=lg,
+        validation_errors=errors
+    )
     if not validation:
-        # TODO: Report more precise errors
+        error_details = extract_error_msg(errors)
         raise IngestError(
             f"Failed schema validation for phenopacket{(' ' + str(idx)) if idx is not None else ''} "
-            f"(check Katsu logs for more information)")
+            f"{error_details}(check Katsu logs for more information)")
 
 
 def update_or_create_subject(subject: dict) -> pm.Individual:

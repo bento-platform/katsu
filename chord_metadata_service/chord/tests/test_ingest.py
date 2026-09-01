@@ -7,7 +7,7 @@ from chord_metadata_service.chord.ingest.experiments import (
     ingest_experiment,
     ingest_derived_experiment_results,
 )
-from chord_metadata_service.chord.ingest.schema import schema_validation
+from chord_metadata_service.chord.ingest.schema import schema_validation, extract_error_msg
 from chord_metadata_service.chord.ingest.phenopackets import (
     get_or_create_phenotypic_feature,
     get_or_create_genomic_interpretation,
@@ -320,6 +320,32 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
             EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
             [v["identifier"] for v in related_results.values("identifier")]
         )
+
+
+class SchemaHelperTest(ProjectTestCase):
+    """
+    Unit tests for schema validation helper functions.
+    """
+    def test_extract_error_msg(self):
+        # mock class to simulate a jsonschema validation error
+        class MockError:
+            def __init__(self, message, path):
+                self.message = message
+                self.path = path
+
+        # test error with nested path
+        error = MockError("Invalid integer", ["body", "experiments", 0, "id"])
+        msg = extract_error_msg([error])
+        self.assertEqual(msg, "at field 'body -> experiments -> 0 -> id': Invalid integer")
+
+        # test error at root
+        error_root = MockError("Root object is invalid", [])
+        msg_root = extract_error_msg([error_root])
+        self.assertEqual(msg_root, "at field 'root': Root object is invalid")
+
+        # test empty error list
+        msg_empty = extract_error_msg([])
+        self.assertEqual(msg_empty, "Unknown validation error")
 
 
 class IngestMultipleTest(ProjectTestCase):
