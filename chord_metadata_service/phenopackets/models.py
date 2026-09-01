@@ -483,7 +483,7 @@ class Diagnosis(BaseTimeStamp, ToFTSReprMixin):
     """
     id = models.CharField(primary_key=True, max_length=200,
                           help_text="Unique ID, uses the parent Interpretation's id when ingesting.")
-    disease = models.JSONField(null=True, blank=True, validators=[ontology_validator])
+    disease = models.JSONField(validators=[ontology_validator])
     genomic_interpretations = models.ManyToManyField(
         GenomicInterpretation, blank=True,
         help_text='The genomic elements assessed as being responsible for the disease.')
