@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import re
-
 from collections import defaultdict
+from typing import Any
+
 from django.db.models import F
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
-from typing import Any
 
 from chord_metadata_service.phenopackets.models import Biosample
 

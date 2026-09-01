@@ -5,9 +5,7 @@ from rest_framework.request import Request as DrfRequest
 from typing import Iterable
 
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
-from chord_metadata_service.authz.types import (
-    DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
-)
+from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 from chord_metadata_service.chord.data_types import KatsuDataType, DATA_TYPES
 
 from .field_paths.normalize import normalize_field_path_true_model
@@ -33,12 +31,10 @@ async def get_discovery_data_type_permissions(
 
     return await get_data_type_query_permissions(
         request,
-
         # Collect all data types that we need permissions for to give various parts of the public overview response.
         #  - individuals & biosamples are in the 'phenopacket' data type, experiments are in the 'experiment' data type
         #  - TODO: filter to just data types which are ingested?
         data_types=list(set(DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE.values())),
-
         # Pass scope for permissions as resource
         resource=resource,
         dataset_level=dataset_level,
@@ -89,7 +85,7 @@ def get_discovery_field_set_permissions(
     all_fields_permissions = DataPermissions(
         bool_=all(dt_permissions[dt].bool_ for dt in dts_accessed),
         counts=all(dt_permissions[dt].counts for dt in dts_accessed),
-        data=all(dt_permissions[dt].data for dt in dts_accessed)
+        data=all(dt_permissions[dt].data for dt in dts_accessed),
     )  # AND of permissions for every field, so we know if we have, e.g., boolean-level access for every field passed.
     field_permissions: FieldDiscoveryPermissions = {f: dt_permissions[field_dts[f]] for f in field_set}
 

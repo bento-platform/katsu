@@ -26,12 +26,12 @@ def schema_validation(
         lg = lg.bind(obj_idx=obj_idx)
 
     validator_args = {
-        'schema': schema,
-        'format_checker': Draft7Validator.FORMAT_CHECKER,
+        "schema": schema,
+        "format_checker": Draft7Validator.FORMAT_CHECKER,
     }
 
     if registry:
-        validator_args['registry'] = registry
+        validator_args["registry"] = registry
 
     validator = Draft7Validator(**validator_args)
     try:
@@ -43,8 +43,8 @@ def schema_validation(
         lg.info(
             "JSON schema validation failed",
             errors=[
-                {"idx": i, "path": '.'.join(str(v) for v in error.path), "message": error.message}
+                {"idx": i, "path": ".".join(str(v) for v in error.path), "message": error.message}
                 for i, error in enumerate(errors)
-            ]
+            ],
         )
         return False

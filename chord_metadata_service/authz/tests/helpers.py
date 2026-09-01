@@ -1,12 +1,11 @@
 import json
+from typing import ClassVar, Literal
 
 from aioresponses import aioresponses
 from bento_lib.auth.types import EvaluationResultMatrix
 from rest_framework.test import APITransactionTestCase
-from typing import Literal
 
 from ..types import DataPermissions
-
 
 __all__ = [
     "DTAccessLevel",
@@ -20,12 +19,12 @@ DTAccessLevel = Literal["none", "bool", "counts", "full"]
 
 class AuthzAPITestCase(APITransactionTestCase):
     # data type permissions: bool, counts, data
-    dt_none_eval_res = [[False, False, False]]
-    dt_bool_eval_res = [[True, False, False]]
-    dt_counts_eval_res = [[True, True, False]]
-    dt_full_eval_res = [[True, True, True]]
+    dt_none_eval_res: ClassVar[list[list[bool]]] = [[False, False, False]]
+    dt_bool_eval_res: ClassVar[list[list[bool]]] = [[True, False, False]]
+    dt_counts_eval_res: ClassVar[list[list[bool]]] = [[True, True, False]]
+    dt_full_eval_res: ClassVar[list[list[bool]]] = [[True, True, True]]
 
-    dt_levels: dict[DTAccessLevel, list[list[bool]]] = {
+    dt_levels: ClassVar[dict[DTAccessLevel, list[list[bool]]]] = {
         "none": dt_none_eval_res,
         "bool": dt_bool_eval_res,
         "counts": dt_counts_eval_res,

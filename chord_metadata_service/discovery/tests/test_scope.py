@@ -6,7 +6,6 @@ from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INST
 
 
 class DiscoveryScopeBuildingTestCase(ProjectTestCase):
-
     def setUp(self):
         self.instance_scope = INSTANCE_SCOPE
         self.project_scope = ValidatedDiscoveryScope(self.project, None)

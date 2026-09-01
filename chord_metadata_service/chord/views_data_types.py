@@ -75,7 +75,7 @@ async def get_count_for_data_type(
 async def get_last_ingested_for_data_type(data_type: str, scope: ValidatedDiscoveryScope) -> dict | None:
 
     q = await _filtered_query(data_type, scope)
-    latest_obj = await q.order_by('-created').afirst()
+    latest_obj = await q.order_by("-created").afirst()
 
     if not latest_obj:
         return None
@@ -92,11 +92,8 @@ async def make_data_type_response_object(
     return {
         **data_type_details,
         "id": data_type_id,
-        **(
-            {"count": await get_count_for_data_type(data_type_id, scope, permissions)}
-            if permissions.counts else {}
-        ),
-        "last_ingested": await get_last_ingested_for_data_type(data_type_id, scope)
+        **({"count": await get_count_for_data_type(data_type_id, scope, permissions)} if permissions.counts else {}),
+        "last_ingested": await get_last_ingested_for_data_type(data_type_id, scope),
     }
 
 
@@ -115,10 +112,12 @@ async def data_type_list(request: DrfRequest):
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
 
     dt_response: list[dict] = list(
-        await asyncio.gather(*(
-            make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
-            for dt_id, dt_d in dt.DATA_TYPES.items()
-        ))
+        await asyncio.gather(
+            *(
+                make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
+                for dt_id, dt_d in dt.DATA_TYPES.items()
+            )
+        )
     )
 
     dt_response.sort(key=lambda d: d["id"])
@@ -181,10 +180,12 @@ async def dataset_data_type_summary(request: DrfRequest, identifier: str):
     discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     dt_response = sorted(
-        await asyncio.gather(*(
-            make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
-            for dt_id, dt_d in dt.DATA_TYPES.items()
-        )),
+        await asyncio.gather(
+            *(
+                make_data_type_response_object(dt_id, dt_d, discovery_scope, dt_permissions[dt_id])
+                for dt_id, dt_d in dt.DATA_TYPES.items()
+            )
+        ),
         key=lambda d: d["id"],
     )
     return Response(dt_response)
@@ -225,7 +226,10 @@ async def dataset_data_type(request: DrfRequest, identifier: str, data_type: str
     discovery_scope = ValidatedDiscoveryScope(project, dataset)
     dt_permissions = await get_discovery_data_type_permissions(request, discovery_scope)
     response_object = await make_data_type_response_object(
-        data_type, dt.DATA_TYPES[data_type], discovery_scope, permissions=dt_permissions[data_type],
+        data_type,
+        dt.DATA_TYPES[data_type],
+        discovery_scope,
+        permissions=dt_permissions[data_type],
     )
     authz.mark_authz_done(request)
     return Response(response_object)

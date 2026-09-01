@@ -1,9 +1,23 @@
+import uuid
+
 from rest_framework import status
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.models import Dataset, Project
+from chord_metadata_service.chord.tests.constants import (
+    VALID_DATASET_PRIMARY_CONTACT,
+    VALID_PROJECT_1,
+    valid_phenotypic_feature,
+)
 from chord_metadata_service.cleanup import run_all_cleanup
 from chord_metadata_service.experiments import cleanup as ec
 from chord_metadata_service.experiments.models import Experiment, ExperimentResult, Instrument
+from chord_metadata_service.experiments.tests.constants import (
+    valid_experiment,
+    valid_experiment_result,
+    valid_instrument,
+)
 from chord_metadata_service.logger import logger
 from chord_metadata_service.patients.cleanup import clean_individuals
 from chord_metadata_service.patients.models import Individual
@@ -23,9 +37,9 @@ from chord_metadata_service.phenopackets.models import (
 from chord_metadata_service.phenopackets.tests.constants import (
     VALID_DISEASE_ONTOLOGY,
     VALID_GENE_DESCRIPTOR_1,
+    VALID_META_DATA_1,
     VALID_PROCEDURE_1,
     VALID_VARIANT_DESCRIPTOR,
-    VALID_META_DATA_1,
     valid_biosample_1,
     valid_biosample_2,
     valid_diagnosis,
@@ -36,20 +50,6 @@ from chord_metadata_service.phenopackets.tests.constants import (
 from chord_metadata_service.resources.cleanup import clean_resources
 from chord_metadata_service.resources.models import Resource
 from chord_metadata_service.resources.tests.constants import VALID_RESOURCE_1
-from chord_metadata_service.experiments.tests.constants import (
-    valid_instrument,
-    valid_experiment_result,
-    valid_experiment,
-)
-import uuid
-
-from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.tests.constants import (
-    VALID_PROJECT_1,
-    VALID_DATASET_PRIMARY_CONTACT,
-    valid_phenotypic_feature,
-)
-from chord_metadata_service.chord.models import Project, Dataset
 
 
 class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
@@ -58,8 +58,11 @@ class CleanUpIndividualsAndPhenopacketsTestCase(AuthzAPITestCase):
 
         self.project = Project.objects.create(**VALID_PROJECT_1)
         _schema = KatsuDatasetModel(
-            schema_version="1.0", title="Dataset 1", description="Test dataset",
-            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.project.identifier),
+            schema_version="1.0",
+            title="Dataset 1",
+            description="Test dataset",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
         )
         self.dataset = Dataset.from_schema(_schema)
@@ -220,8 +223,11 @@ class CleanUpExperimentsTestCase(AuthzAPITestCase):
 
         self.project = Project.objects.create(**VALID_PROJECT_1)
         _schema = KatsuDatasetModel(
-            schema_version="1.0", title="Dataset 1", description="Test dataset",
-            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.project.identifier),
+            schema_version="1.0",
+            title="Dataset 1",
+            description="Test dataset",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.project.identifier),
             identifier=str(uuid.uuid4()),
         )
         self.dataset = Dataset.from_schema(_schema)

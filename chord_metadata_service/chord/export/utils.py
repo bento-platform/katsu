@@ -55,7 +55,7 @@ class ExportFileContext:
             if os.path.exists(self.path):
                 shutil.rmtree(self.path)
 
-            original_umask = os.umask(0)    # fix issue with non-writable dir due to OS based mask
+            original_umask = os.umask(0)  # fix issue with non-writable dir due to OS based mask
             os.makedirs(self.path, 0o777)
 
             os.umask(original_umask)
@@ -70,7 +70,7 @@ class ExportFileContext:
         if self.should_del and self.path:
             shutil.rmtree(self.path)
 
-    def get_path(self, filename: str = ''):
+    def get_path(self, filename: str = ""):
         """Returns a path within the export directory
 
         Attributes:
@@ -94,8 +94,8 @@ class ExportFileContext:
 
         Return: path to the generated tar file
         """
-        tar_path = os.path.join(self.base_path, EXPORT_DIR, self.project_id + '.tar.gz')
-        with tarfile.open(tar_path, 'w:gz') as tar:
+        tar_path = os.path.join(self.base_path, EXPORT_DIR, self.project_id + ".tar.gz")
+        with tarfile.open(tar_path, "w:gz") as tar:
             output_dir = self.get_path()
             # tar.gz will contain one `export/` output directory:
             tar.add(output_dir, arcname="export")

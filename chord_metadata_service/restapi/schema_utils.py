@@ -1,8 +1,9 @@
+from copy import deepcopy
 from enum import Enum
+from pathlib import Path
+
 from bento_lib.search import queries as q
 from django.db import models
-from pathlib import Path
-from copy import deepcopy
 from structlog.stdlib import BoundLogger
 
 from .description_utils import describe_schema
@@ -264,11 +265,11 @@ def customize_schema(
     second_typeof: dict,
     first_property: str,
     second_property: str,
-    schema_id: str = None,
-    title: str = None,
-    description: str = None,
+    schema_id: str | None = None,
+    title: str | None = None,
+    description: str | None = None,
     additional_properties: bool = False,
-    required: list[str] = None,
+    required: list[str] | None = None,
 ) -> dict:
     return {
         "$schema": DRAFT_07,
@@ -287,11 +288,11 @@ def customize_schema(
 
 def make_object_schema(
     properties: dict,
-    schema_id: str = None,
-    title: str = None,
-    description: str = None,
+    schema_id: str | None = None,
+    title: str | None = None,
+    description: str | None = None,
     additional_properties: bool = False,
-    required: list[str] = None,
+    required: list[str] | None = None,
 ) -> dict:
     return {
         "$schema": DRAFT_07,

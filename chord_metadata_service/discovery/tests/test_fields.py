@@ -16,26 +16,27 @@ from ..pydantic_models import BinWithValue
 
 
 class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
-    discovery: DiscoveryConfig = DiscoveryConfig.model_validate({
-        "fields": {
-            "some_prop": {
-                "datatype": "string",
-                "mapping": "individual/extra_properties/some_prop",
-                "title": "Some Prop",
-                "description": "Some property",
-                "config": {
-                    "enum": ["a", "b"],
-                },
+    discovery: DiscoveryConfig = DiscoveryConfig.model_validate(
+        {
+            "fields": {
+                "some_prop": {
+                    "datatype": "string",
+                    "mapping": "individual/extra_properties/some_prop",
+                    "title": "Some Prop",
+                    "description": "Some property",
+                    "config": {
+                        "enum": ["a", "b"],
+                    },
+                }
             }
         }
-    })
+    )
 
     async def test_get_string_options(self):
         test_scope = ValidatedDiscoveryScope(None, None)
         test_scope._discovery = TestGetFieldOptions.discovery
         self.assertListEqual(
-            await get_field_options("phenopacket", "some_prop", test_scope, self.permissions_full),
-            ["a", "b"]
+            await get_field_options("phenopacket", "some_prop", test_scope, self.permissions_full), ["a", "b"]
         )
 
     async def test_get_field_options_not_impl(self):
@@ -52,7 +53,6 @@ class TestGetFieldOptions(TransactionTestCase, PermissionsTestCaseMixin):
 
 
 class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
-
     def setUp(self):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
         self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
@@ -72,9 +72,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             DISCOVERY_CONFIG_TEST.fields["sex"],
             field_permissions=self.permissions_full,
         )
-        self.assertListEqual(
-            res.root, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)]
-        )
+        self.assertListEqual(res.root, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
@@ -89,7 +87,6 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
 
 
 class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
-
     tumor_lengths = range(1, 50, 5)
     dm_fp = DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"]
     mtl_fp = DISCOVERY_CONFIG_TEST.fields["measurement_tumor_length"]
@@ -238,7 +235,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
         # "uncensored": 0-threshold
         dm_values = await get_distinct_field_values(
-            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 0
+            "phenopacket", base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 0
         )
         self.assertEqual(len(dm_values), 2)
         self.assertTrue("Genetic Testing" in dm_values)
@@ -246,6 +243,6 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
         # censored: 5-threshold eliminates all options
         dm_values_censored = await get_distinct_field_values(
-            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 5
+            "phenopacket", base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 5
         )
         self.assertListEqual(dm_values_censored, [])

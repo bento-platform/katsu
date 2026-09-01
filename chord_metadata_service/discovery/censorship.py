@@ -154,9 +154,7 @@ def aggregate_counts_from_censored_by_dataset(
     aggregated: EntityCountOrBoolResponse = {}
     for entity in all_entities:
         values: list[int | bool] = [
-            ds_counts[entity]
-            for ds_counts in counts_by_dataset.values()
-            if entity in ds_counts
+            ds_counts[entity] for ds_counts in counts_by_dataset.values() if entity in ds_counts
         ]
         # If any dataset-level value is boolean, treat the aggregated value as boolean (OR)
         if any(isinstance(v, bool) for v in values):

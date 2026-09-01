@@ -8,7 +8,6 @@ from chord_metadata_service.restapi.validators import base_extra_properties_vali
 from . import descriptions as d
 from .constants import ISO_3166_1_ALPHA_3_COUNTRY_CODE_CHOICES
 
-
 __all__ = [
     "GeoLocation",
 ]

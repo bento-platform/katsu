@@ -1,7 +1,6 @@
-import json
 import inspect
+import json
 import os
-
 
 # Helper functions for tests
 

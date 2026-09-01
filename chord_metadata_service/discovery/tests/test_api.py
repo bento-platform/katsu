@@ -31,13 +31,13 @@ from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE
 from chord_metadata_service.restapi.tests.constants import (
     VALID_INDIVIDUALS,
     INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_LIST,
-    INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT
+    INDIVIDUALS_NOT_ACCEPTED_DATA_TYPES_DICT,
 )
 from .constants import (
     CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
     DISCOVERY_CONFIG_TEST,
     CONFIG_PUBLIC_TEST_SEARCH_UNSET_FIELDS,
-    DISCOVERY_CONFIG_EXTRA_PROPERTIES
+    DISCOVERY_CONFIG_EXTRA_PROPERTIES,
 )
 
 
@@ -46,7 +46,6 @@ def _iso(ts: datetime) -> str:
 
 
 class ScopedDiscoveryTestCase(TestCase):
-
     @classmethod
     def setUpTestData(cls) -> None:
         # fallback on the node's discovery config
@@ -104,15 +103,13 @@ class TestDiscoveryConfigsDict(TypedDict):
 
 
 class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
-
     def setUp(self) -> None:
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
         self.metadata_1 = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket_1 = ph_m.Phenopacket.objects.create(
-            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1),
-            dataset=self.dataset_a
+            **ph_c.valid_phenopacket(subject=self.individual_1, meta_data=self.metadata_1), dataset=self.dataset_a
         )
         self.disease = ph_m.Disease.objects.create(**ph_c.VALID_DISEASE_1)
         self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1))
@@ -133,7 +130,7 @@ class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     def assert_response_section_fields(self, response_obj: dict, config: dict):
         self.assertSetEqual(
             set(field["id"] for section in response_obj["sections"] for field in section["fields"]),
-            set(field for section in config["search"] for field in section["fields"])
+            set(field for section in config["search"] for field in section["fields"]),
         )
 
     @staticmethod
@@ -213,9 +210,8 @@ class DiscoverySearchFieldsTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
 
 class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
-
     def setUp(self) -> None:
-        self.url = '/api/discovery'
+        self.url = "/api/discovery"
 
         # individuals (count 8)
         individuals = {
@@ -227,18 +223,15 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                 **ph_c.valid_phenopacket(
                     subject=ind,
                     meta_data=ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1),
-                    id=f"phenopacket_{ind_label}"
+                    id=f"phenopacket_{ind_label}",
                 ),
-                dataset=self.dataset_a
-            ) for ind_label, ind in individuals.items()
+                dataset=self.dataset_a,
+            )
+            for ind_label, ind in individuals.items()
         }
         # biosamples
-        self.biosample_1 = ph_m.Biosample.objects.create(
-            **ph_c.valid_biosample_1(individuals["individual_1"])
-        )
-        self.biosample_2 = ph_m.Biosample.objects.create(
-            **ph_c.valid_biosample_2(individuals["individual_2"])
-        )
+        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(individuals["individual_1"]))
+        self.biosample_2 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(individuals["individual_2"]))
         phenopackets["phenopacket_individual_1"].biosamples.set([self.biosample_1])
         phenopackets["phenopacket_individual_2"].biosamples.set([self.biosample_2])
         # experiments
@@ -410,13 +403,16 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             expected_fields=set(discovery.get_chart_field_ids()) - {"tissues", "diagnostic_markers"},
         )
         # because we only have two biosamples, counts of biosamples + entities nested under (experiments)
-        self.assertDictEqual(res_json["counts"], {
-            "phenopacket": 8,
-            "individual": 8,
-            "biosample": 0,
-            "experiment": 0,
-            "experiment_result": 0,
-        })
+        self.assertDictEqual(
+            res_json["counts"],
+            {
+                "phenopacket": 8,
+                "individual": 8,
+                "biosample": 0,
+                "experiment": 0,
+                "experiment_result": 0,
+            },
+        )
 
         # SCOPE: project_a + dataset_b (invalid)
         response_invalid = self.dt_authz_counts_get(f"{self.url}?project={self.id_proj_a}&dataset={self.id_ds_b}")
@@ -471,7 +467,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         # but top-level counts should still be computed correctly via internal per-dataset aggregation.
         with aioresponses() as m:
             self.mock_authz_eval_result(m, self.dt_counts_eval_res)  # project-level counts
-            self.mock_authz_eval_result(m, self.dt_bool_eval_res)    # dataset-level bool only
+            self.mock_authz_eval_result(m, self.dt_bool_eval_res)  # dataset-level bool only
             response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         res_json = response.json()
@@ -485,9 +481,8 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
 
 
 class DiscoveryOverviewTest2(AuthzAPITestCase):
-
     def setUp(self) -> None:
-        self.url = '/api/discovery'
+        self.url = "/api/discovery"
         # create only 2 individuals
         for i, ind in enumerate(VALID_INDIVIDUALS[:2]):
             ind_obj = pa_m.Individual.objects.create(**ind)
@@ -525,7 +520,7 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesListTest(AuthzAPITestCase):
     def test_overview_response(self):
         # test overview response with passing TypeError exception
 
-        response = self.dt_authz_counts_get('/api/discovery')
+        response = self.dt_authz_counts_get("/api/discovery")
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
@@ -539,9 +534,7 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesListTest(AuthzAPITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
         # if we add support for an array values for the discovery fields response
         # then this assertion will fail, so far there is no support for it
-        self.assertNotIn(
-            100,
-            [data["value"] for data in response_obj["fields"]["baseline_creatinine"]["data"]])
+        self.assertNotIn(100, [data["value"] for data in response_obj["fields"]["baseline_creatinine"]["data"]])
 
 
 class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
@@ -557,7 +550,7 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_response(self):
         # test overview response with passing TypeError exception
-        response = self.dt_authz_counts_get('/api/discovery')
+        response = self.dt_authz_counts_get("/api/discovery")
         response_obj = response.json()
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIsInstance(response_obj, dict)
@@ -575,8 +568,11 @@ def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Indivi
     # create project + dataset
     p = ch_m.Project.objects.create(**ch_c.VALID_PROJECT_1)
     schema = KatsuDatasetModel(
-        schema_version="1.0", title="Dataset 1", description="Test dataset",
-        primary_contact=ch_c.VALID_DATASET_PRIMARY_CONTACT, project=str(p.identifier),
+        schema_version="1.0",
+        title="Dataset 1",
+        description="Test dataset",
+        primary_contact=ch_c.VALID_DATASET_PRIMARY_CONTACT,
+        project=str(p.identifier),
         identifier=str(uuid.uuid4()),
     )
     d = ch_m.Dataset.from_schema(schema)
@@ -668,15 +664,18 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def test_empty_matches(self):
         res = self.dt_authz_full_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(res.json(), {
-            "results_entity": "phenopacket",
-            "results": [],
-            "pagination": {
-                "page": 0,
-                "page_size": 25,
-                "total": 0,
+        self.assertDictEqual(
+            res.json(),
+            {
+                "results_entity": "phenopacket",
+                "results": [],
+                "pagination": {
+                    "page": 0,
+                    "page_size": 25,
+                    "total": 0,
+                },
             },
-        })
+        )
 
     def assertErrorRes(
         self, res, error_text: str, is_csv_response: bool = False, code: int = status.HTTP_400_BAD_REQUEST, **kwargs
@@ -686,22 +685,31 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         if is_csv_response:
             r = csv.DictReader(io.StringIO(res.content.decode("utf-8")))
             res_dict = next(r)
-            self.assertDictEqual(res_dict, {k: str(v) for k, v in {
-                "code": code,
-                "message": "Bad Request",
-                "errors": json.dumps([{"message": error_text}], indent=None).strip(),
-                "timestamp": res_dict["timestamp"],
-                **kwargs,
-            }.items()})
+            self.assertDictEqual(
+                res_dict,
+                {
+                    k: str(v)
+                    for k, v in {
+                        "code": code,
+                        "message": "Bad Request",
+                        "errors": json.dumps([{"message": error_text}], indent=None).strip(),
+                        "timestamp": res_dict["timestamp"],
+                        **kwargs,
+                    }.items()
+                },
+            )
         else:
             res_json = res.json()
-            self.assertDictEqual(res_json, {
-                "code": code,
-                "message": "Bad Request",
-                "errors": [{"message": error_text}],
-                "timestamp": res_json["timestamp"],
-                **kwargs,
-            })
+            self.assertDictEqual(
+                res_json,
+                {
+                    "code": code,
+                    "message": "Bad Request",
+                    "errors": [{"message": error_text}],
+                    "timestamp": res_json["timestamp"],
+                    **kwargs,
+                },
+            )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_bad_pagination_non_int_page(self):
@@ -762,24 +770,28 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                 {
                     "id": "phe-0",
                     "subject": str(individuals[0].id),
-                    "biosamples": [{
-                        "id": str(bs0.id),
-                        "individual_id": str(phenopackets[0].subject_id),
-                        "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
-                        "phenopacket": str(phenopackets[0].id),
-                    }],
+                    "biosamples": [
+                        {
+                            "id": str(bs0.id),
+                            "individual_id": str(phenopackets[0].subject_id),
+                            "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
+                            "phenopacket": str(phenopackets[0].id),
+                        }
+                    ],
                     "project": p,
                     "dataset": d,
                 },
                 {
                     "id": "phe-1",
                     "subject": str(individuals[1].id),
-                    "biosamples": [{
-                        "id": str(bs1.id),
-                        "individual_id": str(phenopackets[1].subject_id),
-                        "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
-                        "phenopacket": str(phenopackets[1].id),
-                    }],
+                    "biosamples": [
+                        {
+                            "id": str(bs1.id),
+                            "individual_id": str(phenopackets[1].subject_id),
+                            "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
+                            "phenopacket": str(phenopackets[1].id),
+                        }
+                    ],
                     "project": p,
                     "dataset": d,
                 },
@@ -812,28 +824,33 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
 
         bs1 = phenopackets[1].biosamples.first()
 
-        self.assertDictEqual(res.json(), {
-            "results_entity": "phenopacket",
-            "results": [
-                {
-                    "id": "phe-1",
-                    "subject": str(individuals[1].id),
-                    "biosamples": [{
-                        "id": str(bs1.id),
-                        "individual_id": str(phenopackets[1].subject_id),
-                        "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
-                        "phenopacket": str(phenopackets[1].id),
-                    }],
-                    "project": p,
-                    "dataset": d,
+        self.assertDictEqual(
+            res.json(),
+            {
+                "results_entity": "phenopacket",
+                "results": [
+                    {
+                        "id": "phe-1",
+                        "subject": str(individuals[1].id),
+                        "biosamples": [
+                            {
+                                "id": str(bs1.id),
+                                "individual_id": str(phenopackets[1].subject_id),
+                                "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
+                                "phenopacket": str(phenopackets[1].id),
+                            }
+                        ],
+                        "project": p,
+                        "dataset": d,
+                    },
+                ],
+                "pagination": {
+                    "page": 1,
+                    "page_size": 1,
+                    "total": 2,
                 },
-            ],
-            "pagination": {
-                "page": 1,
-                "page_size": 1,
-                "total": 2,
             },
-        })
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_individuals(self):
@@ -845,50 +862,57 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         res = self.dt_authz_full_get(f"{self.url}?_entity=individual")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
-        self.assertDictEqual(res.json(), {
-            "results_entity": "individual",
-            "results": [
-                {
-                    "id": VALID_INDIVIDUALS[1]["id"],
-                    "phenopackets": [
-                        {
-                            "biosamples": [{
-                                "id": str(phenopackets[1].biosamples.first().id),
-                                "individual_id": str(phenopackets[1].subject_id),
-                                "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
-                                "phenopacket": str(phenopackets[1].id),
-                            }],
-                            "id": "phe-1",
-                            "subject": str(individuals[1].id),
-                        },
-                    ],
-                    "project": p,
-                    "dataset": d,
+        self.assertDictEqual(
+            res.json(),
+            {
+                "results_entity": "individual",
+                "results": [
+                    {
+                        "id": VALID_INDIVIDUALS[1]["id"],
+                        "phenopackets": [
+                            {
+                                "biosamples": [
+                                    {
+                                        "id": str(phenopackets[1].biosamples.first().id),
+                                        "individual_id": str(phenopackets[1].subject_id),
+                                        "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
+                                        "phenopacket": str(phenopackets[1].id),
+                                    }
+                                ],
+                                "id": "phe-1",
+                                "subject": str(individuals[1].id),
+                            },
+                        ],
+                        "project": p,
+                        "dataset": d,
+                    },
+                    {
+                        "id": VALID_INDIVIDUALS[0]["id"],
+                        "phenopackets": [
+                            {
+                                "biosamples": [
+                                    {
+                                        "id": str(phenopackets[0].biosamples.first().id),
+                                        "individual_id": str(phenopackets[0].subject_id),
+                                        "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
+                                        "phenopacket": str(phenopackets[0].id),
+                                    }
+                                ],
+                                "id": "phe-0",
+                                "subject": str(individuals[0].id),
+                            },
+                        ],
+                        "project": p,
+                        "dataset": d,
+                    },
+                ],
+                "pagination": {
+                    "page": 0,
+                    "page_size": 25,
+                    "total": 2,
                 },
-                {
-                    "id": VALID_INDIVIDUALS[0]["id"],
-                    "phenopackets": [
-                        {
-                            "biosamples": [{
-                                "id": str(phenopackets[0].biosamples.first().id),
-                                "individual_id": str(phenopackets[0].subject_id),
-                                "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
-                                "phenopacket": str(phenopackets[0].id),
-                            }],
-                            "id": "phe-0",
-                            "subject": str(individuals[0].id),
-                        },
-                    ],
-                    "project": p,
-                    "dataset": d,
-                },
-            ],
-            "pagination": {
-                "page": 0,
-                "page_size": 25,
-                "total": 2,
             },
-        })
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_experiments(self):
@@ -899,18 +923,21 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
 
         res = self.dt_authz_full_get(f"{self.url}?_entity=experiment")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(res.json(), {
-            "results_entity": "experiment",
-            "results": [
-                {**self.exp_match_dict(bs0, phenopackets[0], 0), "project": p, "dataset": d},
-                {**self.exp_match_dict(bs1, phenopackets[1], 1), "project": p, "dataset": d},
-            ],
-            "pagination": {
-                "page": 0,
-                "page_size": 25,
-                "total": 2,
+        self.assertDictEqual(
+            res.json(),
+            {
+                "results_entity": "experiment",
+                "results": [
+                    {**self.exp_match_dict(bs0, phenopackets[0], 0), "project": p, "dataset": d},
+                    {**self.exp_match_dict(bs1, phenopackets[1], 1), "project": p, "dataset": d},
+                ],
+                "pagination": {
+                    "page": 0,
+                    "page_size": 25,
+                    "total": 2,
+                },
             },
-        })
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_experiment_results(self):
@@ -921,18 +948,21 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
 
         res = self.dt_authz_full_get(f"{self.url}?_entity=experiment_result")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(res.json(), {
-            "results_entity": "experiment_result",
-            "results": [
-                {**self.exp_res_match_dict(bs0, phenopackets[0], 0), "project": p, "dataset": d},
-                {**self.exp_res_match_dict(bs1, phenopackets[1], 1), "project": p, "dataset": d},
-            ],
-            "pagination": {
-                "page": 0,
-                "page_size": 25,
-                "total": 2,
+        self.assertDictEqual(
+            res.json(),
+            {
+                "results_entity": "experiment_result",
+                "results": [
+                    {**self.exp_res_match_dict(bs0, phenopackets[0], 0), "project": p, "dataset": d},
+                    {**self.exp_res_match_dict(bs1, phenopackets[1], 1), "project": p, "dataset": d},
+                ],
+                "pagination": {
+                    "page": 0,
+                    "page_size": 25,
+                    "total": 2,
+                },
             },
-        })
+        )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_csv_responses_phenopackets(self):
@@ -947,7 +977,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
 phe-0,ind:NA19648,FEMALE,{sp},katsu.biosample_id:1 [wall of urinary bladder],{self.csv_disease},{self.csv_cr_sub},{d}
 phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d}
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -962,7 +992,7 @@ phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},
 phe-0,ind:NA19648
 phe-1,ind:HG00096
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -976,9 +1006,7 @@ phe-1,ind:HG00096
         p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
         res = self.dt_authz_full_get(f"{self.url}?_format=xlsx")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            res["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        self.assertEqual(res["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         sp = "Homo sapiens"
         wb = openpyxl.load_workbook(io.BytesIO(res.content))
         ws = wb.active
@@ -986,12 +1014,39 @@ phe-1,ind:HG00096
         self.assertEqual(
             rows,
             [
-                ["Id", "Subject id", "Subject sex", "Subject taxonomy", "Biosamples", "Diseases", "Created by",
-                 "Submitted by", "Dataset"],
-                ["phe-0", "ind:NA19648", "FEMALE", sp, "katsu.biosample_id:1 [wall of urinary bladder]",
-                 self.csv_disease, "David Lougheed", "David Lougheed", d],
-                ["phe-1", "ind:HG00096", "MALE", sp, "biosample_id:2 [urinary bladder]", None, "David Lougheed",
-                 "David Lougheed", d],
+                [
+                    "Id",
+                    "Subject id",
+                    "Subject sex",
+                    "Subject taxonomy",
+                    "Biosamples",
+                    "Diseases",
+                    "Created by",
+                    "Submitted by",
+                    "Dataset",
+                ],
+                [
+                    "phe-0",
+                    "ind:NA19648",
+                    "FEMALE",
+                    sp,
+                    "katsu.biosample_id:1 [wall of urinary bladder]",
+                    self.csv_disease,
+                    "David Lougheed",
+                    "David Lougheed",
+                    d,
+                ],
+                [
+                    "phe-1",
+                    "ind:HG00096",
+                    "MALE",
+                    sp,
+                    "biosample_id:2 [urinary bladder]",
+                    None,
+                    "David Lougheed",
+                    "David Lougheed",
+                    d,
+                ],
             ],
         )
 
@@ -1003,9 +1058,7 @@ phe-1,ind:HG00096
         wb = openpyxl.load_workbook(io.BytesIO(res.content))
         ws = wb.active
         rows = [[c.value for c in row] for row in ws.iter_rows()]
-        self.assertEqual(
-            rows, [["Id", "Subject id"], ["phe-0", "ind:NA19648"], ["phe-1", "ind:HG00096"]]
-        )
+        self.assertEqual(rows, [["Id", "Subject id"], ["phe-0", "ind:NA19648"], ["phe-1", "ind:HG00096"]])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_xlsx_responses_phenopackets_unknown_field(self):
@@ -1021,8 +1074,17 @@ phe-1,ind:HG00096
         keys = [f["key"] for f in res.json()]
         self.assertEqual(
             keys,
-            ["id", "subject_id", "subject_sex", "subject_taxonomy", "biosamples", "diseases", "created_by",
-             "submitted_by", "dataset"],
+            [
+                "id",
+                "subject_id",
+                "subject_sex",
+                "subject_taxonomy",
+                "biosamples",
+                "diseases",
+                "created_by",
+                "submitted_by",
+                "dataset",
+            ],
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -1057,7 +1119,7 @@ phe-1,ind:HG00096
                 f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
 phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d}
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -1073,7 +1135,7 @@ phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_
 ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{_iso(i1.created)},{_iso(i1.updated)}
 ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.created)},{_iso(i0.updated)}
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -1099,7 +1161,7 @@ ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.c
 {bs1.id},This is a test biosample.,urinary bladder,P45Y,Infiltrating Urothelial Carcinoma,Material: NA,{cruds1}
 {bs0.id},This is a test biosample.,wall of urinary bladder,P45Y,Infiltrating Urothelial Carcinoma,Material: NA,{cruds0}
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -1128,7 +1190,7 @@ ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.c
 experiment:0,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Genomic,PCR,Single,{cruds0}
 experiment:1,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Genomic,PCR,Single,{cruds1}
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -1154,7 +1216,7 @@ experiment:1,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Gen
 {er0},Test Experiment result 0,00.vcf.gz,,,VCF,Derived data,download,2021-06-28,admin
 {er1},Test Experiment result 1,01.vcf.gz,,,VCF,Derived data,download,2021-06-28,admin
 """
-            )  # CSVs use \r\n line endings here
+            ),  # CSVs use \r\n line endings here
         )
 
 

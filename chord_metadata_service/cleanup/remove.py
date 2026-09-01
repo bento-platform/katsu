@@ -1,6 +1,5 @@
 from django.db.models import Model
 from structlog.stdlib import BoundLogger
-from typing import Type
 
 from ..utils import build_id_set
 
@@ -11,7 +10,7 @@ __all__ = [
 
 
 async def remove_items(
-    model: Type[Model], to_remove: set[int | str | None], name_plural: str, logger: BoundLogger
+    model: type[Model], to_remove: set[int | str | None], name_plural: str, logger: BoundLogger
 ) -> int:
     n_to_remove = len(to_remove)
 
@@ -25,7 +24,7 @@ async def remove_items(
 
 
 async def remove_not_referenced(
-    model: Type[Model], references: set[int | str | None], name_plural: str, logger: BoundLogger
+    model: type[Model], references: set[int | str | None], name_plural: str, logger: BoundLogger
 ) -> int:
     objs_referenced = references.copy()
 

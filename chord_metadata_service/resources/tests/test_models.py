@@ -3,7 +3,7 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from ..models import Resource
-from .constants import VALID_RESOURCE_1, VALID_RESOURCE_2, DUPLICATE_RESOURCE_3
+from .constants import DUPLICATE_RESOURCE_3, VALID_RESOURCE_1, VALID_RESOURCE_2
 
 
 class ResourceTest(TestCase):

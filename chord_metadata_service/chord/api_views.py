@@ -218,8 +218,9 @@ class DatasetViewSet(CHORDPublicModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED,
-                            headers=self.get_success_headers(serializer.data))
+            return Response(
+                serializer.data, status=status.HTTP_201_CREATED, headers=self.get_success_headers(serializer.data)
+            )
 
         return await sync_to_async(_do)()
 
@@ -299,8 +300,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         return Response(ResourceSerializer(dataset.resources, many=True).data)
 
     @async_to_sync
-    @action(detail=True, methods=["get"], url_path="summary", url_name="summary",
-            permission_classes=[BentoAllowAny])
+    @action(detail=True, methods=["get"], url_path="summary", url_name="summary", permission_classes=[BentoAllowAny])
     async def summary(self, request, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
@@ -323,15 +323,22 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         )
 
         summaries = await asyncio.gather(
-            *[summary_functions[data_type](discovery_scope, dt_permissions[data_type])
-              for data_type in summary_functions]
+            *[
+                summary_functions[data_type](discovery_scope, dt_permissions[data_type])
+                for data_type in summary_functions
+            ]
         )
 
         return Response(dict(zip(summary_functions.keys(), summaries)))
 
     @async_to_sync
-    @action(detail=True, methods=["get", "post"], url_path="translations", url_name="translations-list",
-            permission_classes=[BentoAllowAnyReadOnly | BentoDeferToHandler])
+    @action(
+        detail=True,
+        methods=["get", "post"],
+        url_path="translations",
+        url_name="translations-list",
+        permission_classes=[BentoAllowAnyReadOnly | BentoDeferToHandler],
+    )
     async def translations(self, request, **kwargs):
         identifier = self.kwargs["identifier"]
         if request.method == "GET":
@@ -348,9 +355,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             dataset = await Dataset.objects.aget(identifier=identifier)
         except Dataset.DoesNotExist:
             return not_found(request)
-        if not (await authz.async_evaluate_one(
-            request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
-        )):
+        if not (
+            await authz.async_evaluate_one(
+                request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
+            )
+        ):
             return forbidden(request)
         authz.mark_authz_done(request)
         serializer = DatasetTranslationSerializer(data=request.data, context=self.get_serializer_context())
@@ -364,8 +373,13 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         return await sync_to_async(_create)()
 
     @async_to_sync
-    @action(detail=True, methods=["get", "put", "delete"], url_path=r"translations/(?P<language>[^/.]+)",
-            url_name="translations-detail", permission_classes=[BentoAllowAnyReadOnly | BentoDeferToHandler])
+    @action(
+        detail=True,
+        methods=["get", "put", "delete"],
+        url_path=r"translations/(?P<language>[^/.]+)",
+        url_name="translations-detail",
+        permission_classes=[BentoAllowAnyReadOnly | BentoDeferToHandler],
+    )
     async def translation_detail(self, request, language, **kwargs):
         identifier = self.kwargs["identifier"]
         try:
@@ -379,9 +393,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             dataset = await Dataset.objects.aget(identifier=identifier)
         except Dataset.DoesNotExist:  # pragma: no cover
             return not_found(request)  # pragma: no cover
-        if not (await authz.async_evaluate_one(
-            request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
-        )):
+        if not (
+            await authz.async_evaluate_one(
+                request, build_resource(project=str(dataset.project_id), dataset=identifier), P_EDIT_DATASET
+            )
+        ):
             return forbidden(request)
         authz.mark_authz_done(request)
         if request.method == "DELETE":

@@ -10,7 +10,10 @@ from rest_framework.request import Request as DrfRequest
 from typing import Literal, Self
 
 from chord_metadata_service.authz.types import (
-    DataPermissionsLevel, DataTypeDiscoveryPermissions, DataPermissions, FieldDiscoveryPermissions
+    DataPermissionsLevel,
+    DataTypeDiscoveryPermissions,
+    DataPermissions,
+    FieldDiscoveryPermissions,
 )
 from chord_metadata_service.experiments.types import ExperimentResultFileFormat
 from .censorship import get_max_query_parameters
@@ -130,6 +133,7 @@ class MatchExperiment(BaseMatchModel):
     """
     Compact representation of an experiment for returning/rendering search responses.
     """
+
     id: str = Field(..., title="Experiment ID")
     description: str | None = Field(..., title="Description")
     experiment_type: str = Field(..., title="Experiment Type")
@@ -147,6 +151,7 @@ class MatchBiosample(BaseMatchModel):
     """
     Compact representation of a biosample for returning/rendering search responses.
     """
+
     id: str = Field(..., title="Biosample ID")
     # sampled_tissue: OntologyTerm | None
     # sample_type: OntologyTerm | None
@@ -159,6 +164,7 @@ class MatchPhenopacket(BaseMatchModel):
     """
     Compact representation of a phenopacket for returning/rendering search responses.
     """
+
     id: str = Field(..., title="Phenopacket ID")
     subject: str | None = Field(..., title="Subject ID")
     biosamples: list[MatchBiosample]
@@ -168,16 +174,17 @@ class MatchIndividual(BaseMatchModel):
     """
     Compact representation of a subject for returning/rendering search responses.
     """
+
     id: str = Field(..., title="Subject ID")
     phenopackets: list[MatchPhenopacket]
 
 
 type MatchObject = (
-    list[MatchPhenopacket] |
-    list[MatchIndividual] |
-    list[MatchBiosample] |
-    list[MatchExperiment] |
-    list[MatchExperimentResult]
+    list[MatchPhenopacket]
+    | list[MatchIndividual]
+    | list[MatchBiosample]
+    | list[MatchExperiment]
+    | list[MatchExperimentResult]
 )
 
 
@@ -205,9 +212,9 @@ class DiscoveryResponse(BaseModel):
     queried_entities: frozenset[DiscoveryEntity]
     message: str = ""  # A message related to the response, e.g., insufficient data. If blank, it shouldn't be shown.
     counts: (
-        EntityCountOrBoolResponse |
-        dict[str, EntityCountOrBoolResponse] |
-        dict[str, dict[str, EntityCountOrBoolResponse]]
+        EntityCountOrBoolResponse
+        | dict[str, EntityCountOrBoolResponse]
+        | dict[str, dict[str, EntityCountOrBoolResponse]]
     )
     counts_by_dataset: dict[str, EntityCountOrBoolResponse] = Field(default_factory=dict)
 
@@ -379,11 +386,13 @@ class DiscoveryQuery(BaseModel):
                         # TODO: will we be able to support AllOf queries with GET, or just OneOf?
                         filters[k] = DiscoveryQueryFilterOneOf(filter_type="one_of", values=v)
 
-        return cls.model_validate({
-            "fts": params.get("_fts", ""),
-            "fts_type": params.get("_fts_type") or "plain",
-            "filters": filters,
-        })
+        return cls.model_validate(
+            {
+                "fts": params.get("_fts", ""),
+                "fts_type": params.get("_fts_type") or "plain",
+                "filters": filters,
+            }
+        )
 
 
 class DiscoveryUIHintsResponse(BaseModel):

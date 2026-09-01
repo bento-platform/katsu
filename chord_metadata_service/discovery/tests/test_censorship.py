@@ -22,7 +22,6 @@ test_logger = structlog.stdlib.get_logger("test_censorship")
 
 
 class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
-
     # get_threshold(...)
 
     def test_get_threshold_no_censorship(self):
@@ -39,7 +38,6 @@ class CensorshipGetThresholdTest(TestCase, PermissionsTestCaseMixin):
 
 
 class CensorshipThresholdedCountTest(TestCase, PermissionsTestCaseMixin):
-
     def test_get_threshold_configured(self):
         self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_full), 0)
         self.assertEqual(get_threshold(DISCOVERY_CONFIG_TEST, self.permissions_counts), 5)
@@ -61,7 +59,6 @@ class CensorshipThresholdedCountTest(TestCase, PermissionsTestCaseMixin):
 
 
 class CensorshipGetMaxQueryParametersTest(TestCase, PermissionsTestCaseMixin):
-
     # get_max_query_parameters(...)
 
     def test_get_max_query_parameters_no_censorship(self):
@@ -79,11 +76,14 @@ class CensorshipGetMaxQueryParametersTest(TestCase, PermissionsTestCaseMixin):
 
 
 class CensorshipCensorEntityCountsTest(TestCase):
-
     # censor_entity_counts(...)
 
     LARGE_COUNTS: EntityCounts = {
-        "phenopacket": 100, "individual": 100, "biosample": 100, "experiment": 100, "experiment_result": 100
+        "phenopacket": 100,
+        "individual": 100,
+        "biosample": 100,
+        "experiment": 100,
+        "experiment_result": 100,
     }
 
     DT_PERMISSIONS_BOOL = {
@@ -135,7 +135,6 @@ class CensorshipCensorEntityCountsTest(TestCase):
 
 
 class CensorshipCensorEntityCountsByDatasetTest(TestCase):
-
     COUNTS_BY_DATASET: dict[str, EntityCounts] = {
         "ds-1": {"phenopacket": 100, "individual": 100, "biosample": 100, "experiment": 100, "experiment_result": 100},
         "ds-2": {"phenopacket": 1, "individual": 1, "biosample": 0, "experiment": 0, "experiment_result": 0},
@@ -169,7 +168,6 @@ class CensorshipCensorEntityCountsByDatasetTest(TestCase):
 
 
 class CensorshipAggregateCountsFromCensoredByDatasetTest(TestCase):
-
     def test_aggregate_integers(self):
         counts_by_dataset: dict[str, EntityCountOrBoolResponse] = {
             "ds-1": {"phenopacket": 60, "individual": 60},

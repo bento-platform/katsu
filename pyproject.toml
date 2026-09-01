@@ -72,3 +72,7 @@ aioresponses = "^0.7.8"
 [tool.ruff]
 line-length = 120
 extend-exclude = ["chord_metadata_service/*/migrations"]
+
+[tool.ruff.lint]
+# TODO: remove RUF100 when flake8 gets unplugged
+ignore = ["PYI041", "RUF012", "RUF022", "RUF100", "T100"]

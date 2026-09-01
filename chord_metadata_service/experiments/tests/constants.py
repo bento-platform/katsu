@@ -22,7 +22,7 @@ def valid_experiment(biosample, instrument=None, dataset=None, num_experiment=1)
         "extra_properties": {"some_field": "value"},
         "biosample": biosample,
         "instrument": instrument,
-        "dataset": dataset
+        "dataset": dataset,
     }
 
 
@@ -39,7 +39,7 @@ def valid_experiment_result(num_exp_res=1):
         "usage": "download",
         "creation_date": "2021-06-28",
         "created_by": "admin",
-        "extra_properties": {"target": "None"}
+        "extra_properties": {"target": "None"},
     }
 
 
@@ -48,5 +48,5 @@ def valid_instrument():
         "identifier": "instrument:01",
         "device": "Illumina",
         "description": "Test description 1",
-        "extra_properties": {"date": "2021-06-21"}
+        "extra_properties": {"date": "2021-06-21"},
     }

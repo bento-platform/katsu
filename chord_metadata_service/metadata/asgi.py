@@ -7,9 +7,9 @@ For more information on this file, see
 https://docs.djangoproject.com/en/4.1/howto/deployment/asgi/
 """
 
-import structlog.stdlib
 import os
 
+import structlog.stdlib
 from django.conf import settings
 from django.core.asgi import get_asgi_application
 
@@ -22,7 +22,7 @@ if settings.DEBUG:
     try:
         import debugpy
 
-        DEBUGGER_PORT = int(os.environ.get("DEBUGGER_PORT", 5678))
+        DEBUGGER_PORT = int(os.environ.get("DEBUGGER_PORT", "5678"))
         debugpy.listen(("0.0.0.0", DEBUGGER_PORT))
         logger.info("debugger attached")
     except ImportError:

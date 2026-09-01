@@ -1,4 +1,5 @@
 from chord_metadata_service.discovery.full_text_search import FTSHelpersMixin
+
 from .constants import GeoLocationTestCase
 
 

@@ -47,9 +47,7 @@ async def biosample_summary(
     }
 
 
-async def disease_summary(
-    phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions
-):
+async def disease_summary(phenopackets: QuerySet, discovery: DiscoveryConfig, phenopacket_permissions: DataPermissions):
     disease_stats = await queryset_stats_for_field(
         queryset=phenopackets,
         field="diseases__term__label",
@@ -70,7 +68,7 @@ async def phenotypic_feature_summary(
     # already been filtered to the discovery scope.
     qs = models.PhenotypicFeature.objects.filter(phenopacket__in=phenopackets)
     phenotypic_features_count, phenotypic_features_type = await asyncio.gather(
-        qs.distinct('pftype').acount(),
+        qs.distinct("pftype").acount(),
         queryset_stats_for_field(qs, "pftype__label", discovery, phenopacket_permissions),
     )
     return {

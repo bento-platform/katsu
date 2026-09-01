@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .constants import MODEL_ATTRS_TO_PREDEF_PROPS
 from .models import GeoLocation
 

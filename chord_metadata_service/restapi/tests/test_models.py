@@ -1,9 +1,10 @@
 from django.core.exceptions import ValidationError
-from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+
 from chord_metadata_service.chord.models import ProjectJsonSchema
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.logger import logger
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.phenopackets.models import Biosample, Phenopacket, MetaData
+from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket
 from chord_metadata_service.phenopackets.tests import constants as pheno_consts
 from chord_metadata_service.restapi.models import SchemaType
 

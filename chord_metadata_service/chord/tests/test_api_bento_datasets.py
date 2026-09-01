@@ -33,18 +33,14 @@ VALID_RESOURCE_MONDO = {
 
 
 class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
-
     def setUp(self) -> None:
         super().setUp()
         self.entities_by_data_type = {
             DATA_TYPE_PHENOPACKET: {
-                'class': Phenopacket,
-                'entity': self.phenopacket,
+                "class": Phenopacket,
+                "entity": self.phenopacket,
             },
-            DATA_TYPE_EXPERIMENT: {
-                'class': Experiment,
-                'entity': self.experiment
-            }
+            DATA_TYPE_EXPERIMENT: {"class": Experiment, "entity": self.experiment},
         }
 
     def test_list_datasets(self):
@@ -77,78 +73,70 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
         self.assertEqual(type(data), dict)
-        self.assertDictEqual(data, {
-            "phenopacket": {
-                "count": 1,
-                "data_type_specific": {
-                    "biosamples": {
-                        "count": 2,
-                        "histological_diagnosis": {"Infiltrating Urothelial Carcinoma": 2},
-                        "is_control_sample": {"False": 1, "True": 1},
-                        "sampled_tissue": {"urinary bladder": 1, "wall of urinary bladder": 1},
-                        "taxonomy": {"Homo sapiens": 2}
-                    },
-                    "diseases": {
-                        "count": 1,
-                        "term": {"Spinocerebellar ataxia 1": 1}
-                    },
-                    "individuals": {
-                        "age": {"40": 1},
-                        "count": 1,
-                        "karyotypic_sex": {
-                            "OTHER_KARYOTYPE": 0,
-                            "UNKNOWN_KARYOTYPE": 1,
-                            "XO": 0,
-                            "XX": 0,
-                            "XXX": 0,
-                            "XXXX": 0,
-                            "XXXY": 0,
-                            "XXY": 0,
-                            "XXYY": 0,
-                            "XY": 0,
-                            "XYY": 0,
+        self.assertDictEqual(
+            data,
+            {
+                "phenopacket": {
+                    "count": 1,
+                    "data_type_specific": {
+                        "biosamples": {
+                            "count": 2,
+                            "histological_diagnosis": {"Infiltrating Urothelial Carcinoma": 2},
+                            "is_control_sample": {"False": 1, "True": 1},
+                            "sampled_tissue": {"urinary bladder": 1, "wall of urinary bladder": 1},
+                            "taxonomy": {"Homo sapiens": 2},
                         },
-                        "sex": {
-                            "FEMALE": 0,
-                            "MALE": 1,
-                            "OTHER_SEX": 0,
-                            "UNKNOWN_SEX": 0,
+                        "diseases": {"count": 1, "term": {"Spinocerebellar ataxia 1": 1}},
+                        "individuals": {
+                            "age": {"40": 1},
+                            "count": 1,
+                            "karyotypic_sex": {
+                                "OTHER_KARYOTYPE": 0,
+                                "UNKNOWN_KARYOTYPE": 1,
+                                "XO": 0,
+                                "XX": 0,
+                                "XXX": 0,
+                                "XXXX": 0,
+                                "XXXY": 0,
+                                "XXY": 0,
+                                "XXYY": 0,
+                                "XY": 0,
+                                "XYY": 0,
+                            },
+                            "sex": {
+                                "FEMALE": 0,
+                                "MALE": 1,
+                                "OTHER_SEX": 0,
+                                "UNKNOWN_SEX": 0,
+                            },
+                            "taxonomy": {},
                         },
-                        "taxonomy": {},
+                        "phenotypic_features": {
+                            "count": 1,
+                            "type": {"Proptosis": 3},
+                        },
                     },
-                    "phenotypic_features": {
-                        "count": 1,
-                        "type": {"Proptosis": 3},
+                },
+                "experiment": {
+                    "count": 1,
+                    "data_type_specific": {
+                        "experiment_results": {"count": 0, "data_output_type": {}, "file_format": {}, "usage": {}},
+                        "experiments": {
+                            "count": 1,
+                            "experiment_type": {"DNA Methylation": 1},
+                            "extraction_protocol": {"NGS": 1},
+                            "library_layout": {"Single": 1},
+                            "library_selection": {"PCR": 1},
+                            "library_source": {"Genomic": 1},
+                            "library_strategy": {"Bisulfite-Seq": 1},
+                            "molecule": {"total RNA": 1},
+                            "study_type": {"Whole genome Sequencing": 1},
+                        },
+                        "instruments": {"count": 0, "device": {}},
                     },
                 },
             },
-            "experiment": {
-                "count": 1,
-                "data_type_specific": {
-                    "experiment_results": {
-                        "count": 0,
-                        "data_output_type": {},
-                        "file_format": {},
-                        "usage": {}
-                    },
-                    "experiments": {
-                        "count": 1,
-                        "experiment_type": {"DNA Methylation": 1},
-                        "extraction_protocol": {"NGS": 1},
-                        "library_layout": {"Single": 1},
-                        "library_selection": {"PCR": 1},
-                        "library_source": {"Genomic": 1},
-                        "library_strategy": {"Bisulfite-Seq": 1},
-                        "molecule": {"total RNA": 1},
-                        "study_type": {"Whole genome Sequencing": 1}
-                    },
-                    "instruments": {
-                        "count": 0,
-                        "device": {}
-                    }
-                },
-            }
-        })
+        )
 
     def test_dataset_summary_not_a_uuid(self):
         r = self.dt_authz_full_get(reverse("dataset-summary", kwargs={"identifier": "not-a-uuid"}))
@@ -160,22 +148,20 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_dataset_data_type_summary(self):
         r = self.dt_authz_full_get(
-            reverse("chord-dataset-data-type-summary", kwargs={"identifier": self.dataset.identifier}))
+            reverse("chord-dataset-data-type-summary", kwargs={"identifier": self.dataset.identifier})
+        )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
-        r = self.dt_authz_full_get(
-            reverse("chord-dataset-data-type-summary", kwargs={"identifier": str(uuid.uuid4())}))
+        r = self.dt_authz_full_get(reverse("chord-dataset-data-type-summary", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
-        r = self.dt_authz_full_get(
-            reverse("chord-dataset-data-type-summary", kwargs={"identifier": "not-a-uuid"}))
+        r = self.dt_authz_full_get(reverse("chord-dataset-data-type-summary", kwargs={"identifier": "not-a-uuid"}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def _dataset_data_type_url(self, dt: str, ds_id: str = ""):
-        return reverse("chord-dataset-data-type", kwargs={
-            "identifier": ds_id or self.dataset.identifier,
-            "data_type": dt
-        })
+        return reverse(
+            "chord-dataset-data-type", kwargs={"identifier": ds_id or self.dataset.identifier, "data_type": dt}
+        )
 
     def test_get_dataset_data_type(self):
         for dt, dt_def in DATA_TYPES.items():
@@ -194,13 +180,9 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 self.assertTrue(timestamp_pattern.match(c["last_ingested"]))
                 del c["last_ingested"]
 
-                self.assertDictEqual(c, {
-                    "id": dt,
-                    "label": "Clinical Data",
-                    **DATA_TYPES[dt],
-                    "queryable": True,
-                    "count": 1
-                })
+                self.assertDictEqual(
+                    c, {"id": dt, "label": "Clinical Data", **DATA_TYPES[dt], "queryable": True, "count": 1}
+                )
 
                 r = self.dt_authz_none_get(url)
                 self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -211,13 +193,16 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
                 self.assertTrue(timestamp_pattern.match(c["last_ingested"]))
                 del c["last_ingested"]
 
-                self.assertDictEqual(c, {
-                    "id": dt,
-                    "label": "Clinical Data",
-                    **DATA_TYPES[dt],
-                    "queryable": True,
-                    # no count - no permissions to see it
-                })
+                self.assertDictEqual(
+                    c,
+                    {
+                        "id": dt,
+                        "label": "Clinical Data",
+                        **DATA_TYPES[dt],
+                        "queryable": True,
+                        # no count - no permissions to see it
+                    },
+                )
 
     def test_get_dataset_data_type_dne(self):
         subtest_params = [
@@ -283,8 +268,10 @@ class BentoDatasetsTest(AuthzAPITestCase, PhenoTestCase):
         explicit_id = str(uuid.uuid4())
         r = self.one_authz_post(
             reverse("dataset-list"),
-            json={**valid_dataset(str(self.project.identifier), title="Explicit ID Dataset"),
-                  "identifier": explicit_id},
+            json={
+                **valid_dataset(str(self.project.identifier), title="Explicit ID Dataset"),
+                "identifier": explicit_id,
+            },
         )
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r.json()["identifier"], explicit_id)

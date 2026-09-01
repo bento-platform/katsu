@@ -1,6 +1,6 @@
 from asgiref.sync import async_to_sync
-from rest_framework.settings import api_settings
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
@@ -8,9 +8,9 @@ from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
+from .filters import ResourceFilter
 from .models import Resource
 from .serializers import ResourceSerializer
-from .filters import ResourceFilter
 
 
 class ResourceViewSet(BentoAuthzScopedModelViewSet):

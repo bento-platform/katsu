@@ -10,22 +10,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
+import logging
 import os
 import sys
-import logging
+from urllib.parse import urlparse
 
 from bento_lib.discovery import DiscoveryConfig, load_discovery_config
 from bento_lib.logging.structured import configure_structlog, configure_structlog_uvicorn
 from bento_lib.service_info.types import GA4GHServiceType
-from structlog.stdlib import get_logger
-from urllib.parse import urlparse
 from dotenv import load_dotenv
+from structlog.stdlib import get_logger
 
 from .. import __version__
 
 
 def str_to_bool(value: str | None) -> bool:
-    return value and value.strip().lower() in ("true", "1", "t", "yes")
+    return bool(value) and value.strip().lower() in ("true", "1", "t", "yes")
 
 
 load_dotenv()
@@ -102,6 +102,12 @@ if ADDITIONAL_ALLOWED_HOSTS:
     ALLOWED_HOSTS = list(set(ALLOWED_HOSTS + ADDITIONAL_ALLOWED_HOSTS))
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
+
+# POST body size maximum - increase from default of 2.5 MB to 64 MiB
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("KATSU_DATA_UPLOAD_MAX_MEMORY_SIZE", "64000000"))
+
+# Turns off redirect to path with slash
 
 APPEND_SLASH = False
 
@@ -327,7 +333,7 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 # Cache time constant
-CACHE_TIME = int(os.getenv("CACHE_TIME", 60 * 60 * 2))
+CACHE_TIME = int(os.getenv("CACHE_TIME", str(60 * 60 * 2)))
 
 # Settings related to the Public APIs
 

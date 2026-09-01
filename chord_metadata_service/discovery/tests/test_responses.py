@@ -9,7 +9,6 @@ from chord_metadata_service.discovery.types import AcceptedDiscoveryResponseForm
 
 
 class DiscoveryCsvJsonErrorResponseTest(SimpleTestCase):
-
     def setUp(self):
         dr = HttpRequest()
         dr.method = "GET"
@@ -42,7 +41,7 @@ class DiscoveryCsvJsonErrorResponseTest(SimpleTestCase):
                         "message": "Not Found",
                         "timestamp": res.data["timestamp"],
                         **({"errors": [{"message": p} for p in params[1]]} if params[1] else {}),
-                    }
+                    },
                 )
 
     def test_csv_or_json_error_response_csv(self):
@@ -55,11 +54,11 @@ class DiscoveryCsvJsonErrorResponseTest(SimpleTestCase):
             (
                 ["extra_message", "extra_message_2"],
                 (
-                    'code,message,timestamp,errors\r\n'
-                    '404,Not Found,%TS%,'
+                    "code,message,timestamp,errors\r\n"
+                    "404,Not Found,%TS%,"
                     '"[{""message"": ""extra_message""}, {""message"": ""extra_message_2""}]"\r\n'
                 ),
-            )
+            ),
         ]
 
         for params in csv_params:

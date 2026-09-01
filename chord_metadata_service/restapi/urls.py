@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
@@ -7,15 +7,15 @@ from chord_metadata_service.discovery.api_views import (
     discovery_matches,
     discovery_matches_export_fields,
     discovery_rules,
-    discovery_search_fields,
     discovery_schema,
+    discovery_search_fields,
     discovery_ui_hints,
 )
 from chord_metadata_service.experiments import api_views as experiment_views
 from chord_metadata_service.patients import api_views as individual_views
 from chord_metadata_service.phenopackets import api_views as phenopacket_views
 from chord_metadata_service.resources import api_views as resources_views
-from chord_metadata_service.restapi.api_views import search_overview, extra_properties_schema_types
+from chord_metadata_service.restapi.api_views import extra_properties_schema_types, search_overview
 from chord_metadata_service.restapi.routers import BatchListRouter
 
 __all__ = ["router", "batch_router", "urlpatterns"]
@@ -24,9 +24,9 @@ router = routers.DefaultRouter(trailing_slash=False)
 batch_router = BatchListRouter()
 
 # CHORD app urls
-router.register(r'projects', chord_views.ProjectViewSet)
-router.register(r'datasets', chord_views.DatasetViewSet, basename="dataset")
-router.register(r'project_json_schemas', chord_views.ProjectJsonSchemaViewSet)
+router.register(r"projects", chord_views.ProjectViewSet)
+router.register(r"datasets", chord_views.DatasetViewSet, basename="dataset")
+router.register(r"project_json_schemas", chord_views.ProjectJsonSchemaViewSet)
 
 # Experiments app urls
 router.register(r"experiments", experiment_views.ExperimentViewSet, basename="experiments")

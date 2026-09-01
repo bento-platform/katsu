@@ -213,17 +213,18 @@ class ExportCBioTest(TestCase):
                 self.assertTrue(REGEXP_INVALID_FOR_ID.search(record["SAMPLE_ID"]) is None)
                 self.assertEqual(record["PATIENT_ID"], exp.sanitize_id(samples[sample_count].individual_id))
                 self.assertEqual(
-                    record["SAMPLE_ID"],
-                    exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])
+                    record["SAMPLE_ID"], exp.sanitize_id(EXAMPLE_INGEST_PHENOPACKET["biosamples"][sample_count]["id"])
                 )
                 sample_count += 1
 
             self.assertEqual(sample_count, samples.count())
 
     def test_export_maf_list(self):
-        exp_res = self.exp_res.filter(experiments__dataset_id=self.study_id)\
-            .filter(file_format="MAF") \
+        exp_res = (
+            self.exp_res.filter(experiments__dataset_id=self.study_id)
+            .filter(file_format="MAF")
             .annotate(biosample_id=F("experiments__biosample"))
+        )
         maf_count = exp_res.count()
         self.assertTrue(maf_count > 0)
         with io.StringIO() as output:
@@ -247,9 +248,11 @@ class ExportCBioTest(TestCase):
         self.assertEqual(content["data_filename"], MUTATION_DATA_FILENAME)
 
     def test_export_case_list(self):
-        exp_res = self.exp_res.filter(experiments__dataset_id=self.study_id)\
-            .filter(file_format="MAF") \
+        exp_res = (
+            self.exp_res.filter(experiments__dataset_id=self.study_id)
+            .filter(file_format="MAF")
             .annotate(biosample_id=F("experiments__biosample"))
+        )
         self.assertGreater(exp_res.count(), 0)
         with io.StringIO() as output:
             exp.case_list_export(self.study_id, exp_res, output)
@@ -261,8 +264,7 @@ class ExportCBioTest(TestCase):
         self.assertIn("case_list_description", content)
         self.assertIn("case_list_ids", content)
         self.assertSetEqual(
-            set(content["case_list_ids"].split("\t")),
-            set([exp.sanitize_id(e.biosample_id) for e in exp_res])
+            set(content["case_list_ids"].split("\t")), set([exp.sanitize_id(e.biosample_id) for e in exp_res])
         )
 
 

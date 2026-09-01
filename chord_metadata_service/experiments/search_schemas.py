@@ -3,195 +3,190 @@ from chord_metadata_service.restapi.schema_utils import (
     search_optional_eq,
     search_optional_str,
     tag_schema_with_search_properties,
-    merge_schema_dictionaries
+    merge_schema_dictionaries,
 )
 from chord_metadata_service.restapi.search_schemas import ONTOLOGY_SEARCH_SCHEMA
 
 __all__ = ["EXPERIMENT_SEARCH_SCHEMA"]
 
-EXPERIMENT_RESULT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_RESULT_SCHEMA, {
-    "properties": {
-        "identifier": {
-            "search": search_optional_eq(0)
-        },
-        "description": {
-            "search": search_optional_str(1)
-        },
-        "filename": {
-            "search": search_optional_str(2)
-        },
-        "url": {
-            "search": search_optional_str(3)
-        },
-        "indices": {
-            "items": {
-                "properties": {
-                    "url": {
-                        "search": search_optional_str(0),
+EXPERIMENT_RESULT_SEARCH_SCHEMA = tag_schema_with_search_properties(
+    schemas.EXPERIMENT_RESULT_SCHEMA,
+    {
+        "properties": {
+            "identifier": {"search": search_optional_eq(0)},
+            "description": {"search": search_optional_str(1)},
+            "filename": {"search": search_optional_str(2)},
+            "url": {"search": search_optional_str(3)},
+            "indices": {
+                "items": {
+                    "properties": {
+                        "url": {
+                            "search": search_optional_str(0),
+                        },
+                        "format": {
+                            "search": search_optional_eq(1),
+                        },
                     },
-                    "format": {
-                        "search": search_optional_eq(1),
-                    },
+                    "search": {"database": {"type": "jsonb"}},
                 },
-                "search": {"database": {"type": "jsonb"}},
+                "search": {"order": 4, "database": {"type": "jsonb"}},
             },
-            "search": {"order": 4, "database": {"type": "jsonb"}}
-        },
-        "storage_uri": {
-            "search": search_optional_str(5),
-        },
-        "storage_server": {
-            "search": search_optional_str(6),
-        },
-        "file_format": {
-            "search": search_optional_eq(7)
-        },
-        "data_output_type": {
-            "search": search_optional_eq(8)
-        },
-        "usage": {
-            "search": search_optional_str(9)
-        },
-        "genome_assembly_id": {
-            "search": search_optional_eq(10)
-        },
-    },
-    "search": {
-        "database": {
-            "primary_key": models.ExperimentResult._meta.pk.column,
-            "relation": models.ExperimentResult._meta.db_table,
-        }
-    }
-})
-
-INSTRUMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.INSTRUMENT_SCHEMA, {
-    "properties": {
-        "identifier": {
-            "search": search_optional_eq(0)
-        },
-        "device": {
-            "search": search_optional_str(1)
-        },
-        "device_ontology": ONTOLOGY_SEARCH_SCHEMA,
-        "description": {
-            "search": search_optional_str(3)
-        },
-    },
-    "search": {
-        "database": {
-            "primary_key": models.Instrument._meta.pk.column,
-            "relation": models.Instrument._meta.db_table,
-        }
-    }
-})
-
-EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(schemas.EXPERIMENT_SCHEMA, {
-    "properties": {
-        "id": {
-            "search": {"order": 0, "database": {"field": models.Experiment._meta.pk.column}}
-        },
-        "description": {
-            "search": search_optional_str(1),
-        },
-        "reference_registry_id": {
-            "search": search_optional_str(2, queryable="internal"),
-        },
-        "qc_flags": {
-            "items": {
-                "search": search_optional_str(0),
+            "storage_uri": {
+                "search": search_optional_str(5),
             },
-            "search": {"order": 3, "database": {"type": "array"}}
+            "storage_server": {
+                "search": search_optional_str(6),
+            },
+            "file_format": {"search": search_optional_eq(7)},
+            "data_output_type": {"search": search_optional_eq(8)},
+            "usage": {"search": search_optional_str(9)},
+            "genome_assembly_id": {"search": search_optional_eq(10)},
         },
-        "experiment_type": {
-            "search": search_optional_eq(4),
-        },
-        "experiment_ontology": {
-            **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
-            "search": {"order": 5, "database": {"type": "jsonb"}}
-        },
-        "molecule": {
-            "search": search_optional_eq(6),
-        },
-        "molecule_ontology": {
-            **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
-            "search": {"order": 7, "database": {"type": "jsonb"}}
-        },
-        "library_strategy": {
-            "search": search_optional_eq(8),
-        },
-        "biosample": {
-            "search": merge_schema_dictionaries(
-                search_optional_eq(9),
-                {"database": {"field": models.Experiment._meta.get_field("biosample").column}}
-            )
-        },
-        "extraction_protocol": {
-            "search": search_optional_str(10),
-        },
-        "study_type": {
-            "search": search_optional_eq(11),
-        },
-        "library_id": {
-            "search": search_optional_str(12),
-        },
-        "library_description": {
-            "search": search_optional_str(13),
-        },
-        "library_source": {
-            "search": search_optional_eq(14),
-        },
-        "library_selection": {
-            "search": search_optional_eq(15),
-        },
-        "library_layout": {
-            "search": search_optional_eq(16),
-        },
-        "library_extract_id": {
-            "search": search_optional_str(17),
-        },
-        "insert_size": {
-            "search": search_optional_eq(18),
-        },
-        "protocol_url": {
-            "search": search_optional_str(19),
-        },
-        # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
-        "instrument": merge_schema_dictionaries(
-            INSTRUMENT_SEARCH_SCHEMA,
-            {"search": {"database": {
-                "relationship": {
-                    "type": "MANY_TO_ONE",
-                    "foreign_key": models.Experiment._meta.get_field("instrument").column
-                }
-            }}}),
-        # query example: ["#ico", ["#resolve", "experiment_results", "[item]", "description"], "VCF file"]
-        "experiment_results": {
-            "items": merge_schema_dictionaries(
-                EXPERIMENT_RESULT_SEARCH_SCHEMA,
-                {"search": {"database": {
-                    "relationship": {
-                        "type": "MANY_TO_ONE",
-                        "foreign_key": "experimentresult_id"  # TODO: No hard-code, from M2M
-                    }
-                }}}
-            ),
-            "search": {
-                "database": {
-                    "relation": models.Experiment._meta.get_field(
-                        "experiment_results").remote_field.through._meta.db_table,
-                    "relationship": {
-                        "type": "ONE_TO_MANY",
-                        "parent_foreign_key": "experiment_id",  # TODO: No hard-code
-                        "parent_primary_key": models.Experiment._meta.pk.column
-                    }
-                }
+        "search": {
+            "database": {
+                "primary_key": models.ExperimentResult._meta.pk.column,
+                "relation": models.ExperimentResult._meta.db_table,
             }
         },
     },
-    "search": {
-        "database": {
-            "relation": models.Experiment._meta.db_table,
-            "primary_key": models.Experiment._meta.pk.column,
-        }
-    }
-})
+)
+
+INSTRUMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(
+    schemas.INSTRUMENT_SCHEMA,
+    {
+        "properties": {
+            "identifier": {"search": search_optional_eq(0)},
+            "device": {"search": search_optional_str(1)},
+            "device_ontology": ONTOLOGY_SEARCH_SCHEMA,
+            "description": {"search": search_optional_str(3)},
+        },
+        "search": {
+            "database": {
+                "primary_key": models.Instrument._meta.pk.column,
+                "relation": models.Instrument._meta.db_table,
+            }
+        },
+    },
+)
+
+EXPERIMENT_SEARCH_SCHEMA = tag_schema_with_search_properties(
+    schemas.EXPERIMENT_SCHEMA,
+    {
+        "properties": {
+            "id": {"search": {"order": 0, "database": {"field": models.Experiment._meta.pk.column}}},
+            "description": {
+                "search": search_optional_str(1),
+            },
+            "reference_registry_id": {
+                "search": search_optional_str(2, queryable="internal"),
+            },
+            "qc_flags": {
+                "items": {
+                    "search": search_optional_str(0),
+                },
+                "search": {"order": 3, "database": {"type": "array"}},
+            },
+            "experiment_type": {
+                "search": search_optional_eq(4),
+            },
+            "experiment_ontology": {
+                **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
+                "search": {"order": 5, "database": {"type": "jsonb"}},
+            },
+            "molecule": {
+                "search": search_optional_eq(6),
+            },
+            "molecule_ontology": {
+                **ONTOLOGY_SEARCH_SCHEMA,  # TODO: Specific ontology?
+                "search": {"order": 7, "database": {"type": "jsonb"}},
+            },
+            "library_strategy": {
+                "search": search_optional_eq(8),
+            },
+            "biosample": {
+                "search": merge_schema_dictionaries(
+                    search_optional_eq(9),
+                    {"database": {"field": models.Experiment._meta.get_field("biosample").column}},
+                )
+            },
+            "extraction_protocol": {
+                "search": search_optional_str(10),
+            },
+            "study_type": {
+                "search": search_optional_eq(11),
+            },
+            "library_id": {
+                "search": search_optional_str(12),
+            },
+            "library_description": {
+                "search": search_optional_str(13),
+            },
+            "library_source": {
+                "search": search_optional_eq(14),
+            },
+            "library_selection": {
+                "search": search_optional_eq(15),
+            },
+            "library_layout": {
+                "search": search_optional_eq(16),
+            },
+            "library_extract_id": {
+                "search": search_optional_str(17),
+            },
+            "insert_size": {
+                "search": search_optional_eq(18),
+            },
+            "protocol_url": {
+                "search": search_optional_str(19),
+            },
+            # query example: ["#ico", ["#resolve", "instrument", "device"], "Illumina"]
+            "instrument": merge_schema_dictionaries(
+                INSTRUMENT_SEARCH_SCHEMA,
+                {
+                    "search": {
+                        "database": {
+                            "relationship": {
+                                "type": "MANY_TO_ONE",
+                                "foreign_key": models.Experiment._meta.get_field("instrument").column,
+                            }
+                        }
+                    }
+                },
+            ),
+            # query example: ["#ico", ["#resolve", "experiment_results", "[item]", "description"], "VCF file"]
+            "experiment_results": {
+                "items": merge_schema_dictionaries(
+                    EXPERIMENT_RESULT_SEARCH_SCHEMA,
+                    {
+                        "search": {
+                            "database": {
+                                "relationship": {
+                                    "type": "MANY_TO_ONE",
+                                    "foreign_key": "experimentresult_id",  # TODO: No hard-code, from M2M
+                                }
+                            }
+                        }
+                    },
+                ),
+                "search": {
+                    "database": {
+                        "relation": models.Experiment._meta.get_field(
+                            "experiment_results"
+                        ).remote_field.through._meta.db_table,
+                        "relationship": {
+                            "type": "ONE_TO_MANY",
+                            "parent_foreign_key": "experiment_id",  # TODO: No hard-code
+                            "parent_primary_key": models.Experiment._meta.pk.column,
+                        },
+                    }
+                },
+            },
+        },
+        "search": {
+            "database": {
+                "relation": models.Experiment._meta.db_table,
+                "primary_key": models.Experiment._meta.pk.column,
+            }
+        },
+    },
+)

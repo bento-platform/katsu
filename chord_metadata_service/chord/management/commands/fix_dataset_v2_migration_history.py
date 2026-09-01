@@ -54,9 +54,7 @@ class Command(BaseCommand):
             self.stdout.write("0017/0019 not applied yet. Run migrate normally.")
             return
 
-        self.stdout.write(
-            "Detected: 0017/0019 applied, 0013 missing. Fixing migration history..."
-        )
+        self.stdout.write("Detected: 0017/0019 applied, 0013 missing. Fixing migration history...")
 
         if dry_run:
             self.stdout.write(self.style.WARNING("DRY RUN — no changes will be made."))

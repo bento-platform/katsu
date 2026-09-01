@@ -1,7 +1,9 @@
-from django.urls import path, include
-from chord_metadata_service.restapi import api_views, urls as restapi_urls
-from chord_metadata_service.chord import urls as chord_urls
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from chord_metadata_service.chord import urls as chord_urls
+from chord_metadata_service.restapi import api_views
+from chord_metadata_service.restapi import urls as restapi_urls
 
 urlpatterns = [
     path("api/", include(restapi_urls)),

@@ -2,7 +2,11 @@ from bento_lib.discovery import DiscoveryEntity
 
 # Python typing struggles with frozenset[Literal[...]] so this is a little hack to build one:
 _DISCOVERY_ENTITIES_SET: set[DiscoveryEntity] = {
-    "phenopacket", "individual", "biosample", "experiment", "experiment_result"
+    "phenopacket",
+    "individual",
+    "biosample",
+    "experiment",
+    "experiment_result",
 }
 DISCOVERY_ENTITIES: frozenset[DiscoveryEntity] = frozenset(_DISCOVERY_ENTITIES_SET)
 

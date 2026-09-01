@@ -5,7 +5,6 @@ from chord_metadata_service.restapi.schema_utils import (
 
 from . import schemas
 
-
 __all__ = ["RESOURCE_SEARCH_SCHEMA"]
 
 

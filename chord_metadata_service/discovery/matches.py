@@ -120,7 +120,8 @@ async def experiment_result_matches(
                         # TODO: have a foreign key to dataset directly to not have to do so many lookups
                         dataset=scope.dataset_id or (str(first_exp.dataset_id) if first_exp else None),
                     )
-                    if root else dict()
+                    if root
+                    else dict()
                 ),
             )
         )
@@ -166,10 +167,14 @@ async def experiment_matches(
                 biosample=str(exp.biosample.id) if exp.biosample else None,
                 phenopacket=str(phenopacket.id) if phenopacket else None,
                 # ------------------------------------------------------------------------------------------------------
-                **(dict(
-                    project=scope.project_id or str(exp.dataset.project_id),
-                    dataset=scope.dataset_id or str(exp.dataset_id)
-                ) if root else dict()),
+                **(
+                    dict(
+                        project=scope.project_id or str(exp.dataset.project_id),
+                        dataset=scope.dataset_id or str(exp.dataset_id),
+                    )
+                    if root
+                    else dict()
+                ),
             )
         )
     return res
@@ -192,14 +197,18 @@ async def biosample_matches(
 
         # TODO: prefetch all the time, even when not filtering?
         experiments = (
-            await experiment_matches(
-                getattr(b, "experiment_matches", b.experiments),
-                scope,
-                dt_permissions,
-                False,
-                {**ctx, "biosample": str(b.id)},
+            (
+                await experiment_matches(
+                    getattr(b, "experiment_matches", b.experiments),
+                    scope,
+                    dt_permissions,
+                    False,
+                    {**ctx, "biosample": str(b.id)},
+                )
             )
-        ) if dt_permissions[DATA_TYPE_EXPERIMENT].data else None
+            if dt_permissions[DATA_TYPE_EXPERIMENT].data
+            else None
+        )
 
         if experiments:
             experiments.sort(key=lambda e: e.id)
@@ -249,7 +258,9 @@ async def phenopacket_matches(
                     dict(
                         project=scope.project_id or (str(phe.dataset.project_id) if phe.dataset else None),
                         dataset=scope.dataset_id or (str(phe.dataset_id) if phe.dataset else None),
-                    ) if root else dict()
+                    )
+                    if root
+                    else dict()
                 ),
             )
         )
@@ -287,11 +298,12 @@ async def individual_matches(
                 **(
                     dict(
                         # TODO: put this on Individual itself, i.e., link individual with project/dataset?
-                        project=scope.project_id or (
-                            str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None
-                        ),
+                        project=scope.project_id
+                        or (str(first_phenopacket.dataset.project_id) if first_phenopacket.dataset_id else None),
                         dataset=scope.dataset_id or str(first_phenopacket.dataset_id),
-                    ) if root else dict()
+                    )
+                    if root
+                    else dict()
                 ),
             )
         )
@@ -301,10 +313,7 @@ async def individual_matches(
 
 DISCOVERY_ENTITY_TO_MATCH_FN: dict[
     DiscoveryEntity,
-    Callable[
-        [QuerySet, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, bool, MatchContext],
-        Awaitable[list]
-    ]
+    Callable[[QuerySet, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, bool, MatchContext], Awaitable[list]],
 ] = {
     "phenopacket": phenopacket_matches,
     "individual": individual_matches,

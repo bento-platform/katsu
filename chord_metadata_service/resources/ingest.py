@@ -1,7 +1,9 @@
 import json
+
 from structlog.stdlib import BoundLogger
 
-from . import models as rm, utils as ru
+from . import models as rm
+from . import utils as ru
 
 __all__ = ["ingest_resource"]
 

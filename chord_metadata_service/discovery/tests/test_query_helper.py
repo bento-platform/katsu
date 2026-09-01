@@ -12,7 +12,6 @@ from .constants import DISCOVERY_CONFIG_TEST
 
 
 class QueryHelperTest(TransactionTestCase):
-
     def setUp(self):
         self.fts_query = DiscoveryQuery(fts="cancer", filters={})
         self.filters_query = DiscoveryQuery(filters={"sex": "MALE"})

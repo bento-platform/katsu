@@ -1,28 +1,29 @@
 from enum import Enum
+
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.experiments.schemas import EXPERIMENT_RESULT_FILE_INDEX_LIST_SCHEMA
 from chord_metadata_service.phenopackets.schemas import (
+    EXPRESSION_SCHEMA,
+    EXTENSION_SCHEMA,
     PHENOPACKET_EVIDENCE_SCHEMA,
     PHENOPACKET_MEASUREMENT_SCHEMA,
-    EXPRESSION_SCHEMA,
-    VCF_RECORD_SCHEMA,
-    EXTENSION_SCHEMA,
     PHENOPACKET_MEDICAL_ACTION_SCHEMA,
-    VRS_VARIATION_SCHEMA,
-    VALIDATION_PHENOPACKET_UPDATE_SCHEMA,
     VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA,
+    VALIDATION_PHENOPACKET_UPDATE_SCHEMA,
+    VCF_RECORD_SCHEMA,
+    VRS_VARIATION_SCHEMA,
 )
 from chord_metadata_service.restapi.schemas import (
-    ONTOLOGY_CLASS,
-    ONTOLOGY_CLASS_LIST,
-    AGE_STRING,
     AGE,
-    AGE_RANGE,
     AGE_OR_AGE_RANGE,
-    TIME_INTERVAL,
+    AGE_RANGE,
+    AGE_STRING,
     EXTRA_PROPERTIES_SCHEMA,
     GESTATIONAL_AGE,
+    ONTOLOGY_CLASS,
+    ONTOLOGY_CLASS_LIST,
     TIME_ELEMENT_SCHEMA,
+    TIME_INTERVAL,
 )
 
 __all__ = [
@@ -54,7 +55,7 @@ class SchemaRefs(Enum):
     # Alias for experiments/migrations/0012_alter_experiment_experiment_ontology_and_more.py
     # Previously, the key-value object for experiment extra properties forced all dict values to be strings;
     # it should instead allow arbitrary value types.
-    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA
+    KEY_VALUE_OBJECT = EXTRA_PROPERTIES_SCHEMA  # noqa: PIE796
     ONTOLOGY_CLASS = ONTOLOGY_CLASS
     ONTOLOGY_CLASS_LIST = ONTOLOGY_CLASS_LIST
     PHENOPACKET_EVIDENCE_SCHEMA = PHENOPACKET_EVIDENCE_SCHEMA

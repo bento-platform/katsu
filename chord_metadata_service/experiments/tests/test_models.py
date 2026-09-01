@@ -8,7 +8,7 @@ from .helpers import ExperimentTestCase
 
 
 class ExperimentTest(ExperimentTestCase):
-    """ Test module for Experiment model """
+    """Test module for Experiment model"""
 
     @staticmethod
     def create(**kwargs):
@@ -30,15 +30,10 @@ class ExperimentTest(ExperimentTestCase):
             library_strategy="Bisulfite-Seq",
             experiment_type="DNA Methylation",
             experiment_ontology=["invalid_value"],
-            biosample=self.biosample
+            biosample=self.biosample,
         )
         # Missing required experiment_type
-        self.assertRaises(
-            ValidationError,
-            self.create,
-            library_strategy="Bisulfite-Seq",
-            biosample=self.biosample
-        )
+        self.assertRaises(ValidationError, self.create, library_strategy="Bisulfite-Seq", biosample=self.biosample)
 
         # Invalid molecule_ontology
         self.assertRaises(
@@ -47,7 +42,7 @@ class ExperimentTest(ExperimentTestCase):
             library_strategy="Bisulfite-Seq",
             experiment_type="DNA Methylation",
             molecule_ontology=[{"id": "some_id"}],
-            biosample=self.biosample
+            biosample=self.biosample,
         )
 
         # valid value in extra_properties
@@ -56,22 +51,19 @@ class ExperimentTest(ExperimentTestCase):
                 library_strategy="Bisulfite-Seq",
                 experiment_type="DNA Methylation",
                 extra_properties={"some_field": "value", "invalid_value": 42},
-                biosample=self.biosample
+                biosample=self.biosample,
             )
         except Exception as e:
             self.fail(f"ExperimentResult creation with arbitrary extra_properties should succeed, got: {e}")
 
         # Missing biosample
         self.assertRaises(
-            ValidationError,
-            self.create,
-            library_strategy="Bisulfite-Seq",
-            experiment_type="DNA Methylation"
+            ValidationError, self.create, library_strategy="Bisulfite-Seq", experiment_type="DNA Methylation"
         )
 
 
 class ExperimentResultTest(TestCase):
-    """ Test module for ExperimentResult model """
+    """Test module for ExperimentResult model"""
 
     def setUp(self):
         self.exp_res_dict = valid_experiment_result()
@@ -101,7 +93,7 @@ class ExperimentResultTest(TestCase):
                 identifier="experiment_results:1",
                 description="Test description",
                 filename="test.vcf",
-                extra_properties={"date": 2021}
+                extra_properties={"date": 2021},
             )
         except Exception as e:
             self.fail(f"ExperimentResult creation with arbitrary extra_properties should succeed, got: {e}")
@@ -111,7 +103,7 @@ class ExperimentResultTest(TestCase):
 
 
 class InstrumentTest(TestCase):
-    """ Test module for ExperimentResult model """
+    """Test module for ExperimentResult model"""
 
     def setUp(self):
         Instrument.objects.create(**valid_instrument())
@@ -125,11 +117,7 @@ class InstrumentTest(TestCase):
     def test_validation(self):
         # Valid CV for extra_properties
         try:
-            self.create(
-                device="Illumina HiScanSQ",
-                description="Test description 2",
-                extra_properties={"date": 2021}
-            )
+            self.create(device="Illumina HiScanSQ", description="Test description 2", extra_properties={"date": 2021})
         except Exception as e:
             self.fail(f"Instrument creation with arbitrary extra_properties should succeed, got: {e}")
         obj = Instrument.objects.get(device="Illumina HiScanSQ")
