@@ -1,16 +1,16 @@
 import csv
 import io
-import openpyxl
 import random
 import uuid
-
-from bento_lib.discovery import DiscoveryConfig
 from copy import deepcopy
 
-from django.db.models import Q, F, Value
-from django.urls import reverse
+import openpyxl
+from bento_lib.discovery import DiscoveryConfig
+from django.db.models import F, Q, Value
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from rest_framework import status
+
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
@@ -19,9 +19,9 @@ from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.fields_utils import JSONBPathFilter
 from chord_metadata_service.discovery.tests.constants import (
+    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
     DISCOVERY_CONFIG_EXTRA_PROPERTIES,
     DISCOVERY_CONFIG_TEST,
-    CONFIG_PUBLIC_TEST_SEARCH_SEX_ONLY,
     DISCOVERY_ZERO_COUNTS,
 )
 from chord_metadata_service.experiments import models as ex_m
@@ -612,7 +612,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
     @staticmethod
     def response_threshold_check(response):
-        return response["count"] if "count" in response else dres.INSUFFICIENT_DATA_AVAILABLE
+        return response.get("count", dres.INSUFFICIENT_DATA_AVAILABLE)
 
     def setUp(self):
         random.seed(self.random_seed)
@@ -1269,7 +1269,7 @@ class DiscoveryAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
 
     @staticmethod
     def response_threshold_check(response):
-        return response["count"] if "count" in response else dres.INSUFFICIENT_DATA_AVAILABLE
+        return response.get("count", dres.INSUFFICIENT_DATA_AVAILABLE)
 
     def setUp(self):
         individuals = [c.generate_valid_individual(gen_random_age=(1, 100)) for _ in range(self.random_range)]
@@ -1277,12 +1277,11 @@ class DiscoveryAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
             Individual.objects.create(**individual)
 
         for individual in Individual.objects.all():
-            if individual.time_at_last_encounter:
-                if "age" in individual.time_at_last_encounter:
-                    age_numeric, age_unit = iso_duration_to_years(individual.time_at_last_encounter["age"])
-                    individual.age_numeric = age_numeric
-                    individual.age_unit = age_unit if age_unit else ""
-                    individual.save()
+            if individual.time_at_last_encounter and "age" in individual.time_at_last_encounter:
+                age_numeric, age_unit = iso_duration_to_years(individual.time_at_last_encounter["age"])
+                individual.age_numeric = age_numeric
+                individual.age_unit = age_unit if age_unit else ""
+                individual.save()
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_age_range(self):
