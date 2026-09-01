@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
-from chord_metadata_service.discovery.stats import queryset_stats_for_field
+from chord_metadata_service.discovery.stats import queryset_stats_for_field, to_legacy_stats
 from chord_metadata_service.patients.summaries import individual_summary
 
 from . import models
@@ -32,18 +32,18 @@ async def biosample_summary(
         biosamples_is_control_sample,
     ) = await asyncio.gather(
         biosamples.acount(),
-        queryset_stats_for_field(biosamples, "taxonomy__label", discovery, phenopacket_permissions),
-        queryset_stats_for_field(biosamples, "sampled_tissue__label", discovery, phenopacket_permissions),
-        queryset_stats_for_field(biosamples, "histological_diagnosis__label", discovery, phenopacket_permissions),
-        queryset_stats_for_field(biosamples, "is_control_sample", discovery, phenopacket_permissions),
+        queryset_stats_for_field(biosamples, "taxonomy__label", None, discovery, phenopacket_permissions),
+        queryset_stats_for_field(biosamples, "sampled_tissue__label", None, discovery, phenopacket_permissions),
+        queryset_stats_for_field(biosamples, "histological_diagnosis__label", None, discovery, phenopacket_permissions),
+        queryset_stats_for_field(biosamples, "is_control_sample", None, discovery, phenopacket_permissions),
     )
 
     return {
         "count": thresholded_count(biosamples_count, discovery, phenopacket_permissions),
-        "taxonomy": biosamples_taxonomy,
-        "sampled_tissue": biosamples_sampled_tissue,
-        "histological_diagnosis": biosamples_histological_diagnosis,
-        "is_control_sample": biosamples_is_control_sample,
+        "taxonomy": to_legacy_stats(biosamples_taxonomy),
+        "sampled_tissue": to_legacy_stats(biosamples_sampled_tissue),
+        "histological_diagnosis": to_legacy_stats(biosamples_histological_diagnosis),
+        "is_control_sample": to_legacy_stats(biosamples_is_control_sample),
     }
 
 
@@ -53,13 +53,14 @@ async def disease_summary(
     disease_stats = await queryset_stats_for_field(
         queryset=phenopackets,
         field="diseases__term__label",
+        field_props=None,
         discovery=discovery,
         field_permissions=phenopacket_permissions,
     )
     return {
         # count is a number of unique disease terms (not all diseases in the database)
         "count": thresholded_count(len(disease_stats), discovery, phenopacket_permissions),
-        "term": disease_stats,
+        "term": to_legacy_stats(disease_stats),
     }
 
 
@@ -71,12 +72,12 @@ async def phenotypic_feature_summary(
     qs = models.PhenotypicFeature.objects.filter(phenopacket__in=phenopackets)
     phenotypic_features_count, phenotypic_features_type = await asyncio.gather(
         qs.distinct('pftype').acount(),
-        queryset_stats_for_field(qs, "pftype__label", discovery, phenopacket_permissions),
+        queryset_stats_for_field(qs, "pftype__label", None, discovery, phenopacket_permissions),
     )
     return {
         # count is a number of unique phenotypic feature types, not all phenotypic features in the database.
         "count": thresholded_count(phenotypic_features_count, discovery, phenopacket_permissions),
-        "type": phenotypic_features_type,
+        "type": to_legacy_stats(phenotypic_features_type),
     }
 
 

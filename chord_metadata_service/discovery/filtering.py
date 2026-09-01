@@ -6,6 +6,7 @@ from structlog.stdlib import BoundLogger
 from chord_metadata_service.authz.types import DataTypeDiscoveryPermissions, DataPermissions
 from .exceptions import DiscoveryEmptyException
 from .fields import (
+    is_curie_format,
     is_number_query_format,
     is_date_query_format,
     get_field_options,
@@ -46,8 +47,14 @@ async def validate_field_query_value(
     if (
         not field_value_is_in_options(value, frozenset(options), field_props.datatype)
         and not (
+            # TODO: this might be not correct?
             # no restriction when enum is not set for categories
             field_props.datatype == "string" and field_props.config.enum is None  # narrowed type via datatype ==
+        )
+        and not (
+            # TODO: this might be not correct?
+            # no restriction when enum is not set for categories
+            field_props.datatype == "ontology-class" and field_props.config.enum is None and is_curie_format(value)
         )
         and not (
             # with query:data permissions, we can query ANY range of numbers

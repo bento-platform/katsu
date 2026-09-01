@@ -6,7 +6,7 @@ from django.db.models import QuerySet
 from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.discovery.censorship import thresholded_count
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
-from chord_metadata_service.discovery.stats import queryset_stats_for_field
+from chord_metadata_service.discovery.stats import queryset_stats_for_field, to_legacy_stats
 from . import models
 
 __all__ = [
@@ -23,7 +23,6 @@ async def experiment_summary(
     # TODO: limit to authorized field list if we're in censored discovery mode - based on discovery config
 
     (
-        count,
         study_type,
         experiment_type,
         molecule,
@@ -33,27 +32,26 @@ async def experiment_summary(
         library_layout,
         extraction_protocol,
     ) = await asyncio.gather(
-        experiments.acount(),
-        queryset_stats_for_field(experiments, "study_type", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "experiment_type", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "molecule", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "library_strategy", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "library_source", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "library_selection", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "library_layout", discovery, experiment_permissions),
-        queryset_stats_for_field(experiments, "extraction_protocol", discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "study_type", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "experiment_type", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "molecule", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_strategy", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_source", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_selection", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "library_layout", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiments, "extraction_protocol", None, discovery, experiment_permissions),
     )
 
     return {
-        "count": thresholded_count(count, discovery, experiment_permissions),
-        "study_type": study_type,
-        "experiment_type": experiment_type,
-        "molecule": molecule,
-        "library_strategy": library_strategy,
-        "library_source": library_source,
-        "library_selection": library_selection,
-        "library_layout": library_layout,
-        "extraction_protocol": extraction_protocol,
+        "count": thresholded_count(await experiments.acount(), discovery, experiment_permissions),
+        "study_type": to_legacy_stats(study_type),
+        "experiment_type": to_legacy_stats(experiment_type),
+        "molecule": to_legacy_stats(molecule),
+        "library_strategy": to_legacy_stats(library_strategy),
+        "library_source": to_legacy_stats(library_source),
+        "library_selection": to_legacy_stats(library_selection),
+        "library_layout": to_legacy_stats(library_layout),
+        "extraction_protocol": to_legacy_stats(extraction_protocol),
     }
 
 
@@ -71,16 +69,16 @@ async def experiment_result_summary(
         usage,
     ) = await asyncio.gather(
         experiment_results.acount(),
-        queryset_stats_for_field(experiment_results, "file_format", discovery, experiment_permissions),
-        queryset_stats_for_field(experiment_results, "data_output_type", discovery, experiment_permissions),
-        queryset_stats_for_field(experiment_results, "usage", discovery, experiment_permissions),
+        queryset_stats_for_field(experiment_results, "file_format", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiment_results, "data_output_type", None, discovery, experiment_permissions),
+        queryset_stats_for_field(experiment_results, "usage", None, discovery, experiment_permissions),
     )
 
     return {
         "count": thresholded_count(count, discovery, experiment_permissions),
-        "file_format": file_format,
-        "data_output_type": data_output_type,
-        "usage": usage,
+        "file_format": to_legacy_stats(file_format),
+        "data_output_type": to_legacy_stats(data_output_type),
+        "usage": to_legacy_stats(usage),
     }
 
 
@@ -91,12 +89,12 @@ async def instrument_summary(
 
     count, device = await asyncio.gather(
         instruments.acount(),
-        queryset_stats_for_field(instruments, "device", discovery, experiment_permissions),
+        queryset_stats_for_field(instruments, "device", None, discovery, experiment_permissions),
     )
 
     return {
         "count": thresholded_count(count, discovery, experiment_permissions),
-        "device": device,
+        "device": to_legacy_stats(device),
     }
 
 

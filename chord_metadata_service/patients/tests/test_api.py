@@ -1165,7 +1165,8 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=CONFIG_PUBLIC_TEST_NO_THRESHOLD)
     def test_discovery_filtering_mapping_for_search_filter(self):
         # biosample tissue field search
-        response = self.dt_authz_counts_get("/api/discovery?tissues=wall of urinary bladder")
+        #  UBERON:0001256 - wall of urinary bladder
+        response = self.dt_authz_counts_get("/api/discovery?tissues=UBERON:0001256")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
         self.assertDictEqual(
@@ -1173,7 +1174,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             {
                 "phenopacket": 1,
                 "individual": 1,
-                "biosample": 1,  # biosample 2 does not match "wall of urinary bladder"
+                "biosample": 1,  # biosample 2 does not match "wall of urinary bladder" (UBERON:0001256)
                 "experiment": 2,  # both experiments are on biosample 1
                 "experiment_result": 0,
             },

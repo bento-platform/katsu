@@ -55,6 +55,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
 
     def setUp(self):
         self.individual_1 = pa_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_1)
+        self.biosample_1 = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.individual_1.id))
         self.meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
         self.phenopacket = ph_m.Phenopacket.objects.create(
             id="phenopacket_id:1",
@@ -62,19 +63,38 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             dataset=self.dataset,
             meta_data=self.meta_data,
         )
+        self.phenopacket.biosamples.set([self.biosample_1])
+        self.phenopacket.save()
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lcf(self):
-        res = await get_categorical_stats(
-            self.scope,
-            "phenopacket",
-            ph_m.Phenopacket.objects.all(),
-            DISCOVERY_CONFIG_TEST.fields["sex"],
-            field_permissions=self.permissions_full,
-        )
-        self.assertListEqual(
-            res.root, [BinWithValue(label="MALE", value=1), BinWithValue(label="missing", value=0)]
-        )
+        subtest_params = [
+            (
+                "sex",
+                [
+                    BinWithValue(key="MALE", label="MALE", value=1),
+                    BinWithValue(key="missing", label="missing", value=0),
+                ],
+            ),
+            (
+                "tissues",
+                [
+                    BinWithValue(key="UBERON:0001256", label="wall of urinary bladder", value=1),
+                    BinWithValue(key="missing", label="missing", value=0),
+                ],
+            ),
+        ]
+
+        for params in subtest_params:
+            with self.subTest(params=params):
+                res = await get_categorical_stats(
+                    self.scope,
+                    "phenopacket",
+                    ph_m.Phenopacket.objects.all(),
+                    DISCOVERY_CONFIG_TEST.fields[params[0]],
+                    field_permissions=self.permissions_full,
+                )
+                self.assertListEqual(res.root, params[1])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_categorical_stats_lct(self):
@@ -85,7 +105,7 @@ class TestGetCategoricalStats(ProjectTestCase, PermissionsTestCaseMixin):
             DISCOVERY_CONFIG_TEST.fields["sex"],
             field_permissions=self.permissions_counts,
         )
-        self.assertListEqual(res.root, [BinWithValue(label="missing", value=0)])
+        self.assertListEqual(res.root, [BinWithValue(key="missing", label="missing", value=0)])
 
 
 class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
@@ -118,12 +138,11 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             self.dm_fp,
             field_permissions=self.permissions_full,
         )
-        ground_truth = [
-            BinWithValue(label="Genetic Testing", value=1),
-            BinWithValue(label="Hematology Test", value=1),
-            BinWithValue(label="missing", value=0),
-        ]
-        self.assertListEqual(res.root, ground_truth)
+        self.assertListEqual(res.root, [
+            BinWithValue(key="Genetic Testing", label="Genetic Testing", value=1),
+            BinWithValue(key="Hematology Test", label="Hematology Test", value=1),
+            BinWithValue(key="missing", label="missing", value=0),
+        ])
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     async def test_json_categorical_stats_lct(self):
@@ -134,10 +153,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             self.dm_fp,
             field_permissions=self.permissions_counts,
         )
-        ground_truth = [
-            BinWithValue(label="missing", value=0),
-        ]
-        self.assertListEqual(res.root, ground_truth)
+        self.assertListEqual(res.root, [BinWithValue(key="missing", label="missing", value=0)])
 
     async def test_filter_queryset_field_value_string(self):
         base_qs = ph_m.Individual.objects.all()
@@ -238,7 +254,8 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
         # "uncensored": 0-threshold
         dm_values = await get_distinct_field_values(
-            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 0
+            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"],
+            self.permissions_full
         )
         self.assertEqual(len(dm_values), 2)
         self.assertTrue("Genetic Testing" in dm_values)
@@ -246,6 +263,7 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
 
         # censored: 5-threshold eliminates all options
         dm_values_censored = await get_distinct_field_values(
-            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 5
+            "phenopacket",  base_qs_pheno, DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"],
+            self.permissions_counts
         )
         self.assertListEqual(dm_values_censored, [])

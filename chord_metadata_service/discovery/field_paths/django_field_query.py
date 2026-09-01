@@ -30,7 +30,10 @@ class DiscoveryFieldSubquery:
 
 
 def get_field_django_mapping_and_queried_entity(
-    queryset_entity: DiscoveryEntity, field_props: AnyFieldDefinition, force_through_phenopackets: bool = False
+    queryset_entity: DiscoveryEntity,
+    field_props: AnyFieldDefinition,
+    force_through_phenopackets: bool = False,
+    resolve_ontology_class: bool = False,
 ) -> tuple[str, DiscoveryFieldSubquery | None, DiscoveryEntity]:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
@@ -53,7 +56,7 @@ def get_field_django_mapping_and_queried_entity(
 
     resolved_field_path = resolve_queryset_entity_path_from_field_path(
         queryset_entity, entity_name, field_path, force_through_phenopackets
-    )
+    ) + (("id",) if field_props.datatype == "ontology-class" and resolve_ontology_class else ())
 
     subquery: DiscoveryFieldSubquery | None = None
 
@@ -83,11 +86,13 @@ def get_field_django_mapping_and_queried_entity(
     return field_path_to_django_mapping(resolved_field_path), subquery, entity_name
 
 
-def get_field_django_mapping(queryset_entity: DiscoveryEntity, field_props: AnyFieldDefinition) -> str:
+def get_field_django_mapping(
+    queryset_entity: DiscoveryEntity, field_props: AnyFieldDefinition, resolve_ontology_class: bool = False
+) -> str:
     """
     Parses a path-like string representing an ORM such as "individual/extra_properties/date_of_consent"
     where the first crumb represents the object in the DB model, and the next ones
     are the field with their possible joins through tables relations.
     Returns the Django string representation of the field for this object.
     """
-    return get_field_django_mapping_and_queried_entity(queryset_entity, field_props)[0]
+    return get_field_django_mapping_and_queried_entity(queryset_entity, field_props, resolve_ontology_class)[0]
