@@ -1,8 +1,8 @@
-from bento_lib.auth.permissions import P_QUERY_DATA, Permission, P_INGEST_DATA, P_DELETE_DATA
+from bento_lib.auth.permissions import P_DELETE_DATA, P_INGEST_DATA, P_QUERY_DATA, Permission
 from rest_framework import mixins, viewsets
 from rest_framework.request import Request as DrfRequest
 
-from chord_metadata_service.discovery.scope import get_request_discovery_scope, ValidatedDiscoveryScope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.logger import logger
 
@@ -76,5 +76,3 @@ class BentoAuthzScopedModelViewSet(
     replacing the base viewsets.GenericViewSet. In this way, we get all the scoping / permissions helper functions.
     Security note: Subclasses MUST implement a get_queryset(...) which returns a model-scoped queryset!
     """
-
-    pass

@@ -13,15 +13,17 @@ from chord_metadata_service.phenopackets.tests.helpers import PhenoTestCase
 
 
 class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
-
     # ---- helpers ----
 
     def _translation_url(self, language: str = "") -> str:
         if language:
-            return reverse("dataset-translations-detail", kwargs={
-                "identifier": self.dataset.identifier,
-                "language": language,
-            })
+            return reverse(
+                "dataset-translations-detail",
+                kwargs={
+                    "identifier": self.dataset.identifier,
+                    "language": language,
+                },
+            )
         return reverse("dataset-translations-list", kwargs={"identifier": self.dataset.identifier})
 
     def _translation_payload(self, title: str = "Test Translation") -> dict:
@@ -41,9 +43,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
-        translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset.identifier, language=language
-        )
+        translation = DatasetTranslation.from_schema(schema, dataset_id=self.dataset.identifier, language=language)
         translation.save()
         return translation
 
@@ -85,9 +85,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
-        translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset.identifier, language="fr"
-        )
+        translation = DatasetTranslation.from_schema(schema, dataset_id=self.dataset.identifier, language="fr")
         translation.save()
         self.addCleanup(translation.delete)
 
@@ -109,17 +107,18 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
             identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
-        translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset.identifier, language="de"
-        )
+        translation = DatasetTranslation.from_schema(schema, dataset_id=self.dataset.identifier, language="de")
         translation.save()
         self.addCleanup(translation.delete)
 
         r = self.client.get(
-            reverse("dataset-translations-detail", kwargs={
-                "identifier": self.dataset.identifier,
-                "language": "de",
-            })
+            reverse(
+                "dataset-translations-detail",
+                kwargs={
+                    "identifier": self.dataset.identifier,
+                    "language": "de",
+                },
+            )
         )
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
@@ -140,8 +139,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         payload["language"] = "fr"
         r = self.one_authz_post(self._translation_url(), json=payload)
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-        self.addCleanup(lambda: DatasetTranslation.objects.filter(
-            dataset=self.dataset, language="fr").delete())
+        self.addCleanup(lambda: DatasetTranslation.objects.filter(dataset=self.dataset, language="fr").delete())
 
     def test_create_translation_dataset_not_found(self):
         # DatasetTranslationViewSet.create: dataset DoesNotExist → 404
@@ -193,13 +191,15 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
 
     def test_serializer_resolve_dataset_id_no_context(self):
         # _resolve_dataset_id: no instance, no view in context → returns None (line 228)
-        serializer = DatasetTranslationSerializer(data={
-            "schema_version": "1.0",
-            "title": "Test",
-            "description": "Test",
-            "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
-            "language": "fr",
-        })
+        serializer = DatasetTranslationSerializer(
+            data={
+                "schema_version": "1.0",
+                "title": "Test",
+                "description": "Test",
+                "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
+                "language": "fr",
+            }
+        )
         serializer.is_valid()  # may fail Pydantic validation; line 228 is still hit before that
 
     def test_serializer_nonexistent_dataset_in_view_context(self):
@@ -250,10 +250,13 @@ class DatasetTranslationValidationTest(AuthzAPITestCase, PhenoTestCase):
         return reverse("dataset-translations-list", kwargs={"identifier": dataset.identifier})
 
     def _detail_url(self, dataset: Dataset, language: str) -> str:
-        return reverse("dataset-translations-detail", kwargs={
-            "identifier": dataset.identifier,
-            "language": language,
-        })
+        return reverse(
+            "dataset-translations-detail",
+            kwargs={
+                "identifier": dataset.identifier,
+                "language": language,
+            },
+        )
 
     def _payload(self, primary_contact=None, **kwargs) -> dict:
         return {

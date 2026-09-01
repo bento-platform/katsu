@@ -11,12 +11,11 @@ NCBITAXON_RESOURCE = {
     "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
     "version": "2018-07-27",
     "namespace_prefix": "NCBITaxon",
-    "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_"
+    "iri_prefix": "http://purl.obolibrary.org/obo/NCBITaxon_",
 }
 
 
 class IngestResourcesTest(ProjectTestCase, ModelFieldsTestMixin):
-
     def test_ingest_new_resource(self):
         res = ingest_resource(NCBITAXON_RESOURCE, logger)
         res.refresh_from_db()
@@ -47,10 +46,13 @@ class IngestResourcesTest(ProjectTestCase, ModelFieldsTestMixin):
     def test_ingest_updated_resource(self):
         res1 = ingest_resource(NCBITAXON_RESOURCE, logger)
 
-        res2 = ingest_resource({
-            **NCBITAXON_RESOURCE,
-            "url": f"https://purl.obolibrary.org/obo/ncbitaxon/{NCBITAXON_RESOURCE['version']}/ncbitaxon.owl",
-        }, logger)
+        res2 = ingest_resource(
+            {
+                **NCBITAXON_RESOURCE,
+                "url": f"https://purl.obolibrary.org/obo/ncbitaxon/{NCBITAXON_RESOURCE['version']}/ncbitaxon.owl",
+            },
+            logger,
+        )
 
         self.assertEqual(res1, res2)
         self.assertEqual(res1.url, "http://purl.obolibrary.org/obo/ncbitaxon.owl")

@@ -29,14 +29,14 @@ class CreateProjectAPITest(AuthzAPITestCase):
                 "title": "Project 3",
                 "description": "Lorem",
                 "discovery": DISCOVERY_CONFIG_TEST_DICT,
-            }
+            },
         ]
 
         self.invalid_payloads = [
             {
                 "title": "Project 1",
                 "description": "",
-                "discovery": {"fake": "prop"}  # invalid discovery
+                "discovery": {"fake": "prop"},  # invalid discovery
             },
             {
                 "title": "aa",  # name must be at least 3 characters
@@ -46,7 +46,7 @@ class CreateProjectAPITest(AuthzAPITestCase):
                 "title": "Project 3",
                 "description": "Lorem",
                 "discovery": [DISCOVERY_CONFIG_TEST_DICT],  # wrapped in list
-            }
+            },
         ]
 
     def test_create_project(self):
@@ -69,7 +69,6 @@ class CreateProjectAPITest(AuthzAPITestCase):
 
 
 class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
-
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_list_projects(self):
         with aioresponses() as m:
@@ -93,7 +92,6 @@ class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
 
 
 class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
-
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_project_detail_with_counts(self):
         with aioresponses() as m:
@@ -194,21 +192,27 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.valid_payloads = [
             valid_dataset(self.project["identifier"]),
             valid_dataset(self.project["identifier"], title="Dataset 2"),
-            valid_dataset(self.project["identifier"], title="Dataset 3",
-                          discovery=DISCOVERY_CONFIG_TEST_DICT),
+            valid_dataset(self.project["identifier"], title="Dataset 3", discovery=DISCOVERY_CONFIG_TEST_DICT),
         ]
 
         _pc = {"type": "person", "name": "X", "roles": []}
         self.invalid_payloads = [
             # Missing schema_version
-            {"title": "Dataset Bad", "description": "Test",
-             "primary_contact": _pc, "project": self.project["identifier"]},
+            {
+                "title": "Dataset Bad",
+                "description": "Test",
+                "primary_contact": _pc,
+                "project": self.project["identifier"],
+            },
             # Missing project
-            {"schema_version": "1.0", "title": "Dataset Bad",
-             "description": "Test", "primary_contact": _pc},
+            {"schema_version": "1.0", "title": "Dataset Bad", "description": "Test", "primary_contact": _pc},
             # Missing primary_contact
-            {"schema_version": "1.0", "title": "Dataset Bad",
-             "description": "Test", "project": self.project["identifier"]},
+            {
+                "schema_version": "1.0",
+                "title": "Dataset Bad",
+                "description": "Test",
+                "project": self.project["identifier"],
+            },
         ]
 
     def test_create_dataset(self):
@@ -242,7 +246,6 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
 
 class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
-
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_list_datasets(self):
         with aioresponses() as m:
@@ -266,7 +269,6 @@ class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
 
 
 class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
-
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_dataset_detail_with_counts(self):
         with aioresponses() as m:
@@ -312,7 +314,6 @@ class DatasetDetailAPITest(AuthzAPITestCase, ProjectTestCase):
 
 
 class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
-
     def setUp(self):
         super().setUp()
 
@@ -333,9 +334,7 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
         self.assertEqual(self.dataset.title, self.valid_update["title"])
 
     def test_update_dataset_partial(self):
-        r = self.one_authz_patch(
-            f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]}
-        )
+        r = self.one_authz_patch(f"/api/datasets/{self.dataset.identifier}", json={"title": self.valid_update["title"]})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.dataset.refresh_from_db()
         self.assertEqual(self.dataset.title, self.valid_update["title"])
@@ -346,7 +345,7 @@ class UpdateDatasetTest(AuthzAPITestCase, ProjectTestCase):
             json={
                 **self.valid_update,
                 "project": str(self.project_2.identifier),
-            }
+            },
         )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         res = r.json()
@@ -374,10 +373,13 @@ class SerializerErrorMessagesTest(TestCase):
     def test_list_errors(self):
         # Both list and non-list branches of _serializer_error_messages
         from rest_framework.settings import api_settings
-        result = _serializer_error_messages({
-            "title": ["too short"],
-            api_settings.NON_FIELD_ERRORS_KEY: ["global error"],
-        })
+
+        result = _serializer_error_messages(
+            {
+                "title": ["too short"],
+                api_settings.NON_FIELD_ERRORS_KEY: ["global error"],
+            }
+        )
         self.assertIn("title: too short", result)
         self.assertIn("global error", result)
 
@@ -387,7 +389,6 @@ class SerializerErrorMessagesTest(TestCase):
 
 
 class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
-
     def test_delete_dataset(self):
         r = self.one_authz_delete(f"/api/datasets/{self.dataset.identifier}")
         self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
@@ -406,7 +407,6 @@ class DeleteDatasetTest(AuthzAPITestCase, ProjectTestCase):
 
 
 class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
-
     def setUp(self) -> None:
         super().setUp()
 
@@ -440,7 +440,6 @@ class CreateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
 
 
 class UpdateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
-
     def setUp(self) -> None:
         super().setUp()
 
@@ -448,15 +447,17 @@ class UpdateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
             "/api/project_json_schemas", json=valid_project_json_schema(project_id=self.project["identifier"])
         ).json()
 
-        upd = valid_project_json_schema(project_id=self.project["identifier"], )
+        upd = valid_project_json_schema(
+            project_id=self.project["identifier"],
+        )
         upd["required"] = True
         self.upd = upd
 
     def test_update_project_json_schema(self):
-        self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs['id']).required, False)
+        self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs["id"]).required, False)
         r = self.one_authz_put(f"/api/project_json_schemas/{self.pjs['id']}", json=self.upd)
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs['id']).required, True)
+        self.assertEqual(ProjectJsonSchema.objects.get(id=self.pjs["id"]).required, True)
 
     def test_update_project_json_schema_not_found(self):
         # don't need auth
@@ -469,7 +470,6 @@ class UpdateProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
 
 
 class DeleteProjectJsonSchema(AuthzAPITestCaseWithProjectJSON):
-
     def setUp(self) -> None:
         super().setUp()
 

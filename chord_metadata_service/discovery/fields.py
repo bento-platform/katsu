@@ -1,7 +1,12 @@
 import re
 
 from bento_lib.discovery import (
-    DiscoveryConfig, DateFieldDefinition, FieldDefinition, NumberFieldDefinition, StringFieldDefinition, DiscoveryEntity
+    DiscoveryConfig,
+    DateFieldDefinition,
+    FieldDefinition,
+    NumberFieldDefinition,
+    StringFieldDefinition,
+    DiscoveryEntity,
 )
 from collections import Counter, defaultdict
 from functools import wraps
@@ -73,11 +78,13 @@ def map_if_multi_value_filter(func: Callable[[str], bool]) -> Callable[[str | Di
     Decorator for filter format checker functions. If the value is a DiscoveryQueryFilterOneOf, the inner function will
     be mapped over the inner values; otherwise, it'll transparently check the format of a single value string.
     """
+
     @wraps(func)
     def inner(value: str | DiscoveryQueryFilterOneOf) -> bool:
         if isinstance(value, DiscoveryQueryFilterOneOf):
             return all(map(func, value.values))
         return func(value)
+
     return inner
 
 
@@ -116,12 +123,11 @@ async def get_field_bins(query_set: QuerySet, field: str, bin_size: int):
     # the value which requires binning (e.g. 28 => 28 - 28 % 10 = 20)
     # cast to integer to avoid numbers such as 60.00 if that was a decimal,
     # and aggregate over this value.
-    query_set = query_set.annotate(
-        binned=Cast(
-            F(field) - Func(F(field), bin_size, function="MOD"),
-            IntegerField()
-        )
-    ).values("binned").annotate(total=Count("binned"))
+    query_set = (
+        query_set.annotate(binned=Cast(F(field) - Func(F(field), bin_size, function="MOD"), IntegerField()))
+        .values("binned")
+        .annotate(total=Count("binned"))
+    )
     stats = {item["binned"]: item["total"] async for item in query_set}
     return stats
 
@@ -208,7 +214,7 @@ async def compute_binned_ages(individual_queryset: QuerySet, bin_size: int) -> l
     Returns a list of values floored to the closest decade (e.g. 25 --> 20)
     """
 
-    a = individual_queryset.filter(age_numeric__isnull=True).values('time_at_last_encounter')
+    a = individual_queryset.filter(age_numeric__isnull=True).values("time_at_last_encounter")
     binned_ages = []
     async for r in a:
         if r["time_at_last_encounter"] is None:
@@ -241,10 +247,7 @@ async def get_age_numeric_binned(
         await compute_binned_ages(individual_queryset, bin_size)
     )
 
-    return {
-        b: thresholded_count(bv, discovery, field_permissions)
-        for b, bv in individuals_age.items()
-    }
+    return {b: thresholded_count(bv, discovery, field_permissions) for b, bv in individuals_age.items()}
 
 
 def _month_start_end_from_stats(stats: dict[str, int], threshold: int) -> tuple[str | None, str | None]:
@@ -314,14 +317,17 @@ async def get_range_stats(
     # This is equivalent to an SQL CASE statement.
     if group_by and group_by_value and value_mapping:
         # group_by, group_by_value and value_mapping are required field props to get range stats on a JSONField array.
-        whens = [When(
-            # Django's gte and lt lookups cannot span multiple JSON array indexes,
-            # so we use the jsonb_path_exists function instead.
-            f_utils.get_json_range_condition(
-                queryset_entity, field_props, min_value=floor, max_value=ceil, max_inclusive=False
-            ),
-            then=Value(label)
-        ) for floor, ceil, label in bin_ranges]
+        whens = [
+            When(
+                # Django's gte and lt lookups cannot span multiple JSON array indexes,
+                # so we use the jsonb_path_exists function instead.
+                f_utils.get_json_range_condition(
+                    queryset_entity, field_props, min_value=floor, max_value=ceil, max_inclusive=False
+                ),
+                then=Value(label),
+            )
+            for floor, ceil, label in bin_ranges
+        ]
     else:
         whens = [
             When(
@@ -336,7 +342,8 @@ async def get_range_stats(
     # queryset directly).
     # TODO: cache IDs from search queryset?
     stats_queryset = (
-        get_discovery_entity_model_scoped_queryset(queryset_entity, scope).filter(pk__in=queryset)
+        get_discovery_entity_model_scoped_queryset(queryset_entity, scope)
+        .filter(pk__in=queryset)
         .values(label=Case(*whens, default=Value("missing"), output_field=CharField()))
         .annotate(total=Count("label"))
     )
@@ -347,10 +354,9 @@ async def get_range_stats(
         stats[item["label"]] = thresholded_count(item["total"], scope, field_permissions)
 
     # All the bins between start and end must be represented and ordered
-    bins: BinList = BinList(root=[
-        BinWithValue(label=label, value=stats.get(label, 0))
-        for floor, ceil, label in bin_ranges
-    ])
+    bins: BinList = BinList(
+        root=[BinWithValue(label=label, value=stats.get(label, 0)) for floor, ceil, label in bin_ranges]
+    )
 
     if "missing" in stats:
         bins.append(BinWithValue(label="missing", value=stats["missing"]))
@@ -395,17 +401,16 @@ async def get_categorical_stats(
     #   otherwise we LEAK that there is 1 <= x <= threshold matching entries in the DB. However, since
     #   stats_for_field(...) has already handled not adding these keys, these labels don't make it into this list.
     if labels is None:
-        labels = sorted(
-            [k for k in stats.keys() if k != "missing"],
-            key=lambda x: x.lower()
-        )
+        labels = sorted([k for k in stats.keys() if k != "missing"], key=lambda x: x.lower())
 
     # Create bin structures for each label, and add an extra `missing` bin for items missing a value for this field.
-    return BinList(root=[
-        # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
-        *(BinWithValue(label=category, value=stats.get(category, 0)) for category in labels),
-        BinWithValue(label="missing", value=stats["missing"]),
-    ])
+    return BinList(
+        root=[
+            # Don't need to re-censor counts - we've already censored them in stats_for_field(...):
+            *(BinWithValue(label=category, value=stats.get(category, 0)) for category in labels),
+            BinWithValue(label="missing", value=stats["missing"]),
+        ]
+    )
 
 
 def get_condition_for_non_jsonb_field(
@@ -420,12 +425,16 @@ def get_condition_for_non_jsonb_field(
         # Instead, we do an Exists subquery to check if we have at least one matching object from the other side
         # of the m2m/many-to-one relation which matches the field query (which as been rewritten to be valid for
         # the model referred to in the relation rather than the queryset model.)
-        return Q(Exists(
-            subquery.queryset.filter(**{
-                subquery.related_field: OuterRef("pk"),
-                **{f"{subquery.inner_field}{'__' + op if op is not None else ''}": value for op, value in ops}
-            })
-        ))
+        return Q(
+            Exists(
+                subquery.queryset.filter(
+                    **{
+                        subquery.related_field: OuterRef("pk"),
+                        **{f"{subquery.inner_field}{'__' + op if op is not None else ''}": value for op, value in ops},
+                    }
+                )
+            )
+        )
     else:
         return Q(**{f"{field}{'__' + op if op is not None else ''}": value for op, value in ops})
 
@@ -615,7 +624,7 @@ async def filter_queryset_field_value(
     qs: QuerySet,
     field_props: FieldDefinition,
     value: str | DiscoveryQueryFilterOneOf,
-    logger: BoundLogger
+    logger: BoundLogger,
 ) -> tuple[QuerySet, DiscoveryEntity]:
     """
     Further filter a queryset using the field defined by field_props and the

@@ -51,8 +51,8 @@ class DatasetSerializer(PydanticJSONBSerializer):
 
     class Meta:
         model = Dataset
-        exclude = ['additional_resources']
-        read_only_fields = ['created_at', 'updated_at']
+        exclude = ["additional_resources"]
+        read_only_fields = ["created_at", "updated_at"]
 
     def to_internal_value(self, data):
         if self.instance:
@@ -70,9 +70,7 @@ class DatasetSerializer(PydanticJSONBSerializer):
                 translation = prefetched[0] if prefetched else None
             else:
                 try:
-                    translation = DatasetTranslation.objects.get(
-                        dataset_id=instance.identifier, language=language
-                    )
+                    translation = DatasetTranslation.objects.get(dataset_id=instance.identifier, language=language)
                 except DatasetTranslation.DoesNotExist:
                     translation = None
 
@@ -86,10 +84,10 @@ class DatasetSerializer(PydanticJSONBSerializer):
             data = super().to_representation(instance)
             self.context.setdefault("_content_language", "en")
 
-        data['created_at'] = instance.created_at
-        data['updated_at'] = instance.updated_at
-        data['counts_by_entity'] = self.get_counts_by_entity(instance)
-        data['translations'] = [t.language for t in instance.translations.all()]
+        data["created_at"] = instance.created_at
+        data["updated_at"] = instance.updated_at
+        data["counts_by_entity"] = self.get_counts_by_entity(instance)
+        data["translations"] = [t.language for t in instance.translations.all()]
         return data
 
     def get_counts_by_entity(self, obj):
@@ -134,8 +132,9 @@ def _roles_for(contact) -> list:
 
 # 'discovery' is also explicitly blocked in DatasetTranslationSerializer.to_internal_value,
 # but must be immutable here too so Rule 2 doesn't fire when it's omitted.
-_IMMUTABLE_FIELDS = frozenset({"version", "release_date", "last_modified", "study_status", "study_context",
-                               "discovery", "pcgl_dac_id"})
+_IMMUTABLE_FIELDS = frozenset(
+    {"version", "release_date", "last_modified", "study_status", "study_context", "discovery", "pcgl_dac_id"}
+)
 
 
 def _check_translation_constraints(translation: ProjectScopedDatasetModel):
@@ -202,10 +201,7 @@ def _check_translation_constraints(translation: ProjectScopedDatasetModel):
         c_val = getattr(canonical, field, None)
         t_val = getattr(translation, field, None)
         if t_val is not None and t_val != c_val:
-            errors[field] = [
-                f"'{field}' cannot change in a translation "
-                f"(expected {c_val!r}, got {t_val!r})."
-            ]
+            errors[field] = [f"'{field}' cannot change in a translation (expected {c_val!r}, got {t_val!r})."]
 
     if errors:
         raise serializers.ValidationError(errors)
@@ -217,7 +213,7 @@ class DatasetTranslationSerializer(PydanticJSONBSerializer):
     class Meta:
         model = DatasetTranslation
         fields = "__all__"
-        read_only_fields = ['created_at', 'updated_at', 'dataset']
+        read_only_fields = ["created_at", "updated_at", "dataset"]
 
     def _resolve_dataset_id(self) -> str | None:
         if self.instance is not None:
@@ -243,8 +239,8 @@ class DatasetTranslationSerializer(PydanticJSONBSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['created_at'] = instance.created_at
-        data['updated_at'] = instance.updated_at
+        data["created_at"] = instance.created_at
+        data["updated_at"] = instance.updated_at
         return data
 
 
@@ -286,4 +282,4 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = '__all__'
+        fields = "__all__"

@@ -12,7 +12,6 @@ from ..stats import individual_biosample_tissue_stats, individual_experiment_typ
 
 
 class IndividualPublicStatsTest(TransactionTestCase, PermissionsTestCaseMixin):
-
     def setUp(self):
         # create 2 phenopackets for 2 individuals; each individual has 1 biosample;
         # one of phenopackets has 1 phenotypic feature and 1 disease
@@ -31,13 +30,11 @@ class IndividualPublicStatsTest(TransactionTestCase, PermissionsTestCaseMixin):
         self.experiment.experiment_results.set([self.experiment_result])
 
     async def test_individual_biosample_tissue_stats(self):
-        count, res = await individual_biosample_tissue_stats(
-            pa_m.Individual.objects.all(), None, self.permissions_full)
+        count, res = await individual_biosample_tissue_stats(pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
         self.assertListEqual(res.root, [BinWithValue(label="wall of urinary bladder", value=1)])
 
     async def individual_experiment_type_stats(self):
-        count, res = await individual_experiment_type_stats(
-            pa_m.Individual.objects.all(), None, self.permissions_full)
+        count, res = await individual_experiment_type_stats(pa_m.Individual.objects.all(), None, self.permissions_full)
         self.assertEqual(count, 1)
         self.assertListEqual(res.root, [BinWithValue(label="DNA Methylation", value=1)])

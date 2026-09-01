@@ -16,7 +16,9 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_META_DATA_1,
 )
 from chord_metadata_service.experiments.tests.constants import (
-    valid_experiment, valid_experiment_result, valid_instrument
+    valid_experiment,
+    valid_experiment_result,
+    valid_instrument,
 )
 
 from .constants import (
@@ -36,17 +38,11 @@ from .constants import (
 )
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from ..models import Project, Dataset
-from ..data_types import (
-    DATA_TYPE_EXPERIMENT,
-    DATA_TYPE_PHENOPACKET
-)
+from ..data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
 
 POST_GET = ("POST", "GET")
 
-SQ1_DATA = {
-    "data_type": DATA_TYPE_PHENOPACKET,
-    "query": TEST_SEARCH_QUERY_1
-}
+SQ1_DATA = {"data_type": DATA_TYPE_PHENOPACKET, "query": TEST_SEARCH_QUERY_1}
 
 # Valid query to search for phenotypic feature type
 SQ3_DATA = {
@@ -73,13 +69,8 @@ class SearchTest(AuthzAPITestCase):
         # Set up a dummy phenopacket
 
         self.individual, _ = Individual.objects.get_or_create(
-            id='patient:1',
-            sex='FEMALE',
-            time_at_last_encounter={
-                "age": {
-                    "iso8601duration": "P25Y3M2D"
-                }
-            })
+            id="patient:1", sex="FEMALE", time_at_last_encounter={"age": {"iso8601duration": "P25Y3M2D"}}
+        )
 
         self.biosample_1 = Biosample.objects.create(**valid_biosample_1(self.individual))
         self.biosample_2 = Biosample.objects.create(**valid_biosample_2(None, VALID_PROCEDURE_1))
@@ -87,10 +78,7 @@ class SearchTest(AuthzAPITestCase):
         self.meta_data = MetaData.objects.create(**VALID_META_DATA_1)
 
         self.phenopacket = Phenopacket.objects.create(
-            id="phenopacket_id:1",
-            subject=self.individual,
-            meta_data=self.meta_data,
-            dataset=self.dataset
+            id="phenopacket_id:1", subject=self.individual, meta_data=self.meta_data, dataset=self.dataset
         )
 
         self.phenopacket.biosamples.set([self.biosample_1, self.biosample_2])
@@ -102,8 +90,9 @@ class SearchTest(AuthzAPITestCase):
         # add Experiments metadata and link to self.biosample_1
         self.instrument = Instrument.objects.create(**valid_instrument())
         self.experiment_result = ExperimentResult.objects.create(**valid_experiment_result())
-        self.experiment = Experiment.objects.create(**valid_experiment(
-            biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset))
+        self.experiment = Experiment.objects.create(
+            **valid_experiment(biosample=self.biosample_1, instrument=self.instrument, dataset=self.dataset)
+        )
         self.experiment.experiment_results.set([self.experiment_result])
 
     def _search_call(self, endpoint, args=None, data=None, method="GET", authz: bool = True):
@@ -112,15 +101,19 @@ class SearchTest(AuthzAPITestCase):
         if method == "POST":
             data = json.dumps(data)
         else:
-            data = data if data is None or "query" not in data else {
-                **data,
-                "query": json.dumps(data["query"]),
-            }
+            data = (
+                data
+                if data is None or "query" not in data
+                else {
+                    **data,
+                    "query": json.dumps(data["query"]),
+                }
+            )
 
         if authz:
-            fn = (self.one_authz_post if method == "POST" else self.one_authz_get)
+            fn = self.one_authz_post if method == "POST" else self.one_authz_get
         else:
-            fn = (self.one_no_authz_post if method == "POST" else self.one_no_authz_get)
+            fn = self.one_no_authz_post if method == "POST" else self.one_no_authz_get
 
         return fn(reverse(endpoint, args=args), data=data)
 
@@ -149,30 +142,36 @@ class SearchTest(AuthzAPITestCase):
         # Bad data type
         for method in POST_GET:
             with self.subTest(params=(method,)):
-                r = self._search_call("private-search", data={
-                    "data_type": "bad_data_type",
-                    "query": TEST_SEARCH_QUERY_1,
-                }, method=method)
+                r = self._search_call(
+                    "private-search",
+                    data={
+                        "data_type": "bad_data_type",
+                        "query": TEST_SEARCH_QUERY_1,
+                    },
+                    method=method,
+                )
                 self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_common_search_5(self):
         # Bad syntax for query
         for method in POST_GET:
             with self.subTest(params=(method,)):
-                r = self._search_call("private-search", data={
-                    "data_type": DATA_TYPE_PHENOPACKET,
-                    "query": ["hello", "world"]
-                }, method=method)
+                r = self._search_call(
+                    "private-search",
+                    data={"data_type": DATA_TYPE_PHENOPACKET, "query": ["hello", "world"]},
+                    method=method,
+                )
                 self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_search_without_result(self):
         # Valid search without result
         for method in POST_GET:
             with self.subTest(params=(method,)):
-                r = self._search_call("private-search", data={
-                    "data_type": DATA_TYPE_PHENOPACKET,
-                    "query": TEST_SEARCH_QUERY_2
-                }, method=method)
+                r = self._search_call(
+                    "private-search",
+                    data={"data_type": DATA_TYPE_PHENOPACKET, "query": TEST_SEARCH_QUERY_2},
+                    method=method,
+                )
                 self.assertEqual(r.status_code, status.HTTP_200_OK)
                 c = r.json()
                 self.assertEqual(len(c["results"]), 0)
@@ -217,7 +216,8 @@ class SearchTest(AuthzAPITestCase):
                         self.assertEqual(self.phenopacket.id, c["results"][0]["id"])
 
                     r_forbidden = self._search_call(
-                        "private-dataset-search", args=args, data=params[0], method=method, authz=False)
+                        "private-dataset-search", args=args, data=params[0], method=method, authz=False
+                    )
                     self.assertEqual(r_forbidden.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_private_dataset_search_not_found(self):
@@ -234,7 +234,8 @@ class SearchTest(AuthzAPITestCase):
 
         for method in POST_GET:
             r = self._search_call(
-                "private-dataset-search", args=[str(self.dataset.identifier)], data=SQ3_DATA, method=method)
+                "private-dataset-search", args=[str(self.dataset.identifier)], data=SQ3_DATA, method=method
+            )
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)
@@ -290,10 +291,7 @@ class SearchTest(AuthzAPITestCase):
     def test_private_search_10_experiment(self):
         # Valid search with result
 
-        d = {
-            "data_type": DATA_TYPE_EXPERIMENT,
-            "query": TEST_SEARCH_QUERY_7
-        }
+        d = {"data_type": DATA_TYPE_EXPERIMENT, "query": TEST_SEARCH_QUERY_7}
 
         for method in POST_GET:
             r = self._search_call("private-search", data=d, method=method)
@@ -304,27 +302,29 @@ class SearchTest(AuthzAPITestCase):
             self.assertEqual(self.experiment.id, c["results"][str(self.dataset.identifier)]["matches"][0]["id"])
             self.assertEqual(len(c["results"][str(self.dataset.identifier)]["matches"]), 1)
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["id"], "experiment:1")
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["study_type"],
-                             "Whole genome Sequencing")
+            self.assertEqual(
+                c["results"][str(self.dataset.identifier)]["matches"][0]["study_type"], "Whole genome Sequencing"
+            )
             self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["molecule"], "total RNA")
             self.assertEqual(len(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_results"]), 1)
             self.assertEqual(
                 c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_results"][0]["file_format"], "VCF"
             )
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["identifier"],
-                             "instrument:01")
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["device"],
-                             "Illumina")
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["extra_properties"],
-                             {"date": "2021-06-21"})
+            self.assertEqual(
+                c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["identifier"], "instrument:01"
+            )
+            self.assertEqual(
+                c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["device"], "Illumina"
+            )
+            self.assertEqual(
+                c["results"][str(self.dataset.identifier)]["matches"][0]["instrument"]["extra_properties"],
+                {"date": "2021-06-21"},
+            )
 
     def test_private_search_11_experiment(self):
         # Valid search with result, case-insensitive search for experiment_type
 
-        d = {
-            "data_type": DATA_TYPE_EXPERIMENT,
-            "query": TEST_SEARCH_QUERY_8
-        }
+        d = {"data_type": DATA_TYPE_EXPERIMENT, "query": TEST_SEARCH_QUERY_8}
 
         for method in POST_GET:
             r = self._search_call("private-search", data=d, method=method)
@@ -332,8 +332,9 @@ class SearchTest(AuthzAPITestCase):
             c = r.json()
             self.assertIn(str(self.dataset.identifier), c["results"])
             self.assertEqual(c["results"][str(self.dataset.identifier)]["data_type"], DATA_TYPE_EXPERIMENT)
-            self.assertEqual(c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_type"],
-                             "DNA Methylation")
+            self.assertEqual(
+                c["results"][str(self.dataset.identifier)]["matches"][0]["experiment_type"], "DNA Methylation"
+            )
 
     def test_private_dataset_search_12(self):
         # Valid query to search for subject id
@@ -364,12 +365,8 @@ class SearchTest(AuthzAPITestCase):
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 phenopacket that contains 2 matching biosamples
             self.assertIn(
-                "katsu.biosample_id:1",
-                [
-                    b["id"]
-                    for phenopacket in c["results"]
-                    for b in phenopacket["biosamples"]
-                ])
+                "katsu.biosample_id:1", [b["id"] for phenopacket in c["results"] for b in phenopacket["biosamples"]]
+            )
 
     def test_private_dataset_search_values_list(self):
         # Valid query to search for biosample id in list
@@ -379,7 +376,7 @@ class SearchTest(AuthzAPITestCase):
             "query": TEST_SEARCH_QUERY_10,
             "output": "values_list",
             "field": '["biosamples", "[item]", "id"]',
-            "data_type": DATA_TYPE_PHENOPACKET
+            "data_type": DATA_TYPE_PHENOPACKET,
         }
 
         for method in POST_GET:
@@ -437,10 +434,11 @@ class SearchTest(AuthzAPITestCase):
             self.assertEqual(r.status_code, status.HTTP_200_OK)
             c = r.json()
             self.assertEqual(len(c["results"]), 1)  # 1 matching phenopacket
-            self.assertEqual(len(c["results"][0]), 5)    # 5 columns by result
+            self.assertEqual(len(c["results"][0]), 5)  # 5 columns by result
             self.assertEqual(
                 {"subject_id", "alternate_ids", "biosamples", "experiments_with_biosamples", "num_experiments"},
-                set(c["results"][0].keys()))
+                set(c["results"][0].keys()),
+            )
             self.assertIsInstance(c["results"][0]["alternate_ids"], list)
             self.assertIsInstance(c["results"][0]["experiments_with_biosamples"], list)
             for biosample in c["results"][0]["experiments_with_biosamples"]:
@@ -469,7 +467,7 @@ class SearchTest(AuthzAPITestCase):
             c = r.json()
             dataset_id = list(c["results"].keys())[0]
             matches = c["results"][dataset_id]["matches"]
-            self.assertEqual(len(matches), 1)   # 1 matching phenopacket
+            self.assertEqual(len(matches), 1)  # 1 matching phenopacket
 
     def test_private_search_values_list(self):
         # Valid query to search for biosample id in list
@@ -488,27 +486,26 @@ class SearchTest(AuthzAPITestCase):
             c = r.json()
             dataset_id = list(c["results"].keys())[0]
             matches = c["results"][dataset_id]["matches"]
-            self.assertEqual(len(matches), 2)   # 2 biosamples in list
+            self.assertEqual(len(matches), 2)  # 2 biosamples in list
 
     def test_get_search_invalid_json_query(self):
         # GET with a query value that is not parseable JSON
-        r = self.one_authz_get(reverse("private-search"), data={
-            "data_type": DATA_TYPE_PHENOPACKET,
-            "query": "{not: valid json}",
-        })
+        r = self.one_authz_get(
+            reverse("private-search"),
+            data={
+                "data_type": DATA_TYPE_PHENOPACKET,
+                "query": "{not: valid json}",
+            },
+        )
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_dataset_summary_not_found(self):
-        r = self.client.get(
-            reverse("chord-dataset-counts", kwargs={"identifier": str(uuid.uuid4())})
-        )
+        r = self.client.get(reverse("chord-dataset-counts", kwargs={"identifier": str(uuid.uuid4())}))
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_dataset_summary_empty_counts(self):
         # Dataset created in setUp has no counts field in its data blob
-        r = self.client.get(
-            reverse("chord-dataset-counts", kwargs={"identifier": self.dataset.identifier})
-        )
+        r = self.client.get(reverse("chord-dataset-counts", kwargs={"identifier": self.dataset.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r.json(), {"counts": []})
 
@@ -525,9 +522,7 @@ class SearchTest(AuthzAPITestCase):
         ds = Dataset.from_schema(schema)
         ds.save()
 
-        r = self.client.get(
-            reverse("chord-dataset-counts", kwargs={"identifier": ds.identifier})
-        )
+        r = self.client.get(reverse("chord-dataset-counts", kwargs={"identifier": ds.identifier}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         data = r.json()
         self.assertEqual(len(data["counts"]), 1)

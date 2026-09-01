@@ -41,7 +41,6 @@ __all__ = [
     "PHENOPACKET_META_DATA_SCHEMA",
     "PHENOPACKET_EVIDENCE_SCHEMA",
     "PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA",
-    "PHENOPACKET_GENE_SCHEMA",
     "PHENOPACKET_BIOSAMPLE_SCHEMA",
     "PHENOPACKET_DISEASE_ONSET_SCHEMA",
     "PHENOPACKET_DISEASE_SCHEMA",
@@ -162,22 +161,6 @@ PHENOPACKET_PHENOTYPIC_FEATURE_SCHEMA = describe_schema(
     descriptions.PHENOTYPIC_FEATURE,
 )
 
-# TODO: search
-PHENOPACKET_GENE_SCHEMA = describe_schema(
-    {
-        "$schema": DRAFT_07,
-        "$id": sub_schema_uri(phenopacket_base_uri, "gene"),
-        "type": "object",
-        "properties": {
-            "id": base_type(SchemaTypes.STRING),
-            "alternate_ids": array_of(base_type(SchemaTypes.STRING)),
-            "symbol": base_type(SchemaTypes.STRING),
-            "extra_properties": EXTRA_PROPERTIES_SCHEMA,
-        },
-        "required": ["id", "symbol"],
-    },
-    descriptions.GENE,
-)
 
 PHENOPACKET_PROCEDURE_SCHEMA = describe_schema(
     {

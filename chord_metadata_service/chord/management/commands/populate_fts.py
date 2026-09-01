@@ -17,10 +17,8 @@ class Command(BaseCommand):
             if e == "biosample":
                 qs = qs.prefetch_related("phenotypic_features").select_related("location_collected")
             elif e == "phenopacket":
-                qs = (
-                    qs
-                    .prefetch_related("interpretations", "diseases", "phenotypic_features")
-                    .select_related("meta_data")
+                qs = qs.prefetch_related("interpretations", "diseases", "phenotypic_features").select_related(
+                    "meta_data"
                 )
             elif e == "experiment":
                 qs = qs.select_related("instrument")

@@ -22,12 +22,9 @@ __all__ = [
     "MAF_LIST_FILENAME",
     "CASE_LIST_SEQUENCED",
     "CBIO_FILES_SET",
-
     "PATIENT_DATATYPE",
     "SAMPLE_DATATYPE",
-
     "REGEXP_INVALID_FOR_ID",
-
     "study_export",
 ]
 
@@ -38,21 +35,23 @@ SAMPLE_META_FILENAME = "meta_clinical_sample.txt"
 PATIENT_DATA_FILENAME = "data_clinical_patient.txt"
 PATIENT_META_FILENAME = "meta_clinical_patient.txt"
 MUTATION_META_FILENAME = "meta_mutation.txt"
-MUTATION_DATA_FILENAME = "data_mutations_extended.txt"   # is generated during workflow from files coming from DRS
+MUTATION_DATA_FILENAME = "data_mutations_extended.txt"  # is generated during workflow from files coming from DRS
 MAF_LIST_FILENAME = "maf_list.txt"  # Accessory file
 CASE_LIST_SEQUENCED = "case_lists/case_list_sequenced.txt"  # in a subfolder
 
 
-CBIO_FILES_SET = frozenset({
-    STUDY_FILENAME,
-    SAMPLE_DATA_FILENAME,
-    SAMPLE_META_FILENAME,
-    PATIENT_DATA_FILENAME,
-    PATIENT_META_FILENAME,
-    MUTATION_META_FILENAME,
-    # MUTATION_DATA_FILENAME is not part of the files generated here
-    CASE_LIST_SEQUENCED
-})
+CBIO_FILES_SET = frozenset(
+    {
+        STUDY_FILENAME,
+        SAMPLE_DATA_FILENAME,
+        SAMPLE_META_FILENAME,
+        PATIENT_DATA_FILENAME,
+        PATIENT_META_FILENAME,
+        MUTATION_META_FILENAME,
+        # MUTATION_DATA_FILENAME is not part of the files generated here
+        CASE_LIST_SEQUENCED,
+    }
+)
 
 PATIENT_DATATYPE = "PATIENT"
 SAMPLE_DATATYPE = "SAMPLE"
@@ -95,8 +94,8 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
 
     # Export samples
     with open(get_path(SAMPLE_DATA_FILENAME), "w", newline="\n") as file_sample:
-        biosamples = (
-            pm.Biosample.objects.filter(phenopackets__dataset_id=dataset.identifier).prefetch_related("phenopackets")
+        biosamples = pm.Biosample.objects.filter(phenopackets__dataset_id=dataset.identifier).prefetch_related(
+            "phenopackets"
         )
         await sample_export(biosamples, file_sample)
 
@@ -104,11 +103,12 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
         clinical_meta_export(cbio_study_id, SAMPLE_DATATYPE, file_sample_meta)
 
     # .maf files stored
-    with open(get_path(MAF_LIST_FILENAME), "w", newline="\n") as file_maf_list, \
-         open(get_path(CASE_LIST_SEQUENCED), "w", newline="\n") as file_case_list:
+    with (
+        open(get_path(MAF_LIST_FILENAME), "w", newline="\n") as file_maf_list,
+        open(get_path(CASE_LIST_SEQUENCED), "w", newline="\n") as file_case_list,
+    ):
         exp_res = (
-            ExperimentResult.objects
-            .prefetch_related("experiments")
+            ExperimentResult.objects.prefetch_related("experiments")
             .filter(experiments__dataset_id=dataset.identifier, file_format="MAF")
             .annotate(biosample_id=F("experiments__biosample"))
         )
@@ -118,7 +118,7 @@ async def study_export(get_path: Callable[[str], str], dataset_id: str):
         write_maf_list(exp_res_list, file_maf_list)
         case_list_export(cbio_study_id, exp_res_list, file_case_list)
 
-    with open(get_path(MUTATION_META_FILENAME), 'w', newline='\n') as file_mutation_meta:
+    with open(get_path(MUTATION_META_FILENAME), "w", newline="\n") as file_mutation_meta:
         mutation_meta_export(cbio_study_id, file_mutation_meta)
 
 
@@ -138,10 +138,8 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO) -> None:
         "cancer_study_identifier": str(dataset.identifier),
         "name": dataset.title,
         "description": schema.description or "",
-
         # pmid: unavailable
         # groups: unused for authentication
-
         "add_global_case_list": "true",  # otherwise causes an error at validation
         # tags_file: ?
         "reference_genome": "hg38",  # TODO: should not be hard-coded...
@@ -192,10 +190,13 @@ async def individual_export(results, file_handle: TextIO):
     - TUMOR_SITE
     """
 
-    individuals = [{
-        'id': sanitize_id(individual.id),
-        'sex': individual.sex,
-    } async for individual in results]
+    individuals = [
+        {
+            "id": sanitize_id(individual.id),
+            "sex": individual.sex,
+        }
+        async for individual in results
+    ]
 
     columns = list(individuals[0].keys())
     headers = individual_to_patient_header(columns)
@@ -249,10 +250,7 @@ async def sample_export(results, file_handle: TextIO):
 
         subject_id = sample.individual_id
 
-        sample_obj = {
-            "individual_id": sanitize_id(subject_id),
-            "id": sanitize_id(sample.id)
-        }
+        sample_obj = {"individual_id": sanitize_id(subject_id), "id": sanitize_id(sample.id)}
         if sample.sampled_tissue:
             if "tissue_label" not in columns:
                 columns.append("tissue_label")
@@ -293,17 +291,20 @@ def mutation_meta_export(study_id: str, file_handle: TextIO):
     namespaces (optional): Comma-delimited list of namespaces to import.
     """
 
-    write_dict_in_cbioportal_format({
-        "cancer_study_identifier": study_id,
-        "genetic_alteration_type": "MUTATION_EXTENDED",
-        "datatype": "MAF",
-        "stable_id": "mutations",
-        "show_profile_in_analysis_tab": "true",
-        "profile_name": "Mutations",
-        "profile_description": "Mutation data from whole exome sequencing",
-        "data_filename": MUTATION_DATA_FILENAME,
-        "swissprot_identifier": "name",
-    }, file_handle)
+    write_dict_in_cbioportal_format(
+        {
+            "cancer_study_identifier": study_id,
+            "genetic_alteration_type": "MUTATION_EXTENDED",
+            "datatype": "MAF",
+            "stable_id": "mutations",
+            "show_profile_in_analysis_tab": "true",
+            "profile_name": "Mutations",
+            "profile_description": "Mutation data from whole exome sequencing",
+            "data_filename": MUTATION_DATA_FILENAME,
+            "swissprot_identifier": "name",
+        },
+        file_handle,
+    )
 
 
 def case_list_export(study_id: str, results, file_handle: TextIO):
@@ -327,13 +328,16 @@ def case_list_export(study_id: str, results, file_handle: TextIO):
         with CNA data in some of the analysis.
     """
 
-    write_dict_in_cbioportal_format({
-        "cancer_study_identifier": study_id,
-        "stable_id": f"{study_id}_sequenced",
-        "case_list_name": "All samples",
-        "case_list_description": "All samples",
-        "case_list_ids": "\t".join(sanitize_id(exp_res.biosample_id) for exp_res in results),
-    }, file_handle)
+    write_dict_in_cbioportal_format(
+        {
+            "cancer_study_identifier": study_id,
+            "stable_id": f"{study_id}_sequenced",
+            "case_list_name": "All samples",
+            "case_list_description": "All samples",
+            "case_list_ids": "\t".join(sanitize_id(exp_res.biosample_id) for exp_res in results),
+        },
+        file_handle,
+    )
 
 
 class CbioportalClinicalHeaderGenerator:
@@ -363,7 +367,7 @@ class CbioportalClinicalHeaderGenerator:
                     fieldname,  # description
                     "STRING",  # type !!!TODO: TYPE DETECTION!!!
                     "1",  # priority (note: string here for use in join())
-                    field.upper()   # DB suitable identifier
+                    field.upper(),  # DB suitable identifier
                 )
                 field_properties.append(prop)
 
@@ -378,7 +382,7 @@ class CbioportalClinicalHeaderGenerator:
             "#" + "\t".join(rows[1]),
             "#" + "\t".join(rows[2]),
             "#" + "\t".join(rows[3]),
-            "\t".join(rows[4])
+            "\t".join(rows[4]),
         ]
 
         return cbio_header
@@ -392,8 +396,8 @@ def individual_to_patient_header(fields: list):
 
     # predefined mappings from Individual keys to cBioPortal field properties
     fields_mapping = {
-        'id': ('Patient Identifier', 'Patient Identifier', 'STRING', '1', 'PATIENT_ID'),
-        'sex': ('Sex', 'Sex', 'STRING', '1', 'SEX'),
+        "id": ("Patient Identifier", "Patient Identifier", "STRING", "1", "PATIENT_ID"),
+        "sex": ("Sex", "Sex", "STRING", "1", "SEX"),
     }
 
     cbio_header = CbioportalClinicalHeaderGenerator(fields_mapping)
@@ -408,9 +412,9 @@ def biosample_to_sample_header(fields: list):
 
     # predefined mappings from Samples keys to cBioPortal field properties
     fields_mapping = {
-        'individual_id': ('Patient Identifier', 'Patient Identifier', 'STRING', '1', 'PATIENT_ID'),
-        'id': ('Sample Identifier', 'Sample Identifier', 'STRING', '1', 'SAMPLE_ID'),
-        'tissue_label': ('Sampled Tissue', 'Sampled Tissue', 'STRING', '1', 'TISSUE_LABEL')
+        "individual_id": ("Patient Identifier", "Patient Identifier", "STRING", "1", "PATIENT_ID"),
+        "id": ("Sample Identifier", "Sample Identifier", "STRING", "1", "SAMPLE_ID"),
+        "tissue_label": ("Sampled Tissue", "Sampled Tissue", "STRING", "1", "TISSUE_LABEL"),
     }
 
     cbio_header = CbioportalClinicalHeaderGenerator(fields_mapping)
@@ -422,7 +426,7 @@ def sanitize_id(id_: str):
 
     IDs must contain alphanumeric characters, dot, hyphen or underscore
     """
-    id_ = str(id_)    # force casting to string
+    id_ = str(id_)  # force casting to string
     if REGEXP_INVALID_FOR_ID.search(id_) is None:
         return id_
 

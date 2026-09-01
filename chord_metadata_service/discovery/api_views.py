@@ -62,7 +62,11 @@ from .pydantic_models import (
 from .schemas import DISCOVERY_SCHEMA
 from .scope import get_request_discovery_scope
 from .types import (
-    EntityCountOrBoolResponse, EntityCounts, DiscoveryResponseFormat, AcceptedDiscoveryResponseFormats, FTSType
+    EntityCountOrBoolResponse,
+    EntityCounts,
+    DiscoveryResponseFormat,
+    AcceptedDiscoveryResponseFormats,
+    FTSType,
 )
 from .utils import (
     get_discovery_data_type_permissions,
@@ -228,6 +232,7 @@ class QueryHelper:
         """
 
         if self._entity_counts is None:
+
             async def _get_entity_count(ee: DiscoveryEntity) -> int:
                 # We cannot re-validate the field against its options here, as it can trip up "invalid options" due to
                 # small cell counts if we're in a nested entity.
@@ -251,17 +256,18 @@ class QueryHelper:
         return self._entity_counts
 
     @overload
-    async def get_censored_entity_counts(self, return_raw_counts: Literal[False] = False) -> EntityCountOrBoolResponse:
-        ...
+    async def get_censored_entity_counts(
+        self, return_raw_counts: Literal[False] = False
+    ) -> EntityCountOrBoolResponse: ...
 
     @overload
     async def get_censored_entity_counts(
         self, return_raw_counts: Literal[True]
-    ) -> tuple[EntityCounts, EntityCountOrBoolResponse]:
-        ...
+    ) -> tuple[EntityCounts, EntityCountOrBoolResponse]: ...
 
     async def get_censored_entity_counts(
-        self, return_raw_counts: bool = False,
+        self,
+        return_raw_counts: bool = False,
     ) -> EntityCountOrBoolResponse | tuple[EntityCounts, EntityCountOrBoolResponse]:
         """
         Get censored entity counts for a scope with given permissions, i.e., a given QueryHelper instance.
@@ -345,8 +351,11 @@ def inject_discovery_deps(empty_404: bool, empty_response: Literal["fields", "da
         empty_404: specifies whether an empty discovery config means we should return a 404 error (endpoint-dependent).
         empty_response: which empty response to return if discovery config is empty (fields or data).
     """
+
     def wrapper(
-        func: Callable[[DrfRequest, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, BoundLogger], Awaitable[Any]]
+        func: Callable[
+            [DrfRequest, ValidatedDiscoveryScope, DataTypeDiscoveryPermissions, BoundLogger], Awaitable[Any]
+        ],
     ):
         @wraps(func)
         async def wrapped(request: DrfRequest):  # wraps a DRF API view
@@ -385,14 +394,13 @@ def inject_discovery_deps(empty_404: bool, empty_response: Literal["fields", "da
     description="Discovery search fields with their configuration",
     responses={
         status.HTTP_200_OK: inline_serializer(
-            name='discovery_search_fields_response',
-            fields={'sections': serializers.JSONField()}
+            name="discovery_search_fields_response", fields={"sections": serializers.JSONField()}
         ),
         status.HTTP_404_NOT_FOUND: inline_serializer(
-            name='discovery_search_fields_not_configured',
-            fields={'message': serializers.CharField()},
+            name="discovery_search_fields_not_configured",
+            fields={"message": serializers.CharField()},
         ),
-    }
+    },
 )
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
@@ -440,9 +448,11 @@ async def discovery_search_fields(
 
         return DiscoverySearchSectionWithOptions(section_title=section.section_title, fields=section_fields)
 
-    return Response(DiscoverySearchFieldsResponse(
-        sections=list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery.search))))
-    ))
+    return Response(
+        DiscoverySearchFieldsResponse(
+            sections=list(filter(is_not_none, await asyncio.gather(*map(_get_section_response, discovery.search))))
+        )
+    )
 
 
 async def discovery_field_response(
@@ -507,17 +517,14 @@ async def discovery_queryset_entity_counts_by_dataset(
     """
     Returns a dictionary of discovery entity counts grouped by dataset identifier for a given scope/query context.
     """
+
     async def _get_entity_counts_by_dataset(ee: DiscoveryEntity) -> dict[str, int]:
         qs, _ = await qqs.get_query_queryset_and_queried_entities(ee, validate_field=False)
         group_by = DISCOVERY_ENTITY_NAMES_TO_MODEL[ee].get_scope_filters()["dataset"]["filter"]
-        res = await sync_to_async(list)(
-            qs.values(group_by).annotate(count=Count("id", distinct=True))
-        )
+        res = await sync_to_async(list)(qs.values(group_by).annotate(count=Count("id", distinct=True)))
         return {str(r[group_by]): r["count"] for r in res if r[group_by] is not None}
 
-    entity_counts_per_entity = await asyncio.gather(
-        *(_get_entity_counts_by_dataset(e) for e in DISCOVERY_ENTITIES)
-    )
+    entity_counts_per_entity = await asyncio.gather(*(_get_entity_counts_by_dataset(e) for e in DISCOVERY_ENTITIES))
 
     all_datasets: set[str] = set()
     for ec in entity_counts_per_entity:
@@ -526,10 +533,7 @@ async def discovery_queryset_entity_counts_by_dataset(
     res: dict[str, EntityCounts] = {}
 
     for ds in all_datasets:
-        res[ds] = {
-            entity: entity_counts_per_entity[i].get(ds, 0)
-            for i, entity in enumerate(DISCOVERY_ENTITIES)
-        }
+        res[ds] = {entity: entity_counts_per_entity[i].get(ds, 0) for i, entity in enumerate(DISCOVERY_ENTITIES)}
 
     return res
 
@@ -619,15 +623,19 @@ async def discovery_endpoint(
     discovery = scope.discovery
     fields: tuple[str, ...] = discovery.get_chart_field_ids()
 
-    field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate({
-        field: field_res
-        for field, field_res in zip(
-            fields,
-            await asyncio.gather(*(discovery_field_response(qh, field, count_or_bools_res, lg) for field in fields))
-        )
-        if field_res is not None
-        # Parallel async collection of field responses for public overview
-    })
+    field_responses: DiscoveryFieldResponses = DiscoveryFieldResponses.model_validate(
+        {
+            field: field_res
+            for field, field_res in zip(
+                fields,
+                await asyncio.gather(
+                    *(discovery_field_response(qh, field, count_or_bools_res, lg) for field in fields)
+                ),
+            )
+            if field_res is not None
+            # Parallel async collection of field responses for public overview
+        }
+    )
 
     # -- Discovery structured event logging ----------------------------------------------------------------------------
 
@@ -739,8 +747,10 @@ async def discovery_matches(
     # -- CSV/XLSX field selection validation -----------------------------------------------------------------------
 
     export_renderer_cls = (
-        DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity] if response_format == "csv"
-        else DISCOVERY_ENTITY_TO_XLSX_RENDERER[queried_entity] if response_format == "xlsx"
+        DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity]
+        if response_format == "csv"
+        else DISCOVERY_ENTITY_TO_XLSX_RENDERER[queried_entity]
+        if response_format == "xlsx"
         else None
     )
 
@@ -795,7 +805,7 @@ async def discovery_matches(
 
     matches_page: QuerySet
     if page_size > 0:
-        matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
+        matches_page = queryset[page * page_size : (page + 1) * page_size] if page_size > 0 else queryset[:]
     else:
         matches_page = queryset[:]
 
@@ -807,6 +817,7 @@ async def discovery_matches(
     # -- Build and return response -------------------------------------------------------------------------------------
 
     if export_renderer_cls is not None:
+
         @sync_to_async
         def _get_export():
             renderer = export_renderer_cls()
@@ -885,17 +896,19 @@ async def discovery_ui_hints(
     qh = QueryHelper(EMPTY_DISCOVERY_QUERY, scope, dt_permissions, lg)
     entities_with_data = await qh.get_scope_entities_with_data()
 
-    return Response(DiscoveryUIHintsResponse(
-        # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
-        # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
-        # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
-        # search, but we don't want them
-        entities_with_data=entities_with_data,
-        # TODO: implement something like this for hinting towards maps
-        # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
-        #  should present a consolidated map view?
-        # "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
-    ))
+    return Response(
+        DiscoveryUIHintsResponse(
+            # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
+            # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
+            # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
+            # search, but we don't want them
+            entities_with_data=entities_with_data,
+            # TODO: implement something like this for hinting towards maps
+            # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
+            #  should present a consolidated map view?
+            # "biosample_location_present": False,  # TODO: non-Null location_collected above threshold
+        )
+    )
 
 
 @api_view(["GET"])

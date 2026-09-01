@@ -15,7 +15,6 @@ PublicScopeFilterKeys = Literal["project", "dataset"]
 
 
 class BaseScopeableModel(Model):
-
     class Meta:
         abstract = True
 
@@ -61,7 +60,7 @@ class BaseScopeableModel(Model):
 
         prefetch = (
             *base_prefetch_related,
-            *(p for p in scope_filter_spec.get("prefetch_related", ()) if p not in base_prefetch_related)
+            *(p for p in scope_filter_spec.get("prefetch_related", ()) if p not in base_prefetch_related),
         )
 
         filter_query = scope_filter_spec["filter"]

@@ -8,9 +8,9 @@ from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA
 
 NAME_TO_SCHEMA: dict[str, object] = {
-  DATA_TYPE_PHENOPACKET: PHENOPACKET_SCHEMA,
-  DATA_TYPE_EXPERIMENT: EXPERIMENT_SCHEMA,
-  "discovery": DISCOVERY_SCHEMA,
+    DATA_TYPE_PHENOPACKET: PHENOPACKET_SCHEMA,
+    DATA_TYPE_EXPERIMENT: EXPERIMENT_SCHEMA,
+    "discovery": DISCOVERY_SCHEMA,
 }
 
 

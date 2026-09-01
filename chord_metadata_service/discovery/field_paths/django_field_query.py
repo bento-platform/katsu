@@ -24,6 +24,7 @@ class DiscoveryFieldSubquery:
     Data class representing a spec for executing an Exists(...) subquery across a many-to-many or many-to-one Django
     relation boundary.
     """
+
     queryset: QuerySet  # queryset for inner Exists
     inner_field: str  # queried field, rewritten for the inner queryset
     related_field: str

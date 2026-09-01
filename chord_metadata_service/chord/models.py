@@ -61,8 +61,10 @@ class BaseProjectOrDataset(BaseTimeStamp):
     description = models.TextField(blank=True)
 
     discovery = DiscoveryJSONField(
-        blank=True, null=True, help_text="Discovery configuration",
-        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.DISCOVERY_SCHEMA)]
+        blank=True,
+        null=True,
+        help_text="Discovery configuration",
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.DISCOVERY_SCHEMA)],
     )
 
 
@@ -77,24 +79,23 @@ class Project(BaseProjectOrDataset):
 
 
 class Dataset(AbstractPydanticJSONBModel):
-
     # --- AbstractPydanticJSONBModel configuration ---
     COLUMN_FIELDS = {
-        'identifier',
-        'project',
-        'title',
-        'release_date',
-        'last_modified',
-        'discovery',
+        "identifier",
+        "project",
+        "title",
+        "release_date",
+        "last_modified",
+        "discovery",
     }
-    JSONB_FIELD = 'data'
+    JSONB_FIELD = "data"
     SCHEMA_CLASS = KatsuDatasetModel
 
     # --- Django fields ---
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,  # Delete dataset upon project deletion
-        related_name="datasets"
+        related_name="datasets",
     )
 
     identifier = models.CharField(
@@ -125,16 +126,18 @@ class Dataset(AbstractPydanticJSONBModel):
 
     @property
     def resources(self):
-        return Resource.objects.filter(id__in={
-            *(r.id for r in self.additional_resources.all()),
-            *(
-                r.id
-                for p in Phenopacket.objects.filter(
-                    dataset_id=self.identifier
-                ).prefetch_related("meta_data", "meta_data__resources")
-                for r in p.meta_data.resources.all()
-            ),
-        })
+        return Resource.objects.filter(
+            id__in={
+                *(r.id for r in self.additional_resources.all()),
+                *(
+                    r.id
+                    for p in Phenopacket.objects.filter(dataset_id=self.identifier).prefetch_related(
+                        "meta_data", "meta_data__resources"
+                    )
+                    for r in p.meta_data.resources.all()
+                ),
+            }
+        )
 
     def __str__(self) -> str:
         return f"{self.identifier}: {self.title}"
@@ -146,15 +149,15 @@ class DatasetTranslation(AbstractPydanticJSONBModel):
     # --- Mixin configuration ---
     # 'dataset' is NOT in COLUMN_FIELDS — it has no matching field in ProjectScopedDatasetModel.
     # Callers pass dataset_id=<pk> as extra_column_kwargs to from_schema().
-    COLUMN_FIELDS = {'language'}
-    JSONB_FIELD = 'data'
+    COLUMN_FIELDS = {"language"}
+    JSONB_FIELD = "data"
     SCHEMA_CLASS = ProjectScopedDatasetModel
 
     # --- Django fields ---
     dataset = models.ForeignKey(
         Dataset,
         on_delete=models.CASCADE,
-        related_name='translations',
+        related_name="translations",
     )
     language = models.CharField(max_length=8, db_index=True)
     data = models.JSONField(help_text="Full ProjectScopedDatasetModel payload for this language.")
@@ -163,7 +166,7 @@ class DatasetTranslation(AbstractPydanticJSONBModel):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = [('dataset', 'language')]
+        unique_together = [("dataset", "language")]
 
     def __str__(self) -> str:
         return f"{self.dataset_id}: {self.language}"
@@ -172,8 +175,9 @@ class DatasetTranslation(AbstractPydanticJSONBModel):
 class ProjectJsonSchema(models.Model):
     id = models.CharField(primary_key=True, max_length=200, default=uuid.uuid4, editable=False)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_schemas")
-    required = models.BooleanField(default=False,
-                                   help_text="Determines if the extra_properties field is required or not.")
+    required = models.BooleanField(
+        default=False, help_text="Determines if the extra_properties field is required or not."
+    )
     json_schema = models.JSONField()
     schema_type = models.CharField(max_length=200, choices=SchemaType.choices)
 
@@ -187,13 +191,9 @@ class ProjectJsonSchema(models.Model):
 
         target_count = 0
         if self.schema_type == SchemaType.PHENOPACKET:
-            target_count = Phenopacket.objects.filter(
-                dataset__project_id=self.project_id
-            ).count()
+            target_count = Phenopacket.objects.filter(dataset__project_id=self.project_id).count()
         elif self.schema_type == SchemaType.INDIVIDUAL:
-            target_count = Individual.objects.filter(
-                phenopackets__dataset__project_id=self.project_id
-            ).count()
+            target_count = Individual.objects.filter(phenopackets__dataset__project_id=self.project_id).count()
         elif self.schema_type == SchemaType.BIOSAMPLE:
             target_count = Biosample.objects.filter(
                 individual__phenopackets__dataset__project_id=self.project_id
@@ -208,6 +208,4 @@ class ProjectJsonSchema(models.Model):
         return super().save(*args, **kwargs)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")
-        ]
+        constraints = [models.UniqueConstraint(fields=["project", "schema_type"], name="unique_project_schema")]

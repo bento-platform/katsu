@@ -39,7 +39,7 @@ class IndividualSerializer(DynamicFieldsMixin, GenericSerializer):
 class ExperimentSerializer(GenericSerializer):
     experiment_results = ExperimentResultSerializer(read_only=True, many=True)
     instrument = InstrumentSerializer()
-    biosample_individual = IndividualSerializer(source='biosample.individual', read_only=True, fields=['id'])
+    biosample_individual = IndividualSerializer(source="biosample.individual", read_only=True, fields=["id"])
 
     class Meta:
         model = Experiment

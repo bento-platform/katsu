@@ -99,14 +99,17 @@ class DataTypeTest(AuthzAPITestCase, PermissionsTestCaseMixin):
         # counts permission
         r = self.dt_authz_counts_get(reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}))
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertDictEqual(r.json(), {
-            "id": DATA_TYPE_PHENOPACKET,
-            "label": "Clinical Data",
-            **DATA_TYPES[DATA_TYPE_PHENOPACKET],
-            "queryable": True,
-            "count": 0,
-            "last_ingested": None,
-        })
+        self.assertDictEqual(
+            r.json(),
+            {
+                "id": DATA_TYPE_PHENOPACKET,
+                "label": "Clinical Data",
+                **DATA_TYPES[DATA_TYPE_PHENOPACKET],
+                "queryable": True,
+                "count": 0,
+                "last_ingested": None,
+            },
+        )
 
     def test_data_type_detail_no_counts(self):
         kwargs = {"data_type": DATA_TYPE_PHENOPACKET}
@@ -131,13 +134,15 @@ class DataTypeTest(AuthzAPITestCase, PermissionsTestCaseMixin):
     def test_data_type_detail_non_uuid_project(self):
         # Non-UUID project
         r = self.dt_authz_counts_get(
-            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"project": "a"})
+            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"project": "a"}
+        )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_data_type_detail_non_uuid_dataset(self):
         # Non-UUID dataset
         r = self.dt_authz_counts_get(
-            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"dataset": "a"})
+            reverse("data-type-detail", kwargs={"data_type": DATA_TYPE_PHENOPACKET}), {"dataset": "a"}
+        )
         self.assertEqual(r.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_data_type_detail_404(self):

@@ -26,7 +26,7 @@ from typing import Any, Callable, Iterable, TypeVar
 from django.db.models import Model
 
 # Generic TypeVar for django db models
-T = TypeVar('T', bound=Model)
+T = TypeVar("T", bound=Model)
 
 
 def _get_or_create_opt(key: str, data: dict, create_func: Callable[..., T]) -> T | None:
@@ -77,10 +77,7 @@ def get_or_create_phenotypic_feature(pf: dict) -> pm.PhenotypicFeature:
 
 
 def validate_phenopacket(
-    phenopacket_data: dict[str, Any],
-    lg: BoundLogger,
-    schema: dict = PHENOPACKET_SCHEMA,
-    idx: int | None = None
+    phenopacket_data: dict[str, Any], lg: BoundLogger, schema: dict = PHENOPACKET_SCHEMA, idx: int | None = None
 ) -> None:
     # Validate phenopacket data against phenopackets schema.
     validation = schema_validation(phenopacket_data, schema, registry=VRS_REF_REGISTRY, obj_idx=idx, logger=lg)
@@ -88,7 +85,8 @@ def validate_phenopacket(
         # TODO: Report more precise errors
         raise IngestError(
             f"Failed schema validation for phenopacket{(' ' + str(idx)) if idx is not None else ''} "
-            f"(check Katsu logs for more information)")
+            f"(check Katsu logs for more information)"
+        )
 
 
 def update_or_create_subject(subject: dict) -> pm.Individual:
@@ -137,7 +135,7 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
         age_unit=age_unit_value if age_unit_value else "",
         extra_properties=existing_extra_properties,
         vital_status=existing_vital_status,
-        **subject_query
+        **subject_query,
     )
 
     if not subject_obj_created:
@@ -151,8 +149,14 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
 def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Biosample:
     bs_query = query_and_check_nulls(bs, "individual_id", lambda i: pm.Individual.objects.get(id=i))
-    for k in ("sampled_tissue", "taxonomy", "time_of_collection", "histological_diagnosis",
-              "tumor_progression", "tumor_grade"):
+    for k in (
+        "sampled_tissue",
+        "taxonomy",
+        "time_of_collection",
+        "histological_diagnosis",
+        "tumor_progression",
+        "tumor_grade",
+    ):
         bs_query.update(query_and_check_nulls(bs, k))
 
     bs_obj, bs_created = pm.Biosample.objects.get_or_create(
@@ -166,7 +170,7 @@ def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Bi
         pathological_tnm_finding=bs.get("pathological_tnm_finding", []),
         diagnostic_markers=bs.get("diagnostic_markers", []),
         extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
-        **bs_query
+        **bs_query,
     )
 
     if isinstance(bs_loc_json := bs.get("location_collected"), dict):
@@ -181,7 +185,8 @@ def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Bi
         except pm.Biosample.DoesNotExist:
             lg.warning(
                 "biosample refers to non-existing 'derived_from_id' biosample",
-                biosample_id=bs["id"], derived_from_id=derived_from_id
+                biosample_id=bs["id"],
+                derived_from_id=derived_from_id,
             )
 
     if bs_created:
@@ -205,7 +210,7 @@ def get_or_create_gene_descriptor(gene_desc) -> pm.GeneDescriptor:
         description=gene_desc.get("description", ""),
         alternate_ids=gene_desc.get("alternate_ids", []),
         xrefs=gene_desc.get("xrefs", []),
-        alternate_symbols=gene_desc.get("alternate_symbols", [])
+        alternate_symbols=gene_desc.get("alternate_symbols", []),
     )
     return gene_descriptor
 
@@ -226,7 +231,7 @@ def get_or_create_variant_descriptor(var_desc: dict) -> pm.VariationDescriptor:
         molecule_context=var_desc.get("molecule_context", "unspecified_molecule_context"),
         structural_type=var_desc.get("structural_type", {}),
         vrs_ref_allele_seq=var_desc.get("vrs_ref_allele_seq", ""),
-        allelic_state=var_desc.get("allelic_state", {})
+        allelic_state=var_desc.get("allelic_state", {}),
     )
     return variant_descriptor
 
@@ -236,7 +241,7 @@ def get_or_create_variant_interp(variant_interp_data: dict) -> pm.VariantInterpr
     variant_interpretation, _ = pm.VariantInterpretation.objects.get_or_create(
         acmg_pathogenicity_classification=variant_interp_data["acmg_pathogenicity_classification"],
         therapeutic_actionability=variant_interp_data["therapeutic_actionability"],
-        variation_descriptor=variant_descriptor
+        variation_descriptor=variant_descriptor,
     )
     return variant_interpretation
 
@@ -260,7 +265,8 @@ def get_or_create_genomic_interpretation(
         # Cannot be both
         raise IngestError(
             f"Ambiguous GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
-            "points to a Biosample AND a Subject. Must point to a Biosample or a Subject, not both.")
+            "points to a Biosample AND a Subject. Must point to a Biosample or a Subject, not both."
+        )
     elif related_biosample:
         related_obj = related_biosample
     elif related_subject:
@@ -269,7 +275,8 @@ def get_or_create_genomic_interpretation(
         # Cannot be neither
         raise IngestError(
             f"GenomicInterpretation.subject_or_biosample_id {subject_or_biosample_id} "
-            "has no matching Biosample or Individual in the phenopacket context.")
+            "has no matching Biosample or Individual in the phenopacket context."
+        )
 
     gene_descriptor = _get_or_create_opt("gene_descriptor", gen_interp, get_or_create_gene_descriptor)
     variant_interpretation = _get_or_create_opt("variant_interpretation", gen_interp, get_or_create_variant_interp)
@@ -298,7 +305,7 @@ def get_or_create_disease(disease) -> pm.Disease:
         primary_site=disease.get("primary_site"),
         laterality=disease.get("laterality"),
         extra_properties=remove_computed_properties(disease.get("extra_properties", {})),
-        **query_and_check_nulls(disease, "onset")
+        **query_and_check_nulls(disease, "onset"),
     )
     return d_obj
 
@@ -327,8 +334,7 @@ def get_or_create_interpretation_diagnosis(
         genomic_interpretations_data = diagnosis.get("genomic_interpretations", [])
         genomic_interpretations = [
             get_or_create_genomic_interpretation(gen_interp, subject, biosamples)
-            for gen_interp
-            in genomic_interpretations_data
+            for gen_interp in genomic_interpretations_data
         ]
         diag_obj.genomic_interpretations.set(genomic_interpretations)
     return diag_obj
@@ -343,7 +349,7 @@ def get_or_create_interpretation(
         diagnosis=diagnosis,
         progress_status=interpretation["progress_status"],
         summary=interpretation.get("summary", ""),
-        extra_properties=remove_computed_properties(interpretation.get("extra_properties", {}))
+        extra_properties=remove_computed_properties(interpretation.get("extra_properties", {})),
     )
 
     return interp_obj
@@ -384,7 +390,7 @@ def ingest_phenopacket(
 
     # Abort the ingestion if the phenopacket's ID exists in the DB
     if pm.Phenopacket.objects.filter(id=phenopacket_id).exists():
-        lg.error("cannot ingest phenopacket: ID already exists in the database"),
+        (lg.error("cannot ingest phenopacket: ID already exists in the database"),)
         raise IngestError(f"Cannot ingest phenopacket with ID {phenopacket_id}: ID already exists in the database.")
 
     subject = phenopacket_data.get("subject")
@@ -477,20 +483,17 @@ def ingest_phenopacket_workflow(json_data, dataset_id, lg: BoundLogger) -> list[
     project = Project.objects.get(identifier=Dataset.objects.get(identifier=dataset_id).project_id)
     lg = lg.bind(project_id=str(project.identifier), dataset_id=dataset_id)
 
-    project_schemas: Iterable[ExtensionSchemaDict] = (
-        ProjectJsonSchema.objects
-        .filter(project_id=project.identifier)
-        .values(
-            "json_schema",
-            "required",
-            "schema_type",
-        )
+    project_schemas: Iterable[ExtensionSchemaDict] = ProjectJsonSchema.objects.filter(
+        project_id=project.identifier
+    ).values(
+        "json_schema",
+        "required",
+        "schema_type",
     )
 
     # Map with key:schema_type and value:json_schema
     extension_schemas: dict[str, ExtensionSchemaDict] = {
-        proj_schema["schema_type"].lower(): proj_schema
-        for proj_schema in project_schemas
+        proj_schema["schema_type"].lower(): proj_schema for proj_schema in project_schemas
     }
     json_schema = patch_project_schemas(PHENOPACKET_SCHEMA, extension_schemas, lg)
 

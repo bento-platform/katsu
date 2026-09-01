@@ -32,7 +32,8 @@ WINDOWS_DRIVE_SCHEME = re.compile(r"^[a-zA-Z]$")
 def map_if_list(fn: Callable, data: Any, *args, **kwargs) -> Any:
     # TODO: Any sequence?
     return (
-        [fn(d, *args, idx=idx, **kwargs) for idx, d in enumerate(data)] if isinstance(data, list)
+        [fn(d, *args, idx=idx, **kwargs) for idx, d in enumerate(data)]
+        if isinstance(data, list)
         else fn(data, *args, **kwargs)
     )
 
@@ -51,9 +52,7 @@ def workflow_http_download(tmp_dir: str, http_uri: str, lg: BoundLogger) -> str:
 
     if not r.ok:
         err = "HTTP error encountered while downloading ingestion URI"
-        lg.error(
-            err, ingestion_uri=http_uri, response_status=r.status_code, response_body=r.content.decode("utf-8")
-        )
+        lg.error(err, ingestion_uri=http_uri, response_status=r.status_code, response_body=r.content.decode("utf-8"))
         raise IngestError(err)
 
     data_path = f"{tmp_dir}ingest_download_data"

@@ -9,7 +9,6 @@ from humps import decamelize
 
 
 class Command(BaseCommand):
-
     help = """
         Validates a JSON file against json-schemas (Phenopackets V2)
     """

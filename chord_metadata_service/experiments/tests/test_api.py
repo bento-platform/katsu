@@ -41,8 +41,11 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         """
         self.p = Project.objects.create(**VALID_PROJECT_1)
         schema1 = KatsuDatasetModel(
-            schema_version="1.0", title="dataset_1", description="Some dataset 1",
-            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
+            schema_version="1.0",
+            title="dataset_1",
+            description="Some dataset 1",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
         self.d1 = Dataset.from_schema(schema1)
@@ -50,8 +53,11 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.d1.refresh_from_db()
         self.d1_id = self.d1.identifier
         schema2 = KatsuDatasetModel(
-            schema_version="1.0", title="dataset_2", description="Some dataset 2",
-            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
+            schema_version="1.0",
+            title="dataset_2",
+            description="Some dataset 2",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.p.identifier),
             identifier=str(uuid.uuid4()),
         )
         self.d2 = Dataset.from_schema(schema2)
@@ -74,11 +80,11 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertEqual(len(response_data["results"]), assert_len)
 
     def test_get_experiments(self):
-        response = self.one_authz_get('/api/experiments')
+        response = self.one_authz_get("/api/experiments")
         self.assert_response_200_and_length(response, 2)
 
     def test_get_experiments_forbidden(self):
-        response = self.one_no_authz_get('/api/experiments')
+        response = self.one_no_authz_get("/api/experiments")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_experiments_scoped(self):
@@ -106,18 +112,18 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_get_experiment_one(self):
-        response = self.one_authz_get('/api/experiments/katsu.experiment:1')
+        response = self.one_authz_get("/api/experiments/katsu.experiment:1")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        self.assertEqual(response_data['id'], 'katsu.experiment:1')
+        self.assertEqual(response_data["id"], "katsu.experiment:1")
 
     def test_get_experiment_one_forbidden(self):
-        response = self.one_no_authz_get('/api/experiments/katsu.experiment:1')
+        response = self.one_no_authz_get("/api/experiments/katsu.experiment:1")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_experiment_schema(self):
         # endpoint is open to everyone
-        response = self.one_authz_get('/api/schemas/experiment')
+        response = self.one_authz_get("/api/schemas/experiment")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         Draft7Validator.check_schema(response_data)
@@ -136,7 +142,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
                 self.assert_response_200_and_length(response, params[1])
 
     def test_get_experiment_results(self):
-        response = self.one_authz_get('/api/experimentresults')
+        response = self.one_authz_get("/api/experimentresults")
         self.assert_response_200_and_length(response, 4)
 
     def test_get_experiment_results_scoped(self):
@@ -164,238 +170,284 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_filter_experiment_results(self):
-        response = self.one_authz_get('/api/experimentresults?file_format=vcf')
+        response = self.one_authz_get("/api/experimentresults?file_format=vcf")
         self.assert_response_200_and_length(response, 2)
 
     def test_filter_experiment_results_url(self):
-        response = self.one_authz_get('/api/experimentresults?url=example.org')
+        response = self.one_authz_get("/api/experimentresults?url=example.org")
         self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_indices(self):
-        response = self.one_authz_get('/api/experimentresults?indices=tabix')
+        response = self.one_authz_get("/api/experimentresults?indices=tabix")
         self.assert_response_200_and_length(response, 1)
 
     def test_filter_experiment_results_by_dataset_1(self):
-        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d1_id}')
+        response = self.one_authz_get(f"/api/experimentresults?datasets={self.d1_id}")
         self.assert_response_200_and_length(response, 4)
 
     def test_filter_experiment_results_by_dataset_2(self):
-        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id}')
+        response = self.one_authz_get(f"/api/experimentresults?datasets={self.d2_id}")
         self.assert_response_200_and_length(response, 0)
 
     def test_filter_experiment_results_by_datasets_list(self):
-        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}')
+        response = self.one_authz_get(f"/api/experimentresults?datasets={self.d2_id},{self.d1_id}")
         self.assert_response_200_and_length(response, 4)
 
     def test_combine_filters_experiment_results(self):
-        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id},{self.d1_id}&file_format=cram')
+        response = self.one_authz_get(f"/api/experimentresults?datasets={self.d2_id},{self.d1_id}&file_format=cram")
         self.assert_response_200_and_length(response, 2)
 
     def test_combine_filters_experiment_results_2(self):
         # there are no experiments in dataset_2
-        response = self.one_authz_get(f'/api/experimentresults?datasets={self.d2_id}&file_format=vcf')
+        response = self.one_authz_get(f"/api/experimentresults?datasets={self.d2_id}&file_format=vcf")
         self.assert_response_200_and_length(response, 0)
 
     def test_get_experiment_batch(self):
-        response = self.one_authz_get('/api/batch/experiments')
+        response = self.one_authz_get("/api/batch/experiments")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        self.assertEqual(response_data['count'], 2)
-        self.assertEqual(len(response_data['results']), 2)
+        self.assertEqual(response_data["count"], 2)
+        self.assertEqual(len(response_data["results"]), 2)
 
     def test_post_experiment_batch_no_data(self):
-        response = self.one_authz_post('/api/batch/experiments', format='json')
+        response = self.one_authz_post("/api/batch/experiments", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 2)
 
     def test_post_experiment_batch_with_ids(self):
-        response = self.one_authz_post('/api/batch/experiments', {'id': ['katsu.experiment:1']}, format='json')
+        response = self.one_authz_post("/api/batch/experiments", {"id": ["katsu.experiment:1"]}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data), 1)
-        self.assertEqual(response_data[0]['id'], 'katsu.experiment:1')
+        self.assertEqual(response_data[0]["id"], "katsu.experiment:1")
 
     def test_post_experiment_batch_csv_selected_fields(self):
         response = self.one_authz_post(
-            '/api/batch/experiments', {'format': 'csv', 'fields': ['id', 'study_type']}, format='json'
+            "/api/batch/experiments", {"format": "csv", "fields": ["id", "study_type"]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        headers = next(csv.reader(io.StringIO(response.content.decode('utf-8'))))
-        self.assertEqual(headers, ['Id', 'Study type'])
+        headers = next(csv.reader(io.StringIO(response.content.decode("utf-8"))))
+        self.assertEqual(headers, ["Id", "Study type"])
 
     def test_export_fields_action(self):
-        response = self.one_authz_get('/api/batch/experiments/export_fields')
+        response = self.one_authz_get("/api/batch/experiments/export_fields")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        keys = [f['key'] for f in response.json()]
+        keys = [f["key"] for f in response.json()]
         self.assertEqual(
             keys,
-            ['id', 'study_type', 'experiment_type', 'molecule', 'library_strategy', 'library_source',
-             'library_selection', 'library_layout', 'created', 'updated', 'biosample', 'individual'],
+            [
+                "id",
+                "study_type",
+                "experiment_type",
+                "molecule",
+                "library_strategy",
+                "library_source",
+                "library_selection",
+                "library_layout",
+                "created",
+                "updated",
+                "biosample",
+                "individual",
+            ],
         )
 
     def test_export_fields_action_forbidden(self):
-        response = self.one_no_authz_get('/api/batch/experiments/export_fields')
+        response = self.one_no_authz_get("/api/batch/experiments/export_fields")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_experiment_batch_csv_unknown_field_error(self):
         response = self.one_authz_post(
-            '/api/batch/experiments', {'format': 'csv', 'fields': ['id', 'not_a_real_field']}, format='json'
+            "/api/batch/experiments", {"format": "csv", "fields": ["id", "not_a_real_field"]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+        self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
 
     def test_get_experiment_batch_csv_unknown_field_error(self):
-        response = self.one_authz_get('/api/batch/experiments?format=csv&fields=not_a_real_field')
+        response = self.one_authz_get("/api/batch/experiments?format=csv&fields=not_a_real_field")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+        self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
 
     def test_get_experiment_result_batch(self):
-        response = self.one_authz_get('/api/batch/experimentresults')
+        response = self.one_authz_get("/api/batch/experimentresults")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
-        self.assertEqual(response_data['count'], 4)
-        self.assertEqual(len(response_data['results']), 4)
+        self.assertEqual(response_data["count"], 4)
+        self.assertEqual(len(response_data["results"]), 4)
 
     def test_get_experiment_result_batch_forbidden(self):
-        response = self.one_no_authz_get('/api/batch/experimentresults')
+        response = self.one_no_authz_get("/api/batch/experimentresults")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_experiment_result_batch_no_data(self):
-        response = self.one_authz_post('/api/batch/experimentresults', format='json')
+        response = self.one_authz_post("/api/batch/experimentresults", format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 4)
 
     def test_post_experiment_result_batch_with_ids(self):
         er_id = ExperimentResult.objects.first().id
-        response = self.one_authz_post('/api/batch/experimentresults', {'id': [er_id]}, format='json')
+        response = self.one_authz_post("/api/batch/experimentresults", {"id": [er_id]}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_data = response.json()
         self.assertEqual(len(response_data), 1)
-        self.assertEqual(response_data[0]['id'], er_id)
+        self.assertEqual(response_data[0]["id"], er_id)
 
     def test_post_experiment_result_batch_with_unknown_ids(self):
         # ExperimentResult uses an integer PK, so an out-of-range int (not a malformed non-numeric string) is the
         # realistic "doesn't exist" case here.
-        response = self.one_authz_post('/api/batch/experimentresults', {'id': [999999]}, format='json')
+        response = self.one_authz_post("/api/batch/experimentresults", {"id": [999999]}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.json()), 0)
 
     def test_post_experiment_result_batch_forbidden(self):
-        response = self.one_no_authz_post('/api/batch/experimentresults', format='json')
+        response = self.one_no_authz_post("/api/batch/experimentresults", format="json")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_experiment_result_batch_csv_selected_fields(self):
         response = self.one_authz_post(
-            '/api/batch/experimentresults', {'format': 'csv', 'fields': ['id', 'file_format']}, format='json'
+            "/api/batch/experimentresults", {"format": "csv", "fields": ["id", "file_format"]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        headers = next(csv.reader(io.StringIO(response.content.decode('utf-8'))))
-        self.assertEqual(headers, ['Id', 'File format'])
+        headers = next(csv.reader(io.StringIO(response.content.decode("utf-8"))))
+        self.assertEqual(headers, ["Id", "File format"])
 
     def test_post_experiment_result_batch_xlsx_selected_fields(self):
         response = self.one_authz_post(
-            '/api/batch/experimentresults', {'format': 'xlsx', 'fields': ['id', 'file_format']}, format='json'
+            "/api/batch/experimentresults", {"format": "xlsx", "fields": ["id", "file_format"]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response['Content-Type'], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        self.assertEqual(response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         wb = openpyxl.load_workbook(io.BytesIO(response.content))
         ws = wb.active
         headers = [c.value for c in next(ws.iter_rows())]
-        self.assertEqual(headers, ['Id', 'File format'])
+        self.assertEqual(headers, ["Id", "File format"])
 
     def test_get_experiment_result_batch_xlsx(self):
-        response = self.one_authz_get('/api/batch/experimentresults?format=xlsx')
+        response = self.one_authz_get("/api/batch/experimentresults?format=xlsx")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         wb = openpyxl.load_workbook(io.BytesIO(response.content))
         ws = wb.active
         headers = [c.value for c in next(ws.iter_rows())]
         self.assertEqual(
             headers,
-            ['Id', 'Description', 'Filename', 'Url', 'Genome assembly id', 'File format', 'Data output type',
-             'Usage', 'Creation date', 'Created by'],
+            [
+                "Id",
+                "Description",
+                "Filename",
+                "Url",
+                "Genome assembly id",
+                "File format",
+                "Data output type",
+                "Usage",
+                "Creation date",
+                "Created by",
+            ],
         )
 
     def test_experiment_result_export_fields_action(self):
-        response = self.one_authz_get('/api/batch/experimentresults/export_fields')
+        response = self.one_authz_get("/api/batch/experimentresults/export_fields")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        keys = [f['key'] for f in response.json()]
+        keys = [f["key"] for f in response.json()]
         self.assertEqual(
             keys,
-            ['id', 'description', 'filename', 'url', 'genome_assembly_id', 'file_format', 'data_output_type',
-             'usage', 'creation_date', 'created_by'],
+            [
+                "id",
+                "description",
+                "filename",
+                "url",
+                "genome_assembly_id",
+                "file_format",
+                "data_output_type",
+                "usage",
+                "creation_date",
+                "created_by",
+            ],
         )
 
     def test_experiment_result_export_fields_action_forbidden(self):
-        response = self.one_no_authz_get('/api/batch/experimentresults/export_fields')
+        response = self.one_no_authz_get("/api/batch/experimentresults/export_fields")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_post_experiment_result_batch_csv_unknown_field_error(self):
         response = self.one_authz_post(
-            '/api/batch/experimentresults', {'format': 'csv', 'fields': ['id', 'not_a_real_field']}, format='json'
+            "/api/batch/experimentresults", {"format": "csv", "fields": ["id", "not_a_real_field"]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+        self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
 
     def test_get_experiment_result_batch_csv_unknown_field_error(self):
-        response = self.one_authz_get('/api/batch/experimentresults?format=csv&fields=not_a_real_field')
+        response = self.one_authz_get("/api/batch/experimentresults?format=csv&fields=not_a_real_field")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+        self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
 
 
 class TestExperimentCSVRenderer(TestCase):
     """
     Test the CSV renderer for the experiment API
     """
+
     def setUp(self):
         self.renderer = ExperimentCSVRenderer()
-        self.data = [{
-            'id': 'id1',
-            'study_type': 'study_type1',
-            'experiment_type': 'experiment_type1',
-            'molecule': 'molecule1',
-            'library_strategy': 'library_strategy1',
-            'library_source': 'library_source1',
-            'library_selection': 'library_selection1',
-            'library_layout': 'library_layout1',
-            'created': 'created1',
-            'updated': 'updated1',
-            'biosample': 'biosample1',
-            'biosample_individual': {'id': 'individual_id1'},
-        }]
+        self.data = [
+            {
+                "id": "id1",
+                "study_type": "study_type1",
+                "experiment_type": "experiment_type1",
+                "molecule": "molecule1",
+                "library_strategy": "library_strategy1",
+                "library_source": "library_source1",
+                "library_selection": "library_selection1",
+                "library_layout": "library_layout1",
+                "created": "created1",
+                "updated": "updated1",
+                "biosample": "biosample1",
+                "biosample_individual": {"id": "individual_id1"},
+            }
+        ]
 
     def test_csv_headers(self):
         response = self.renderer.render(self.data)
         csv_content = response.content.decode()
         csv_file = io.StringIO(csv_content)
         reader = csv.DictReader(csv_file)
-        expected_headers = ['Id', 'Study type', 'Experiment type', 'Molecule', 'Library strategy',
-                            'Library source', 'Library selection', 'Library layout',
-                            'Created', 'Updated', 'Biosample', 'Individual']
+        expected_headers = [
+            "Id",
+            "Study type",
+            "Experiment type",
+            "Molecule",
+            "Library strategy",
+            "Library source",
+            "Library selection",
+            "Library layout",
+            "Created",
+            "Updated",
+            "Biosample",
+            "Individual",
+        ]
         self.assertListEqual(list(reader.fieldnames), expected_headers)
 
     def test_csv_render_with_missing_fields(self):
-        data_with_missing_fields = [{
-            'id': 'id3',
-            'study_type': 'study_type3',
-            'experiment_type': 'experiment_type3',
-            'molecule': 'molecule3',
-            'library_strategy': 'library_strategy3',
-            'library_source': 'library_source3',
-            # 'library_selection' intentionally missing
-            'library_layout': 'library_layout3',
-            'created': 'created3',
-            'updated': 'updated3',
-            'biosample': 'biosample3',
-            'biosample_individual': {'id': 'individual_id3'},
-        }]
+        data_with_missing_fields = [
+            {
+                "id": "id3",
+                "study_type": "study_type3",
+                "experiment_type": "experiment_type3",
+                "molecule": "molecule3",
+                "library_strategy": "library_strategy3",
+                "library_source": "library_source3",
+                # 'library_selection' intentionally missing
+                "library_layout": "library_layout3",
+                "created": "created3",
+                "updated": "updated3",
+                "biosample": "biosample3",
+                "biosample_individual": {"id": "individual_id3"},
+            }
+        ]
         response = self.renderer.render(data_with_missing_fields)
         csv_content = response.content.decode()
         csv_file = io.StringIO(csv_content)
         reader = csv.DictReader(csv_file)
         row = next(reader)
-        self.assertIsNone(row.get('library_selection'))
+        self.assertIsNone(row.get("library_selection"))
 
     def test_csv_render_with_empty_data(self):
         data_empty = [{}]
@@ -406,11 +458,10 @@ class TestExperimentCSVRenderer(TestCase):
         next(reader)  # skip header
         for row in reader:
             for key in row:
-                self.assertEqual(row[key], '')
+                self.assertEqual(row[key], "")
 
 
 class TestExperimentSchema(APITestCase):
-
     def test_experiment_schema(self):
         response = self.client.get(reverse("experiment-schema"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -418,7 +469,7 @@ class TestExperimentSchema(APITestCase):
 
     def test_experiment_subschema(self):
         for subschema in EXPERIMENT_SCHEMA["properties"].values():
-            property = subschema["$id"].split('/')[-1]
+            property = subschema["$id"].split("/")[-1]
             response = self.client.get(reverse("experiment-subschema", kwargs={"subschema": property}))
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), subschema)
