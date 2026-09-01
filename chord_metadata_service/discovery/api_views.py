@@ -805,7 +805,7 @@ async def discovery_matches(
 
     matches_page: QuerySet
     if page_size > 0:
-        matches_page = queryset[page * page_size : (page + 1) * page_size] if page_size > 0 else queryset[:]
+        matches_page = queryset[page * page_size:(page + 1) * page_size] if page_size > 0 else queryset[:]
     else:
         matches_page = queryset[:]
 
@@ -898,10 +898,10 @@ async def discovery_ui_hints(
 
     return Response(
         DiscoveryUIHintsResponse(
-            # This helps the UI determine which entities are available in a particular scope, so we can hide entities with
-            # no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of this
-            # purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a specific
-            # search, but we don't want them
+            # This helps the UI determine which entities are available in a particular scope, so we can hide entities
+            # with no data ingested (e.g., not showing experiments for an instance with only phenopackets). Because of
+            # this purpose, we don't filter it beforehand - we still want to see 0 counts if they're the result of a
+            # specific search, but we don't want them
             entities_with_data=entities_with_data,
             # TODO: implement something like this for hinting towards maps
             # TODO: instead of this, maybe we also collect experiment results and check for geojson, and indicate if we
