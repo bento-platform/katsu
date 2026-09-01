@@ -1,6 +1,8 @@
 from django.contrib.gis.geos import Point
-from . import constants as gc, models as gm, serializers as gs
 
+from . import constants as gc
+from . import models as gm
+from . import serializers as gs
 
 __all__ = [
     "get_or_create_geo_location",

@@ -1,5 +1,5 @@
-from .schemas import ONTOLOGY_CLASS, TIME_ELEMENT_SCHEMA
 from .schema_utils import SEARCH_DATABASE_JSONB, search_optional_str, tag_schema_with_search_properties
+from .schemas import ONTOLOGY_CLASS, TIME_ELEMENT_SCHEMA
 
 __all__ = [
     "ONTOLOGY_SEARCH_SCHEMA",

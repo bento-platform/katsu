@@ -1,0 +1,196 @@
+{
+  "identifier": "dataset-json-full-001",
+  "language": "en",
+  "schema_version": "1.0",
+  "title": "Full Test Dataset from JSON",
+  "description": "A comprehensive dataset loaded from JSON fixture with all fields populated",
+  "long_description": {
+    "content": "<h1>Full Dataset Description</h1><p>This is a comprehensive test dataset with all fields populated.</p>",
+    "content_type": "text/html"
+  },
+  "keywords": [
+    "genomics",
+    "cancer",
+    {"id": "HP:0001250", "label": "Seizure"},
+    {"id": "HP:0002664", "label": "Neoplasm"}
+  ],
+  "resources": [
+    {
+      "id": "hp",
+      "version": "2024-04-26",
+      "namespace_prefix": "HP",
+      "iri_prefix": "http://purl.obolibrary.org/obo/HP_",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "name": "Human Phenotype Ontology"
+    }
+  ],
+  "stakeholders": [
+    {
+      "type": "person",
+      "name": "Jane Doe",
+      "honorific": "Dr.",
+      "other_names": ["J. Doe", "Jane D."],
+      "location": "City, Country",
+      "affiliations": [
+        "Test University",
+        {
+          "type": "organization",
+          "name": "Research Institute",
+          "description": "A leading research institution",
+          "contact": {
+            "website": "https://research.org",
+            "email": ["contact@research.org"],
+            "address": "123 Research Ave, City, Country",
+            "phone": {
+              "country_code": 1,
+              "number": 5551234567
+            }
+          },
+          "location": "City, Country",
+          "roles": ["Research Center"]
+        }
+      ],
+      "roles": ["Principal Investigator", "Researcher"]
+    },
+    {
+      "type": "person",
+      "name": "John Smith",
+      "honorific": "Prof.",
+      "contact": {
+        "email": ["contact@research.org"],
+        "address": "123 Research Ave, City, Country",
+        "phone": {
+          "country_code": 1,
+          "number": 5551234567
+        }
+      },
+      "affiliations": ["Test University"],
+      "roles": ["Co-Investigator"]
+    }
+  ],
+  "funding_sources": [
+    {
+      "funder": "National Science Foundation",
+      "grant_numbers": ["NSF-2024-001", "NSF-2024-002"]
+    },
+    {
+      "funder": "Jane Doe"
+    }
+  ],
+  "spatial_coverage": "New York City, USA",
+  "version": "2.1.0",
+  "privacy": "De-identified according to HIPAA Safe Harbor method",
+  "license": {
+    "label": "Creative Commons Attribution 4.0",
+    "type": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "counts": [
+    {
+      "count_entity": "participants",
+      "value": 1500,
+      "description": "Total number of study participants"
+    },
+    {
+      "count_entity": "samples",
+      "value": 3200,
+      "description": "Total number of biological samples collected"
+    }
+  ],
+  "primary_contact": {
+    "type": "person",
+    "name": "Jane Doe",
+    "honorific": "Dr.",
+    "affiliations": ["Test University"],
+    "roles": ["Principal Investigator"]
+  },
+  "links": [
+    {
+      "label": "Study Protocol",
+      "url": "https://example.org/protocol.pdf",
+      "type": "Downloadable Artifact"
+    },
+    {
+      "label": "Data Dictionary",
+      "url": "https://example.org/data-dictionary",
+      "type": "Schema"
+    },
+    {
+      "label": "Data Access",
+      "url": "https://data.example.org/access",
+      "type": "Data Access"
+    },
+    {
+      "label": "Download Portal",
+      "url": "https://portal.example.org/download",
+      "type": "Data Access"
+    }
+  ],
+  "publications": [
+    {
+      "title": "Genomic Analysis of Cancer Patients",
+      "url": "https://doi.org/10.1234/example",
+      "doi": "10.1234/example",
+      "publication_type": "Journal Article",
+      "authors": [
+        {
+          "type": "person",
+          "name": "Jane Doe",
+          "honorific": "Dr.",
+          "affiliations": ["Test University"],
+          "roles": ["Principal Investigator"]
+        },
+        {
+          "type": "person",
+          "name": "John Smith",
+          "honorific": "Prof.",
+          "affiliations": ["Test University"],
+          "roles": ["Co-Investigator"]
+        }
+      ],
+      "publication_date": "2023-06-15",
+      "publication_venue": {
+        "name": "Journal of Genomics",
+        "venue_type": "Journal",
+        "publisher": "Academic Press",
+        "location": "New York"
+      },
+      "description": "Primary publication describing the study methodology and initial results"
+    }
+  ],
+  "logos": [
+    {
+      "url": "https://example.org/logo-light.png",
+      "theme": "light",
+      "description": "Study logo for light backgrounds"
+    },
+    {
+      "url": "https://example.org/logo-dark.png",
+      "theme": "dark",
+      "description": "Study logo for dark backgrounds"
+    }
+  ],
+  "release_date": "2023-01-15",
+  "last_modified": "2024-06-01",
+  "participant_criteria": [
+    {
+      "type": "Inclusion",
+      "description": "Adults aged 18-65 with confirmed diagnosis"
+    },
+    {
+      "type": "Exclusion",
+      "description": "Participants with prior treatment within 6 months"
+    }
+  ],
+  "study_status": "ONGOING",
+  "study_context": "RESEARCH",
+  "domain": ["Genomics", "Cancer Research"],
+  "program_name": "National Cancer Genomics Program",
+  "extra_properties": {
+    "institution_code": "TU-001",
+    "ethics_approval": "IRB-2022-456",
+    "recruitment_target": 2000,
+    "completion_rate": 0.75,
+    "data_sharing_allowed": true
+  }
+}

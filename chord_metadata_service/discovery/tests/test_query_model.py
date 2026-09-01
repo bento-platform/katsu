@@ -1,9 +1,9 @@
 import json
 import sys
-from io import BytesIO
 
 from django.http import HttpRequest
 from django.test import SimpleTestCase
+from django.test.client import RequestFactory
 from pydantic import ValidationError
 from rest_framework.parsers import JSONParser
 from rest_framework.request import Request as DrfRequest
@@ -72,13 +72,10 @@ class TestDiscoveryQueryModel(SimpleTestCase):
 
     @staticmethod
     def _mock_json_post(content: dict | list):
-        dr = HttpRequest()
-        dr.content_type = "application/json"
-        dr.method = "POST"
-        dr.META["CONTENT_TYPE"] = "application/json"
+        rf = RequestFactory()
 
+        dr = rf.post("/mock", json.dumps(content), content_type="application/json")
         r = DrfRequest(dr, parsers=(JSONParser(),))
-        r._stream = BytesIO(json.dumps(content).encode("utf-8"))
         r._load_data_and_files()
 
         return r

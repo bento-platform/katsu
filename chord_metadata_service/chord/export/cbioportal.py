@@ -131,12 +131,13 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO) -> None:
     """
     Study meta data file generation
     """
+    schema = dataset.to_schema()
 
     lines: dict[str, str] = {
         "type_of_cancer": "mixed",  # TODO: find if this information is available. !IMPORTANT! uses Oncotree codes
         "cancer_study_identifier": str(dataset.identifier),
         "name": dataset.title,
-        "description": dataset.description,
+        "description": schema.description or "",
 
         # pmid: unavailable
         # groups: unused for authentication
@@ -146,9 +147,9 @@ def study_export_meta(dataset: Dataset, file_handle: TextIO) -> None:
         "reference_genome": "hg38",  # TODO: should not be hard-coded...
     }
 
-    # optional fields
-    if dataset.primary_publications:
-        lines["citation"] = dataset.primary_publications[0]
+    # optional fields — use publications list from schema (no primary_publications distinction in Dataset)
+    if schema.publications:
+        lines["citation"] = schema.publications[0]
 
     write_dict_in_cbioportal_format(lines, file_handle)
 

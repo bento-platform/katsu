@@ -4,6 +4,7 @@ import json
 from copy import deepcopy
 import uuid
 
+import openpyxl
 from aioresponses import aioresponses
 from bento_lib.discovery import DiscoveryConfig, RULES_NO_PERMISSIONS
 from datetime import datetime
@@ -15,12 +16,14 @@ from typing import Literal, TypedDict
 
 from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITestCase
 from chord_metadata_service.chord import models as ch_m
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.tests import constants as ch_c
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.patients import models as pa_m
 from chord_metadata_service.phenopackets import models as ph_m
 from chord_metadata_service.phenopackets.tests import constants as ph_c
+from chord_metadata_service.restapi.api_renderers import XLSX_MEDIA_TYPE
 from chord_metadata_service.experiments import models as exp_m
 from chord_metadata_service.experiments.tests import constants as exp_c
 
@@ -54,13 +57,18 @@ class ScopedDiscoveryTestCase(TestCase):
         )
         cls.id_proj_a = cls.project_a.identifier
         # use provided dataset discovery config
-        cls.dataset_a = ch_m.Dataset.objects.create(
+        schema_a = KatsuDatasetModel(
+            schema_version="1.0",
             title="Dataset 1",
             description="Test dataset",
-            data_use=ch_c.VALID_DATA_USE_1,
-            project=cls.project_a,
-            discovery=DISCOVERY_CONFIG_EXTRA_PROPERTIES,
+            primary_contact=ch_c.VALID_DATASET_PRIMARY_CONTACT,
+            project=str(cls.project_a.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        cls.dataset_a = ch_m.Dataset.from_schema(schema_a)
+        cls.dataset_a.discovery = DISCOVERY_CONFIG_EXTRA_PROPERTIES
+        cls.dataset_a.save()
+        cls.dataset_a.refresh_from_db()
         cls.id_ds_a = cls.dataset_a.identifier
 
         # use provided project discovery config
@@ -71,13 +79,17 @@ class ScopedDiscoveryTestCase(TestCase):
         )
         cls.id_proj_b = cls.project_b.identifier
         # Should fallback on project's discovery config
-        cls.dataset_b = ch_m.Dataset.objects.create(
+        schema_b = KatsuDatasetModel(
+            schema_version="1.0",
             title="Dataset 2",
             description="Test dataset 2",
-            data_use=ch_c.VALID_DATA_USE_1,
-            project=cls.project_b,
-            discovery=None,
+            primary_contact=ch_c.VALID_DATASET_PRIMARY_CONTACT,
+            project=str(cls.project_b.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        cls.dataset_b = ch_m.Dataset.from_schema(schema_b)
+        cls.dataset_b.save()
+        cls.dataset_b.refresh_from_db()
         cls.id_ds_b = cls.dataset_b.identifier
 
 
@@ -281,6 +293,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
         chart_fields = set(discovery.get_chart_field_ids()) if expected_fields is None else expected_fields
         self.assertSetEqual(response_fields, chart_fields)
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_empty_discovery(self):
         res = self.dt_authz_full_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -561,7 +574,14 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
 def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Individual], list[ph_m.Phenopacket]]:
     # create project + dataset
     p = ch_m.Project.objects.create(**ch_c.VALID_PROJECT_1)
-    d = ch_m.Dataset.objects.create(**ch_c.valid_dataset_1(p))
+    schema = KatsuDatasetModel(
+        schema_version="1.0", title="Dataset 1", description="Test dataset",
+        primary_contact=ch_c.VALID_DATASET_PRIMARY_CONTACT, project=str(p.identifier),
+        identifier=str(uuid.uuid4()),
+    )
+    d = ch_m.Dataset.from_schema(schema)
+    d.save()
+    d.refresh_from_db()
 
     individuals = []
     phenopackets = []
@@ -638,6 +658,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
     def _rn_newline(x: str) -> str:
         return x.replace("\r\n", "\n").replace("\n", "\r\n")
 
+    @override_settings(CONFIG_PUBLIC=DiscoveryConfig())
     def test_empty_discovery(self):
         res = self.dt_authz_full_get(self.url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
@@ -719,6 +740,14 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     code=status.HTTP_406_NOT_ACCEPTABLE,
                     message="Not Acceptable",
                 )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_default_format_falls_back_to_xlsx(self):
+        # No _format param, and Accept header only allows XLSX --> should default to xlsx response format.
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(self.url, headers={"Accept": XLSX_MEDIA_TYPE})
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res["Content-Type"], XLSX_MEDIA_TYPE)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_json_responses_phenopackets(self):
@@ -920,6 +949,101 @@ phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},
 """
             )  # CSVs use \r\n line endings here
         )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses_phenopackets_selected_fields(self):
+        p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_fields=id,subject_id")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res.content.decode("utf-8"),
+            self._rn_newline(
+                """Id,Subject id
+phe-0,ind:NA19648
+phe-1,ind:HG00096
+"""
+            )  # CSVs use \r\n line endings here
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_csv_responses_phenopackets_unknown_field(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=csv&_fields=id,not_a_real_field")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_xlsx_responses_phenopackets(self):
+        p, d, _individuals, _phenopackets = make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=xlsx")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            res["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        sp = "Homo sapiens"
+        wb = openpyxl.load_workbook(io.BytesIO(res.content))
+        ws = wb.active
+        rows = [[c.value for c in row] for row in ws.iter_rows()]
+        self.assertEqual(
+            rows,
+            [
+                ["Id", "Subject id", "Subject sex", "Subject taxonomy", "Biosamples", "Diseases", "Created by",
+                 "Submitted by", "Dataset"],
+                ["phe-0", "ind:NA19648", "FEMALE", sp, "katsu.biosample_id:1 [wall of urinary bladder]",
+                 self.csv_disease, "David Lougheed", "David Lougheed", d],
+                ["phe-1", "ind:HG00096", "MALE", sp, "biosample_id:2 [urinary bladder]", None, "David Lougheed",
+                 "David Lougheed", d],
+            ],
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_xlsx_responses_phenopackets_selected_fields(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=xlsx&_fields=id,subject_id")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        wb = openpyxl.load_workbook(io.BytesIO(res.content))
+        ws = wb.active
+        rows = [[c.value for c in row] for row in ws.iter_rows()]
+        self.assertEqual(
+            rows, [["Id", "Subject id"], ["phe-0", "ind:NA19648"], ["phe-1", "ind:HG00096"]]
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_a_few_xlsx_responses_phenopackets_unknown_field(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=xlsx&_fields=id,not_a_real_field")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get("/api/discovery_matches_export_fields")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        keys = [f["key"] for f in res.json()]
+        self.assertEqual(
+            keys,
+            ["id", "subject_id", "subject_sex", "subject_taxonomy", "biosamples", "diseases", "created_by",
+             "submitted_by", "dataset"],
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields_entity(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get("/api/discovery_matches_export_fields?_entity=individual")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        keys = [f["key"] for f in res.json()]
+        self.assertEqual(
+            keys, ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+        )
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields_invalid_entity(self):
+        res = self.dt_authz_full_get("/api/discovery_matches_export_fields?_entity=does-not-exist")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_matches_export_fields_forbidden(self):
+        res = self.dt_authz_counts_get("/api/discovery_matches_export_fields")
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_a_few_csv_responses_phenopackets_pagination(self):

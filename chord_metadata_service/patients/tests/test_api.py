@@ -1,5 +1,6 @@
 import csv
 import io
+import openpyxl
 import random
 import uuid
 
@@ -12,7 +13,8 @@ from django.test import TestCase, override_settings
 from rest_framework import status
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord import models as cm
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.fields_utils import JSONBPathFilter
@@ -187,24 +189,30 @@ class IndividualListFilterTest(TestWithTwoIndividuals):
         # ----
 
         self.project_1 = cm.Project.objects.create(title="Project 1", description="p1")
-        self.dataset_1 = cm.Dataset.objects.create(
-            **{
-                "title": "Dataset 1",
-                "description": "Test Dataset 1",
-                "data_use": VALID_DATA_USE_1,
-                "project": self.project_1,
-            }
+        schema_1 = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset 1",
+            description="Test Dataset 1",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.project_1.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        self.dataset_1 = cm.Dataset.from_schema(schema_1)
+        self.dataset_1.save()
+        self.dataset_1.refresh_from_db()
 
         self.project_2 = cm.Project.objects.create(title="Project 2", description="p2")
-        self.dataset_2 = cm.Dataset.objects.create(
-            **{
-                "title": "Dataset 2",
-                "description": "Test Dataset 2",
-                "data_use": VALID_DATA_USE_1,
-                "project": self.project_2,
-            }
+        schema_2 = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset 2",
+            description="Test Dataset 2",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.project_2.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        self.dataset_2 = cm.Dataset.from_schema(schema_2)
+        self.dataset_2.save()
+        self.dataset_2.refresh_from_db()
 
         # ----
 
@@ -287,6 +295,36 @@ class IndividualCSVRendererTest(TestWithIndividual):
 
     def test_csv_export_forbidden(self):
         get_resp = self.one_no_authz_get("/api/individuals?format=csv")
+        self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_csv_export_selected_fields(self):
+        get_resp = self.one_authz_get("/api/individuals?format=csv&fields=id,sex")
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        content = get_resp.content.decode("utf-8")
+        reader = csv.reader(io.StringIO(content))
+        body = list(reader)
+        self.assertEqual(body[0], ["Id", "Sex"])
+        self.assertEqual(body[1], ["patient:1", c.VALID_INDIVIDUAL["sex"]])
+
+    def test_csv_export_selected_fields_unknown_field_error(self):
+        get_resp = self.one_authz_get("/api/individuals?format=csv&fields=id,not_a_real_field")
+        self.assertEqual(get_resp.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("not_a_real_field", get_resp.json()["errors"][0]["message"])
+
+    def test_export_fields_action(self):
+        get_resp = self.one_authz_get(reverse("individuals-export-fields"))
+        self.assertEqual(get_resp.status_code, status.HTTP_200_OK)
+        choices = get_resp.json()
+        self.assertEqual(
+            choices,
+            [{"key": k, "label": v} for k, v in zip(
+                ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"],
+                ["Id", "Sex", "Date of birth", "Taxonomy", "Karyotypic sex", "Age", "Diseases", "Created", "Updated"],
+            )],
+        )
+
+    def test_export_fields_action_forbidden(self):
+        get_resp = self.one_no_authz_get(reverse("individuals-export-fields"))
         self.assertEqual(get_resp.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -377,6 +415,58 @@ class BatchIndividualsCSVTest(TestWithTwoIndividuals):
     def test_batch_individuals_csv_forbidden(self):
         response = self.one_no_authz_post(reverse("batch/individuals"), json={"format": "csv"})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_batch_individuals_csv_selected_fields(self):
+        response = self.one_authz_post(
+            reverse("batch/individuals"), json={"format": "csv", "fields": ["id", "sex"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        headers = next(csv.reader(io.StringIO(response.content.decode("utf-8"))))
+        self.assertEqual(headers, ["Id", "Sex"])
+
+    def test_batch_individuals_export_fields_action(self):
+        response = self.one_authz_get(reverse("batch/individuals-export-fields"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        keys = [f["key"] for f in response.json()]
+        self.assertEqual(
+            keys, ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+        )
+
+    def test_batch_individuals_export_fields_action_forbidden(self):
+        response = self.one_no_authz_get(reverse("batch/individuals-export-fields"))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_batch_individuals_csv_unknown_field_error(self):
+        response = self.one_authz_post(
+            reverse("batch/individuals"), json={"format": "csv", "fields": ["id", "not_a_real_field"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
+
+
+class BatchIndividualsXLSXTest(TestWithTwoIndividuals):
+    """Test for getting a batch of individuals as xlsx."""
+
+    def test_batch_individuals_xlsx_selected_fields(self):
+        response = self.one_authz_post(
+            reverse("batch/individuals"), json={"format": "xlsx", "fields": ["id", "sex"]}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        headers = [c.value for c in next(ws.iter_rows())]
+        self.assertEqual(headers, ["Id", "Sex"])
+
+    def test_post_batch_individuals_xlsx(self):
+        response = self.one_authz_post(reverse("batch/individuals"), json={"format": "xlsx"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        wb = openpyxl.load_workbook(io.BytesIO(response.content))
+        ws = wb.active
+        headers = [c.value for c in next(ws.iter_rows())]
+        self.assertEqual(headers, c.CSV_HEADER.split(","))
 
 
 class BatchIndividualsCSVTest1(TestWithTwoIndividuals):
@@ -511,12 +601,17 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         random.seed(self.random_seed)
 
         self.project_2 = cm.Project.objects.create(title="Project 2", description="")
-        self.dataset_2 = cm.Dataset.objects.create(
+        schema_2 = KatsuDatasetModel(
+            schema_version="1.0",
             title="Dataset 2",
             description="Some dataset",
-            data_use=VALID_DATA_USE_1,
-            project=self.project_2,
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.project_2.identifier),
+            identifier=str(uuid.uuid4()),
         )
+        self.dataset_2 = cm.Dataset.from_schema(schema_2)
+        self.dataset_2.save()
+        self.dataset_2.refresh_from_db()
 
         self.individuals = [
             c.generate_valid_individual(date_of_consent_range=(2020, 2023)) for _ in range(self.num_individuals)
@@ -940,10 +1035,10 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_no_bins(self):
         # data not in this range, so we won't have this bin available
-        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 1997")
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=1997-03")
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(
-            "Invalid value used in field query: date_of_consent=Mar 1997",
+            "Invalid value used in field query: date_of_consent=1997-03",
             response.json()["errors"][0]["message"][0],
             # TODO: message not supposed to be array of str but can't break API for beacon
         )
@@ -951,12 +1046,12 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_1(self):
         # extra_properties date range search (only after or before, single value)
-        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021")
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=2021-03")
         if "SmallCellCount" in str(type(self)):
             # no bins available due to low counts, should be 400 as we don't want to leak start/end
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn(
-                "Invalid value used in field query: date_of_consent=Mar 2021",
+                "Invalid value used in field query: date_of_consent=2021-03",
                 response.json()["errors"][0]["message"][0],
                 # TODO: message not supposed to be array of str but can't break API for beacon
             )
@@ -975,7 +1070,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         doc = "extra_properties__date_of_consent"
 
         subtest_params = [
-            ("Mar 2021", {f"{doc}__startswith": "2021-03"}),
+            ("2021-03", {f"{doc}__startswith": "2021-03"}),
             ("> 2021-01", {f"{doc}__gt": "2021-01"}),
             ("[2021-01, 2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
             ("[2021-01,2021-03]", {f"{doc}__gte": "2021-01", f"{doc}__lte": "2021-03"}),
@@ -988,7 +1083,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             ("[2020, 2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             ("[2020,2025]", {f"{doc}__gte": "2020", f"{doc}__lte": "2025"}),
             (
-                ("Mar 2021", "Apr 2021", "May 2021", "Jun 2021"),
+                ("2021-03", "2021-04", "2021-05", "2021-06"),
                 Q(**{f"{doc}__startswith": "2021-03"})
                 | Q(**{f"{doc}__startswith": "2021-04"})
                 | Q(**{f"{doc}__startswith": "2021-05"})
@@ -1027,7 +1122,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
     def test_discovery_filtering_extra_properties_date_range_full_access_errors(self):
         subtest_params = [
-            (("Mar 2021", "April 2021"),),
+            (("2021-03", "2021-3"),),
             (("[2021-03, 2021-045)", "[2021-04, 2021-05)"),),
         ]
         for params in subtest_params:
@@ -1046,12 +1141,12 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_extra_properties_date_range_and_other_range(self):
         # extra_properties date range search (both after and before, single value) and other number range search
         # Testing with a date of consent from 2 years ago
-        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=Mar 2021&lab_test_result_value=< 55.5")
+        response = self.dt_authz_counts_get("/api/discovery?date_of_consent=2021-03&lab_test_result_value=< 55.5")
         if "SmallCellCount" in str(type(self)):
             # no bins available due to low counts, should be 400 as we don't want to leak start/end
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn(
-                "Invalid value used in field query: date_of_consent=Mar 2021",
+                "Invalid value used in field query: date_of_consent=2021-03",
                 response.json()["errors"][0]["message"][0],
                 # TODO: message not supposed to be array of str but can't break API for beacon
             )

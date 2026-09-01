@@ -1,7 +1,7 @@
-from rest_framework import serializers
 from jsonschema import Draft7Validator, FormatChecker
-from .schema_ref import SchemaRefs
+from rest_framework import serializers
 
+from .schema_ref import SchemaRefs
 
 __all__ = [
     "JsonSchemaValidator",
@@ -15,7 +15,9 @@ __all__ = [
 class JsonSchemaValidator:
     """Custom class based validator to validate against Json schema for JSONField"""
 
-    def __init__(self, schema: dict = None, schema_ref: SchemaRefs | str = None, formats=None, registry=None):
+    def __init__(
+        self, schema: dict | None = None, schema_ref: SchemaRefs | str | None = None, formats=None, registry=None
+    ):
         """
         Validators should be constructed from a `SchemaRefs` enum value.
         DeprecationWarning!: Construction from full `schema` is supported to ensure that the method is backwards
@@ -45,8 +47,8 @@ class JsonSchemaValidator:
             raise serializers.ValidationError("Not valid JSON schema for this field.")
         return value
 
-    def __eq__(self, other):
-        return self.schema == other.schema
+    def __eq__(self, other: object):
+        return isinstance(other, JsonSchemaValidator) and self.schema == other.schema
 
     def deconstruct(self):
         if hasattr(self, "schema_name"):

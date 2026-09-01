@@ -41,7 +41,9 @@ from chord_metadata_service.phenopackets.serializers import PhenopacketSerialize
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
     IndividualCSVRenderer,
+    IndividualXLSXRenderer,
     IndividualBentoSearchRenderer,
+    csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
@@ -86,10 +88,14 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
     data_type = dts.DATA_TYPE_PHENOPACKET
 
     def permission_from_request(self, request: DrfRequest) -> Permission | None:
-        if self.action == "phenopackets":
+        if self.action in ("phenopackets", "export_fields"):
             # GET or POST; either way, we're querying data for this action
             return P_QUERY_DATA
         return super().permission_from_request(request)
+
+    @action(detail=False, methods=["GET"])
+    def export_fields(self, _request: DrfRequest, *_args, **_kwargs):
+        return Response(IndividualCSVRenderer.field_choices())
 
     @async_to_sync
     async def get_queryset(self):
@@ -104,6 +110,9 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
         )
 
     def list(self, request, *args, **kwargs):
+        if (err := csv_fields_error_response(request, IndividualCSVRenderer)) is not None:
+            return err
+
         if request.query_params.get("format") == OUTPUT_FORMAT_BENTO_SEARCH_RESULT:
             # TODO: this whole thing is badly-placed: it really should be an alternate view of phenopackets, not
             #  individuals. As such, it can return >1 record for the same individual if they have >1 phenopacket.
@@ -181,12 +190,27 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         *api_settings.DEFAULT_RENDERER_CLASSES,
         PhenopacketsRenderer,
         IndividualCSVRenderer,
+        IndividualXLSXRenderer,
         IndividualBentoSearchRenderer,
     )
     # Override to infer the renderer based on a `format` argument from the POST request body
     content_negotiation_class = FormatInPostContentNegotiation
 
     data_type = dts.DATA_TYPE_PHENOPACKET
+
+    def permission_from_request(self, request: DrfRequest) -> Permission | None:
+        if self.action == "export_fields":
+            return P_QUERY_DATA
+        return super().permission_from_request(request)
+
+    @action(detail=False, methods=["GET"])
+    def export_fields(self, _request: DrfRequest, *_args, **_kwargs):
+        return Response(IndividualCSVRenderer.field_choices())
+
+    def list(self, request, *args, **kwargs):
+        if (err := csv_fields_error_response(request, IndividualCSVRenderer)) is not None:
+            return err
+        return super().list(request, *args, **kwargs)
 
     @async_to_sync
     async def get_queryset(self):

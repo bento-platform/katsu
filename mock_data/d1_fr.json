@@ -1,0 +1,196 @@
+{
+  "identifier": "dataset-json-full-001",
+  "language": "fr",
+  "schema_version": "1.0",
+  "title": "Ensemble de données de test complet provenant de JSON",
+  "description": "Un ensemble de données complet chargé à partir d'une fixture JSON avec tous les champs remplis",
+  "long_description": {
+    "content": "<h1>Description complète de l'ensemble de données</h1><p>Ceci est un ensemble de données de test complet avec tous les champs remplis.</p>",
+    "content_type": "text/html"
+  },
+  "keywords": [
+    "génomique",
+    "cancer",
+    {"id": "HP:0001250", "label": "Crise d'épilepsie"},
+    {"id": "HP:0002664", "label": "Néoplasme"}
+  ],
+  "resources": [
+    {
+      "id": "hp",
+      "version": "2024-04-26",
+      "namespace_prefix": "HP",
+      "iri_prefix": "http://purl.obolibrary.org/obo/HP_",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "name": "Ontologie du Phénotype Humain"
+    }
+  ],
+  "stakeholders": [
+    {
+      "type": "person",
+      "name": "Jane Doe",
+      "honorific": "Dr.",
+      "other_names": ["J. Doe", "Jane D."],
+      "location": "City, Country",
+      "affiliations": [
+        "Test University",
+        {
+          "type": "organization",
+          "name": "Research Institute",
+          "description": "Un établissement de recherche de premier plan",
+          "contact": {
+            "website": "https://research.org",
+            "email": ["contact@research.org"],
+            "address": "123 Research Ave, City, Country",
+            "phone": {
+              "country_code": 1,
+              "number": 5551234567
+            }
+          },
+          "location": "City, Country",
+          "roles": ["Centre de recherche"]
+        }
+      ],
+      "roles": ["Chercheur principal", "Chercheur"]
+    },
+    {
+      "type": "person",
+      "name": "John Smith",
+      "honorific": "Prof.",
+      "contact": {
+        "email": ["contact@research.org"],
+        "address": "123 Research Ave, City, Country",
+        "phone": {
+          "country_code": 1,
+          "number": 5551234567
+        }
+      },
+      "affiliations": ["Test University"],
+      "roles": ["Co-chercheur"]
+    }
+  ],
+  "funding_sources": [
+    {
+      "funder": "National Science Foundation",
+      "grant_numbers": ["NSF-2024-001", "NSF-2024-002"]
+    },
+    {
+      "funder": "Jane Doe"
+    }
+  ],
+  "spatial_coverage": "New York City, USA",
+  "version": "2.1.0",
+  "privacy": "Dés-identifié selon la méthode Safe Harbor de HIPAA",
+  "license": {
+    "label": "Creative Commons Attribution 4.0",
+    "type": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/"
+  },
+  "counts": [
+    {
+      "count_entity": "participants",
+      "value": 1500,
+      "description": "Nombre total de participants à l'étude"
+    },
+    {
+      "count_entity": "samples",
+      "value": 3200,
+      "description": "Nombre total d'échantillons biologiques collectés"
+    }
+  ],
+  "primary_contact": {
+    "type": "person",
+    "name": "Jane Doe",
+    "honorific": "Dr.",
+    "affiliations": ["Test University"],
+    "roles": ["Chercheur principal"]
+  },
+  "links": [
+    {
+      "label": "Protocole d'étude",
+      "url": "https://example.org/protocol.pdf",
+      "type": "Artéfact téléchargeable"
+    },
+    {
+      "label": "Dictionnaire de données",
+      "url": "https://example.org/data-dictionary",
+      "type": "Schéma"
+    },
+    {
+      "label": "Accès aux données",
+      "url": "https://data.example.org/access",
+      "type": "Accès aux données"
+    },
+    {
+      "label": "Portail de téléchargement",
+      "url": "https://portal.example.org/download",
+      "type": "Accès aux données"
+    }
+  ],
+  "publications": [
+    {
+      "title": "Analyse génomique des patients atteints de cancer",
+      "url": "https://doi.org/10.1234/example",
+      "doi": "10.1234/example",
+      "publication_type": "Article de revue",
+      "authors": [
+        {
+          "type": "person",
+          "name": "Jane Doe",
+          "honorific": "Dr.",
+          "affiliations": ["Test University"],
+          "roles": ["Chercheur principal"]
+        },
+        {
+          "type": "person",
+          "name": "John Smith",
+          "honorific": "Prof.",
+          "affiliations": ["Test University"],
+          "roles": ["Co-chercheur"]
+        }
+      ],
+      "publication_date": "2023-06-15",
+      "publication_venue": {
+        "name": "Journal of Genomics",
+        "venue_type": "Revue",
+        "publisher": "Academic Press",
+        "location": "New York"
+      },
+      "description": "Publication principale décrivant la méthodologie de l'étude et les résultats initiaux"
+    }
+  ],
+  "logos": [
+    {
+      "url": "https://example.org/logo-light.png",
+      "theme": "light",
+      "description": "Logo de l'étude pour les fonds clairs"
+    },
+    {
+      "url": "https://example.org/logo-dark.png",
+      "theme": "dark",
+      "description": "Logo de l'étude pour les fonds sombres"
+    }
+  ],
+  "release_date": "2023-01-15",
+  "last_modified": "2024-06-01",
+  "participant_criteria": [
+    {
+      "type": "Inclusion",
+      "description": "Adultes âgés de 18 à 65 ans ayant un diagnostic confirmé"
+    },
+    {
+      "type": "Exclusion",
+      "description": "Participants ayant reçu un traitement antérieur dans les 6 mois"
+    }
+  ],
+  "study_status": "ONGOING",
+  "study_context": "RESEARCH",
+  "domain": ["Génomique", "Recherche sur le cancer"],
+  "program_name": "Programme national de génomique du cancer",
+  "extra_properties": {
+    "institution_code": "TU-001",
+    "ethics_approval": "IRB-2022-456",
+    "recruitment_target": 2000,
+    "completion_rate": 0.75,
+    "data_sharing_allowed": true
+  }
+}

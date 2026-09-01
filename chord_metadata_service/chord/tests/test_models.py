@@ -2,6 +2,8 @@ from django.db.utils import IntegrityError
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from uuid import uuid4
+from bento_lib.discovery import DiscoveryConfig
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.patients.models import Individual
@@ -11,8 +13,8 @@ from chord_metadata_service.phenopackets.tests.constants import (
     VALID_INDIVIDUAL_1
 )
 from chord_metadata_service.restapi.models import SchemaType
-from ..models import Project, Dataset, ProjectJsonSchema
-from .constants import VALID_DATA_USE_1
+from ..models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
+from .constants import VALID_DATASET_PRIMARY_CONTACT
 
 
 P2_DESC = "This is a good project..."
@@ -31,24 +33,17 @@ class ProjectTest(TestCase):
         self.assertEqual(p2.description, P2_DESC)
 
         self.assertEqual(str(p1), f"Project 1 (ID: {str(p1.identifier)})")
+        self.assertEqual(str(p2), f"Project 2 (ID: {str(p2.identifier)})")
 
-
-class DatasetTest(TestCase):
-    def setUp(self) -> None:
-        p = Project.objects.create(title="Project 1", description="")
-        Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1, project=p)
-
-    def test_dataset(self):
+    def test_project_discovery_null(self):
         p = Project.objects.get(title="Project 1")
-        d = Dataset.objects.get(title="Dataset 1")
+        self.assertIsNone(p.discovery)
 
-        self.assertEqual(d.description, "Some dataset")
-        self.assertDictEqual(d.data_use, VALID_DATA_USE_1)
-        self.assertEqual(d.project, p)
-
-        self.assertEqual(str(d), f"Dataset 1 (ID: {str(d.identifier)})")
-
-        self.assertIn(d.identifier, set(d2.identifier for d2 in p.datasets.all()))
+    def test_project_discovery_config(self):
+        cfg = DiscoveryConfig()
+        p = Project.objects.create(title="Project 3", description="", discovery=cfg)
+        reloaded = Project.objects.get(pk=p.pk)
+        self.assertIsInstance(reloaded.discovery, DiscoveryConfig)
 
 
 TABLE_ID = str(uuid4())
@@ -130,3 +125,65 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         with self.assertRaises(ValidationError):
             # A biosample exists already for this project
             invalid_pjs_biosample.save()
+
+
+class DatasetTest(ProjectTestCase):
+    def test_str(self):
+        self.assertEqual(str(self.dataset), f"{self.dataset.identifier}: {self.dataset.title}")
+
+    def test_resources_empty(self):
+        self.assertEqual(self.dataset.resources.count(), 0)
+
+    def test_to_schema(self):
+        schema = self.dataset.to_schema()
+        self.assertIsInstance(schema, KatsuDatasetModel)
+        self.assertEqual(schema.title, self.dataset.title)
+
+    def test_update_from_schema(self):
+        new_title = "Updated Title"
+        updated_schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title=new_title,
+            description="Updated description",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            identifier=str(self.dataset.identifier),
+            project=str(self.project.identifier),
+        )
+        ds = Dataset.objects.get(pk=self.dataset.identifier)
+        ds.update_from_schema(updated_schema)
+        ds.save()
+        reloaded = Dataset.objects.get(pk=self.dataset.identifier)
+        self.assertEqual(reloaded.title, new_title)
+
+
+class DatasetTranslationTest(ProjectTestCase):
+    def setUp(self):
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset Translation Test",
+            description="Test translation",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            identifier=str(self.dataset.identifier),
+            project=str(self.project.identifier),
+        )
+        self.translation = DatasetTranslation.from_schema(
+            schema, dataset_id=self.dataset.identifier, language='fr'
+        )
+        self.translation.save()
+
+    def test_str(self):
+        self.assertEqual(str(self.translation), f"{self.dataset.identifier}: fr")
+
+    def test_unique_together(self):
+        dup = DatasetTranslation(
+            dataset=self.dataset,
+            language='fr',
+            data=self.translation.data,
+        )
+        with self.assertRaises(IntegrityError):
+            dup.save()
+
+    def test_translation_data_stored(self):
+        reloaded = DatasetTranslation.objects.get(pk=self.translation.pk)
+        self.assertEqual(reloaded.language, 'fr')
+        self.assertEqual(reloaded.dataset_id, self.dataset.identifier)

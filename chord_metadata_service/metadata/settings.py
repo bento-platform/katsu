@@ -103,6 +103,12 @@ if ADDITIONAL_ALLOWED_HOSTS:
 if "*" in ALLOWED_HOSTS:
     ALLOWED_HOSTS = ["*"]  # Simplify
 
+# POST body size maximum - increase from default of 2.5 MB to 64 MiB
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get("KATSU_DATA_UPLOAD_MAX_MEMORY_SIZE", "64000000"))
+
+# Turns off redirect to path with slash
+
 APPEND_SLASH = False
 
 # Bento misc. settings

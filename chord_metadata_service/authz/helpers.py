@@ -1,19 +1,19 @@
 from bento_lib.auth.permissions import (
-    Permission,
-    P_QUERY_PROJECT_LEVEL_BOOLEAN,
+    P_QUERY_DATA,
     P_QUERY_DATASET_LEVEL_BOOLEAN,
     P_QUERY_DATASET_LEVEL_COUNTS,
+    P_QUERY_PROJECT_LEVEL_BOOLEAN,
     P_QUERY_PROJECT_LEVEL_COUNTS,
-    P_QUERY_DATA,
+    Permission,
 )
 from bento_lib.auth.resources import RESOURCE_EVERYTHING
 from django.http import HttpRequest
 from rest_framework.request import Request
 
 from chord_metadata_service.chord.data_types import KatsuDataType
+
 from .middleware import authz_middleware
 from .types import DataPermissions, DataTypeDiscoveryPermissions
-
 
 __all__ = [
     "get_bool_permission",

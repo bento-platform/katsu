@@ -1,5 +1,4 @@
-from .semantic_mappings.context import CONTEXT_TYPES, CONTEXT
-
+from .semantic_mappings.context import CONTEXT, CONTEXT_TYPES
 
 # utils to convert dataset json to json-ld
 
@@ -19,7 +18,7 @@ def dates_to_jsonld(dates) -> list:
 
 def creators_to_jsonld(creators) -> list:
     for creator in creators:
-        if "name" in creator.keys():
+        if "name" in creator:
             obj_to_jsonld(creator, "organization")
         else:
             obj_to_jsonld(creator, "person")
@@ -59,10 +58,10 @@ def distributions_to_jsonld(distributions) -> list:
         _obj_identifiers_to_jsonld(distribution)
         if "stored_in" in distribution:
             obj_to_jsonld(distribution["stored_in"], "stored_in")
-        if "dates" in distribution.keys():
+        if "dates" in distribution:
             dates_to_jsonld(distribution["dates"])
         if "licenses" in distribution:
-            for license_ in distribution["liceses"]:
+            for license_ in distribution["licenses"]:
                 obj_to_jsonld(license_, "licenses")
         # access
     return distributions
@@ -77,43 +76,43 @@ def dataset_to_jsonld(dataset):
     dataset["@context"] = CONTEXT
     dataset["@type"] = CONTEXT_TYPES["dataset"]["type"]
 
-    if "dates" in dataset.keys():
+    if "dates" in dataset:
         dates_to_jsonld(dataset["dates"])
-    if "stored_in" in dataset.keys():
+    if "stored_in" in dataset:
         obj_to_jsonld(dataset["stored_in"], "stored_in")
-    if "creators" in dataset.keys():
+    if "creators" in dataset:
         creators_to_jsonld(dataset["creators"])
-    if "types" in dataset.keys():
+    if "types" in dataset:
         for t in dataset["types"]:
             obj_to_jsonld(t, "types")
-            if "information" in t.keys():
+            if "information" in t:
                 obj_to_jsonld(t["information"], "annotation")
-    if "licenses" in dataset.keys():
+    if "licenses" in dataset:
         for license_ in dataset["licenses"]:
             obj_to_jsonld(license_, "licenses")
-    if "extra_properties" in dataset.keys():
+    if "extra_properties" in dataset:
         extra_properties_to_jsonld(dataset["extra_properties"])
-    if "alternate_identifiers" in dataset.keys():
+    if "alternate_identifiers" in dataset:
         for identifier in dataset["alternate_identifiers"]:
             obj_to_jsonld(identifier, "alternate_identifiers")
-    if "related_identifiers" in dataset.keys():
+    if "related_identifiers" in dataset:
         for rel_id in dataset["related_identifiers"]:
             obj_to_jsonld(rel_id, "related_identifiers")
-    if "spatial_coverage" in dataset.keys():
+    if "spatial_coverage" in dataset:
         spatial_coverage_to_jsonld(dataset["spatial_coverage"])
-    if "distributions" in dataset.keys():
+    if "distributions" in dataset:
         distributions_to_jsonld(dataset["distributions"])
-    if "dimensions" in dataset.keys():
+    if "dimensions" in dataset:
         for dimension in dataset["dimensions"]:
             obj_to_jsonld(dimension, "dimensions")
-    if "primary_publications" in dataset.keys():
+    if "primary_publications" in dataset:
         for pp in dataset["primary_publications"]:
             obj_to_jsonld(pp, "primary_publications")
-            if "identifier" in pp.keys():
+            if "identifier" in pp:
                 obj_to_jsonld(pp["identifier"], "identifier")
-            if "authors" in pp.keys():
+            if "authors" in pp:
                 creators_to_jsonld(pp["authors"])
-            if "dates" in pp.keys():
+            if "dates" in pp:
                 dates_to_jsonld(pp["dates"])
 
     return dataset

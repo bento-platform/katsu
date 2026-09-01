@@ -10,6 +10,7 @@ from __future__ import annotations
 from bento_lib.discovery import DiscoveryEntity
 from bento_lib.ontologies.models import OntologyClass
 from django.db.models import QuerySet, Manager
+from pydantic import AnyUrl
 from typing import Awaitable, Callable, Type, TypeVar, TypedDict, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -38,6 +39,7 @@ __all__ = [
     "individual_matches",
     "DISCOVERY_ENTITY_TO_MATCH_FN",
     "DISCOVERY_ENTITY_TO_CSV_RENDERER",
+    "DISCOVERY_ENTITY_TO_XLSX_RENDERER",
 ]
 
 T = TypeVar("T")
@@ -99,6 +101,8 @@ async def experiment_result_matches(
                 filename=er.filename,
                 url=er.url,
                 indices=ExperimentResultIndices.model_validate(er.indices),
+                storage_uri=AnyUrl(er.storage_uri) if er.storage_uri else None,
+                storage_server=er.storage_server,
                 genome_assembly_id=er.genome_assembly_id,
                 file_format=er.file_format,
                 data_output_type=er.data_output_type,
@@ -316,4 +320,12 @@ DISCOVERY_ENTITY_TO_CSV_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuCSVRender
     "biosample": apir.BiosamplesCSVRenderer,
     "experiment": apir.ExperimentCSVRenderer,
     "experiment_result": apir.ExperimentResultCSVRenderer,
+}
+
+DISCOVERY_ENTITY_TO_XLSX_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuXLSXRenderer]] = {
+    "phenopacket": apir.PhenopacketXLSXRenderer,
+    "individual": apir.IndividualXLSXRenderer,
+    "biosample": apir.BiosamplesXLSXRenderer,
+    "experiment": apir.ExperimentXLSXRenderer,
+    "experiment_result": apir.ExperimentResultXLSXRenderer,
 }

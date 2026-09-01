@@ -25,7 +25,7 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferTo
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.api_renderers import PassThruCSVRenderer
+from chord_metadata_service.restapi.api_renderers import PassThruCSVRenderer, PassThruXLSXRenderer, XLSX_MEDIA_TYPE
 from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE
 from chord_metadata_service.utils import build_id_set
 
@@ -43,7 +43,7 @@ from .fields import get_field_options, get_range_stats, get_categorical_stats
 from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import trigram_similarity_search, normal_full_text_search
-from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER
+from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER, DISCOVERY_ENTITY_TO_XLSX_RENDERER
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import (
     DiscoveryFieldResponse,
@@ -328,6 +328,10 @@ def get_accepted_formats(request: DrfRequest) -> AcceptedDiscoveryResponseFormat
     # noinspection PyProtectedMember
     if request._request.accepts("text/csv"):
         fmts.add("csv")
+
+    # noinspection PyProtectedMember
+    if request._request.accepts(XLSX_MEDIA_TYPE):
+        fmts.add("xlsx")
 
     return frozenset(fmts)
 
@@ -647,7 +651,7 @@ async def discovery_endpoint(
 
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
-@renderer_classes([JSONRenderer, PassThruCSVRenderer])  # renderers here are just handling negotiation
+@renderer_classes([JSONRenderer, PassThruCSVRenderer, PassThruXLSXRenderer])  # renderers here just handle negotiation
 @inject_discovery_deps(empty_404=True)
 async def discovery_matches(
     request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
@@ -663,7 +667,10 @@ async def discovery_matches(
       _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
-      _format:    Response format ("json" or "csv"; must match request Accept header[s])
+      _format:    Response format ("json", "csv", or "xlsx"; must match request Accept header[s])
+      _fields:    (CSV/XLSX only) comma-separated subset of export columns to return; see
+                  discovery_matches_export_fields for the available {key, label} choices per entity. Omit to get
+                  every registered column.
       project:    Discovery scope - project ID (if not set, the global scope is used)
       dataset:    Discovery scope - dataset ID (if not set, the project or global scope is used)
 
@@ -691,8 +698,10 @@ async def discovery_matches(
         elif "csv" in accepted_formats:
             # if we can accept CSV but not JSON and _format is not set --> response format should be CSV
             response_format_param = "csv"
+        elif "xlsx" in accepted_formats:
+            response_format_param = "xlsx"
 
-    if response_format_param not in ("json", "csv"):
+    if response_format_param not in ("json", "csv", "xlsx"):
         return dres.csv_or_json_error_response(
             request, errors.bad_request_error("bad response format"), accepted_formats
         )
@@ -726,6 +735,23 @@ async def discovery_matches(
         return dres.insufficient_privileges(request, accepted_formats)
 
     authz_middleware.mark_authz_done(request)
+
+    # -- CSV/XLSX field selection validation -----------------------------------------------------------------------
+
+    export_renderer_cls = (
+        DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity] if response_format == "csv"
+        else DISCOVERY_ENTITY_TO_XLSX_RENDERER[queried_entity] if response_format == "xlsx"
+        else None
+    )
+
+    if export_renderer_cls is not None:
+        unknown_fields = export_renderer_cls.unknown_requested_fields(request)
+        if unknown_fields:
+            return dres.csv_or_json_error_response(
+                request,
+                errors.bad_request_error(f"unknown export field(s): {', '.join(unknown_fields)}"),
+                accepted_formats,
+            )
 
     # -- Query execution -----------------------------------------------------------------------------------------------
 
@@ -780,15 +806,18 @@ async def discovery_matches(
 
     # -- Build and return response -------------------------------------------------------------------------------------
 
-    if response_format == "csv":
+    if export_renderer_cls is not None:
         @sync_to_async
-        def _get_csv():
-            renderer = DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity]()
-            return renderer.render(renderer.get_model_serializer()(matches_page, many=True).data)
+        def _get_export():
+            renderer = export_renderer_cls()
+            return renderer.render(
+                renderer.get_model_serializer()(matches_page, many=True).data,
+                renderer_context={"request": request},
+            )
 
-        return await _get_csv()
+        return await _get_export()
 
-    # Otherwise, return a CSV response
+    # Otherwise, return a JSON response
     return Response(
         DiscoveryMatchesPaginatedResponse(
             results_entity=queried_entity,
@@ -798,6 +827,42 @@ async def discovery_matches(
             pagination=pagination,
         ).model_dump(mode="json", exclude_unset=True)
     )
+
+
+@extend_schema(
+    description="Exportable CSV/XLSX columns for a discovery_matches entity, for a UI export column picker",
+    responses={
+        status.HTTP_200_OK: inline_serializer(
+            name="discovery_matches_export_fields_response",
+            fields={"key": serializers.CharField(), "label": serializers.CharField()},
+        ),
+    },
+)
+@api_view(["GET"])
+@permission_classes([BentoDeferToHandler])
+@inject_discovery_deps(empty_404=True)
+async def discovery_matches_export_fields(
+    request: DrfRequest, _scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, _lg: BoundLogger
+):
+    """
+    Returns the columns discovery_matches can export (CSV and XLSX share the same columns) for a given entity, so
+    a UI can build a column picker before calling discovery_matches?_format=csv|xlsx&_entity=...&_fields=....
+
+    Query parameters:
+      _entity: Entity to list export columns for. phenopacket|individual|biosample|experiment|experiment_result
+               (default: phenopacket)
+    """
+    queried_entity: DiscoveryEntity = request.query_params.get("_entity", "phenopacket")
+    if queried_entity not in DISCOVERY_ENTITIES:
+        authz_middleware.mark_authz_done(request)
+        return Response(errors.bad_request_error("invalid entity"), status=status.HTTP_400_BAD_REQUEST)
+
+    if not dt_permissions[DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[queried_entity]].data:
+        # Same permission requirement as discovery_matches' CSV/XLSX/data export - we need full data permissions.
+        return dres.insufficient_privileges(request)
+
+    authz_middleware.mark_authz_done(request)
+    return Response(DISCOVERY_ENTITY_TO_CSV_RENDERER[queried_entity].field_choices())
 
 
 # TODO: extend this implementation for Bento v20+

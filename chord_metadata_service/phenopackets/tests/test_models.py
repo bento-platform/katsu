@@ -68,6 +68,11 @@ class BiosampleTest(ProjectTestCase):
         self.assertEqual(str(self.meta_data), str(self.meta_data.pk))
         self.assertEqual(str(self.phenopacket), str(self.phenopacket.pk))
 
+    def test_get_sample_tissue_data(self):
+        data = self.biosample_1.get_sample_tissue_data
+        self.assertEqual(data["reference"]["reference"], "UBERON:0001256")
+        self.assertEqual(data["reference"]["display"], "wall of urinary bladder")
+
 
 class PhenotypicFeatureTest(TestCase):
     """ Test module for PhenotypicFeature model. """
@@ -120,6 +125,9 @@ class GeneDescriptorTest(TestCase):
     def setUp(self):
         self.gene_descriptor = m.GeneDescriptor.objects.create(**c.VALID_GENE_DESCRIPTOR_1)
 
+    def test_gene_descriptor_str(self):
+        self.assertEqual(str(self.gene_descriptor), self.gene_descriptor.value_id)
+
     def test_gene_descriptor_fts_repr(self):
         self.assertEqual(
             FTSHelpersMixin.fts_repr_values_to_str(self.gene_descriptor.fts_repr_values()),
@@ -145,9 +153,30 @@ class GenomicInterpretationTest(TestCase):
     def test_genomic_interpretation(self):
         self.assertEqual(m.GenomicInterpretation.objects.count(), 1)
 
+    def test_variation_descriptor_str(self):
+        self.assertEqual(str(self.variant_descriptor), self.variant_descriptor.id)
+
+    def test_variant_interpretation_str(self):
+        self.assertEqual(str(self.variant_interpretation), str(self.variant_interpretation.id))
+
     def test_validation_gene_or_variant(self):
         with self.assertRaises(ValidationError):
             m.GenomicInterpretation.objects.create(**c.valid_genomic_interpretation()).clean()
+
+    def test_validation_no_subject_or_biosample(self):
+        with self.assertRaises(ValidationError):
+            m.GenomicInterpretation.objects.create(
+                **c.valid_genomic_interpretation(self.gene_descriptor)
+            ).clean()
+
+    def test_clean_passes_with_gene_and_subject(self):
+        individual = m.Individual.objects.create(**c.VALID_INDIVIDUAL_1)
+        gi = m.GenomicInterpretation(
+            gene_descriptor=self.gene_descriptor,
+            subject=individual,
+            interpretation_status="CANDIDATE",
+        )
+        gi.clean()  # should not raise
 
     def test_variant_descriptor_repr(self):
         self.assertEqual(
@@ -372,6 +401,9 @@ class PhenopacketTest(ProjectTestCase):
                 " datatype symptom David Lougheed David Lougheed"
             ),
         )  # should be populated with interpretations + diseases + phenotypic features + metadata stuff
+
+    def test_disease_str(self):
+        self.assertEqual(str(self.disease), str(self.disease.id))
 
     def test_filtering(self):
         f = PhenopacketFilter()

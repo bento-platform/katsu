@@ -8,6 +8,7 @@ from ..fields_utils import (
     get_jsonb_path_query,
     get_json_range_condition,
     labelled_number_range_generator,
+    labelled_date_range_generator_by_month,
     get_nested_json_condition,
     str_to_numeric,
 )
@@ -86,6 +87,32 @@ class TestLabelledRangeGeneratorCustomBins(TestCase):
         for params in subtests:
             with self.subTest(params=params):
                 self.assertEqual(str_to_numeric(params[0]), params[1])
+
+
+class TestLabelledDateRangeGeneratorByMonth(TestCase):
+    def test_empty_range(self):
+        self.assertEqual(list(labelled_date_range_generator_by_month(None, None)), [])
+        self.assertEqual(list(labelled_date_range_generator_by_month("2022-01", None)), [])
+        self.assertEqual(list(labelled_date_range_generator_by_month(None, "2022-01")), [])
+
+    def test_single_month(self):
+        rg = list(labelled_date_range_generator_by_month("2022-01", "2022-01"))
+        self.assertEqual(rg, [("2022-01", "2022-02", "2022-01")])
+
+    def test_multi_month_spanning_year(self):
+        rg = list(labelled_date_range_generator_by_month("2021-11", "2022-02"))
+        self.assertEqual(rg, [
+            ("2021-11", "2021-12", "2021-11"),
+            ("2021-12", "2022-01", "2021-12"),
+            ("2022-01", "2022-02", "2022-01"),
+            ("2022-02", "2022-03", "2022-02"),
+        ])
+
+    def test_label_is_machine_readable_floor(self):
+        # the label must be the machine-readable "yyyy-mm" bin key (equal to floor), not a display string, so that
+        # the front-end can format it however it likes (e.g., localized month/year names).
+        for floor, _ceil, label in labelled_date_range_generator_by_month("2020-06", "2021-06"):
+            self.assertEqual(label, floor)
 
 
 class TestJsonFieldUtils(TestCase):

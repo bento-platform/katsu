@@ -2,12 +2,14 @@ import io
 import uuid
 from typing import TextIO
 from os import walk, path
+from unittest.mock import MagicMock
 
 from asgiref.sync import async_to_sync
 from django.db.models import F
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 
 from chord_metadata_service.chord.export import cbioportal as exp
+from chord_metadata_service.chord.export.cbioportal import CbioportalClinicalHeaderGenerator
 from chord_metadata_service.chord.export.cbioportal import (
     CBIO_FILES_SET,
     MUTATION_DATA_FILENAME,
@@ -18,6 +20,7 @@ from chord_metadata_service.chord.export.cbioportal import (
     SAMPLE_DATATYPE,
 )
 from chord_metadata_service.chord.export.utils import ExportError, ExportFileContext
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
@@ -31,7 +34,7 @@ from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets import models as pm
 
 
-from .constants import VALID_DATA_USE_1
+from .constants import VALID_DATASET_PRIMARY_CONTACT
 from .example_ingest import (
     EXAMPLE_INGEST_EXPERIMENT,
     EXAMPLE_INGEST_EXPERIMENT_RESULT,
@@ -44,8 +47,17 @@ class ExportCBioTest(TestCase):
         # Creates a test database and populate with a phenopacket test file
 
         p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="Dataset 1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=p)
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset 1",
+            description="Some dataset",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(p.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.d = Dataset.from_schema(schema)
+        self.d.save()
+        self.d.refresh_from_db()
         self.study_id = str(self.d.identifier)
 
         self.p = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
@@ -104,7 +116,7 @@ class ExportCBioTest(TestCase):
         self.assertIn("type_of_cancer", content)
         self.assertEqual(content["cancer_study_identifier"], self.study_id)
         self.assertEqual(content["name"], self.d.title)
-        self.assertEqual(content["description"], self.d.description)
+        self.assertEqual(content["description"], self.d.data.get("description", ""))
 
     def test_export_cbio_sample_meta(self):
         with io.StringIO() as output:
@@ -164,7 +176,7 @@ class ExportCBioTest(TestCase):
                 break
 
     def test_export_cbio_sample_data(self):
-        samples = pm.Biosample.objects.filter(phenopackets=self.p)
+        samples = pm.Biosample.objects.filter(phenopackets=self.p).order_by("id")
 
         with io.StringIO() as output:
             async_to_sync(exp.sample_export)(samples, output)
@@ -252,3 +264,57 @@ class ExportCBioTest(TestCase):
             set(content["case_list_ids"].split("\t")),
             set([exp.sanitize_id(e.biosample_id) for e in exp_res])
         )
+
+
+async def _agen(*items):
+    for item in items:
+        yield item
+
+
+class CbioportalUnitTest(SimpleTestCase):
+    def test_study_meta_exports_citation_when_publications_present(self):
+        mock_dataset = MagicMock()
+        mock_dataset.identifier = uuid.uuid4()
+        mock_dataset.title = "Test Dataset"
+        mock_schema = MagicMock()
+        mock_schema.description = ""
+        mock_schema.publications = ["doi:10.1234/test"]
+        mock_dataset.to_schema.return_value = mock_schema
+        with io.StringIO() as output:
+            exp.study_export_meta(mock_dataset, output)
+            output.seek(0)
+            content = output.read()
+        self.assertIn("citation", content)
+
+    def test_sample_export_skips_null_individual_id(self):
+        null_sample = MagicMock()
+        null_sample.individual_id = None
+        valid_sample = MagicMock()
+        valid_sample.individual_id = "ind1"
+        valid_sample.id = "samp1"
+        valid_sample.sampled_tissue = None
+        with io.StringIO() as output:
+            async_to_sync(exp.sample_export)(_agen(null_sample, valid_sample), output)
+            output.seek(0)
+            non_header_lines = [ln for ln in output if not ln.startswith("#") and ln.strip()]
+        # column header row + 1 data row (null_sample skipped)
+        self.assertEqual(len(non_header_lines), 2)
+
+    def test_sample_export_no_sampled_tissue_skips_tissue_column(self):
+        sample = MagicMock()
+        sample.individual_id = "ind1"
+        sample.id = "samp1"
+        sample.sampled_tissue = None
+        with io.StringIO() as output:
+            async_to_sync(exp.sample_export)(_agen(sample), output)
+            output.seek(0)
+            content = output.read()
+        self.assertNotIn("TISSUE_LABEL", content)
+
+    def test_make_header_generates_default_for_unmapped_field(self):
+        header = CbioportalClinicalHeaderGenerator().make_header(["my_custom_field"])
+        self.assertEqual(len(header), 5)
+        self.assertIn("MY_CUSTOM_FIELD", header[4])
+
+    def test_sanitize_id_replaces_invalid_chars(self):
+        self.assertEqual(exp.sanitize_id("bad id!"), "bad_id_")

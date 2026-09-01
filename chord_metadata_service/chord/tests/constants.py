@@ -4,14 +4,11 @@ __all__ = [
     "VALID_DATA_USE_1",
     "VALID_PROJECT_1",
     "VALID_PROJECT_2",
-    "VALID_DATS_CREATORS",
-    "INVALID_DATS_CREATORS",
-    "valid_dataset_1",
-    "valid_dataset_2",
+    "VALID_DATASET_PRIMARY_CONTACT",
+    "valid_dataset",
     "PROJECT_JSON_SCHEMA_MISSING_PROJECT",
     "valid_project_json_schema",
     "valid_phenotypic_feature",
-    "dats_dataset",
     "TEST_SEARCH_QUERY_1",
     "TEST_SEARCH_QUERY_2",
     "TEST_SEARCH_QUERY_3",
@@ -49,35 +46,6 @@ VALID_PROJECT_2 = {
     "description": "Some description too",
 }
 
-VALID_DATS_CREATORS = [
-    {
-        "name": "1000 Genomes Project"
-    }
-]
-
-INVALID_DATS_CREATORS = [
-    {
-        "fullName": "John, Doe",
-        "lastName": "Doe",
-        "firstName": "John",
-        "affiliations": [
-            {
-                "name": "Medical Center"
-            }
-        ]
-    },
-    {
-        "fullName": "Jane, Doe",
-        "surname": "Doe",
-        "firstName": "Jane",
-        "affiliations": [
-            {
-                "organization": "Medical Center"
-            }
-        ]
-    }
-]
-
 DEFAULT_PROJECT_JSON_SCHEMA = {
     "type": "object",
     "properties": {
@@ -88,21 +56,17 @@ DEFAULT_PROJECT_JSON_SCHEMA = {
 }
 
 
-def valid_dataset_1(project_id):
+VALID_DATASET_PRIMARY_CONTACT = {"type": "person", "name": "Test Contact", "roles": []}
+
+
+def valid_dataset(project_id, title="Dataset 1", **kwargs):
     return {
-        "title": "Dataset 1",
+        "schema_version": "1.0",
+        "title": title,
         "description": "Test Dataset",
-        "data_use": VALID_DATA_USE_1,
-        "project": project_id,
-    }
-
-
-def valid_dataset_2(project_id):
-    return {
-        "title": "Dataset 2",
-        "description": "Test Dataset Too",
-        "data_use": VALID_DATA_USE_1,
-        "project": project_id,
+        "primary_contact": VALID_DATASET_PRIMARY_CONTACT,
+        "project": str(project_id),
+        **kwargs,
     }
 
 
@@ -122,132 +86,6 @@ def valid_project_json_schema(project_id: str,
         "required": required,
         "schema_type": schema_type,
         "json_schema": json_schema
-    }
-
-
-def dats_dataset(project_id, creators):
-    return {
-        "version": "1.0",
-        "project": project_id,
-        "privacy": "public open",
-        "licenses": [
-            {
-                "name": "BY-NC-SA"
-            }
-        ],
-        "creators": creators,
-        "types": [
-            {
-                "information": {
-                    "value": "genomics"
-                }
-            }
-        ],
-        "title": "1000 Genomes Project",
-        "description": "The 1000 Genomes Project provides a comprehensive description of common human variation by "
-                       "applying a combination of whole-genome sequencing, deep exome sequencing and dense microarray "
-                       "genotyping to a diverse set of 2504 individuals from 26 populations.  Over 88 million variants "
-                       "are characterised, including >99% of SNP variants with a frequency of >1% for a variety of "
-                       "ancestries.",
-        "storedIn": {
-            "name": "European Bioinformatics Institute"
-        },
-        "primaryPublications": [
-            {
-                "identifier": {
-                    "identifier": "https://doi.org/10.1038/nature15393"
-                },
-                "title": "A global reference for human genetic variation",
-                "dates": [
-                    {
-                        "type": {
-                            "value": "Primary reference publication date"
-                        },
-                        "date": "2015-10-01 00:00:00"
-                    }
-                ],
-                "authors": [
-                    {
-                        "name": "1000 Genomes Project"
-                    }
-                ]
-            }
-        ],
-        "isAbout": [
-            {
-                "identifier": {
-                    "identifier": "9606",
-                    "identifierSource": "https://www.ncbi.nlm.nih.gov/taxonomy/9606"
-                },
-                "name": "Homo sapiens"
-            }
-        ],
-        "dates": [
-            {
-                "type": {
-                    "value": "CONP DATS JSON fileset creation date"
-                },
-                "date": "2019-06-17 13:16:33"
-            }
-        ],
-        "distributions": [
-            {
-                "formats": [
-                    "VCF"
-                ],
-                "size": 10,
-                "unit": {
-                    "value": "GB"
-                },
-                "access": {
-                    "landingPage": "https://example.org",
-                    "authorizations": [
-                        {
-                            "value": "public"
-                        }
-                    ]
-                },
-                "storedIn": {
-                    "name": "European Bioinformatics Institute"
-                }
-            }
-        ],
-        "alternateIdentifiers": [
-            {
-                "identifier": "test alternative id"
-            }
-        ],
-        "relatedIdentifiers": [
-            {
-                "identifier": "test related id"
-            }
-        ],
-        "spatialCoverage": [
-            {
-                "@type": "Place",
-                "name": "Worldwide"
-            }
-        ],
-        "dimensions": [
-            {
-                "name": {
-                    "value": "test dimensions"
-                }
-            }
-        ],
-        "hasPart": [],
-        "extraProperties": [
-            {
-                "category": "contact",
-                "values": [
-                    {
-                        "value": "Jennifer Tremblay-Mercier, Research Co-ordinator, "
-                                 "jennifer.tremblay-mercier@douglas.mcgill.ca, 514-761-6131 #3329"
-                    }
-                ]
-            }
-        ],
-        "data_use": VALID_DATA_USE_1
     }
 
 

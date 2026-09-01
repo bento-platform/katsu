@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.models import Dataset
-from chord_metadata_service.chord.tests.constants import valid_dataset_1, VALID_PROJECT_2, valid_dataset_2
+from chord_metadata_service.chord.tests.constants import valid_dataset, VALID_PROJECT_2
 from chord_metadata_service.chord.tests.helpers import AuthzAPITestCaseWithProjectJSON
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
 from chord_metadata_service.logger import logger
@@ -43,7 +43,9 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         self.url_with_proj = f"{self.url}?project={self.project['identifier']}"
 
         # dataset for project 1
-        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_1(self.project["identifier"]))
+        r = self.one_authz_post(
+            reverse("dataset-list"), json=valid_dataset(self.project["identifier"], title="Dataset 1")
+        )
         self.dataset = r.json()
         self.url_with_proj_ds = f"{self.url}?project={self.project['identifier']}&dataset={self.dataset['identifier']}"
 
@@ -52,7 +54,9 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         self.project_2 = r.json()
 
         #  - dataset for project 2
-        r = self.one_authz_post(reverse("dataset-list"), json=valid_dataset_2(self.project_2["identifier"]))
+        r = self.one_authz_post(
+            reverse("dataset-list"), json=valid_dataset(self.project_2["identifier"], title="Dataset 2")
+        )
         self.dataset_2 = r.json()
 
     def test_list_resources_basic(self):
@@ -88,7 +92,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
         r = Resource.objects.create(**VALID_RESOURCE_1)
         Resource.objects.create(**VALID_RESOURCE_2)  # r2
 
-        ds = Dataset.objects.get(pk=self.dataset["identifier"])
+        ds = Dataset.objects.get(identifier=self.dataset["identifier"])
         ds.additional_resources.add(r)
 
         subtests = [
@@ -108,7 +112,7 @@ class ListResourceTest(AuthzAPITestCaseWithProjectJSON):
     def test_list_resources_dataset_and_phenopacket(self):
         r = Resource.objects.create(**VALID_RESOURCE_1)
 
-        ds = Dataset.objects.get(pk=self.dataset["identifier"])
+        ds = Dataset.objects.get(identifier=self.dataset["identifier"])
         ds.additional_resources.add(r)
 
         pd = {

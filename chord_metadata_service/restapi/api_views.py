@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from chord_metadata_service.authz.helpers import get_data_type_query_permissions
 from chord_metadata_service.authz.middleware import authz_middleware
 from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferToHandler
-from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
+from chord_metadata_service.chord.data_types import DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.experiments import models as experiments_models
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
@@ -18,7 +18,6 @@ from chord_metadata_service.metadata.service_info import get_service_info
 from chord_metadata_service.phenopackets import models as pheno_models
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.restapi.models import SchemaType
-
 
 OVERVIEW_AGE_BIN_SIZE = 10
 

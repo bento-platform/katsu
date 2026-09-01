@@ -99,6 +99,9 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
     "experiment_result": (
         (["description"], None, TrigramWordSimilarity),
         (["filename"], None, TrigramWordSimilarity),
+        (["indices"], TextField, TrigramWordSimilarity),
+        (["storage_uri"], None, TrigramWordSimilarity),
+        (["storage_server"], None, TrigramSimilarity),
         (["file_format"], None, TrigramSimilarity),
         (["genome_assembly_id"], None, TrigramSimilarity),
         (["data_output_type"], None, TrigramSimilarity),

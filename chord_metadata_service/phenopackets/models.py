@@ -1,7 +1,7 @@
 from django.apps import apps
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
@@ -567,12 +567,9 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
         return TOP_LEVEL_MODEL_SCOPE_FILTERS
 
     def get_project_id(self) -> str | None:
-        model = apps.get_model("chord.Project")
-        try:
-            project = model.objects.get(datasets=self.dataset)
-            return project.identifier
-        except ObjectDoesNotExist:
+        if self.dataset is None:
             return None
+        return self.dataset.project_id
 
     # ------------------------------------------------------------------------------------------------------------------
 

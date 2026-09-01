@@ -1,5 +1,6 @@
 from django.contrib.gis.geos import Point
 from django.test import TestCase
+
 from ..models import GeoLocation
 
 __all__ = ["KINGSTON_GEOM_JSON", "GEO_LOCATION_1", "GeoLocationTestCase"]

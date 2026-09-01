@@ -1,15 +1,17 @@
 import csv
 import io
+import uuid
 
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Project, Dataset
 from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON
-from chord_metadata_service.chord.tests.constants import VALID_DATA_USE_1
+from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.geo.tests.constants import KINGSTON_GEOM_JSON
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.tests import constants as restapi_c
@@ -221,6 +223,40 @@ class BatchBiosamplesCSVTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         # TODO: test content
 
+    def test_post_biosamples_with_selected_fields(self):
+        response = self.one_authz_post(
+            reverse(self.view), json={**self.post_biosamples_body, 'fields': ['id', 'description']}
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        headers = next(csv.reader(io.StringIO(response.content.decode('utf-8'))))
+        self.assertEqual(headers, ['Id', 'Description'])
+
+    def test_post_biosamples_unknown_field_error(self):
+        response = self.one_authz_post(
+            reverse(self.view), json={**self.post_biosamples_body, 'fields': ['id', 'not_a_real_field']}
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+
+    def test_get_biosamples_batch_unknown_field_error(self):
+        response = self.one_authz_get(reverse(self.view) + '?format=csv&fields=not_a_real_field')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('not_a_real_field', response.json()['errors'][0]['message'])
+
+    def test_export_fields_action(self):
+        response = self.one_authz_get(reverse('batch/biosamples-export-fields'))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        keys = [f['key'] for f in response.json()]
+        self.assertEqual(
+            keys,
+            ['id', 'description', 'sampled_tissue', 'time_of_collection', 'histological_diagnosis',
+             'extra_properties', 'created', 'updated', 'individual'],
+        )
+
+    def test_export_fields_action_forbidden(self):
+        response = self.one_no_authz_get(reverse('batch/biosamples-export-fields'))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
 
 class CreatePhenopacketTest(AuthzAPITestCase):
 
@@ -258,10 +294,22 @@ class GetPhenopacketsApiTest(AuthzAPITestCase):
         Create two datasets and ingest 1 phenopacket into each.
         """
         self.p = Project.objects.create(title="Project 1", description="")
-        self.d = Dataset.objects.create(title="dataset_1", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                        project=self.p)
-        self.d2 = Dataset.objects.create(title="dataset_2", description="Some dataset", data_use=VALID_DATA_USE_1,
-                                         project=self.p)
+        schema1 = KatsuDatasetModel(
+            schema_version="1.0", title="dataset_1", description="Some dataset",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.d = Dataset.from_schema(schema1)
+        self.d.save()
+        self.d.refresh_from_db()
+        schema2 = KatsuDatasetModel(
+            schema_version="1.0", title="dataset_2", description="Some dataset",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT, project=str(self.p.identifier),
+            identifier=str(uuid.uuid4()),
+        )
+        self.d2 = Dataset.from_schema(schema2)
+        self.d2.save()
+        self.d2.refresh_from_db()
 
         WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             restapi_c.VALID_PHENOPACKET_1, self.d.identifier, logger)

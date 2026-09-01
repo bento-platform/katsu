@@ -20,7 +20,7 @@ jobs:
         python-version: ["3.12", "3.13", "3.14"]
     services:
       postgres:
-        image: ghcr.io/bento-platform/bento_postgis_dist:2026.02.13
+        image: ghcr.io/bento-platform/bento_postgis_dist:2026.07.27
         env:
           POSTGRES_DB: postgres
           POSTGRES_PASSWORD: postgres
@@ -30,11 +30,11 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
       with:
         submodules: true
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Poetry
@@ -49,8 +49,8 @@ jobs:
         poetry run coverage run --branch ./manage.py test
         poetry run coverage xml
     - name: Upload Coverage to Codecov
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v7
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
+        files: ./coverage.xml
         verbose: true

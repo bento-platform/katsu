@@ -1,7 +1,7 @@
-from django.conf import settings
-from rest_framework import pagination
 from urllib.parse import urljoin
 
+from django.conf import settings
+from rest_framework import pagination
 
 __all__ = [
     "DEFAULT_PAGE_SIZE",
@@ -30,19 +30,19 @@ class LargeResultsSetPagination(pagination.PageNumberPagination):
         if settings.SERVICE_URL_BASE_PATH is not None:
             # Monkey-patch rewrite build_absolute_uri
             self.request.build_absolute_uri = self._get_absolute_uri
-        return super(LargeResultsSetPagination, self).get_next_link()
+        return super().get_next_link()
 
     def get_previous_link(self):
         if settings.SERVICE_URL_BASE_PATH is not None:
             # Monkey-patch rewrite build_absolute_uri
             self.request.build_absolute_uri = self._get_absolute_uri
-        return super(LargeResultsSetPagination, self).get_previous_link()
+        return super().get_previous_link()
 
     def get_html_context(self):
         if settings.SERVICE_URL_BASE_PATH is not None:
             # Monkey-patch rewrite build_absolute_uri
             self.request.build_absolute_uri = self._get_absolute_uri
-        super(LargeResultsSetPagination, self).get_html_context()
+        super().get_html_context()
 
 
 class BatchResultsSetPagination(LargeResultsSetPagination):

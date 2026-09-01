@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import uuid
-
 from adrf.decorators import api_view
 from asgiref.sync import sync_to_async
 from bento_lib.auth.permissions import P_INGEST_DATA
@@ -49,7 +47,7 @@ def call_ingest_function_and_handle(
         validation_errors = tuple(e.error_list if hasattr(e, "error_list") else e.error_dict.items())
         err = "encountered validation errors during ingestion"
         lg.exception(err, exc_info=e)
-        return Response(errors.bad_request_error(err, *validation_errors))
+        return Response(errors.bad_request_error(err, *validation_errors), status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
         # Encountered some other error from the ingestion attempt, return a somewhat detailed message
@@ -115,7 +113,6 @@ async def ingest_into_dataset(request: DrfRequest, dataset_id: str, workflow_id:
 
     workflow = workflow_set.get_workflow(workflow_id)
 
-    dataset_id = str(uuid.UUID(dataset_id))  # Normalize dataset ID to UUID's str format.
     if not (
         await authz_middleware.async_evaluate_one(
             request,

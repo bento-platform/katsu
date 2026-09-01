@@ -1,10 +1,12 @@
 from abc import abstractmethod
+
 from django.apps import apps
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import Q, QuerySet
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
 from jsonschema import Draft7Validator
 from structlog.stdlib import BoundLogger
+
 from chord_metadata_service.logger import logger
 
 
@@ -48,7 +50,6 @@ class BaseExtraProperties(models.Model):
         Returns the SchemaType of the model.
         Template method design pattern, implementation left to inheritors.
         """
-        pass
 
     @abstractmethod
     def get_project_id(self) -> str | None:  # pragma: no cover
@@ -56,7 +57,6 @@ class BaseExtraProperties(models.Model):
         Returns the Project.identifier of the project that owns this object.
         Template method design pattern, implementation left to inheritors.
         """
-        pass
 
     def get_json_schema(self, lg: BoundLogger) -> QuerySet | None:
         """

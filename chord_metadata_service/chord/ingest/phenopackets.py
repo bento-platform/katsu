@@ -13,7 +13,7 @@ from chord_metadata_service.phenopackets import models as pm
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, VRS_REF_REGISTRY
 from chord_metadata_service.phenopackets.utils import time_element_to_years
 from chord_metadata_service.patients.models import Individual, VitalStatus
-from chord_metadata_service.patients.values import KaryotypicSex
+from chord_metadata_service.patients.values import KaryotypicSex, PatientStatus
 from chord_metadata_service.restapi.schema_utils import patch_project_schemas
 from chord_metadata_service.restapi.types import ExtensionSchemaDict
 from chord_metadata_service.restapi.utils import remove_computed_properties
@@ -111,7 +111,10 @@ def update_or_create_subject(subject: dict) -> pm.Individual:
 
     vital_status: VitalStatus | None = None
     if vital_status_data := subject.get("vital_status"):
-        vital_status, _ = VitalStatus.objects.get_or_create(**vital_status_data)
+        vs_query = {"status": vital_status_data.get("status", PatientStatus.UNKNOWN_STATUS)}
+        for k in ("time_of_death", "cause_of_death", "survival_time_in_days"):
+            vs_query.update(query_and_check_nulls(vital_status_data, k))
+        vital_status, _ = VitalStatus.objects.get_or_create(**vs_query)
 
     # Check if subject already exists
     existing_extra_properties: dict[str, Any]
@@ -471,7 +474,7 @@ def ingest_phenopacket(
 
 
 def ingest_phenopacket_workflow(json_data, dataset_id, lg: BoundLogger) -> list[pm.Phenopacket] | pm.Phenopacket:
-    project = Project.objects.get(datasets=dataset_id)
+    project = Project.objects.get(identifier=Dataset.objects.get(identifier=dataset_id).project_id)
     lg = lg.bind(project_id=str(project.identifier), dataset_id=dataset_id)
 
     project_schemas: Iterable[ExtensionSchemaDict] = (

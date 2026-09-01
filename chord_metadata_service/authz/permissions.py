@@ -1,11 +1,10 @@
 from asgiref.sync import async_to_sync
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 
 from .middleware import authz_middleware
-
 
 __all__ = [
     "BentoAllowAny",
