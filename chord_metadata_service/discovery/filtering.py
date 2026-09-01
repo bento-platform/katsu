@@ -26,7 +26,7 @@ async def validate_field_query_value(
     scope: ValidatedDiscoveryScope,
     field_id: str,
     value: str | DiscoveryQueryFilterOneOf,
-    field_permissions: DataPermissions
+    field_permissions: DataPermissions,
 ):
     """
     Validate a query value for a particular field against the discovery configuration and raise a ValidationError if the
@@ -111,9 +111,7 @@ async def discovery_filter_queryset(
         #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the
         #    queryset model
         if validate_field:
-            await validate_field_query_value(
-                queryset_entity, discovery_scope, field, value, qf_permissions[field]
-            )
+            await validate_field_query_value(queryset_entity, discovery_scope, field, value, qf_permissions[field])
 
         # Update queryset to include the Django ORM filter for this query field/value
         #  - can throw DiscoveryFilterRewriteException if we cannot rewrite the field mapping as a subpath of the

@@ -8,10 +8,7 @@ from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket
-from chord_metadata_service.phenopackets.tests.constants import (
-    valid_biosample_1,
-    VALID_INDIVIDUAL_1
-)
+from chord_metadata_service.phenopackets.tests.constants import valid_biosample_1, VALID_INDIVIDUAL_1
 from chord_metadata_service.restapi.models import SchemaType
 from ..models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
 from .constants import VALID_DATASET_PRIMARY_CONTACT
@@ -52,18 +49,9 @@ SERVICE_ID = str(uuid4())
 
 class ProjectJsonSchemaTest(ProjectTestCase):
     def setUp(self) -> None:
-        self.json_schema = {
-            "type": "object",
-            "properties": {
-                "prop_a": {"type": "string"}
-            },
-            "required": ["prop_a"]
-        }
+        self.json_schema = {"type": "object", "properties": {"prop_a": {"type": "string"}}, "required": ["prop_a"]}
         self.required_pheno_schema = ProjectJsonSchema.objects.create(
-            project=self.project,
-            required=True,
-            json_schema=self.json_schema,
-            schema_type=SchemaType.PHENOPACKET
+            project=self.project, required=True, json_schema=self.json_schema, schema_type=SchemaType.PHENOPACKET
         )
 
     def test_project_json_schema(self):
@@ -76,10 +64,7 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         # ProjectJsonSchema must be unique for every project_id, schema_type pair
         # Should fail
         invalid_pjs = ProjectJsonSchema(
-            project=self.project,
-            required=False,
-            json_schema={"type": "string"},
-            schema_type=SchemaType.PHENOPACKET
+            project=self.project, required=False, json_schema={"type": "string"}, schema_type=SchemaType.PHENOPACKET
         )
         with self.assertRaises(IntegrityError):
             # Should fail;
@@ -89,34 +74,23 @@ class ProjectJsonSchemaTest(ProjectTestCase):
         # Add a Phenopacket with an Individual and a Biosample to the project
         individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
         biosample = Biosample.objects.create(**valid_biosample_1(individual))
-        meta_data = MetaData.objects.create(
-            created_by="test",
-            submitted_by="test"
-        )
+        meta_data = MetaData.objects.create(created_by="test", submitted_by="test")
         phenopacket = Phenopacket.objects.create(
             id="phenopacket_id:1",
             subject=individual,
             dataset=self.dataset,
-            extra_properties={
-                "prop_a": "extra property text"
-            },
+            extra_properties={"prop_a": "extra property text"},
             meta_data=meta_data,
         )
         phenopacket.biosamples.set([biosample])
 
         # Tentative new ProjectJsonSchema for Individual
         invalid_pjs_individual = ProjectJsonSchema(
-            project=self.project,
-            required=False,
-            json_schema={"type": "string"},
-            schema_type=SchemaType.INDIVIDUAL
+            project=self.project, required=False, json_schema={"type": "string"}, schema_type=SchemaType.INDIVIDUAL
         )
         # Tentative new ProjectJsonSchema for Biosample
         invalid_pjs_biosample = ProjectJsonSchema(
-            project=self.project,
-            required=False,
-            json_schema={"type": "string"},
-            schema_type=SchemaType.BIOSAMPLE
+            project=self.project, required=False, json_schema={"type": "string"}, schema_type=SchemaType.BIOSAMPLE
         )
 
         with self.assertRaises(ValidationError):
@@ -166,9 +140,7 @@ class DatasetTranslationTest(ProjectTestCase):
             identifier=str(self.dataset.identifier),
             project=str(self.project.identifier),
         )
-        self.translation = DatasetTranslation.from_schema(
-            schema, dataset_id=self.dataset.identifier, language='fr'
-        )
+        self.translation = DatasetTranslation.from_schema(schema, dataset_id=self.dataset.identifier, language="fr")
         self.translation.save()
 
     def test_str(self):
@@ -177,7 +149,7 @@ class DatasetTranslationTest(ProjectTestCase):
     def test_unique_together(self):
         dup = DatasetTranslation(
             dataset=self.dataset,
-            language='fr',
+            language="fr",
             data=self.translation.data,
         )
         with self.assertRaises(IntegrityError):
@@ -185,5 +157,5 @@ class DatasetTranslationTest(ProjectTestCase):
 
     def test_translation_data_stored(self):
         reloaded = DatasetTranslation.objects.get(pk=self.translation.pk)
-        self.assertEqual(reloaded.language, 'fr')
+        self.assertEqual(reloaded.language, "fr")
         self.assertEqual(reloaded.dataset_id, self.dataset.identifier)

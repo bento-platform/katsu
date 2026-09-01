@@ -144,12 +144,12 @@ class TestResolveFilterMapping(TestCase):
         for params in subtests:
             with self.subTest(params=params):
                 if params[3] is None:
-                    self.assertEqual(resolve_filter_mapping_to_queryset_model(
-                        params[0], params[1], params[2], False
-                    ), params[4])
-                    self.assertEqual(resolve_filter_mapping_to_queryset_model(
-                        params[0], params[1], params[2], True
-                    ), params[4])
+                    self.assertEqual(
+                        resolve_filter_mapping_to_queryset_model(params[0], params[1], params[2], False), params[4]
+                    )
+                    self.assertEqual(
+                        resolve_filter_mapping_to_queryset_model(params[0], params[1], params[2], True), params[4]
+                    )
                 else:
                     self.assertEqual(resolve_filter_mapping_to_queryset_model(*params[:4]), params[4])
 
@@ -218,7 +218,6 @@ class TestNormalizeFieldPath(TestCase):
 
 
 class TestModelField(TransactionTestCase):
-
     def test_get_model_field_basic(self):
         field, _, queried_entity = get_field_django_mapping_and_queried_entity(
             "phenopacket", DISCOVERY_CONFIG_TEST.fields["age"]

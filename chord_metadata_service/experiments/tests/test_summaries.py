@@ -13,7 +13,6 @@ from .helpers import ExperimentTestCase
 
 
 class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
-
     empty_response = {
         "count": 0,
         "data_type_specific": {
@@ -64,24 +63,27 @@ class ExperimentSummaryTest(ExperimentTestCase, PermissionsTestCaseMixin):
         self.maxDiff = None
 
         r = await dt_experiment_summary(INSTANCE_SCOPE, self.permissions_full)
-        self.assertDictEqual(r, {
-            "count": 1,
-            "data_type_specific": {
-                "experiments": {
-                    "count": 1,
-                    "experiment_type": {"DNA Methylation": 1},
-                    "extraction_protocol": {"NGS": 1},
-                    "library_layout": {"Single": 1},
-                    "library_selection": {"PCR": 1},
-                    "library_source": {"Genomic": 1},
-                    "library_strategy": {"Bisulfite-Seq": 1},
-                    "study_type": {"Whole genome Sequencing": 1},
-                    "molecule": {"total RNA": 1},
+        self.assertDictEqual(
+            r,
+            {
+                "count": 1,
+                "data_type_specific": {
+                    "experiments": {
+                        "count": 1,
+                        "experiment_type": {"DNA Methylation": 1},
+                        "extraction_protocol": {"NGS": 1},
+                        "library_layout": {"Single": 1},
+                        "library_selection": {"PCR": 1},
+                        "library_source": {"Genomic": 1},
+                        "library_strategy": {"Bisulfite-Seq": 1},
+                        "study_type": {"Whole genome Sequencing": 1},
+                        "molecule": {"total RNA": 1},
+                    },
+                    "experiment_results": {"count": 0, "file_format": {}, "data_output_type": {}, "usage": {}},
+                    "instruments": {"count": 0, "device": {}},
                 },
-                "experiment_results": {"count": 0, "file_format": {}, "data_output_type": {}, "usage": {}},
-                "instruments": {"count": 0, "device": {}},
-            }
-        })
+            },
+        )
 
     async def test_summary_empty_project(self):
         r = await dt_experiment_summary(ValidatedDiscoveryScope(self.empty_project, None), self.permissions_full)

@@ -31,7 +31,7 @@ def generate_phenopackets_ingest(dataset_id):
         "workflow_metadata": workflow_set.get_workflow(WORKFLOW_PHENOPACKETS_JSON),
         "workflow_params": {
             "json_document": ""  # TODO
-        }
+        },
     }
 
 
@@ -126,8 +126,10 @@ class IngestTest(APITestCaseWithDataset):
         def _raise(*_):
             raise DjangoValidationError("invalid")
 
-        with patch.dict("chord_metadata_service.chord.ingest.views.WORKFLOW_INGEST_FUNCTION_MAP",
-                        {WORKFLOW_PHENOPACKETS_JSON: _raise}):
+        with patch.dict(
+            "chord_metadata_service.chord.ingest.views.WORKFLOW_INGEST_FUNCTION_MAP",
+            {WORKFLOW_PHENOPACKETS_JSON: _raise},
+        ):
             r = self.one_authz_post(
                 reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
                 json={},
@@ -138,8 +140,10 @@ class IngestTest(APITestCaseWithDataset):
         def _raise(*_):
             raise RuntimeError("unexpected")
 
-        with patch.dict("chord_metadata_service.chord.ingest.views.WORKFLOW_INGEST_FUNCTION_MAP",
-                        {WORKFLOW_PHENOPACKETS_JSON: _raise}):
+        with patch.dict(
+            "chord_metadata_service.chord.ingest.views.WORKFLOW_INGEST_FUNCTION_MAP",
+            {WORKFLOW_PHENOPACKETS_JSON: _raise},
+        ):
             r = self.one_authz_post(
                 reverse("ingest-into-dataset", args=(self.dataset_id, WORKFLOW_PHENOPACKETS_JSON)),
                 json={},

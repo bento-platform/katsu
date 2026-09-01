@@ -317,10 +317,33 @@ class IndividualCSVRendererTest(TestWithIndividual):
         choices = get_resp.json()
         self.assertEqual(
             choices,
-            [{"key": k, "label": v} for k, v in zip(
-                ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"],
-                ["Id", "Sex", "Date of birth", "Taxonomy", "Karyotypic sex", "Age", "Diseases", "Created", "Updated"],
-            )],
+            [
+                {"key": k, "label": v}
+                for k, v in zip(
+                    [
+                        "id",
+                        "sex",
+                        "date_of_birth",
+                        "taxonomy",
+                        "karyotypic_sex",
+                        "age",
+                        "diseases",
+                        "created",
+                        "updated",
+                    ],
+                    [
+                        "Id",
+                        "Sex",
+                        "Date of birth",
+                        "Taxonomy",
+                        "Karyotypic sex",
+                        "Age",
+                        "Diseases",
+                        "Created",
+                        "Updated",
+                    ],
+                )
+            ],
         )
 
     def test_export_fields_action_forbidden(self):
@@ -417,9 +440,7 @@ class BatchIndividualsCSVTest(TestWithTwoIndividuals):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_batch_individuals_csv_selected_fields(self):
-        response = self.one_authz_post(
-            reverse("batch/individuals"), json={"format": "csv", "fields": ["id", "sex"]}
-        )
+        response = self.one_authz_post(reverse("batch/individuals"), json={"format": "csv", "fields": ["id", "sex"]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         headers = next(csv.reader(io.StringIO(response.content.decode("utf-8"))))
         self.assertEqual(headers, ["Id", "Sex"])
@@ -448,13 +469,9 @@ class BatchIndividualsXLSXTest(TestWithTwoIndividuals):
     """Test for getting a batch of individuals as xlsx."""
 
     def test_batch_individuals_xlsx_selected_fields(self):
-        response = self.one_authz_post(
-            reverse("batch/individuals"), json={"format": "xlsx", "fields": ["id", "sex"]}
-        )
+        response = self.one_authz_post(reverse("batch/individuals"), json={"format": "xlsx", "fields": ["id", "sex"]})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(
-            response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        self.assertEqual(response["Content-Type"], "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         wb = openpyxl.load_workbook(io.BytesIO(response.content))
         ws = wb.active
         headers = [c.value for c in next(ws.iter_rows())]
@@ -625,9 +642,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
             phenopacket = ph_m.Phenopacket.objects.create(
                 id=f"phenopacket_id:{idx}",
                 subject=individual,
-                measurements=[
-                    ph_c.valid_measurement_tumor_length(random.randint(1, 199))
-                ],
+                measurements=[ph_c.valid_measurement_tumor_length(random.randint(1, 199))],
                 meta_data=meta_data,
                 dataset=self.dataset,
             )
@@ -729,7 +744,7 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
         response_obj = response.json()
         self.assertEqual(
             str(response_obj["errors"][0]["message"]),
-            "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None dataset=None>)']"
+            "['Insufficient permissions to access discovery (<ValidatedDiscoveryScope project=None dataset=None>)']",
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_EXTRA_PROPERTIES)
@@ -774,25 +789,25 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
     def test_discovery_filtering_one_of(self):
         # test GET query string search for OneOf (OR) queries
         params = [
-             ("sex=MALE&sex=FEMALE", Q(sex="MALE") | Q(sex="FEMALE")),
-             ("sex=MALE&sex=UNKNOWN_SEX", Q(sex="MALE") | Q(sex="UNKNOWN_SEX")),
-             (
-                 "smoking=Smoker&smoking=Former smoker",
-                 Q(extra_properties__smoking="Smoker") | Q(extra_properties__smoking="Former smoker"),
-             ),
-             (
-                 "measurement_tumor_length=[0, 50)&measurement_tumor_length=(100, 150]",  # custom bins + OR query
-                 Q(
-                     JSONBPathFilter(
-                         F("phenopackets__measurements"),
-                         Value(
-                             '$[*] ? (((@.value.quantity.value >= 0 && @.value.quantity.value < 50) '
-                             '          || (@.value.quantity.value > 100 && @.value.quantity.value <= 150)) '
-                             '&& @.assay.id == "NCIT:C200479")'
-                         )
-                     )
-                 ),
-             )
+            ("sex=MALE&sex=FEMALE", Q(sex="MALE") | Q(sex="FEMALE")),
+            ("sex=MALE&sex=UNKNOWN_SEX", Q(sex="MALE") | Q(sex="UNKNOWN_SEX")),
+            (
+                "smoking=Smoker&smoking=Former smoker",
+                Q(extra_properties__smoking="Smoker") | Q(extra_properties__smoking="Former smoker"),
+            ),
+            (
+                "measurement_tumor_length=[0, 50)&measurement_tumor_length=(100, 150]",  # custom bins + OR query
+                Q(
+                    JSONBPathFilter(
+                        F("phenopackets__measurements"),
+                        Value(
+                            "$[*] ? (((@.value.quantity.value >= 0 && @.value.quantity.value < 50) "
+                            "          || (@.value.quantity.value > 100 && @.value.quantity.value <= 150)) "
+                            '&& @.assay.id == "NCIT:C200479")'
+                        ),
+                    )
+                ),
+            ),
         ]
         for p in params:
             with self.subTest(params=p):
@@ -992,17 +1007,19 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
 
         for i in self.individual_objs[:10]:
             iv = i.extra_properties["lab_test_result_value"]
-            subtests.extend((
-                (f"< {iv}", {f"{ltrv}__lt": iv}),
-                (f"<{iv}", {f"{ltrv}__lt": iv}),
-                (f"≤ {iv}", {f"{ltrv}__lte": iv}),
-                (f"≤{iv}", {f"{ltrv}__lte": iv}),
-                (f"> {iv}", {f"{ltrv}__gt": iv}),
-                (f">{iv}", {f"{ltrv}__gt": iv}),
-                (f"≥ {iv}", {f"{ltrv}__gte": iv}),
-                (f"≥{iv}", {f"{ltrv}__gte": iv}),
-                (f"{iv}", {ltrv: iv}),
-            ))
+            subtests.extend(
+                (
+                    (f"< {iv}", {f"{ltrv}__lt": iv}),
+                    (f"<{iv}", {f"{ltrv}__lt": iv}),
+                    (f"≤ {iv}", {f"{ltrv}__lte": iv}),
+                    (f"≤{iv}", {f"{ltrv}__lte": iv}),
+                    (f"> {iv}", {f"{ltrv}__gt": iv}),
+                    (f">{iv}", {f"{ltrv}__gt": iv}),
+                    (f"≥ {iv}", {f"{ltrv}__gte": iv}),
+                    (f"≥{iv}", {f"{ltrv}__gte": iv}),
+                    (f"{iv}", {ltrv: iv}),
+                )
+            )
 
         for params in subtests:
             with self.subTest(params=params):
@@ -1087,14 +1104,14 @@ class DiscoveryFilteringIndividualsTest(AuthzAPITestCase, ProjectTestCase):
                 Q(**{f"{doc}__startswith": "2021-03"})
                 | Q(**{f"{doc}__startswith": "2021-04"})
                 | Q(**{f"{doc}__startswith": "2021-05"})
-                | Q(**{f"{doc}__startswith": "2021-06"})
+                | Q(**{f"{doc}__startswith": "2021-06"}),
             ),
             (
                 ("[2021-03, 2021-04)", "[2021-04, 2021-05)", "[2021-05, 2021-06)", "[2021-06, 2021-07)"),
                 Q(**{f"{doc}__startswith": "2021-03"})
                 | Q(**{f"{doc}__startswith": "2021-04"})
                 | Q(**{f"{doc}__startswith": "2021-05"})
-                | Q(**{f"{doc}__startswith": "2021-06"})
+                | Q(**{f"{doc}__startswith": "2021-06"}),
             ),
         ]
 

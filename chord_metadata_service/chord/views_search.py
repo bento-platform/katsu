@@ -91,7 +91,8 @@ async def experiment_query_results(
     # TODO: possibly a quite inefficient way of doing things...
     # TODO: Prefetch related biosample or no?
     queryset = Experiment.get_model_scoped_queryset(scope).filter(
-        id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
+        id__in=await sync_to_async(data_type_results)(query, params, "id", logger)
+    )
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -104,7 +105,8 @@ async def phenopacket_query_results(
     scope: ValidatedDiscoveryScope, query: sql.Composable, params, logger: BoundLogger, options: dict | None = None
 ):
     queryset = Phenopacket.get_model_scoped_queryset(scope).filter(
-        id__in=await sync_to_async(data_type_results)(query, params, "id", logger))
+        id__in=await sync_to_async(data_type_results)(query, params, "id", logger)
+    )
 
     output_format = options.get("output") if options else None
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
@@ -124,7 +126,7 @@ async def phenopacket_query_results(
         )
 
         # Get the biosamples with experiments data
-        subject_ids = [result['subject_id'] async for result in results]
+        subject_ids = [result["subject_id"] async for result in results]
         biosamples_experiments_details = get_biosamples_with_experiment_details(subject_ids)
 
         # Group the experiments with biosamples by subject_id
@@ -144,7 +146,7 @@ QUERY_RESULTS_FN: dict[
     Callable[
         [ValidatedDiscoveryScope, sql.Composed, tuple[str | int | float, ...], BoundLogger, dict | None],
         Awaitable[QuerySet],
-    ]
+    ],
 ] = {
     DATA_TYPE_EXPERIMENT: experiment_query_results,
     DATA_TYPE_PHENOPACKET: phenopacket_query_results,
@@ -158,25 +160,23 @@ QUERY_RESULT_SERIALIZERS = {
 
 def _search_response(data_type, serializer_class, queryset: QuerySet, start):
     return Response(
-        build_search_response({
-            dataset_id: {
-                "data_type": data_type,
-                "matches": list(serializer_class(p).data for p in dataset_objects)
-            } for dataset_id, dataset_objects in itertools.groupby(
-                queryset if queryset is not None else [],
-                key=lambda o: str(o.dataset_id)  # object here
-            )
-        }, start)
+        build_search_response(
+            {
+                dataset_id: {"data_type": data_type, "matches": list(serializer_class(p).data for p in dataset_objects)}
+                for dataset_id, dataset_objects in itertools.groupby(
+                    queryset if queryset is not None else [],
+                    key=lambda o: str(o.dataset_id),  # object here
+                )
+            },
+            start,
+        )
     )
 
 
 async def _async_group_by_dataset_id(queryset: QuerySet) -> itertools.groupby:
     # Queryset is in an async context, so it becomes an async iterator. We need to convert it to a "normal"
     # iterable object for itertools.groupby.
-    return itertools.groupby(
-        [r async for r in queryset],
-        key=lambda d: str(d["dataset_id"])
-    )
+    return itertools.groupby([r async for r in queryset], key=lambda d: str(d["dataset_id"]))
 
 
 async def search(request: DrfRequest, logger: BoundLogger):
@@ -196,8 +196,10 @@ async def search(request: DrfRequest, logger: BoundLogger):
         authz_middleware.mark_authz_done(request)
         return bad_request_response(err)
 
-    if (search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
-       or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT):
+    if (
+        search_params["output"] == OUTPUT_FORMAT_VALUES_LIST
+        or search_params["output"] == OUTPUT_FORMAT_BENTO_SEARCH_RESULT
+    ):
         search_params["add_field"] = "dataset_id"
 
     start = datetime.now()
@@ -217,10 +219,8 @@ async def search(request: DrfRequest, logger: BoundLogger):
 
     if search_params["output"] == OUTPUT_FORMAT_VALUES_LIST:
         result = {
-            dataset_id: {
-                "data_type": data_type,
-                "matches": [p["value"] for p in dataset_dicts]
-            } for dataset_id, dataset_dicts in await _async_group_by_dataset_id(queryset)
+            dataset_id: {"data_type": data_type, "matches": [p["value"] for p in dataset_dicts]}
+            for dataset_id, dataset_dicts in await _async_group_by_dataset_id(queryset)
         }
         return Response(build_search_response(result, start))
 
@@ -232,11 +232,9 @@ async def search(request: DrfRequest, logger: BoundLogger):
         result = {
             dataset_id: {
                 "data_type": data_type,
-                "matches": [
-                    {key: value for key, value in p.items() if key != "dataset_id"}
-                    for p in dataset_dicts
-                ]
-            } for dataset_id, dataset_dicts in await _async_group_by_dataset_id(queryset)
+                "matches": [{key: value for key, value in p.items() if key != "dataset_id"} for p in dataset_dicts],
+            }
+            for dataset_id, dataset_dicts in await _async_group_by_dataset_id(queryset)
         }
         return Response(build_search_response(result, start))
 
@@ -310,7 +308,7 @@ def get_chord_search_parameters(request, logger: BoundLogger, data_type=None):
     if query is None:
         return None, "Missing query in request body"
 
-    if request.method == "GET":     # Query passed as a JSON in the URL: must be decoded.
+    if request.method == "GET":  # Query passed as a JSON in the URL: must be decoded.
         try:
             query = json.loads(query)
         except json.decoder.JSONDecodeError:
@@ -335,7 +333,7 @@ def get_chord_search_parameters(request, logger: BoundLogger, data_type=None):
         "params": params,
         "data_type": data_type,
         "output": query_params.get("output", None),
-        "field": field
+        "field": field,
     }, None
 
 
@@ -344,7 +342,10 @@ def _serialize_many(serializer_class, queryset):
 
 
 async def chord_dataset_search(
-    scope: ValidatedDiscoveryScope, search_params, start, logger: BoundLogger,
+    scope: ValidatedDiscoveryScope,
+    search_params,
+    start,
+    logger: BoundLogger,
 ) -> tuple[bool | list | None, str | None]:
     """
     Performs a search based on a psycopg2 object and paramaters and restricted
@@ -439,8 +440,10 @@ async def dataset_summary(request: DrfRequest, identifier: str):
         resource=discovery_scope.as_authz_resource(),
     )
     summaries = await asyncio.gather(
-        *map(lambda d: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[d](discovery_scope, dt_permissions[d]),
-             DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys())
+        *map(
+            lambda d: DATASET_DATA_TYPE_SUMMARY_FUNCTIONS[d](discovery_scope, dt_permissions[d]),
+            DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(),
+        )
     )
     return Response({d: s for d, s in zip(DATASET_DATA_TYPE_SUMMARY_FUNCTIONS.keys(), summaries)})
 

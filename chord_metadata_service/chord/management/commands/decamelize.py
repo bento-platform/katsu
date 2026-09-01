@@ -4,7 +4,6 @@ from humps import decamelize
 
 
 class Command(BaseCommand):
-
     help = "Converts the keys of a json document from camelCase to snake_case"
 
     def add_arguments(self, parser):

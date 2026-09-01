@@ -44,18 +44,16 @@ IGNORE_COMMON_FIELDS = ["created", "updated", "created_by", "submitted_by"]
 
 
 class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
-
     def test_create_pf(self):
-        p1 = get_or_create_phenotypic_feature({
-            "description": "test",
-            "type": {
-                "id": "HP:0000790",
-                "label": "Hematuria"
-            },
-            "excluded": False,
-            "modifiers": [],
-            "evidence": []
-        })
+        p1 = get_or_create_phenotypic_feature(
+            {
+                "description": "test",
+                "type": {"id": "HP:0000790", "label": "Hematuria"},
+                "excluded": False,
+                "modifiers": [],
+                "evidence": [],
+            }
+        )
 
         p2 = pm.PhenotypicFeature.objects.get(description="test")
 
@@ -120,7 +118,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_equal(
             db_obj=p.subject,
             ground_truth=EXAMPLE_INGEST_PHENOPACKET["subject"],
-            ignore_fields=IGNORE_COMMON_FIELDS + ["date_of_birth", "vital_status"]  # DOB needs parsing
+            ignore_fields=IGNORE_COMMON_FIELDS + ["date_of_birth", "vital_status"],  # DOB needs parsing
         )
         self.assertIn("__computed", EXAMPLE_INGEST_PHENOPACKET["subject"]["extra_properties"])
         self.assertNotIn("__computed", p.subject.extra_properties)  # Explicitly test computed extra_properties
@@ -128,7 +126,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_equal(
             db_obj=p.subject.vital_status,
             ground_truth=EXAMPLE_INGEST_PHENOPACKET["subject"]["vital_status"],
-            ignore_fields=IGNORE_COMMON_FIELDS
+            ignore_fields=IGNORE_COMMON_FIELDS,
         )
 
         # Phenotypic Features
@@ -155,7 +153,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_equal(
             db_obj=p.meta_data,
             ground_truth=EXAMPLE_INGEST_PHENOPACKET["meta_data"],
-            ignore_fields=IGNORE_COMMON_FIELDS + ["id", "resources"]
+            ignore_fields=IGNORE_COMMON_FIELDS + ["id", "resources"],
         )
 
         # Metadata Resources
@@ -163,7 +161,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_list_equal(
             db_list=resources,
             ground_truths=EXAMPLE_INGEST_PHENOPACKET["meta_data"]["resources"],
-            ignore_fields=IGNORE_COMMON_FIELDS
+            ignore_fields=IGNORE_COMMON_FIELDS,
         )
 
         # Biosamples
@@ -175,11 +173,11 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         )
         self.assertEqual(
             biosamples[0].location_collected.point.coords,
-            tuple(EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["location_collected"]["geometry"]["coordinates"])
+            tuple(EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["location_collected"]["geometry"]["coordinates"]),
         )
         self.assertEqual(
             biosamples[0].location_collected.label,
-            EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["location_collected"]["properties"]["label"]
+            EXAMPLE_INGEST_PHENOPACKET["biosamples"][0]["location_collected"]["properties"]["label"],
         )
 
         # Make sure biosamples are properly associated with phenopacket subject
@@ -227,7 +225,7 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assert_model_fields_equal(
             p2.subject.vital_status,
             ground_truth=EXAMPLE_INGEST_PHENOPACKET_UPDATE["subject"]["vital_status"],
-            ignore_fields=IGNORE_COMMON_FIELDS
+            ignore_fields=IGNORE_COMMON_FIELDS,
         )
 
     def test_phenopackets_validation(self):
@@ -315,10 +313,11 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         # check that it has been linked to the same experiment as the file it
         # has been derived from.
         related_results = ExperimentResult.objects.filter(
-            experiments__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"])
+            experiments__experiment_results__identifier=EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["identifier"]
+        )
         self.assertIn(
             EXAMPLE_INGEST_EXPERIMENT_RESULT[0]["extra_properties"]["derived_from"],
-            [v["identifier"] for v in related_results.values("identifier")]
+            [v["identifier"] for v in related_results.values("identifier")],
         )
 
 
@@ -333,7 +332,6 @@ class IngestMultipleTest(ProjectTestCase):
 
 
 class IngestISOAgeToNumberTest(ProjectTestCase):
-
     def test_ingesting_phenopackets_json(self):
         ingested_phenopackets = WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
             EXAMPLE_INGEST_MULTIPLE_PHENOPACKETS, self.dataset.identifier, logger
@@ -350,7 +348,6 @@ class IngestISOAgeToNumberTest(ProjectTestCase):
 
 
 class IngestGenomicInterpretationsTest(ProjectTestCase):
-
     def setUp(self):
         self.individual = Individual.objects.create(**pc.VALID_INDIVIDUAL_1)
         self.biosample = pm.Biosample.objects.create(**pc.valid_biosample_1(self.individual))

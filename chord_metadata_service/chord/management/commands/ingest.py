@@ -12,8 +12,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("dataset", action="store", type=str, help="The dataset ID to ingest into")
-        parser.add_argument("type", action="store", type=str, choices=[DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET],
-                            help=f"The type of data to be ingested, {DATA_TYPE_PHENOPACKET} or {DATA_TYPE_EXPERIMENT}")
+        parser.add_argument(
+            "type",
+            action="store",
+            type=str,
+            choices=[DATA_TYPE_EXPERIMENT, DATA_TYPE_PHENOPACKET],
+            help=f"The type of data to be ingested, {DATA_TYPE_PHENOPACKET} or {DATA_TYPE_EXPERIMENT}",
+        )
         parser.add_argument("data", action="store", type=str, help="JSON data file or DRS URI to ingest")
 
     def handle(self, *args, **options):

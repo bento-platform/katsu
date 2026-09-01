@@ -4,27 +4,29 @@ from django.db.models import F
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
-from rest_framework.settings import api_settings
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
 from chord_metadata_service.authz.permissions import BentoAllowAny
-from chord_metadata_service.authz.viewset import BentoAuthzScopedModelViewSet, BentoAuthzScopedModelGenericListViewSet
+from chord_metadata_service.authz.viewset import BentoAuthzScopedModelGenericListViewSet, BentoAuthzScopedModelViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
 from chord_metadata_service.discovery.scope import get_request_discovery_scope
+from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phenopacket_base_uri, phenopacket_resolver
 from chord_metadata_service.restapi.api_renderers import (
-    PhenopacketsRenderer,
     BiosamplesCSVRenderer,
     IndividualBentoSearchRenderer,
+    PhenopacketsRenderer,
     csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
-from chord_metadata_service.restapi.pagination import LargeResultsSetPagination, BatchResultsSetPagination
 from chord_metadata_service.restapi.negociation import FormatInPostContentNegotiation
-from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phenopacket_resolver, phenopacket_base_uri
+from chord_metadata_service.restapi.pagination import BatchResultsSetPagination, LargeResultsSetPagination
 
-from . import models as m, serializers as s, filters as f
+from . import filters as f
+from . import models as m
+from . import serializers as s
 
 
 class PhenopacketsModelViewSet(BentoAuthzScopedModelViewSet):
@@ -192,12 +194,12 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
     description="Chord phenopacket schema that can be shared with data providers",
     responses={
         200: inline_serializer(
-            name='chord_phenopacket_schema_response',
+            name="chord_phenopacket_schema_response",
             fields={
-                'PHENOPACKET_SCHEMA': serializers.JSONField(),
-            }
+                "PHENOPACKET_SCHEMA": serializers.JSONField(),
+            },
         )
-    }
+    },
 )
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])

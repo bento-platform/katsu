@@ -39,9 +39,7 @@ class ExportTest(AuthzAPITestCase):
         self.study_id = str(dataset.identifier)
 
         # Ingest test phenopackets
-        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
-            EXAMPLE_INGEST_PHENOPACKET, dataset.identifier, logger
-        )
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](EXAMPLE_INGEST_PHENOPACKET, dataset.identifier, logger)
 
         self.base_export_payload = {
             "format": "cbioportal",
@@ -57,7 +55,7 @@ class ExportTest(AuthzAPITestCase):
     def test_export_cbio_no_path(self):
         # Test with no output_path: expect a tar archive to be returned
         r = self.one_authz_post(reverse("export"), json=self.base_export_payload)
-        self.assertEqual(r.get('Content-Disposition'), f"attachment; filename=\"{self.study_id}.tar.gz\"")
+        self.assertEqual(r.get("Content-Disposition"), f'attachment; filename="{self.study_id}.tar.gz"')
 
     def test_export_cbio_object_dne(self):
         r = self.one_authz_post(reverse("export"), json={**self.base_export_payload, "object_id": str(uuid.uuid4())})

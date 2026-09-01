@@ -13,15 +13,17 @@ class TestDiscoveryUtils(TestCase):
             (DiscoveryConfig(), True),
             (DiscoveryConfig(fields={}), True),
             (
-                DiscoveryConfig(fields={
-                    "test": StringFieldDefinition(
-                        datatype="string",
-                        mapping="individual/test",
-                        title="Test",
-                        description="Test",
-                        config=StringFieldConfig(enum=None),
-                    )
-                }),
+                DiscoveryConfig(
+                    fields={
+                        "test": StringFieldDefinition(
+                            datatype="string",
+                            mapping="individual/test",
+                            title="Test",
+                            description="Test",
+                            config=StringFieldConfig(enum=None),
+                        )
+                    }
+                ),
                 True,
             ),
             (DISCOVERY_CONFIG_TEST, False),

@@ -16,7 +16,9 @@ __all__ = [
 
 
 async def individual_experiment_type_stats(
-    queryset: QuerySet, discovery: DiscoveryConfig, field_permissions: DataPermissions,
+    queryset: QuerySet,
+    discovery: DiscoveryConfig,
+    field_permissions: DataPermissions,
 ) -> tuple[int, BinList]:
     """
     Used for a fixed-response public API and beacon.
@@ -28,9 +30,9 @@ async def individual_experiment_type_stats(
     # occurs sometimes in tests or in the case of a new packet model), which would cause this to return the wrong stats.
 
     return await bento_public_format_count_and_stats_list(
-        queryset
-        .values(label=F("phenopackets__biosamples__experiments__experiment_type"))
-        .annotate(value=Count("phenopackets__biosamples__experiments", distinct=True)),
+        queryset.values(label=F("phenopackets__biosamples__experiments__experiment_type")).annotate(
+            value=Count("phenopackets__biosamples__experiments", distinct=True)
+        ),
         discovery,
         field_permissions,
     )
@@ -48,9 +50,9 @@ async def individual_biosample_tissue_stats(
     # occurs sometimes in tests or in the case of a new packet model), which would cause this to return the wrong stats.
 
     return await bento_public_format_count_and_stats_list(
-        queryset
-        .values(label=F("phenopackets__biosamples__sampled_tissue__label"))
-        .annotate(value=Count("phenopackets__biosamples", distinct=True)),
+        queryset.values(label=F("phenopackets__biosamples__sampled_tissue__label")).annotate(
+            value=Count("phenopackets__biosamples", distinct=True)
+        ),
         discovery,
         field_permissions,
     )

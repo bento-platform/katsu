@@ -47,15 +47,15 @@ def get_jsonb_path_query(field: str, json_path: str, is_array=True, is_mapping=T
 
 
 def parse_duration(duration: str | dict):
-    """ Returns years integer. """
+    """Returns years integer."""
     if isinstance(duration, dict) and "iso8601duration" in duration:
         duration = duration["iso8601duration"]
-    string = duration.split('P')[-1]
-    return int(float(string.split('Y')[0]))
+    string = duration.split("P")[-1]
+    return int(float(string.split("Y")[0]))
 
 
 def parse_individual_age(age_obj: dict) -> int:
-    """ Parses two possible age representations and returns average age or age as integer. """
+    """Parses two possible age representations and returns average age or age as integer."""
 
     if "age_range" in age_obj:
         age_obj = age_obj["age_range"]
@@ -71,7 +71,7 @@ def parse_individual_age(age_obj: dict) -> int:
 
 
 def labelled_number_range_generator(
-    field_props: NumberFieldDefinition
+    field_props: NumberFieldDefinition,
 ) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
     Returns a generator yielding floor, ceil and label value for each bin from a numeric field configuration.
@@ -86,7 +86,7 @@ def labelled_number_range_generator(
 
 
 def custom_binning_generator(
-    c: ManualBinsNumberFieldConfig
+    c: ManualBinsNumberFieldConfig,
 ) -> Iterator[tuple[int | float | None, int | float | None, str]]:
     """
     Generator for custom bins. It expects an array of bin boundaries (`bins` property)
@@ -230,12 +230,14 @@ def get_json_op_condition(
     group_by_json_path = mapping_to_json_path(group_by)
     value_json_path = mapping_to_json_path(value_mapping)
 
-    return Q(JSONBPathFilter(
-        # Points to the JSONField
-        F(field),
-        # JSON path expression with operator on field we're interested in and group_by_value condition
-        Value(f'$[*] ? (@.{value_json_path} {op} {value} && @.{group_by_json_path} == "{group_by_value}")')
-    ))
+    return Q(
+        JSONBPathFilter(
+            # Points to the JSONField
+            F(field),
+            # JSON path expression with operator on field we're interested in and group_by_value condition
+            Value(f'$[*] ? (@.{value_json_path} {op} {value} && @.{group_by_json_path} == "{group_by_value}")'),
+        )
+    )
 
 
 def get_json_range_condition(

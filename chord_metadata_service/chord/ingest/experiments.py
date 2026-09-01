@@ -24,9 +24,7 @@ from .exceptions import IngestError
 
 
 def create_instrument(instrument: dict) -> em.Instrument:
-    instrument_obj, _ = em.Instrument.objects.get_or_create(
-        identifier=instrument.get("identifier", str(uuid.uuid4()))
-    )
+    instrument_obj, _ = em.Instrument.objects.get_or_create(identifier=instrument.get("identifier", str(uuid.uuid4())))
 
     # Backwards compatibility for v19
     # Allows ingestion of "device" and "model" values as instrument.device
@@ -58,7 +56,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
         usage=er.get("usage"),
         creation_date=er.get("creation_date"),
         created_by=er.get("created_by"),
-        extra_properties=er.get("extra_properties", {})
+        extra_properties=er.get("extra_properties", {}),
     )
     er_obj.save()
     return er_obj
@@ -71,7 +69,8 @@ def validate_experiment(experiment_data, lg: BoundLogger, idx: int | None = None
         # TODO: Report more precise errors
         raise IngestError(
             f"Failed schema validation for experiment{(' ' + str(idx)) if idx is not None else ''} "
-            f"(check Katsu logs for more information)")
+            f"(check Katsu logs for more information)"
+        )
 
 
 def ingest_experiment(
@@ -155,7 +154,7 @@ def ingest_experiment(
         biosample=biosample,
         instrument=instrument_db,
         extra_properties=extra_properties,
-        dataset=Dataset.objects.get(identifier=dataset_id)
+        dataset=Dataset.objects.get(identifier=dataset_id),
     )
 
     # create m2m relationships
@@ -184,10 +183,10 @@ def ingest_experiments_workflow(json_data, dataset_id: str, lg: BoundLogger) -> 
 def ingest_derived_experiment_results(
     json_data: list[dict], dataset_id: str, lg: BoundLogger
 ) -> list[em.ExperimentResult]:
-    """ Reads a JSON file containing a list of experiment results and adds them
-        to the database.
-        The linkage to experiments is inferred from the `derived_from` category
-        in `extra_properties`
+    """Reads a JSON file containing a list of experiment results and adds them
+    to the database.
+    The linkage to experiments is inferred from the `derived_from` category
+    in `extra_properties`
     """
 
     # First, validate all experiment results with the schema before creating anything in the database.
@@ -197,8 +196,8 @@ def ingest_derived_experiment_results(
         if not validation:
             # TODO: Report more precise errors
             raise IngestError(
-                f"Failed schema validation for experiment result {idx} "
-                f"(check Katsu logs for more information)")
+                f"Failed schema validation for experiment result {idx} (check Katsu logs for more information)"
+            )
 
     # If everything passes, perform the actual ingestion next.
 
@@ -211,7 +210,7 @@ def ingest_derived_experiment_results(
         exp_result2exp[row["experiment_results__identifier"]] = row["id"]
 
     for idx, exp_result in enumerate(json_data):
-        derived_identifier = exp_result['extra_properties']['derived_from']
+        derived_identifier = exp_result["extra_properties"]["derived_from"]
         experiment_id = exp_result2exp.get(derived_identifier, None)
         if experiment_id is None:
             lg.warning(

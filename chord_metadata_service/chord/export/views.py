@@ -49,26 +49,26 @@ async def export(request: DrfRequest):
     if not BENTO_EXPORT_SCHEMA_VALIDATOR.is_valid(request.data):
         msg_list = [err.message for err in BENTO_EXPORT_SCHEMA_VALIDATOR.iter_errors(request.data)]
         await lg.aerror("invalid export request body", errors=msg_list)
-        return Response(errors.bad_request_error(
-            "Invalid export request body: " + "\n".join(msg_list)),
-            status=status.HTTP_400_BAD_REQUEST
+        return Response(
+            errors.bad_request_error("Invalid export request body: " + "\n".join(msg_list)),
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     object_id = request.data["object_id"]
-    object_type: str = request.data["object_type"]   # 'project', 'dataset',...
+    object_type: str = request.data["object_type"]  # 'project', 'dataset',...
 
     lg = lg.bind(object_type=object_type)  # don't bind object ID yet to prevent log injection
 
     model = EXPORT_OBJECT_TYPE[object_type]["model"]
     if not await model.objects.filter(identifier=object_id).aexists():
         await lg.aerror("object with ID does not exist")
-        return Response(errors.bad_request_error(
-            f"{object_type.capitalize()} with ID {object_id} does not exist"),
+        return Response(
+            errors.bad_request_error(f"{object_type.capitalize()} with ID {object_id} does not exist"),
             status=status.HTTP_400_BAD_REQUEST,
         )
 
     fmt = request.data["format"].strip()
-    output_path = request.data.get("output_path")   # optional parameter
+    output_path = request.data.get("output_path")  # optional parameter
 
     lg = lg.bind(output_format=fmt)
 
@@ -76,9 +76,9 @@ async def export(request: DrfRequest):
 
     if object_type not in EXPORT_FORMAT_OBJECT_TYPE_MAP[fmt]:
         await lg.aerror("exporting entities of specified type in specified format: not implemented")
-        return Response(errors.bad_request_error(
-            f"Exporting entities of type {object_type} in format {fmt} is not implemented"),
-             status=status.HTTP_400_BAD_REQUEST,
+        return Response(
+            errors.bad_request_error(f"Exporting entities of type {object_type} in format {fmt} is not implemented"),
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     # TODO: secure the output_path value
@@ -106,9 +106,8 @@ async def export(request: DrfRequest):
         # Encountered some other error from the export attempt, return a somewhat detailed message
         err_msg = "encountered exception while processing export attempt"
         await lg.aexception(err_msg, exc_info=e)
-        return Response(errors.internal_server_error(
-            f"{err_msg} (error: {repr(e)}"),
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        return Response(
+            errors.internal_server_error(f"{err_msg} (error: {repr(e)}"), status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
     return Response(status=status.HTTP_204_NO_CONTENT)

@@ -17,10 +17,11 @@ class AbstractPydanticJSONBModel(models.Model):
         - JSONB_FIELD: name of the JSONField (default: 'other_data')
         - SCHEMA_CLASS: the Pydantic model class
     """
+
     _meta: Options  # for pylance
 
     COLUMN_FIELDS: set[str] = set()
-    JSONB_FIELD: str = 'other_data'
+    JSONB_FIELD: str = "other_data"
     SCHEMA_CLASS: type[BaseModel] | None = None
 
     class Meta:
@@ -28,7 +29,7 @@ class AbstractPydanticJSONBModel(models.Model):
 
     @classmethod
     def from_schema(cls, schema: BaseModel, **extra_column_kwargs):
-        data = schema.model_dump(exclude_unset=True, mode='json')
+        data = schema.model_dump(exclude_unset=True, mode="json")
 
         # Translation to model fields (1 to 1 schema to column name match required)
         column_data = {}
@@ -45,10 +46,7 @@ class AbstractPydanticJSONBModel(models.Model):
         column_data.update(extra_column_kwargs)
 
         # Data to be put in JSONB_FIELD
-        jsonb_data = {
-            k: v for k, v in data.items()
-            if k not in cls.COLUMN_FIELDS
-        }
+        jsonb_data = {k: v for k, v in data.items() if k not in cls.COLUMN_FIELDS}
         instance = cls(**column_data, **{cls.JSONB_FIELD: jsonb_data})
 
         return instance
@@ -74,7 +72,7 @@ class AbstractPydanticJSONBModel(models.Model):
         return self.SCHEMA_CLASS(**data)
 
     def update_from_schema(self, schema: BaseModel):
-        data = schema.model_dump(exclude_unset=True, mode='json')
+        data = schema.model_dump(exclude_unset=True, mode="json")
         pk_name = self._meta.pk.name
         for k, v in data.items():
             if k in self.COLUMN_FIELDS and k != pk_name:
@@ -105,8 +103,7 @@ class PydanticJSONBSerializer(serializers.ModelSerializer):
         cls = self.schema_class or self.Meta.model.SCHEMA_CLASS
         if cls is None:
             raise ImproperlyConfigured(
-                f"{self.__class__.__name__} requires either `schema_class` or "
-                f"`Meta.model.SCHEMA_CLASS` to be set."
+                f"{self.__class__.__name__} requires either `schema_class` or `Meta.model.SCHEMA_CLASS` to be set."
             )
         return cls
 
@@ -114,11 +111,11 @@ class PydanticJSONBSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         try:
             if self.partial and self.instance is not None:
-                existing = self.instance.to_schema().model_dump(mode='json')
+                existing = self.instance.to_schema().model_dump(mode="json")
                 data = {**existing, **data}
             schema = self.get_schema_class().model_validate(data)
             self._validated_schema = schema
-            return schema.model_dump(mode='json')
+            return schema.model_dump(mode="json")
         except PydanticValidationError as e:
             drf_errors = {}
             for err in e.errors():
@@ -130,7 +127,7 @@ class PydanticJSONBSerializer(serializers.ModelSerializer):
     @override
     def to_representation(self, instance):
         schema = instance.to_schema()
-        return schema.model_dump(mode='json')
+        return schema.model_dump(mode="json")
 
     @override
     def create(self, _validated_data):

@@ -50,7 +50,7 @@ DAYS_IN_A_YEAR = 365.25  # 365.25 average days in a year (including leap year)
 
 
 def _days_to_years(days: float) -> float:
-    return days / DAYS_IN_A_YEAR   # 365.25 average days in a year (including leap year)
+    return days / DAYS_IN_A_YEAR  # 365.25 average days in a year (including leap year)
 
 
 def _round_decimal_two_places(d: float) -> Decimal:

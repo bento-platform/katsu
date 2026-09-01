@@ -9,7 +9,7 @@ class BatchListRouter(SimpleRouter):
     (e.g. export_fields) declared on the viewset.
     """
 
-    routes = [  # noqa: RUF012
+    routes = [
         Route(
             url=r"^{prefix}$",
             mapping={"post": "list"},

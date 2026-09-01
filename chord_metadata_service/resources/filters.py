@@ -1,4 +1,5 @@
 import django_filters
+
 from .models import Resource
 
 
@@ -10,4 +11,4 @@ class ResourceFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = Resource
-        fields = ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"]
+        fields = ["id", "name", "namespace_prefix", "url", "version", "iri_prefix"]  # noqa: RUF012

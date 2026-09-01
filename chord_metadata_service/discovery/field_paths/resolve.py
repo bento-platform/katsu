@@ -34,9 +34,7 @@ def _resolve_filter_mapping_to_queryset_model_inner_2(
             )
         return norm_path
 
-    exc = DiscoveryFilterRewriteException(
-        f"cannot map field model {field_entity} to filtering model {queryset_entity}"
-    )
+    exc = DiscoveryFilterRewriteException(f"cannot map field model {field_entity} to filtering model {queryset_entity}")
 
     match (queryset_entity, field_entity):
         #  - Phenopackets <-> Individuals
@@ -206,11 +204,10 @@ def resolve_queryset_entity_path_from_field_path(
 
     # While our resolved path is still getting shorter, keep running the inner function to simplify it. This should
     # usually just run 0-1 times.
-    while (
-        len(res) >
-        len(res2 := _resolve_filter_mapping_to_queryset_model_inner_2(
+    while len(res) > len(
+        res2 := _resolve_filter_mapping_to_queryset_model_inner_2(
             queryset_entity, queryset_entity, res, force_through_phenopackets
-        ))
+        )
     ):
         res = res2
 

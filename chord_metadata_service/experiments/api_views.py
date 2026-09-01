@@ -36,14 +36,9 @@ __all__ = [
 ]
 
 
-EXPERIMENT_SELECT_REL = (
-    "instrument",
-)
+EXPERIMENT_SELECT_REL = ("instrument",)
 
-EXPERIMENT_PREFETCH = (
-    "experiment_results",
-    "biosample__individual"
-)
+EXPERIMENT_PREFETCH = ("experiment_results", "biosample__individual")
 
 
 class ExperimentViewSet(BentoAuthzScopedModelViewSet):
@@ -67,8 +62,7 @@ class ExperimentViewSet(BentoAuthzScopedModelViewSet):
     @async_to_sync
     async def get_queryset(self):
         return (
-            Experiment
-            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+            Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             .select_related(*EXPERIMENT_SELECT_REL)
             .prefetch_related(*EXPERIMENT_PREFETCH)
             .order_by("id")
@@ -161,10 +155,8 @@ class ExperimentResultViewSet(BentoAuthzScopedModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
-        return (
-            ExperimentResult
-            .get_model_scoped_queryset(await get_request_discovery_scope(self.request))
-            .order_by("id")
+        return ExperimentResult.get_model_scoped_queryset(await get_request_discovery_scope(self.request)).order_by(
+            "id"
         )
 
 
@@ -244,12 +236,12 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
     description="Experiment schema",
     responses={
         200: inline_serializer(
-            name='get_experiment_schema_response',
+            name="get_experiment_schema_response",
             fields={
-                'EXPERIMENT_SCHEMA': serializers.JSONField(),
-            }
+                "EXPERIMENT_SCHEMA": serializers.JSONField(),
+            },
         )
-    }
+    },
 )
 @api_view(["GET"])
 @permission_classes([BentoAllowAny])
