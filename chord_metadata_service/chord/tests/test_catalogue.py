@@ -46,7 +46,11 @@ class CatalogueSearchTestCase(TestCase):
             domain=["Oncology", "Genomics"],
             taxa=["Homo sapiens"],
             keywords=["breast cancer", "genomics"],
-            license={"label": "CC-BY-4.0", "type": "Creative Commons", "url": "https://creativecommons.org/licenses/by/4.0/"},
+            license={
+                "label": "CC-BY-4.0",
+                "type": "Creative Commons",
+                "url": "https://creativecommons.org/licenses/by/4.0/",
+            },
             study_status="ONGOING",
             study_context="CLINICAL",
             program_name="Program X",
