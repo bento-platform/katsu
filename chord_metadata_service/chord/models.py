@@ -1,18 +1,21 @@
 import uuid
-from django.utils import timezone
+
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
-from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from django.contrib.postgres.fields import ArrayField
+from django.contrib.postgres.indexes import GinIndex
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
+
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.common.base_pydantic_jsonb import AbstractPydanticJSONBModel
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.resources.models import Resource
+from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
-from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
-from chord_metadata_service.common.base_pydantic_jsonb import AbstractPydanticJSONBModel
-
 
 __all__ = ["Project", "ProjectJsonSchema", "Dataset", "DatasetTranslation"]
 
@@ -87,6 +90,11 @@ class Dataset(AbstractPydanticJSONBModel):
         "release_date",
         "last_modified",
         "discovery",
+        "program_name",
+        "privacy",
+        "study_status",
+        "study_context",
+        "domain",
     }
     JSONB_FIELD = "data"
     SCHEMA_CLASS = KatsuDatasetModel
@@ -112,6 +120,22 @@ class Dataset(AbstractPydanticJSONBModel):
     last_modified = models.DateField(db_index=True, null=True, blank=True)
     discovery = DiscoveryJSONField(blank=True, null=True, help_text="Dataset-level discovery configuration.")
 
+    # --- Catalogue facet columns, promoted from `data` for filtering/faceting/sorting ---
+    program_name = models.CharField(max_length=512, null=True, blank=True, db_index=True)
+    privacy = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    study_status = models.CharField(max_length=32, null=True, blank=True, db_index=True)
+    study_context = models.CharField(max_length=32, null=True, blank=True, db_index=True)
+    # No `default=list`: the pydantic schema requires these to be either None or non-empty
+    # (min_length=1), so an empty list must be stored as NULL, not [].
+    domain = ArrayField(models.CharField(max_length=256), null=True, blank=True)
+
+    # Derived facet columns for polymorphic/nested `data` fields (str | OntologyClass, License object).
+    # Kept in sync via save() below rather than COLUMN_FIELDS, since these don't have a 1:1 name/shape
+    # match with the pydantic schema.
+    taxa_labels = ArrayField(models.CharField(max_length=256), null=True, blank=True)
+    keyword_labels = ArrayField(models.CharField(max_length=256), null=True, blank=True)
+    license_label = models.CharField(max_length=256, null=True, blank=True, db_index=True)
+
     # Store the whole validated payload (English default, validated by Pydantic before saving)
     data = models.JSONField(help_text="Full DatasetModel payload validated by Pydantic before saving.")
 
@@ -123,6 +147,25 @@ class Dataset(AbstractPydanticJSONBModel):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [
+            GinIndex(fields=["domain"]),
+            GinIndex(fields=["taxa_labels"]),
+            GinIndex(fields=["keyword_labels"]),
+        ]
+
+    def save(self, *args, **kwargs):
+        def _label(item):
+            return item.get("label") if isinstance(item, dict) else item
+
+        # None rather than [] for "no value": the pydantic schema requires taxa/keywords/domain to be
+        # either None or non-empty (min_length=1), and to_schema() round-trips these columns as-is.
+        self.taxa_labels = [_label(t) for t in (self.data.get("taxa") or [])] or None
+        self.keyword_labels = [_label(k) for k in (self.data.get("keywords") or [])] or None
+        license_ = self.data.get("license")
+        self.license_label = license_.get("label") if isinstance(license_, dict) else None
+        super().save(*args, **kwargs)
 
     @property
     def resources(self):
