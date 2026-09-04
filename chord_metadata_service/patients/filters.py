@@ -2,6 +2,7 @@ import django_filters
 from django.db.models import Q
 
 from chord_metadata_service.discovery.full_text_search import full_text_search_vector
+
 from .models import Individual
 
 GENOMIC_INTERPRETATION_QUERY = "phenopackets__interpretations__diagnosis__genomic_interpretations"
