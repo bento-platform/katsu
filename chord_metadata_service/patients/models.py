@@ -1,15 +1,17 @@
 from django.apps import apps
+from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import JSONField
-from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+
 from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.discovery.types import ModelScopeFilters
-from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
+from chord_metadata_service.restapi.models import BaseExtraProperties, BaseTimeStamp, IndexableMixin, SchemaType
 from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator, ontology_validator
-from .values import PatientStatus, Sex, KaryotypicSex
+
+from .values import KaryotypicSex, PatientStatus, Sex
 
 
 class VitalStatus(BaseTimeStamp, IndexableMixin, ToFTSReprMixin):
