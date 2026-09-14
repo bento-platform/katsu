@@ -216,12 +216,15 @@ class DatasetCatalogueSearchTestCase(TestCase):
         titles = [row["title"] for row in r.data["results"]]
         self.assertEqual(titles, [self.dataset_c.title, self.dataset_a.title, self.dataset_b.title])
 
-    def test_sort_individuals_desc_unauthenticated_is_rejected(self):
-        # individuals_desc/biosamples_desc require a real censored count, which needs an authenticated caller (see
-        # DatasetCountSortTestCase below for the authenticated behavior) — an anonymous request is rejected outright
-        # rather than silently served under a different sort.
-        r = self.client.get(self.url, {"sort": "individuals_desc"})
-        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
+    def test_sort_individuals_desc_uses_censored_counts(self):
+        # individuals_desc/biosamples_desc always go through the real per-dataset censored count (see
+        # DatasetCountSortTestCase below for more thorough coverage) — an authz call happens even for an
+        # unauthenticated request, since counts-level access isn't tied to whether a token is present.
+        with aioresponses() as m:
+            m.post("http://authz.local/policy/evaluate", payload={"result": [[True, True, True]] * 3})
+            r = self.client.get(self.url, {"sort": "individuals_desc"})
+        titles = [row["title"] for row in r.data["results"]]
+        self.assertEqual(titles[0], self.dataset_a.title)
 
     def test_invalid_sort_falls_back_to_default(self):
         r = self.client.get(self.url, {"sort": "not-a-real-option"})
@@ -253,9 +256,10 @@ class DatasetCatalogueSearchTestCase(TestCase):
 
 class DatasetCountSortTestCase(AuthzAPITestCase):
     """
-    Covers individuals_desc/biosamples_desc sort for authenticated requests: backed by a real per-dataset censored
-    count (chord/dataset_search.py::sort_by_censored_counts), evaluated via one batched authz call rather than the
-    raw DB count. Per-dataset threshold math itself belongs to discovery/censorship.py's own test suite — this only
+    Covers individuals_desc/biosamples_desc sort: backed by a real per-dataset censored count
+    (chord/dataset_search.py::sort_by_censored_counts), evaluated via one batched authz call rather than the raw DB
+    count — for every request, authenticated or not, since counts-level access isn't tied to whether a token is
+    present. Per-dataset threshold math itself belongs to discovery/censorship.py's own test suite — this only
     checks that the sort path is wired to real permissions, not a static/raw count.
     """
 
@@ -289,29 +293,22 @@ class DatasetCountSortTestCase(AuthzAPITestCase):
         )
 
         self.url = reverse("dataset-list")
-        self.auth_headers = {"HTTP_AUTHORIZATION": "Bearer test-token"}
 
-    def test_count_sort_requires_authentication(self):
-        r = self.client.get(self.url, {"sort": "individuals_desc"})
-        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_count_sort_requires_authentication_biosamples(self):
-        r = self.client.get(self.url, {"sort": "biosamples_desc"})
-        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_count_sort_authenticated_with_full_permissions_uses_real_counts(self):
+    def test_count_sort_anonymous_request_with_permissions_uses_real_counts(self):
+        # No Authorization header at all — but the authz service can still grant counts-level access to an
+        # anonymous caller (e.g. for a public dataset), so the real count must still be used to rank it.
         with aioresponses() as m:
             self.mock_authz_eval_result(m, [[True, True, True]] * 3)  # bool, counts, data — for each dataset
-            r = self.client.get(self.url, {"sort": "individuals_desc"}, **self.auth_headers)
+            r = self.client.get(self.url, {"sort": "individuals_desc"})
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         titles = [row["title"] for row in r.data["results"]]
         self.assertEqual(titles[0], self.dataset_a.title)
 
-    def test_count_sort_authenticated_without_permissions_censors_to_zero(self):
+    def test_count_sort_without_permissions_censors_to_zero(self):
         with aioresponses() as m:
             self.mock_authz_eval_result(m, [[False, False, False]] * 3)
-            r = self.client.get(self.url, {"sort": "individuals_desc"}, **self.auth_headers)
+            r = self.client.get(self.url, {"sort": "individuals_desc"})
 
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         # With no permissions on any dataset, every count censors to 0, so the sort falls through to its

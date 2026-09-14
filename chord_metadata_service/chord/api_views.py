@@ -89,11 +89,6 @@ def forbidden(request: DrfRequest):
     return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
 
 
-def unauthorized(request: DrfRequest, *args):
-    authz.mark_authz_done(request)
-    return Response(errors.unauthorized_error(*args), status=status.HTTP_401_UNAUTHORIZED)
-
-
 def not_found(request: DrfRequest):
     authz.mark_authz_done(request)
     return Response(errors.not_found_error(), status=status.HTTP_404_NOT_FOUND)
@@ -205,10 +200,10 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         and — opt-in via ?include=facets — per-facet option counts for the active search/filter scope, alongside the
         plain paginated dataset listing.
 
-        individuals_desc/biosamples_desc sort by a per-dataset censored count (see
-        dataset_search.sort_by_censored_counts), which needs a real authz-evaluated permission per dataset — so an
-        unauthenticated request (no Authorization header) asking for either of these two sort options gets 401
-        Unauthorized rather than a silently-different sort.
+        individuals_desc/biosamples_desc sort by a real, per-dataset censored count (see
+        dataset_search.sort_by_censored_counts) rather than a DB-level column — evaluated via authz for every
+        request, authenticated or not, since a dataset's counts-level access isn't tied to whether a token is
+        present (e.g. a public dataset can grant counts access to anonymous callers too).
         """
         authz.mark_authz_done(request)
 
@@ -216,8 +211,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         sort_key = request.query_params.get("sort", DEFAULT_SORT)
         if sort_key not in SORT_OPTIONS:
             sort_key = DEFAULT_SORT
-        if sort_key in COUNT_SORT_KEYS and authz.get_authz_header_value(request) is None:
-            return unauthorized(request, f"Sorting by '{sort_key}' requires authentication")
         active = active_facets(request.query_params)
 
         base_qs = with_search_annotations(self.get_queryset())
