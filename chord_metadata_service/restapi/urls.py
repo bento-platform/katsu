@@ -2,7 +2,6 @@ from django.urls import include, path
 from rest_framework import routers
 
 from chord_metadata_service.chord import api_views as chord_views
-from chord_metadata_service.chord.catalogue_views import CatalogueSearchView
 from chord_metadata_service.discovery.api_views import (
     discovery_endpoint,
     discovery_matches,
@@ -76,5 +75,4 @@ urlpatterns = [
     path("discovery_ui_hints", discovery_ui_hints, name="discovery-ui-hints"),
     path("public", individual_views.PublicListIndividuals.as_view(), name="public"),
     path("discovery_rules", discovery_rules, name="discovery-rules"),
-    path("catalogue", CatalogueSearchView.as_view(), name="catalogue-search"),
 ]

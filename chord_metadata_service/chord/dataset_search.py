@@ -1,3 +1,9 @@
+"""
+Shared query-building helpers behind the searchable/facetable/sortable GET /datasets listing
+(chord/api_views.py::DatasetViewSet.list). Split out from the view itself so they stay unit-testable independently of
+DRF request/response plumbing.
+"""
+
 from django.db.models import (
     Count,
     DateTimeField,
@@ -13,20 +19,20 @@ from django.db.models import (
 )
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Coalesce
-from rest_framework.request import Request as DrfRequest
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from chord_metadata_service.authz.middleware import authz_middleware as authz
-from chord_metadata_service.authz.permissions import BentoAllowAnyReadOnly, BentoDeferToHandler
 from chord_metadata_service.phenopackets.models import Phenopacket
-from chord_metadata_service.restapi.pagination import CataloguePagination
 
-from .catalogue_filters import FACET_FIELDS, active_facets, apply_facets
-from .models import Dataset
-from .serializers import DatasetSerializer
+from .dataset_facets import FACET_FIELDS, apply_facets
 
-__all__ = ["CatalogueSearchView"]
+__all__ = [
+    "with_search_annotations",
+    "apply_search",
+    "SORT_OPTIONS",
+    "DEFAULT_SORT",
+    "with_sort_annotations",
+    "with_count_annotations",
+    "compute_facets",
+]
 
 
 class Unaccent(Func):
@@ -84,7 +90,7 @@ def with_sort_annotations(qs: QuerySet) -> QuerySet:
 
 # --- Per-dataset individual/biosample counts, for sorting only -------------------------------------------------------
 #
-# These are raw (uncensored) counts, used purely to rank the catalogue before pagination. The *displayed*
+# These are raw (uncensored) counts, used purely to rank the listing before pagination. The *displayed*
 # counts_by_entity value for each result still comes from DatasetSerializer, which applies the same small-cell
 # censoring used everywhere else in the API (see chord/utils.py::get_censored_counts_for_serializer). Sorting by the
 # raw count is an accepted proxy-ranking trade-off: censoring is a display transform on top of true counts, not a
@@ -143,64 +149,3 @@ def compute_facets(base_qs: QuerySet, active: dict[str, list[str]]) -> dict[str,
             {"value": v, "count": c} for v, c in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
         ]
     return facets
-
-
-# --- View ----------------------------------------------------------------------------------------------------------
-
-
-class CatalogueSearchView(APIView):
-    """
-    GET /catalogue?q=...&domain=X&domain=Y&status=Ongoing&sort=updated_desc&page=1&page_size=24
-
-    Server-side search/facet/sort/pagination over the dataset catalogue, replacing the previous client-side
-    implementation that fetched the full unpaginated dataset list.
-    """
-
-    permission_classes = [BentoAllowAnyReadOnly | BentoDeferToHandler]
-
-    def get(self, request: DrfRequest, *args, **kwargs):
-        authz.mark_authz_done(request)
-
-        q = request.query_params.get("q", "").strip()
-        sort_key = request.query_params.get("sort", DEFAULT_SORT)
-        if sort_key not in SORT_OPTIONS:
-            sort_key = DEFAULT_SORT
-
-        active = active_facets(request.query_params)
-
-        base_qs = with_search_annotations(Dataset.objects.select_related("project"))
-        base_qs = apply_search(base_qs, q)
-
-        facets = compute_facets(base_qs, active)
-
-        results_qs = apply_facets(base_qs, active)
-        results_qs = with_count_annotations(results_qs)
-        results_qs = with_sort_annotations(results_qs)
-
-        field_name, desc = SORT_OPTIONS[sort_key]
-        order_field = f"-{field_name}" if desc else field_name
-        results_qs = results_qs.order_by(order_field, "identifier")
-
-        paginator = CataloguePagination()
-        page = paginator.paginate_queryset(results_qs, request, view=self)
-
-        serializer_context = {"request": request}
-        results = [
-            {
-                "dataset": DatasetSerializer(ds, context=serializer_context).data,
-                "project": {"identifier": str(ds.project_id), "title": ds.project.title},
-            }
-            for ds in page
-        ]
-
-        return Response(
-            {
-                "results": results,
-                "pagination": {
-                    "page": paginator.page.number,
-                    "page_size": paginator.get_page_size(request),
-                    "total": paginator.page.paginator.count,
-                },
-                "facets": facets,
-            }
-        )

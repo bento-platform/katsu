@@ -8,15 +8,11 @@ __all__ = [
     "DEFAULT_MAX_PAGE_SIZE",
     "LargeResultsSetPagination",
     "BatchResultsSetPagination",
-    "CataloguePagination",
 ]
 
 
 DEFAULT_PAGE_SIZE: int = 25
 DEFAULT_MAX_PAGE_SIZE: int = 10000
-
-CATALOGUE_PAGE_SIZE: int = 24
-CATALOGUE_MAX_PAGE_SIZE: int = 100
 
 
 class LargeResultsSetPagination(pagination.PageNumberPagination):
@@ -58,8 +54,3 @@ class BatchResultsSetPagination(LargeResultsSetPagination):
 
     def get_page_size(self, request):
         return self.max_page_size
-
-
-class CataloguePagination(LargeResultsSetPagination):
-    page_size = CATALOGUE_PAGE_SIZE
-    max_page_size = CATALOGUE_MAX_PAGE_SIZE

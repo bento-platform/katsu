@@ -35,6 +35,16 @@ from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
+from .dataset_facets import active_facets, apply_facets
+from .dataset_search import (
+    DEFAULT_SORT,
+    SORT_OPTIONS,
+    apply_search,
+    compute_facets,
+    with_count_annotations,
+    with_search_annotations,
+    with_sort_annotations,
+)
 from .models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
 from .serializers import (
     ProjectJsonSchemaSerializer,
@@ -153,7 +163,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
     lookup_field = "identifier"
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().select_related("project")
         project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
@@ -181,8 +191,39 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         return context
 
     def list(self, request, *args, **kwargs):
+        """
+        GET /datasets?q=...&domain=X&domain=Y&status=Ongoing&sort=updated_desc&include=facets&page=1&page_size=25
+
+        Supports free-text search (?q=), faceted filtering (see dataset_facets.FACET_FIELDS), sorting (?sort=),
+        and — opt-in via ?include=facets — per-facet option counts for the active search/filter scope, alongside the
+        plain paginated dataset listing.
+        """
         authz.mark_authz_done(request)
-        return super().list(request, *args, **kwargs)
+
+        q = request.query_params.get("q", "").strip()
+        sort_key = request.query_params.get("sort", DEFAULT_SORT)
+        if sort_key not in SORT_OPTIONS:
+            sort_key = DEFAULT_SORT
+        active = active_facets(request.query_params)
+
+        base_qs = with_search_annotations(self.get_queryset())
+        base_qs = apply_search(base_qs, q)
+
+        results_qs = apply_facets(base_qs, active)
+        results_qs = with_count_annotations(results_qs)
+        results_qs = with_sort_annotations(results_qs)
+
+        field_name, desc = SORT_OPTIONS[sort_key]
+        results_qs = results_qs.order_by(f"-{field_name}" if desc else field_name, "identifier")
+
+        page = self.paginate_queryset(results_qs)
+        serializer = self.get_serializer(page if page is not None else results_qs, many=True)
+        response = self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
+
+        if request.query_params.get("include") == "facets":
+            response.data["facets"] = compute_facets(base_qs, active)
+
+        return response
 
     def retrieve(self, request, *args, **kwargs):
         authz.mark_authz_done(request)

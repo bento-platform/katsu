@@ -28,10 +28,11 @@ def _make_dataset(*, project: Project, title: str, **fields) -> Dataset:
     return ds
 
 
-class CatalogueSearchTestCase(TestCase):
+class DatasetCatalogueSearchTestCase(TestCase):
     """
-    Covers: search (incl. diacritics), facet AND-across/OR-within semantics, own-facet-exclusion in facet counts,
-    zero-count selected facet values, sort options, pagination, and post-migration facet column population.
+    Covers the search/facet/sort/pagination behaviour of GET /datasets: search (incl. diacritics), facet
+    AND-across/OR-within semantics, own-facet-exclusion in facet counts, zero-count selected facet values, sort
+    options, pagination, and post-migration facet column population.
     """
 
     @classmethod
@@ -95,7 +96,7 @@ class CatalogueSearchTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.url = reverse("catalogue-search")
+        self.url = reverse("dataset-list")
 
     # ---- facet column backfill / model save() derivation ----
 
@@ -122,7 +123,7 @@ class CatalogueSearchTestCase(TestCase):
     def test_search_matches_title(self):
         r = self.client.get(self.url, {"q": "breast"})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertIn(self.dataset_a.title, titles)
         self.assertNotIn(self.dataset_b.title, titles)
 
@@ -130,68 +131,72 @@ class CatalogueSearchTestCase(TestCase):
         # dataset_a's description contains "Étude ... cancer", searching without accents should still match.
         r = self.client.get(self.url, {"q": "etude"})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertIn(self.dataset_a.title, titles)
 
     def test_search_matches_domain_and_keywords(self):
         r = self.client.get(self.url, {"q": "oncology"})
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertIn(self.dataset_a.title, titles)
 
         r = self.client.get(self.url, {"q": "registry"})
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertIn(self.dataset_b.title, titles)
 
     def test_search_no_match(self):
         r = self.client.get(self.url, {"q": "nonexistent-term-xyz"})
-        self.assertEqual(r.data["pagination"]["total"], 0)
+        self.assertEqual(r.data["count"], 0)
         self.assertEqual(r.data["results"], [])
 
     # ---- facet filtering: AND across facets, OR within a facet ----
 
     def test_facet_filter_scalar(self):
         r = self.client.get(self.url, {"status": "ONGOING"})
-        titles = {row["dataset"]["title"] for row in r.data["results"]}
+        titles = {row["title"] for row in r.data["results"]}
         self.assertEqual(titles, {self.dataset_a.title, self.dataset_c.title})
 
     def test_facet_filter_or_within_facet(self):
         r = self.client.get(self.url, {"status": ["ONGOING", "COMPLETED"]})
-        self.assertEqual(r.data["pagination"]["total"], 3)
+        self.assertEqual(r.data["count"], 3)
 
     def test_facet_filter_and_across_facets(self):
         r = self.client.get(self.url, {"status": "ONGOING", "program": "Program X"})
-        titles = {row["dataset"]["title"] for row in r.data["results"]}
+        titles = {row["title"] for row in r.data["results"]}
         self.assertEqual(titles, {self.dataset_a.title})
 
     def test_facet_filter_array_field(self):
         r = self.client.get(self.url, {"taxon": "Homo sapiens"})
-        titles = {row["dataset"]["title"] for row in r.data["results"]}
+        titles = {row["title"] for row in r.data["results"]}
         self.assertEqual(titles, {self.dataset_a.title})
 
     def test_facet_filter_project(self):
         r = self.client.get(self.url, {"project": str(self.project_2.identifier)})
-        titles = {row["dataset"]["title"] for row in r.data["results"]}
+        titles = {row["title"] for row in r.data["results"]}
         self.assertEqual(titles, {self.dataset_c.title})
 
-    # ---- facet counts: exclude own filter, include zero-count selected values ----
+    # ---- facet counts: exclude own filter, include zero-count selected values (opt-in via ?include=facets) ----
+
+    def test_facets_not_included_by_default(self):
+        r = self.client.get(self.url, {"status": "ONGOING"})
+        self.assertNotIn("facets", r.data)
 
     def test_facet_counts_exclude_own_filter(self):
-        r = self.client.get(self.url, {"status": "ONGOING"})
+        r = self.client.get(self.url, {"status": "ONGOING", "include": "facets"})
         status_facet = {row["value"]: row["count"] for row in r.data["facets"]["status"]}
         # Both options should still be present with their full (status-unfiltered) counts.
         self.assertEqual(status_facet.get("ONGOING"), 2)
         self.assertEqual(status_facet.get("COMPLETED"), 1)
 
     def test_facet_counts_respect_other_active_facets(self):
-        r = self.client.get(self.url, {"status": "ONGOING"})
+        r = self.client.get(self.url, {"status": "ONGOING", "include": "facets"})
         program_facet = {row["value"]: row["count"] for row in r.data["facets"]["program"]}
         # program facet is scoped by the active status=ONGOING filter, so Program Y (dataset_b, COMPLETED) is absent.
         self.assertEqual(program_facet.get("Program X"), 1)
         self.assertNotIn("Program Y", program_facet)
 
     def test_facet_counts_include_zero_count_selected_value(self):
-        r = self.client.get(self.url, {"program": "Nonexistent Program"})
-        self.assertEqual(r.data["pagination"]["total"], 0)
+        r = self.client.get(self.url, {"program": "Nonexistent Program", "include": "facets"})
+        self.assertEqual(r.data["count"], 0)
         program_facet = {row["value"]: row["count"] for row in r.data["facets"]["program"]}
         self.assertEqual(program_facet.get("Nonexistent Program"), 0)
         # real programs still listed too
@@ -201,23 +206,23 @@ class CatalogueSearchTestCase(TestCase):
 
     def test_sort_title_az(self):
         r = self.client.get(self.url, {"sort": "title_az"})
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertEqual(titles, sorted(titles))
 
     def test_sort_created_desc(self):
         r = self.client.get(self.url, {"sort": "created_desc"})
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertEqual(titles, [self.dataset_c.title, self.dataset_a.title, self.dataset_b.title])
 
     def test_sort_individuals_desc(self):
         r = self.client.get(self.url, {"sort": "individuals_desc"})
-        titles = [row["dataset"]["title"] for row in r.data["results"]]
+        titles = [row["title"] for row in r.data["results"]]
         self.assertEqual(titles[0], self.dataset_a.title)
 
     def test_invalid_sort_falls_back_to_default(self):
         r = self.client.get(self.url, {"sort": "not-a-real-option"})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
-        self.assertEqual(r.data["pagination"]["total"], 3)
+        self.assertEqual(r.data["count"], 3)
 
     # ---- pagination ----
 
@@ -225,21 +230,18 @@ class CatalogueSearchTestCase(TestCase):
         r = self.client.get(self.url, {"page_size": 2})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data["results"]), 2)
-        self.assertEqual(r.data["pagination"], {"page": 1, "page_size": 2, "total": 3})
+        self.assertEqual(r.data["count"], 3)
 
     def test_pagination_second_page(self):
         r = self.client.get(self.url, {"page_size": 2, "page": 2})
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(len(r.data["results"]), 1)
-        self.assertEqual(r.data["pagination"]["page"], 2)
 
     # ---- response shape ----
 
-    def test_response_includes_project_and_dataset(self):
+    def test_response_includes_project_detail(self):
         r = self.client.get(self.url, {"q": "breast"})
         row = r.data["results"][0]
-        self.assertIn("dataset", row)
-        self.assertIn("project", row)
-        self.assertEqual(row["project"]["identifier"], str(self.project_1.identifier))
-        self.assertEqual(row["project"]["title"], self.project_1.title)
-        self.assertIn("counts_by_entity", row["dataset"])
+        self.assertEqual(row["project_detail"]["identifier"], str(self.project_1.identifier))
+        self.assertEqual(row["project_detail"]["title"], self.project_1.title)
+        self.assertIn("counts_by_entity", row)
