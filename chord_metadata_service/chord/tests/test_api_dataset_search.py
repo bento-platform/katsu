@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.models import Dataset, Project
+from chord_metadata_service.chord.models import Dataset, DatasetTranslation, Project
 from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.phenopackets.models import Biosample, MetaData, Phenopacket
@@ -149,6 +149,24 @@ class DatasetCatalogueSearchTestCase(TestCase):
         r = self.client.get(self.url, {"q": "nonexistent-term-xyz"})
         self.assertEqual(r.data["count"], 0)
         self.assertEqual(r.data["results"], [])
+
+    def test_search_matches_french_translation(self):
+        # dataset_b's English title/description contain none of this — only its French translation does, so a
+        # match here proves q searches both languages at once, not just whichever one the request happens to be in.
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Registre des maladies rares",
+            description="Cohorte francophone sur le diabete pancreatique.",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            identifier=str(self.dataset_b.identifier),
+            project=str(self.project_1.identifier),
+        )
+        DatasetTranslation.from_schema(schema, dataset_id=self.dataset_b.identifier, language="fr").save()
+
+        r = self.client.get(self.url, {"q": "pancreatique"})
+        titles = [row["title"] for row in r.data["results"]]
+        self.assertIn(self.dataset_b.title, titles)
+        self.assertNotIn(self.dataset_a.title, titles)
 
     # ---- facet filtering: AND across facets, OR within a facet ----
 

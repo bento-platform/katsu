@@ -29,7 +29,7 @@ from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from .dataset_facets import FACET_FIELDS, apply_facets
-from .models import Dataset
+from .models import Dataset, DatasetTranslation
 
 __all__ = [
     "with_search_annotations",
@@ -56,7 +56,20 @@ class Unaccent(Func):
 # --- Search (?q=) --------------------------------------------------------------------------------------------------
 
 # Fields searched, matching the client-side behaviour being replaced: title + description + long_description +
-# domain + keywords, diacritic-stripped substring match.
+# domain + keywords, diacritic-stripped substring match — against both the dataset's base (English) record and its
+# French translation (chord.DatasetTranslation), if one exists, so a query matches whichever language it was typed
+# in regardless of the viewer's own display language. Domain/keyword are structured/categorical rather than prose,
+# so they're only searched on the base record for now — only title/description/long_description are duplicated
+# per-translation.
+
+
+def _translation_text_subquery(language: str, *key_path: str) -> Subquery:
+    """Per-dataset, correlated lookup of one text field from a specific-language DatasetTranslation row, if any."""
+    expr = KeyTextTransform(key_path[0], "data")
+    for key in key_path[1:]:
+        expr = KeyTextTransform(key, expr)
+    translation = DatasetTranslation.objects.filter(dataset_id=OuterRef("identifier"), language=language)
+    return Subquery(translation.annotate(_v=expr).values("_v")[:1], output_field=TextField())
 
 
 def with_search_annotations(qs: QuerySet) -> QuerySet:
@@ -65,6 +78,9 @@ def with_search_annotations(qs: QuerySet) -> QuerySet:
         _long_description_text=KeyTextTransform("content", KeyTextTransform("long_description", "data")),
         _domain_text=Func(F("domain"), Value(" "), function="array_to_string", output_field=TextField()),
         _keyword_text=Func(F("keyword_labels"), Value(" "), function="array_to_string", output_field=TextField()),
+        _fr_title=_translation_text_subquery("fr", "title"),
+        _fr_description_text=_translation_text_subquery("fr", "description"),
+        _fr_long_description_text=_translation_text_subquery("fr", "long_description", "content"),
     )
 
 
@@ -78,6 +94,9 @@ def apply_search(qs: QuerySet, q: str) -> QuerySet:
         | Q(_long_description_text__unaccent__icontains=uq)
         | Q(_domain_text__unaccent__icontains=uq)
         | Q(_keyword_text__unaccent__icontains=uq)
+        | Q(_fr_title__unaccent__icontains=uq)
+        | Q(_fr_description_text__unaccent__icontains=uq)
+        | Q(_fr_long_description_text__unaccent__icontains=uq)
     )
 
 
