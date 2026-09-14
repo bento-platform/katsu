@@ -37,9 +37,12 @@ __all__ = [
     "SORT_OPTIONS",
     "DEFAULT_SORT",
     "COUNT_SORT_KEYS",
+    "CENSORED_COUNT_FIELDS",
     "with_sort_annotations",
     "with_count_annotations",
-    "sort_by_censored_counts",
+    "compute_censored_counts",
+    "sort_datasets_by_censored_count",
+    "compute_totals",
     "compute_facets",
 ]
 
@@ -99,11 +102,11 @@ def with_sort_annotations(qs: QuerySet) -> QuerySet:
     )
 
 
-# --- Per-dataset individual/biosample counts, for sorting only -------------------------------------------------------
+# --- Per-dataset phenopacket/individual/biosample counts, for sort/totals only -----------------------------------
 #
-# Raw counts, annotated at the DB level. These are never returned or displayed directly — sort_by_censored_counts
-# below re-derives a censored value from them per dataset before anything is ranked or returned, using the same
-# small-cell censoring rules applied everywhere else in the API (see discovery/censorship.py).
+# Raw counts, annotated at the DB level. These are never returned or displayed directly — compute_censored_counts
+# below re-derives a censored value from them per dataset before anything is ranked, summed, or returned, using the
+# same small-cell censoring rules applied everywhere else in the API (see discovery/censorship.py).
 
 
 def with_count_annotations(qs: QuerySet) -> QuerySet:
@@ -135,34 +138,68 @@ def with_count_annotations(qs: QuerySet) -> QuerySet:
     )
 
 
-# --- Censored count sort (individuals_desc / biosamples_desc) ------------------------------------------------------
+# --- Censored counts, shared by individuals_desc/biosamples_desc sort and ?include=totals --------------------------
+
+# The entities a censored count is computed for. Both consumers below (sort, totals) key off these names.
+CENSORED_COUNT_FIELDS: tuple[str, ...] = ("phenopacket", "individual", "biosample")
+
+CensoredCounts = list[tuple[Dataset, dict[str, int]]]
 
 
-async def sort_by_censored_counts(request: DrfRequest, qs: QuerySet, sort_key: str) -> list[Dataset]:
+async def compute_censored_counts(request: DrfRequest, qs: QuerySet) -> CensoredCounts:
+    """
+    Materializes `qs` (already annotated via with_count_annotations) and, for every dataset in it, censors its
+    phenopacket/individual/biosample counts using the requester's real authz-evaluated permissions for that dataset
+    — the same small-cell rules the display path applies (discovery/censorship.py), including: if a dataset's
+    phenopacket count itself gets censored to 0, its nested individual/biosample counts are forced to 0 too, so they
+    can't indirectly reveal a hidden phenopacket's existence.
+
+    This needs a real per-dataset threshold (a project/dataset-level authz permission lookup), evaluated for every
+    request regardless of whether it's authenticated — a public dataset can grant an anonymous caller counts-level
+    access just as a logged-in one might be denied it — so it's one batched authz call up front rather than a
+    single DB-level ORDER BY/SUM.
+    """
     datasets = [ds async for ds in qs]
     if not datasets:
-        return datasets
+        return []
 
     resources = tuple(ValidatedDiscoveryScope(ds.project, ds).as_authz_resource() for ds in datasets)
     permissions = (P_QUERY_DATASET_LEVEL_BOOLEAN, P_QUERY_DATASET_LEVEL_COUNTS, P_QUERY_DATA)
     results = await authz.async_evaluate_to_dict(request, resources, permissions)
 
-    field = "individual_count" if sort_key == "individuals_desc" else "biosample_count"
-
-    def censored_value(ds: Dataset, perms: dict) -> int:
+    def censored(ds: Dataset, perms: dict) -> dict[str, int]:
         data_permissions = DataPermissions(
             bool_=perms[P_QUERY_DATASET_LEVEL_BOOLEAN],
             counts=perms[P_QUERY_DATASET_LEVEL_COUNTS],
             data=perms[P_QUERY_DATA],
         )
         threshold = get_threshold(ValidatedDiscoveryScope(ds.project, ds), data_permissions)
-        if censor_count(ds.phenopacket_count, threshold) == 0:
-            return 0  # phenopacket count itself is hidden, so nested counts must be hidden too
-        return censor_count(getattr(ds, field), threshold)
+        phenopacket = censor_count(ds.phenopacket_count, threshold)
+        if phenopacket == 0:
+            return dict.fromkeys(CENSORED_COUNT_FIELDS, 0)  # nested counts hidden too
+        return {
+            "phenopacket": phenopacket,
+            "individual": censor_count(ds.individual_count, threshold),
+            "biosample": censor_count(ds.biosample_count, threshold),
+        }
 
-    scored = [(censored_value(ds, perms), ds) for ds, perms in zip(datasets, results)]
-    scored.sort(key=lambda sv: (-sv[0], str(sv[1].identifier)))
-    return [ds for _, ds in scored]
+    return [(ds, censored(ds, perms)) for ds, perms in zip(datasets, results)]
+
+
+def sort_datasets_by_censored_count(censored_counts: CensoredCounts, sort_key: str) -> list[Dataset]:
+    field = "individual" if sort_key == "individuals_desc" else "biosample"
+    ordered = sorted(censored_counts, key=lambda dc: (-dc[1][field], str(dc[0].identifier)))
+    return [ds for ds, _ in ordered]
+
+
+def compute_totals(censored_counts: CensoredCounts) -> dict[str, int]:
+    """Sums each entity's *censored* count across every dataset — never the raw one, so a total can't leak a count
+    that wouldn't otherwise be shown for a dataset on its own (e.g. a single-dataset filtered result)."""
+    totals = dict.fromkeys(CENSORED_COUNT_FIELDS, 0)
+    for _, counts in censored_counts:
+        for field in CENSORED_COUNT_FIELDS:
+            totals[field] += counts[field]
+    return totals
 
 
 # --- Facets ------------------------------------------------------------------------------------------------------

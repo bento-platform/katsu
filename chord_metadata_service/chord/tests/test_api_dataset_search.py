@@ -256,11 +256,11 @@ class DatasetCatalogueSearchTestCase(TestCase):
 
 class DatasetCountSortTestCase(AuthzAPITestCase):
     """
-    Covers individuals_desc/biosamples_desc sort: backed by a real per-dataset censored count
-    (chord/dataset_search.py::sort_by_censored_counts), evaluated via one batched authz call rather than the raw DB
-    count — for every request, authenticated or not, since counts-level access isn't tied to whether a token is
-    present. Per-dataset threshold math itself belongs to discovery/censorship.py's own test suite — this only
-    checks that the sort path is wired to real permissions, not a static/raw count.
+    Covers individuals_desc/biosamples_desc sort and ?include=totals: both backed by a real per-dataset censored
+    count (chord/dataset_search.py::compute_censored_counts), evaluated via one batched authz call rather than a
+    raw DB-level column/SUM — for every request, authenticated or not, since counts-level access isn't tied to
+    whether a token is present. Per-dataset threshold math itself belongs to discovery/censorship.py's own test
+    suite — this only checks that the sort/totals paths are wired to real permissions, not a static/raw count.
     """
 
     def setUp(self):
@@ -315,3 +315,38 @@ class DatasetCountSortTestCase(AuthzAPITestCase):
         # identifier tie-break — dataset_a's real count of 1 must not leak through.
         expected_order = [str(ds.identifier) for ds in self.datasets_by_identifier]
         self.assertEqual([row["identifier"] for row in r.data["results"]], expected_order)
+
+    # ---- totals (?include=totals) ----
+
+    def test_totals_not_included_by_default(self):
+        r = self.client.get(self.url)
+        self.assertNotIn("totals", r.data)
+
+    def test_totals_with_permissions_sums_real_counts(self):
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, [[True, True, True]] * 3)
+            r = self.client.get(self.url, {"include": "totals"})
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        # Only dataset_a has any phenopacket/individual/biosample, and full permissions censor nothing.
+        self.assertEqual(r.data["totals"], {"phenopacket": 1, "individual": 1, "biosample": 1})
+
+    def test_totals_without_permissions_are_censored_not_summed_raw(self):
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, [[False, False, False]] * 3)
+            r = self.client.get(self.url, {"include": "totals"})
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        # dataset_a's real count of 1 must not leak into the total once it's censored to 0.
+        self.assertEqual(r.data["totals"], {"phenopacket": 0, "individual": 0, "biosample": 0})
+
+    def test_totals_and_count_sort_together_share_one_authz_call(self):
+        with aioresponses() as m:
+            # Registered without repeat=True: a second authz call with no response queued would error the
+            # request, so a 200 here proves sort + totals reused the same batched evaluation.
+            self.mock_authz_eval_result(m, [[True, True, True]] * 3)
+            r = self.client.get(self.url, {"sort": "individuals_desc", "include": "totals"})
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.data["totals"]["individual"], 1)
+        self.assertEqual(r.data["results"][0]["title"], self.dataset_a.title)

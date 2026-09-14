@@ -41,8 +41,10 @@ from .dataset_search import (
     DEFAULT_SORT,
     SORT_OPTIONS,
     apply_search,
+    compute_censored_counts,
     compute_facets,
-    sort_by_censored_counts,
+    compute_totals,
+    sort_datasets_by_censored_count,
     with_count_annotations,
     with_search_annotations,
     with_sort_annotations,
@@ -194,11 +196,14 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """
-        GET /datasets?q=...&domain=X&domain=Y&status=Ongoing&sort=updated_desc&include=facets&page=1&page_size=25
+        GET /datasets?q=...&domain=X&domain=Y&status=Ongoing&sort=updated_desc&include=facets,totals&page=1
 
-        Supports free-text search (?q=), faceted filtering (see dataset_facets.FACET_FIELDS), sorting (?sort=),
-        and — opt-in via ?include=facets — per-facet option counts for the active search/filter scope, alongside the
-        plain paginated dataset listing.
+        Supports free-text search (?q=), faceted filtering (see dataset_facets.FACET_FIELDS), sorting (?sort=), and
+        two opt-in additions via ?include= (repeatable and/or comma-separated, e.g. ?include=facets&include=totals):
+          - "facets": per-facet option counts for the active search/filter scope.
+          - "totals": phenopacket/individual/biosample counts summed across every dataset matching the current
+            search/filter scope (not just the current page).
+        Both are opt-in so a plain list call doesn't pay for the extra queries.
         """
         authz.mark_authz_done(request)
 
@@ -206,6 +211,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         sort_key = request.query_params.get("sort", DEFAULT_SORT)
         if sort_key not in SORT_OPTIONS:
             sort_key = DEFAULT_SORT
+        includes = {v.strip() for raw in request.query_params.getlist("include") for v in raw.split(",") if v.strip()}
         active = active_facets(request.query_params)
 
         base_qs = with_search_annotations(self.get_queryset())
@@ -214,8 +220,12 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         results_qs = apply_facets(base_qs, active)
         results_qs = with_count_annotations(results_qs)
 
+        censored_counts = None
+        if sort_key in COUNT_SORT_KEYS or "totals" in includes:
+            censored_counts = async_to_sync(compute_censored_counts)(request, results_qs.order_by("identifier"))
+
         if sort_key in COUNT_SORT_KEYS:
-            ordered = async_to_sync(sort_by_censored_counts)(request, results_qs.order_by("identifier"), sort_key)
+            ordered = sort_datasets_by_censored_count(censored_counts, sort_key)
         else:
             results_qs = with_sort_annotations(results_qs)
             field_name, desc = SORT_OPTIONS[sort_key]
@@ -225,8 +235,10 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         serializer = self.get_serializer(page if page is not None else ordered, many=True)
         response = self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
 
-        if request.query_params.get("include") == "facets":
+        if "facets" in includes:
             response.data["facets"] = compute_facets(base_qs, active)
+        if "totals" in includes:
+            response.data["totals"] = compute_totals(censored_counts)
 
         return response
 
