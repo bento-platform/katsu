@@ -4,6 +4,7 @@ Shared query-building helpers behind the searchable/facetable/sortable GET /data
 DRF request/response plumbing.
 """
 
+from bento_lib.auth.permissions import P_QUERY_DATA, P_QUERY_DATASET_LEVEL_BOOLEAN, P_QUERY_DATASET_LEVEL_COUNTS
 from django.db.models import (
     Count,
     DateTimeField,
@@ -19,18 +20,26 @@ from django.db.models import (
 )
 from django.db.models.fields.json import KeyTextTransform
 from django.db.models.functions import Coalesce
+from rest_framework.request import Request as DrfRequest
 
+from chord_metadata_service.authz.middleware import authz_middleware as authz
+from chord_metadata_service.authz.types import DataPermissions
+from chord_metadata_service.discovery.censorship import censor_count, get_threshold
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from .dataset_facets import FACET_FIELDS, apply_facets
+from .models import Dataset
 
 __all__ = [
     "with_search_annotations",
     "apply_search",
     "SORT_OPTIONS",
     "DEFAULT_SORT",
+    "COUNT_SORT_KEYS",
     "with_sort_annotations",
     "with_count_annotations",
+    "sort_by_censored_counts",
     "compute_facets",
 ]
 
@@ -80,6 +89,8 @@ SORT_OPTIONS: dict[str, tuple[str, bool]] = {
 }
 DEFAULT_SORT = "updated_desc"
 
+COUNT_SORT_KEYS: frozenset[str] = frozenset({"individuals_desc", "biosamples_desc"})
+
 
 def with_sort_annotations(qs: QuerySet) -> QuerySet:
     return qs.annotate(
@@ -90,14 +101,19 @@ def with_sort_annotations(qs: QuerySet) -> QuerySet:
 
 # --- Per-dataset individual/biosample counts, for sorting only -------------------------------------------------------
 #
-# These are raw (uncensored) counts, used purely to rank the listing before pagination. The *displayed*
-# counts_by_entity value for each result still comes from DatasetSerializer, which applies the same small-cell
-# censoring used everywhere else in the API (see chord/utils.py::get_censored_counts_for_serializer). Sorting by the
-# raw count is an accepted proxy-ranking trade-off: censoring is a display transform on top of true counts, not a
-# rank-altering one.
+# Raw counts, annotated at the DB level. These are never returned or displayed directly — sort_by_censored_counts
+# below re-derives a censored value from them per dataset before anything is ranked or returned, using the same
+# small-cell censoring rules applied everywhere else in the API (see discovery/censorship.py).
 
 
 def with_count_annotations(qs: QuerySet) -> QuerySet:
+    phenopacket_sq = (
+        Phenopacket.objects.filter(dataset_id=OuterRef("identifier"))
+        .order_by()
+        .values("dataset_id")
+        .annotate(c=Count("id"))
+        .values("c")
+    )
     individual_sq = (
         Phenopacket.objects.filter(dataset_id=OuterRef("identifier"))
         .order_by()
@@ -113,9 +129,40 @@ def with_count_annotations(qs: QuerySet) -> QuerySet:
         .values("c")
     )
     return qs.annotate(
+        phenopacket_count=Coalesce(Subquery(phenopacket_sq, output_field=IntegerField()), 0),
         individual_count=Coalesce(Subquery(individual_sq, output_field=IntegerField()), 0),
         biosample_count=Coalesce(Subquery(biosample_sq, output_field=IntegerField()), 0),
     )
+
+
+# --- Censored count sort (individuals_desc / biosamples_desc) ------------------------------------------------------
+
+
+async def sort_by_censored_counts(request: DrfRequest, qs: QuerySet, sort_key: str) -> list[Dataset]:
+    datasets = [ds async for ds in qs]
+    if not datasets:
+        return datasets
+
+    resources = tuple(ValidatedDiscoveryScope(ds.project, ds).as_authz_resource() for ds in datasets)
+    permissions = (P_QUERY_DATASET_LEVEL_BOOLEAN, P_QUERY_DATASET_LEVEL_COUNTS, P_QUERY_DATA)
+    results = await authz.async_evaluate_to_dict(request, resources, permissions)
+
+    field = "individual_count" if sort_key == "individuals_desc" else "biosample_count"
+
+    def censored_value(ds: Dataset, perms: dict) -> int:
+        data_permissions = DataPermissions(
+            bool_=perms[P_QUERY_DATASET_LEVEL_BOOLEAN],
+            counts=perms[P_QUERY_DATASET_LEVEL_COUNTS],
+            data=perms[P_QUERY_DATA],
+        )
+        threshold = get_threshold(ValidatedDiscoveryScope(ds.project, ds), data_permissions)
+        if censor_count(ds.phenopacket_count, threshold) == 0:
+            return 0  # phenopacket count itself is hidden, so nested counts must be hidden too
+        return censor_count(getattr(ds, field), threshold)
+
+    scored = [(censored_value(ds, perms), ds) for ds, perms in zip(datasets, results)]
+    scored.sort(key=lambda sv: (-sv[0], str(sv[1].identifier)))
+    return [ds for _, ds in scored]
 
 
 # --- Facets ------------------------------------------------------------------------------------------------------
@@ -142,7 +189,10 @@ def compute_facets(base_qs: QuerySet, active: dict[str, list[str]]) -> dict[str,
                 .values(value=F(field_name))
                 .annotate(count=Count("identifier", distinct=True))
             )
-        counts = {row["value"]: row["count"] for row in rows if row["value"]}
+        # str(...) here, since e.g. the "project" facet's underlying field is a UUID FK: row["value"] comes back as a
+        # uuid.UUID, but active facet values are always plain strings from the query params — without normalizing,
+        # the zero-count backfill below would treat "same project, different type" as two distinct dict keys.
+        counts = {str(row["value"]): row["count"] for row in rows if row["value"]}
         for v in active.get(facet_id, []):
             counts.setdefault(v, 0)
         facets[facet_id] = [

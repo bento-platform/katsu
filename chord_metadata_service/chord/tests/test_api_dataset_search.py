@@ -1,10 +1,12 @@
 import uuid
 
+from aioresponses import aioresponses
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
+from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
@@ -214,10 +216,12 @@ class DatasetCatalogueSearchTestCase(TestCase):
         titles = [row["title"] for row in r.data["results"]]
         self.assertEqual(titles, [self.dataset_c.title, self.dataset_a.title, self.dataset_b.title])
 
-    def test_sort_individuals_desc(self):
+    def test_sort_individuals_desc_unauthenticated_is_rejected(self):
+        # individuals_desc/biosamples_desc require a real censored count, which needs an authenticated caller (see
+        # DatasetCountSortTestCase below for the authenticated behavior) — an anonymous request is rejected outright
+        # rather than silently served under a different sort.
         r = self.client.get(self.url, {"sort": "individuals_desc"})
-        titles = [row["title"] for row in r.data["results"]]
-        self.assertEqual(titles[0], self.dataset_a.title)
+        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_invalid_sort_falls_back_to_default(self):
         r = self.client.get(self.url, {"sort": "not-a-real-option"})
@@ -245,3 +249,72 @@ class DatasetCatalogueSearchTestCase(TestCase):
         self.assertEqual(row["project_detail"]["identifier"], str(self.project_1.identifier))
         self.assertEqual(row["project_detail"]["title"], self.project_1.title)
         self.assertIn("counts_by_entity", row)
+
+
+class DatasetCountSortTestCase(AuthzAPITestCase):
+    """
+    Covers individuals_desc/biosamples_desc sort for authenticated requests: backed by a real per-dataset censored
+    count (chord/dataset_search.py::sort_by_censored_counts), evaluated via one batched authz call rather than the
+    raw DB count. Per-dataset threshold math itself belongs to discovery/censorship.py's own test suite — this only
+    checks that the sort path is wired to real permissions, not a static/raw count.
+    """
+
+    def setUp(self):
+        self.project = Project.objects.create(title="Count Sort Project", description="")
+        self.dataset_a = _make_dataset(
+            project=self.project, title="Has Data", description="Has data.", last_modified="2024-01-01"
+        )
+        self.dataset_b = _make_dataset(
+            project=self.project, title="No Data", description="No data.", last_modified="2024-01-01"
+        )
+        self.dataset_c = _make_dataset(
+            project=self.project, title="Also No Data", description="Also no data.", last_modified="2024-01-01"
+        )
+
+        individual = Individual.objects.create(**VALID_INDIVIDUAL_1)
+        biosample = Biosample.objects.create(**valid_biosample_1(individual))
+        meta_data = MetaData.objects.create(**VALID_META_DATA_1)
+        phenopacket = Phenopacket.objects.create(
+            id="phenopacket:count-sort-test-1",
+            subject=individual,
+            meta_data=meta_data,
+            dataset=self.dataset_a,
+        )
+        phenopacket.biosamples.set([biosample])
+
+        # sort_by_censored_counts materializes in identifier order, so the authz mock's result rows must line up
+        # with datasets sorted the same way.
+        self.datasets_by_identifier = sorted(
+            (self.dataset_a, self.dataset_b, self.dataset_c), key=lambda ds: str(ds.identifier)
+        )
+
+        self.url = reverse("dataset-list")
+        self.auth_headers = {"HTTP_AUTHORIZATION": "Bearer test-token"}
+
+    def test_count_sort_requires_authentication(self):
+        r = self.client.get(self.url, {"sort": "individuals_desc"})
+        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_count_sort_requires_authentication_biosamples(self):
+        r = self.client.get(self.url, {"sort": "biosamples_desc"})
+        self.assertEqual(r.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_count_sort_authenticated_with_full_permissions_uses_real_counts(self):
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, [[True, True, True]] * 3)  # bool, counts, data — for each dataset
+            r = self.client.get(self.url, {"sort": "individuals_desc"}, **self.auth_headers)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        titles = [row["title"] for row in r.data["results"]]
+        self.assertEqual(titles[0], self.dataset_a.title)
+
+    def test_count_sort_authenticated_without_permissions_censors_to_zero(self):
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, [[False, False, False]] * 3)
+            r = self.client.get(self.url, {"sort": "individuals_desc"}, **self.auth_headers)
+
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        # With no permissions on any dataset, every count censors to 0, so the sort falls through to its
+        # identifier tie-break — dataset_a's real count of 1 must not leak through.
+        expected_order = [str(ds.identifier) for ds in self.datasets_by_identifier]
+        self.assertEqual([row["identifier"] for row in r.data["results"]], expected_order)

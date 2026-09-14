@@ -37,10 +37,12 @@ from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from .dataset_facets import active_facets, apply_facets
 from .dataset_search import (
+    COUNT_SORT_KEYS,
     DEFAULT_SORT,
     SORT_OPTIONS,
     apply_search,
     compute_facets,
+    sort_by_censored_counts,
     with_count_annotations,
     with_search_annotations,
     with_sort_annotations,
@@ -85,6 +87,11 @@ def bad_request(request: DrfRequest, *args):
 def forbidden(request: DrfRequest):
     authz.mark_authz_done(request)
     return Response(errors.forbidden_error(), status=status.HTTP_403_FORBIDDEN)
+
+
+def unauthorized(request: DrfRequest, *args):
+    authz.mark_authz_done(request)
+    return Response(errors.unauthorized_error(*args), status=status.HTTP_401_UNAUTHORIZED)
 
 
 def not_found(request: DrfRequest):
@@ -197,6 +204,11 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         Supports free-text search (?q=), faceted filtering (see dataset_facets.FACET_FIELDS), sorting (?sort=),
         and — opt-in via ?include=facets — per-facet option counts for the active search/filter scope, alongside the
         plain paginated dataset listing.
+
+        individuals_desc/biosamples_desc sort by a per-dataset censored count (see
+        dataset_search.sort_by_censored_counts), which needs a real authz-evaluated permission per dataset — so an
+        unauthenticated request (no Authorization header) asking for either of these two sort options gets 401
+        Unauthorized rather than a silently-different sort.
         """
         authz.mark_authz_done(request)
 
@@ -204,6 +216,8 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         sort_key = request.query_params.get("sort", DEFAULT_SORT)
         if sort_key not in SORT_OPTIONS:
             sort_key = DEFAULT_SORT
+        if sort_key in COUNT_SORT_KEYS and authz.get_authz_header_value(request) is None:
+            return unauthorized(request, f"Sorting by '{sort_key}' requires authentication")
         active = active_facets(request.query_params)
 
         base_qs = with_search_annotations(self.get_queryset())
@@ -211,13 +225,16 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         results_qs = apply_facets(base_qs, active)
         results_qs = with_count_annotations(results_qs)
-        results_qs = with_sort_annotations(results_qs)
 
-        field_name, desc = SORT_OPTIONS[sort_key]
-        results_qs = results_qs.order_by(f"-{field_name}" if desc else field_name, "identifier")
+        if sort_key in COUNT_SORT_KEYS:
+            ordered = async_to_sync(sort_by_censored_counts)(request, results_qs.order_by("identifier"), sort_key)
+        else:
+            results_qs = with_sort_annotations(results_qs)
+            field_name, desc = SORT_OPTIONS[sort_key]
+            ordered = results_qs.order_by(f"-{field_name}" if desc else field_name, "identifier")
 
-        page = self.paginate_queryset(results_qs)
-        serializer = self.get_serializer(page if page is not None else results_qs, many=True)
+        page = self.paginate_queryset(ordered)
+        serializer = self.get_serializer(page if page is not None else ordered, many=True)
         response = self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
 
         if request.query_params.get("include") == "facets":
