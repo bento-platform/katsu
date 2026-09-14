@@ -200,7 +200,9 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
         Supports free-text search (?q=), faceted filtering (see dataset_facets.FACET_FIELDS), sorting (?sort=), and
         two opt-in additions via ?include= (repeatable and/or comma-separated, e.g. ?include=facets&include=totals):
-          - "facets": per-facet option counts for the active search/filter scope.
+          - "facets": per-facet option counts for the active search/filter scope. Each option's `value` is always
+            the canonical (English) filterable string; when Accept-Language resolves to a translation that exists
+            for that field, options also get a `label` in that language (see dataset_search.compute_facets).
           - "totals": phenopacket/individual/biosample counts summed across every dataset matching the current
             search/filter scope (not just the current page).
         """
@@ -212,6 +214,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
             sort_key = DEFAULT_SORT
         includes = {v.strip() for raw in request.query_params.getlist("include") for v in raw.split(",") if v.strip()}
         active = active_facets(request.query_params)
+        language = _get_preferred_language(request)
 
         base_qs = with_search_annotations(self.get_queryset())
         base_qs = apply_search(base_qs, q)
@@ -235,7 +238,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         response = self.get_paginated_response(serializer.data) if page is not None else Response(serializer.data)
 
         if "facets" in includes:
-            response.data["facets"] = compute_facets(base_qs, active)
+            response.data["facets"] = compute_facets(base_qs, active, language)
         if "totals" in includes:
             response.data["totals"] = compute_totals(censored_counts)
 

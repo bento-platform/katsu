@@ -194,6 +194,53 @@ class DatasetCatalogueSearchTestCase(TestCase):
         titles = {row["title"] for row in r.data["results"]}
         self.assertEqual(titles, {self.dataset_c.title})
 
+    # ---- facet labels localize to Accept-Language, value stays the canonical (English) filterable string ----
+
+    def test_facet_labels_default_to_value_without_translation(self):
+        r = self.client.get(self.url, {"include": "facets"})
+        program_facet = {row["value"]: row for row in r.data["facets"]["program"]}
+        self.assertEqual(program_facet["Program X"]["label"], "Program X")
+
+    def test_facet_labels_localized_when_french_translation_exists(self):
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Cohorte alpha",
+            description="Description en francais.",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            identifier=str(self.dataset_a.identifier),
+            project=str(self.project_1.identifier),
+            program_name="Programme X",
+            domain=["Oncologie", "Genomique"],
+            study_status="ONGOING",
+        )
+        DatasetTranslation.from_schema(schema, dataset_id=self.dataset_a.identifier, language="fr").save()
+
+        r = self.client.get(self.url, {"include": "facets"}, HTTP_ACCEPT_LANGUAGE="fr")
+
+        program_facet = {row["value"]: row for row in r.data["facets"]["program"]}
+        self.assertEqual(program_facet["Program X"]["label"], "Programme X")
+
+        domain_facet = {row["value"]: row for row in r.data["facets"]["domain"]}
+        self.assertEqual(domain_facet["Oncology"]["label"], "Oncologie")
+        self.assertEqual(domain_facet["Genomics"]["label"], "Genomique")
+
+        # status/context are backed by a bento_lib TranslatedLiteral (StudyStatus/StudyContext), a fixed
+        # code-defined mapping — not per-dataset translation data, so this doesn't depend on the fixture above.
+        status_facet = {row["value"]: row for row in r.data["facets"]["status"]}
+        self.assertEqual(status_facet["ONGOING"]["label"], "EN COURS")
+
+    def test_facet_labels_english_default_leaves_status_unchanged(self):
+        r = self.client.get(self.url, {"include": "facets"})
+        status_facet = {row["value"]: row for row in r.data["facets"]["status"]}
+        self.assertEqual(status_facet["ONGOING"]["label"], "ONGOING")
+
+    def test_facet_labels_translated_literal_does_not_need_any_translation_fixture(self):
+        # No DatasetTranslation created anywhere in this test — status/context's label still translates, since it
+        # comes from the fixed StudyStatus/StudyContext mapping, not per-dataset data.
+        r = self.client.get(self.url, {"include": "facets"}, HTTP_ACCEPT_LANGUAGE="fr")
+        context_facet = {row["value"]: row for row in r.data["facets"]["context"]}
+        self.assertEqual(context_facet["CLINICAL"]["label"], "CLINIQUE")
+
     # ---- facet counts: exclude own filter, include zero-count selected values (opt-in via ?include=facets) ----
 
     def test_facets_not_included_by_default(self):

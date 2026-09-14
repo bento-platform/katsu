@@ -125,8 +125,6 @@ class Dataset(AbstractPydanticJSONBModel):
     privacy = models.CharField(max_length=64, null=True, blank=True, db_index=True)
     study_status = models.CharField(max_length=32, null=True, blank=True, db_index=True)
     study_context = models.CharField(max_length=32, null=True, blank=True, db_index=True)
-    # No `default=list`: the pydantic schema requires these to be either None or non-empty
-    # (min_length=1), so an empty list must be stored as NULL, not [].
     domain = ArrayField(models.CharField(max_length=256), null=True, blank=True)
 
     # Derived facet columns for polymorphic/nested `data` fields (str | OntologyClass, License object).

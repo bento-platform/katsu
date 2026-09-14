@@ -4,7 +4,10 @@ Shared query-building helpers behind the searchable/facetable/sortable GET /data
 DRF request/response plumbing.
 """
 
+import typing
+
 from bento_lib.auth.permissions import P_QUERY_DATA, P_QUERY_DATASET_LEVEL_BOOLEAN, P_QUERY_DATASET_LEVEL_COUNTS
+from bento_lib.i18n import TranslatedLiteral
 from django.db.models import (
     Count,
     DateTimeField,
@@ -29,6 +32,7 @@ from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.phenopackets.models import Phenopacket
 
 from .dataset_facets import FACET_FIELDS, apply_facets
+from .dataset_schema import KatsuDatasetModel
 from .models import Dataset, DatasetTranslation
 
 __all__ = [
@@ -223,12 +227,119 @@ def compute_totals(censored_counts: CensoredCounts) -> dict[str, int]:
 
 # --- Facets ------------------------------------------------------------------------------------------------------
 
+# facet id -> KatsuDatasetModel field name, for the two kinds of label lookup below. Not present here: "license"'s
+# value is a derived nested field (license.label) handled separately via TRANSLATABLE_FACET_PATHS; "project"'s
+# value is a UUID relation, not schema text at all.
+FACET_SCHEMA_FIELDS: dict[str, str] = {
+    "program": "program_name",
+    "domain": "domain",
+    "taxon": "taxa",
+    "access": "privacy",
+    "context": "study_context",
+    "status": "study_status",
+    "keyword": "keywords",
+}
 
-def compute_facets(base_qs: QuerySet, active: dict[str, list[str]]) -> dict[str, list[dict]]:
+# facet id -> json key path into a DatasetTranslation's `data` payload, for the facets whose *value* is per-dataset
+# free text with no canonical translation of its own — status/context are excluded here since they're handled by
+# the TranslatedLiteral meta-model lookup below instead (a real, always-available translation, not a per-dataset
+# guess); "project" has no path since its value isn't text.
+TRANSLATABLE_FACET_PATHS: dict[str, tuple[str, ...]] = {
+    "program": ("program_name",),
+    "domain": ("domain",),
+    "taxon": ("taxa",),
+    "access": ("privacy",),
+    "license": ("license", "label"),
+    "keyword": ("keywords",),
+}
+
+
+def _find_translated_literal(annotation) -> TranslatedLiteral | None:
+    """Recursively unwrap a pydantic field annotation (through Optional/Annotated) looking for a bound
+    bento_lib.i18n.TranslatedLiteral, e.g. Annotated[str, StudyStatus] | None."""
+    metadata = getattr(annotation, "__metadata__", None)
+    if metadata:
+        for m in metadata:
+            if isinstance(m, TranslatedLiteral):
+                return m
+    for arg in typing.get_args(annotation):
+        found = _find_translated_literal(arg)
+        if found is not None:
+            return found
+    return None
+
+
+def _translated_literal_for_facet(facet_id: str) -> TranslatedLiteral | None:
+    """
+    "Meta modelling" lookup: if the KatsuDatasetModel field backing a facet is declared as a TranslatedLiteral
+    (currently study_status/study_context — see bento_lib.provenance.dataset.StudyStatus/StudyContext), that's the
+    single source of truth for its label: a fixed, code-defined mapping that exists regardless of whether any
+    dataset happens to have a translation row, unlike the free-text fields below.
+    """
+    field_name = FACET_SCHEMA_FIELDS.get(facet_id)
+    if field_name is None:
+        return None
+    field = KatsuDatasetModel.model_fields.get(field_name)
+    if field is None:
+        return None
+    return _find_translated_literal(field.annotation)
+
+
+def _label_of(element) -> str | None:
+    """An array element may be a plain string or an OntologyClass-shaped {"label": ..., ...} dict."""
+    return element.get("label") if isinstance(element, dict) else element
+
+
+def _resolve_fr_labels_scalar(scoped: QuerySet, field_name: str, key_path: tuple[str, ...]) -> dict[str, str]:
+    """
+    English facet value -> a French label for it, drawn from whichever dataset in `scoped` carrying that value has
+    one (there's no canonical per-value translation for free-text fields like program/license, so this is an
+    arbitrary-but-deterministic pick — the alphabetically-first label found — not "the" translation).
+    """
+    rows = (
+        scoped.exclude(**{f"{field_name}__isnull": True})
+        .annotate(_fr_label=_translation_text_subquery("fr", *key_path))
+        .values("_fr_label", v=F(field_name))
+    )
+    labels: dict[str, str] = {}
+    for row in rows:
+        v, label = row["v"], row["_fr_label"]
+        if label and (v not in labels or label < labels[v]):
+            labels[v] = label
+    return labels
+
+
+def _resolve_fr_labels_array(scoped: QuerySet, field_name: str, translation_key: str) -> dict[str, str]:
+    """
+    Same as _resolve_fr_labels_scalar, for an array facet. Pairs each dataset's base (English) array with its
+    translation's raw array by position — assuming a translation preserves the same tag order/count as the base
+    record it translates, which is how translations are authored today. Datasets without a French translation
+    simply don't contribute any labels here.
+    """
+    labels: dict[str, str] = {}
+    rows = scoped.filter(translations__language="fr").values(field_name, "translations__data")
+    for row in rows:
+        base_list = row[field_name] or []
+        translated_list = (row["translations__data"] or {}).get(translation_key) or []
+        for i, v in enumerate(base_list):
+            if i >= len(translated_list):
+                break
+            label = _label_of(translated_list[i])
+            if label and (v not in labels or label < labels[v]):
+                labels[v] = label
+    return labels
+
+
+def compute_facets(base_qs: QuerySet, active: dict[str, list[str]], language: str = "en") -> dict[str, list[dict]]:
     """
     Per-facet option counts. Each facet's counts exclude that facet's own active filter (but respect every other
     active facet + q), and any of the facet's currently-selected values are included even at count 0, so the UI can
     still offer to deselect them.
+
+    `value` is always the canonical (English-stored) string — the same one `?<facet_id>=` filters against — so
+    filtering keeps working regardless of display language. `label` always exists too: for a TranslatedLiteral
+    field (status/context) it's the fixed, code-defined translation; for a free-text field with a matching
+    DatasetTranslation (see TRANSLATABLE_FACET_PATHS) it's that; otherwise it just repeats `value`.
     """
     facets: dict[str, list[dict]] = {}
     for facet_id, (field_name, is_array) in FACET_FIELDS.items():
@@ -251,7 +362,27 @@ def compute_facets(base_qs: QuerySet, active: dict[str, list[str]]) -> dict[str,
         counts = {str(row["value"]): row["count"] for row in rows if row["value"]}
         for v in active.get(facet_id, []):
             counts.setdefault(v, 0)
+
+        # A TranslatedLiteral field (status/context) has a fixed, code-defined mapping — no query needed, and it's
+        # available for every value, not just ones some dataset happens to have translated. Everything else falls
+        # back to whatever a DatasetTranslation row supplies, if any.
+        literal = _translated_literal_for_facet(facet_id)
+        labels: dict[str, str] = {}
+        if literal is None:
+            key_path = TRANSLATABLE_FACET_PATHS.get(facet_id)
+            if language != "en" and key_path:
+                labels = (
+                    _resolve_fr_labels_array(scoped, field_name, key_path[0])
+                    if is_array
+                    else _resolve_fr_labels_scalar(scoped, field_name, key_path)
+                )
+
         facets[facet_id] = [
-            {"value": v, "count": c} for v, c in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+            {
+                "value": v,
+                "count": c,
+                "label": literal.translate(v, language) if literal is not None else labels.get(v, v),
+            }
+            for v, c in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
         ]
     return facets
