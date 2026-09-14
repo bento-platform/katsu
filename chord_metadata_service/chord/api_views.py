@@ -203,7 +203,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
           - "facets": per-facet option counts for the active search/filter scope.
           - "totals": phenopacket/individual/biosample counts summed across every dataset matching the current
             search/filter scope (not just the current page).
-        Both are opt-in so a plain list call doesn't pay for the extra queries.
         """
         authz.mark_authz_done(request)
 
