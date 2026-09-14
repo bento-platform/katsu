@@ -261,7 +261,7 @@ FILE_SCHEMA = describe_schema(
         "type": "object",
         "properties": {
             "uri": base_type(SchemaTypes.STRING),
-            "undividual_to_file_identifiers": base_type(SchemaTypes.OBJECT),
+            "individual_to_file_identifiers": base_type(SchemaTypes.OBJECT),
             "file_attributes": base_type(SchemaTypes.OBJECT),
         },
     },
