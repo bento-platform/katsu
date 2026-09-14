@@ -199,11 +199,6 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         Supports free-text search (?q=), faceted filtering (see dataset_facets.FACET_FIELDS), sorting (?sort=),
         and — opt-in via ?include=facets — per-facet option counts for the active search/filter scope, alongside the
         plain paginated dataset listing.
-
-        individuals_desc/biosamples_desc sort by a real, per-dataset censored count (see
-        dataset_search.sort_by_censored_counts) rather than a DB-level column — evaluated via authz for every
-        request, authenticated or not, since a dataset's counts-level access isn't tied to whether a token is
-        present (e.g. a public dataset can grant counts access to anonymous callers too).
         """
         authz.mark_authz_done(request)
 
