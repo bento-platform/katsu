@@ -21,6 +21,7 @@ from chord_metadata_service.chord.ingest import WORKFLOW_INGEST_FUNCTION_MAP
 from chord_metadata_service.chord.workflows.metadata import WORKFLOW_PHENOPACKETS_JSON, WORKFLOW_EXPERIMENTS_JSON
 from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
+from chord_metadata_service.experiments.serializers import ExperimentResultSerializer
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer, ExperimentResultManifestTSVRenderer
 from chord_metadata_service.restapi.tests.utils import load_local_json
@@ -562,6 +563,20 @@ class TestExperimentResultManifestTSVRenderer(TestCase):
         response = self.renderer.render([])
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
         self.assertEqual(len(rows), 1)  # header only
+
+    def test_manifest_get_model_serializer(self):
+        self.assertEqual(ExperimentResultManifestTSVRenderer.get_model_serializer(), ExperimentResultSerializer)
+
+
+class TestExperimentResultSerializerStudyField(TestCase):
+    """
+    Test ExperimentResultSerializer's derived `study` field, used by the download-manifest export.
+    """
+
+    def test_get_study_without_linked_experiment(self):
+        # An ExperimentResult not (yet) linked to any Experiment has no dataset to derive a study from.
+        er = ExperimentResult.objects.create(identifier="detached-1", filename="detached.txt", file_format="OTHER")
+        self.assertIsNone(ExperimentResultSerializer(er).data["study"])
 
 
 class TestExperimentSchema(APITestCase):
