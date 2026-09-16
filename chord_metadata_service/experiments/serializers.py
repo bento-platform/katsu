@@ -1,3 +1,5 @@
+from rest_framework import serializers
+
 from chord_metadata_service.patients.models import Individual
 from chord_metadata_service.restapi.serializers import GenericSerializer
 from .models import Experiment, ExperimentResult, Instrument
@@ -7,9 +9,20 @@ __all__ = ["ExperimentSerializer", "ExperimentResultSerializer", "InstrumentSeri
 
 
 class ExperimentResultSerializer(GenericSerializer):
+    # The dataset (i.e., "study") this result belongs to, reached via its linked experiment(s) - read-only/derived,
+    # used by the download-manifest export. A result could in principle be linked to multiple experiments (M2M), so
+    # this just takes the first one.
+    study = serializers.SerializerMethodField()
+
     class Meta:
         model = ExperimentResult
         exclude = ("fts_extra",)
+
+    def get_study(self, obj: ExperimentResult) -> str | None:
+        experiment = next(iter(obj.experiments.all()), None)
+        if experiment is None or experiment.dataset_id is None:
+            return None
+        return str(experiment.dataset.identifier)
 
 
 class InstrumentSerializer(GenericSerializer):

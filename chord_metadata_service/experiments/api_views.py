@@ -17,6 +17,7 @@ from chord_metadata_service.restapi.api_renderers import (
     ExperimentCSVRenderer,
     ExperimentResultCSVRenderer,
     ExperimentResultXLSXRenderer,
+    ExperimentResultManifestTSVRenderer,
     csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
@@ -38,7 +39,7 @@ __all__ = [
 
 EXPERIMENT_SELECT_REL = ("instrument",)
 
-EXPERIMENT_PREFETCH = ("experiment_results", "biosample__individual")
+EXPERIMENT_PREFETCH = ("experiment_results", "experiment_results__experiments__dataset", "biosample__individual")
 
 
 class ExperimentViewSet(BentoAuthzScopedModelViewSet):
@@ -176,6 +177,7 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         PhenopacketsRenderer,
         ExperimentResultCSVRenderer,
         ExperimentResultXLSXRenderer,
+        ExperimentResultManifestTSVRenderer,
     )
     content_negotiation_class = FormatInPostContentNegotiation
 
@@ -185,6 +187,7 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         # We pre-filter experiment results to the scope. This way, if they specify an ID outside the scope, it's
         # just ignored - the requester won't even know if it exists.
         queryset = ExperimentResult.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
+        queryset = queryset.prefetch_related("experiments__dataset")
 
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
