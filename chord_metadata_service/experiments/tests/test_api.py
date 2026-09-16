@@ -575,8 +575,10 @@ class TestExperimentResultSerializerStudyField(TestCase):
 
     def test_get_study_without_linked_experiment(self):
         # An ExperimentResult not (yet) linked to any Experiment has no dataset to derive a study from.
+        # Note: GenericSerializer.to_representation() drops falsey fields entirely, so a None study is absent
+        # from .data rather than present-with-None - same as what the manifest renderer's simple_field() sees.
         er = ExperimentResult.objects.create(identifier="detached-1", filename="detached.txt", file_format="OTHER")
-        self.assertIsNone(ExperimentResultSerializer(er).data["study"])
+        self.assertIsNone(ExperimentResultSerializer(er).data.get("study"))
 
 
 class TestExperimentSchema(APITestCase):
