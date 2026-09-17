@@ -11,12 +11,14 @@ from bento_lib.responses import errors
 from django.http import HttpResponse
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from openpyxl import Workbook
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from pydantic_extra_types.language_code import LanguageAlpha2
 from rdflib import Graph
 from rdflib.plugin import register
 from rdflib.serializer import Serializer
 from rest_framework import status
 from rest_framework.renderers import BaseRenderer, BrowsableAPIRenderer, JSONRenderer
+from rest_framework.request import Request as DrfRequest
 from rest_framework.response import Response
 
 from chord_metadata_service.experiments import serializers as exp_s
@@ -25,6 +27,7 @@ from chord_metadata_service.phenopackets import serializers as phe_s
 from chord_metadata_service.phenopackets.utils import time_element_to_str
 
 from .jsonld_utils import dataset_to_jsonld
+from .language import get_preferred_language
 from .serializers import GenericSerializer
 
 __all__ = [
@@ -542,8 +545,24 @@ class IndividualBentoSearchRenderer(JSONRenderer):
     format = OUTPUT_FORMAT_BENTO_SEARCH_RESULT
 
 
-def _json_dump_if_pyd(data):
-    return data.model_dump(mode="json") if isinstance(data, BaseModel) else data
+def _json_dump_if_pyd(data, context: dict | None = None):
+    return data.model_dump(mode="json", context=context) if isinstance(data, BaseModel) else data
+
+
+def _lang_context_from_renderer_context(renderer_context: dict | None) -> dict | None:
+    try:
+        req: DrfRequest | None = renderer_context.get("request") if renderer_context else None
+        lang = get_preferred_language(req) if req is not None else None
+        lang_code = LanguageAlpha2(lang) if lang is not None else None
+        if lang_code is None:
+            return None
+
+        # inject language translation context for any models using the TranslatedString Pydantic type from
+        # bento_lib. This will use the request Accept-Language wherever possible, falling back to
+        # English/French (in that order), and then finally to the first defined language in the dictionary.
+        return {"lang": lang, "lang_fallback": ("en", "fr"), "lang_fallback_policy": "first"}
+    except ValidationError:  # pydantic invalid language code
+        return None
 
 
 class PydanticJSONRenderer(JSONRenderer):
@@ -552,8 +571,12 @@ class PydanticJSONRenderer(JSONRenderer):
     data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
     """
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
+    def render(self, data, accepted_media_type=None, renderer_context: dict | None = None):
+        return super().render(
+            _json_dump_if_pyd(data, context=_lang_context_from_renderer_context(renderer_context)),
+            accepted_media_type,
+            renderer_context,
+        )
 
 
 class PydanticBrowsableAPIRenderer(BrowsableAPIRenderer):
@@ -562,5 +585,9 @@ class PydanticBrowsableAPIRenderer(BrowsableAPIRenderer):
     If the data passed is not a Pydantic model instance, this simply falls back to the superclass behaviour.
     """
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
-        return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
+    def render(self, data, accepted_media_type=None, renderer_context: dict | None = None):
+        return super().render(
+            _json_dump_if_pyd(data, context=_lang_context_from_renderer_context(renderer_context)),
+            accepted_media_type,
+            renderer_context,
+        )
