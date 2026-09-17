@@ -32,6 +32,7 @@ from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
 from chord_metadata_service.logger import logger
 from chord_metadata_service.resources.serializers import ResourceSerializer
 from chord_metadata_service.restapi.api_renderers import PhenopacketsRenderer
+from chord_metadata_service.restapi.language import get_preferred_language
 from chord_metadata_service.restapi.pagination import LargeResultsSetPagination
 
 from .data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
@@ -56,15 +57,6 @@ def _serializer_error_messages(errs: dict) -> list[str]:
         else:
             msgs.append(f"{prefix}{field_errors}")
     return msgs
-
-
-def _get_preferred_language(request: DrfRequest) -> str:
-    """Normalize the primary language tag from the Accept-Language header."""
-    header = request.META.get("HTTP_ACCEPT_LANGUAGE", "")
-    if not header:
-        return "en"
-    primary = header.split(",")[0].split(";")[0].strip()
-    return primary.split("-")[0].lower() or "en"
 
 
 def bad_request(request: DrfRequest, *args):
@@ -105,7 +97,7 @@ class ProjectViewSet(CHORDPublicModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context["language"] = _get_preferred_language(self.request)
+        context["language"] = get_preferred_language(self.request)
         return context
 
     @async_to_sync
@@ -158,7 +150,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         if project_id:
             queryset = queryset.filter(project_id=project_id)
         queryset = queryset.prefetch_related("translations")
-        language = _get_preferred_language(self.request)
+        language = get_preferred_language(self.request)
         if language != "en":
             queryset = queryset.prefetch_related(
                 Prefetch(
@@ -177,7 +169,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context["language"] = _get_preferred_language(self.request)
+        context["language"] = get_preferred_language(self.request)
         return context
 
     def list(self, request, *args, **kwargs):

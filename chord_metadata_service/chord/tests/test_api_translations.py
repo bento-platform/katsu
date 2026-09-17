@@ -59,7 +59,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r["Content-Language"], "en")
 
     def test_get_dataset_language_region_subtag(self):
-        # _get_preferred_language: "fr-CA" → primary tag "fr" (region stripped)
+        # get_preferred_language: "fr-CA" → primary tag "fr" (region stripped)
         r = self.client.get(
             reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}),
             HTTP_ACCEPT_LANGUAGE="fr-CA",
@@ -67,7 +67,7 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
 
     def test_get_dataset_language_empty_primary_tag(self):
-        # _get_preferred_language: "-" → split("-")[0] is "" → falls back to "en"
+        # get_preferred_language: "-" → split("-")[0] is "" → falls back to "en"
         r = self.client.get(
             reverse("dataset-detail", kwargs={"identifier": self.dataset.identifier}),
             HTTP_ACCEPT_LANGUAGE="-",
