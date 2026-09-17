@@ -9,20 +9,19 @@ __all__ = ["ExperimentSerializer", "ExperimentResultSerializer", "InstrumentSeri
 
 
 class ExperimentResultSerializer(GenericSerializer):
-    # The dataset (i.e., "study") this result belongs to, reached via its linked experiment(s) - read-only/derived,
-    # used by the download-manifest export. A result could in principle be linked to multiple experiments (M2M), so
-    # this just takes the first one.
-    study = serializers.SerializerMethodField()
+    # Read-only/derived dataset ID, used by the download-manifest export. A result could in principle be linked to
+    # multiple experiments (M2M), so this just takes the first one.
+    dataset = serializers.SerializerMethodField()
 
     class Meta:
         model = ExperimentResult
         exclude = ("fts_extra",)
 
-    def get_study(self, obj: ExperimentResult) -> str | None:
+    def get_dataset(self, obj: ExperimentResult) -> str | None:
         experiment = next(iter(obj.experiments.all()), None)
         if experiment is None or experiment.dataset_id is None:
             return None
-        return str(experiment.dataset.identifier)
+        return str(experiment.dataset_id)
 
 
 class InstrumentSerializer(GenericSerializer):

@@ -23,7 +23,7 @@ from chord_metadata_service.experiments.models import ExperimentResult
 from chord_metadata_service.experiments.schemas import EXPERIMENT_SCHEMA
 from chord_metadata_service.experiments.serializers import ExperimentResultSerializer
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer, ExperimentResultManifestTSVRenderer
+from chord_metadata_service.restapi.api_renderers import ExperimentCSVRenderer, ExperimentResultPcglManifestTSVRenderer
 from chord_metadata_service.restapi.tests.utils import load_local_json
 
 
@@ -381,7 +381,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertIn("not_a_real_field", response.json()["errors"][0]["message"])
 
     def test_get_experiment_result_batch_manifest(self):
-        response = self.one_authz_get("/api/batch/experimentresults?format=manifest")
+        response = self.one_authz_get("/api/batch/experimentresults?format=pcgl_manifest")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response["Content-Type"], "text/tab-separated-values")
 
@@ -408,7 +408,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
     def test_post_experiment_result_batch_manifest_with_ids(self):
         er = ExperimentResult.objects.order_by("id").first()
         response = self.one_authz_post(
-            "/api/batch/experimentresults", {"format": "manifest", "id": [er.id]}, format="json"
+            "/api/batch/experimentresults", {"format": "pcgl_manifest", "id": [er.id]}, format="json"
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
@@ -421,13 +421,13 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         # NOTE: `fields` is still validated against the CSV renderer's registry regardless of `format` (existing
         # shared behaviour in list()/create()), so the value here must be one of ExperimentResultCSVRenderer's
         # fields, even though the manifest itself doesn't support column subsetting.
-        response = self.one_authz_get("/api/batch/experimentresults?format=manifest&fields=id")
+        response = self.one_authz_get("/api/batch/experimentresults?format=pcgl_manifest&fields=id")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
         self.assertEqual(len(rows[0]), 11)
 
     def test_get_experiment_result_batch_manifest_forbidden(self):
-        response = self.one_no_authz_get("/api/batch/experimentresults?format=manifest")
+        response = self.one_no_authz_get("/api/batch/experimentresults?format=pcgl_manifest")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
@@ -512,19 +512,19 @@ class TestExperimentCSVRenderer(TestCase):
                 self.assertEqual(row[key], "")
 
 
-class TestExperimentResultManifestTSVRenderer(TestCase):
+class TestExperimentResultPcglManifestTSVRenderer(TestCase):
     """
     Test the download-manifest TSV renderer for the experiment result batch API.
     """
 
     def setUp(self):
-        self.renderer = ExperimentResultManifestTSVRenderer()
+        self.renderer = ExperimentResultPcglManifestTSVRenderer()
         self.data = [{
             "identifier": "obj-uuid-1",
             "file_format": "VCF",
             "filename": "sample1_01.vcf.gz",
             "extra_properties": {"file_size": "12345", "file_md5sum": "abcdef0123456789"},
-            "study": "dataset-uuid-1",
+            "dataset": "dataset-uuid-1",
         }]
 
     def test_manifest_headers_and_order(self):
@@ -550,7 +550,7 @@ class TestExperimentResultManifestTSVRenderer(TestCase):
         self.assertEqual(row["projectId"], "")
 
     def test_manifest_render_with_missing_fields(self):
-        # No extra_properties/study at all - every unmappable column should still be present, just blank.
+        # No extra_properties/dataset at all - every unmappable column should still be present, just blank.
         data_with_missing_fields = [{"identifier": "obj-uuid-2", "file_format": "CRAM", "filename": "x.cram"}]
         response = self.renderer.render(data_with_missing_fields)
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
@@ -565,20 +565,20 @@ class TestExperimentResultManifestTSVRenderer(TestCase):
         self.assertEqual(len(rows), 1)  # header only
 
     def test_manifest_get_model_serializer(self):
-        self.assertEqual(ExperimentResultManifestTSVRenderer.get_model_serializer(), ExperimentResultSerializer)
+        self.assertEqual(ExperimentResultPcglManifestTSVRenderer.get_model_serializer(), ExperimentResultSerializer)
 
 
-class TestExperimentResultSerializerStudyField(TestCase):
+class TestExperimentResultSerializerDatasetField(TestCase):
     """
-    Test ExperimentResultSerializer's derived `study` field, used by the download-manifest export.
+    Test ExperimentResultSerializer's derived `dataset` field, used by the download-manifest export.
     """
 
-    def test_get_study_without_linked_experiment(self):
-        # An ExperimentResult not (yet) linked to any Experiment has no dataset to derive a study from.
-        # Note: GenericSerializer.to_representation() drops falsey fields entirely, so a None study is absent
+    def test_get_dataset_without_linked_experiment(self):
+        # An ExperimentResult not (yet) linked to any Experiment has no dataset to derive.
+        # Note: GenericSerializer.to_representation() drops falsey fields entirely, so a None dataset is absent
         # from .data rather than present-with-None - same as what the manifest renderer's simple_field() sees.
         er = ExperimentResult.objects.create(identifier="detached-1", filename="detached.txt", file_format="OTHER")
-        self.assertIsNone(ExperimentResultSerializer(er).data.get("study"))
+        self.assertIsNone(ExperimentResultSerializer(er).data.get("dataset"))
 
 
 class TestExperimentSchema(APITestCase):

@@ -17,7 +17,7 @@ from chord_metadata_service.restapi.api_renderers import (
     ExperimentCSVRenderer,
     ExperimentResultCSVRenderer,
     ExperimentResultXLSXRenderer,
-    ExperimentResultManifestTSVRenderer,
+    ExperimentResultPcglManifestTSVRenderer,
     csv_fields_error_response,
 )
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
@@ -177,7 +177,7 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         PhenopacketsRenderer,
         ExperimentResultCSVRenderer,
         ExperimentResultXLSXRenderer,
-        ExperimentResultManifestTSVRenderer,
+        ExperimentResultPcglManifestTSVRenderer,
     )
     content_negotiation_class = FormatInPostContentNegotiation
 

@@ -42,7 +42,7 @@ __all__ = [
     "BiosamplesXLSXRenderer",
     "ExperimentCSVRenderer",
     "ExperimentXLSXRenderer",
-    "ExperimentResultManifestTSVRenderer",
+    "ExperimentResultPcglManifestTSVRenderer",
     "IndividualBentoSearchRenderer",
     "PydanticJSONRenderer",
     "PydanticBrowsableAPIRenderer",
@@ -562,7 +562,7 @@ class ExperimentResultXLSXRenderer(KatsuXLSXRenderer):
 
 
 # Score-CLI-style download manifest: a fixed 11-column TSV shape
-EXPERIMENT_RESULT_MANIFEST_FIELDS: dict[str, FieldSpec] = {
+EXPERIMENT_RESULT_PCGL_MANIFEST_FIELDS: dict[str, FieldSpec] = {
     "repoCode": static_field("file-manager.pcgl"),
     "fileId": static_field(),
     "fileUuid": simple_field("identifier"),
@@ -573,14 +573,14 @@ EXPERIMENT_RESULT_MANIFEST_FIELDS: dict[str, FieldSpec] = {
     "indexFileUuid": static_field(),
     "donorId": static_field(),
     "projectId": static_field(),
-    "study": simple_field("study"),
+    "study": simple_field("dataset"),
 }
 
 
-class ExperimentResultManifestTSVRenderer(KatsuTSVRenderer):
-    format = "manifest"
+class ExperimentResultPcglManifestTSVRenderer(KatsuTSVRenderer):
+    format = "pcgl_manifest"
     file_name = "manifest.tsv"
-    field_registry = EXPERIMENT_RESULT_MANIFEST_FIELDS
+    field_registry = EXPERIMENT_RESULT_PCGL_MANIFEST_FIELDS
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
