@@ -58,6 +58,47 @@ class DatasetTranslationTest(AuthzAPITestCase, PhenoTestCase):
         self.assertEqual(r.status_code, status.HTTP_200_OK)
         self.assertEqual(r["Content-Language"], "en")
 
+    def _make_dataset_with_role(self) -> Dataset:
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="Dataset with role",
+            description="Test",
+            primary_contact={**VALID_DATASET_PRIMARY_CONTACT, "roles": ["Principal Investigator"]},
+            identifier=str(uuid.uuid4()),
+            project=str(self.project.identifier),
+        )
+        dataset = Dataset.from_schema(schema)
+        dataset.save()
+        self.addCleanup(dataset.delete)
+        return dataset
+
+    def test_get_dataset_language_fallback_serializes_french_model(self):
+        # No fr translation stored, but the model can still render translatable terms (roles) in French
+        dataset = self._make_dataset_with_role()
+        url = reverse("dataset-detail", kwargs={"identifier": dataset.identifier})
+
+        r = self.client.get(url, HTTP_ACCEPT_LANGUAGE="fr")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r["Content-Language"], "en")  # free text is still English
+        data = r.json()
+        self.assertEqual(data["language"], "fr")
+        self.assertEqual(data["title"], "Dataset with role")
+        self.assertEqual(data["primary_contact"]["roles"], ["Chercheur principal"])
+
+        # English is unaffected
+        r = self.client.get(url)
+        self.assertEqual(r.json()["primary_contact"]["roles"], ["Principal Investigator"])
+
+    def test_get_dataset_unsupported_language_fallback_stays_english(self):
+        dataset = self._make_dataset_with_role()
+        r = self.client.get(
+            reverse("dataset-detail", kwargs={"identifier": dataset.identifier}), HTTP_ACCEPT_LANGUAGE="de"
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+        self.assertEqual(data["language"], "en")
+        self.assertEqual(data["primary_contact"]["roles"], ["Principal Investigator"])
+
     def test_get_dataset_language_region_subtag(self):
         # _get_preferred_language: "fr-CA" → primary tag "fr" (region stripped)
         r = self.client.get(
