@@ -328,8 +328,8 @@ files = [
 
 [package.dependencies]
 cbor2 = [
-    {version = ">=5.2.0", markers = "platform_python_implementation != \"PyPy\" or sys_platform != \"win32\""},
     {version = ">=5.2.0,<6", markers = "platform_python_implementation == \"PyPy\" and sys_platform == \"win32\""},
+    {version = ">=5.2.0", markers = "platform_python_implementation != \"PyPy\" or sys_platform != \"win32\""},
 ]
 cffi = ">=2.0.0"
 cryptography = ">=3.4.6"
@@ -368,14 +368,14 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "17.2.0"
+version = "18.0.1"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "bento_lib-17.2.0-py3-none-any.whl", hash = "sha256:d91f7b3ed42e51bf472e7265fc59cf4a1e65bf66ca1994bacac1d9cedd39e1dd"},
-    {file = "bento_lib-17.2.0.tar.gz", hash = "sha256:a32340d74ae8dc59e9e6d27c0fcf19ed4e0aa7529206a4f875996f6cff777036"},
+    {file = "bento_lib-18.0.1-py3-none-any.whl", hash = "sha256:7c442c94fd31c9439567561c23079fb7684fcaf04e88b2d17424af25b3b547ca"},
+    {file = "bento_lib-18.0.1.tar.gz", hash = "sha256:825b9d61ffcc44457961ed73c519a9ffbf65915d375252b11aeb94f69e72aa13"},
 ]
 
 [package.dependencies]
@@ -3696,4 +3696,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "5f35053c9a22deacdd700b2629793878a3d56d34ee89ec18557d5dba2719c12c"
+content-hash = "837aab1df3b44a60b0727ea546b3f3e27adcd38e91eed7ca8dc5c96c0a4bd328"

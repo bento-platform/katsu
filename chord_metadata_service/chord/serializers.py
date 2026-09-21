@@ -1,7 +1,7 @@
 import uuid
 from pydantic import ValidationError as PydValidationError
 from bento_lib.discovery import DiscoveryConfig
-from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+from bento_lib.provenance.dataset import ProjectScopedDatasetModel, Role
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.common.base_pydantic_jsonb import PydanticJSONBSerializer
 from chord_metadata_service.resources.ingest import ingest_resource
@@ -77,6 +77,12 @@ class DatasetSerializer(PydanticJSONBSerializer):
             if translation is not None:
                 data = translation.to_schema().model_dump(mode="json")
                 self.context["_content_language"] = language
+            elif language in Role.available_languages():
+                # No stored translation, but the model itself can still render translatable terms (roles, etc.) in
+                # this language - serialize the canonical payload with the language set. Free text (title, description,
+                # etc.) is still the canonical English, so Content-Language stays "en".
+                data = instance.to_schema().model_copy(update={"language": language}).model_dump(mode="json")
+                self.context.setdefault("_content_language", "en")
             else:
                 data = super().to_representation(instance)
                 self.context.setdefault("_content_language", "en")
