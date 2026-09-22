@@ -1,4 +1,4 @@
-from bento_lib.discovery import NumberFieldDefinition, DiscoveryEntity
+from bento_lib.discovery import DateFieldDefinition, NumberFieldDefinition, DiscoveryEntity
 from bento_lib.discovery.models.fields import ManualBinsNumberFieldConfig, AutoBinsNumberFieldConfig
 from typing import Any, Iterator, Literal
 from django.db.models import Q, Func, BooleanField, F, Value, JSONField
@@ -14,6 +14,8 @@ __all__ = [
     "parse_individual_age",
     "labelled_number_range_generator",
     "labelled_date_range_generator_by_month",
+    "labelled_date_range_generator_by_year",
+    "labelled_date_range_generator",
     "get_nested_json_condition",
     "get_json_op_condition",
     "get_json_range_condition",
@@ -126,7 +128,7 @@ def custom_binning_generator(
         yield c.bins[-1], c.maximum, f"≥ {c.bins[-1]}"
 
 
-def auto_binning_generator(c: AutoBinsNumberFieldConfig) -> Iterator[tuple[int, int, str]]:
+def auto_binning_generator(c: AutoBinsNumberFieldConfig) -> Iterator[tuple[int | None, int | None, str]]:
     """
     Note: limited to operations on integer values for simplicity.
     A word of caution: when implementing handling of floating point values,
@@ -176,6 +178,39 @@ def labelled_date_range_generator_by_month(start: str | None, end: str | None) -
         floor = f"{gte_year}-{gte_month:02d}"
         ceil = f"{lt_year}-{lt_month:02d}"
         yield floor, ceil, floor
+
+
+def labelled_date_range_generator_by_year(start: str | None, end: str | None) -> Iterator[tuple[str, str, str]]:
+    """
+    Returns a generator yielding floor, ceil and label value for each bin from a date field configuration,
+    binning by year given starting/ending years.
+    """
+
+    if start is None or end is None:
+        yield from ()
+        return
+
+    start_year = int(start)
+    end_year = int(end)
+
+    for year in range(start_year, end_year + 1):
+        yield f"{year}", f"{year + 1}", f"{year}"
+
+
+def labelled_date_range_generator(
+    field_props: DateFieldDefinition, start: str | None, end: str | None
+) -> Iterator[tuple[str, str, str]]:
+    """
+    Returns a generator yielding floor, ceil and label value for each bin from a date field configuration.
+    """
+
+    match field_props.config.bin_by:
+        case "month":
+            return labelled_date_range_generator_by_month(start, end)
+        case "year":
+            return labelled_date_range_generator_by_year(start, end)
+        case _:  # pragma: no cover
+            raise NotImplementedError()
 
 
 def mapping_to_json_path(mapping: str) -> str:
