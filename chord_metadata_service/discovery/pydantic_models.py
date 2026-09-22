@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import sys
 
@@ -236,8 +238,22 @@ class DiscoverySearchFieldsResponse(BaseModel):
 class DiscoveryQueryFilterBase(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    filter_type: Literal["one_of"]
+    filter_type: Literal["all_of", "one_of", "single"]
     negated: bool = False
+
+
+class DiscoveryQueryFilterSingle(DiscoveryQueryFilterBase):
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    filter_type: Literal["single"]
+    value: str
+
+
+class DiscoveryQueryFilterAllOf(DiscoveryQueryFilterBase):
+    model_config = ConfigDict(frozen=True)
+
+    filter_type: Literal["all_of"]  # Boolean And for filter values
+    values: list[str] = Field(..., min_length=1)  # must have at least one value specified
 
 
 class DiscoveryQueryFilterOneOf(DiscoveryQueryFilterBase):
@@ -245,6 +261,11 @@ class DiscoveryQueryFilterOneOf(DiscoveryQueryFilterBase):
 
     filter_type: Literal["one_of"]  # really more like "one or more of" - essentially Boolean Or for filter values
     values: list[str] = Field(..., min_length=1)  # must have at least one value specified
+
+
+type DiscoveryQueryFilterValue = (
+    str | DiscoveryQueryFilterAllOf | DiscoveryQueryFilterOneOf | DiscoveryQueryFilterSingle
+)
 
 
 class DiscoveryQuery(BaseModel):
@@ -265,10 +286,14 @@ class DiscoveryQuery(BaseModel):
     # Filter query parameters:
     #  - Keys in this dictionary must be the IDs of filters in the corresponding discovery config.
     #  - Values can be either a string, or (with query:data permissions) a more advanced filter structure.
-    filters: dict[str, str | DiscoveryQueryFilterOneOf] = Field(default_factory=dict, title="Filters")
+    filters: dict[str, DiscoveryQueryFilterValue] = Field(default_factory=dict, title="Filters")
 
     def queried_filter_fields(self) -> list[str]:
         return list(self.filters.keys())
+
+    @staticmethod
+    def _non_negated_single_field(f: DiscoveryQueryFilterValue):
+        return isinstance(f, str) or (isinstance(f, DiscoveryQueryFilterSingle) and not f.negated)
 
     def n_filter_parameters(self) -> int:
         """
@@ -277,14 +302,18 @@ class DiscoveryQuery(BaseModel):
         """
         n = 0
         for f in self.filters.values():
-            if isinstance(f, DiscoveryQueryFilterOneOf):
+            if (
+                isinstance(f, DiscoveryQueryFilterOneOf)
+                or isinstance(f, DiscoveryQueryFilterAllOf)
+                or (isinstance(f, DiscoveryQueryFilterSingle) and f.negated)
+            ):
                 # this branch shouldn't happen in real use since _required_global_permission_level will block OneOf
                 # filters with before this function can be called.
                 # the subtraction is to prevent us going over our stated filter limit in the censorship rules even with
                 # uncensored search (where the maximum number of filters is set to sys.maxsize).
                 n = sys.maxsize - len(self.filters)  # cannot be used in a censored discovery context
                 break
-            elif isinstance(f, str):
+            elif self._non_negated_single_field(f):
                 n += 1
             else:  # pragma: no cover
                 raise NotImplementedError()
