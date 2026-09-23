@@ -8,10 +8,11 @@ from chord_metadata_service.resources.ingest import ingest_resource
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
 from chord_metadata_service.restapi.serializers import GenericSerializer
+from django.db.models import Manager
 from rest_framework import serializers
 
 from .models import Project, ProjectJsonSchema, Dataset, DatasetTranslation
-from .utils import get_censored_counts_for_serializer
+from .utils import get_censored_counts_for_serializer, prefetch_discovery_permissions_for_serializer
 
 __all__ = [
     "ProjectSerializer",
@@ -44,6 +45,18 @@ class DiscoveryConfigField(serializers.Field):
 #############################################################
 
 
+def _dataset_scope(dataset: Dataset) -> ValidatedDiscoveryScope:
+    return ValidatedDiscoveryScope(dataset.project, dataset)
+
+
+class DatasetListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        datasets = data.all() if isinstance(data, Manager) else data
+        # Resolve discovery permissions for every dataset in one authz request, instead of one per dataset
+        prefetch_discovery_permissions_for_serializer(self.context, [_dataset_scope(d) for d in datasets], logger)
+        return super().to_representation(datasets)
+
+
 class DatasetSerializer(PydanticJSONBSerializer):
     schema_class = KatsuDatasetModel
 
@@ -53,6 +66,7 @@ class DatasetSerializer(PydanticJSONBSerializer):
         model = Dataset
         exclude = ["additional_resources"]
         read_only_fields = ["created_at", "updated_at"]
+        list_serializer_class = DatasetListSerializer
 
     def to_internal_value(self, data):
         if self.instance:
@@ -100,8 +114,7 @@ class DatasetSerializer(PydanticJSONBSerializer):
         request = self.context.get("request")
         if not request or request.method not in ("GET", "HEAD", "OPTIONS"):
             return {}
-        scope = ValidatedDiscoveryScope(obj.project, obj)
-        return get_censored_counts_for_serializer(request, scope, logger)
+        return get_censored_counts_for_serializer(request, _dataset_scope(obj), logger, context=self.context)
 
     def _sync_schema_resources(self, instance: Dataset) -> None:
         schema: KatsuDatasetModel = self._validated_schema
@@ -258,6 +271,20 @@ class ProjectJsonSchemaSerializer(GenericSerializer):
         fields = "__all__"
 
 
+def _project_scopes(project: Project) -> list[ValidatedDiscoveryScope]:
+    return [ValidatedDiscoveryScope(project, None), *(_dataset_scope(d) for d in project.datasets.all())]
+
+
+class ProjectListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        projects = data.all() if isinstance(data, Manager) else data
+        # Resolve discovery permissions for every project and dataset in one authz request, instead of one per object
+        prefetch_discovery_permissions_for_serializer(
+            self.context, [s for p in projects for s in _project_scopes(p)], logger
+        )
+        return super().to_representation(projects)
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     # Don't inherit GenericSerializer to not pop empty fields
 
@@ -280,12 +307,18 @@ class ProjectSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Name must be at least 3 characters")
         return value.strip()
 
+    def to_representation(self, instance):
+        # No-op when already prefetched by ProjectListSerializer; otherwise (e.g., retrieve) batches this project and
+        # its datasets into a single authz request.
+        prefetch_discovery_permissions_for_serializer(self.context, _project_scopes(instance), logger)
+        return super().to_representation(instance)
+
     def get_counts(self, obj):
-        # TODO: with more projects, refactor to batch queries (currently N queries for N projects)
         request = self.context.get("request")
         scope = ValidatedDiscoveryScope(obj, None)
-        return get_censored_counts_for_serializer(request, scope, logger)
+        return get_censored_counts_for_serializer(request, scope, logger, context=self.context)
 
     class Meta:
         model = Project
         fields = "__all__"
+        list_serializer_class = ProjectListSerializer

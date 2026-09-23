@@ -24,6 +24,10 @@ class AuthzAPITestCase(APITransactionTestCase):
     dt_counts_eval_res: ClassVar[list[list[bool]]] = [[True, True, False]]
     dt_full_eval_res: ClassVar[list[list[bool]]] = [[True, True, True]]
 
+    # bulk data type permissions (see get_data_type_query_permissions_bulk), one row per resource:
+    # project-level bool, project-level counts, dataset-level bool, dataset-level counts, data
+    dt_counts_bulk_eval_row: ClassVar[list[bool]] = [True, True, True, True, False]
+
     dt_levels: ClassVar[dict[DTAccessLevel, list[list[bool]]]] = {
         "none": dt_none_eval_res,
         "bool": dt_bool_eval_res,
