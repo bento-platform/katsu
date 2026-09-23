@@ -72,8 +72,8 @@ class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_list_projects(self):
         with aioresponses() as m:
-            # Mock authorization for counts computation
-            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            # Mock authorization for counts computation (one bulk request; one row for the project)
+            self.mock_authz_eval_result(m, [self.dt_counts_bulk_eval_row])
 
             r = self.client.get("/api/projects")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -91,13 +91,30 @@ class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
                 self.assertIn(entity, project["counts"])
 
 
+class ListProjectWithDatasetsAPITest(AuthzAPITestCase, ProjectTestCase):
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_list_projects_single_authz_request(self):
+        with aioresponses() as m:
+            # Only ONE authz request is mocked: counts for the project and its dataset must be resolved in a single
+            # bulk request (one row per resource: project, then dataset), otherwise counts will come back empty.
+            self.mock_authz_eval_result(m, [self.dt_counts_bulk_eval_row, self.dt_counts_bulk_eval_row])
+
+            r = self.client.get("/api/projects")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            project = r.json()["results"][0]
+
+            expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
+            for entity in expected_entities:
+                self.assertIn(entity, project["counts"])
+                self.assertIn(entity, project["datasets"][0]["counts_by_entity"])
+
+
 class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_project_detail_with_counts(self):
         with aioresponses() as m:
-            # Mock authorization for the main request AND for counts computation
-            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
-            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            # Mock authorization for counts computation (one bulk request; one row for the project)
+            self.mock_authz_eval_result(m, [self.dt_counts_bulk_eval_row])
 
             r = self.client.get(f"/api/projects/{self.project['identifier']}")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -249,8 +266,8 @@ class DatasetListAPITest(AuthzAPITestCase, ProjectTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_list_datasets(self):
         with aioresponses() as m:
-            # Mock authorization for counts computation
-            self.mock_authz_eval_result(m, self.dt_counts_eval_res)
+            # Mock authorization for counts computation (one bulk request; one row for the dataset)
+            self.mock_authz_eval_result(m, [self.dt_counts_bulk_eval_row])
 
             r = self.client.get("/api/datasets")
             self.assertEqual(r.status_code, status.HTTP_200_OK)
