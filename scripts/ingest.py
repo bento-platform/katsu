@@ -1,5 +1,6 @@
-import sys
 import json
+import sys
+
 import requests
 
 """
@@ -47,19 +48,15 @@ def create_project(katsu_server_url, project_title):
     try:
         r = requests.post(katsu_server_url + "/api/projects", json=project_request)
     except requests.exceptions.ConnectionError:
-        print("Connection to the API server {} cannot be established.".format(katsu_server_url))
+        print(f"Connection to the API server {katsu_server_url} cannot be established.")
         sys.exit()
 
     if r.status_code == 201:
         project_uuid = r.json()["identifier"]
-        print("Project {} with uuid {} has been created!".format(project_title, project_uuid))
+        print(f"Project {project_title} with uuid {project_uuid} has been created!")
         return project_uuid
     elif r.status_code == 400:
-        print(
-            "A project of title '{}' exists, please choose a different title, or delete this project.".format(
-                project_title
-            )
-        )
+        print(f"A project of title '{project_title}' exists, please choose a different title, or delete this project.")
         sys.exit()
     else:
         print(r.json())
@@ -88,14 +85,10 @@ def create_dataset(katsu_server_url, project_uuid, dataset_title):
 
     if r2.status_code == 201:
         dataset_uuid = r2.json()["identifier"]
-        print("Dataset {} with uuid {} has been created!".format(dataset_title, dataset_uuid))
+        print(f"Dataset {dataset_title} with uuid {dataset_uuid} has been created!")
         return dataset_uuid
     elif r2.status_code == 400:
-        print(
-            "A dataset of title '{}' exists, please choose a different title, or delete this dataset.".format(
-                dataset_title
-            )
-        )
+        print(f"A dataset of title '{dataset_title}' exists, please choose a different title, or delete this dataset.")
         sys.exit()
     else:
         print(r2.json())
@@ -115,7 +108,7 @@ def create_table(katsu_server_url, dataset_uuid, table_name):
 
     if r3.status_code == 200 or r3.status_code == 201:
         table_id = r3.json()["id"]
-        print("Table {} with uuid {} has been created!".format(table_name, table_id))
+        print(f"Table {table_name} with uuid {table_id} has been created!")
         return table_id
     else:
         print("Something went wrong...")
@@ -139,7 +132,7 @@ def ingest_phenopackets(katsu_server_url, table_id, phenopackets_json_location):
     r4 = requests.post(katsu_server_url + "/private/ingest", json=private_ingest_request)
 
     if r4.status_code == 200 or r4.status_code == 201 or r4.status_code == 204:
-        print("Phenopackets have been ingested from source at {}".format(phenopackets_json_location))
+        print(f"Phenopackets have been ingested from source at {phenopackets_json_location}")
     elif r4.status_code == 400:
         print(r4.text)
         sys.exit()
@@ -165,7 +158,7 @@ def main():
         katsu_server_url = config["katsu_server_url"]
         phenopackets_json_location = config["phenopackets_json_location"]
     except KeyError as e:
-        print("Config file corrupted: missing key {}".format(str(e)))
+        print(f"Config file corrupted: missing key {e!s}")
         sys.exit()
 
     project_uuid = create_project(katsu_server_url, project_title)

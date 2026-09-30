@@ -1,6 +1,5 @@
 from abc import ABC
 
-
 __all__ = [
     "Sex",
     "KaryotypicSex",

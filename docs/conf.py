@@ -14,10 +14,10 @@
 import datetime
 import os
 import sys
+from pathlib import Path
+
 import django
 import toml
-
-from pathlib import Path
 
 sys.path.insert(0, os.path.abspath(".."))
 os.environ["DJANGO_SETTINGS_MODULE"] = "chord_metadata_service.metadata.settings"
