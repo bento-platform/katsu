@@ -1,9 +1,9 @@
-import chord_metadata_service.phenopackets.models as pm
-
 from structlog.stdlib import BoundLogger
 
+import chord_metadata_service.phenopackets.models as pm
 from chord_metadata_service.cleanup.remove import remove_not_referenced
 from chord_metadata_service.utils import build_id_set_from_model
+
 from .models import Individual
 
 __all__ = [

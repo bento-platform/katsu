@@ -251,7 +251,11 @@ async def get_age_numeric_binned(
     return {b: thresholded_count(bv, discovery, field_permissions) for b, bv in individuals_age.items()}
 
 
-def _date_start_end_from_stats(stats: dict[str, int], threshold: int, prefix_size: int) -> tuple[str | None, str | None]:
+def _date_start_end_from_stats(
+    stats: dict[str, int],
+    threshold: int,
+    prefix_size: int,
+) -> tuple[str | None, str | None]:
     """
     Given ISO date stats of format {YYYY[-MM[-...]]: count}, truncates and groups keys based on date bin prefix size and
     finds the starting and ending years/months which exceed the censorship threshold.
