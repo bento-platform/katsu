@@ -8,6 +8,7 @@ from typing import Any, ClassVar
 from uuid import UUID
 
 from bento_lib.responses import errors
+from django.db.models import Prefetch
 from django.http import HttpResponse
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from openpyxl import Workbook
@@ -20,7 +21,8 @@ from rest_framework.renderers import BaseRenderer, BrowsableAPIRenderer, JSONRen
 from rest_framework.response import Response
 
 from chord_metadata_service.experiments import serializers as exp_s
-from chord_metadata_service.patients import serializers as pa_s
+from chord_metadata_service.patients import models as pa_m
+from chord_metadata_service.phenopackets import models as phe_m
 from chord_metadata_service.phenopackets import serializers as phe_s
 from chord_metadata_service.phenopackets.utils import time_element_to_str
 
@@ -399,13 +401,46 @@ INDIVIDUAL_FIELDS: dict[str, FieldSpec] = {
 }
 
 
+# The *ExportSerializer classes below serialize only what the corresponding field registry reads, in the same shape as
+# the full model serializers. Exports serialize every matching record, so skipping the rest of the (deeply nested)
+# record keeps them fast. Keep these in sync with the field registries.
+
+
+class _PhenopacketDiseasesExportSerializer(GenericSerializer):
+    diseases = phe_s.DiseaseSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = phe_m.Phenopacket
+        fields = ("diseases",)
+
+
+class IndividualExportSerializer(GenericSerializer):
+    phenopackets = _PhenopacketDiseasesExportSerializer(many=True, read_only=True)
+
+    prefetch_related_fields = (Prefetch("phenopackets__diseases", queryset=phe_m.Disease.objects.order_by("id")),)
+
+    class Meta:
+        model = pa_m.Individual
+        fields = (
+            "id",
+            "sex",
+            "date_of_birth",
+            "taxonomy",
+            "karyotypic_sex",
+            "time_at_last_encounter",
+            "phenopackets",
+            "created",
+            "updated",
+        )
+
+
 class IndividualCSVRenderer(KatsuCSVRenderer):
     file_name = "individuals.csv"
     field_registry = INDIVIDUAL_FIELDS
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
-        return pa_s.IndividualSerializer
+        return IndividualExportSerializer
 
 
 class IndividualXLSXRenderer(KatsuXLSXRenderer):
@@ -415,7 +450,7 @@ class IndividualXLSXRenderer(KatsuXLSXRenderer):
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
-        return pa_s.IndividualSerializer
+        return IndividualExportSerializer
 
 
 def _phenopacket_biosamples(phe: dict) -> str | None:
@@ -440,13 +475,50 @@ PHENOPACKET_FIELDS: dict[str, FieldSpec] = {
 }
 
 
+class _SubjectExportSerializer(GenericSerializer):
+    class Meta:
+        model = pa_m.Individual
+        fields = ("id", "sex", "taxonomy")
+
+
+class _BiosampleSummaryExportSerializer(GenericSerializer):
+    class Meta:
+        model = phe_m.Biosample
+        fields = ("id", "sampled_tissue")
+
+
+class _MetaDataExportSerializer(GenericSerializer):
+    class Meta:
+        model = phe_m.MetaData
+        fields = ("created_by", "submitted_by")
+
+
+class PhenopacketExportSerializer(GenericSerializer):
+    always_include = ("meta_data",)  # like the full serializer, which always includes it (even if empty)
+
+    subject = _SubjectExportSerializer(read_only=True)
+    biosamples = _BiosampleSummaryExportSerializer(many=True, read_only=True)
+    diseases = phe_s.DiseaseSerializer(many=True, read_only=True)
+    meta_data = _MetaDataExportSerializer(read_only=True)
+
+    select_related_fields = ("subject", "meta_data")
+    prefetch_related_fields = (
+        Prefetch("biosamples", queryset=phe_m.Biosample.objects.order_by("id")),
+        Prefetch("diseases", queryset=phe_m.Disease.objects.order_by("id")),
+    )
+
+    class Meta:
+        model = phe_m.Phenopacket
+        fields = ("id", "subject", "biosamples", "diseases", "meta_data", "dataset")
+
+
 class PhenopacketCSVRenderer(KatsuCSVRenderer):
     file_name = "phenopackets.csv"
     field_registry = PHENOPACKET_FIELDS
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
-        return phe_s.PhenopacketSerializer
+        return PhenopacketExportSerializer
 
 
 class PhenopacketXLSXRenderer(KatsuXLSXRenderer):
@@ -456,7 +528,7 @@ class PhenopacketXLSXRenderer(KatsuXLSXRenderer):
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
-        return phe_s.PhenopacketSerializer
+        return PhenopacketExportSerializer
 
 
 BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
@@ -474,13 +546,19 @@ BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
 }
 
 
+class BiosampleExportSerializer(GenericSerializer):
+    class Meta:
+        model = phe_m.Biosample
+        fields = tuple(BIOSAMPLE_FIELDS)  # every column is read straight from the same-named model field
+
+
 class BiosamplesCSVRenderer(KatsuCSVRenderer):
     file_name = "biosamples.csv"
     field_registry = BIOSAMPLE_FIELDS
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
-        return phe_s.BiosampleSerializer
+        return BiosampleExportSerializer
 
 
 class BiosamplesXLSXRenderer(KatsuXLSXRenderer):
@@ -490,7 +568,7 @@ class BiosamplesXLSXRenderer(KatsuXLSXRenderer):
 
     @staticmethod
     def get_model_serializer() -> type[GenericSerializer]:
-        return phe_s.BiosampleSerializer
+        return BiosampleExportSerializer
 
 
 EXPERIMENT_FIELDS: dict[str, FieldSpec] = {
