@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework import serializers
 from rest_framework.fields import CharField
 
@@ -5,7 +6,7 @@ from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.geo.serializers import GeoLocationSerializer
 from chord_metadata_service.resources.serializers import ResourceSerializer
-from chord_metadata_service.restapi.serializers import GenericSerializer
+from chord_metadata_service.restapi.serializers import GenericSerializer, prefixed_lookups
 from chord_metadata_service.restapi.utils import computed_property
 
 from .models import (
@@ -89,6 +90,15 @@ class BiosampleSerializer(GenericSerializer):
     experiments = ExperimentSerializer(read_only=True, many=True)
     location_collected = GeoLocationSerializer(required=False)
 
+    select_related_fields = ("individual", "location_collected")
+    prefetch_related_fields = (
+        "phenotypic_features",
+        # nested experiments get their biosample (+ its individual) set from the reverse foreign key prefetch, so we
+        # only need the experiments' other relations here.
+        "experiments__instrument",
+        *prefixed_lookups("experiments", ExperimentSerializer.prefetch_related_fields),
+    )
+
     class Meta:
         model = Biosample
         exclude = ("fts_extra",)
@@ -150,9 +160,9 @@ class VariantInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["variation_descriptor"] = VariationDescriptorSerializer(
-            instance.variation_descriptor, many=False, required=True
-        ).data
+        response["variation_descriptor"] = self.nested_data(
+            VariationDescriptorSerializer, instance.variation_descriptor, many=False, required=True
+        )
         return response
 
 
@@ -168,13 +178,13 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
         # May contain a gene_descriptor or a variant_interpretation, not both
         if instance.gene_descriptor:
-            response["gene_descriptor"] = GeneDescriptorSerializer(
-                instance.gene_descriptor, many=False, required=False
-            ).data
+            response["gene_descriptor"] = self.nested_data(
+                GeneDescriptorSerializer, instance.gene_descriptor, many=False, required=False
+            )
         elif instance.variant_interpretation:
-            response["variant_interpretation"] = VariantInterpretationSerializer(
-                instance.variant_interpretation, many=False, required=False
-            ).data
+            response["variant_interpretation"] = self.nested_data(
+                VariantInterpretationSerializer, instance.variant_interpretation, many=False, required=False
+            )
 
         # The 'subject_or_biosample_id' value is obtained from the referenced subject/biosample
         # The '__related_type' property is added to extra_properties as a computed value ("__" prefix)
@@ -211,7 +221,7 @@ class InterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["diagnosis"] = DiagnosisSerializer(instance.diagnosis, many=False, required=False).data
+        response["diagnosis"] = self.nested_data(DiagnosisSerializer, instance.diagnosis, many=False, required=False)
         return response
 
 
@@ -231,6 +241,28 @@ class SimplePhenopacketSerializer(GenericSerializer):
     interpretations = InterpretationSerializer(many=True, required=False)
     diseases = DiseaseSerializer(many=True, required=False)
 
+    select_related_fields = ("meta_data",)
+    prefetch_related_fields = (
+        "meta_data__resources",
+        "phenotypic_features",
+        Prefetch("diseases", queryset=Disease.objects.order_by("id")),
+        *prefixed_lookups(
+            "interpretations__diagnosis__genomic_interpretations",
+            (
+                "subject",
+                "biosample",
+                "gene_descriptor",
+                "variant_interpretation__variation_descriptor__gene_context",
+            ),
+        ),
+        Prefetch("biosamples", queryset=Biosample.objects.order_by("id")),
+        *prefixed_lookups(
+            "biosamples",
+            BiosampleSerializer.select_related_fields,
+            BiosampleSerializer.prefetch_related_fields,
+        ),
+    )
+
     class Meta:
         model = Phenopacket
         exclude = ("fts_extra",)
@@ -241,14 +273,16 @@ class SimplePhenopacketSerializer(GenericSerializer):
         objects and return their nested serialization.
         """
         response = super().to_representation(instance)
-        response["biosamples"] = BiosampleSerializer(
-            instance.biosamples, many=True, required=False, exclude_when_nested=["individual"]
-        ).data
-        response["meta_data"] = MetaDataSerializer(instance.meta_data, exclude_when_nested=["id"]).data
+        response["biosamples"] = self.nested_data(
+            BiosampleSerializer, instance.biosamples, many=True, required=False, exclude_when_nested=["individual"]
+        )
+        response["meta_data"] = self.nested_data(MetaDataSerializer, instance.meta_data, exclude_when_nested=["id"])
         return response
 
 
 class PhenopacketSerializer(SimplePhenopacketSerializer):
+    select_related_fields = (*SimplePhenopacketSerializer.select_related_fields, "subject__vital_status")
+
     def to_representation(self, instance):
         # Phenopacket serializer for nested individuals - need to import here to
         # prevent circular import issues.
@@ -256,7 +290,7 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
 
         response = super().to_representation(instance)
         response["subject"] = (
-            IndividualSerializer(instance.subject, exclude_when_nested=["phenopackets", "biosamples"]).data
+            self.nested_data(IndividualSerializer, instance.subject, exclude_when_nested=["phenopackets", "biosamples"])
             if instance.subject
             else None
         )

@@ -28,14 +28,12 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferTo
 
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 
-from chord_metadata_service.experiments.api_views import EXPERIMENT_SELECT_REL, EXPERIMENT_PREFETCH
 from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.experiments.summaries import dt_experiment_summary
 
 from chord_metadata_service.logger import logger as katsu_logger
 
-from chord_metadata_service.phenopackets.api_views import PHENOPACKET_SELECT_REL, PHENOPACKET_PREFETCH
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.phenopackets.summaries import dt_phenopacket_summary
@@ -98,7 +96,7 @@ async def experiment_query_results(
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         return get_values_list(queryset, options)
 
-    return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH)
+    return ExperimentSerializer.setup_eager_loading(queryset)
 
 
 async def phenopacket_query_results(
@@ -138,7 +136,7 @@ async def phenopacket_query_results(
 
         return results
     else:
-        return queryset.select_related(*PHENOPACKET_SELECT_REL).prefetch_related(*PHENOPACKET_PREFETCH)
+        return PhenopacketSerializer.setup_eager_loading(queryset)
 
 
 QUERY_RESULTS_FN: dict[

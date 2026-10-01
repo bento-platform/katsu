@@ -30,16 +30,9 @@ from .schemas import EXPERIMENT_SCHEMA, experiment_resolver, experiment_base_uri
 from .filters import ExperimentFilter, ExperimentResultFilter
 
 __all__ = [
-    "EXPERIMENT_SELECT_REL",
-    "EXPERIMENT_PREFETCH",
     "ExperimentViewSet",
     "get_experiment_schema",
 ]
-
-
-EXPERIMENT_SELECT_REL = ("instrument",)
-
-EXPERIMENT_PREFETCH = ("experiment_results", "experiment_results__experiments__dataset", "biosample__individual")
 
 
 class ExperimentViewSet(BentoAuthzScopedModelViewSet):
@@ -62,12 +55,9 @@ class ExperimentViewSet(BentoAuthzScopedModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
-        return (
+        return ExperimentSerializer.setup_eager_loading(
             Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
-            .select_related(*EXPERIMENT_SELECT_REL)
-            .prefetch_related(*EXPERIMENT_PREFETCH)
-            .order_by("id")
-        )
+        ).order_by("id")
 
 
 class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
@@ -94,7 +84,7 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        return queryset.select_related(*EXPERIMENT_SELECT_REL).prefetch_related(*EXPERIMENT_PREFETCH).order_by("id")
+        return ExperimentSerializer.setup_eager_loading(queryset).order_by("id")
 
     @async_to_sync
     async def _get_filtered_queryset(self, ids_list: list[str] | None = None):
