@@ -4,7 +4,10 @@ from django.db.models import QuerySet
 from rest_framework.request import Request as DrfRequest
 from typing import Iterable
 
-from chord_metadata_service.authz.helpers import get_data_type_query_permissions
+from chord_metadata_service.authz.helpers import (
+    get_data_type_query_permissions,
+    get_data_type_query_permissions_bulk,
+)
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions, FieldDiscoveryPermissions
 from chord_metadata_service.chord.data_types import KatsuDataType, DATA_TYPES
 
@@ -14,6 +17,7 @@ from .scope import ValidatedDiscoveryScope
 
 __all__ = [
     "get_discovery_data_type_permissions",
+    "get_discovery_data_type_permissions_bulk",
     "get_discovery_field_set_permissions",
     "extract_discovery",
     "empty_discovery",
@@ -39,6 +43,21 @@ async def get_discovery_data_type_permissions(
         resource=resource,
         dataset_level=dataset_level,
     )
+
+
+async def get_discovery_data_type_permissions_bulk(
+    request: DrfRequest, scopes: list[ValidatedDiscoveryScope]
+) -> dict[ValidatedDiscoveryScope, DataTypeDiscoveryPermissions]:
+    """
+    Bulk version of get_discovery_data_type_permissions: resolves data type permissions for many scopes with a single
+    authorization service request.
+    """
+    perms = await get_data_type_query_permissions_bulk(
+        request,
+        data_types=list(set(DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE.values())),
+        resources=[(s.as_authz_resource(), s.dataset_id is not None) for s in scopes],
+    )
+    return dict(zip(scopes, perms))
 
 
 def get_discovery_field_set_permissions(
