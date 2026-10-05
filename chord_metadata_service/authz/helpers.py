@@ -37,6 +37,29 @@ async def get_data_type_query_permissions(
     resource: dict | None = None,
     dataset_level: bool = False,
 ) -> DataTypeDiscoveryPermissions:
+    return (
+        await get_data_type_query_permissions_bulk(
+            request, data_types, [resource or RESOURCE_EVERYTHING], dataset_level=dataset_level
+        )
+    )[0]
+
+
+async def get_data_type_query_permissions_bulk(
+    request: Request | HttpRequest,
+    data_types: list[KatsuDataType],
+    resources: list[dict],
+    dataset_level: bool = False,
+) -> list[DataTypeDiscoveryPermissions]:
+    """
+    Evaluates data type query permissions for many resources in a single request to the authorization service, rather
+    than one request per resource. All resources are evaluated at the same level - entirely dataset-level or entirely
+    project-level permissions - so every entry in the returned list has the same meaning.
+    Returns a list of DataTypeDiscoveryPermissions in the same order as the passed resources.
+    """
+
+    if not resources:
+        return []
+
     # For all of these required data types, figure out if we have:
     #  a) full-response query:data permissions, and
     #  b) count-level permissions (at the project level) - will also re-check the query:data permissions currently :(
@@ -45,47 +68,13 @@ async def get_data_type_query_permissions(
     bool_permission = get_bool_permission(dataset_level)
     counts_permission = get_counts_permission(dataset_level)
 
-    p_query_bool, p_query_counts, p_query_data = (
-        await authz_middleware.async_evaluate(
-            request, (resource or RESOURCE_EVERYTHING,), (bool_permission, counts_permission, P_QUERY_DATA)
-        )
-    )[0]
+    matrix = await authz_middleware.async_evaluate(
+        request, tuple(resources), (bool_permission, counts_permission, P_QUERY_DATA)
+    )
 
     # Collect these permissions, organized by data type, in a dictionary, so we can query them later:
     #  - TODO: data type resources instead?
-    return {dt: DataPermissions(bool_=p_query_bool, counts=p_query_counts, data=p_query_data) for dt in data_types}
-
-
-async def get_data_type_query_permissions_bulk(
-    request: Request | HttpRequest,
-    data_types: list[KatsuDataType],
-    resources: list[tuple[dict, bool]],
-) -> list[DataTypeDiscoveryPermissions]:
-    """
-    Bulk version of get_data_type_query_permissions, which evaluates permissions for many (resource, dataset_level)
-    pairs in a single request to the authorization service rather than one request per resource.
-    Returns a list of DataTypeDiscoveryPermissions in the same order as the passed resources.
-    """
-
-    if not resources:
-        return []
-
-    permissions = (
-        get_bool_permission(False),
-        get_counts_permission(False),
-        get_bool_permission(True),
-        get_counts_permission(True),
-        P_QUERY_DATA,
-    )
-
-    matrix = await authz_middleware.async_evaluate(request, tuple(r for r, _ in resources), permissions)
-
-    res: list[DataTypeDiscoveryPermissions] = []
-    for (_, dataset_level), (p_bool_p, p_counts_p, p_bool_d, p_counts_d, p_data) in zip(resources, matrix):
-        dp = DataPermissions(
-            bool_=p_bool_d if dataset_level else p_bool_p,
-            counts=p_counts_d if dataset_level else p_counts_p,
-            data=p_data,
-        )
-        res.append({dt: dp for dt in data_types})
-    return res
+    return [
+        {dt: DataPermissions(bool_=p_query_bool, counts=p_query_counts, data=p_query_data) for dt in data_types}
+        for p_query_bool, p_query_counts, p_query_data in matrix
+    ]

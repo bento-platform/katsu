@@ -46,16 +46,22 @@ async def get_discovery_data_type_permissions(
 
 
 async def get_discovery_data_type_permissions_bulk(
-    request: DrfRequest, scopes: list[ValidatedDiscoveryScope]
+    request: DrfRequest, scopes: list[ValidatedDiscoveryScope], dataset_level: bool
 ) -> dict[ValidatedDiscoveryScope, DataTypeDiscoveryPermissions]:
     """
     Bulk version of get_discovery_data_type_permissions: resolves data type permissions for many scopes with a single
-    authorization service request.
+    authorization service request. All scopes must be at the requested level (dataset scopes for dataset-level
+    permissions, project scopes for project-level permissions), so every permissions object has the same meaning.
     """
+
+    if any((s.dataset_id is not None) != dataset_level for s in scopes):
+        raise ValueError(f"all scopes must be {'dataset' if dataset_level else 'project'}-level scopes")
+
     perms = await get_data_type_query_permissions_bulk(
         request,
         data_types=list(set(DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE.values())),
-        resources=[(s.as_authz_resource(), s.dataset_id is not None) for s in scopes],
+        resources=[s.as_authz_resource() for s in scopes],
+        dataset_level=dataset_level,
     )
     return dict(zip(scopes, perms))
 
