@@ -2,13 +2,15 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .constants import Granularity
+from .constants import CountPrecision, Granularity
 
 # Request:  ---------------------------------------------------------------------------------
 
 
 class BeaconPagination(BaseModel):
     """Pagination parameters for a Beacon request or response."""
+
+    # these map respectively to katsu "page" and "page_size"
 
     skip: int = Field(default=0, ge=0)
     limit: int = Field(default=10, ge=0)
@@ -20,7 +22,7 @@ class BeaconOntologyFilter(BaseModel):
     similarity: Literal["exact", "high", "medium", "low"] = "exact"
     scope: str | None = None
 
-    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    model_config = ConfigDict(extra="forbid")
 
 
 class BeaconAlphanumericFilter(BaseModel):
@@ -49,15 +51,15 @@ BeaconFilter = Annotated[
 
 class BeaconRequestMeta(BaseModel):
     # schema_: str | None = Field(default=None, alias="$schema")
-    api_version: str = Field(alias="apiVersion")
+    api_version: str = Field(default="v2.2.0", alias="apiVersion")
     requested_schemas: list[dict[str, str]] | None = Field(default=None, alias="requestedSchemas")
-
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class BeaconGenomicVariantRequestParameters(BaseModel):
     assembly_id: str | None = Field(default=None, alias="assemblyId")
     reference_name: str | None = Field(default=None, alias="referenceName")
+
+    # 0-based coordinates
     start: list[Annotated[int, Field(ge=0)]] | None = Field(default=None, min_length=1, max_length=2)
     end: list[Annotated[int, Field(ge=1)]] | None = Field(default=None, min_length=1, max_length=2)
 
@@ -66,6 +68,7 @@ class BeaconGenomicVariantRequestParameters(BaseModel):
     # for now accept the broader options and leave it to variants service to accept or reject
     reference_bases: str | None = Field(default=None, alias="referenceBases", pattern=r"^([ACGTUNRYSWKMBDHV\-\.]*)$")
     alternate_bases: str | None = Field(default=None, alias="alternateBases", pattern=r"^([ACGTUNRYSWKMBDHV\-\.]*)$")
+
     variant_type: str | None = Field(default=None, alias="variantType")
     variant_min_length: int | None = Field(default=None, alias="variantMinLength", ge=0)
     variant_max_length: int | None = Field(default=None, alias="variantMaxLength", ge=1)
@@ -74,14 +77,8 @@ class BeaconGenomicVariantRequestParameters(BaseModel):
     aminoacid_change: str | None = Field(default=None, alias="aminoacidChange")
     genomic_allele_short_form: str | None = Field(default=None, alias="genomicAlleleShortForm")
 
-    model_config = ConfigDict(populate_by_name=True)
-
-
 class BeaconRequestParameters(BaseModel):
     g_variant: BeaconGenomicVariantRequestParameters | None = None
-
-    model_config = ConfigDict(populate_by_name=True)
-
 
 class BeaconQuery(BaseModel):
     request_parameters: BeaconRequestParameters | None = Field(default=None, alias="requestParameters")
@@ -91,10 +88,9 @@ class BeaconQuery(BaseModel):
         default="HIT", alias="includeResultsetResponses"
     )
     pagination: BeaconPagination | None = None
-    requested_granularity: Granularity = Field(default=Granularity.GRANULARITY_BOOLEAN, alias="requestedGranularity")
+    requested_granularity: Granularity = Field(default=Granularity.BOOLEAN, alias="requestedGranularity")
     test_mode: bool = Field(default=False, alias="testMode")
 
-    model_config = ConfigDict(populate_by_name=True)
 
 
 class BeaconRequest(BaseModel):
@@ -109,6 +105,7 @@ class BeaconRequest(BaseModel):
 
 # Response:  ---------------------------------------------------------------------------------
 
+# probably want serialize_by_alias=true everywhere there's an alias
 
 class BeaconReceivedRequestSummary(BaseModel):
     api_version: str = Field(alias="apiVersion")
@@ -122,7 +119,7 @@ class BeaconReceivedRequestSummary(BaseModel):
     requested_granularity: Literal["boolean", "count", "record"] = Field(alias="requestedGranularity")
     test_mode: bool | None = Field(default=None, alias="testMode")
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
 class BeaconResponseMeta(BaseModel):
@@ -133,27 +130,27 @@ class BeaconResponseMeta(BaseModel):
     received_request_summary: BeaconReceivedRequestSummary = Field(alias="receivedRequestSummary")
     test_mode: bool | None = Field(default=None, alias="testMode")
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
-class BeaconBooleanResponseSection(BaseModel):
+class BeaconBooleanSummaryResponse(BaseModel):
     exists: bool
 
     model_config = ConfigDict(extra="allow")
 
 
-class BeaconCountResponseSection(BeaconBooleanResponseSection):
+class BeaconCountSummaryResponse(BeaconBooleanSummaryResponse):
     num_total_results: int = Field(alias="numTotalResults", ge=0)
     count_adjusted_to: str | None = Field(default=None, alias="countAdjustedTo")
-    count_precision: str | None = Field(default=None, alias="countPrecision")
+    count_precision: CountPrecision | None = Field(default=CountPrecision.EXACT, alias="countPrecision")
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
-class BeaconSummaryResponseSection(BeaconBooleanResponseSection):
+class BeaconResultSetSummaryResponse(BeaconBooleanSummaryResponse):
     num_total_results: int | None = Field(default=None, alias="numTotalResults", ge=0)
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
 # any response granularity can return ResultsetResponse, although this is not at all clear from the schema
@@ -169,13 +166,13 @@ class BeaconResultset(BaseModel):
     info: dict[str, Any] | None = None
     results: list[dict[str, Any]] = Field(default_factory=list)
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
 class BeaconResultsets(BaseModel):
     result_sets: list[BeaconResultset] = Field(alias="resultSets", min_length=0)
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
 class BeaconResponseBase(BaseModel):
@@ -183,19 +180,19 @@ class BeaconResponseBase(BaseModel):
     info: dict[str, Any] | None = None
     beacon_handovers: list[dict[str, Any]] | None = Field(default=None, alias="beaconHandovers")
 
-    model_config = ConfigDict(extra="allow", populate_by_name=True)
+    model_config = ConfigDict(extra="allow")
 
 
 class BeaconBooleanResponse(BeaconResponseBase):
-    response_summary: BeaconBooleanResponseSection = Field(alias="responseSummary")
+    response_summary: BeaconBooleanSummaryResponse = Field(alias="responseSummary")
 
 
 class BeaconCountResponse(BeaconResponseBase):
-    response_summary: BeaconCountResponseSection = Field(alias="responseSummary")
+    response_summary: BeaconCountSummaryResponse = Field(alias="responseSummary")
 
 
 class BeaconResultsetsResponse(BeaconResponseBase):
-    response_summary: BeaconSummaryResponseSection = Field(alias="responseSummary")
+    response_summary: BeaconResultSetSummaryResponse = Field(alias="responseSummary")
     response: BeaconResultsets
 
 
@@ -211,16 +208,16 @@ __all__ = [
     "BeaconRequestMeta",
     "BeaconRequestParameters",
     "BeaconBooleanResponse",
-    "BeaconBooleanResponseSection",
+    "BeaconBooleanSummaryResponse",
     "BeaconCountResponse",
-    "BeaconCountResponseSection",
+    "BeaconCountSummaryResponse",
     "BeaconReceivedRequestSummary",
     "BeaconResponseBase",
     "BeaconResponseMeta",
     "BeaconResultset",
     "BeaconResultsets",
     "BeaconResultsetsResponse",
-    "BeaconSummaryResponseSection",
+    "BeaconResultSetSummaryResponse",
 ]
 
 # add aggregation response
