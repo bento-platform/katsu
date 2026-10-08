@@ -770,9 +770,6 @@ async def discovery_matches(
         qh = QueryHelper(query, scope, dt_permissions, lg)
         queryset, _ = await qh.get_query_queryset_and_queried_entities(queried_entity)
         queryset = queryset.order_by("pk")
-        if export_renderer_cls is not None:
-            # exports serialize full records, so eagerly load everything the serializer walks to avoid N+1 queries
-            queryset = export_renderer_cls.get_model_serializer().setup_eager_loading(queryset)
     except ValidationError as e:
         return await dres.django_validation_error(
             request, e, lg, "discovery matches endpoint encountered validation error", accepted_formats
@@ -824,10 +821,7 @@ async def discovery_matches(
         @sync_to_async
         def _get_export():
             renderer = export_renderer_cls()
-            return renderer.render(
-                renderer.get_model_serializer()(matches_page, many=True).data,
-                renderer_context={"request": request},
-            )
+            return renderer.render(renderer.serialize(matches_page), renderer_context={"request": request})
 
         return await _get_export()
 

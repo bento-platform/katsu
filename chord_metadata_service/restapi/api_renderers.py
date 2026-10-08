@@ -8,7 +8,7 @@ from typing import Any, ClassVar
 from uuid import UUID
 
 from bento_lib.responses import errors
-from django.db.models import Prefetch
+from django.db.models import Prefetch, QuerySet
 from django.http import HttpResponse
 from djangorestframework_camel_case.render import CamelCaseJSONRenderer
 from openpyxl import Workbook
@@ -226,6 +226,12 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
     @abstractmethod
     def get_model_serializer() -> type[GenericSerializer]:
         pass
+
+    @classmethod
+    def serialize(cls, queryset: QuerySet) -> list:
+        """Serializes a queryset for export, eagerly loading everything the serializer walks to avoid N+1 queries."""
+        serializer_cls = cls.get_model_serializer()
+        return serializer_cls(serializer_cls.setup_eager_loading(queryset), many=True).data
 
     @classmethod
     def field_choices(cls) -> list[dict[str, str]]:
