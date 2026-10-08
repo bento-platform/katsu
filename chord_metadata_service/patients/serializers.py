@@ -1,5 +1,5 @@
 from chord_metadata_service.phenopackets.serializers import BiosampleSerializer, SimplePhenopacketSerializer
-from chord_metadata_service.restapi.serializers import GenericSerializer
+from chord_metadata_service.restapi.serializers import GenericSerializer, prefixed_lookups
 from .models import Individual, VitalStatus
 
 __all__ = [
@@ -18,6 +18,18 @@ class IndividualSerializer(GenericSerializer):
     biosamples = BiosampleSerializer(read_only=True, many=True)
     phenopackets = SimplePhenopacketSerializer(read_only=True, many=True)
     vital_status = VitalStatusSerializer(read_only=True, exclude_when_nested=["id", "created", "updated"])
+
+    select_related_fields = ("vital_status",)
+    prefetch_related_fields = (
+        # nested biosamples get their individual set from the reverse foreign key prefetch
+        "biosamples__location_collected",
+        *prefixed_lookups("biosamples", BiosampleSerializer.prefetch_related_fields),
+        *prefixed_lookups(
+            "phenopackets",
+            SimplePhenopacketSerializer.select_related_fields,
+            SimplePhenopacketSerializer.prefetch_related_fields,
+        ),
+    )
 
     class Meta:
         model = Individual
