@@ -1,7 +1,11 @@
-from typing import Annotated, Any, Literal
+import json
+from typing import Annotated, Any, Literal, Self
 
+from django.core.exceptions import ValidationError
 from pydantic import BaseModel, ConfigDict, Field
+from rest_framework.request import Request as DrfRequest
 
+from chord_metadata_service.authz.types import DataPermissions, DataPermissionsLevel
 from .constants import CountPrecision, Granularity
 
 # Request:  ---------------------------------------------------------------------------------
@@ -101,6 +105,65 @@ class BeaconRequest(BaseModel):
     query: BeaconQuery | None = None
 
     model_config = ConfigDict(populate_by_name=True)
+
+    @classmethod
+    def from_drf_request(cls, request: DrfRequest) -> Self:
+        if request.method == "POST":
+            payload = request.data
+        elif request.method == "GET":
+            params = request.query_params
+            meta: dict[str, Any] = {}
+            if api_version := params.get("apiVersion"):
+                meta["apiVersion"] = api_version
+            if requested_schemas := params.get("requestedSchemas"):
+                meta["requestedSchemas"] = json.loads(requested_schemas)
+
+            query: dict[str, Any] = {}
+            variant_parameters: dict[str, Any] = {}
+            for name, field in BeaconGenomicVariantRequestParameters.model_fields.items():
+                alias = field.alias or name
+                values = params.getlist(alias)
+                if values:
+                    variant_parameters[alias] = values if alias in ("start", "end") else values[-1]
+
+            if variant_parameters:
+                query["requestParameters"] = {"g_variant": variant_parameters}
+
+            for name in ("includeResultsetResponses", "requestedGranularity", "testMode"):
+                if name in params:
+                    query[name] = params.get(name)
+
+            filter_values = params.getlist("filters")
+            if filter_values:
+                query["filters"] = [json.loads(value) for value in filter_values]
+
+            if "pagination" in params:
+                query["pagination"] = json.loads(params.get("pagination"))
+            elif "skip" in params or "limit" in params:
+                query["pagination"] = {
+                    key: params.get(key) for key in ("skip", "limit") if key in params
+                }
+
+            payload = {"meta": meta, "query": query or None}
+        else:
+            raise NotImplementedError("from_drf_request implemented for GET|POST only")
+
+        return cls.model_validate(payload)
+
+    def get_and_validate_permissions(self, permissions: DataPermissions) -> None:
+        granularity = (self.query or BeaconQuery()).requested_granularity
+
+        # map beacon -> katsu levels 
+        required_level: DataPermissionsLevel = {
+            Granularity.BOOLEAN: "bool_",
+            Granularity.COUNT: "counts",
+            Granularity.RECORD: "data",
+            Granularity.AGGREGATED: "counts",
+        }[granularity]
+
+        if not permissions.has_permissions_level(required_level):
+            raise ValidationError(f"Insufficient permissions to execute Beacon query at {granularity} granularity")
+
 
 
 # Response:  ---------------------------------------------------------------------------------

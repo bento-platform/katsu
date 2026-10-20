@@ -63,7 +63,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "test":
 
 SERVICE_URL_BASE_PATH = os.environ.get("SERVICE_URL_BASE_PATH")
 if SERVICE_URL_BASE_PATH:
-    SCHEMAS_BASE_URL = SERVICE_URL_BASE_PATH + "/api/schemas"
+    SCHEMAS_BASE_URL = SERVICE_URL_BASE_PATH + "beacon" "/api/schemas"
 else:
     SCHEMAS_BASE_URL = "/chord_metadata_service/schemas"
 
@@ -110,6 +110,25 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 12000000
 # Turns off redirect to path with slash
 
 APPEND_SLASH = False
+
+# Beacon
+
+# ideally an api for this
+VARIANTS_SERVICE_BASE_URL = os.environ.get("SERVICE_URL_BASE_PATH")
+VARIANTS_SERVICE_QUERY_ENDPOINT = VARIANTS_SERVICE_BASE_URL + "/variants/get/by/variantId"
+
+BEACON_VERSION = "v2.2.0"
+
+BEACON_SERVICE_TYPE: GA4GHServiceType = {
+    "group": "ca.c3g.beacon",  # or org.ga4gh if compliant
+    "artifact": "beacon-v2",
+    "version": BEACON_VERSION,
+}
+
+BEACON_BASE_URL = SERVICE_URL_BASE_PATH + "beacon"
+
+
+
 
 # Bento misc. settings
 
@@ -205,7 +224,7 @@ LOGGING = {
         "daphne.server": _logging_propagate_to_root,
         "django": _logging_propagate_to_root,
         # Log SQL queries to diagnose N+1 / other inefficient query issues when we're in debug mode:
-        **({"django.db.backends": {"level": "DEBUG"}} if DEBUG else {}),
+        # **({"django.db.backends": {"level": "DEBUG"}} if DEBUG else {}),
         "django.request": _logging_propagate_to_root,
         "django.channels.server": {"level": "WARNING"},  # silence in favour of custom access middleware
         "katsu": _logging_propagate_to_root,

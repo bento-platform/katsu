@@ -564,3 +564,7 @@ class PydanticBrowsableAPIRenderer(BrowsableAPIRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return super().render(_json_dump_if_pyd(data), accepted_media_type, renderer_context)
+
+
+# -----------------------------------------
+# add beacon renderers

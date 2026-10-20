@@ -52,7 +52,7 @@ router.register(r"phenopackets", phenopacket_views.PhenopacketViewSet, basename=
 router.register(r"resources", resources_views.ResourceViewSet, basename="resource")
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("", include(router.urls)), 
     path("", include(batch_router.urls)),
     path("beacon/", include(beacon_urls)),
     # apps schemas

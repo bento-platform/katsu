@@ -321,6 +321,8 @@ class PublicListIndividuals(APIView):
             project_id=F("phenopackets__dataset__project__identifier"),
         )
 
+        # hardcoded overview stuff
+        # we need better than this 
         (tissues_count, sampled_tissues), (experiments_count, experiment_types) = await asyncio.gather(
             individual_biosample_tissue_stats(filtered_qs, discovery, dt_perms_pheno),
             individual_experiment_type_stats(filtered_qs, discovery, dt_perms_exp),
