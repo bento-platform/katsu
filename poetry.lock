@@ -2821,6 +2821,21 @@ docs = ["sphinx (!=5.2.0,!=5.2.0.post0,!=7.2.5)", "sphinx_rtd_theme"]
 test = ["pretend", "pytest (>=3.0.1)", "pytest-rerunfailures"]
 
 [[package]]
+name = "pyparsing"
+version = "3.3.3"
+description = "pyparsing - Classes and methods to define and execute parsing grammars"
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "pyparsing-3.3.3-py3-none-any.whl", hash = "sha256:ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"},
+    {file = "pyparsing-3.3.3.tar.gz", hash = "sha256:928ae7e20211f3b6f3915a72f06a0cfd29ab9d24279dd6346b6b1a7146397d36"},
+]
+
+[package.extras]
+diagrams = ["jinja2", "railroad-diagrams"]
+
+[[package]]
 name = "pyproject-api"
 version = "1.12.1"
 description = "API to interact with the python pyproject.toml based projects"
@@ -2978,6 +2993,30 @@ files = [
     {file = "pyyaml-6.0.3-cp39-cp39-win_amd64.whl", hash = "sha256:2e71d11abed7344e42a8849600193d15b6def118602c4c176f748e4583246007"},
     {file = "pyyaml-6.0.3.tar.gz", hash = "sha256:d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"},
 ]
+
+[[package]]
+name = "rdflib"
+version = "7.6.0"
+description = "RDFLib is a Python library for working with RDF, a simple yet powerful language for representing information."
+optional = false
+python-versions = ">=3.8.1"
+groups = ["main"]
+files = [
+    {file = "rdflib-7.6.0-py3-none-any.whl", hash = "sha256:30c0a3ebf4c0e09215f066be7246794b6492e054e782d7ac2a34c9f70a15e0dd"},
+    {file = "rdflib-7.6.0.tar.gz", hash = "sha256:6c831288d5e4a5a7ece85d0ccde9877d512a3d0f02d7c06455d00d6d0ea379df"},
+]
+
+[package.dependencies]
+pyparsing = ">=2.1.0,<4"
+
+[package.extras]
+berkeleydb = ["berkeleydb (>=18.1.0,<19.0.0)"]
+graphdb = ["httpx (>=0.28.1,<0.29.0)"]
+html = ["html5rdf (>=1.2,<2)"]
+lxml = ["lxml (>=4.3,<6.0)"]
+networkx = ["networkx (>=2,<4)"]
+orjson = ["orjson (>=3.9.14,<4)"]
+rdf4j = ["httpx (>=0.28.1,<0.29.0)"]
 
 [[package]]
 name = "redis"
@@ -3919,4 +3958,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "912b58bbfa9430a5b4ad9b9fa28e2abe86696d3d1c73af45355d84f4f29cd083"
+content-hash = "30fb787e41479afa57d06002574eefeaf5e23da2300d96bc36c5e3a265388636"
