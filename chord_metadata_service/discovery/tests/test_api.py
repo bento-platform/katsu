@@ -1219,6 +1219,26 @@ experiment:1,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Gen
             ),  # CSVs use \r\n line endings here
         )
 
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_pcgl_manifest_response_experiment_results(self):
+        _p, _d, _, phenopackets = make_two_individuals_with_phenopackets()
+        er0 = phenopackets[0].biosamples.first().experiments.first().experiment_results.first()
+        er1 = phenopackets[1].biosamples.first().experiments.first().experiment_results.first()
+
+        res = self.dt_authz_full_get(f"{self.url}?_format=pcgl_manifest&_entity=experiment_result")
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res["Content-Type"], "text/tab-separated-values")
+        rows = list(csv.reader(io.StringIO(res.content.decode("utf-8")), delimiter="\t"))
+        self.assertEqual(len(rows), 3)  # header + 2 rows
+        self.assertEqual(len(rows[0]), 11)
+        self.assertEqual({dict(zip(rows[0], r))["fileUuid"] for r in rows[1:]}, {er0.identifier, er1.identifier})
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_pcgl_manifest_response_wrong_entity(self):
+        make_two_individuals_with_phenopackets()
+        res = self.dt_authz_full_get(f"{self.url}?_format=pcgl_manifest&_entity=phenopacket")
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
 
 class DiscoveryUIHintsTest(AuthzAPITestCase):
     def setUp(self):
