@@ -11,6 +11,7 @@ def main():
         os.environ["DJANGO_SETTINGS_MODULE"] = "chord_metadata_service.metadata.test_settings"
 
         # monkeypatch aioresponses compatibility for aiohttp 3.14+
+        # see https://github.com/j7an/dep-rank/blob/9ce06c5bc039675bb12c2b9da0766fa1e4c654dd/tests/conftest.py#L14-L30
         # TODO: switch to aiointercept
 
         import inspect
