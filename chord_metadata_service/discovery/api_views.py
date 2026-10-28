@@ -673,7 +673,8 @@ async def discovery_endpoint(
 
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
-@renderer_classes([JSONRenderer, PassThruCSVRenderer, PassThruXLSXRenderer, PassThruTSVManifestRenderer])  # renderers here just handle negotiation
+# renderers here just handle negotiation
+@renderer_classes([JSONRenderer, PassThruCSVRenderer, PassThruXLSXRenderer, PassThruTSVManifestRenderer])
 @inject_discovery_deps(empty_404=True)
 async def discovery_matches(
     request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
@@ -689,7 +690,8 @@ async def discovery_matches(
       _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
-      _format:    Response format ("json", "csv", "xlsx", or "pcgl_manifest" (experiment_result only); must match request Accept header[s])
+      _format:    Response format ("json", "csv", "xlsx", or "pcgl_manifest" (experiment_result only); must
+                  match request Accept header[s])
       _fields:    (CSV/XLSX only) comma-separated subset of export columns to return; see
                   discovery_matches_export_fields for the available {key, label} choices per entity. Omit to get
                   every registered column.
@@ -774,7 +776,8 @@ async def discovery_matches(
 
     if response_format == "pcgl_manifest" and export_renderer_cls is None:
         return dres.csv_or_json_error_response(
-            request, errors.bad_request_error("pcgl_manifest is only available for _entity=experiment_result"),
+            request,
+            errors.bad_request_error("pcgl_manifest is only available for _entity=experiment_result"),
             accepted_formats,
         )
 
