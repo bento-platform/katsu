@@ -9,6 +9,24 @@ def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chord_metadata_service.metadata.settings")
     if "test" in sys.argv:
         os.environ["DJANGO_SETTINGS_MODULE"] = "chord_metadata_service.metadata.test_settings"
+
+        # monkeypatch aioresponses compatibility for aiohttp 3.14+
+        # TODO: switch to aiointercept
+
+        import inspect
+        from unittest.mock import Mock
+
+        import aiohttp
+
+        _response_init = aiohttp.ClientResponse.__init__
+        if "stream_writer" in inspect.signature(_response_init).parameters:
+
+            def _patched_response_init(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+                kwargs.setdefault("stream_writer", Mock(output_size=0))
+                _response_init(self, *args, **kwargs)
+
+            aiohttp.ClientResponse.__init__ = _patched_response_init
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
