@@ -25,7 +25,12 @@ from chord_metadata_service.authz.permissions import BentoAllowAny, BentoDeferTo
 from chord_metadata_service.authz.types import DataPermissions, DataTypeDiscoveryPermissions
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.logger import logger
-from chord_metadata_service.restapi.api_renderers import PassThruCSVRenderer, PassThruXLSXRenderer, XLSX_MEDIA_TYPE
+from chord_metadata_service.restapi.api_renderers import (
+    PassThruCSVRenderer,
+    PassThruTSVManifestRenderer,
+    PassThruXLSXRenderer,
+    XLSX_MEDIA_TYPE,
+)
 from chord_metadata_service.restapi.pagination import DEFAULT_PAGE_SIZE, DEFAULT_MAX_PAGE_SIZE
 from chord_metadata_service.utils import build_id_set
 
@@ -43,7 +48,12 @@ from .fields import get_field_options, get_range_stats, get_categorical_stats
 from .field_paths.normalize import normalize_field_path_true_model
 from .filtering import discovery_filter_queryset
 from .full_text_search import trigram_similarity_search, normal_full_text_search
-from .matches import DISCOVERY_ENTITY_TO_MATCH_FN, DISCOVERY_ENTITY_TO_CSV_RENDERER, DISCOVERY_ENTITY_TO_XLSX_RENDERER
+from .matches import (
+    DISCOVERY_ENTITY_TO_MATCH_FN,
+    DISCOVERY_ENTITY_TO_CSV_RENDERER,
+    DISCOVERY_ENTITY_TO_MANIFEST_RENDERER,
+    DISCOVERY_ENTITY_TO_XLSX_RENDERER,
+)
 from .model_lookups import DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE, DISCOVERY_ENTITY_NAMES_TO_MODEL
 from .pydantic_models import (
     DiscoveryFieldResponse,
@@ -338,6 +348,10 @@ def get_accepted_formats(request: DrfRequest) -> AcceptedDiscoveryResponseFormat
     # noinspection PyProtectedMember
     if request._request.accepts(XLSX_MEDIA_TYPE):
         fmts.add("xlsx")
+
+    # noinspection PyProtectedMember
+    if request._request.accepts("text/tab-separated-values"):
+        fmts.add("pcgl_manifest")
 
     return frozenset(fmts)
 
@@ -659,7 +673,7 @@ async def discovery_endpoint(
 
 @api_view(["GET"])
 @permission_classes([BentoDeferToHandler])
-@renderer_classes([JSONRenderer, PassThruCSVRenderer, PassThruXLSXRenderer])  # renderers here just handle negotiation
+@renderer_classes([JSONRenderer, PassThruCSVRenderer, PassThruXLSXRenderer, PassThruTSVManifestRenderer])  # renderers here just handle negotiation
 @inject_discovery_deps(empty_404=True)
 async def discovery_matches(
     request: DrfRequest, scope: ValidatedDiscoveryScope, dt_permissions: DataTypeDiscoveryPermissions, lg: BoundLogger
@@ -675,7 +689,7 @@ async def discovery_matches(
       _entity:    Entity to return in result-set. phenopacket|individual|biosample|experiment|experiment_result
       _page:      Page number, 0-indexed integer; defaults to 0
       _page_size: Page size; defaults to 25
-      _format:    Response format ("json", "csv", or "xlsx"; must match request Accept header[s])
+      _format:    Response format ("json", "csv", "xlsx", or "pcgl_manifest" (experiment_result only); must match request Accept header[s])
       _fields:    (CSV/XLSX only) comma-separated subset of export columns to return; see
                   discovery_matches_export_fields for the available {key, label} choices per entity. Omit to get
                   every registered column.
@@ -708,8 +722,10 @@ async def discovery_matches(
             response_format_param = "csv"
         elif "xlsx" in accepted_formats:
             response_format_param = "xlsx"
+        elif "pcgl_manifest" in accepted_formats:
+            response_format_param = "pcgl_manifest"
 
-    if response_format_param not in ("json", "csv", "xlsx"):
+    if response_format_param not in ("json", "csv", "xlsx", "pcgl_manifest"):
         return dres.csv_or_json_error_response(
             request, errors.bad_request_error("bad response format"), accepted_formats
         )
@@ -751,10 +767,18 @@ async def discovery_matches(
         if response_format == "csv"
         else DISCOVERY_ENTITY_TO_XLSX_RENDERER[queried_entity]
         if response_format == "xlsx"
+        else DISCOVERY_ENTITY_TO_MANIFEST_RENDERER.get(queried_entity)
+        if response_format == "pcgl_manifest"
         else None
     )
 
-    if export_renderer_cls is not None:
+    if response_format == "pcgl_manifest" and export_renderer_cls is None:
+        return dres.csv_or_json_error_response(
+            request, errors.bad_request_error("pcgl_manifest is only available for _entity=experiment_result"),
+            accepted_formats,
+        )
+
+    if export_renderer_cls is not None and response_format != "pcgl_manifest":  # manifest ignores _fields
         unknown_fields = export_renderer_cls.unknown_requested_fields(request)
         if unknown_fields:
             return dres.csv_or_json_error_response(

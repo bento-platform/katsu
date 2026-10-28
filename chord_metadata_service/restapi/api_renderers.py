@@ -32,6 +32,7 @@ __all__ = [
     "RDFDatasetRenderer",
     "render_age",
     "PassThruCSVRenderer",
+    "PassThruTSVManifestRenderer",
     "PassThruXLSXRenderer",
     "KatsuCSVRenderer",
     "KatsuTSVRenderer",
@@ -148,6 +149,19 @@ class PassThruXLSXRenderer(BaseRenderer):
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
         return HttpResponse(data, content_type=XLSX_MEDIA_TYPE)  # XLSX should already be rendered as bytes here
+
+
+class PassThruTSVManifestRenderer(BaseRenderer):
+    """
+    A sort-of skeleton TSV manifest renderer, which assumes data are already a rendered TSV response and just handles
+    negotiation and response content type.
+    """
+
+    media_type = "text/tab-separated-values"
+    format = "pcgl_manifest"
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return HttpResponse(data, content_type=self.media_type)  # TSV should already be rendered as bytes here
 
 
 @dataclass(frozen=True)

@@ -338,3 +338,8 @@ DISCOVERY_ENTITY_TO_XLSX_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuXLSXRend
     "experiment": apir.ExperimentXLSXRenderer,
     "experiment_result": apir.ExperimentResultXLSXRenderer,
 }
+
+# Download manifests are only defined for experiment results (the files themselves)
+DISCOVERY_ENTITY_TO_MANIFEST_RENDERER: dict[DiscoveryEntity, Type[apir.KatsuTSVRenderer]] = {
+    "experiment_result": apir.ExperimentResultPcglManifestTSVRenderer,
+}
