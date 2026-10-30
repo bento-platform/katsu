@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from chord_metadata_service.patients.models import Individual
-from chord_metadata_service.restapi.serializers import GenericSerializer
+from chord_metadata_service.restapi.serializers import GenericSerializer, prefixed_lookups
 from .models import Experiment, ExperimentResult, Instrument
 
 
@@ -12,6 +12,8 @@ class ExperimentResultSerializer(GenericSerializer):
     # Read-only/derived dataset ID, used by the download-manifest export. A result could in principle be linked to
     # multiple experiments (M2M), so this just takes the first one.
     dataset = serializers.SerializerMethodField()
+
+    prefetch_related_fields = ("experiments",)  # for get_dataset
 
     class Meta:
         model = ExperimentResult
@@ -52,6 +54,9 @@ class ExperimentSerializer(GenericSerializer):
     experiment_results = ExperimentResultSerializer(read_only=True, many=True)
     instrument = InstrumentSerializer()
     biosample_individual = IndividualSerializer(source="biosample.individual", read_only=True, fields=["id"])
+
+    select_related_fields = ("instrument", "biosample__individual")
+    prefetch_related_fields = prefixed_lookups("experiment_results", ExperimentResultSerializer.prefetch_related_fields)
 
     class Meta:
         model = Experiment

@@ -30,12 +30,6 @@ from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.api_views import (
-    BIOSAMPLE_PREFETCH,
-    BIOSAMPLE_SELECT_REL,
-    PHENOPACKET_PREFETCH,
-    PHENOPACKET_SELECT_REL,
-)
 from chord_metadata_service.phenopackets.models import Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
@@ -100,14 +94,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
     @async_to_sync
     async def get_queryset(self):
         scope = await get_request_discovery_scope(self.request)
-        return (
-            Individual.get_model_scoped_queryset(scope)
-            .prefetch_related(
-                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
-            )
-            .order_by("id")
-        )
+        return IndividualSerializer.setup_eager_loading(Individual.get_model_scoped_queryset(scope)).order_by("id")
 
     def list(self, request, *args, **kwargs):
         if (err := csv_fields_error_response(request, IndividualCSVRenderer)) is not None:
@@ -168,10 +155,8 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
         individual = self.get_object()
 
         phenopackets = (
-            Phenopacket.get_model_scoped_queryset(scope)
+            PhenopacketSerializer.setup_eager_loading(Phenopacket.get_model_scoped_queryset(scope))
             .filter(subject=individual)
-            .prefetch_related(*PHENOPACKET_PREFETCH)
-            .select_related(*PHENOPACKET_SELECT_REL)
             .annotate(project=F("dataset__project_id"))
             .order_by("id")
         )
@@ -219,14 +204,7 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         individual_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
         queryset = (
-            Individual.get_model_scoped_queryset(scope)
-            .prefetch_related(
-                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_SELECT_REL),
-            )
-            .select_related("vital_status")
+            IndividualSerializer.setup_eager_loading(Individual.get_model_scoped_queryset(scope))
             .filter(**filter_by_id)
             .order_by("id")
         )
