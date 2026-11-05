@@ -5,6 +5,7 @@ from django.contrib.postgres.fields import ArrayField
 from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.scopeable_model import (
     BaseScopeableModel,
+    Prefetches,
     TOP_LEVEL_MODEL_SCOPE_FILTERS,
 )
 from chord_metadata_service.discovery.types import ModelScopeFilters
@@ -56,6 +57,9 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
             GinIndex(name="exp_ref_registry_id_trgm_idx", fields=["reference_registry_id"], opclasses=["gin_trgm_ops"]),
             BaseFTSModel.get_fts_extra_trgm_index("exp"),
         ]
+
+    # Relations to eagerly load per output shape; see Prefetches. Keep in sync with what each serializer reads.
+    PREFETCHES_FULL = Prefetches(("experiment_results__experiments",))  # ExperimentSerializer
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -222,6 +226,9 @@ class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
             GinIndex(name="expres_created_by_trgm_idx", fields=["created_by"], opclasses=["gin_trgm_ops"]),
             BaseFTSModel.get_fts_extra_trgm_index("expres"),
         ]
+
+    # Relations to eagerly load per output shape; see Prefetches. Keep in sync with what each serializer reads.
+    PREFETCHES_FULL = Prefetches(("experiments",))  # ExperimentResultSerializer (already covered by the scope prefetch)
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:

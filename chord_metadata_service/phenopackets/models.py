@@ -6,7 +6,11 @@ from django.db import models
 from django.db.models import JSONField
 
 from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
-from chord_metadata_service.discovery.scopeable_model import TOP_LEVEL_MODEL_SCOPE_FILTERS, BaseScopeableModel
+from chord_metadata_service.discovery.scopeable_model import (
+    TOP_LEVEL_MODEL_SCOPE_FILTERS,
+    BaseScopeableModel,
+    Prefetches,
+)
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.geo import models as geo_models
 from chord_metadata_service.patients.models import Individual
@@ -201,6 +205,16 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
             GinIndex(name="sample_description_trgm_idx", fields=["description"], opclasses=["gin_trgm_ops"]),
             BaseFTSModel.get_fts_extra_trgm_index("sample"),
         ]
+
+    # Relations to eagerly load per output shape; see Prefetches. Keep in sync with what each serializer reads.
+    PREFETCHES_FULL = Prefetches(
+        (
+            # BiosampleSerializer
+            "phenotypic_features",
+            "experiments__experiment_results__experiments",
+        )
+    )
+    PREFETCHES_EXPORT = Prefetches()  # BiosampleExportSerializer
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
@@ -692,6 +706,20 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.PHENOPACKET
+
+    # Relations to eagerly load per output shape; see Prefetches. Keep in sync with what each serializer reads.
+    PREFETCHES_FULL = Prefetches(
+        (
+            # PhenopacketSerializer
+            "meta_data__resources",
+            "phenotypic_features",
+            "diseases",
+            "interpretations__diagnosis__genomic_interpretations",
+            "biosamples__phenotypic_features",
+            "biosamples__experiments__experiment_results__experiments",
+        )
+    )
+    PREFETCHES_EXPORT = Prefetches(("biosamples", "diseases"))  # PhenopacketExportSerializer
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:

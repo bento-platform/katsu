@@ -150,9 +150,9 @@ class VariantInterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["variation_descriptor"] = VariationDescriptorSerializer(
-            instance.variation_descriptor, many=False, required=True
-        ).data
+        response["variation_descriptor"] = self.nested_data(
+            VariationDescriptorSerializer, instance.variation_descriptor, many=False, required=True
+        )
         return response
 
 
@@ -168,13 +168,13 @@ class GenomicInterpretationSerializer(GenericSerializer):
 
         # May contain a gene_descriptor or a variant_interpretation, not both
         if instance.gene_descriptor:
-            response["gene_descriptor"] = GeneDescriptorSerializer(
-                instance.gene_descriptor, many=False, required=False
-            ).data
+            response["gene_descriptor"] = self.nested_data(
+                GeneDescriptorSerializer, instance.gene_descriptor, many=False, required=False
+            )
         elif instance.variant_interpretation:
-            response["variant_interpretation"] = VariantInterpretationSerializer(
-                instance.variant_interpretation, many=False, required=False
-            ).data
+            response["variant_interpretation"] = self.nested_data(
+                VariantInterpretationSerializer, instance.variant_interpretation, many=False, required=False
+            )
 
         # The 'subject_or_biosample_id' value is obtained from the referenced subject/biosample
         # The '__related_type' property is added to extra_properties as a computed value ("__" prefix)
@@ -211,7 +211,7 @@ class InterpretationSerializer(GenericSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
-        response["diagnosis"] = DiagnosisSerializer(instance.diagnosis, many=False, required=False).data
+        response["diagnosis"] = self.nested_data(DiagnosisSerializer, instance.diagnosis, many=False, required=False)
         return response
 
 
@@ -241,10 +241,10 @@ class SimplePhenopacketSerializer(GenericSerializer):
         objects and return their nested serialization.
         """
         response = super().to_representation(instance)
-        response["biosamples"] = BiosampleSerializer(
-            instance.biosamples, many=True, required=False, exclude_when_nested=["individual"]
-        ).data
-        response["meta_data"] = MetaDataSerializer(instance.meta_data, exclude_when_nested=["id"]).data
+        response["biosamples"] = self.nested_data(
+            BiosampleSerializer, instance.biosamples, many=True, required=False, exclude_when_nested=["individual"]
+        )
+        response["meta_data"] = self.nested_data(MetaDataSerializer, instance.meta_data, exclude_when_nested=["id"])
         return response
 
 
@@ -256,7 +256,7 @@ class PhenopacketSerializer(SimplePhenopacketSerializer):
 
         response = super().to_representation(instance)
         response["subject"] = (
-            IndividualSerializer(instance.subject, exclude_when_nested=["phenopackets", "biosamples"]).data
+            self.nested_data(IndividualSerializer, instance.subject, exclude_when_nested=["phenopackets", "biosamples"])
             if instance.subject
             else None
         )
