@@ -1,4 +1,3 @@
-from django.db.models import Prefetch
 from rest_framework import serializers
 from rest_framework.fields import CharField
 
@@ -6,7 +5,7 @@ from chord_metadata_service.experiments.serializers import ExperimentSerializer
 from chord_metadata_service.geo.ingest import get_or_create_geo_location
 from chord_metadata_service.geo.serializers import GeoLocationSerializer
 from chord_metadata_service.resources.serializers import ResourceSerializer
-from chord_metadata_service.restapi.serializers import GenericSerializer, prefixed_lookups
+from chord_metadata_service.restapi.serializers import GenericSerializer
 from chord_metadata_service.restapi.utils import computed_property
 
 from .models import (
@@ -89,15 +88,6 @@ class BiosampleSerializer(GenericSerializer):
     phenotypic_features = PhenotypicFeatureSerializer(read_only=True, many=True)
     experiments = ExperimentSerializer(read_only=True, many=True)
     location_collected = GeoLocationSerializer(required=False)
-
-    select_related_fields = ("individual", "location_collected")
-    prefetch_related_fields = (
-        "phenotypic_features",
-        # nested experiments get their biosample (+ its individual) set from the reverse foreign key prefetch, so we
-        # only need the experiments' other relations here.
-        "experiments__instrument",
-        *prefixed_lookups("experiments", ExperimentSerializer.prefetch_related_fields),
-    )
 
     class Meta:
         model = Biosample
@@ -241,28 +231,6 @@ class SimplePhenopacketSerializer(GenericSerializer):
     interpretations = InterpretationSerializer(many=True, required=False)
     diseases = DiseaseSerializer(many=True, required=False)
 
-    select_related_fields = ("meta_data",)
-    prefetch_related_fields = (
-        "meta_data__resources",
-        "phenotypic_features",
-        Prefetch("diseases", queryset=Disease.objects.order_by("id")),
-        *prefixed_lookups(
-            "interpretations__diagnosis__genomic_interpretations",
-            (
-                "subject",
-                "biosample",
-                "gene_descriptor",
-                "variant_interpretation__variation_descriptor__gene_context",
-            ),
-        ),
-        Prefetch("biosamples", queryset=Biosample.objects.order_by("id")),
-        *prefixed_lookups(
-            "biosamples",
-            BiosampleSerializer.select_related_fields,
-            BiosampleSerializer.prefetch_related_fields,
-        ),
-    )
-
     class Meta:
         model = Phenopacket
         exclude = ("fts_extra",)
@@ -281,8 +249,6 @@ class SimplePhenopacketSerializer(GenericSerializer):
 
 
 class PhenopacketSerializer(SimplePhenopacketSerializer):
-    select_related_fields = (*SimplePhenopacketSerializer.select_related_fields, "subject__vital_status")
-
     def to_representation(self, instance):
         # Phenopacket serializer for nested individuals - need to import here to
         # prevent circular import issues.

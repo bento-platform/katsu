@@ -55,7 +55,7 @@ class ExperimentViewSet(BentoAuthzScopedModelViewSet):
 
     @async_to_sync
     async def get_queryset(self):
-        return ExperimentSerializer.setup_eager_loading(
+        return Experiment.PREFETCHES_FULL.setup_eager_loading(
             Experiment.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
         ).order_by("id")
 
@@ -84,7 +84,7 @@ class ExperimentBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        return ExperimentSerializer.setup_eager_loading(queryset).order_by("id")
+        return Experiment.PREFETCHES_FULL.setup_eager_loading(queryset).order_by("id")
 
     @async_to_sync
     async def _get_filtered_queryset(self, ids_list: list[str] | None = None):

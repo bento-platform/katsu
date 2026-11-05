@@ -1,42 +1,13 @@
 from collections import OrderedDict
-from collections.abc import Iterable, Sequence
-from typing import ClassVar
+from collections.abc import Sequence
 
-from django.db.models import Prefetch, QuerySet
 from rest_framework import serializers
-
-RelatedLookup = str | Prefetch
-
-
-def _prefixed_lookup(prefix: str, lookup: RelatedLookup) -> RelatedLookup:
-    if isinstance(lookup, Prefetch):
-        return Prefetch(f"{prefix}__{lookup.prefetch_through}", queryset=lookup.queryset)
-    return f"{prefix}__{lookup}"
-
-
-def prefixed_lookups(prefix: str, *lookup_groups: Iterable[RelatedLookup]) -> tuple[RelatedLookup, ...]:
-    """Nests a (nested) serializer's related lookups under the relation it is reached through from the parent."""
-    return tuple(_prefixed_lookup(prefix, lookup) for lookups in lookup_groups for lookup in lookups)
 
 
 class GenericSerializer(serializers.ModelSerializer):
     """Subclass of ModelSerializer"""
 
     always_include: tuple[str, ...] = ()
-
-    # Related lookups which serializing an instance (including any nested serializers) walks. Applied to a queryset
-    # via setup_eager_loading(...) to avoid N+1 queries when serializing many instances, e.g., for CSV exports.
-    select_related_fields: ClassVar[tuple[str, ...]] = ()
-    # Prefetch objects with an ordered queryset keep to-many relations in a stable (primary key) order; a Prefetch must
-    # come before any string lookups which traverse through it.
-    prefetch_related_fields: ClassVar[tuple[RelatedLookup, ...]] = ()
-
-    @classmethod
-    def setup_eager_loading(cls, queryset: QuerySet) -> QuerySet:
-        # guard: select_related() with no arguments follows *every* non-null foreign key instead of none
-        if cls.select_related_fields:
-            queryset = queryset.select_related(*cls.select_related_fields)
-        return queryset.prefetch_related(*cls.prefetch_related_fields)
 
     def __init__(self, *args, **kwargs):
         exclude_when_nested: Sequence[str] | None = kwargs.pop("exclude_when_nested", None)

@@ -53,7 +53,7 @@ class BiosampleViewSet(PhenopacketsModelViewSet):
     # required to have discovery-scope-enabled queryset here to use a BentoAuthzScopedModelViewSet-derived viewset
     @async_to_sync
     async def get_queryset(self):
-        return s.BiosampleSerializer.setup_eager_loading(
+        return m.Biosample.PREFETCHES_FULL.setup_eager_loading(
             m.Biosample.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
         ).order_by("id")
 
@@ -90,7 +90,7 @@ class BiosampleBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         if ids_list:
             queryset = queryset.filter(id__in=ids_list)
 
-        return s.BiosampleSerializer.setup_eager_loading(queryset).order_by("id")
+        return m.Biosample.PREFETCHES_FULL.setup_eager_loading(queryset).order_by("id")
 
     def get_queryset(self):
         return self._get_filtered_queryset(ids_list=self.request.data.get("id", None))
@@ -143,7 +143,7 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
     @async_to_sync
     async def get_queryset(self):
         return (
-            s.PhenopacketSerializer.setup_eager_loading(
+            m.Phenopacket.PREFETCHES_FULL.setup_eager_loading(
                 m.Phenopacket.get_model_scoped_queryset(await get_request_discovery_scope(self.request))
             )
             .annotate(project=F("dataset__project_id"))

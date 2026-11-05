@@ -96,7 +96,7 @@ async def experiment_query_results(
     if output_format == OUTPUT_FORMAT_VALUES_LIST:
         return get_values_list(queryset, options)
 
-    return ExperimentSerializer.setup_eager_loading(queryset)
+    return Experiment.PREFETCHES_FULL.setup_eager_loading(queryset)
 
 
 async def phenopacket_query_results(
@@ -136,7 +136,7 @@ async def phenopacket_query_results(
 
         return results
     else:
-        return PhenopacketSerializer.setup_eager_loading(queryset)
+        return Phenopacket.PREFETCHES_FULL.setup_eager_loading(queryset)
 
 
 QUERY_RESULTS_FN: dict[
