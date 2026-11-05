@@ -1,17 +1,26 @@
 import uuid
 
-from aioresponses import aioresponses
+from aioresponses import CallbackResult, aioresponses
+from bento_lib.auth.permissions import (
+    P_QUERY_DATA,
+    P_QUERY_DATASET_LEVEL_BOOLEAN,
+    P_QUERY_DATASET_LEVEL_COUNTS,
+    P_QUERY_PROJECT_LEVEL_BOOLEAN,
+    P_QUERY_PROJECT_LEVEL_COUNTS,
+)
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from rest_framework import status
 from .constants import (
     VALID_PROJECT_1,
+    VALID_DATASET_PRIMARY_CONTACT,
     valid_dataset,
     PROJECT_JSON_SCHEMA_MISSING_PROJECT,
     valid_project_json_schema,
 )
 from .helpers import ProjectTestCase, AuthzAPITestCaseWithProjectJSON
 from ..api_views import _serializer_error_messages
+from ..dataset_schema import KatsuDatasetModel
 from ..models import Project, Dataset, ProjectJsonSchema
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.discovery.tests.constants import DISCOVERY_CONFIG_TEST, DISCOVERY_CONFIG_TEST_DICT
@@ -89,6 +98,71 @@ class ListProjectAPITest(AuthzAPITestCaseWithProjectJSON):
             expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
             for entity in expected_entities:
                 self.assertIn(entity, project["counts"])
+
+
+def _perms_key(*permissions) -> tuple[str, ...]:
+    return tuple(str(p) for p in permissions)
+
+
+class ListProjectWithDatasetsAPITest(AuthzAPITestCase, ProjectTestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.dataset_2 = Dataset.from_schema(
+            KatsuDatasetModel(
+                schema_version="1.0",
+                title="Dataset 2",
+                description="Another dataset",
+                primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+                identifier=str(uuid.uuid4()),
+                project=str(cls.project.identifier),
+            )
+        )
+        cls.dataset_2.save()
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_list_projects_bulk_authz_per_permission_level(self):
+        eval_bodies = []
+
+        def _eval(_url, **kwargs):
+            body = kwargs["json"]
+            eval_bodies.append(body)
+            return CallbackResult(payload={"result": [[True, True, False]] * len(body["resources"])})
+
+        with aioresponses() as m:
+            m.post("http://authz.local/policy/evaluate", callback=_eval, repeat=True)
+
+            r = self.client.get("/api/projects")
+            self.assertEqual(r.status_code, status.HTTP_200_OK)
+            project = r.json()["results"][0]
+
+        # Permissions for the project and both of its datasets are resolved with exactly one request per permission
+        # level - not one request per object, and never mixing project- and dataset-level permissions in a request.
+        requests_by_permissions = {_perms_key(*b["permissions"]): b["resources"] for b in eval_bodies}
+        self.assertEqual(len(eval_bodies), 2)
+        self.assertEqual(
+            len(
+                requests_by_permissions[
+                    _perms_key(P_QUERY_PROJECT_LEVEL_BOOLEAN, P_QUERY_PROJECT_LEVEL_COUNTS, P_QUERY_DATA)
+                ]
+            ),
+            1,
+        )
+        self.assertEqual(
+            len(
+                requests_by_permissions[
+                    _perms_key(P_QUERY_DATASET_LEVEL_BOOLEAN, P_QUERY_DATASET_LEVEL_COUNTS, P_QUERY_DATA)
+                ]
+            ),
+            2,
+        )
+
+        expected_entities = ["phenopacket", "individual", "biosample", "experiment", "experiment_result"]
+        self.assertEqual(len(project["datasets"]), 2)
+        for entity in expected_entities:
+            self.assertIn(entity, project["counts"])
+            for dataset in project["datasets"]:
+                self.assertIn(entity, dataset["counts_by_entity"])
 
 
 class ProjectDetailAPITest(AuthzAPITestCaseWithProjectJSON):

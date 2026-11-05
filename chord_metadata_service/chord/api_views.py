@@ -100,8 +100,21 @@ class ProjectViewSet(CHORDPublicModelViewSet):
     Create a new project
     """
 
-    queryset = Project.objects.prefetch_related("datasets").order_by("identifier")
+    queryset = Project.objects.prefetch_related("datasets__translations", "project_schemas").order_by("identifier")
     serializer_class = ProjectSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        language = _get_preferred_language(self.request)
+        if language != "en":
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    "datasets__translations",
+                    queryset=DatasetTranslation.objects.filter(language=language),
+                    to_attr="prefetched_translations",
+                )
+            )
+        return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -157,7 +170,7 @@ class DatasetViewSet(CHORDPublicModelViewSet):
         project_id = self.request.query_params.get("project_id")
         if project_id:
             queryset = queryset.filter(project_id=project_id)
-        queryset = queryset.prefetch_related("translations")
+        queryset = queryset.select_related("project").prefetch_related("translations")
         language = _get_preferred_language(self.request)
         if language != "en":
             queryset = queryset.prefetch_related(

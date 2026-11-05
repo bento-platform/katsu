@@ -34,7 +34,7 @@ class ModelScopeFilters(TypedDict):
 EntityCounts: TypeAlias = dict[DiscoveryEntity, int]
 EntityCountOrBoolResponse: TypeAlias = dict[DiscoveryEntity, int | bool]
 
-DiscoveryResponseFormat = Literal["json", "csv", "xlsx"]
+DiscoveryResponseFormat = Literal["json", "csv", "xlsx", "pcgl_manifest"]
 AcceptedDiscoveryResponseFormats: TypeAlias = frozenset[DiscoveryResponseFormat]
 
 AnyFieldDefinition: TypeAlias = FieldDefinition | NumberFieldDefinition | StringFieldDefinition | DateFieldDefinition
