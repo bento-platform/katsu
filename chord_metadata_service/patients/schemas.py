@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schema_utils import (
     DATE_TIME,
@@ -6,15 +7,15 @@ from chord_metadata_service.restapi.schema_utils import (
     SchemaTypes,
     array_of,
     base_type,
-    string_with_pattern,
     enum_of,
-    tag_ids_and_describe,
+    string_with_pattern,
     sub_schema_uri,
+    tag_ids_and_describe,
 )
-from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA, TIME_ELEMENT_SCHEMA
-from .descriptions import INDIVIDUAL, VITAL_STATUS
-from .values import Sex, KaryotypicSex
+from chord_metadata_service.restapi.schemas import EXTRA_PROPERTIES_SCHEMA, ONTOLOGY_CLASS, TIME_ELEMENT_SCHEMA
 
+from .descriptions import INDIVIDUAL, VITAL_STATUS
+from .values import KaryotypicSex, Sex
 
 phenopacket_base_uri = f"{settings.SCHEMAS_BASE_URL}/phenopacket"
 

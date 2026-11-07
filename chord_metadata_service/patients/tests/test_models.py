@@ -1,10 +1,10 @@
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
-from chord_metadata_service.phenopackets.tests import constants as c
 from chord_metadata_service.phenopackets import models as m
+from chord_metadata_service.phenopackets.tests import constants as c
 from chord_metadata_service.restapi.models import SchemaType
 
-from ..models import Individual, VitalStatus
 from ..filters import IndividualFilter
+from ..models import Individual, VitalStatus
 
 
 class IndividualTest(ProjectTestCase):

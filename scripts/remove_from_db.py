@@ -1,5 +1,5 @@
-import sys
 import subprocess
+import sys
 
 """
 A script that automates the process of deleting the data
@@ -26,15 +26,16 @@ def main():
 
     for table in sys.argv[1:]:
         response = subprocess.run(
-            'python ../manage.py shell --command="{}"'.format(script + "{}.objects.all().delete();".format(table)),
+            'python ../manage.py shell --command="{}"'.format(script + f"{table}.objects.all().delete();"),
             shell=True,
             stderr=subprocess.PIPE,
+            check=False,
         )
         if response.returncode:
             print(response.stderr)
-            print('"{}" does not seem to be a valid table'.format(table))
+            print(f'"{table}" does not seem to be a valid table')
         else:
-            print("Deleted data on table {}".format(table))
+            print(f"Deleted data on table {table}")
 
 
 if __name__ == "__main__":
