@@ -419,6 +419,35 @@ class SearchTest(AuthzAPITestCase):
             r = self._search_call("private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_private_search_values_list_rejects_fields_outside_schema(self):
+        # Field paths are turned into ORM lookups; paths not in the search schema (e.g. reverse relations which
+        # escape the dataset scope) must be rejected.
+        bad_fields = [
+            '["meta_data", "resources", "metadata", "phenopacket", "subject", "extra_properties"]',
+            '["meta_data", "resources", "[item]", "metadata", "phenopacket", "subject", "id"]',
+            '["dataset", "project", "datasets", "phenopacket", "subject", "id"]',
+            '["subject__phenopackets__id"]',
+            '["biosamples", "[item]"]',
+            "[]",
+            '"id"',
+        ]
+
+        for field in bad_fields:
+            d = {
+                "query": TEST_SEARCH_QUERY_10,
+                "output": "values_list",
+                "field": field,
+                "data_type": DATA_TYPE_PHENOPACKET,
+            }
+            for method in POST_GET:
+                with self.subTest(field=field, method=method):
+                    r = self._search_call(
+                        "private-dataset-search", args=[str(self.dataset.identifier)], data=d, method=method
+                    )
+                    self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+                    r = self._search_call("private-search", data=d, method=method)
+                    self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_private_dataset_search_bento_search_results(self):
         # Valid query to search for biosample id in list
         # Output as Bento search (a list of 5 values)

@@ -60,6 +60,32 @@ def get_field_lookup(field: list[str]) -> str:
     return "__".join(f for f in field if f != "[item]")
 
 
+def validate_field_against_schema(field, schema: dict) -> str | None:
+    """
+    Checks that a values_list field path (e.g. ['biosamples', '[item]', 'id']) exists in the data type's search
+    schema. Since the path is turned into a Django ORM lookup, an unchecked path could follow relations (including
+    reverse ones) out of the caller's scope. Only forward paths declared in the schema are allowed.
+    Returns an error message, or None if the field is valid.
+    """
+    if not isinstance(field, list) or not field or not all(isinstance(f, str) for f in field):
+        return "Field must be a non-empty list of strings"
+
+    node = schema
+    for segment in field:
+        if segment == "[item]":
+            node = node.get("items") if node.get("type") == "array" else None
+        else:
+            props = node.get("properties") if node.get("type") == "object" else None
+            node = props.get(segment) if isinstance(props, dict) else None
+        if not isinstance(node, dict):
+            return f"Invalid field for data type: {field}"
+
+    if field[-1] == "[item]":
+        return f"Invalid field for data type: {field}"
+
+    return None
+
+
 def get_values_list(queryset: QuerySet, options):
     field_lookup = get_field_lookup(options.get("field", []))
 
@@ -327,12 +353,17 @@ def get_chord_search_parameters(request, logger: BoundLogger, data_type=None):
         except json.decoder.JSONDecodeError:
             return None, f"Invalid field identifier as JSON string: {field}"
 
+    output = query_params.get("output", None)
+    if output == OUTPUT_FORMAT_VALUES_LIST:
+        if field_err := validate_field_against_schema(field, DATA_TYPES[data_type]["schema"]):
+            return None, field_err
+
     return {
         "query": query,
         "compiled_query": compiled_query,
         "params": params,
         "data_type": data_type,
-        "output": query_params.get("output", None),
+        "output": output,
         "field": field,
     }, None
 
