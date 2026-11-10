@@ -1,5 +1,5 @@
 from asgiref.sync import async_to_sync
-from bento_lib.auth.permissions import P_QUERY_DATA
+from bento_lib.auth.permissions import P_DOWNLOAD_METADATA, P_QUERY_DATA
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
@@ -210,6 +210,15 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
             # Here, "create" maps to the data query permission because we use create(..) (i.e., POST) as a way to run a
             # query with a large body.
             # TODO: distant future: replace with HTTP QUERY verb.
+            if (
+                self.action in ("list", "create")
+                and request.accepted_renderer.format == ExperimentResultPcglManifestTSVRenderer.format
+            ):
+                # The file manifest only needs download:metadata, which may also be granted by an external authorization
+                # service (e.g., PCGL). query:data gives download:metadata, so users with data access keep the manifest.
+                # Content negotiation happens before permission checks, so accepted_renderer is set here (also for
+                # POST requests, via FormatInPostContentNegotiation).
+                return P_DOWNLOAD_METADATA
             return P_QUERY_DATA
         return None  # viewset not implemented for any other action
 
