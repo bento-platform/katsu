@@ -87,7 +87,19 @@ class BaseScopeableModel(Model):
         """
         if (scope_q := cls.get_scope_q(scope)) is None:
             return cls.objects.all()
+        # Correlated EXISTS subqueries, so each candidate row is checked through index lookups instead of the whole table
+        # being joined for every primary key DRF looks up.
+        return cls.objects.filter(
+            Q(Exists(cls.objects.filter(scope_q, pk=OuterRef("pk")))) | cls.get_referenceable_outside_scope_q(scope)
+        )
 
+    @classmethod
+    def get_referenceable_outside_scope_q(cls, scope: ValidatedDiscoveryScope) -> Q:
+        """
+        Returns the filter for objects which are not in the passed (non-instance) scope, but which a write under the
+        scope may still reference: those with no dataset link pointing outside the scope. Models can extend this with
+        extra conditions; see get_referenceable_queryset.
+        """
         # Avoid a circular import: chord.models imports the models which subclass this one.
         from chord_metadata_service.chord.models import Dataset
 
@@ -95,13 +107,7 @@ class BaseScopeableModel(Model):
         linked_outside_q = Q()
         for lookup in cls.get_dataset_link_lookups():
             linked_outside_q |= Q(**{f"{lookup}__in": outside_datasets.values("pk")})
-
-        # Correlated EXISTS subqueries, so each candidate row is checked through index lookups instead of the whole table
-        # being joined for every primary key DRF looks up.
-        return cls.objects.filter(
-            Q(Exists(cls.objects.filter(scope_q, pk=OuterRef("pk"))))
-            | ~Q(Exists(cls.objects.filter(linked_outside_q, pk=OuterRef("pk"))))
-        )
+        return ~Q(Exists(cls.objects.filter(linked_outside_q, pk=OuterRef("pk"))))
 
     @classmethod
     def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:

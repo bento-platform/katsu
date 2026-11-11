@@ -236,11 +236,22 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
 
     @classmethod
     def get_dataset_link_lookups(cls) -> tuple[str, ...]:
-        # A biosample without phenopackets can still carry a dataset's data through its experiments or its individual.
+        # A biosample without phenopackets can still carry a dataset's data through its experiments.
         return (
             "phenopackets__dataset__identifier",
             "experiments__dataset_id",
-            "individual__phenopackets__dataset_id",
+        )
+
+    @classmethod
+    def get_referenceable_outside_scope_q(cls, scope: "ValidatedDiscoveryScope") -> models.Q:
+        # A biosample outside the scope must also belong to an individual which may be referenced under the scope. The
+        # individual is checked as a whole (rather than listing its phenopackets as dataset links of the biosample), so
+        # a biosample of an individual shared between datasets can still be created under either dataset's scope.
+        individual_ok = models.Exists(
+            Individual.get_referenceable_queryset(scope).filter(pk=models.OuterRef("individual_id"))
+        )
+        return super().get_referenceable_outside_scope_q(scope) & (
+            models.Q(individual__isnull=True) | models.Q(individual_ok)
         )
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))

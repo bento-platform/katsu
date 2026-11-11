@@ -167,8 +167,7 @@ class ScopedWriteTest(AuthzAPITestCase):
 
     def test_scoped_ingest_order(self):
         # individual (already in A) -> biosample -> experiment / phenopacket, all under dataset A's scope
-        biosample = {**ph_c.valid_biosample_1(self.ind_a.id), "id": "biosample:new", "individual": self.ind_a.id}
-        r = self.one_authz_post(reverse("biosamples-list") + self.scope_a, json=biosample)
+        r = self.one_authz_post(reverse("biosamples-list") + self.scope_a, json=self._new_biosample(self.ind_a.id))
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
         r = self.one_authz_patch(
@@ -178,6 +177,31 @@ class ScopedWriteTest(AuthzAPITestCase):
 
         r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=["biosample:new"]))
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    def _new_biosample(self, individual_id: str, biosample_id: str = "biosample:new") -> dict:
+        return {**ph_c.valid_biosample_1(individual_id), "id": biosample_id, "individual": individual_id}
+
+    def test_create_biosample_for_shared_individual(self):
+        # An individual with phenopackets in both A and B may get new biosamples under either dataset's scope
+        ph_m.Phenopacket.objects.create(id="pheno:b-in-a", subject=self.ind_b, meta_data=self.meta_a, dataset=self.ds_a)
+        for ds, bs_id in ((self.ds_a, "biosample:new-a"), (self.ds_b, "biosample:new-b")):
+            with self.subTest(dataset=ds.title):
+                r = self.one_authz_post(
+                    reverse("biosamples-list") + f"?dataset={ds.identifier}",
+                    json=self._new_biosample(self.ind_b.id, bs_id),
+                )
+                self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    def test_create_biosample_for_out_of_scope_individual_rejected(self):
+        r = self.one_authz_post(reverse("biosamples-list") + self.scope_a, json=self._new_biosample(self.ind_b.id))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(ph_m.Biosample.objects.filter(id="biosample:new").exists())
+
+    def test_create_phenopacket_with_biosample_of_out_of_scope_individual_rejected(self):
+        # Biosample with no phenopacket or experiment, whose only link is an individual in dataset B
+        bs_y = ph_m.Biosample.objects.create(**{**ph_c.valid_biosample_2(self.ind_b), "id": "biosample_id:y"})
+        r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=[bs_y.id]))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_phenopacket_with_subject_linked_only_through_experiments(self):
         # An individual whose only dataset link is an experiment in A (through a biosample) may be referenced from A
