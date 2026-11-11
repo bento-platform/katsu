@@ -91,6 +91,18 @@ class Dataset(AbstractPydanticJSONBModel):
     JSONB_FIELD = "data"
     SCHEMA_CLASS = KatsuDatasetModel
 
+    @classmethod
+    def get_referenceable_queryset(cls, scope) -> models.QuerySet:
+        """
+        Returns the datasets which a write made under the passed scope (a ValidatedDiscoveryScope) may reference.
+        See BaseScopeableModel.get_referenceable_queryset.
+        """
+        if scope.dataset_id:
+            return cls.objects.filter(identifier=scope.dataset_id)
+        elif scope.project_id:
+            return cls.objects.filter(project_id=scope.project_id)
+        return cls.objects.all()
+
     # --- Django fields ---
     project = models.ForeignKey(
         Project,

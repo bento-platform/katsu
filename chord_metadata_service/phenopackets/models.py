@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
@@ -20,6 +22,9 @@ from . import descriptions as d
 from .utils import time_element_to_str
 from .validators import vrs_variation_validator
 
+if TYPE_CHECKING:  # pragma: no cover
+    from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+
 #############################################################
 #                                                           #
 #                        Metadata                           #
@@ -32,6 +37,20 @@ class MetaData(BaseTimeStamp, ToFTSReprMixin):
     Class to store structured definitions of the resources
     and ontologies used within the phenopacket
     """
+
+    @classmethod
+    def get_referenceable_queryset(cls, scope: "ValidatedDiscoveryScope") -> models.QuerySet:
+        """
+        MetaData is not scopeable itself; it is scoped by the phenopackets which use it. A write made under the passed
+        scope may reference metadata used by a phenopacket in the scope, or metadata not used by any dataset's
+        phenopacket. See BaseScopeableModel.get_referenceable_queryset.
+        """
+        if (scope_q := Phenopacket.get_scope_q(scope)) is None:
+            return cls.objects.all()
+        return cls.objects.filter(
+            models.Q(pk__in=Phenopacket.objects.filter(scope_q).values("meta_data_id"))
+            | ~models.Q(pk__in=Phenopacket.objects.filter(dataset__isnull=False).values("meta_data_id"))
+        )
 
     created_by = models.CharField(
         max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "created_by")
@@ -213,6 +232,15 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
                 "filter": "phenopackets__dataset__identifier",
             },
         }
+
+    @classmethod
+    def get_dataset_link_lookups(cls) -> tuple[str, ...]:
+        # A biosample without phenopackets can still carry a dataset's data through its experiments or its individual.
+        return (
+            "phenopackets__dataset__identifier",
+            "experiments__dataset_id",
+            "individual__phenopackets__dataset_id",
+        )
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))
     # if Individual instance is deleted Biosample instance is deleted too

@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Iterable
 
 from adrf.views import APIView
 from asgiref.sync import async_to_sync
@@ -8,7 +9,7 @@ from bento_lib.search import build_search_response
 from datetime import datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F, Prefetch, Q
+from django.db.models import Count, F, Prefetch, Q, QuerySet
 from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -26,9 +27,11 @@ from chord_metadata_service.discovery.censorship import get_threshold, threshold
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
 from chord_metadata_service.discovery.filtering import discovery_filter_queryset
 from chord_metadata_service.discovery.pydantic_models import DiscoveryQuery
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
+from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.logger import logger
 from chord_metadata_service.phenopackets.api_views import (
     BIOSAMPLE_PREFETCH,
@@ -61,24 +64,53 @@ from .serializers import IndividualSerializer
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
+def _scoped_plain_queryset(model: type[BaseScopeableModel], scope: ValidatedDiscoveryScope) -> QuerySet:
+    """
+    Objects of a model in the passed scope, without the DISTINCT / base prefetches of get_model_scoped_queryset(...),
+    for use in Prefetch querysets. The scope filter is applied through a pk__in subquery, since it may follow
+    multi-valued relations (e.g. biosample -> phenopackets) and would otherwise yield duplicate rows.
+    """
+    if (scope_q := model.get_scope_q(scope)) is None:
+        return model.objects.all()
+    return model.objects.filter(pk__in=model.objects.filter(scope_q).values("pk"))
+
+
+def _with_scoped_experiments(scope: ValidatedDiscoveryScope, lookups: Iterable[str], experiments_lookup: str) -> tuple:
+    """
+    Replaces the experiments lookups (under experiments_lookup) in a prefetch lookup list with a single scoped Prefetch,
+    since a biosample in scope can have experiments in other datasets.
+    """
+    experiments = (
+        _scoped_plain_queryset(Experiment, scope).select_related("instrument").prefetch_related("experiment_results")
+    )
+    return (
+        Prefetch(experiments_lookup, queryset=experiments),
+        *(lk for lk in lookups if lk != experiments_lookup and not lk.startswith(f"{experiments_lookup}__")),
+    )
+
+
 def scoped_individual_prefetches(
-    scope: ValidatedDiscoveryScope, biosample_prefetch: tuple[str, ...], phenopacket_prefetch: tuple[str, ...]
+    scope: ValidatedDiscoveryScope, biosample_prefetch: Iterable[str], phenopacket_prefetch: Iterable[str]
 ) -> tuple[Prefetch, Prefetch]:
     """
-    Builds prefetches for an individual's biosamples and phenopackets which only include records inside the passed
-    scope. An individual can be shared between datasets, so the nested records must be filtered separately from the
-    individual itself; otherwise, records from other datasets would be included.
+    Builds prefetches for an individual's biosamples and phenopackets (and their biosamples' experiments) which only
+    include records inside the passed scope. An individual can be shared between datasets, so the nested records must
+    be filtered separately from the individual itself; otherwise, records from other datasets would be included.
     Any existing unfiltered prefetch of these relations must be cleared first, since Django refuses two different
     querysets for the same lookup.
     """
     return (
         Prefetch(
             "biosamples",
-            queryset=Biosample.get_model_scoped_queryset(scope).prefetch_related(*biosample_prefetch),
+            queryset=_scoped_plain_queryset(Biosample, scope).prefetch_related(
+                *_with_scoped_experiments(scope, biosample_prefetch, "experiments")
+            ),
         ),
         Prefetch(
             "phenopackets",
-            queryset=Phenopacket.get_model_scoped_queryset(scope).prefetch_related(*phenopacket_prefetch),
+            queryset=_scoped_plain_queryset(Phenopacket, scope).prefetch_related(
+                *_with_scoped_experiments(scope, phenopacket_prefetch, "biosamples__experiments")
+            ),
         ),
     )
 

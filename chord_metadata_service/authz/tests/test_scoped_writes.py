@@ -49,8 +49,8 @@ class ScopedWriteTest(AuthzAPITestCase):
         )
         self.bs_a = ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(self.ind_a))
         self.pheno_a.biosamples.add(self.bs_a)
-        instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
-        self.exp_a = ex_m.Experiment.objects.create(**ex_c.valid_experiment(self.bs_a, instrument, self.ds_a))
+        self.instrument = ex_m.Instrument.objects.create(**ex_c.valid_instrument())
+        self.exp_a = ex_m.Experiment.objects.create(**ex_c.valid_experiment(self.bs_a, self.instrument, self.ds_a))
 
         # Dataset B: the "victim" individual 2 with a phenopacket and a biosample
         self.ind_b = ph_m.Individual.objects.create(**ph_c.VALID_INDIVIDUAL_2)
@@ -77,24 +77,42 @@ class ScopedWriteTest(AuthzAPITestCase):
 
     # (a) writes into another dataset
 
-    def test_create_phenopacket_in_other_dataset_forbidden(self):
+    def test_create_phenopacket_in_other_dataset_rejected(self):
         r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(dataset=str(self.ds_b.identifier)))
-        self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("does not exist", str(r.json()))
         self.assertFalse(ph_m.Phenopacket.objects.filter(id="pheno:new").exists())
 
-    def test_move_phenopacket_to_other_dataset_forbidden(self):
+    def test_move_phenopacket_to_other_dataset_rejected(self):
         r = self.one_authz_patch(
             reverse("phenopackets-detail", args=[self.pheno_a.id]) + self.scope_a,
             json={"dataset": str(self.ds_b.identifier)},
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.pheno_a.refresh_from_db()
+        self.assertEqual(self.pheno_a.dataset_id, self.ds_a.identifier)
+
+    def test_move_experiment_to_other_dataset_rejected(self):
+        r = self.one_authz_patch(
+            reverse("experiments-detail", args=[self.exp_a.id]) + self.scope_a,
+            json={"dataset": str(self.ds_b.identifier)},
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.exp_a.refresh_from_db()
+        self.assertEqual(self.exp_a.dataset_id, self.ds_a.identifier)
+
+    def test_detach_phenopacket_from_dataset_forbidden(self):
+        # Unsetting the dataset would act as a delete without the delete permission
+        r = self.one_authz_patch(
+            reverse("phenopackets-detail", args=[self.pheno_a.id]) + self.scope_a, json={"dataset": None}
         )
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.pheno_a.refresh_from_db()
         self.assertEqual(self.pheno_a.dataset_id, self.ds_a.identifier)
 
-    def test_move_experiment_to_other_dataset_forbidden(self):
+    def test_detach_experiment_from_dataset_forbidden(self):
         r = self.one_authz_patch(
-            reverse("experiments-detail", args=[self.exp_a.id]) + self.scope_a,
-            json={"dataset": str(self.ds_b.identifier)},
+            reverse("experiments-detail", args=[self.exp_a.id]) + self.scope_a, json={"dataset": None}
         )
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
         self.exp_a.refresh_from_db()
@@ -128,7 +146,24 @@ class ScopedWriteTest(AuthzAPITestCase):
         self.exp_a.refresh_from_db()
         self.assertEqual(self.exp_a.biosample_id, self.bs_a.id)
 
+    def test_create_phenopacket_with_biosample_linked_through_experiments_rejected(self):
+        # Biosample without phenopackets, but with an individual and an experiment in dataset B
+        bs_x = ph_m.Biosample.objects.create(**{**ph_c.valid_biosample_2(self.ind_b), "id": "biosample_id:x"})
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(bs_x, self.instrument, self.ds_b, num_experiment=3))
+        r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=[bs_x.id]))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(ph_m.Phenopacket.objects.filter(id="pheno:new").exists())
+
     # writes which stay in scope are still allowed
+
+    def test_update_phenopacket_with_shared_meta_data(self):
+        # Metadata shared with a phenopacket in dataset B is still visible in dataset A, so it may be referenced
+        self.pheno_b.meta_data = self.meta_a
+        self.pheno_b.save()
+        r = self.one_authz_patch(
+            reverse("phenopackets-detail", args=[self.pheno_a.id]) + self.scope_a, json={"meta_data": self.meta_a.id}
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
 
     def test_create_phenopacket_in_scope(self):
         r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=[self.bs_a.id]))
@@ -156,6 +191,33 @@ class ScopedWriteTest(AuthzAPITestCase):
         data = r.json()
         self.assertEqual(sorted(p["id"] for p in data["phenopackets"]), ["pheno:b", "pheno:b-in-a"])
         self.assertEqual([b["id"] for b in data["biosamples"]], [self.bs_b.id])
+
+    def test_individual_update_response_filtered_by_scope(self):
+        ph_m.Phenopacket.objects.create(id="pheno:b-in-a", subject=self.ind_b, meta_data=self.meta_a, dataset=self.ds_a)
+
+        r = self.one_authz_patch(
+            reverse("individuals-detail", args=[self.ind_b.id]) + self.scope_a, json={"sex": "MALE"}
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+        self.assertEqual([p["id"] for p in data["phenopackets"]], ["pheno:b-in-a"])
+        self.assertEqual(data.get("biosamples", []), [])
+
+    def test_individual_nested_experiments_filtered_by_scope(self):
+        # dataset A's biosample also has an experiment in dataset B
+        exp_b = ex_m.Experiment.objects.create(
+            **ex_c.valid_experiment(self.bs_a, self.instrument, self.ds_b, num_experiment=2)
+        )
+
+        r = self.one_authz_get(reverse("individuals-detail", args=[self.ind_a.id]) + self.scope_a)
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        data = r.json()
+        self.assertEqual([e["id"] for e in data["biosamples"][0]["experiments"]], [self.exp_a.id])
+        self.assertEqual([e["id"] for e in data["phenopackets"][0]["biosamples"][0]["experiments"]], [self.exp_a.id])
+
+        r = self.one_authz_get(reverse("individuals-detail", args=[self.ind_a.id]))
+        data = r.json()
+        self.assertEqual(sorted(e["id"] for e in data["biosamples"][0]["experiments"]), [self.exp_a.id, exp_b.id])
 
     def test_individual_batch_nested_records_filtered_by_scope(self):
         ph_m.Phenopacket.objects.create(id="pheno:b-in-a", subject=self.ind_b, meta_data=self.meta_a, dataset=self.ds_a)

@@ -1,14 +1,14 @@
 from asgiref.sync import async_to_sync
 from bento_lib.auth.permissions import P_DELETE_DATA, P_INGEST_DATA, P_QUERY_DATA, Permission
 from django.db import transaction
-from django.db.models import Model
 from rest_framework import mixins, viewsets
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.logger import logger
+from chord_metadata_service.restapi.serializers import WRITE_SCOPE_CONTEXT_KEY
 
 from .middleware import authz_middleware
 from .permissions import BentoDataTypePermission
@@ -80,37 +80,43 @@ class BentoAuthzScopedModelViewSet(
     replacing the base viewsets.GenericViewSet. In this way, we get all the scoping / permissions helper functions.
     Security note: Subclasses MUST implement a get_queryset(...) which returns a model-scoped queryset!
 
-    Permissions are evaluated against the scope in the query string, so writes are additionally checked to make sure
-    the request body cannot reach outside that scope: every referenced object must be in scope (or not belong to any
-    dataset), and the saved object itself must end up in scope (or not belong to any dataset).
+    Permissions are evaluated against the scope in the query string, so writes are additionally kept inside it:
+     - Every primary key relation in the request body is narrowed to the objects a write under the request scope may
+       reference (see GenericSerializer.get_fields), so out-of-scope references fail validation.
+     - A created object must end up in scope, or not be linked to any dataset. An updated object (which was in scope
+       to begin with) must stay in scope, so an update cannot move it out or detach it (e.g. by unsetting its dataset).
+     - Validation, the save, and these checks run in one transaction.
+     - The response is built from the object re-fetched through the scoped get_queryset(...), since DRF drops the
+       (scoped) prefetch cache after an update.
     """
 
-    async def related_object_in_scope(self, scope: ValidatedDiscoveryScope, obj: Model) -> bool:
-        """
-        Returns whether an object referenced by a create/update request body may be referenced under the passed scope.
-        Subclasses can override this to handle related models which are not scopeable themselves.
-        """
-        if isinstance(obj, BaseScopeableModel):
-            return await obj.scope_allows_object(scope)
-        return True
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        if self.action in ("create", "update", "partial_update"):
+            context[WRITE_SCOPE_CONTEXT_KEY] = async_to_sync(get_request_discovery_scope)(self.request)
+        return context
 
-    async def _check_related_objects_in_scope(self, scope: ValidatedDiscoveryScope, validated_data: dict) -> None:
-        for field_name, value in validated_data.items():
-            for obj in value if isinstance(value, (list, tuple)) else (value,):
-                if isinstance(obj, Model) and not await self.related_object_in_scope(scope, obj):
-                    # Same message as DRF's PrimaryKeyRelatedField, so out-of-scope objects look like missing ones.
-                    raise ValidationError({field_name: [f'Invalid pk "{obj.pk}" - object does not exist.']})
-
-    def _save_within_scope(self, serializer) -> None:
-        scope = async_to_sync(get_request_discovery_scope)(self.request)
-        async_to_sync(self._check_related_objects_in_scope)(scope, serializer.validated_data)
+    def create(self, request, *args, **kwargs):
         with transaction.atomic():
-            obj = serializer.save()
-            if not async_to_sync(obj.scope_allows_object)(scope):
-                raise PermissionDenied("Object would be outside of the authorized scope")  # rolls back the save
+            return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        with transaction.atomic():
+            return super().update(request, *args, **kwargs)
+
+    def _use_scoped_instance_for_response(self, serializer, obj: BaseScopeableModel) -> None:
+        if (scoped_obj := self.get_queryset().filter(pk=obj.pk).first()) is not None:
+            serializer.instance = scoped_obj
 
     def perform_create(self, serializer):
-        self._save_within_scope(serializer)
+        obj = serializer.save()
+        scope = serializer.context[WRITE_SCOPE_CONTEXT_KEY]
+        if not type(obj).get_referenceable_queryset(scope).filter(pk=obj.pk).exists():
+            raise PermissionDenied("Object would be outside of the authorized scope")  # rolls back the transaction
+        self._use_scoped_instance_for_response(serializer, obj)
 
     def perform_update(self, serializer):
-        self._save_within_scope(serializer)
+        obj = serializer.save()
+        if not async_to_sync(self.obj_is_in_request_scope)(self.request, obj):
+            raise PermissionDenied("Object would be outside of the authorized scope")  # rolls back the transaction
+        self._use_scoped_instance_for_response(serializer, obj)

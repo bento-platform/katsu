@@ -12,7 +12,7 @@ from rest_framework.settings import api_settings
 from chord_metadata_service.authz.permissions import BentoAllowAny
 from chord_metadata_service.authz.viewset import BentoAuthzScopedModelGenericListViewSet, BentoAuthzScopedModelViewSet
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
-from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
+from chord_metadata_service.discovery.scope import get_request_discovery_scope
 from chord_metadata_service.phenopackets.schemas import PHENOPACKET_SCHEMA, phenopacket_base_uri, phenopacket_resolver
 from chord_metadata_service.restapi.api_renderers import (
     BiosamplesCSVRenderer,
@@ -188,13 +188,6 @@ class PhenopacketViewSet(PhenopacketsModelViewSet):
             .annotate(project=F("dataset__project_id"))
             .order_by("id")
         )
-
-    async def related_object_in_scope(self, scope: ValidatedDiscoveryScope, obj) -> bool:
-        if isinstance(obj, m.MetaData):
-            # MetaData is not scopeable itself; it is scoped by the phenopackets which use it.
-            scoped_ids = m.Phenopacket.get_model_scoped_queryset(scope).values("id")
-            return not await m.Phenopacket.objects.filter(meta_data=obj).exclude(id__in=scoped_ids).aexists()
-        return await super().related_object_in_scope(scope, obj)
 
 
 @extend_schema(

@@ -35,24 +35,62 @@ class BaseScopeableModel(Model):
         """
         return await self.get_model_scoped_queryset(scope).filter(pk=self.pk).aexists()
 
-    async def belongs_to_any_dataset(self) -> bool:
-        """
-        Returns whether this object falls under the scope of at least one dataset. Objects which do not (e.g., a newly
-        created individual without any phenopackets yet) cannot expose any dataset's data.
-        """
-        filter_query = self.get_scope_filters()["dataset"]["filter"]
-        filters = filter_query if isinstance(filter_query, tuple) else (filter_query,)
+    @staticmethod
+    def _or_lookups(filter_query: str | tuple[str, ...], value) -> Q:
+        # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for, e.g.,
+        # the Resource model, where there are multiple possible paths one can take from the object to the parent
+        # dataset(s).
+        lookups = filter_query if isinstance(filter_query, tuple) else (filter_query,)
         q = Q()
-        for fq in filters:
-            q |= Q(**{f"{fq}__isnull": False})
-        return await type(self).objects.filter(q, pk=self.pk).aexists()
+        for lookup in lookups:
+            q |= Q(**{lookup: value})
+        return q
 
-    async def scope_allows_object(self, scope: ValidatedDiscoveryScope) -> bool:
+    @staticmethod
+    def _scope_filter_key(scope: ValidatedDiscoveryScope) -> tuple[PublicScopeFilterKeys, str] | None:
+        if scope.dataset_id:
+            return "dataset", scope.dataset_id
+        elif scope.project_id:
+            return "project", scope.project_id
+        return None  # whole-instance scope
+
+    @classmethod
+    def get_scope_q(cls, scope: ValidatedDiscoveryScope) -> Q | None:
         """
-        Returns whether a write made under the passed scope may produce or reference this object: it must either be
-        inside the scope, or not belong to any dataset at all.
+        Returns the filter which narrows objects of this model to the passed scope, or None for a whole-instance scope.
+        Note that the filter may follow multi-valued relations, so it can yield duplicate rows if used with filter(...)
+        directly; use get_model_scoped_queryset(...) or a pk__in subquery when that matters.
         """
-        return await self.scope_contains_object(scope) or not await self.belongs_to_any_dataset()
+        if (key := cls._scope_filter_key(scope)) is None:
+            return None
+        filter_scope, value = key
+        return cls._or_lookups(cls.get_scope_filters()[filter_scope]["filter"], value)
+
+    @classmethod
+    def get_dataset_link_lookups(cls) -> tuple[str, ...]:
+        """
+        Returns the lookups (ending in a dataset ID) through which objects of this model can be linked to a dataset.
+        By default, these are the lookups used for dataset scoping; models which can also be linked to a dataset some
+        other way (and so expose that dataset's data when referenced) should override this.
+        """
+        filter_query = cls.get_scope_filters()["dataset"]["filter"]
+        return filter_query if isinstance(filter_query, tuple) else (filter_query,)
+
+    @classmethod
+    def get_referenceable_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
+        """
+        Returns the objects of this model which a write made under the passed scope may reference or produce: objects
+        inside the scope, plus objects which are not linked to any dataset at all (e.g., a newly created individual
+        without any phenopackets yet), since those cannot expose any dataset's data.
+        """
+        if (scope_q := cls.get_scope_q(scope)) is None:
+            return cls.objects.all()
+        linked_q = Q()
+        for lookup in cls.get_dataset_link_lookups():
+            linked_q |= Q(**{f"{lookup}__isnull": False})
+        return cls.objects.filter(
+            Q(pk__in=cls.objects.filter(scope_q).values("pk")) | ~Q(pk__in=cls.objects.filter(linked_q).values("pk"))
+        )
 
     @classmethod
     def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
@@ -65,16 +103,10 @@ class BaseScopeableModel(Model):
 
         base_prefetch_related = class_scope_filters_and_prefetches["base_prefetch_related"]
 
-        filter_scope: PublicScopeFilterKeys
-        if scope.dataset_id:
-            filter_scope = "dataset"
-            value = scope.dataset_id
-        elif scope.project_id and not scope.dataset_id:
-            filter_scope = "project"
-            value = scope.project_id
-        else:
+        if (key := cls._scope_filter_key(scope)) is None:
             return cls.objects.distinct().prefetch_related(*base_prefetch_related)
 
+        filter_scope, value = key
         scope_filter_spec = class_scope_filters_and_prefetches[filter_scope]
 
         prefetch = (
@@ -82,18 +114,7 @@ class BaseScopeableModel(Model):
             *(p for p in scope_filter_spec.get("prefetch_related", ()) if p not in base_prefetch_related),
         )
 
-        filter_query = scope_filter_spec["filter"]
-        if isinstance(filter_query, tuple):
-            # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for,
-            # e.g., the Resource model, where there are multiple possible paths one can take from the object to the
-            # parent dataset(s).
-            obj_q = Q(**{filter_query[0]: value})
-            for fq in filter_query[1:]:
-                obj_q = obj_q | Q(**{fq: value})
-        else:
-            # Just one filter to get the scoped queryset
-            obj_q = Q(**{filter_query: value})
-
+        obj_q = cls._or_lookups(scope_filter_spec["filter"], value)
         return cls.objects.distinct().prefetch_related(*prefetch).filter(obj_q)
 
 
