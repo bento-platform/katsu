@@ -93,10 +93,7 @@ class Dataset(AbstractPydanticJSONBModel):
 
     @classmethod
     def get_referenceable_queryset(cls, scope) -> models.QuerySet:
-        """
-        Returns the datasets which a write made under the passed scope (a ValidatedDiscoveryScope) may reference.
-        See BaseScopeableModel.get_referenceable_queryset.
-        """
+        """Returns the datasets which a write under the scope may reference."""
         if scope.dataset_id:
             return cls.objects.filter(identifier=scope.dataset_id)
         elif scope.project_id:

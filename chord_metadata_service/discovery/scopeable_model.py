@@ -37,9 +37,7 @@ class BaseScopeableModel(Model):
 
     @staticmethod
     def _or_lookups(filter_query: str | tuple[str, ...], value) -> Q:
-        # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for, e.g.,
-        # the Resource model, where there are multiple possible paths one can take from the object to the parent
-        # dataset(s).
+        # A tuple holds several paths to the parent dataset(s) (e.g. for Resource), ORed together.
         lookups = filter_query if isinstance(filter_query, tuple) else (filter_query,)
         q = Q()
         for lookup in lookups:
@@ -57,9 +55,8 @@ class BaseScopeableModel(Model):
     @classmethod
     def get_scope_q(cls, scope: ValidatedDiscoveryScope) -> Q | None:
         """
-        Returns the filter which narrows objects of this model to the passed scope, or None for a whole-instance scope.
-        Note that the filter may follow multi-valued relations, so it can yield duplicate rows if used with filter(...)
-        directly; use get_model_scoped_queryset(...) or a pk__in subquery when that matters.
+        Returns the filter for this model's objects in the scope, or None for a whole-instance scope.
+        It may follow multi-valued relations, so use a pk__in subquery to avoid duplicate rows.
         """
         if (key := cls._scope_filter_key(scope)) is None:
             return None
@@ -69,9 +66,8 @@ class BaseScopeableModel(Model):
     @classmethod
     def get_dataset_link_lookups(cls) -> tuple[str, ...]:
         """
-        Returns the lookups (ending in a dataset ID) through which objects of this model can be linked to a dataset.
-        By default, these are the lookups used for dataset scoping; models which can also be linked to a dataset some
-        other way (and so expose that dataset's data when referenced) should override this.
+        Returns the lookups (ending in a dataset ID) which link objects of this model to a dataset.
+        Override this if a model has dataset links other than its dataset scope filter.
         """
         filter_query = cls.get_scope_filters()["dataset"]["filter"]
         return filter_query if isinstance(filter_query, tuple) else (filter_query,)
@@ -79,34 +75,29 @@ class BaseScopeableModel(Model):
     @classmethod
     def get_referenceable_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
         """
-        Returns the objects of this model which a write made under the passed scope may reference or produce: objects
-        inside the scope, plus objects with no dataset link (see get_dataset_link_lookups) pointing outside the scope.
-        The latter covers both objects which are not linked to any dataset yet (e.g., a new individual) and objects
-        only linked to the scope in some other way (e.g., a new biosample of an individual in the scope). An object with
-        any link outside the scope is rejected, since referencing it could expose another dataset's data.
+        Returns the objects which a write under the scope may reference or produce: objects in the scope, plus
+        objects with no dataset link outside it (referencing those could expose another dataset's data).
         """
         if (scope_q := cls.get_scope_q(scope)) is None:
             return cls.objects.all()
-        # Correlated EXISTS subqueries, so each candidate row is checked through index lookups instead of the whole table
-        # being joined for every primary key DRF looks up.
+        # Correlated EXISTS, so each primary key DRF looks up uses index lookups, not a full-table join.
         return cls.objects.filter(
-            Q(Exists(cls.objects.filter(scope_q, pk=OuterRef("pk")))) | cls.get_referenceable_outside_scope_q(scope)
+            Exists(cls.objects.filter(scope_q, pk=OuterRef("pk"))) | cls.get_referenceable_outside_scope_q(scope)
         )
 
     @classmethod
     def get_referenceable_outside_scope_q(cls, scope: ValidatedDiscoveryScope) -> Q:
         """
-        Returns the filter for objects which are not in the passed (non-instance) scope, but which a write under the
-        scope may still reference: those with no dataset link pointing outside the scope. Models can extend this with
-        extra conditions; see get_referenceable_queryset.
+        Returns the filter for objects outside the (non-instance) scope which a write under it may still reference.
+        Models can extend this with extra conditions.
         """
         # Avoid a circular import: chord.models imports the models which subclass this one.
         from chord_metadata_service.chord.models import Dataset
 
         outside_datasets = Dataset.objects.exclude(pk__in=Dataset.get_referenceable_queryset(scope).values("pk"))
-        linked_outside_q = Q()
-        for lookup in cls.get_dataset_link_lookups():
-            linked_outside_q |= Q(**{f"{lookup}__in": outside_datasets.values("pk")})
+        linked_outside_q = cls._or_lookups(
+            tuple(f"{lookup}__in" for lookup in cls.get_dataset_link_lookups()), outside_datasets.values("pk")
+        )
         return ~Q(Exists(cls.objects.filter(linked_outside_q, pk=OuterRef("pk"))))
 
     @classmethod

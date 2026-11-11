@@ -75,6 +75,9 @@ class ScopedWriteTest(AuthzAPITestCase):
             **kwargs,
         }
 
+    def _new_biosample(self, individual_id: str, biosample_id: str = "biosample:new") -> dict:
+        return {**ph_c.valid_biosample_1(individual_id), "id": biosample_id, "individual": individual_id}
+
     # (a) writes into another dataset
 
     def test_create_phenopacket_in_other_dataset_rejected(self):
@@ -177,9 +180,6 @@ class ScopedWriteTest(AuthzAPITestCase):
 
         r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=["biosample:new"]))
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-
-    def _new_biosample(self, individual_id: str, biosample_id: str = "biosample:new") -> dict:
-        return {**ph_c.valid_biosample_1(individual_id), "id": biosample_id, "individual": individual_id}
 
     def test_create_biosample_for_shared_individual(self):
         # An individual with phenopackets in both A and B may get new biosamples under either dataset's scope

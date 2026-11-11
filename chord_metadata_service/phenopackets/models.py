@@ -40,18 +40,14 @@ class MetaData(BaseTimeStamp, ToFTSReprMixin):
 
     @classmethod
     def get_referenceable_queryset(cls, scope: "ValidatedDiscoveryScope") -> models.QuerySet:
-        """
-        MetaData is not scopeable itself; it is scoped by the phenopackets which use it. A write made under the passed
-        scope may reference metadata used by a phenopacket in the scope, or metadata not used by any phenopacket of a
-        dataset outside the scope. See BaseScopeableModel.get_referenceable_queryset.
-        """
+        # MetaData is scoped by its phenopackets: allow it if used in the scope or unused by other datasets.
         if (scope_q := Phenopacket.get_scope_q(scope)) is None:
             return cls.objects.all()
         in_scope_use = Phenopacket.objects.filter(scope_q, meta_data=models.OuterRef("pk"))
         outside_use = Phenopacket.objects.filter(dataset__isnull=False, meta_data=models.OuterRef("pk")).exclude(
             scope_q
         )
-        return cls.objects.filter(models.Q(models.Exists(in_scope_use)) | ~models.Q(models.Exists(outside_use)))
+        return cls.objects.filter(models.Exists(in_scope_use) | ~models.Exists(outside_use))
 
     created_by = models.CharField(
         max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "created_by")
@@ -244,15 +240,12 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
 
     @classmethod
     def get_referenceable_outside_scope_q(cls, scope: "ValidatedDiscoveryScope") -> models.Q:
-        # A biosample outside the scope must also belong to an individual which may be referenced under the scope. The
-        # individual is checked as a whole (rather than listing its phenopackets as dataset links of the biosample), so
-        # a biosample of an individual shared between datasets can still be created under either dataset's scope.
+        # The individual is checked as a whole, so a shared individual's biosample can be created under either
+        # dataset's scope.
         individual_ok = models.Exists(
             Individual.get_referenceable_queryset(scope).filter(pk=models.OuterRef("individual_id"))
         )
-        return super().get_referenceable_outside_scope_q(scope) & (
-            models.Q(individual__isnull=True) | models.Q(individual_ok)
-        )
+        return super().get_referenceable_outside_scope_q(scope) & (models.Q(individual__isnull=True) | individual_ok)
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))
     # if Individual instance is deleted Biosample instance is deleted too

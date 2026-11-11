@@ -79,15 +79,7 @@ class BentoAuthzScopedModelViewSet(
     This class is equivalent to the DRF viewsets.ModelViewSet class, except with our BentoAuthzModelGenericViewSet
     replacing the base viewsets.GenericViewSet. In this way, we get all the scoping / permissions helper functions.
     Security note: Subclasses MUST implement a get_queryset(...) which returns a model-scoped queryset!
-
-    Permissions are evaluated against the scope in the query string, so writes are additionally kept inside it:
-     - Every primary key relation in the request body is narrowed to the objects a write under the request scope may
-       reference (see GenericSerializer.get_fields), so out-of-scope references fail validation.
-     - A created object must end up in scope, or not be linked to any dataset. An updated object (which was in scope
-       to begin with) must stay in scope, so an update cannot move it out or detach it (e.g. by unsetting its dataset).
-     - Validation, the save, and these checks run in one transaction.
-     - The response is built from the object re-fetched through the scoped get_queryset(...), since DRF drops the
-       (scoped) prefetch cache after an update.
+    Writes must also stay inside the request scope, since permissions are only checked against it.
     """
 
     def get_serializer_context(self):
@@ -96,14 +88,15 @@ class BentoAuthzScopedModelViewSet(
             context[WRITE_SCOPE_CONTEXT_KEY] = async_to_sync(get_request_discovery_scope)(self.request)
         return context
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
-        with transaction.atomic():
-            return super().create(request, *args, **kwargs)
+        return super().create(request, *args, **kwargs)
 
+    @transaction.atomic
     def update(self, request, *args, **kwargs):
-        with transaction.atomic():
-            return super().update(request, *args, **kwargs)
+        return super().update(request, *args, **kwargs)
 
+    # DRF drops the (scoped) prefetch cache after a save, so re-fetch through the scoped queryset.
     def _use_scoped_instance_for_response(self, serializer, obj: BaseScopeableModel) -> None:
         if (scoped_obj := self.get_queryset().filter(pk=obj.pk).first()) is not None:
             serializer.instance = scoped_obj

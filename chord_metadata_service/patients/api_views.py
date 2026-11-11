@@ -27,8 +27,8 @@ from chord_metadata_service.discovery.censorship import get_threshold, threshold
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
 from chord_metadata_service.discovery.filtering import discovery_filter_queryset
 from chord_metadata_service.discovery.pydantic_models import DiscoveryQuery
-from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.experiments.models import Experiment
@@ -65,21 +65,14 @@ OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
 
 
 def _scoped_plain_queryset(model: type[BaseScopeableModel], scope: ValidatedDiscoveryScope) -> QuerySet:
-    """
-    Objects of a model in the passed scope, without the DISTINCT / base prefetches of get_model_scoped_queryset(...),
-    for use in Prefetch querysets. The scope filter is applied through a pk__in subquery, since it may follow
-    multi-valued relations (e.g. biosample -> phenopackets) and would otherwise yield duplicate rows.
-    """
+    # Like get_model_scoped_queryset(...) without DISTINCT or prefetches, for use in Prefetch querysets.
     if (scope_q := model.get_scope_q(scope)) is None:
         return model.objects.all()
     return model.objects.filter(pk__in=model.objects.filter(scope_q).values("pk"))
 
 
 def _with_scoped_experiments(scope: ValidatedDiscoveryScope, lookups: Iterable[str], experiments_lookup: str) -> tuple:
-    """
-    Replaces the experiments lookups (under experiments_lookup) in a prefetch lookup list with a single scoped Prefetch,
-    since a biosample in scope can have experiments in other datasets.
-    """
+    # A biosample in scope can have experiments in other datasets, so replace those lookups with a scoped Prefetch.
     experiments = (
         _scoped_plain_queryset(Experiment, scope).select_related("instrument").prefetch_related("experiment_results")
     )
@@ -89,16 +82,11 @@ def _with_scoped_experiments(scope: ValidatedDiscoveryScope, lookups: Iterable[s
     )
 
 
-def scoped_individual_prefetches(
+def _scoped_individual_prefetches(
     scope: ValidatedDiscoveryScope, biosample_prefetch: Iterable[str], phenopacket_prefetch: Iterable[str]
 ) -> tuple[Prefetch, Prefetch]:
-    """
-    Builds prefetches for an individual's biosamples and phenopackets (and their biosamples' experiments) which only
-    include records inside the passed scope. An individual can be shared between datasets, so the nested records must
-    be filtered separately from the individual itself; otherwise, records from other datasets would be included.
-    Any existing unfiltered prefetch of these relations must be cleared first, since Django refuses two different
-    querysets for the same lookup.
-    """
+    # An individual can be shared between datasets, so its nested records need their own scope filter.
+    # Clear any unscoped prefetch of these relations first; Django refuses two querysets for one lookup.
     return (
         Prefetch(
             "biosamples",
@@ -156,12 +144,12 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
         scope = await get_request_discovery_scope(self.request)
         return (
             Individual.get_model_scoped_queryset(scope)
-            .prefetch_related(None)  # drop the unfiltered base prefetches; replaced by the scoped ones below
+            .prefetch_related(None)  # replaced by the scoped prefetches below
             .prefetch_related(
-                *scoped_individual_prefetches(
+                *_scoped_individual_prefetches(
                     scope,
                     BIOSAMPLE_PREFETCH,
-                    tuple(p for p in PHENOPACKET_PREFETCH if p != "subject"),
+                    (p for p in PHENOPACKET_PREFETCH if p != "subject"),
                 )
             )
             .order_by("id")
@@ -278,9 +266,9 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
         queryset = (
             Individual.get_model_scoped_queryset(scope)
-            .prefetch_related(None)  # drop the unfiltered base prefetches; replaced by the scoped ones below
+            .prefetch_related(None)  # replaced by the scoped prefetches below
             .prefetch_related(
-                *scoped_individual_prefetches(
+                *_scoped_individual_prefetches(
                     scope,
                     (*BIOSAMPLE_PREFETCH, *BIOSAMPLE_SELECT_REL),
                     (*PHENOPACKET_PREFETCH, *PHENOPACKET_SELECT_REL),

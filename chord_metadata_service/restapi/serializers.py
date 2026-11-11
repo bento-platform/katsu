@@ -24,10 +24,8 @@ class GenericSerializer(serializers.ModelSerializer):
 
     def get_fields(self):
         """
-        If the serializer context carries a write scope (set by scoped viewsets on create/update; see
-        BentoAuthzScopedModelViewSet), narrow every primary key relation to the objects which a write under that scope
-        may reference. Out-of-scope primary keys then fail validation with DRF's usual "does not exist" error, exactly
-        like non-existent ones. Nested serializers share the root serializer's context, so they are narrowed too.
+        With a write scope in the context, narrow primary key relations to referenceable objects, so out-of-scope
+        keys fail with the same "does not exist" error as missing ones.
         """
         fields = super().get_fields()
 
@@ -38,7 +36,6 @@ class GenericSerializer(serializers.ModelSerializer):
             relation = field.child_relation if isinstance(field, serializers.ManyRelatedField) else field
             if not isinstance(relation, serializers.PrimaryKeyRelatedField) or relation.queryset is None:
                 continue
-            # Models which can carry a dataset's data implement get_referenceable_queryset(scope)
             if (get_referenceable := getattr(relation.queryset.model, "get_referenceable_queryset", None)) is not None:
                 relation.queryset = get_referenceable(scope)
 
