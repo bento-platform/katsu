@@ -430,6 +430,94 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         response = self.one_no_authz_get("/api/batch/experimentresults?format=pcgl_manifest")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
+    def _batch_manifest_request(self, method: str, result: list[list[bool]]):
+        url = "/api/batch/experimentresults"
+        qs = f"?project={self.p.identifier}&dataset={self.d1_id}"
+        if method == "get":
+            return self.authz_eval_request("get", result, f"{url}{qs}&format=pcgl_manifest")
+        return self.authz_eval_request("post", result, f"{url}{qs}", {"format": "pcgl_manifest"}, format="json")
+
+    def test_experiment_result_batch_manifest_permissions(self):
+        # The manifest only needs download:metadata (given by query:data, or granted by e.g. PCGL) on the experiment
+        # data type of the dataset.
+        expected_resource = {"project": str(self.p.identifier), "dataset": self.d1_id, "data_type": "experiment"}
+        for method in ("get", "post"):
+            for result, expected_status in (
+                ([[True]], status.HTTP_200_OK),
+                ([[False]], status.HTTP_403_FORBIDDEN),
+            ):
+                with self.subTest(method=method, result=result):
+                    response, bodies = self._batch_manifest_request(method, result)
+                    self.assertEqual(response.status_code, expected_status)
+                    self.assertEqual(len(bodies), 1)
+                    self.assertEqual(bodies[0]["permissions"], ["download:metadata"])
+                    self.assertEqual(bodies[0]["resources"], [expected_resource])
+
+    def test_experiment_result_batch_other_formats_need_query_data(self):
+        url = "/api/batch/experimentresults"
+        qs = f"?project={self.p.identifier}&dataset={self.d1_id}"
+        for fmt in ("json", "csv", "xlsx"):
+            for method in ("get", "post"):
+                with self.subTest(format=fmt, method=method):
+                    if method == "get":
+                        response, bodies = self.authz_eval_request("get", [[False]], f"{url}{qs}&format={fmt}")
+                    else:
+                        response, bodies = self.authz_eval_request(
+                            "post", [[False]], f"{url}{qs}", {"format": fmt}, format="json"
+                        )
+                    self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+                    self.assertEqual(len(bodies), 1)
+                    self.assertEqual(bodies[0]["permissions"], ["query:data"])
+
+
+class ExperimentResultBatchExternalDatasetIdTest(AuthzAPITestCase):
+    """
+    Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier.
+    """
+
+    study_id = "PCGLST0002"
+
+    def setUp(self) -> None:
+        self.p = Project.objects.create(**VALID_PROJECT_1)
+        schema = KatsuDatasetModel(
+            schema_version="1.0",
+            title="PCGL study",
+            description="Some PCGL study",
+            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
+            project=str(self.p.identifier),
+            identifier=self.study_id,
+        )
+        Dataset.from_schema(schema).save()
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.study_id, logger
+        )
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.study_id, logger
+        )
+
+    def test_manifest_for_study_dataset(self):
+        for qs in (f"dataset={self.study_id}", f"project={self.p.identifier}&dataset={self.study_id}"):
+            with self.subTest(qs=qs):
+                response, bodies = self.authz_eval_request(
+                    "get", [[True]], f"/api/batch/experimentresults?{qs}&format=pcgl_manifest"
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                # project is inferred from the dataset when not specified
+                self.assertEqual(
+                    bodies[0]["resources"],
+                    [{"project": str(self.p.identifier), "dataset": self.study_id, "data_type": "experiment"}],
+                )
+                rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
+                self.assertEqual(len(rows), 5)  # header + 4 experiment results
+                self.assertTrue(all(dict(zip(rows[0], r))["study"] == self.study_id for r in rows[1:]))
+
+    def test_invalid_dataset_ids_rejected(self):
+        for bad_id in ("a\nb", "<script>", "x" * 129):
+            with self.subTest(bad_id=bad_id):
+                response = self.one_authz_get("/api/batch/experimentresults", {"dataset": bad_id})
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertNotIn(bad_id, response.content.decode("utf-8"))
+
 
 class TestExperimentCSVRenderer(TestCase):
     """
