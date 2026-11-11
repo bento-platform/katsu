@@ -8,7 +8,7 @@ from bento_lib.search import build_search_response
 from datetime import datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F, Q
+from django.db.models import Count, F, Prefetch, Q
 from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -26,7 +26,7 @@ from chord_metadata_service.discovery.censorship import get_threshold, threshold
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
 from chord_metadata_service.discovery.filtering import discovery_filter_queryset
 from chord_metadata_service.discovery.pydantic_models import DiscoveryQuery
-from chord_metadata_service.discovery.scope import get_request_discovery_scope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
 from chord_metadata_service.logger import logger
@@ -36,7 +36,7 @@ from chord_metadata_service.phenopackets.api_views import (
     PHENOPACKET_PREFETCH,
     PHENOPACKET_SELECT_REL,
 )
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
@@ -59,6 +59,28 @@ from .models import Individual
 from .serializers import IndividualSerializer
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
+
+
+def scoped_individual_prefetches(
+    scope: ValidatedDiscoveryScope, biosample_prefetch: tuple[str, ...], phenopacket_prefetch: tuple[str, ...]
+) -> tuple[Prefetch, Prefetch]:
+    """
+    Builds prefetches for an individual's biosamples and phenopackets which only include records inside the passed
+    scope. An individual can be shared between datasets, so the nested records must be filtered separately from the
+    individual itself; otherwise, records from other datasets would be included.
+    Any existing unfiltered prefetch of these relations must be cleared first, since Django refuses two different
+    querysets for the same lookup.
+    """
+    return (
+        Prefetch(
+            "biosamples",
+            queryset=Biosample.get_model_scoped_queryset(scope).prefetch_related(*biosample_prefetch),
+        ),
+        Prefetch(
+            "phenopackets",
+            queryset=Phenopacket.get_model_scoped_queryset(scope).prefetch_related(*phenopacket_prefetch),
+        ),
+    )
 
 
 class IndividualViewSet(BentoAuthzScopedModelViewSet):
@@ -102,9 +124,13 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
         scope = await get_request_discovery_scope(self.request)
         return (
             Individual.get_model_scoped_queryset(scope)
+            .prefetch_related(None)  # drop the unfiltered base prefetches; replaced by the scoped ones below
             .prefetch_related(
-                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH if p != "subject"),
+                *scoped_individual_prefetches(
+                    scope,
+                    BIOSAMPLE_PREFETCH,
+                    tuple(p for p in PHENOPACKET_PREFETCH if p != "subject"),
+                )
             )
             .order_by("id")
         )
@@ -220,11 +246,13 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
         queryset = (
             Individual.get_model_scoped_queryset(scope)
+            .prefetch_related(None)  # drop the unfiltered base prefetches; replaced by the scoped ones below
             .prefetch_related(
-                *(f"biosamples__{p}" for p in BIOSAMPLE_PREFETCH),
-                *(f"biosamples__{p}" for p in BIOSAMPLE_SELECT_REL),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_PREFETCH),
-                *(f"phenopackets__{p}" for p in PHENOPACKET_SELECT_REL),
+                *scoped_individual_prefetches(
+                    scope,
+                    (*BIOSAMPLE_PREFETCH, *BIOSAMPLE_SELECT_REL),
+                    (*PHENOPACKET_PREFETCH, *PHENOPACKET_SELECT_REL),
+                )
             )
             .select_related("vital_status")
             .filter(**filter_by_id)

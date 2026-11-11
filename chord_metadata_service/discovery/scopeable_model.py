@@ -35,6 +35,25 @@ class BaseScopeableModel(Model):
         """
         return await self.get_model_scoped_queryset(scope).filter(pk=self.pk).aexists()
 
+    async def belongs_to_any_dataset(self) -> bool:
+        """
+        Returns whether this object falls under the scope of at least one dataset. Objects which do not (e.g., a newly
+        created individual without any phenopackets yet) cannot expose any dataset's data.
+        """
+        filter_query = self.get_scope_filters()["dataset"]["filter"]
+        filters = filter_query if isinstance(filter_query, tuple) else (filter_query,)
+        q = Q()
+        for fq in filters:
+            q |= Q(**{f"{fq}__isnull": False})
+        return await type(self).objects.filter(q, pk=self.pk).aexists()
+
+    async def scope_allows_object(self, scope: ValidatedDiscoveryScope) -> bool:
+        """
+        Returns whether a write made under the passed scope may produce or reference this object: it must either be
+        inside the scope, or not belong to any dataset at all.
+        """
+        return await self.scope_contains_object(scope) or not await self.belongs_to_any_dataset()
+
     @classmethod
     def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
         """
