@@ -60,16 +60,18 @@ def get_field_lookup(field: list[str]) -> str:
     return "__".join(f for f in field if f != "[item]")
 
 
-def validate_field_against_schema(field, schema: dict) -> str | None:
+def validate_field_against_schema(field: object, schema: dict) -> None:
     """
     Checks that a values_list field path (e.g. ['biosamples', '[item]', 'id']) exists in the data type's search
     schema. Since the path is turned into a Django ORM lookup, an unchecked path could follow relations (including
     reverse ones) out of the caller's scope. Only forward paths declared in the schema are allowed.
-    Returns an error message, or None if the field is valid.
+    `field` is typed as object since it comes straight from user-supplied JSON and is checked here.
+    Raises ValueError if the field is invalid.
     """
     if not isinstance(field, list) or not field or not all(isinstance(f, str) for f in field):
-        return "Field must be a non-empty list of strings"
+        raise ValueError("Field must be a non-empty list of strings")
 
+    # TODO: make schemas immutable (e.g. frozendict) - this walk is only safe as long as `node` is only ever read.
     node = schema
     for segment in field:
         if segment == "[item]":
@@ -78,12 +80,10 @@ def validate_field_against_schema(field, schema: dict) -> str | None:
             props = node.get("properties") if node.get("type") == "object" else None
             node = props.get(segment) if isinstance(props, dict) else None
         if not isinstance(node, dict):
-            return f"Invalid field for data type: {field}"
+            raise ValueError(f"Invalid field for data type: {field}")
 
     if field[-1] == "[item]":
-        return f"Invalid field for data type: {field}"
-
-    return None
+        raise ValueError(f"Invalid field for data type: {field}")
 
 
 def get_values_list(queryset: QuerySet, options):
@@ -355,8 +355,10 @@ def get_chord_search_parameters(request, logger: BoundLogger, data_type=None):
 
     output = query_params.get("output", None)
     if output == OUTPUT_FORMAT_VALUES_LIST:
-        if field_err := validate_field_against_schema(field, DATA_TYPES[data_type]["schema"]):
-            return None, field_err
+        try:
+            validate_field_against_schema(field, DATA_TYPES[data_type]["schema"])
+        except ValueError as e:
+            return None, str(e)
 
     return {
         "query": query,
