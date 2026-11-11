@@ -1,6 +1,6 @@
 from __future__ import annotations  # need to use string-based annotations to make the below type-checking imports work
 from abc import abstractmethod
-from django.db.models import Model, Q, QuerySet
+from django.db.models import Exists, Model, OuterRef, Q, QuerySet
 from typing import Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -80,16 +80,27 @@ class BaseScopeableModel(Model):
     def get_referenceable_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
         """
         Returns the objects of this model which a write made under the passed scope may reference or produce: objects
-        inside the scope, plus objects which are not linked to any dataset at all (e.g., a newly created individual
-        without any phenopackets yet), since those cannot expose any dataset's data.
+        inside the scope, plus objects with no dataset link (see get_dataset_link_lookups) pointing outside the scope.
+        The latter covers both objects which are not linked to any dataset yet (e.g., a new individual) and objects
+        only linked to the scope in some other way (e.g., a new biosample of an individual in the scope). An object with
+        any link outside the scope is rejected, since referencing it could expose another dataset's data.
         """
         if (scope_q := cls.get_scope_q(scope)) is None:
             return cls.objects.all()
-        linked_q = Q()
+
+        # Avoid a circular import: chord.models imports the models which subclass this one.
+        from chord_metadata_service.chord.models import Dataset
+
+        outside_datasets = Dataset.objects.exclude(pk__in=Dataset.get_referenceable_queryset(scope).values("pk"))
+        linked_outside_q = Q()
         for lookup in cls.get_dataset_link_lookups():
-            linked_q |= Q(**{f"{lookup}__isnull": False})
+            linked_outside_q |= Q(**{f"{lookup}__in": outside_datasets.values("pk")})
+
+        # Correlated EXISTS subqueries, so each candidate row is checked through index lookups instead of the whole table
+        # being joined for every primary key DRF looks up.
         return cls.objects.filter(
-            Q(pk__in=cls.objects.filter(scope_q).values("pk")) | ~Q(pk__in=cls.objects.filter(linked_q).values("pk"))
+            Q(Exists(cls.objects.filter(scope_q, pk=OuterRef("pk"))))
+            | ~Q(Exists(cls.objects.filter(linked_outside_q, pk=OuterRef("pk"))))
         )
 
     @classmethod

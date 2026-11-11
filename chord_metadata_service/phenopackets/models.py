@@ -42,15 +42,16 @@ class MetaData(BaseTimeStamp, ToFTSReprMixin):
     def get_referenceable_queryset(cls, scope: "ValidatedDiscoveryScope") -> models.QuerySet:
         """
         MetaData is not scopeable itself; it is scoped by the phenopackets which use it. A write made under the passed
-        scope may reference metadata used by a phenopacket in the scope, or metadata not used by any dataset's
-        phenopacket. See BaseScopeableModel.get_referenceable_queryset.
+        scope may reference metadata used by a phenopacket in the scope, or metadata not used by any phenopacket of a
+        dataset outside the scope. See BaseScopeableModel.get_referenceable_queryset.
         """
         if (scope_q := Phenopacket.get_scope_q(scope)) is None:
             return cls.objects.all()
-        return cls.objects.filter(
-            models.Q(pk__in=Phenopacket.objects.filter(scope_q).values("meta_data_id"))
-            | ~models.Q(pk__in=Phenopacket.objects.filter(dataset__isnull=False).values("meta_data_id"))
+        in_scope_use = Phenopacket.objects.filter(scope_q, meta_data=models.OuterRef("pk"))
+        outside_use = Phenopacket.objects.filter(dataset__isnull=False, meta_data=models.OuterRef("pk")).exclude(
+            scope_q
         )
+        return cls.objects.filter(models.Q(models.Exists(in_scope_use)) | ~models.Q(models.Exists(outside_use)))
 
     created_by = models.CharField(
         max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "created_by")

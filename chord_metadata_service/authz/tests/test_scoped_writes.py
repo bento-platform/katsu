@@ -154,7 +154,38 @@ class ScopedWriteTest(AuthzAPITestCase):
         self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(ph_m.Phenopacket.objects.filter(id="pheno:new").exists())
 
+    def test_create_phenopacket_with_biosample_of_shared_individual_linked_outside_rejected(self):
+        # The biosample's individual is shared with dataset A, but the biosample itself is only linked to dataset B (via
+        # an experiment); referencing it from A would pull B's experiment into A.
+        ph_m.Phenopacket.objects.create(id="pheno:b-in-a", subject=self.ind_b, meta_data=self.meta_a, dataset=self.ds_a)
+        bs_x = ph_m.Biosample.objects.create(**{**ph_c.valid_biosample_2(self.ind_b), "id": "biosample_id:x"})
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(bs_x, self.instrument, self.ds_b, num_experiment=3))
+        r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=[bs_x.id]))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+
     # writes which stay in scope are still allowed
+
+    def test_scoped_ingest_order(self):
+        # individual (already in A) -> biosample -> experiment / phenopacket, all under dataset A's scope
+        biosample = {**ph_c.valid_biosample_1(self.ind_a.id), "id": "biosample:new", "individual": self.ind_a.id}
+        r = self.one_authz_post(reverse("biosamples-list") + self.scope_a, json=biosample)
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        r = self.one_authz_patch(
+            reverse("experiments-detail", args=[self.exp_a.id]) + self.scope_a, json={"biosample": "biosample:new"}
+        )
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+
+        r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(biosamples=["biosample:new"]))
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    def test_create_phenopacket_with_subject_linked_only_through_experiments(self):
+        # An individual whose only dataset link is an experiment in A (through a biosample) may be referenced from A
+        ind_c = ph_m.Individual.objects.create(**{**ph_c.VALID_INDIVIDUAL_1, "id": "patient:c"})
+        bs_c = ph_m.Biosample.objects.create(**{**ph_c.valid_biosample_2(ind_c), "id": "biosample_id:c"})
+        ex_m.Experiment.objects.create(**ex_c.valid_experiment(bs_c, self.instrument, self.ds_a, num_experiment=4))
+        r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(subject=ind_c.id))
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
 
     def test_update_phenopacket_with_shared_meta_data(self):
         # Metadata shared with a phenopacket in dataset B is still visible in dataset A, so it may be referenced
