@@ -3,7 +3,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.db.models import JSONField
 from django.contrib.postgres.fields import ArrayField
-from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel, Prefetches
 from chord_metadata_service.discovery.full_text_search import BaseFTSModel, ToFTSReprMixin
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import BaseTimeStamp, IndexableMixin, SchemaType, BaseExtraProperties
@@ -55,6 +55,22 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTS
     @property
     def schema_type(self) -> SchemaType:
         return SchemaType.INDIVIDUAL
+
+    # Relations to eagerly load per output shape; see Prefetches. Keep in sync with what each serializer reads.
+    PREFETCHES_FULL = Prefetches(
+        (
+            # IndividualSerializer
+            "biosamples__phenotypic_features",
+            "biosamples__experiments__experiment_results__experiments",
+            "phenopackets__meta_data__resources",
+            "phenopackets__phenotypic_features",
+            "phenopackets__diseases",
+            "phenopackets__interpretations__diagnosis__genomic_interpretations",
+            "phenopackets__biosamples__phenotypic_features",
+            "phenopackets__biosamples__experiments__experiment_results__experiments",
+        )
+    )
+    PREFETCHES_EXPORT = Prefetches(("phenopackets__diseases",))  # IndividualExportSerializer
 
     @staticmethod
     def get_scope_filters() -> ModelScopeFilters:
