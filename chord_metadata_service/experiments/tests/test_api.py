@@ -475,7 +475,7 @@ class ExperimentResultBatchExternalDatasetIdTest(AuthzAPITestCase):
     Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier.
     """
 
-    study_id = "PCGLST0002"
+    study_id = "STUDY0002"
 
     def setUp(self) -> None:
         self.p = Project.objects.create(**VALID_PROJECT_1)

@@ -404,7 +404,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_external_dataset_id(self):
         # Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier
-        study_id = "PCGLST0002"
+        study_id = "STUDY0002"
         ch_m.Dataset.from_schema(
             KatsuDatasetModel(
                 schema_version="1.0",

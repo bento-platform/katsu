@@ -19,7 +19,7 @@ __all__ = [
     "INSTANCE_SCOPE",
 ]
 
-# Dataset IDs may be UUIDs (created in katsu) or external IDs such as PCGL study IDs (e.g. PCGLST0002).
+# Dataset IDs may be UUIDs (created in katsu) or external IDs such as study IDs (e.g. STUDY0002).
 # The length matches the Dataset.identifier column.
 DATASET_ID_PATTERN = re.compile(r"[A-Za-z0-9._:-]{1,128}")
 

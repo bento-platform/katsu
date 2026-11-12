@@ -103,7 +103,7 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
 
 
 class GetDiscoveryScopeTestCase(ProjectTestCase):
-    study_id = "PCGLST0002"
+    study_id = "STUDY0002"
 
     @classmethod
     def setUpTestData(cls) -> None:
@@ -135,11 +135,11 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
 
     async def test_dataset_id_not_found(self):
         with self.assertRaises(DiscoveryScopeException) as cm_:
-            await get_discovery_scope(None, "PCGLST9999")
-        self.assertIn("PCGLST9999", cm_.exception.message["message"])
+            await get_discovery_scope(None, "STUDY9999")
+        self.assertIn("STUDY9999", cm_.exception.message["message"])
 
     async def test_invalid_dataset_ids(self):
-        for bad_id in ("a\nb", "PCGLST0002\n", "<script>", "a b", "x" * 129):
+        for bad_id in ("a\nb", "STUDY0002\n", "<script>", "a b", "x" * 129):
             with self.subTest(bad_id=bad_id):
                 with self.assertRaises(DiscoveryScopeException) as cm_:
                     await get_discovery_scope(None, bad_id)
