@@ -68,6 +68,15 @@ class Individual(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFTS
             },
         }
 
+    @classmethod
+    def get_dataset_link_lookups(cls) -> tuple[str, ...]:
+        # An individual without phenopackets can still carry a dataset's data through its biosamples.
+        return (
+            "phenopackets__dataset_id",
+            "biosamples__phenopackets__dataset__identifier",
+            "biosamples__experiments__dataset_id",
+        )
+
     def get_project_id(self) -> str | None:
         if not self.phenopackets.count():
             # Need to wait for phenopacket to exist

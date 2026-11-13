@@ -1,6 +1,6 @@
 from __future__ import annotations  # need to use string-based annotations to make the below type-checking imports work
 from abc import abstractmethod
-from django.db.models import Model, Q, QuerySet
+from django.db.models import Exists, Model, OuterRef, Q, QuerySet
 from typing import Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -35,6 +35,71 @@ class BaseScopeableModel(Model):
         """
         return await self.get_model_scoped_queryset(scope).filter(pk=self.pk).aexists()
 
+    @staticmethod
+    def _or_lookups(filter_query: str | tuple[str, ...], value) -> Q:
+        # A tuple holds several paths to the parent dataset(s) (e.g. for Resource), ORed together.
+        lookups = filter_query if isinstance(filter_query, tuple) else (filter_query,)
+        q = Q()
+        for lookup in lookups:
+            q |= Q(**{lookup: value})
+        return q
+
+    @staticmethod
+    def _scope_filter_key(scope: ValidatedDiscoveryScope) -> tuple[PublicScopeFilterKeys, str] | None:
+        if scope.dataset_id:
+            return "dataset", scope.dataset_id
+        elif scope.project_id:
+            return "project", scope.project_id
+        return None  # whole-instance scope
+
+    @classmethod
+    def get_scope_q(cls, scope: ValidatedDiscoveryScope) -> Q | None:
+        """
+        Returns the filter for this model's objects in the scope, or None for a whole-instance scope.
+        It may follow multi-valued relations, so use a pk__in subquery to avoid duplicate rows.
+        """
+        if (key := cls._scope_filter_key(scope)) is None:
+            return None
+        filter_scope, value = key
+        return cls._or_lookups(cls.get_scope_filters()[filter_scope]["filter"], value)
+
+    @classmethod
+    def get_dataset_link_lookups(cls) -> tuple[str, ...]:
+        """
+        Returns the lookups (ending in a dataset ID) which link objects of this model to a dataset.
+        Override this if a model has dataset links other than its dataset scope filter.
+        """
+        filter_query = cls.get_scope_filters()["dataset"]["filter"]
+        return filter_query if isinstance(filter_query, tuple) else (filter_query,)
+
+    @classmethod
+    def get_referenceable_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
+        """
+        Returns the objects which a write under the scope may reference or produce: objects in the scope, plus
+        objects with no dataset link outside it (referencing those could expose another dataset's data).
+        """
+        if (scope_q := cls.get_scope_q(scope)) is None:
+            return cls.objects.all()
+        # Correlated EXISTS, so each primary key DRF looks up uses index lookups, not a full-table join.
+        return cls.objects.filter(
+            Exists(cls.objects.filter(scope_q, pk=OuterRef("pk"))) | cls.get_referenceable_outside_scope_q(scope)
+        )
+
+    @classmethod
+    def get_referenceable_outside_scope_q(cls, scope: ValidatedDiscoveryScope) -> Q:
+        """
+        Returns the filter for objects outside the (non-instance) scope which a write under it may still reference.
+        Models can extend this with extra conditions.
+        """
+        # Avoid a circular import: chord.models imports the models which subclass this one.
+        from chord_metadata_service.chord.models import Dataset
+
+        outside_datasets = Dataset.objects.exclude(pk__in=Dataset.get_referenceable_queryset(scope).values("pk"))
+        linked_outside_q = cls._or_lookups(
+            tuple(f"{lookup}__in" for lookup in cls.get_dataset_link_lookups()), outside_datasets.values("pk")
+        )
+        return ~Q(Exists(cls.objects.filter(linked_outside_q, pk=OuterRef("pk"))))
+
     @classmethod
     def get_model_scoped_queryset(cls, scope: ValidatedDiscoveryScope) -> QuerySet:
         """
@@ -46,16 +111,10 @@ class BaseScopeableModel(Model):
 
         base_prefetch_related = class_scope_filters_and_prefetches["base_prefetch_related"]
 
-        filter_scope: PublicScopeFilterKeys
-        if scope.dataset_id:
-            filter_scope = "dataset"
-            value = scope.dataset_id
-        elif scope.project_id and not scope.dataset_id:
-            filter_scope = "project"
-            value = scope.project_id
-        else:
+        if (key := cls._scope_filter_key(scope)) is None:
             return cls.objects.distinct().prefetch_related(*base_prefetch_related)
 
+        filter_scope, value = key
         scope_filter_spec = class_scope_filters_and_prefetches[filter_scope]
 
         prefetch = (
@@ -63,18 +122,7 @@ class BaseScopeableModel(Model):
             *(p for p in scope_filter_spec.get("prefetch_related", ()) if p not in base_prefetch_related),
         )
 
-        filter_query = scope_filter_spec["filter"]
-        if isinstance(filter_query, tuple):
-            # If filter is a tuple, the field contains multiple filters that are ORed together. This is useful for,
-            # e.g., the Resource model, where there are multiple possible paths one can take from the object to the
-            # parent dataset(s).
-            obj_q = Q(**{filter_query[0]: value})
-            for fq in filter_query[1:]:
-                obj_q = obj_q | Q(**{fq: value})
-        else:
-            # Just one filter to get the scoped queryset
-            obj_q = Q(**{filter_query: value})
-
+        obj_q = cls._or_lookups(scope_filter_spec["filter"], value)
         return cls.objects.distinct().prefetch_related(*prefetch).filter(obj_q)
 
 
