@@ -456,7 +456,7 @@ class TestExperimentCSVRenderer(TestCase):
         ]
 
     def test_csv_headers(self):
-        response = self.renderer.render(self.data)
+        response = self.renderer.render_response(self.data)
         csv_content = response.content.decode()
         csv_file = io.StringIO(csv_content)
         reader = csv.DictReader(csv_file)
@@ -493,7 +493,7 @@ class TestExperimentCSVRenderer(TestCase):
                 "biosample_individual": {"id": "individual_id3"},
             }
         ]
-        response = self.renderer.render(data_with_missing_fields)
+        response = self.renderer.render_response(data_with_missing_fields)
         csv_content = response.content.decode()
         csv_file = io.StringIO(csv_content)
         reader = csv.DictReader(csv_file)
@@ -502,7 +502,7 @@ class TestExperimentCSVRenderer(TestCase):
 
     def test_csv_render_with_empty_data(self):
         data_empty = [{}]
-        response = self.renderer.render(data_empty)
+        response = self.renderer.render_response(data_empty)
         csv_content = response.content.decode()
         csv_file = io.StringIO(csv_content)
         reader = csv.DictReader(csv_file)
@@ -528,7 +528,7 @@ class TestExperimentResultPcglManifestTSVRenderer(TestCase):
         }]
 
     def test_manifest_headers_and_order(self):
-        response = self.renderer.render(self.data)
+        response = self.renderer.render_response(self.data)
         self.assertEqual(response["Content-Type"], "text/tab-separated-values")
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
         self.assertEqual(
@@ -552,7 +552,7 @@ class TestExperimentResultPcglManifestTSVRenderer(TestCase):
     def test_manifest_render_with_missing_fields(self):
         # No extra_properties/dataset at all - every unmappable column should still be present, just blank.
         data_with_missing_fields = [{"identifier": "obj-uuid-2", "file_format": "CRAM", "filename": "x.cram"}]
-        response = self.renderer.render(data_with_missing_fields)
+        response = self.renderer.render_response(data_with_missing_fields)
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
         row = dict(zip(rows[0], rows[1]))
         self.assertEqual(row["fileSize"], "")
@@ -560,7 +560,7 @@ class TestExperimentResultPcglManifestTSVRenderer(TestCase):
         self.assertEqual(row["study"], "")
 
     def test_manifest_render_with_empty_data(self):
-        response = self.renderer.render([])
+        response = self.renderer.render_response([])
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
         self.assertEqual(len(rows), 1)  # header only
 

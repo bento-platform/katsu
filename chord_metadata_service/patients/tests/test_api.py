@@ -422,12 +422,6 @@ class IndividualWithPhenopacketSearchTest(TestWithTwoIndividuals):
         self.assertEqual(post_resp.status_code, status.HTTP_403_FORBIDDEN)
 
 
-# Note: the next five tests use the same setUp method. Initially they were
-# all combined in the same class. But this caused bugs with regard to unavailable
-# postgre cursor in the call to `setUp()` after the first invocation for undetermined reasons.
-# One hypothesis is that using POST requests without actually
-# adding data to the database creates unexpected behaviour with one of the
-# libraries used  during the testing (?) maybe at teardown time.
 class BatchIndividualsCSVTest(TestWithTwoIndividuals):
     """Test for getting a batch of individuals as csv."""
 
