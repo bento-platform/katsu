@@ -105,7 +105,7 @@ async def data_type_list(request: DrfRequest):
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        # Does not exist, or a UUID validation error - used to be triggered later but scope validation does some of the
+        # Does not exist, or an ID validation error - used to be triggered later but scope validation does some of the
         # Django validation for us.
         return not_found_response(e.message)
 
@@ -135,7 +135,7 @@ async def data_type_detail(request: DrfRequest, data_type: str):
     try:
         discovery_scope = await get_request_discovery_scope(request)
     except DiscoveryScopeException as e:
-        # Does not exist, or a UUID validation error - used to be triggered later but scope validation does some of the
+        # Does not exist, or an ID validation error - used to be triggered later but scope validation does some of the
         # Django validation for us.
         return not_found_response(e.message)
 

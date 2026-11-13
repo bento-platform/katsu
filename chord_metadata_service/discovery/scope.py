@@ -1,3 +1,4 @@
+import re
 import uuid
 
 from bento_lib.auth.resources import build_resource
@@ -8,6 +9,7 @@ from django.http import HttpRequest
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.chord import models as cm
+from chord_metadata_service.chord.dataset_schema import DATASET_ID_REGEX
 
 from .exceptions import DiscoveryScopeException
 
@@ -17,6 +19,8 @@ __all__ = [
     "get_request_discovery_scope",
     "INSTANCE_SCOPE",
 ]
+
+DATASET_ID_PATTERN = re.compile(DATASET_ID_REGEX)
 
 
 class ValidatedDiscoveryScope:
@@ -128,14 +132,15 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
     project: cm.Project | None = None
     dataset: cm.Dataset | None = None
 
+    # We don't want to facilitate log injection, so invalid IDs are replaced with placeholders in the exception.
     try:
         if project_id:
             uuid.UUID(project_id)
-        if dataset_id:
-            uuid.UUID(dataset_id)
     except ValueError:
-        # We don't want to facilitate log injection, so replace the true values with placeholders
-        raise DiscoveryScopeException("<not UUID>", "<not UUID>")
+        raise DiscoveryScopeException("<invalid ID>", "<invalid ID>")
+
+    if dataset_id and not DATASET_ID_PATTERN.fullmatch(dataset_id):
+        raise DiscoveryScopeException("<invalid ID>", "<invalid ID>")
 
     try:
         if dataset_id:
@@ -152,7 +157,7 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
             project = await _get_project_by_id(project_id)
 
     except ObjectDoesNotExist:
-        # We've already checked these are UUIDs, so they're fine to log
+        # We've already validated these IDs (UUID project ID, safe-charset dataset ID), so they're fine to log
         raise DiscoveryScopeException(dataset_id, project_id)
 
     return ValidatedDiscoveryScope(project=project, dataset=dataset)

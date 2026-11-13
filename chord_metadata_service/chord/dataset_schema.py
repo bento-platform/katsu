@@ -1,7 +1,14 @@
-__all__ = ["LinkedFieldSet", "KatsuDatasetModel"]
+__all__ = ["DATASET_ID_REGEX", "LinkedFieldSet", "KatsuDatasetModel"]
 
 from pydantic import BaseModel, Field
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+
+# Dataset IDs may be UUIDs (created in katsu) or external IDs such as PCGL study IDs (e.g. STUDY0002).
+# Restricted to a safe charset so IDs can be used in URLs and logged; length (1-128) matches Dataset.identifier.
+# Letters, digits, "_" and "-" only, starting with a letter or digit. In particular:
+#  - no ":", which separates the IDs in "<project id>:<dataset id>" workflow inputs (see chord/workflows/wdls);
+#  - no ".", which separates the format suffix in API routes (/api/datasets/<id>.json).
+DATASET_ID_REGEX = r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}"
 
 
 class LinkedFieldSet(BaseModel):
@@ -28,6 +35,8 @@ class LinkedFieldSet(BaseModel):
 
 class KatsuDatasetModel(ProjectScopedDatasetModel):
     """ProjectScopedDatasetModel extended with Katsu-internal fields."""
+
+    identifier: str = Field(min_length=1, max_length=128, pattern=rf"^{DATASET_ID_REGEX}$")
 
     linked_field_sets: list[LinkedFieldSet] = Field(
         default_factory=list,

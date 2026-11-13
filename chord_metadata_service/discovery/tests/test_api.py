@@ -258,6 +258,15 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             "experiment": 0,
         }
 
+        # full overview counts for a scope without any data
+        self.overview_counts_empty: dict[str, int] = {
+            "phenopacket": 0,
+            "individual": 0,
+            "biosample": 0,
+            "experiment": 0,
+            "experiment_result": 0,
+        }
+
     def assert_counts_censored(self, overview_response: dict, discovery: DiscoveryConfig, dts: dict[str, int]):
         count_threshold = discovery.rules.count_threshold
         for data_type in dts.keys():
@@ -326,8 +335,12 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             # --- INVALID ---
             # invalid UUID for project (not found; IDs are not of this format)
             ("?project=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
-            # invalid UUID for dataset (not found; IDs are not of this format)
+            # dataset ID with a valid format which does not exist
             ("?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
+            # invalid dataset IDs, rejected without echoing the value
+            ("?dataset=a%0Ab", status.HTTP_404_NOT_FOUND, None, None),
+            ("?dataset=%3Cscript%3E", status.HTTP_404_NOT_FOUND, None, None),
+            (f"?dataset={'x' * 129}", status.HTTP_404_NOT_FOUND, None, None),
         ]
 
         for i, params in enumerate(subtest_params):
@@ -387,6 +400,35 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     self.assertIsInstance(res_json, dict)
                     self.assert_counts_not_censored(res_json, dts)
                     self.assert_scoped_fields(res_json, discovery)  # should have all fields, even ones with 0-counts
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_overview_external_dataset_id(self):
+        # Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier
+        study_id = "STUDY0002"
+        ch_m.Dataset.from_schema(
+            KatsuDatasetModel(
+                schema_version="1.0",
+                title="PCGL study",
+                description="Some PCGL study",
+                primary_contact=ch_c.VALID_DATASET_PRIMARY_CONTACT,
+                project=str(self.id_proj_a),
+                identifier=study_id,
+            )
+        ).save()
+
+        # No data, so discovery is empty
+        for qp in (f"?dataset={study_id}", f"?project={self.id_proj_a}&dataset={study_id}"):
+            with self.subTest(qp=qp):
+                res = self.dt_authz_counts_get(f"{self.url}{qp}")
+                self.assertEqual(res.status_code, status.HTTP_200_OK)
+                self.assertDictEqual(res.json()["counts"], self.overview_counts_empty)
+
+    def test_overview_invalid_dataset_id_not_echoed(self):
+        for bad_id, qp in (("<script>", "%3Cscript%3E"), ("a\nb", "a%0Ab")):
+            with self.subTest(bad_id=bad_id):
+                res = self.dt_authz_counts_get(f"{self.url}?dataset={qp}")
+                self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+                self.assertNotIn(bad_id, res.content.decode("utf-8"))
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_project_dataset(self):

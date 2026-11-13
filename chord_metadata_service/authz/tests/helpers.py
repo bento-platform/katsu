@@ -1,9 +1,10 @@
 import json
-from typing import ClassVar, Literal
+from typing import Any, ClassVar, Literal
 
 from aioresponses import aioresponses
 from bento_lib.auth.types import EvaluationResultMatrix
 from rest_framework.test import APITransactionTestCase
+from yarl import URL
 
 from ..types import DataPermissions
 
@@ -15,6 +16,8 @@ __all__ = [
 
 
 DTAccessLevel = Literal["none", "bool", "counts", "full"]
+
+AUTHZ_EVALUATE_URL = "http://authz.local/policy/evaluate"
 
 
 class AuthzAPITestCase(APITransactionTestCase):
@@ -35,11 +38,31 @@ class AuthzAPITestCase(APITransactionTestCase):
 
     @staticmethod
     def mock_authz_eval_one_result(m: aioresponses, result: bool):
-        m.post("http://authz.local/policy/evaluate", payload={"result": [[result]]})
+        m.post(AUTHZ_EVALUATE_URL, payload={"result": [[result]]})
 
     @staticmethod
     def mock_authz_eval_result(m: aioresponses, result: EvaluationResultMatrix | list[list[bool]]):
-        m.post("http://authz.local/policy/evaluate", payload={"result": result})
+        m.post(AUTHZ_EVALUATE_URL, payload={"result": result})
+
+    def authz_eval_request(
+        self,
+        method: Literal["get", "post"],
+        result: list[list[bool]],
+        url: str,
+        *args,
+        **kwargs,
+    ) -> tuple[Any, list[dict]]:
+        """
+        Mocks one authorization evaluation response with the given result matrix and executes a request.
+        Returns the response and the (JSON-normalized) bodies of the evaluation requests sent to the authz service.
+        """
+        if method == "post" and "format" not in kwargs:
+            kwargs["content_type"] = "application/json"
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, result)
+            res = getattr(self.client, method)(url, *args, **kwargs)
+        calls = m.requests.get(("POST", URL(AUTHZ_EVALUATE_URL)), [])
+        return res, [json.loads(json.dumps(c.kwargs["json"])) for c in calls]
 
     # ------------------------------------------------------------------------------------------------------------------
 
