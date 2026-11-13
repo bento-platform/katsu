@@ -9,6 +9,7 @@ from django.http import HttpRequest
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.chord import models as cm
+from chord_metadata_service.chord.dataset_schema import DATASET_ID_REGEX
 
 from .exceptions import DiscoveryScopeException
 
@@ -19,9 +20,7 @@ __all__ = [
     "INSTANCE_SCOPE",
 ]
 
-# Dataset IDs may be UUIDs (created in katsu) or external IDs such as study IDs (e.g. STUDY0002).
-# The length matches the Dataset.identifier column.
-DATASET_ID_PATTERN = re.compile(r"[A-Za-z0-9._:-]{1,128}")
+DATASET_ID_PATTERN = re.compile(DATASET_ID_REGEX)
 
 
 class ValidatedDiscoveryScope:
