@@ -1,9 +1,12 @@
 import json
+import socket
 from typing import ClassVar, Literal
+from unittest.mock import patch
 
+from aiohttp.abc import AbstractResolver
 from aioresponses import aioresponses
 from bento_lib.auth.types import EvaluationResultMatrix
-from rest_framework.test import APITransactionTestCase
+from rest_framework.test import APITestCase
 
 from ..types import DataPermissions
 
@@ -17,7 +20,18 @@ __all__ = [
 DTAccessLevel = Literal["none", "bool", "counts", "full"]
 
 
-class AuthzAPITestCase(APITransactionTestCase):
+class _NoNetworkResolver(AbstractResolver):
+    def __init__(self, *args, **kwargs):
+        pass
+
+    async def resolve(self, host, port=0, family=socket.AF_INET):
+        raise OSError(f"network access is blocked in tests (tried to resolve {host})")
+
+    async def close(self):
+        pass
+
+
+class AuthzAPITestCase(APITestCase):
     # data type permissions: bool, counts, data
     dt_none_eval_res: ClassVar[list[list[bool]]] = [[False, False, False]]
     dt_bool_eval_res: ClassVar[list[list[bool]]] = [[True, False, False]]
@@ -30,6 +44,15 @@ class AuthzAPITestCase(APITransactionTestCase):
         "counts": dt_counts_eval_res,
         "full": dt_full_eval_res,
     }
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # Make any HTTP call a test does not mock fail at once, instead of waiting on a real authz.local DNS lookup
+        # (8s per call inside the dev container). aioresponses() mocks run before DNS, so they are not affected.
+        patcher = patch("aiohttp.connector.DefaultResolver", _NoNetworkResolver)
+        patcher.start()
+        cls.addClassCleanup(patcher.stop)
 
     # ------------------------------------------------------------------------------------------------------------------
 
