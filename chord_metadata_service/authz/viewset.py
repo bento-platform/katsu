@@ -110,6 +110,7 @@ class BentoAuthzScopedModelViewSet(
 
     def perform_update(self, serializer):
         obj = serializer.save()
-        if not async_to_sync(self.obj_is_in_request_scope)(self.request, obj):
+        scope = serializer.context[WRITE_SCOPE_CONTEXT_KEY]
+        if not type(obj).get_model_scoped_queryset(scope).filter(pk=obj.pk).exists():
             raise PermissionDenied("Object would be outside of the authorized scope")  # rolls back the transaction
         self._use_scoped_instance_for_response(serializer, obj)
