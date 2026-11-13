@@ -131,7 +131,7 @@ class PassThruCSVRenderer(BaseRenderer):
     format = "csv"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        return HttpResponse(data, content_type="text/csv")  # CSV should already be rendered as bytes here
+        return data  # CSV should already be rendered as bytes here
 
 
 XLSX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -148,7 +148,7 @@ class PassThruXLSXRenderer(BaseRenderer):
     charset = None  # binary format - avoid DRF appending "; charset=utf-8" to the Content-Type header
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        return HttpResponse(data, content_type=XLSX_MEDIA_TYPE)  # XLSX should already be rendered as bytes here
+        return data  # XLSX should already be rendered as bytes here
 
 
 class PassThruTSVManifestRenderer(BaseRenderer):
@@ -161,7 +161,7 @@ class PassThruTSVManifestRenderer(BaseRenderer):
     format = "pcgl_manifest"
 
     def render(self, data, accepted_media_type=None, renderer_context=None):
-        return HttpResponse(data, content_type=self.media_type)  # TSV should already be rendered as bytes here
+        return data  # TSV should already be rendered as bytes here
 
 
 @dataclass(frozen=True)
@@ -234,6 +234,10 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
     # place a column is named.
     field_registry: ClassVar[dict[str, FieldSpec]]
 
+    # set by the format/entity subclasses; used by render_response()
+    file_name: str
+    media_type: str
+
     @staticmethod
     @abstractmethod
     def get_model_serializer() -> type[GenericSerializer]:
@@ -264,15 +268,26 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
     def get_dicts(self, data, columns: list[str]) -> list[dict[str, str]]:
         return [{key: self.field_registry[key].getter(row) for key in columns} for row in data]
 
-    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
+    def _render_bytes(self, rows: list[dict[str, str]], columns: list[str]) -> bytes:
         """Subclasses turn selected rows/columns into the actual format-specific response body."""
         raise NotImplementedError
 
-    def render(self, data, accepted_media_type=None, renderer_context=None):
+    def render_response(self, data, renderer_context=None) -> HttpResponse:
+        """
+        Renders data as a downloadable file response, for views that return the export directly instead of through a
+        DRF Response (see discovery_matches).
+        """
+        response = HttpResponse(self.render(data, renderer_context=renderer_context), content_type=self.media_type)
+        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
+        return response
+
+    def render(self, data, accepted_media_type=None, renderer_context=None) -> bytes:
+        # Returns bytes, not an HttpResponse: DRF would close a returned HttpResponse mid-request, which fires
+        # request_finished and closes the request's DB connection.
         columns = self.get_columns(renderer_context)
 
         if not data:
-            return self._build_response([], columns)
+            return self._render_bytes([], columns)
 
         response_obj = renderer_context.get("response") if renderer_context else None
         if response_obj is not None and response_obj.status_code != status.HTTP_200_OK:
@@ -280,9 +295,7 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
             # has no "response" - see discovery_matches, which never hits this branch: it only reaches render() on
             # the success path, errors having already been returned earlier) or via a DRF Response's own rendering
             # (renderer_context["response"] is that same Response, headers already fixed to the export content type
-            # by finalize_response before render() runs) - so we mutate its Content-Type in place and hand back raw
-            # bytes for DRF to assign as the body, rather than building a whole separate HttpResponse that DRF
-            # would just discard the headers of.
+            # by finalize_response before render() runs) - so we mutate its Content-Type in place.
             response_obj["Content-Type"] = "application/json; charset=utf-8"
             return json.dumps(data).encode("utf-8")
 
@@ -291,7 +304,7 @@ class FieldRegistryRenderer(metaclass=ABCMeta):
         if isinstance(data, dict):
             data = data["results"]
 
-        return self._build_response(self.get_dicts(data, columns), columns)
+        return self._render_bytes(self.get_dicts(data, columns), columns)
 
 
 class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
@@ -306,17 +319,15 @@ class KatsuCSVRenderer(FieldRegistryRenderer, JSONRenderer, metaclass=ABCMeta):
         """Header text for a column key - override to bypass the default snake_case -> Title Case transform."""
         return _column_label(key)
 
-    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
+    def _render_bytes(self, rows: list[dict[str, str]], columns: list[str]) -> bytes:
         headers = {key: self.column_label(key) for key in columns}
 
-        response = HttpResponse(content_type=self.media_type)
-        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
-
-        dict_writer = csv.DictWriter(response, fieldnames=columns, delimiter=self.delimiter)
+        buf = io.StringIO()
+        dict_writer = csv.DictWriter(buf, fieldnames=columns, delimiter=self.delimiter)
         dict_writer.writerow(headers)
         dict_writer.writerows(rows)
 
-        return response
+        return buf.getvalue().encode("utf-8")
 
 
 class KatsuTSVRenderer(KatsuCSVRenderer, metaclass=ABCMeta):
@@ -349,7 +360,7 @@ class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
     file_name: str = "data.xlsx"
     sheet_name: str = "Export"
 
-    def _build_response(self, rows: list[dict[str, str]], columns: list[str]):
+    def _render_bytes(self, rows: list[dict[str, str]], columns: list[str]) -> bytes:
         wb = Workbook()
         ws = wb.active
         ws.title = self.sheet_name
@@ -359,10 +370,7 @@ class KatsuXLSXRenderer(FieldRegistryRenderer, BaseRenderer, metaclass=ABCMeta):
 
         buf = io.BytesIO()
         wb.save(buf)
-
-        response = HttpResponse(buf.getvalue(), content_type=XLSX_MEDIA_TYPE)
-        response["Content-Disposition"] = f"attachment; filename='{self.file_name}'"
-        return response
+        return buf.getvalue()
 
 
 def csv_fields_error_response(request, renderer_cls: type["KatsuCSVRenderer"]) -> Response | None:

@@ -848,7 +848,7 @@ async def discovery_matches(
         @sync_to_async
         def _get_export():
             renderer = export_renderer_cls()
-            return renderer.render(
+            return renderer.render_response(
                 renderer.get_model_serializer()(matches_page, many=True).data,
                 renderer_context={"request": request},
             )
