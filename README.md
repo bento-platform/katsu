@@ -233,10 +233,10 @@ Run all tests and linting checks for the whole project:
 tox
 ```
 
-Run all tests for the whole project:
+Run all tests for the whole project, split across one worker process per CPU core:
 
 ```bash
-python manage.py test
+python manage.py test --parallel
 ```
 
 Run tests for an individual app, e.g.:

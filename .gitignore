@@ -33,6 +33,7 @@ CLAUDE.md
 
 # coverage
 .coverage
+.coverage.*
 htmlcov/
 
 # docs build
