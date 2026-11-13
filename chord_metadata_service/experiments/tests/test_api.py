@@ -456,18 +456,54 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
     def test_experiment_result_batch_other_formats_need_query_data(self):
         url = "/api/batch/experimentresults"
         qs = f"?project={self.p.identifier}&dataset={self.d1_id}"
-        for fmt in ("json", "phenopackets", "csv", "xlsx"):
+        # None: no format requested at all (default renderer), which is what most clients send
+        for fmt in (None, "json", "phenopackets", "csv", "xlsx"):
             for method in ("get", "post"):
                 with self.subTest(format=fmt, method=method):
                     if method == "get":
-                        response, bodies = self.authz_eval_request("get", [[False]], f"{url}{qs}&format={fmt}")
+                        fmt_qs = f"&format={fmt}" if fmt else ""
+                        response, bodies = self.authz_eval_request("get", [[False]], f"{url}{qs}{fmt_qs}")
                     else:
-                        response, bodies = self.authz_eval_request(
-                            "post", [[False]], f"{url}{qs}", {"format": fmt}, format="json"
-                        )
+                        body = {"format": fmt} if fmt else {}
+                        response, bodies = self.authz_eval_request("post", [[False]], f"{url}{qs}", body, format="json")
                     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
                     self.assertEqual(len(bodies), 1)
                     self.assertEqual(bodies[0]["permissions"], ["query:data"])
+
+    def test_experiment_result_batch_conflicting_formats(self):
+        # The format can be given in both the query string and the POST body. Whichever one content negotiation picks
+        # (the body) must decide both the permission and the response, so that download:metadata can never authorize
+        # anything other than the manifest.
+        url = f"/api/batch/experimentresults?project={self.p.identifier}&dataset={self.d1_id}"
+
+        # manifest in the query string but JSON in the body: the response would be JSON, so query:data is needed
+        response, bodies = self.authz_eval_request(
+            "post", [[False]], f"{url}&format=pcgl_manifest", {"format": "json"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(bodies), 1)
+        self.assertEqual(bodies[0]["permissions"], ["query:data"])
+
+        # JSON in the query string but manifest in the body: download:metadata is enough, and we get the manifest
+        response, bodies = self.authz_eval_request(
+            "post", [[True]], f"{url}&format=json", {"format": "pcgl_manifest"}, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(bodies), 1)
+        self.assertEqual(bodies[0]["permissions"], ["download:metadata"])
+        self.assertTrue(response["Content-Type"].startswith("text/tab-separated-values"))
+        rows = list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
+        self.assertEqual(rows[0], list(ExperimentResultPcglManifestTSVRenderer.field_registry))
+        self.assertEqual(len(rows), 5)  # header + 4 experiment results
+
+    def test_experiment_result_export_fields_manifest_format_needs_query_data(self):
+        # download:metadata only applies to listing results as a manifest, not to the viewset's other actions
+        response, bodies = self.authz_eval_request(
+            "get", [[False]], "/api/batch/experimentresults/export_fields?format=pcgl_manifest"
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(len(bodies), 1)
+        self.assertEqual(bodies[0]["permissions"], ["query:data"])
 
     def test_experiment_result_batch_manifest_accept_header(self):
         # manifest renderer selected via content negotiation (no format param) still only needs download:metadata

@@ -119,6 +119,7 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
         )
         cls.study_dataset = cm.Dataset.from_schema(schema)
         cls.study_dataset.save()
+        cls.other_project = cm.Project.objects.create(title="Project 2", description="")
 
     async def test_uuid_dataset_id(self):
         scope = await get_discovery_scope(None, str(self.dataset.identifier))
@@ -154,6 +155,21 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
                     await get_discovery_scope(bad_id, None)
                 self.assertNotIn(bad_id, cm_.exception.message["message"])
 
+    async def test_dataset_id_charset(self):
+        # No "." (format suffix separator in API routes), no ":" ("<project id>:<dataset id>" separator in workflow
+        # inputs), and IDs must start with a letter or digit (see DATASET_ID_REGEX)
+        for bad_id in ("PCGL.STUDY1", "proj:STUDY1", "-x", "_a"):
+            with self.subTest(bad_id=bad_id):
+                with self.assertRaises(DiscoveryScopeException) as cm_:
+                    await get_discovery_scope(None, bad_id)
+                self.assertIn("<invalid ID>", cm_.exception.message["message"])
+
     async def test_nonexistent_project_id(self):
         with self.assertRaises(DiscoveryScopeException):
             await get_discovery_scope(str(uuid.uuid4()), self.study_id)
+
+    async def test_dataset_in_another_project(self):
+        # An existing dataset must not resolve under an existing project it does not belong to; otherwise, grants on
+        # that project would apply to the dataset.
+        with self.assertRaises(DiscoveryScopeException):
+            await get_discovery_scope(str(self.other_project.identifier), self.study_id)

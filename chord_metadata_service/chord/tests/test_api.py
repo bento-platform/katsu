@@ -309,9 +309,39 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
         self.assertEqual(r.json()["identifier"], "STUDY0002")
 
+    def test_external_identifier_round_trip(self):
+        # A dataset must stay addressable by its external ID after creation (the ETL creates a study, then reads,
+        # updates and deletes it), including IDs using the punctuation DATASET_ID_REGEX allows.
+        study_id = "PCGL-STUDY_1-v2"
+
+        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"], identifier=study_id))
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+        r = self.one_authz_get(f"/api/datasets/{study_id}")
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(r.json()["identifier"], study_id)
+
+        r = self.one_authz_patch(f"/api/datasets/{study_id}", json={"title": "Renamed study"})
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertEqual(Dataset.objects.get(identifier=study_id).title, "Renamed study")
+
+        r = self.one_authz_delete(f"/api/datasets/{study_id}")
+        self.assertEqual(r.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Dataset.objects.filter(identifier=study_id).exists())
+
     def test_create_dataset_invalid_identifier(self):
         # identifiers must be usable as discovery scope IDs (safe charset, see DATASET_ID_REGEX)
-        for bad_id in ("STUDY 0002", "PCGL/STUDY1", "\u00e9tude1", "a\nb", "x" * 129):
+        for bad_id in (
+            "STUDY 0002",
+            "PCGL/STUDY1",
+            "\u00e9tude1",
+            "a\nb",
+            "STUDY0002\n",
+            "PCGL.STUDY1",  # "." is the format suffix separator in API routes
+            "proj:STUDY1",  # ":" is the separator in "<project id>:<dataset id>" workflow inputs
+            "-x",
+            "x" * 129,
+        ):
             with self.subTest(bad_id=bad_id):
                 r = self.one_authz_post(
                     "/api/datasets", json=valid_dataset(self.project["identifier"], identifier=bad_id)

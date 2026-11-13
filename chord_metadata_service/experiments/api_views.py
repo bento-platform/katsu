@@ -210,9 +210,8 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
             # Here, "create" maps to the data query permission because we use create(..) (i.e., POST) as a way to run a
             # query with a large body.
             # TODO: distant future: replace with HTTP QUERY verb.
-            if (
-                self.action in ("list", "create")
-                and request.accepted_renderer.format == ExperimentResultPcglManifestTSVRenderer.format
+            if self.action in ("list", "create") and isinstance(
+                request.accepted_renderer, ExperimentResultPcglManifestTSVRenderer
             ):
                 # The file manifest only needs download:metadata, which may also be granted by an external authorization
                 # service (e.g., PCGL). query:data gives download:metadata, so users with data access keep the manifest.
