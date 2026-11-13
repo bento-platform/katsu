@@ -456,7 +456,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
     def test_experiment_result_batch_other_formats_need_query_data(self):
         url = "/api/batch/experimentresults"
         qs = f"?project={self.p.identifier}&dataset={self.d1_id}"
-        for fmt in ("json", "csv", "xlsx"):
+        for fmt in ("json", "phenopackets", "csv", "xlsx"):
             for method in ("get", "post"):
                 with self.subTest(format=fmt, method=method):
                     if method == "get":
@@ -468,6 +468,40 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
                     self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
                     self.assertEqual(len(bodies), 1)
                     self.assertEqual(bodies[0]["permissions"], ["query:data"])
+
+    def test_experiment_result_batch_manifest_accept_header(self):
+        # manifest renderer selected via content negotiation (no format param) still only needs download:metadata
+        url = f"/api/batch/experimentresults?project={self.p.identifier}&dataset={self.d1_id}"
+        response, bodies = self.authz_eval_request("get", [[True]], url, HTTP_ACCEPT="text/tab-separated-values")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response["Content-Type"].startswith("text/tab-separated-values"))
+        self.assertEqual(len(bodies), 1)
+        self.assertEqual(bodies[0]["permissions"], ["download:metadata"])
+
+    def test_experiment_result_batch_manifest_post_query_format(self):
+        # POST with the format in the query string rather than the body
+        url = f"/api/batch/experimentresults?project={self.p.identifier}&dataset={self.d1_id}&format=pcgl_manifest"
+        response, bodies = self.authz_eval_request("post", [[True]], url, {}, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(bodies), 1)
+        self.assertEqual(bodies[0]["permissions"], ["download:metadata"])
+
+    def test_experiment_result_batch_manifest_broader_scopes(self):
+        # Without a dataset in the scope, the authz resource is project-/instance-wide, so a dataset-level
+        # download:metadata grant (e.g. from PCGL) does not give access to the manifest.
+        for qs, expected_resource in (
+            (
+                f"?project={self.p.identifier}&format=pcgl_manifest",
+                {"project": str(self.p.identifier), "data_type": "experiment"},
+            ),
+            ("?format=pcgl_manifest", {"everything": True}),
+        ):
+            with self.subTest(qs=qs):
+                response, bodies = self.authz_eval_request("get", [[False]], f"/api/batch/experimentresults{qs}")
+                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+                self.assertEqual(len(bodies), 1)
+                self.assertEqual(bodies[0]["permissions"], ["download:metadata"])
+                self.assertEqual(bodies[0]["resources"], [expected_resource])
 
 
 class ExperimentResultBatchExternalDatasetIdTest(AuthzAPITestCase):

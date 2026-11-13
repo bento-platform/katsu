@@ -303,6 +303,22 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             r = self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_create_dataset_external_identifier(self):
+        # external IDs (e.g. PCGL study IDs) are kept as-is
+        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"], identifier="STUDY0002"))
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.json()["identifier"], "STUDY0002")
+
+    def test_create_dataset_invalid_identifier(self):
+        # identifiers must be usable as discovery scope IDs (safe charset, see DATASET_ID_REGEX)
+        for bad_id in ("STUDY 0002", "PCGL/STUDY1", "\u00e9tude1", "a\nb", "x" * 129):
+            with self.subTest(bad_id=bad_id):
+                r = self.one_authz_post(
+                    "/api/datasets", json=valid_dataset(self.project["identifier"], identifier=bad_id)
+                )
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(Dataset.objects.count(), 0)
+
     def test_create_dataset_forbidden(self):
         r = self.one_no_authz_post("/api/datasets", json=self.valid_payloads[0])
         self.assertEqual(r.status_code, status.HTTP_403_FORBIDDEN)
