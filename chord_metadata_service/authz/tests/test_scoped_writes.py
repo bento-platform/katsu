@@ -64,8 +64,10 @@ class ScopedWriteTest(AuthzAPITestCase):
         # Individual without any phenopackets - not part of any dataset yet
         self.ind_orphan = ph_m.Individual.objects.create(**{**ph_c.VALID_INDIVIDUAL_1, "id": "patient:orphan"})
 
+        self.project = project
         self.scope_a = f"?dataset={self.ds_a.identifier}"
         self.pheno_url_a = reverse("phenopackets-list") + self.scope_a
+        self.pheno_url_project = reverse("phenopackets-list") + f"?project={project.identifier}"
 
     def _new_phenopacket(self, **kwargs) -> dict:
         meta = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
@@ -77,6 +79,15 @@ class ScopedWriteTest(AuthzAPITestCase):
 
     def _new_biosample(self, individual_id: str, biosample_id: str = "biosample:new") -> dict:
         return {**ph_c.valid_biosample_1(individual_id), "id": biosample_id, "individual": individual_id}
+
+    def _make_other_project(self) -> tuple[Project, Dataset, ph_m.Phenopacket]:
+        # Project 2 with dataset C, holding individual C in a phenopacket
+        project_2 = Project.objects.create(title="Project 2", description="")
+        ds_c = _make_dataset(project_2, "Dataset C")
+        ind_c = ph_m.Individual.objects.create(**{**ph_c.VALID_INDIVIDUAL_1, "id": "patient:c"})
+        meta_c = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_2)
+        pheno_c = ph_m.Phenopacket.objects.create(id="pheno:c", subject=ind_c, meta_data=meta_c, dataset=ds_c)
+        return project_2, ds_c, pheno_c
 
     # (a) writes into another dataset
 
@@ -228,6 +239,55 @@ class ScopedWriteTest(AuthzAPITestCase):
     def test_create_phenopacket_with_orphan_subject(self):
         r = self.one_authz_post(self.pheno_url_a, json=self._new_phenopacket(subject=self.ind_orphan.id))
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    # project scopes
+
+    def test_create_phenopacket_in_project_scope(self):
+        # Any dataset of the project may be written to under the project's scope
+        r = self.one_authz_post(self.pheno_url_project, json=self._new_phenopacket(dataset=str(self.ds_b.identifier)))
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(ph_m.Phenopacket.objects.get(id="pheno:new").dataset_id, self.ds_b.identifier)
+
+    def test_create_phenopacket_with_subject_from_other_dataset_in_project_scope(self):
+        # Individual B is in dataset B, which is in the same project as dataset A
+        r = self.one_authz_post(self.pheno_url_project, json=self._new_phenopacket(subject=self.ind_b.id))
+        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+
+    def test_create_phenopacket_in_other_project_rejected(self):
+        _, ds_c, _ = self._make_other_project()
+        r = self.one_authz_post(self.pheno_url_project, json=self._new_phenopacket(dataset=str(ds_c.identifier)))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("does not exist", str(r.json()))
+        self.assertFalse(ph_m.Phenopacket.objects.filter(id="pheno:new").exists())
+
+    def test_create_phenopacket_with_subject_from_other_project_rejected(self):
+        _, _, pheno_c = self._make_other_project()
+        r = self.one_authz_post(self.pheno_url_project, json=self._new_phenopacket(subject=pheno_c.subject_id))
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("does not exist", str(r.json()))
+        self.assertFalse(ph_m.Phenopacket.objects.filter(id="pheno:new").exists())
+
+    def test_move_phenopacket_to_other_project_rejected(self):
+        _, ds_c, _ = self._make_other_project()
+        r = self.one_authz_patch(
+            reverse("phenopackets-detail", args=[self.pheno_a.id]) + f"?project={self.project.identifier}",
+            json={"dataset": str(ds_c.identifier)},
+        )
+        self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+        self.pheno_a.refresh_from_db()
+        self.assertEqual(self.pheno_a.dataset_id, self.ds_a.identifier)
+
+    def test_create_phenopacket_with_invalid_project_scope_rejected(self):
+        project_2, _, _ = self._make_other_project()
+        for desc, scope in (
+            ("non-existent project", f"?project={uuid.uuid4()}"),
+            ("non-UUID project", "?project=not-a-uuid"),
+            ("dataset outside of project", f"?project={project_2.identifier}&dataset={self.ds_a.identifier}"),
+        ):
+            with self.subTest(scope=desc):
+                r = self.one_authz_post(reverse("phenopackets-list") + scope, json=self._new_phenopacket())
+                self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertFalse(ph_m.Phenopacket.objects.filter(id="pheno:new").exists())
 
     # nested records of shared individuals are filtered by scope
 
