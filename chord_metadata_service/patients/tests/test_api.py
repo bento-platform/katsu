@@ -1258,39 +1258,33 @@ class RenderAgeTest(TestCase):
 class DiscoveryAgeRangeFilteringIndividualsTest(AuthzAPITestCase):
     """Test for api/public GET filtering"""
 
-    response_threshold = 5
-    random_range = 45
-
-    @staticmethod
-    def response_threshold_check(response):
-        return response["count"] if "count" in response else dres.INSUFFICIENT_DATA_AVAILABLE
+    # Fixed ages: 8 individuals in [20, 30) (above the count threshold of 5), 3 in [30, 40) (at or below it).
+    ages = [21, 22, 23, 24, 25, 26, 27, 28, 31, 32, 33, 55, 60, 70]
 
     def setUp(self):
-        individuals = [c.generate_valid_individual(gen_random_age=(1, 100)) for _ in range(self.random_range)]
-        for individual in individuals:
-            Individual.objects.create(**individual)
-
-        for individual in Individual.objects.all():
-            if individual.time_at_last_encounter:
-                if "age" in individual.time_at_last_encounter:
-                    age_numeric, age_unit = iso_duration_to_years(individual.time_at_last_encounter["age"])
-                    individual.age_numeric = age_numeric
-                    individual.age_unit = age_unit if age_unit else ""
-                    individual.save()
+        for i, age in enumerate(self.ages):
+            individual = Individual.objects.create(**c.generate_valid_individual(age=f"P{age}Y"))
+            age_numeric, age_unit = iso_duration_to_years(individual.time_at_last_encounter["age"])
+            individual.age_numeric = age_numeric
+            individual.age_unit = age_unit or ""
+            individual.save()
+            # discovery only counts individuals that have a phenopacket
+            meta_data = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
+            ph_m.Phenopacket.objects.create(id=f"phenopacket_id:{i}", subject=individual, meta_data=meta_data)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_age_range(self):
-        # age valid range search
         response = self.dt_authz_counts_get("/api/discovery?age=[20, 30)")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json()["counts"]["individual"], 8)
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_discovery_filtering_age_range_below_threshold(self):
+        response = self.dt_authz_counts_get("/api/discovery?age=[30, 40)")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         response_obj = response.json()
-        db_count = Individual.objects.filter(age_numeric__gte=20, age_numeric__lt=30).count()
-        self.assertIn(self.response_threshold_check(response_obj), [db_count, dres.INSUFFICIENT_DATA_AVAILABLE])
-        if db_count <= self.response_threshold:
-            self.assertEqual(response_obj["counts"], DISCOVERY_ZERO_COUNTS)
-            self.assertEqual(response_obj["message"], dres.INSUFFICIENT_DATA_AVAILABLE_MSG)
-        else:
-            self.assertEqual(db_count, response_obj["count"])
+        self.assertEqual(response_obj["counts"], DISCOVERY_ZERO_COUNTS)
+        self.assertEqual(response_obj["message"], dres.INSUFFICIENT_DATA_AVAILABLE_MSG)
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_discovery_filtering_age_invalid_range(self):
