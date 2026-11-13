@@ -1,4 +1,5 @@
 import uuid
+from typing import TYPE_CHECKING
 from django.utils import timezone
 from bento_lib.discovery import DiscoveryConfig
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
@@ -12,6 +13,9 @@ from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import JsonSchemaValidator
 from chord_metadata_service.restapi.models import BaseTimeStamp, SchemaType
 from chord_metadata_service.common.base_pydantic_jsonb import AbstractPydanticJSONBModel
+
+if TYPE_CHECKING:  # pragma: no cover
+    from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 
 
 __all__ = ["Project", "ProjectJsonSchema", "Dataset", "DatasetTranslation"]
@@ -92,7 +96,7 @@ class Dataset(AbstractPydanticJSONBModel):
     SCHEMA_CLASS = KatsuDatasetModel
 
     @classmethod
-    def get_referenceable_queryset(cls, scope) -> models.QuerySet:
+    def get_referenceable_queryset(cls, scope: "ValidatedDiscoveryScope") -> models.QuerySet:
         """Returns the datasets which a write under the scope may reference."""
         if scope.dataset_id:
             return cls.objects.filter(identifier=scope.dataset_id)
