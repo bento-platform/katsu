@@ -4,4 +4,8 @@ omit=
     chord_metadata_service/*/migrations/*
     chord_metadata_service/*/tests/*
     chord_metadata_service/metadata/settings.py
+    chord_metadata_service/metadata/test_settings.py
 branch=True
+# tests run with --parallel: measure worker processes, then `coverage combine` before reporting
+parallel=True
+concurrency=multiprocessing,thread
