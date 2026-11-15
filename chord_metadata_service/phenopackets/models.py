@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING
+
 from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.indexes import GinIndex
@@ -20,6 +22,9 @@ from . import descriptions as d
 from .utils import time_element_to_str
 from .validators import vrs_variation_validator
 
+if TYPE_CHECKING:  # pragma: no cover
+    from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
+
 #############################################################
 #                                                           #
 #                        Metadata                           #
@@ -32,6 +37,17 @@ class MetaData(BaseTimeStamp, ToFTSReprMixin):
     Class to store structured definitions of the resources
     and ontologies used within the phenopacket
     """
+
+    @classmethod
+    def get_referenceable_queryset(cls, scope: "ValidatedDiscoveryScope") -> models.QuerySet:
+        # MetaData is scoped by its phenopackets: allow it if used in the scope or unused by other datasets.
+        if (scope_q := Phenopacket.get_scope_q(scope)) is None:
+            return cls.objects.all()
+        in_scope_use = Phenopacket.objects.filter(scope_q, meta_data=models.OuterRef("pk"))
+        outside_use = Phenopacket.objects.filter(dataset__isnull=False, meta_data=models.OuterRef("pk")).exclude(
+            scope_q
+        )
+        return cls.objects.filter(models.Exists(in_scope_use) | ~models.Exists(outside_use))
 
     created_by = models.CharField(
         max_length=200, blank=True, null=True, default=None, help_text=rec_help(d.META_DATA, "created_by")
@@ -213,6 +229,23 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
                 "filter": "phenopackets__dataset__identifier",
             },
         }
+
+    @classmethod
+    def get_dataset_link_lookups(cls) -> tuple[str, ...]:
+        # A biosample without phenopackets can still carry a dataset's data through its experiments.
+        return (
+            "phenopackets__dataset__identifier",
+            "experiments__dataset_id",
+        )
+
+    @classmethod
+    def get_referenceable_outside_scope_q(cls, scope: "ValidatedDiscoveryScope") -> models.Q:
+        # The individual is checked as a whole, so a shared individual's biosample can be created under either
+        # dataset's scope.
+        individual_ok = models.Exists(
+            Individual.get_referenceable_queryset(scope).filter(pk=models.OuterRef("individual_id"))
+        )
+        return super().get_referenceable_outside_scope_q(scope) & (models.Q(individual__isnull=True) | individual_ok)
 
     id = models.CharField(primary_key=True, max_length=200, help_text=rec_help(d.BIOSAMPLE, "id"))
     # if Individual instance is deleted Biosample instance is deleted too
