@@ -2,9 +2,7 @@ import uuid
 
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
-from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
-from chord_metadata_service.chord.tests.constants import VALID_DATASET_PRIMARY_CONTACT
-from chord_metadata_service.chord.tests.helpers import ProjectTestCase
+from chord_metadata_service.chord.tests.helpers import ProjectTestCase, create_dataset
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE, get_discovery_scope
 
@@ -109,16 +107,7 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
     def setUpTestData(cls) -> None:
         super().setUpTestData()
         # Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier
-        schema = KatsuDatasetModel(
-            schema_version="1.0",
-            title="PCGL study",
-            description="Some PCGL study",
-            primary_contact=VALID_DATASET_PRIMARY_CONTACT,
-            identifier=cls.study_id,
-            project=str(cls.project.identifier),
-        )
-        cls.study_dataset = cm.Dataset.from_schema(schema)
-        cls.study_dataset.save()
+        cls.study_dataset = create_dataset(cls.project.identifier, cls.study_id, title="PCGL study")
         cls.other_project = cm.Project.objects.create(title="Project 2", description="")
 
     async def test_uuid_dataset_id(self):
@@ -126,13 +115,10 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
         self.assertEqual(scope, ValidatedDiscoveryScope(self.project, self.dataset))
 
     async def test_external_dataset_id(self):
-        # project is inferred from the dataset
-        scope = await get_discovery_scope(None, self.study_id)
-        self.assertEqual(scope.project_id, str(self.project.identifier))
-        self.assertEqual(scope.dataset_id, self.study_id)
-
-        scope = await get_discovery_scope(str(self.project.identifier), self.study_id)
-        self.assertEqual(scope.dataset_id, self.study_id)
+        expected = ValidatedDiscoveryScope(self.project, self.study_dataset)
+        # project is inferred from the dataset when not specified
+        self.assertEqual(await get_discovery_scope(None, self.study_id), expected)
+        self.assertEqual(await get_discovery_scope(str(self.project.identifier), self.study_id), expected)
 
     async def test_dataset_id_not_found(self):
         with self.assertRaises(DiscoveryScopeException) as cm_:
@@ -140,7 +126,12 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
         self.assertIn("STUDY9999", cm_.exception.message["message"])
 
     async def test_invalid_dataset_ids(self):
-        for bad_id in ("a\nb", "STUDY0002\n", "<script>", "a b", "x" * 129):
+        # Besides the safe charset and max. length (see DATASET_ID_REGEX), there must be:
+        #  - no "." (format suffix separator in API routes);
+        #  - no ":" ("<project id>:<dataset id>" separator in workflow inputs);
+        #  - a letter or digit as the first character.
+        bad_ids = ("a\nb", "STUDY0002\n", "<script>", "a b", "x" * 129, "PCGL.STUDY1", "proj:STUDY1", "-x", "_a")
+        for bad_id in bad_ids:
             with self.subTest(bad_id=bad_id):
                 with self.assertRaises(DiscoveryScopeException) as cm_:
                     await get_discovery_scope(None, bad_id)
@@ -154,15 +145,6 @@ class GetDiscoveryScopeTestCase(ProjectTestCase):
                 with self.assertRaises(DiscoveryScopeException) as cm_:
                     await get_discovery_scope(bad_id, None)
                 self.assertNotIn(bad_id, cm_.exception.message["message"])
-
-    async def test_dataset_id_charset(self):
-        # No "." (format suffix separator in API routes), no ":" ("<project id>:<dataset id>" separator in workflow
-        # inputs), and IDs must start with a letter or digit (see DATASET_ID_REGEX)
-        for bad_id in ("PCGL.STUDY1", "proj:STUDY1", "-x", "_a"):
-            with self.subTest(bad_id=bad_id):
-                with self.assertRaises(DiscoveryScopeException) as cm_:
-                    await get_discovery_scope(None, bad_id)
-                self.assertIn("<invalid ID>", cm_.exception.message["message"])
 
     async def test_nonexistent_project_id(self):
         with self.assertRaises(DiscoveryScopeException):

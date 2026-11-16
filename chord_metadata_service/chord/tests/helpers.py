@@ -11,16 +11,26 @@ from chord_metadata_service.chord.models import Dataset, Project
 from chord_metadata_service.chord.tests.constants import (
     VALID_PROJECT_1,
     VALID_DATASET_PRIMARY_CONTACT,
+    valid_dataset,
 )
 from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope
 from chord_metadata_service.restapi.utils import remove_computed_properties
 
 
 __all__ = [
+    "create_dataset",
     "ProjectTestCase",
     "ModelFieldsTestMixin",
     "AuthzAPITestCaseWithProjectJSON",
 ]
+
+
+def create_dataset(project_id: str | uuid.UUID, identifier: str, title: str = "Dataset 1") -> Dataset:
+    """Validates a dataset through the Katsu dataset schema (like the API does), then saves it."""
+    dataset = Dataset.from_schema(KatsuDatasetModel(**valid_dataset(project_id, title=title, identifier=identifier)))
+    dataset.save()
+    dataset.refresh_from_db()  # normalize field types (e.g., project_id: str -> UUID)
+    return dataset
 
 
 class ProjectTestCase(TestCase):

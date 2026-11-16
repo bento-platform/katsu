@@ -1,4 +1,6 @@
-__all__ = ["DATASET_ID_REGEX", "LinkedFieldSet", "KatsuDatasetModel"]
+__all__ = ["DATASET_ID_REGEX", "DATASET_ID_PATTERN", "LinkedFieldSet", "KatsuDatasetModel"]
+
+import re
 
 from pydantic import BaseModel, Field
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
@@ -9,6 +11,7 @@ from bento_lib.provenance.dataset import ProjectScopedDatasetModel
 #  - no ":", which separates the IDs in "<project id>:<dataset id>" workflow inputs (see chord/workflows/wdls);
 #  - no ".", which separates the format suffix in API routes (/api/datasets/<id>.json).
 DATASET_ID_REGEX = r"[A-Za-z0-9][A-Za-z0-9_-]{0,127}"
+DATASET_ID_PATTERN = re.compile(DATASET_ID_REGEX)  # use with fullmatch(...)
 
 
 class LinkedFieldSet(BaseModel):

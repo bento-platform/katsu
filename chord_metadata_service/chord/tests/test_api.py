@@ -303,12 +303,6 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             r = self.one_authz_post("/api/datasets", json=d)
             self.assertEqual(r.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_dataset_external_identifier(self):
-        # external IDs (e.g. PCGL study IDs) are kept as-is
-        r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"], identifier="STUDY0002"))
-        self.assertEqual(r.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(r.json()["identifier"], "STUDY0002")
-
     def test_external_identifier_round_trip(self):
         # A dataset must stay addressable by its external ID after creation (the ETL creates a study, then reads,
         # updates and deletes it), including IDs using the punctuation DATASET_ID_REGEX allows.
@@ -316,6 +310,7 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
 
         r = self.one_authz_post("/api/datasets", json=valid_dataset(self.project["identifier"], identifier=study_id))
         self.assertEqual(r.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(r.json()["identifier"], study_id)  # external IDs (e.g. PCGL study IDs) are kept as-is
 
         r = self.one_authz_get(f"/api/datasets/{study_id}")
         self.assertEqual(r.status_code, status.HTTP_200_OK)
@@ -339,7 +334,8 @@ class CreateDatasetTest(AuthzAPITestCaseWithProjectJSON):
             "STUDY0002\n",
             "PCGL.STUDY1",  # "." is the format suffix separator in API routes
             "proj:STUDY1",  # ":" is the separator in "<project id>:<dataset id>" workflow inputs
-            "-x",
+            "-x",  # must start with a letter or digit
+            "_x",
             "x" * 129,
         ):
             with self.subTest(bad_id=bad_id):
