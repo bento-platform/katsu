@@ -33,7 +33,6 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.12.0"
 aiohttp = "~3.14.5"
-# TODO: replace dev dep with release
 bento-lib = {version = "^18.3.0", extras = ["django"]}
 Django = "~6.1.0"
 django-autocomplete-light = "^5.0.0"
