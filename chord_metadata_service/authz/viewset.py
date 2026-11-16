@@ -37,7 +37,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
 
     @staticmethod
     async def obj_is_in_request_scope(request: DrfRequest, obj: BaseScopeableModel) -> bool:
-        # DiscoveryScopeException - project/dataset does not exist, or non-UUID request for a project/dataset
+        # DiscoveryScopeException - project/dataset does not exist, or invalid project/dataset ID
         #  - will be an API exception and handled by the katsu exception handler
         return await obj.scope_contains_object(await get_request_discovery_scope(request))
 
@@ -55,7 +55,7 @@ class BentoAuthzScopedModelGenericListViewSet(viewsets.GenericViewSet, mixins.Li
     async def request_has_data_type_permissions(
         self, request: DrfRequest, scope: ValidatedDiscoveryScope | None = None
     ):
-        # DiscoveryScopeException - project/dataset does not exist, or non-UUID request for a project/dataset
+        # DiscoveryScopeException - project/dataset does not exist, or invalid project/dataset ID
         #  - will be an API exception and handled by the katsu exception handler
         scope_: ValidatedDiscoveryScope = scope or await get_request_discovery_scope(request)
 

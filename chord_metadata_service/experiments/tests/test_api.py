@@ -13,6 +13,7 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Project, Dataset
+from chord_metadata_service.chord.tests.helpers import create_dataset
 from chord_metadata_service.chord.tests.constants import (
     VALID_DATASET_PRIMARY_CONTACT,
     VALID_PROJECT_1,
@@ -30,6 +31,10 @@ from chord_metadata_service.restapi.tests.utils import load_local_json
 
 EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON = load_local_json("example_experiments.json")
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON = load_local_json("example_phenopackets.json")
+
+
+def tsv_rows(response) -> list[list[str]]:
+    return list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
 
 
 class GetExperimentsAppApisTest(AuthzAPITestCase):
@@ -467,6 +472,46 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assert_one_authz_eval(bodies, "query:data")
+
+
+class ExperimentResultBatchExternalDatasetIdTest(AuthzAPITestCase):
+    """
+    Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier.
+    """
+
+    study_id = "STUDY0002"
+
+    def setUp(self) -> None:
+        self.p = Project.objects.create(**VALID_PROJECT_1)
+        create_dataset(self.p.identifier, self.study_id, title="PCGL study")
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.study_id, logger
+        )
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.study_id, logger
+        )
+
+    def test_manifest_for_study_dataset(self):
+        # project is inferred from the dataset when not specified
+        expected_resource = {"project": str(self.p.identifier), "dataset": self.study_id, "data_type": "experiment"}
+        for qs in (f"dataset={self.study_id}", f"project={self.p.identifier}&dataset={self.study_id}"):
+            with self.subTest(qs=qs):
+                response, bodies = self.authz_eval_request(
+                    "get", [[True]], f"/api/batch/experimentresults?{qs}&format=pcgl_manifest"
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assert_one_authz_eval(bodies, "download:metadata", expected_resource)
+                header, *rows = tsv_rows(response)
+                self.assertEqual(len(rows), 4)  # 4 experiment results
+                study_col = header.index("study")
+                self.assertEqual({r[study_col] for r in rows}, {self.study_id})
+
+    def test_invalid_dataset_ids_rejected(self):
+        for bad_id in ("a\nb", "<script>", "x" * 129):
+            with self.subTest(bad_id=bad_id):
+                response = self.one_authz_get("/api/batch/experimentresults", {"dataset": bad_id})
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertNotIn(bad_id, response.content.decode("utf-8"))
 
 
 class TestExperimentCSVRenderer(TestCase):
