@@ -128,11 +128,11 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
     project: cm.Project | None = None
     dataset: cm.Dataset | None = None
 
+    # Dataset IDs may be external IDs, e.g. PCGL study IDs, so they are not required to be UUIDs.
+    # TODO: validate dataset IDs (safe charset)
     try:
         if project_id:
             uuid.UUID(project_id)
-        if dataset_id:
-            uuid.UUID(dataset_id)
     except ValueError:
         # We don't want to facilitate log injection, so replace the true values with placeholders
         raise DiscoveryScopeException("<not UUID>", "<not UUID>")
@@ -152,7 +152,7 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
             project = await _get_project_by_id(project_id)
 
     except ObjectDoesNotExist:
-        # We've already checked these are UUIDs, so they're fine to log
+        # We've already checked the project ID is a UUID; the dataset ID is not validated yet (see TODO above)
         raise DiscoveryScopeException(dataset_id, project_id)
 
     return ValidatedDiscoveryScope(project=project, dataset=dataset)

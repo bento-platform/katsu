@@ -326,7 +326,7 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             # --- INVALID ---
             # invalid UUID for project (not found; IDs are not of this format)
             ("?project=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
-            # invalid UUID for dataset (not found; IDs are not of this format)
+            # dataset which does not exist
             ("?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
         ]
 

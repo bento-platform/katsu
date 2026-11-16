@@ -1,9 +1,10 @@
 import json
-from typing import ClassVar, Literal
+from typing import Any, ClassVar, Literal
 
 from aioresponses import aioresponses
 from bento_lib.auth.types import EvaluationResultMatrix
 from rest_framework.test import APITransactionTestCase
+from yarl import URL
 
 from ..types import DataPermissions
 
@@ -15,6 +16,9 @@ __all__ = [
 
 
 DTAccessLevel = Literal["none", "bool", "counts", "full"]
+HTTPMethod = Literal["get", "post", "put", "patch", "delete"]
+
+AUTHZ_EVALUATE_URL = "http://authz.local/policy/evaluate"
 
 
 class AuthzAPITestCase(APITransactionTestCase):
@@ -35,24 +39,49 @@ class AuthzAPITestCase(APITransactionTestCase):
 
     @staticmethod
     def mock_authz_eval_one_result(m: aioresponses, result: bool):
-        m.post("http://authz.local/policy/evaluate", payload={"result": [[result]]})
+        m.post(AUTHZ_EVALUATE_URL, payload={"result": [[result]]})
 
     @staticmethod
     def mock_authz_eval_result(m: aioresponses, result: EvaluationResultMatrix | list[list[bool]]):
-        m.post("http://authz.local/policy/evaluate", payload={"result": result})
+        m.post(AUTHZ_EVALUATE_URL, payload={"result": result})
+
+    @staticmethod
+    def _prepare_request_kwargs(method: HTTPMethod, kwargs: dict) -> dict:
+        """Serializes a json=... kwarg as the request body, and defaults to a JSON content type for bodied requests."""
+        if "json" in kwargs:
+            kwargs["data"] = json.dumps(kwargs.pop("json"))
+        if method in ("post", "put", "patch") and "format" not in kwargs:
+            kwargs["content_type"] = "application/json"
+        return kwargs
+
+    def authz_eval_request(
+        self, method: HTTPMethod, result: list[list[bool]], url: str, *args, **kwargs
+    ) -> tuple[Any, list[dict]]:
+        """
+        Mocks one authorization evaluation response with the given result matrix and executes a request.
+        Returns the response and the (JSON-normalized) bodies of the evaluation requests sent to the authz service.
+        """
+        kwargs = self._prepare_request_kwargs(method, kwargs)
+        with aioresponses() as m:
+            self.mock_authz_eval_result(m, result)
+            res = getattr(self.client, method)(url, *args, **kwargs)
+        calls = m.requests.get(("POST", URL(AUTHZ_EVALUATE_URL)), [])
+        return res, [json.loads(json.dumps(c.kwargs["json"])) for c in calls]
+
+    def assert_one_authz_eval(self, eval_bodies: list[dict], permission: str, resource: dict | None = None):
+        """
+        Asserts that exactly one authorization evaluation was requested, for the given permission (and resource, if
+        specified). To be used with the evaluation request bodies returned by authz_eval_request(...).
+        """
+        self.assertEqual(len(eval_bodies), 1)
+        self.assertEqual(eval_bodies[0]["permissions"], [permission])
+        if resource is not None:
+            self.assertEqual(eval_bodies[0]["resources"], [resource])
 
     # ------------------------------------------------------------------------------------------------------------------
 
-    def _one_authz_generic(
-        self, method: Literal["get", "post", "put", "patch", "delete"], authz_res: bool, url: str, *args, **kwargs
-    ):
-        if "json" in kwargs:
-            kwargs["data"] = json.dumps(kwargs["json"])
-            del kwargs["json"]
-
-        if method in ("post", "put", "patch") and "format" not in kwargs:
-            kwargs["content_type"] = "application/json"
-
+    def _one_authz_generic(self, method: HTTPMethod, authz_res: bool, url: str, *args, **kwargs):
+        kwargs = self._prepare_request_kwargs(method, kwargs)
         with aioresponses() as m:
             self.mock_authz_eval_one_result(m, authz_res)
             return getattr(self.client, method)(url, *args, **kwargs)

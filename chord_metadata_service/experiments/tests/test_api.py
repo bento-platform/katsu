@@ -1,6 +1,7 @@
 import csv
 import io
 import uuid
+from typing import Literal
 
 import openpyxl
 from django.test import TestCase
@@ -429,6 +430,43 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
     def test_get_experiment_result_batch_manifest_forbidden(self):
         response = self.one_no_authz_get("/api/batch/experimentresults?format=pcgl_manifest")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def _scoped_batch_url(self, extra_qs: str = "") -> str:
+        return f"/api/batch/experimentresults?project={self.p.identifier}&dataset={self.d1_id}{extra_qs}"
+
+    def _batch_request(self, method: Literal["get", "post"], result: list[list[bool]], fmt: str | None = None):
+        """Requests the dataset-scoped batch endpoint, with the format in the query string (GET) or JSON body (POST)."""
+        if method == "get":
+            return self.authz_eval_request("get", result, self._scoped_batch_url(f"&format={fmt}" if fmt else ""))
+        return self.authz_eval_request("post", result, self._scoped_batch_url(), json={"format": fmt} if fmt else {})
+
+    def test_experiment_result_batch_manifest_permissions(self):
+        # The manifest only needs download:metadata (given by query:data, or granted by e.g. PCGL) on the experiment
+        # data type of the dataset.
+        expected_resource = {"project": str(self.p.identifier), "dataset": self.d1_id, "data_type": "experiment"}
+        for method in ("get", "post"):
+            for result, expected_status in (([[True]], status.HTTP_200_OK), ([[False]], status.HTTP_403_FORBIDDEN)):
+                with self.subTest(method=method, result=result):
+                    response, bodies = self._batch_request(method, result, "pcgl_manifest")
+                    self.assertEqual(response.status_code, expected_status)
+                    self.assert_one_authz_eval(bodies, "download:metadata", expected_resource)
+
+    def test_experiment_result_batch_other_formats_need_query_data(self):
+        # None: no format requested at all (default renderer), which is what most clients send
+        for fmt in (None, "json", "phenopackets", "csv", "xlsx"):
+            for method in ("get", "post"):
+                with self.subTest(format=fmt, method=method):
+                    response, bodies = self._batch_request(method, [[False]], fmt)
+                    self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+                    self.assert_one_authz_eval(bodies, "query:data")
+
+    def test_experiment_result_export_fields_manifest_format_needs_query_data(self):
+        # download:metadata only applies to listing results as a manifest, not to the viewset's other actions
+        response, bodies = self.authz_eval_request(
+            "get", [[False]], "/api/batch/experimentresults/export_fields?format=pcgl_manifest"
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assert_one_authz_eval(bodies, "query:data")
 
 
 class TestExperimentCSVRenderer(TestCase):

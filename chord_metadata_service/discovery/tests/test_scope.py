@@ -1,8 +1,10 @@
 from chord_metadata_service.chord import models as cm
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET
+from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
+from chord_metadata_service.chord.tests.constants import valid_dataset
 from chord_metadata_service.chord.tests.helpers import ProjectTestCase
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException
-from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, INSTANCE_SCOPE, get_discovery_scope
 
 
 class DiscoveryScopeBuildingTestCase(ProjectTestCase):
@@ -96,3 +98,20 @@ class DiscoveryScopeBuildingTestCase(ProjectTestCase):
         for params in subtest_params:
             with self.subTest(params=params):
                 self.assertDictEqual(params[0].as_authz_resource(params[2]), params[1])
+
+
+class ExternalDatasetIdScopeTestCase(ProjectTestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        # Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier
+        cls.study = cm.Dataset.from_schema(
+            KatsuDatasetModel(**valid_dataset(cls.project.identifier, identifier="STUDY0002"))
+        )
+        cls.study.save()
+        cls.study.refresh_from_db()
+
+    async def test_external_dataset_id(self):
+        expected = ValidatedDiscoveryScope(self.project, self.study)
+        self.assertEqual(await get_discovery_scope(None, "STUDY0002"), expected)  # project inferred from the dataset
+        self.assertEqual(await get_discovery_scope(str(self.project.identifier), "STUDY0002"), expected)
