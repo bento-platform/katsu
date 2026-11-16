@@ -69,6 +69,7 @@ tox = "^4.31.0"
 debugpy = "^1.8.17"
 daphne = "^4.2.1"
 aioresponses = "^0.7.8"
+yarl = "^1.25.1"
 
 [tool.ruff]
 line-length = 120
