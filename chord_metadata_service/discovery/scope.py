@@ -8,7 +8,7 @@ from django.http import HttpRequest
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.chord import models as cm
-from chord_metadata_service.chord.dataset_schema import DATASET_ID_PATTERN
+from bento_lib.provenance.dataset import DATASET_ID_PATTERN
 
 from .exceptions import DiscoveryScopeException
 
