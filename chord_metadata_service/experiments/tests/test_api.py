@@ -496,6 +496,15 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         self.assert_one_authz_eval(bodies, "query:data")
 
+    def test_experiment_result_batch_unimplemented_action_forbidden(self):
+        # Actions other than list/create/export_fields (here, OPTIONS -> DRF "metadata") have no permission mapped, so
+        # they're denied outright, even with a manifest format, without asking the authorization service.
+        for fmt_qs in ("", "&format=pcgl_manifest"):
+            with self.subTest(fmt_qs=fmt_qs):
+                response, bodies = self.authz_eval_request("options", [[True]], self._scoped_batch_url(fmt_qs))
+                self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+                self.assertEqual(bodies, [])
+
     def test_experiment_result_batch_manifest_accept_header(self):
         # manifest renderer selected via content negotiation (no format param) still only needs download:metadata
         response, bodies = self.authz_eval_request(

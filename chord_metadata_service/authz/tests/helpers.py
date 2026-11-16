@@ -16,7 +16,7 @@ __all__ = [
 
 
 DTAccessLevel = Literal["none", "bool", "counts", "full"]
-HTTPMethod = Literal["get", "post", "put", "patch", "delete"]
+HTTPMethod = Literal["get", "post", "put", "patch", "delete", "options"]
 
 AUTHZ_EVALUATE_URL = "http://authz.local/policy/evaluate"
 
