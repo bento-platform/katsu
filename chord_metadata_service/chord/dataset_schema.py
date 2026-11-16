@@ -1,9 +1,8 @@
 __all__ = ["LinkedFieldSet", "KatsuDatasetModel"]
 
-import re
-
 from pydantic import BaseModel, Field
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
+
 
 class LinkedFieldSet(BaseModel):
     """
