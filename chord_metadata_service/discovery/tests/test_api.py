@@ -18,6 +18,7 @@ from chord_metadata_service.authz.tests.helpers import DTAccessLevel, AuthzAPITe
 from chord_metadata_service.chord import models as ch_m
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.tests import constants as ch_c
+from chord_metadata_service.chord.tests.helpers import create_dataset
 from chord_metadata_service.discovery import responses as dres
 from chord_metadata_service.discovery.schemas import DISCOVERY_SCHEMA
 from chord_metadata_service.patients import models as pa_m
@@ -326,7 +327,8 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
             # --- INVALID ---
             # invalid UUID for project (not found; IDs are not of this format)
             ("?project=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
-            # dataset which does not exist
+            # dataset ID with a valid format which does not exist (invalid formats: see
+            # test_overview_invalid_dataset_id_not_echoed)
             ("?dataset=not-a-uuid", status.HTTP_404_NOT_FOUND, None, None),
         ]
 
@@ -387,6 +389,27 @@ class DiscoveryOverviewTest(AuthzAPITestCase, ScopedDiscoveryTestCase):
                     self.assertIsInstance(res_json, dict)
                     self.assert_counts_not_censored(res_json, dts)
                     self.assert_scoped_fields(res_json, discovery)  # should have all fields, even ones with 0-counts
+
+    @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
+    def test_overview_external_dataset_id(self):
+        # Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier
+        study_id = "STUDY0002"
+        create_dataset(self.id_proj_a, study_id, title="PCGL study")
+
+        # No data, so discovery is empty
+        empty_counts = {"phenopacket": 0, "individual": 0, "biosample": 0, "experiment": 0, "experiment_result": 0}
+        for qp in (f"?dataset={study_id}", f"?project={self.id_proj_a}&dataset={study_id}"):
+            with self.subTest(qp=qp):
+                res = self.dt_authz_counts_get(f"{self.url}{qp}")
+                self.assertEqual(res.status_code, status.HTTP_200_OK)
+                self.assertDictEqual(res.json()["counts"], empty_counts)
+
+    def test_overview_invalid_dataset_id_not_echoed(self):
+        for bad_id in ("<script>", "a\nb", "x" * 129):
+            with self.subTest(bad_id=bad_id):
+                res = self.dt_authz_counts_get(self.url, {"dataset": bad_id})
+                self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+                self.assertNotIn(bad_id, res.content.decode("utf-8"))
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
     def test_overview_project_dataset(self):

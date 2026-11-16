@@ -5,6 +5,7 @@ import re
 from pydantic import BaseModel, Field
 from bento_lib.provenance.dataset import ProjectScopedDatasetModel
 
+# TODO: move to bento-lib
 # Dataset IDs may be UUIDs (created in katsu) or external IDs such as PCGL study IDs (e.g. STUDY0002).
 # Restricted to a safe charset so IDs can be used in URLs and logged; length (1-128) matches Dataset.identifier.
 # Letters, digits, "_" and "-" only, starting with a letter or digit. In particular:
