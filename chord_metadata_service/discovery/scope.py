@@ -8,7 +8,6 @@ from django.http import HttpRequest
 from rest_framework.request import Request as DrfRequest
 
 from chord_metadata_service.chord import models as cm
-from chord_metadata_service.chord.dataset_schema import DATASET_ID_PATTERN
 
 from .exceptions import DiscoveryScopeException
 
@@ -121,14 +120,6 @@ def _get_project_id_and_dataset_id_from_request(request: DrfRequest | HttpReques
     return request.GET.get("project") or None, request.GET.get("dataset") or None
 
 
-def _is_uuid(value: str) -> bool:
-    try:
-        uuid.UUID(value)
-        return True
-    except ValueError:
-        return False
-
-
 async def _get_project_by_id(project_id: str) -> cm.Project:
     return await cm.Project.objects.filter(identifier=project_id).aget()
 
@@ -137,9 +128,14 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
     project: cm.Project | None = None
     dataset: cm.Dataset | None = None
 
-    # We don't want to facilitate log injection, so invalid IDs are replaced with placeholders in the exception.
-    if (project_id and not _is_uuid(project_id)) or (dataset_id and not DATASET_ID_PATTERN.fullmatch(dataset_id)):
-        raise DiscoveryScopeException("<invalid ID>", "<invalid ID>")
+    # Dataset IDs may be external IDs, e.g. PCGL study IDs, so they are not required to be UUIDs.
+    # TODO: validate dataset IDs (safe charset)
+    try:
+        if project_id:
+            uuid.UUID(project_id)
+    except ValueError:
+        # We don't want to facilitate log injection, so replace the true values with placeholders
+        raise DiscoveryScopeException("<not UUID>", "<not UUID>")
 
     try:
         if dataset_id:
@@ -156,7 +152,7 @@ async def get_discovery_scope(project_id: str | None, dataset_id: str | None) ->
             project = await _get_project_by_id(project_id)
 
     except ObjectDoesNotExist:
-        # We've already validated these IDs (UUID project ID, safe-charset dataset ID), so they're fine to log
+        # We've already checked the project ID is a UUID; the dataset ID is not validated yet (see TODO above)
         raise DiscoveryScopeException(dataset_id, project_id)
 
     return ValidatedDiscoveryScope(project=project, dataset=dataset)

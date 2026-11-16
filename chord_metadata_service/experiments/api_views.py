@@ -206,18 +206,18 @@ class ExperimentResultBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
         return await self._filtered_queryset(self.request.data.get("id", None))
 
     def permission_from_request(self, request: DrfRequest):
-        # Here, "create" maps to the same permissions as "list" because we use create(..) (i.e., POST) as a way to run a
-        # query with a large body.
-        # TODO: distant future: replace with HTTP QUERY verb.
-        if self.action in ("list", "create"):
-            if isinstance(request.accepted_renderer, ExperimentResultPcglManifestTSVRenderer):
+        if self.action in ("list", "create", "export_fields"):
+            # Here, "create" maps to the same permissions as "list" because we use create(..) (i.e., POST) as a way to
+            # run a query with a large body.
+            # TODO: distant future: replace with HTTP QUERY verb.
+            if self.action != "export_fields" and isinstance(
+                request.accepted_renderer, ExperimentResultPcglManifestTSVRenderer
+            ):
                 # The file manifest only needs download:metadata, which may also be granted by an external authorization
                 # service (e.g., PCGL). query:data gives download:metadata, so users with data access keep the manifest.
                 # Content negotiation happens before permission checks, so accepted_renderer is set here (also for
                 # POST requests, via FormatInPostContentNegotiation).
                 return P_DOWNLOAD_METADATA
-            return P_QUERY_DATA
-        if self.action == "export_fields":
             return P_QUERY_DATA
         return None  # viewset not implemented for any other action
 
