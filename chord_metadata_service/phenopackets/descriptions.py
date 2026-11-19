@@ -373,6 +373,10 @@ BIOSAMPLE = {
             "items": phenotypic_feature("a biosample"),
         },
         "measurements": "List of measurements of the sample",
+        "links": {
+            "description": "A list of links to external web resources related to the biosample.",
+            "items": LINK,
+        },
         "taxonomy": ontology_class(
             "specified when more than one organism may be studied. It is advised that codes from the NCBI Taxonomy "
             "resource are used, e.g. NCBITaxon:9606 for humans"

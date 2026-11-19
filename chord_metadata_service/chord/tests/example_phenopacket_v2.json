@@ -81,6 +81,12 @@
     {
       "id": "sample1",
       "individual_id": "patient1",
+      "links": [
+        {
+          "label": "Sample page",
+          "url": "https://example.org/samples/sample1"
+        }
+      ],
       "sampled_tissue": {
         "id": "UBERON:0001256",
         "label": "wall of urinary bladder"

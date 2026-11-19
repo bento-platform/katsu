@@ -272,6 +272,23 @@ FILE_SCHEMA = describe_schema(
     {},
 )
 
+PHENOPACKET_LINK_SCHEMA = describe_schema(
+    {
+        "$schema": DRAFT_07,
+        "$id": sub_schema_uri(phenopacket_base_uri, "link"),
+        "title": "Phenopacket link schema",
+        "description": "A link to an external web resource related to a phenopacket.",
+        "type": "object",
+        "properties": {
+            "label": base_type(SchemaTypes.STRING),
+            "url": string_with_format(SchemaStringFormats.URI),
+        },
+        "required": ["url"],
+        "additionalProperties": False,
+    },
+    descriptions.LINK,
+)
+
 # noinspection PyProtectedMember
 PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema(
     {
@@ -297,6 +314,7 @@ PHENOPACKET_BIOSAMPLE_SCHEMA = describe_schema(
             "diagnostic_markers": array_of(ONTOLOGY_CLASS),
             "procedure": PHENOPACKET_PROCEDURE_SCHEMA,
             "files": array_of(FILE_SCHEMA),
+            "links": array_of(PHENOPACKET_LINK_SCHEMA),
             "material_sample": ONTOLOGY_CLASS,
             "sample_processing": ONTOLOGY_CLASS,
             "sample_storage": ONTOLOGY_CLASS,
@@ -455,23 +473,6 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = describe_schema(
         ],
     },
     descriptions=descriptions.MEDICAL_ACTION,
-)
-
-PHENOPACKET_LINK_SCHEMA = describe_schema(
-    {
-        "$schema": DRAFT_07,
-        "$id": sub_schema_uri(phenopacket_base_uri, "link"),
-        "title": "Phenopacket link schema",
-        "description": "A link to an external web resource related to a phenopacket.",
-        "type": "object",
-        "properties": {
-            "label": base_type(SchemaTypes.STRING),
-            "url": string_with_format(SchemaStringFormats.URI),
-        },
-        "required": ["url"],
-        "additionalProperties": False,
-    },
-    descriptions.LINK,
 )
 
 

@@ -282,6 +282,13 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
         validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEASUREMENT_SCHEMA)],
         help_text=rec_help(d.BIOSAMPLE, "measurements"),
     )
+    # Non-Phenopackets-standard field: links to external web resources related to the biosample
+    links = models.JSONField(
+        blank=True,
+        null=True,
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_PHENOPACKET_LINK_SCHEMA, formats=["uri"])],
+        help_text=rec_help(d.BIOSAMPLE, "links"),
+    )
     taxonomy = JSONField(
         blank=True, null=True, validators=[ontology_validator], help_text=rec_help(d.BIOSAMPLE, "taxonomy")
     )

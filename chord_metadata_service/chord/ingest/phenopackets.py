@@ -170,6 +170,7 @@ def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Bi
         pathological_tnm_finding=bs.get("pathological_tnm_finding", []),
         diagnostic_markers=bs.get("diagnostic_markers", []),
         extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
+        defaults={"links": bs.get("links", [])},  # non-Phenopackets-standard field; not part of the lookup
         **bs_query,
     )
 
