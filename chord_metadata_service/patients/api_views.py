@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Iterable
 
 from adrf.views import APIView
 from asgiref.sync import async_to_sync
@@ -8,7 +9,7 @@ from bento_lib.search import build_search_response
 from datetime import datetime
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.core.exceptions import ValidationError
-from django.db.models import Count, F, Q
+from django.db.models import FETCH_PEERS, Count, F, Prefetch, Q, QuerySet
 from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, inline_serializer
@@ -26,11 +27,13 @@ from chord_metadata_service.discovery.censorship import get_threshold, threshold
 from chord_metadata_service.discovery.exceptions import DiscoveryScopeException, DiscoveryEmptyException
 from chord_metadata_service.discovery.filtering import discovery_filter_queryset
 from chord_metadata_service.discovery.pydantic_models import DiscoveryQuery
-from chord_metadata_service.discovery.scope import get_request_discovery_scope
+from chord_metadata_service.discovery.scope import ValidatedDiscoveryScope, get_request_discovery_scope
+from chord_metadata_service.discovery.scopeable_model import BaseScopeableModel
 from chord_metadata_service.discovery.stats import individual_biosample_tissue_stats, individual_experiment_type_stats
 from chord_metadata_service.discovery.utils import get_discovery_data_type_permissions
+from chord_metadata_service.experiments.models import Experiment
 from chord_metadata_service.logger import logger
-from chord_metadata_service.phenopackets.models import Phenopacket
+from chord_metadata_service.phenopackets.models import Biosample, Phenopacket
 from chord_metadata_service.phenopackets.serializers import PhenopacketSerializer
 from chord_metadata_service.restapi.api_renderers import (
     PhenopacketsRenderer,
@@ -53,6 +56,55 @@ from .models import Individual
 from .serializers import IndividualSerializer
 
 OUTPUT_FORMAT_BENTO_SEARCH_RESULT = "bento_search_result"
+
+
+def _scoped_plain_queryset(model: type[BaseScopeableModel], scope: ValidatedDiscoveryScope) -> QuerySet:
+    # Like get_model_scoped_queryset(...) without DISTINCT or prefetches, for use in Prefetch querysets.
+    queryset = model.objects.all()
+    if (scope_q := model.get_scope_q(scope)) is not None:
+        queryset = model.objects.filter(pk__in=model.objects.filter(scope_q).values("pk"))
+    return queryset.fetch_mode(FETCH_PEERS)
+
+
+def _with_scoped_experiments(scope: ValidatedDiscoveryScope, lookups: Iterable[str], experiments_lookup: str) -> tuple:
+    # A biosample in scope can have experiments in other datasets, so replace those lookups with a scoped Prefetch.
+    experiments = (
+        _scoped_plain_queryset(Experiment, scope)
+        .select_related("instrument")
+        .prefetch_related("experiment_results__experiments")
+    )
+    return (
+        Prefetch(experiments_lookup, queryset=experiments),
+        *(lk for lk in lookups if lk != experiments_lookup and not lk.startswith(f"{experiments_lookup}__")),
+    )
+
+
+def _scoped_individual_prefetches(scope: ValidatedDiscoveryScope) -> tuple[Prefetch, Prefetch]:
+    # An individual can be shared between datasets, so its nested records need their own scope filter.
+    # Clear any unscoped prefetch of these relations first; Django refuses two querysets for one lookup.
+    return (
+        Prefetch(
+            "biosamples",
+            queryset=_scoped_plain_queryset(Biosample, scope).prefetch_related(
+                *_with_scoped_experiments(scope, Biosample.PREFETCHES_FULL.paths, "experiments")
+            ),
+        ),
+        Prefetch(
+            "phenopackets",
+            queryset=_scoped_plain_queryset(Phenopacket, scope).prefetch_related(
+                *_with_scoped_experiments(scope, Phenopacket.PREFETCHES_FULL.paths, "biosamples__experiments")
+            ),
+        ),
+    )
+
+
+def _scoped_individual_queryset(scope: ValidatedDiscoveryScope) -> QuerySet:
+    return (
+        Individual.get_model_scoped_queryset(scope)
+        .prefetch_related(None)  # replaced by the scoped prefetches below
+        .fetch_mode(FETCH_PEERS)
+        .prefetch_related(*_scoped_individual_prefetches(scope))
+    )
 
 
 class IndividualViewSet(BentoAuthzScopedModelViewSet):
@@ -94,8 +146,7 @@ class IndividualViewSet(BentoAuthzScopedModelViewSet):
     @async_to_sync
     async def get_queryset(self):
         scope = await get_request_discovery_scope(self.request)
-        queryset = Individual.get_model_scoped_queryset(scope)
-        return Individual.PREFETCHES_FULL.setup_eager_loading(queryset).order_by("id")
+        return _scoped_individual_queryset(scope).order_by("id")
 
     def list(self, request, *args, **kwargs):
         if (err := csv_fields_error_response(request, IndividualCSVRenderer)) is not None:
@@ -204,11 +255,7 @@ class IndividualBatchViewSet(BentoAuthzScopedModelGenericListViewSet):
 
         individual_ids = self.request.data.get("id", None)
         filter_by_id = {"id__in": individual_ids} if individual_ids else {}
-        queryset = (
-            Individual.PREFETCHES_FULL.setup_eager_loading(Individual.get_model_scoped_queryset(scope))
-            .filter(**filter_by_id)
-            .order_by("id")
-        )
+        queryset = _scoped_individual_queryset(scope).filter(**filter_by_id).order_by("id")
 
         return queryset
 

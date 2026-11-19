@@ -1,6 +1,7 @@
 import csv
 import io
 import uuid
+from typing import Literal
 
 import openpyxl
 from django.test import TestCase
@@ -12,6 +13,7 @@ from rest_framework.test import APITestCase
 from chord_metadata_service.authz.tests.helpers import AuthzAPITestCase
 from chord_metadata_service.chord.dataset_schema import KatsuDatasetModel
 from chord_metadata_service.chord.models import Project, Dataset
+from chord_metadata_service.chord.tests.helpers import create_dataset
 from chord_metadata_service.chord.tests.constants import (
     VALID_DATASET_PRIMARY_CONTACT,
     VALID_PROJECT_1,
@@ -29,6 +31,10 @@ from chord_metadata_service.restapi.tests.utils import load_local_json
 
 EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON = load_local_json("example_experiments.json")
 EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON = load_local_json("example_phenopackets.json")
+
+
+def tsv_rows(response) -> list[list[str]]:
+    return list(csv.reader(io.StringIO(response.content.decode("utf-8")), delimiter="\t"))
 
 
 class GetExperimentsAppApisTest(AuthzAPITestCase):
@@ -429,6 +435,83 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
     def test_get_experiment_result_batch_manifest_forbidden(self):
         response = self.one_no_authz_get("/api/batch/experimentresults?format=pcgl_manifest")
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def _scoped_batch_url(self, extra_qs: str = "") -> str:
+        return f"/api/batch/experimentresults?project={self.p.identifier}&dataset={self.d1_id}{extra_qs}"
+
+    def _batch_request(self, method: Literal["get", "post"], result: list[list[bool]], fmt: str | None = None):
+        """Requests the dataset-scoped batch endpoint, with the format in the query string (GET) or JSON body (POST)."""
+        if method == "get":
+            return self.authz_eval_request("get", result, self._scoped_batch_url(f"&format={fmt}" if fmt else ""))
+        return self.authz_eval_request("post", result, self._scoped_batch_url(), json={"format": fmt} if fmt else {})
+
+    def test_experiment_result_batch_manifest_permissions(self):
+        # The manifest only needs download:metadata (given by query:data, or granted by e.g. PCGL) on the experiment
+        # data type of the dataset.
+        expected_resource = {"project": str(self.p.identifier), "dataset": self.d1_id, "data_type": "experiment"}
+        for method in ("get", "post"):
+            for result, expected_status in (([[True]], status.HTTP_200_OK), ([[False]], status.HTTP_403_FORBIDDEN)):
+                with self.subTest(method=method, result=result):
+                    response, bodies = self._batch_request(method, result, "pcgl_manifest")
+                    self.assertEqual(response.status_code, expected_status)
+                    self.assert_one_authz_eval(bodies, "download:metadata", expected_resource)
+
+    def test_experiment_result_batch_other_formats_need_query_data(self):
+        # None: no format requested at all (default renderer), which is what most clients send
+        for fmt in (None, "json", "phenopackets", "csv", "xlsx"):
+            for method in ("get", "post"):
+                with self.subTest(format=fmt, method=method):
+                    response, bodies = self._batch_request(method, [[False]], fmt)
+                    self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+                    self.assert_one_authz_eval(bodies, "query:data")
+
+    def test_experiment_result_export_fields_manifest_format_needs_query_data(self):
+        # download:metadata only applies to listing results as a manifest, not to the viewset's other actions
+        response, bodies = self.authz_eval_request(
+            "get", [[False]], "/api/batch/experimentresults/export_fields?format=pcgl_manifest"
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assert_one_authz_eval(bodies, "query:data")
+
+
+class ExperimentResultBatchExternalDatasetIdTest(AuthzAPITestCase):
+    """
+    Datasets from PCGL use the PCGL study ID (not a UUID) as their identifier.
+    """
+
+    study_id = "STUDY0002"
+
+    def setUp(self) -> None:
+        self.p = Project.objects.create(**VALID_PROJECT_1)
+        create_dataset(self.p.identifier, self.study_id, title="PCGL study")
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_PHENOPACKETS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_PHENOPACKETS_JSON, self.study_id, logger
+        )
+        WORKFLOW_INGEST_FUNCTION_MAP[WORKFLOW_EXPERIMENTS_JSON](
+            EXAMPLE_INGEST_OUTPUTS_EXPERIMENTS_JSON, self.study_id, logger
+        )
+
+    def test_manifest_for_study_dataset(self):
+        # project is inferred from the dataset when not specified
+        expected_resource = {"project": str(self.p.identifier), "dataset": self.study_id, "data_type": "experiment"}
+        for qs in (f"dataset={self.study_id}", f"project={self.p.identifier}&dataset={self.study_id}"):
+            with self.subTest(qs=qs):
+                response, bodies = self.authz_eval_request(
+                    "get", [[True]], f"/api/batch/experimentresults?{qs}&format=pcgl_manifest"
+                )
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                self.assert_one_authz_eval(bodies, "download:metadata", expected_resource)
+                header, *rows = tsv_rows(response)
+                self.assertEqual(len(rows), 4)  # 4 experiment results
+                study_col = header.index("study")
+                self.assertEqual({r[study_col] for r in rows}, {self.study_id})
+
+    def test_invalid_dataset_ids_rejected(self):
+        for bad_id in ("a\nb", "<script>", "x" * 129):
+            with self.subTest(bad_id=bad_id):
+                response = self.one_authz_get("/api/batch/experimentresults", {"dataset": bad_id})
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertNotIn(bad_id, response.content.decode("utf-8"))
 
 
 class TestExperimentCSVRenderer(TestCase):
