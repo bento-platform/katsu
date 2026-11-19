@@ -12,6 +12,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='biosample',
             name='links',
-            field=models.JSONField(blank=True, help_text='A list of links to external web resources related to the biosample.', null=True, validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=['uri'], schema_ref='VALIDATION_PHENOPACKET_LINK_SCHEMA')]),
+            field=models.JSONField(blank=True, help_text='A list of links to external web resources related to the biosample.', null=True, validators=[chord_metadata_service.restapi.validators.JsonSchemaValidator(formats=['uri'], schema_ref='VALIDATION_LINK_SCHEMA')]),
         ),
     ]

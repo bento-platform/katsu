@@ -286,7 +286,7 @@ class Biosample(BaseExtraProperties, BaseTimeStamp, BaseFTSModel, IndexableMixin
     links = models.JSONField(
         blank=True,
         null=True,
-        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_PHENOPACKET_LINK_SCHEMA, formats=["uri"])],
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_LINK_SCHEMA, formats=["uri"])],
         help_text=rec_help(d.BIOSAMPLE, "links"),
     )
     taxonomy = JSONField(
@@ -784,7 +784,7 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
     links = models.JSONField(
         blank=True,
         null=True,
-        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_PHENOPACKET_LINK_SCHEMA, formats=["uri"])],
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_LINK_SCHEMA, formats=["uri"])],
         help_text=rec_help(d.PHENOPACKET, "links"),
     )
 
