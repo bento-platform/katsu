@@ -12,12 +12,14 @@ from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schema_utils import (
     DATE_TIME,
     DRAFT_07,
+    SchemaStringFormats,
     SchemaTypes,
     array_of,
     base_type,
     describe_schema,
     enum_of,
     named_one_of,
+    string_with_format,
     string_with_pattern,
     sub_schema_uri,
     tag_ids_and_describe,
@@ -56,6 +58,7 @@ __all__ = [
     "PHENOPACKET_RADIATION_THERAPY",
     "PHENOPACKET_THERAPEUTIC_REGIMEN",
     "PHENOPACKET_MEDICAL_ACTION_SCHEMA",
+    "PHENOPACKET_LINK_SCHEMA",
     "EXPRESSION_SCHEMA",
     "EXTENSION_SCHEMA",
     "VCF_RECORD_SCHEMA",
@@ -64,6 +67,7 @@ __all__ = [
     "phenopacket_resolver",
     "VALIDATION_PHENOPACKET_UPDATE_SCHEMA",
     "VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA",
+    "VALIDATION_PHENOPACKET_LINK_SCHEMA",
 ]
 
 phenopacket_base_uri = f"{settings.SCHEMAS_BASE_URL}/phenopacket"
@@ -453,6 +457,23 @@ PHENOPACKET_MEDICAL_ACTION_SCHEMA = describe_schema(
     descriptions=descriptions.MEDICAL_ACTION,
 )
 
+PHENOPACKET_LINK_SCHEMA = describe_schema(
+    {
+        "$schema": DRAFT_07,
+        "$id": sub_schema_uri(phenopacket_base_uri, "link"),
+        "title": "Phenopacket link schema",
+        "description": "A link to an external web resource related to a phenopacket.",
+        "type": "object",
+        "properties": {
+            "label": base_type(SchemaTypes.STRING),
+            "url": string_with_format(SchemaStringFormats.URI),
+        },
+        "required": ["url"],
+        "additionalProperties": False,
+    },
+    descriptions.LINK,
+)
+
 
 GENE_DESCRIPTOR = describe_schema(
     {
@@ -682,6 +703,7 @@ PHENOPACKET_SCHEMA = tag_ids_and_describe(
             "diseases": array_of(PHENOPACKET_DISEASE_SCHEMA),
             "medical_actions": array_of(PHENOPACKET_MEDICAL_ACTION_SCHEMA),
             "files": array_of(FILE_SCHEMA),
+            "links": array_of(PHENOPACKET_LINK_SCHEMA),
             "meta_data": PHENOPACKET_META_DATA_SCHEMA,
             "extra_properties": EXTRA_PROPERTIES_SCHEMA,
         },
@@ -705,3 +727,4 @@ VRS_VARIATION_SCHEMA = resolver.lookup(sub_schema_uri(phenopacket_base_uri, "vrs
 
 VALIDATION_PHENOPACKET_UPDATE_SCHEMA = validation_schema_list(PHENOPACKET_UPDATE_SCHEMA)
 VALIDATION_PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA = validation_schema_list(PHENOPACKET_EXTERNAL_REFERENCE_SCHEMA)
+VALIDATION_PHENOPACKET_LINK_SCHEMA = validation_schema_list(PHENOPACKET_LINK_SCHEMA)

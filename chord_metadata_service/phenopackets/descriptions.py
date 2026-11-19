@@ -56,6 +56,14 @@ EXTERNAL_REFERENCE = {
     },
 }
 
+LINK = {
+    "description": "A link to an external web resource related to a phenopacket.",
+    "properties": {
+        "label": "An optional human-readable label for the link.",
+        "url": "A valid URL of the linked resource. REQUIRED.",
+    },
+}
+
 UPDATE = {
     "description": "An update event for a record (e.g. a phenopacket.)",
     "properties": {
@@ -495,6 +503,10 @@ PHENOPACKET = {
         "medical_actions": {
             "description": "Medical actions performed",
             "items": MEDICAL_ACTION,
+        },
+        "links": {
+            "description": "A list of links to external web resources related to the phenopacket.",
+            "items": LINK,
         },
         "meta_data": META_DATA,
         **EXTRA_PROPERTIES,

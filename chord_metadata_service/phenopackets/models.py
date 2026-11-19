@@ -773,6 +773,14 @@ class Phenopacket(BaseExtraProperties, BaseTimeStamp, BaseScopeableModel, BaseFT
         blank=True, null=True, validators=[JsonSchemaValidator(schema_ref=SchemaRefs.PHENOPACKET_MEDICAL_ACTION_SCHEMA)]
     )
 
+    # Non-Phenopackets-standard field: links to external web resources related to the phenopacket
+    links = models.JSONField(
+        blank=True,
+        null=True,
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_PHENOPACKET_LINK_SCHEMA, formats=["uri"])],
+        help_text=rec_help(d.PHENOPACKET, "links"),
+    )
+
     # TODO OneToOneField
     meta_data = models.ForeignKey(MetaData, on_delete=models.CASCADE, help_text=rec_help(d.PHENOPACKET, "meta_data"))
 
