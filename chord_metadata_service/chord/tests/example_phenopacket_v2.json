@@ -548,6 +548,15 @@
       }
     }
   ],
+  "links": [
+    {
+      "label": "Study page",
+      "url": "https://example.org/studies/pheno-1"
+    },
+    {
+      "url": "https://example.org/cases/pheno-1"
+    }
+  ],
   "meta_data": {
     "created": "2019-04-03T15:31:40.765Z",
     "created_by": "Peter R",

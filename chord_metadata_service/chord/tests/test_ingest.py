@@ -191,6 +191,9 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         # Medical Actions
         self.assertEqual(p.medical_actions, EXAMPLE_INGEST_PHENOPACKET["medical_actions"])
 
+        # Links
+        self.assertEqual(p.links, EXAMPLE_INGEST_PHENOPACKET["links"])
+
         # Interpretations
         interpretations = list(p.interpretations.all().order_by("id"))
         self.assert_model_fields_list_equal(
