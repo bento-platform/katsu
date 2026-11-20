@@ -56,6 +56,14 @@ EXTERNAL_REFERENCE = {
     },
 }
 
+LINK = {
+    "description": "A link to an external web resource.",
+    "properties": {
+        "label": "An optional human-readable label for the link.",
+        "url": "A valid URL of the linked resource. REQUIRED.",
+    },
+}
+
 UPDATE = {
     "description": "An update event for a record (e.g. a phenopacket.)",
     "properties": {
@@ -365,6 +373,10 @@ BIOSAMPLE = {
             "items": phenotypic_feature("a biosample"),
         },
         "measurements": "List of measurements of the sample",
+        "links": {
+            "description": "A list of links to external web resources related to the biosample.",
+            "items": LINK,
+        },
         "taxonomy": ontology_class(
             "specified when more than one organism may be studied. It is advised that codes from the NCBI Taxonomy "
             "resource are used, e.g. NCBITaxon:9606 for humans"
@@ -495,6 +507,10 @@ PHENOPACKET = {
         "medical_actions": {
             "description": "Medical actions performed",
             "items": MEDICAL_ACTION,
+        },
+        "links": {
+            "description": "A list of links to external web resources related to the phenopacket.",
+            "items": LINK,
         },
         "meta_data": META_DATA,
         **EXTRA_PROPERTIES,

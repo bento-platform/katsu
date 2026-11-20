@@ -51,7 +51,7 @@ class ExperimentResultFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = ExperimentResult
-        exclude = ["creation_date", "created", "updated", "fts_extra"]
+        exclude = ["creation_date", "created", "updated", "fts_extra", "links"]
 
     def filter_drs_association_candidate(self, qs, name, value):
         q = Q(url__isnull=True) | Q(file_format__in=("BAM", "CRAM", "VCF", "BCF", "GVCF", "FASTA", "FASTQ"), indices=[])

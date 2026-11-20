@@ -56,6 +56,7 @@ def create_experiment_result(er: dict) -> em.ExperimentResult:
         usage=er.get("usage"),
         creation_date=er.get("creation_date"),
         created_by=er.get("created_by"),
+        links=er.get("links", []),
         extra_properties=er.get("extra_properties", {}),
     )
     er_obj.save()
@@ -112,6 +113,7 @@ def ingest_experiment(
     biosample_id = experiment_data.get("biosample")
     experiment_results = experiment_data.get("experiment_results", [])
     instrument = experiment_data.get("instrument", {})
+    links = experiment_data.get("links", [])
     extra_properties = experiment_data.get("extra_properties", {})
 
     biosample: pm.Biosample | None = None
@@ -153,6 +155,7 @@ def ingest_experiment(
         qc_flags=qc_flags,
         biosample=biosample,
         instrument=instrument_db,
+        links=links,
         extra_properties=extra_properties,
         dataset=Dataset.objects.get(identifier=dataset_id),
     )

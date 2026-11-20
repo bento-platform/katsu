@@ -17,6 +17,9 @@
       "insert_size": 400,
       "extraction_protocol": "NGS",
       "molecule": "genomic DNA",
+      "links": [
+        {"label": "ENCODE experiment", "url": "https://www.encodeproject.org/experiments/ENCSR000BGH/"}
+      ],
       "molecule_ontology": {
           "id": "SO:0000991",
           "label": "genomic DNA"
@@ -24,6 +27,7 @@
       "experiment_results": [
         {
           "identifier": "sample1_01",
+          "links": [{"url": "https://www.encodeproject.org/files/ENCFF000OCW/"}],
           "description": "test",
           "filename": "sample1_01.vcf.gz",
           "file_format": "VCF",

@@ -400,6 +400,33 @@ def _individual_diseases(individual: dict) -> str | None:
     return "; ".join(all_diseases) if all_diseases else None
 
 
+def _render_links(row: dict) -> str | None:
+    """Renders a phenopacket/biosample's links as 'label (url); url', or None if there are none."""
+    if not row.get("links"):
+        return None
+    return "; ".join(
+        (f"{link['label']} ({link['url']})" if link.get("label") else link["url"]) for link in row["links"]
+    )
+
+
+def _render_biosamples(row: dict) -> str | None:
+    """Renders the biosamples of a phenopacket/individual row as 'id [tissue]; id', or None if there are none."""
+    if not row.get("biosamples"):
+        return None
+    return "; ".join(
+        (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
+        for b in row["biosamples"]
+    )
+
+
+def _individual_links(individual: dict) -> str | None:
+    """Renders the links collected from all of an individual's phenopackets (duplicates removed)."""
+    links: list[dict] = []
+    for phenopacket in individual.get("phenopackets") or []:
+        links.extend(link for link in phenopacket.get("links") or [] if link not in links)
+    return _render_links({"links": links})
+
+
 INDIVIDUAL_FIELDS: dict[str, FieldSpec] = {
     "id": simple_field("id"),
     "sex": simple_field("sex"),
@@ -408,6 +435,8 @@ INDIVIDUAL_FIELDS: dict[str, FieldSpec] = {
     "karyotypic_sex": FieldSpec(lambda row: row["karyotypic_sex"]),
     "age": FieldSpec(lambda row: render_age(row, "time_at_last_encounter")),
     "diseases": FieldSpec(_individual_diseases),
+    "biosamples": FieldSpec(_render_biosamples),
+    "links": FieldSpec(_individual_links),
     "created": FieldSpec(lambda row: row["created"]),
     "updated": FieldSpec(lambda row: row["updated"]),
 }
@@ -432,25 +461,17 @@ class IndividualXLSXRenderer(KatsuXLSXRenderer):
         return pa_s.IndividualSerializer
 
 
-def _phenopacket_biosamples(phe: dict) -> str | None:
-    if not phe.get("biosamples"):
-        return None
-    return "; ".join(
-        (f"{b['id']} [{b['sampled_tissue']['label']}]" if b.get("sampled_tissue") else b["id"])
-        for b in phe["biosamples"]
-    )
-
-
 PHENOPACKET_FIELDS: dict[str, FieldSpec] = {
     "id": FieldSpec(lambda row: row["id"]),
     "subject_id": simple_field("subject", "id"),
     "subject_sex": simple_field("subject", "sex"),
     "subject_taxonomy": simple_field("subject", "taxonomy", "label"),
-    "biosamples": FieldSpec(_phenopacket_biosamples),
+    "biosamples": FieldSpec(_render_biosamples),
     "diseases": FieldSpec(lambda row: _render_csv_diseases(row["diseases"]) if row.get("diseases") else None),
     "created_by": FieldSpec(lambda row: row["meta_data"].get("created_by")),
     "submitted_by": FieldSpec(lambda row: row["meta_data"].get("submitted_by")),
     "dataset": simple_field("dataset"),
+    "links": FieldSpec(_render_links),
 }
 
 
@@ -485,6 +506,7 @@ BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
     "created": FieldSpec(lambda row: row["created"]),
     "updated": FieldSpec(lambda row: row["updated"]),
     "individual": simple_field("individual"),
+    "links": FieldSpec(_render_links),
 }
 
 
@@ -520,6 +542,7 @@ EXPERIMENT_FIELDS: dict[str, FieldSpec] = {
     "updated": simple_field("updated"),
     "biosample": simple_field("biosample"),
     "individual": simple_field("biosample_individual", "id", default="NA"),
+    "links": FieldSpec(_render_links),
 }
 
 
@@ -553,6 +576,7 @@ EXPERIMENT_RESULT_FIELDS: dict[str, FieldSpec] = {
     "usage": simple_field("usage"),
     "creation_date": simple_field("creation_date"),
     "created_by": simple_field("created_by"),
+    "links": FieldSpec(_render_links),
 }
 
 

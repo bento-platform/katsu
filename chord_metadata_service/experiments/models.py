@@ -10,7 +10,9 @@ from chord_metadata_service.discovery.scopeable_model import (
 from chord_metadata_service.discovery.types import ModelScopeFilters
 from chord_metadata_service.restapi.models import IndexableMixin
 from chord_metadata_service.restapi.description_utils import rec_help
+from chord_metadata_service.restapi.schema_ref import SchemaRefs
 from chord_metadata_service.restapi.validators import (
+    JsonSchemaValidator,
     ontology_validator,
     base_extra_properties_validator,
 )
@@ -182,6 +184,12 @@ class Experiment(BaseScopeableModel, BaseFTSModel, IndexableMixin):
     # EXPERIMENT DESCRIPTION
     description = models.TextField(blank=True, null=True, help_text=rec_help(d.EXPERIMENT, "description"))
     # EXTRA
+    links = JSONField(
+        blank=True,
+        null=True,
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_LINK_SCHEMA, formats=["uri"])],
+        help_text=rec_help(d.EXPERIMENT, "links"),
+    )
     extra_properties = JSONField(
         blank=True,
         default=dict,
@@ -315,6 +323,12 @@ class ExperimentResult(BaseScopeableModel, BaseFTSModel, IndexableMixin):
         blank=True,
         null=True,
         help_text=rec_help(d.EXPERIMENT_RESULT, "created_by"),
+    )
+    links = JSONField(
+        blank=True,
+        null=True,
+        validators=[JsonSchemaValidator(schema_ref=SchemaRefs.VALIDATION_LINK_SCHEMA, formats=["uri"])],
+        help_text=rec_help(d.EXPERIMENT_RESULT, "links"),
     )
     extra_properties = JSONField(
         blank=True,

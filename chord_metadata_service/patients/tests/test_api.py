@@ -290,6 +290,8 @@ class IndividualCSVRendererTest(TestWithIndividual):
             "diseases",
             "created",
             "updated",
+            "biosamples",
+            "links",
         ]:
             self.assertIn(column, [column_name.lower() for column_name in headers])
 
@@ -328,6 +330,8 @@ class IndividualCSVRendererTest(TestWithIndividual):
                         "karyotypic_sex",
                         "age",
                         "diseases",
+                        "biosamples",
+                        "links",
                         "created",
                         "updated",
                     ],
@@ -339,6 +343,8 @@ class IndividualCSVRendererTest(TestWithIndividual):
                         "Karyotypic sex",
                         "Age",
                         "Diseases",
+                        "Biosamples",
+                        "Links",
                         "Created",
                         "Updated",
                     ],
@@ -450,7 +456,20 @@ class BatchIndividualsCSVTest(TestWithTwoIndividuals):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         keys = [f["key"] for f in response.json()]
         self.assertEqual(
-            keys, ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+            keys,
+            [
+                "id",
+                "sex",
+                "date_of_birth",
+                "taxonomy",
+                "karyotypic_sex",
+                "age",
+                "diseases",
+                "biosamples",
+                "links",
+                "created",
+                "updated",
+            ],
         )
 
     def test_batch_individuals_export_fields_action_forbidden(self):

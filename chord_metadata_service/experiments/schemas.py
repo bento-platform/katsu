@@ -1,9 +1,10 @@
 from django.conf import settings
 from referencing import Registry, Resource
 from .descriptions import EXPERIMENT, EXPERIMENT_RESULT, INSTRUMENT
+from chord_metadata_service.phenopackets.schemas import LINK_SCHEMA
 from chord_metadata_service.restapi.constants import MODEL_ID_PATTERN
 from chord_metadata_service.restapi.schemas import ONTOLOGY_CLASS, EXTRA_PROPERTIES_SCHEMA
-from chord_metadata_service.restapi.schema_utils import tag_ids_and_describe, sub_schema_uri
+from chord_metadata_service.restapi.schema_utils import array_of, tag_ids_and_describe, sub_schema_uri
 
 __all__ = [
     "experiment_base_uri",
@@ -133,6 +134,7 @@ EXPERIMENT_RESULT_SCHEMA = tag_ids_and_describe(
             "usage": {"type": "string"},
             "creation_date": {"type": "string"},
             "created_by": {"type": "string"},
+            "links": array_of(LINK_SCHEMA),
             "extra_properties": EXTRA_PROPERTIES_SCHEMA,
         },
     },
@@ -302,6 +304,7 @@ EXPERIMENT_SCHEMA = tag_ids_and_describe(
             "extraction_protocol": {"type": "string"},
             "reference_registry_id": {"type": "string"},
             "qc_flags": {"type": "array", "items": {"type": "string"}},
+            "links": array_of(LINK_SCHEMA),
             "extra_properties": EXTRA_PROPERTIES_SCHEMA,
             "biosample": {"type": "string"},
             "experiment_results": {"type": "array", "items": EXPERIMENT_RESULT_SCHEMA},

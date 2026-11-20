@@ -255,6 +255,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
                 "updated",
                 "biosample",
                 "individual",
+                "links",
             ],
         )
 
@@ -347,6 +348,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
                 "Usage",
                 "Creation date",
                 "Created by",
+                "Links",
             ],
         )
 
@@ -367,6 +369,7 @@ class GetExperimentsAppApisTest(AuthzAPITestCase):
                 "usage",
                 "creation_date",
                 "created_by",
+                "links",
             ],
         )
 
@@ -556,6 +559,7 @@ class TestExperimentCSVRenderer(TestCase):
             "Updated",
             "Biosample",
             "Individual",
+            "Links",
         ]
         self.assertListEqual(list(reader.fieldnames), expected_headers)
 
