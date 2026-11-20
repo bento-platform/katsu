@@ -44,7 +44,8 @@ workflow experiments_json_with_files {
     call update_experiment_json {
         input:
             json_document = json_document,
-            drs_responses = write_drs_responses_to_file.results_post_drs
+            drs_responses = write_drs_responses_to_file.results_post_drs,
+            filter_out_vcf_files = filter_out_vcf_files
     }
 
     call ingest_task {
@@ -191,6 +192,16 @@ task post_to_drs {
             resp_index=$(ingest_to_drs "~{file_path}${index_ext}")
             echo "$resp_index" | jq -c
         fi
+
+        # Index VCF files
+        if [[ "~{file_path}" =~ \.(vcf.gz)$ ]] && [[ ! -f "~{file_path}.tbi" ]]; then
+            filename=$(basename "~{file_path}")
+            index_ext=".tbi"
+            idx_fmt="TABIX"
+            tabix index "~{file_path}" 1>/dev/null 2>&1
+            resp_index=$(ingest_to_drs "~{file_path}${index_ext}")
+            echo "$resp_index" | jq -c
+        fi
     >>>
     output {
         Array[String] response_message = read_lines(stdout())
@@ -238,10 +249,13 @@ task update_experiment_json {
     input {
         File json_document
         File drs_responses
+        Boolean filter_out_vcf_files
     }
     command <<<
     python3 -c "
 import json, os
+
+filter_vcf = '~{filter_out_vcf_files}'
 
 with open('~{json_document}', 'r') as f:
     data = json.load(f)
@@ -256,6 +270,12 @@ for experiment in data.get('experiments', []):
     for result in experiment.get('experiment_results', []):
         filename = result.get('filename', '')
 
+        is_vcf = filename.endswith('.vcf') or filename.endswith('.vcf.gz')
+
+        if filter_vcf and is_vcf:
+            logger.info('skipping %s (is VCF)', filename)
+            continue
+
         if 'indices' not in result or not isinstance(result['indices'], list):
             result['indices'] = []
 
@@ -269,6 +289,8 @@ for experiment in data.get('experiments', []):
             new_index_format = 'BAI'
         elif filename.endswith('.cram'):
             new_index_format = 'CRAI'
+        elif filename.endswith('.vcf.gz'):
+            new_index_format = 'TABIX'
 
         if new_index_format:
             index_basename = construct_index_basename(filename, new_index_format)
