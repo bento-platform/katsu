@@ -34,6 +34,7 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
         (["id"], None, TrigramSimilarity),
         (["measurements"], TextField, TrigramWordSimilarity),
         (["medical_actions"], TextField, TrigramWordSimilarity),
+        (["links"], TextField, TrigramWordSimilarity),
         (["extra_properties"], TextField, TrigramWordSimilarity),
         # Phenotypic features, interpretations, and diseases are in fts_extra
         #  - the corresponding model classes implement ToFTSReprMixin
@@ -68,6 +69,7 @@ FULL_TEXT_SEARCH_FIELDS: dict[DiscoveryEntity, tuple[FTSFieldDescriptor, ...]] =
         (["tumor_progression"], TextField, TrigramWordSimilarity),
         (["tumor_grade"], TextField, TrigramWordSimilarity),
         (["diagnostic_markers"], TextField, TrigramWordSimilarity),
+        (["links"], TextField, TrigramWordSimilarity),
         (["extra_properties"], TextField, TrigramWordSimilarity),
         # Biosample -> Procedure
         (["procedure", "code"], TextField, TrigramWordSimilarity),
