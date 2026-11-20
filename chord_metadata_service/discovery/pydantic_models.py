@@ -188,6 +188,10 @@ class MatchIndividual(BaseMatchModel):
     """
 
     id: str = Field(..., title="Subject ID")
+    # links collected from all of the individual's phenopackets (duplicates removed)
+    links: list[MatchLink] = Field(..., title="Links")
+    # all of the individual's biosamples; these are also nested under the corresponding phenopacket(s)
+    biosamples: list[MatchBiosample]
     phenopackets: list[MatchPhenopacket]
 
 

@@ -913,6 +913,16 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                 "results": [
                     {
                         "id": VALID_INDIVIDUALS[1]["id"],
+                        "links": [],
+                        "biosamples": [
+                            {
+                                "id": str(bs1.id),
+                                "individual_id": str(phenopackets[1].subject_id),
+                                "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
+                                "phenopacket": str(phenopackets[1].id),
+                                "links": [],
+                            }
+                        ],
                         "phenopackets": [
                             {
                                 "biosamples": [
@@ -934,6 +944,16 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     },
                     {
                         "id": VALID_INDIVIDUALS[0]["id"],
+                        "links": PHENOPACKET_0_LINKS,
+                        "biosamples": [
+                            {
+                                "id": str(bs0.id),
+                                "individual_id": str(phenopackets[0].subject_id),
+                                "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
+                                "phenopacket": str(phenopackets[0].id),
+                                "links": BIOSAMPLE_0_LINKS,
+                            }
+                        ],
                         "phenopackets": [
                             {
                                 "biosamples": [
@@ -1146,7 +1166,20 @@ phe-1,ind:HG00096
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         keys = [f["key"] for f in res.json()]
         self.assertEqual(
-            keys, ["id", "sex", "date_of_birth", "taxonomy", "karyotypic_sex", "age", "diseases", "created", "updated"]
+            keys,
+            [
+                "id",
+                "sex",
+                "date_of_birth",
+                "taxonomy",
+                "karyotypic_sex",
+                "age",
+                "diseases",
+                "created",
+                "updated",
+                "biosamples",
+                "links",
+            ],
         )
 
     @override_settings(CONFIG_PUBLIC=DISCOVERY_CONFIG_TEST)
@@ -1183,9 +1216,9 @@ phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_
         self.assertEqual(
             res.content.decode("utf-8"),
             self._rn_newline(
-                f"""Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,Updated
-ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{_iso(i1.created)},{_iso(i1.updated)}
-ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.created)},{_iso(i0.updated)}
+                f"""Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,Updated,Biosamples,Links
+ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{_iso(i1.created)},{_iso(i1.updated)},biosample_id:2 [urinary bladder],
+ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.created)},{_iso(i0.updated)},katsu.biosample_id:1 [wall of urinary bladder],Study page (https://example.org/studies/phe-0)
 """
             ),  # CSVs use \r\n line endings here
         )

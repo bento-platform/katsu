@@ -292,11 +292,27 @@ async def individual_matches(
             {**ctx, "individual": ind_id},
         )
 
+        # Collect the links of all phenopackets, dropping duplicates but keeping the order they were first seen in
+        links: list[MatchLink] = []
+        for phe in phenopackets:
+            links.extend(link for link in phe.links if link not in links)
+
+        biosamples = await biosample_matches(
+            getattr(ind, "biosample_matches", ind.biosamples),
+            scope,
+            dt_permissions,
+            False,
+            {**ctx, "individual": ind_id},
+        )
+        biosamples.sort(key=lambda b: b.id)
+
         first_phenopacket = await ind.phenopackets.get_queryset().select_related("dataset").afirst()
 
         res.append(
             MatchIndividual(
                 id=ind_id,
+                links=links,
+                biosamples=biosamples,
                 phenopackets=phenopackets,
                 **(
                     dict(
