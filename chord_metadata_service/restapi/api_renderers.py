@@ -435,10 +435,10 @@ INDIVIDUAL_FIELDS: dict[str, FieldSpec] = {
     "karyotypic_sex": FieldSpec(lambda row: row["karyotypic_sex"]),
     "age": FieldSpec(lambda row: render_age(row, "time_at_last_encounter")),
     "diseases": FieldSpec(_individual_diseases),
-    "created": FieldSpec(lambda row: row["created"]),
-    "updated": FieldSpec(lambda row: row["updated"]),
     "biosamples": FieldSpec(_render_biosamples),
     "links": FieldSpec(_individual_links),
+    "created": FieldSpec(lambda row: row["created"]),
+    "updated": FieldSpec(lambda row: row["updated"]),
 }
 
 

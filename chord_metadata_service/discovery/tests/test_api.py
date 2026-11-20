@@ -660,6 +660,11 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
 
         self.csv_disease = "Spinocerebellar ataxia 1 (P25Y3M2D)"
         self.csv_cr_sub = "David Lougheed,David Lougheed"
+        # biosample/link cells, as rendered in the CSV exports
+        self.csv_bs0 = "katsu.biosample_id:1 [wall of urinary bladder]"
+        self.csv_bs1 = "biosample_id:2 [urinary bladder]"
+        self.csv_phe0_links = "Study page (https://example.org/studies/phe-0)"
+        self.csv_bs0_links = "Sample page (https://example.org/samples/bs-0); https://example.org/bs-0"
 
     @staticmethod
     def exp_res_match_dict(biosample, phenopacket, num: int):
@@ -1042,8 +1047,8 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             res.content.decode("utf-8"),
             self._rn_newline(
                 f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset,Links
-phe-0,ind:NA19648,FEMALE,{sp},katsu.biosample_id:1 [wall of urinary bladder],{self.csv_disease},{self.csv_cr_sub},{d},Study page (https://example.org/studies/phe-0)
-phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d},
+phe-0,ind:NA19648,FEMALE,{sp},{self.csv_bs0},{self.csv_disease},{self.csv_cr_sub},{d},{self.csv_phe0_links}
+phe-1,ind:HG00096,MALE,{sp},{self.csv_bs1},,{self.csv_cr_sub},{d},
 """
             ),  # CSVs use \r\n line endings here
         )
@@ -1175,10 +1180,10 @@ phe-1,ind:HG00096
                 "karyotypic_sex",
                 "age",
                 "diseases",
-                "created",
-                "updated",
                 "biosamples",
                 "links",
+                "created",
+                "updated",
             ],
         )
 
@@ -1211,14 +1216,17 @@ phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_
     def test_a_few_csv_responses_individuals(self):
         _p, _d, [i0, i1], _phenopackets = make_two_individuals_with_phenopackets()
 
+        ts0 = f"{_iso(i0.created)},{_iso(i0.updated)}"
+        ts1 = f"{_iso(i1.created)},{_iso(i1.updated)}"
+
         res = self.dt_authz_full_get(f"{self.url}?_format=csv&_entity=individual")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(
             res.content.decode("utf-8"),
             self._rn_newline(
-                f"""Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Created,Updated,Biosamples,Links
-ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{_iso(i1.created)},{_iso(i1.updated)},biosample_id:2 [urinary bladder],
-ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.created)},{_iso(i0.updated)},katsu.biosample_id:1 [wall of urinary bladder],Study page (https://example.org/studies/phe-0)
+                f"""Id,Sex,Date of birth,Taxonomy,Karyotypic sex,Age,Diseases,Biosamples,Links,Created,Updated
+ind:HG00096,MALE,1924-03-29,Homo sapiens,XY,P97Y,,{self.csv_bs1},,{ts1}
+ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{self.csv_bs0},{self.csv_phe0_links},{ts0}
 """
             ),  # CSVs use \r\n line endings here
         )
@@ -1234,7 +1242,7 @@ ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.c
 
         bs0 = phenopackets[0].biosamples.first()
         bs1 = phenopackets[1].biosamples.first()
-        cruds0 = f"{_iso(bs0.created)},{_iso(bs0.updated)},{phenopackets[0].subject.id},Sample page (https://example.org/samples/bs-0); https://example.org/bs-0"
+        cruds0 = f"{_iso(bs0.created)},{_iso(bs0.updated)},{phenopackets[0].subject.id},{self.csv_bs0_links}"
         cruds1 = f"{_iso(bs1.created)},{_iso(bs1.updated)},{phenopackets[1].subject.id},"
 
         res = self.dt_authz_full_get(f"{self.url}?_format=csv&_entity=biosample")

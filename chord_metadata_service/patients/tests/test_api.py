@@ -330,10 +330,10 @@ class IndividualCSVRendererTest(TestWithIndividual):
                         "karyotypic_sex",
                         "age",
                         "diseases",
-                        "created",
-                        "updated",
                         "biosamples",
                         "links",
+                        "created",
+                        "updated",
                     ],
                     [
                         "Id",
@@ -343,10 +343,10 @@ class IndividualCSVRendererTest(TestWithIndividual):
                         "Karyotypic sex",
                         "Age",
                         "Diseases",
-                        "Created",
-                        "Updated",
                         "Biosamples",
                         "Links",
+                        "Created",
+                        "Updated",
                     ],
                 )
             ],
@@ -465,10 +465,10 @@ class BatchIndividualsCSVTest(TestWithTwoIndividuals):
                 "karyotypic_sex",
                 "age",
                 "diseases",
-                "created",
-                "updated",
                 "biosamples",
                 "links",
+                "created",
+                "updated",
             ],
         )
 
