@@ -24,6 +24,7 @@ from chord_metadata_service.restapi import api_renderers as apir
 from .pydantic_models import (
     MatchBiosample,
     MatchExperiment,
+    MatchLink,
     ExperimentResultIndices,
     MatchExperimentResult,
     MatchPhenopacket,
@@ -218,6 +219,7 @@ async def biosample_matches(
                 id=str(b.id),
                 individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
+                links=[MatchLink.model_validate(link) for link in b.links or []],
                 experiments=experiments,
                 **(dict(project=scope.project_id, dataset=ds) if root else dict()),
             )
@@ -253,6 +255,7 @@ async def phenopacket_matches(
             MatchPhenopacket(
                 id=phe_id,
                 subject=s_id or None,
+                links=[MatchLink.model_validate(link) for link in phe.links or []],
                 biosamples=biosamples,
                 **(
                     dict(

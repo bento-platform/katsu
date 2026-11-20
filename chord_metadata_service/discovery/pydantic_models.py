@@ -147,6 +147,16 @@ class MatchExperiment(BaseMatchModel):
     phenopacket: str | None = Field(..., title="Phenopacket ID")
 
 
+class MatchLink(BaseModel):
+    """
+    A link to an external web resource, as stored on phenopackets and biosamples.
+    """
+
+    # url is kept as a plain string (not AnyUrl) so that the stored value is returned unchanged
+    label: str | None = Field(default=None, title="Label")
+    url: str = Field(..., title="URL")
+
+
 class MatchBiosample(BaseMatchModel):
     """
     Compact representation of a biosample for returning/rendering search responses.
@@ -157,6 +167,7 @@ class MatchBiosample(BaseMatchModel):
     # sample_type: OntologyTerm | None
     individual_id: str | None = Field(..., title="Individual ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
+    links: list[MatchLink] = Field(..., title="Links")
     experiments: list[MatchExperiment] | None
 
 
@@ -167,6 +178,7 @@ class MatchPhenopacket(BaseMatchModel):
 
     id: str = Field(..., title="Phenopacket ID")
     subject: str | None = Field(..., title="Subject ID")
+    links: list[MatchLink] = Field(..., title="Links")
     biosamples: list[MatchBiosample]
 
 

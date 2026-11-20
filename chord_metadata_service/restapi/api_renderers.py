@@ -432,6 +432,15 @@ class IndividualXLSXRenderer(KatsuXLSXRenderer):
         return pa_s.IndividualSerializer
 
 
+def _render_links(row: dict) -> str | None:
+    """Renders a phenopacket/biosample's links as 'label (url); url', or None if there are none."""
+    if not row.get("links"):
+        return None
+    return "; ".join(
+        (f"{link['label']} ({link['url']})" if link.get("label") else link["url"]) for link in row["links"]
+    )
+
+
 def _phenopacket_biosamples(phe: dict) -> str | None:
     if not phe.get("biosamples"):
         return None
@@ -451,6 +460,7 @@ PHENOPACKET_FIELDS: dict[str, FieldSpec] = {
     "created_by": FieldSpec(lambda row: row["meta_data"].get("created_by")),
     "submitted_by": FieldSpec(lambda row: row["meta_data"].get("submitted_by")),
     "dataset": simple_field("dataset"),
+    "links": FieldSpec(_render_links),
 }
 
 
@@ -485,6 +495,7 @@ BIOSAMPLE_FIELDS: dict[str, FieldSpec] = {
     "created": FieldSpec(lambda row: row["created"]),
     "updated": FieldSpec(lambda row: row["updated"]),
     "individual": simple_field("individual"),
+    "links": FieldSpec(_render_links),
 }
 
 

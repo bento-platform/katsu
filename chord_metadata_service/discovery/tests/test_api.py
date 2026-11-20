@@ -587,6 +587,13 @@ class DiscoveryOverviewInvalidExtraPropsDataTypesDictTest(AuthzAPITestCase):
         self.assertEqual(8, response_obj["fields"]["baseline_creatinine"]["data"][-1]["value"])
 
 
+PHENOPACKET_0_LINKS = [{"label": "Study page", "url": "https://example.org/studies/phe-0"}]
+BIOSAMPLE_0_LINKS = [
+    {"label": "Sample page", "url": "https://example.org/samples/bs-0"},
+    {"url": "https://example.org/bs-0"},
+]
+
+
 def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Individual], list[ph_m.Phenopacket]]:
     # create project + dataset
     p = ch_m.Project.objects.create(**ch_c.VALID_PROJECT_1)
@@ -611,12 +618,20 @@ def make_two_individuals_with_phenopackets() -> tuple[str, str, list[pa_m.Indivi
         individuals.append(ind_obj)
         bios = []
         if i == 0:
-            bios.append(ph_m.Biosample.objects.create(**ph_c.valid_biosample_1(ind_obj)))
+            bios.append(
+                ph_m.Biosample.objects.create(**{**ph_c.valid_biosample_1(ind_obj), "links": BIOSAMPLE_0_LINKS})
+            )
         elif i == 1:
             bios.append(ph_m.Biosample.objects.create(**ph_c.valid_biosample_2(ind_obj)))
 
         md = ph_m.MetaData.objects.create(**ph_c.VALID_META_DATA_1)
-        phe_obj = ph_m.Phenopacket.objects.create(id=f"phe-{i}", dataset=d, subject=ind_obj, meta_data=md)
+        phe_obj = ph_m.Phenopacket.objects.create(
+            id=f"phe-{i}",
+            dataset=d,
+            subject=ind_obj,
+            meta_data=md,
+            links=PHENOPACKET_0_LINKS if i == 0 else None,
+        )
         phe_obj.biosamples.set(bios)
         phe_obj.save()
 
@@ -793,12 +808,14 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                 {
                     "id": "phe-0",
                     "subject": str(individuals[0].id),
+                    "links": PHENOPACKET_0_LINKS,
                     "biosamples": [
                         {
                             "id": str(bs0.id),
                             "individual_id": str(phenopackets[0].subject_id),
                             "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
                             "phenopacket": str(phenopackets[0].id),
+                            "links": BIOSAMPLE_0_LINKS,
                         }
                     ],
                     "project": p,
@@ -807,12 +824,14 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                 {
                     "id": "phe-1",
                     "subject": str(individuals[1].id),
+                    "links": [],
                     "biosamples": [
                         {
                             "id": str(bs1.id),
                             "individual_id": str(phenopackets[1].subject_id),
                             "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
                             "phenopacket": str(phenopackets[1].id),
+                            "links": [],
                         }
                     ],
                     "project": p,
@@ -855,12 +874,14 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                     {
                         "id": "phe-1",
                         "subject": str(individuals[1].id),
+                        "links": [],
                         "biosamples": [
                             {
                                 "id": str(bs1.id),
                                 "individual_id": str(phenopackets[1].subject_id),
                                 "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
                                 "phenopacket": str(phenopackets[1].id),
+                                "links": [],
                             }
                         ],
                         "project": p,
@@ -900,10 +921,12 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                                         "individual_id": str(phenopackets[1].subject_id),
                                         "experiments": [self.exp_match_dict(bs1, phenopackets[1], 1)],
                                         "phenopacket": str(phenopackets[1].id),
+                                        "links": [],
                                     }
                                 ],
                                 "id": "phe-1",
                                 "subject": str(individuals[1].id),
+                                "links": [],
                             },
                         ],
                         "project": p,
@@ -919,10 +942,12 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
                                         "individual_id": str(phenopackets[0].subject_id),
                                         "experiments": [self.exp_match_dict(bs0, phenopackets[0], 0)],
                                         "phenopacket": str(phenopackets[0].id),
+                                        "links": BIOSAMPLE_0_LINKS,
                                     }
                                 ],
                                 "id": "phe-0",
                                 "subject": str(individuals[0].id),
+                                "links": PHENOPACKET_0_LINKS,
                             },
                         ],
                         "project": p,
@@ -996,9 +1021,9 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
         self.assertEqual(
             res.content.decode("utf-8"),
             self._rn_newline(
-                f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
-phe-0,ind:NA19648,FEMALE,{sp},katsu.biosample_id:1 [wall of urinary bladder],{self.csv_disease},{self.csv_cr_sub},{d}
-phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d}
+                f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset,Links
+phe-0,ind:NA19648,FEMALE,{sp},katsu.biosample_id:1 [wall of urinary bladder],{self.csv_disease},{self.csv_cr_sub},{d},Study page (https://example.org/studies/phe-0)
+phe-1,ind:HG00096,MALE,{sp},biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d},
 """
             ),  # CSVs use \r\n line endings here
         )
@@ -1047,6 +1072,7 @@ phe-1,ind:HG00096
                     "Created by",
                     "Submitted by",
                     "Dataset",
+                    "Links",
                 ],
                 [
                     "phe-0",
@@ -1058,6 +1084,7 @@ phe-1,ind:HG00096
                     "David Lougheed",
                     "David Lougheed",
                     d,
+                    "Study page (https://example.org/studies/phe-0)",
                 ],
                 [
                     "phe-1",
@@ -1069,6 +1096,7 @@ phe-1,ind:HG00096
                     "David Lougheed",
                     "David Lougheed",
                     d,
+                    None,
                 ],
             ],
         )
@@ -1107,6 +1135,7 @@ phe-1,ind:HG00096
                 "created_by",
                 "submitted_by",
                 "dataset",
+                "links",
             ],
         )
 
@@ -1139,8 +1168,8 @@ phe-1,ind:HG00096
         self.assertEqual(
             res.content.decode("utf-8"),
             self._rn_newline(
-                f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset
-phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d}
+                f"""Id,Subject id,Subject sex,Subject taxonomy,Biosamples,Diseases,Created by,Submitted by,Dataset,Links
+phe-1,ind:HG00096,MALE,Homo sapiens,biosample_id:2 [urinary bladder],,{self.csv_cr_sub},{d},
 """
             ),  # CSVs use \r\n line endings here
         )
@@ -1167,13 +1196,13 @@ ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{_iso(i0.c
 
         hdr = (
             "Id,Description,Sampled tissue,Time of collection,Histological diagnosis,Extra properties,Created,Updated,"
-            "Individual"
+            "Individual,Links"
         )
 
         bs0 = phenopackets[0].biosamples.first()
         bs1 = phenopackets[1].biosamples.first()
-        cruds0 = f"{_iso(bs0.created)},{_iso(bs0.updated)},{phenopackets[0].subject.id}"
-        cruds1 = f"{_iso(bs1.created)},{_iso(bs1.updated)},{phenopackets[1].subject.id}"
+        cruds0 = f"{_iso(bs0.created)},{_iso(bs0.updated)},{phenopackets[0].subject.id},Sample page (https://example.org/samples/bs-0); https://example.org/bs-0"
+        cruds1 = f"{_iso(bs1.created)},{_iso(bs1.updated)},{phenopackets[1].subject.id},"
 
         res = self.dt_authz_full_get(f"{self.url}?_format=csv&_entity=biosample")
         self.assertEqual(res.status_code, status.HTTP_200_OK)
