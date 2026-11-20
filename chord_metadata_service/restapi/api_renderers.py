@@ -542,6 +542,7 @@ EXPERIMENT_FIELDS: dict[str, FieldSpec] = {
     "updated": simple_field("updated"),
     "biosample": simple_field("biosample"),
     "individual": simple_field("biosample_individual", "id", default="NA"),
+    "links": FieldSpec(_render_links),
 }
 
 
@@ -575,6 +576,7 @@ EXPERIMENT_RESULT_FIELDS: dict[str, FieldSpec] = {
     "usage": simple_field("usage"),
     "creation_date": simple_field("creation_date"),
     "created_by": simple_field("created_by"),
+    "links": FieldSpec(_render_links),
 }
 
 

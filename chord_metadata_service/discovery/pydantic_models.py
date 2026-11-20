@@ -88,6 +88,16 @@ class BaseMatchModel(BaseModel, abc.ABC):
     dataset: str | None = Field(default=None, title="Dataset ID")
 
 
+class MatchLink(BaseModel):
+    """
+    A link to an external web resource, as stored on phenopackets, biosamples, experiments and experiment results.
+    """
+
+    # url is kept as a plain string (not AnyUrl) so that the stored value is returned unchanged
+    label: str | None = Field(default=None, title="Label")
+    url: str = Field(..., title="URL")
+
+
 class ExperimentResultIndex(BaseModel):
     url: str
     format: Literal[
@@ -120,6 +130,7 @@ class MatchExperimentResult(BaseMatchModel):
     creation_date: str | None = Field(..., title="Creation date")
     created_by: str | None = Field(..., title="Created by")
     genome_assembly_id: str | None = Field(..., title="Genome assembly ID")
+    links: list[MatchLink] = Field(..., title="Links")
     extra_properties: dict = Field(..., title="Extra properties")
     # backlinks to linked experiments
     experiments: list[str] = Field(
@@ -142,19 +153,10 @@ class MatchExperiment(BaseMatchModel):
     molecule: str | None = Field(..., title="Molecule")
     molecule_ontology: OntologyClass | None = Field(..., title="Molecule (Ontology)")
     results: list[MatchExperimentResult]
+    links: list[MatchLink] = Field(..., title="Links")
     # backlinks:
     biosample: str | None = Field(..., title="Biosample ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
-
-
-class MatchLink(BaseModel):
-    """
-    A link to an external web resource, as stored on phenopackets and biosamples.
-    """
-
-    # url is kept as a plain string (not AnyUrl) so that the stored value is returned unchanged
-    label: str | None = Field(default=None, title="Label")
-    url: str = Field(..., title="URL")
 
 
 class MatchBiosample(BaseMatchModel):

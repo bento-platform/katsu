@@ -110,6 +110,7 @@ async def experiment_result_matches(
                 usage=er.usage,
                 creation_date=er.creation_date,
                 created_by=er.created_by,
+                links=[MatchLink.model_validate(link) for link in er.links or []],
                 extra_properties=er.extra_properties,
                 # ------------------------------------------------------------------------------------------------------
                 experiments=[v async for v in er.experiments.values_list("id", flat=True)],
@@ -164,6 +165,7 @@ async def experiment_matches(
                     OntologyClass.model_validate(exp.molecule_ontology) if exp.molecule_ontology else None
                 ),
                 results=experiment_results,
+                links=[MatchLink.model_validate(link) for link in exp.links or []],
                 # ------------------------------------------------------------------------------------------------------
                 biosample=str(exp.biosample.id) if exp.biosample else None,
                 phenopacket=str(phenopacket.id) if phenopacket else None,

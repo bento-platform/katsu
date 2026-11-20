@@ -676,6 +676,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             "indices": [],
             "experiments": [biosample.experiments.first().id],
             "phenopacket": str(phenopacket.id),
+            "links": [],
         }
 
     @staticmethod
@@ -689,6 +690,7 @@ class DiscoveryMatchesTest(AuthzAPITestCase):
             "molecule": "total RNA",  # doesn't make sense haha
             "molecule_ontology": {"id": "ontology:1", "label": "Ontology term 1"},
             "results": [DiscoveryMatchesTest.exp_res_match_dict(biosample, phenopacket, num)],
+            "links": [],
             "biosample": str(biosample.id),
             "phenopacket": str(phenopacket.id),
         }
@@ -1263,15 +1265,15 @@ ind:NA19648,FEMALE,1993-10-04,Homo sapiens,XX,P28Y,{self.csv_disease},{self.csv_
 
         hdr = (
             "Id,Study type,Experiment type,Molecule,Library strategy,Library source,Library selection,Library layout,"
-            "Created,Updated,Biosample,Individual"
+            "Created,Updated,Biosample,Individual,Links"
         )
 
         bs0 = phenopackets[0].biosamples.first()
         bs1 = phenopackets[1].biosamples.first()
         exp0 = bs0.experiments.first()
         exp1 = bs1.experiments.first()
-        cruds0 = f"{_iso(exp0.created)},{_iso(exp0.updated)},{bs0.id},{phenopackets[0].subject.id}"
-        cruds1 = f"{_iso(exp1.created)},{_iso(exp1.updated)},{bs1.id},{phenopackets[1].subject.id}"
+        cruds0 = f"{_iso(exp0.created)},{_iso(exp0.updated)},{bs0.id},{phenopackets[0].subject.id},"
+        cruds1 = f"{_iso(exp1.created)},{_iso(exp1.updated)},{bs1.id},{phenopackets[1].subject.id},"
 
         # Empty CSV
         res = self.dt_authz_full_get(f"{self.url}?_format=csv&_entity=experiment")
@@ -1296,7 +1298,8 @@ experiment:1,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Gen
         er1 = bs1.experiments.first().experiment_results.first().id
 
         hdr = (
-            "Id,Description,Filename,Url,Genome assembly id,File format,Data output type,Usage,Creation date,Created by"
+            "Id,Description,Filename,Url,Genome assembly id,File format,Data output type,Usage,Creation date,"
+            "Created by,Links"
         )
 
         # Empty CSV
@@ -1306,8 +1309,8 @@ experiment:1,Whole genome Sequencing,DNA Methylation,total RNA,Bisulfite-Seq,Gen
             res.content.decode("utf-8"),
             self._rn_newline(
                 f"""{hdr}
-{er0},Test Experiment result 0,00.vcf.gz,,,VCF,Derived data,download,2021-06-28,admin
-{er1},Test Experiment result 1,01.vcf.gz,,,VCF,Derived data,download,2021-06-28,admin
+{er0},Test Experiment result 0,00.vcf.gz,,,VCF,Derived data,download,2021-06-28,admin,
+{er1},Test Experiment result 1,01.vcf.gz,,,VCF,Derived data,download,2021-06-28,admin,
 """
             ),  # CSVs use \r\n line endings here
         )

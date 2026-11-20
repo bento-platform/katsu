@@ -268,9 +268,14 @@ class IngestTest(ProjectTestCase, ModelFieldsTestMixin):
         self.assertEqual(experiments[0].id, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["id"])
         self.assertEqual(experiments[0].biosample.id, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["biosample"])
         self.assertEqual(experiments[0].experiment_type, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["experiment_type"])
+        self.assertEqual(experiments[0].links, EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["links"])
 
         # experiment results
         self.assertEqual(experiments[0].experiment_results.count(), ExperimentResult.objects.all().count())
+        self.assertEqual(
+            experiments[0].experiment_results.get(identifier="sample1_01").links,
+            EXAMPLE_INGEST_EXPERIMENT["experiments"][0]["experiment_results"][0]["links"],
+        )
 
         # instrument
         self.assertEqual(Instrument.objects.all().count(), 2)

@@ -57,7 +57,7 @@ EXTERNAL_REFERENCE = {
 }
 
 LINK = {
-    "description": "A link to an external web resource related to a phenopacket.",
+    "description": "A link to an external web resource.",
     "properties": {
         "label": "An optional human-readable label for the link.",
         "url": "A valid URL of the linked resource. REQUIRED.",
