@@ -55,9 +55,8 @@ def get_threshold(discovery_or_scope_or_rules: RulesExtractable, field_set_permi
 def get_count_rounding(discovery_or_scope_or_rules: RulesExtractable, field_set_permissions: DataPermissions) -> int:
     """
     Gets the rounding base for counts shown without query:data. 0 means no rounding.
-    The getattr fallback keeps this working with bento_lib versions that have no count_rounding rule yet.
     """
-    return getattr(get_rules(discovery_or_scope_or_rules, field_set_permissions), "count_rounding", 0) or 0
+    return get_rules(discovery_or_scope_or_rules, field_set_permissions).count_rounding
 
 
 def round_count(c: int, r: int) -> int:

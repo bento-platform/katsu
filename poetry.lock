@@ -414,25 +414,27 @@ visualize = ["Twisted (>=16.1.1)", "graphviz (>0.5.1)"]
 
 [[package]]
 name = "bento-lib"
-version = "18.3.0"
+version = "18.4.0"
 description = "A set of common utilities and helpers for Bento platform services."
 optional = false
-python-versions = "^3.12"
+python-versions = "<4.0,>=3.12"
 groups = ["main"]
-files = []
-develop = false
+files = [
+    {file = "bento_lib-18.4.0-py3-none-any.whl", hash = "sha256:9667daea41e91e26cb8681680316b979fc3a87c37969314a7e7369653e00e50f"},
+    {file = "bento_lib-18.4.0.tar.gz", hash = "sha256:3b7f4a8a28e9b7290bbeb1e61c3e7116500c07b3d75e660681eb934641f25a19"},
+]
 
 [package.dependencies]
 aiofiles = ">=24.1.0,<26"
 aiohttp = ">=3.10.10,<4"
-django = {version = ">=6.0,<6.2", optional = true}
-djangorestframework = {version = ">=3.17.1,<3.19", optional = true}
-geojson-pydantic = "^2.0.0"
+django = {version = ">=6.0,<6.2", optional = true, markers = "extra == \"django\""}
+djangorestframework = {version = ">=3.17.1,<3.19", optional = true, markers = "extra == \"django\""}
+geojson-pydantic = ">=2.0.0,<3.0.0"
 jsonschema = ">=4.23.0,<5"
 psycopg2-binary = ">=2.9.9,<3.0"
-pycountry = "^26.2.16"
+pycountry = ">=26.2.16,<27.0.0"
 pydantic = {version = ">=2.11.3,<3", extras = ["email"]}
-pydantic-extra-types = "^2.11.0"
+pydantic-extra-types = ">=2.11.0,<3.0.0"
 pydantic-settings = ">=2.8.1"
 redis = ">=6.4.0,<9"
 requests = ">=2.32.3,<3"
@@ -445,12 +447,6 @@ asyncpg = ["asyncpg (>=0.29.0,<0.33.0)"]
 django = ["django (>=6.0,<6.2)", "djangorestframework (>=3.17.1,<3.19)"]
 fastapi = ["fastapi", "uvicorn"]
 flask = ["flask (>=3.0.3,<4)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/bento-platform/bento_lib.git"
-reference = "5e007026dee2f7da6efab005ea83e74a705e1067"
-resolved_reference = "5e007026dee2f7da6efab005ea83e74a705e1067"
 
 [[package]]
 name = "cachetools"
@@ -3995,4 +3991,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12.0"
-content-hash = "8573eb02d557bae25e1e9f30e8996c22618b2eec8aab8be20d6f7b87c4e47928"
+content-hash = "389a8c4607661d7ca21ce5172adcd48b8d570440aa7e2265229d88989b7a5516"
