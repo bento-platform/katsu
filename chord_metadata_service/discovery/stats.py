@@ -143,10 +143,12 @@ async def queryset_stats_for_field(
 
         # Censor low cell counts if necessary - we don't want to betray that the value even exists in the database if
         # we have a low count for it.
-        if should_censor and thresholded_count(item["total"], discovery, field_permissions) == 0:
+        # Counts above the threshold are also rounded (count_rounding), each bin separately.
+        value = thresholded_count(item["total"], discovery, field_permissions) if should_censor else item["total"]
+        if should_censor and value == 0:
             continue
 
-        stats[key] = item["total"]
+        stats[key] = value
 
     if add_missing:
         stats["missing"] = (

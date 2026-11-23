@@ -17,6 +17,8 @@ from .utils import extract_discovery
 
 __all__ = [
     "get_threshold",
+    "get_count_rounding",
+    "round_count",
     "censor_count",
     "thresholded_count",
     "get_max_query_parameters",
@@ -50,12 +52,32 @@ def get_threshold(discovery_or_scope_or_rules: RulesExtractable, field_set_permi
     return get_rules(discovery_or_scope_or_rules, field_set_permissions).count_threshold
 
 
-def censor_count(c: int, t: int) -> int:
+def get_count_rounding(discovery_or_scope_or_rules: RulesExtractable, field_set_permissions: DataPermissions) -> int:
+    """
+    Gets the rounding base for counts shown without query:data. 0 means no rounding.
+    The getattr fallback keeps this working with bento_lib versions that have no count_rounding rule yet.
+    """
+    return getattr(get_rules(discovery_or_scope_or_rules, field_set_permissions), "count_rounding", 0) or 0
+
+
+def round_count(c: int, r: int) -> int:
+    """
+    Rounds a count to the nearest multiple of r, with halves rounding up. This is deterministic on purpose: random
+    rounding would let someone repeat a query and average out the noise. If r <= 0, the count is not changed.
+    """
+    return c if r <= 0 else ((c + r // 2) // r) * r
+
+
+def censor_count(c: int, t: int, r: int = 0) -> int:
     """
     Censors a count if it is less than or equal to a threshold. We make this a tiny little function to ensure
     less-than-or-equal-to is used consistently.
+    A count above the threshold is rounded to the nearest multiple of r, but never down to 0: max(r, rounded).
+    With r = 0, the count is returned as-is.
     """
-    return 0 if c <= t else c
+    if c <= t:
+        return 0
+    return c if r <= 0 else max(r, round_count(c, r))
 
 
 def thresholded_count(
@@ -63,7 +85,11 @@ def thresholded_count(
     discovery_or_scope_or_rules: RulesExtractable,
     field_set_permissions: DataPermissions,
 ) -> int:
-    return censor_count(c, get_threshold(discovery_or_scope_or_rules, field_set_permissions))
+    return censor_count(
+        c,
+        get_threshold(discovery_or_scope_or_rules, field_set_permissions),
+        get_count_rounding(discovery_or_scope_or_rules, field_set_permissions),
+    )
 
 
 def get_max_query_parameters(
@@ -100,13 +126,14 @@ async def censor_entity_counts(
         dt = DISCOVERY_ENTITY_NAMES_TO_DATA_TYPE[e]
         entity_permissions = dt_permissions[dt]
         count_threshold = get_threshold(discovery_or_scope_or_rules, entity_permissions)
-
-        entity_count = counts[e]
+        count_rounding = get_count_rounding(discovery_or_scope_or_rules, entity_permissions)
 
         # Extra check for threshold being above 0 to not log warnings for true-0 counts with query:data
         if 0 < counts[e] <= count_threshold and count_threshold > 0:
             await lg.ainfo("discovery: entity count is below threshold", entity=e, threshold=count_threshold)
-            entity_count = 0  # censor sub-threshold counts to 0
+
+        # censor sub-threshold counts to 0, and round the rest
+        entity_count = censor_count(counts[e], count_threshold, count_rounding)
 
         if entity_permissions.any_permissions():  # if we have any permissions, then add a response for the overview
             # if we only have boolean permissions, store a Boolean "count" (yes or no to above-threshold count) if we

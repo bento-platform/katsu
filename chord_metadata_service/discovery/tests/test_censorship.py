@@ -1,12 +1,14 @@
 import structlog.stdlib
 import sys
-from bento_lib.discovery import DiscoveryConfig
+from bento_lib.discovery import DiscoveryConfig, DiscoveryConfigRules
 from django.test import TestCase
 
 from chord_metadata_service.authz.types import DataPermissions
 from chord_metadata_service.authz.tests.helpers import PermissionsTestCaseMixin
 from chord_metadata_service.chord.data_types import DATA_TYPE_PHENOPACKET, DATA_TYPE_EXPERIMENT
 from chord_metadata_service.discovery.censorship import (
+    censor_count,
+    round_count,
     get_threshold,
     thresholded_count,
     get_max_query_parameters,
@@ -194,3 +196,47 @@ class CensorshipAggregateCountsFromCensoredByDatasetTest(TestCase):
         }
         result = aggregate_counts_from_censored_by_dataset(counts_by_dataset)
         self.assertIs(result["phenopacket"], False)
+
+
+class CensorshipCountRoundingTest(TestCase):
+    def test_round_count(self):
+        self.assertEqual(round_count(37, 5), 35)
+        self.assertEqual(round_count(38, 5), 40)
+        self.assertEqual(round_count(40, 5), 40)
+        self.assertEqual(round_count(37, 0), 37)  # no rounding
+
+    def test_round_count_is_deterministic(self):
+        self.assertEqual({round_count(37, 5) for _ in range(100)}, {35})
+
+    def test_censor_count_no_rounding_matches_old_behaviour(self):
+        self.assertEqual(censor_count(5, 5), 0)
+        self.assertEqual(censor_count(6, 5), 6)
+        self.assertEqual(censor_count(37, 5, 0), 37)
+
+    def test_censor_count_with_rounding(self):
+        # threshold 5, rounding 5: bins {A: 37, B: 3, missing: 0}, total 40
+        total, a, b, missing = (censor_count(c, 5, 5) for c in (40, 37, 3, 0))
+        self.assertEqual((total, a, b, missing), (40, 35, 0, 0))
+        self.assertNotEqual(total - a, 3)  # the hidden bin B is not recoverable by subtraction
+
+    def test_censor_count_never_rounds_above_threshold_down_to_zero(self):
+        # threshold 1, rounding 10: 2 rounds to 0 under plain rounding, but must show as 10
+        self.assertEqual(censor_count(2, 1, 10), 10)
+
+
+class CensorshipRulesCountRoundingTest(TestCase, PermissionsTestCaseMixin):
+    rules = DiscoveryConfigRules(count_threshold=5, max_query_parameters=2, count_rounding=5)
+
+    def test_thresholded_count_rounds_with_counts_permission(self):
+        counts_only = DataPermissions(counts=True)
+        self.assertEqual([thresholded_count(c, self.rules, counts_only) for c in (3, 5, 37, 40)], [0, 0, 35, 40])
+
+    def test_query_data_gets_exact_counts(self):
+        self.assertEqual(thresholded_count(37, self.rules, DataPermissions(data=True)), 37)
+
+    def test_censor_entity_counts_rounds(self):
+        # sync check of the rule lookup used by censor_entity_counts
+        from chord_metadata_service.discovery.censorship import get_count_rounding
+
+        self.assertEqual(get_count_rounding(self.rules, DataPermissions(counts=True)), 5)
+        self.assertEqual(get_count_rounding(self.rules, DataPermissions(data=True)), 0)
