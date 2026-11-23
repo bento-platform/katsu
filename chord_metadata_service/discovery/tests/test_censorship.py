@@ -228,15 +228,15 @@ class CensorshipRulesCountRoundingTest(TestCase, PermissionsTestCaseMixin):
     rules = DiscoveryConfigRules(count_threshold=5, max_query_parameters=2, count_rounding=5)
 
     def test_thresholded_count_rounds_with_counts_permission(self):
-        counts_only = DataPermissions(counts=True)
+        counts_only = DataPermissions(bool_=True, counts=True, data=False)
         self.assertEqual([thresholded_count(c, self.rules, counts_only) for c in (3, 5, 37, 40)], [0, 0, 35, 40])
 
     def test_query_data_gets_exact_counts(self):
-        self.assertEqual(thresholded_count(37, self.rules, DataPermissions(data=True)), 37)
+        self.assertEqual(thresholded_count(37, self.rules, DataPermissions(bool_=True, counts=True, data=True)), 37)
 
     def test_censor_entity_counts_rounds(self):
         # sync check of the rule lookup used by censor_entity_counts
         from chord_metadata_service.discovery.censorship import get_count_rounding
 
-        self.assertEqual(get_count_rounding(self.rules, DataPermissions(counts=True)), 5)
-        self.assertEqual(get_count_rounding(self.rules, DataPermissions(data=True)), 0)
+        self.assertEqual(get_count_rounding(self.rules, DataPermissions(bool_=True, counts=True, data=False)), 5)
+        self.assertEqual(get_count_rounding(self.rules, DataPermissions(bool_=True, counts=True, data=True)), 0)
