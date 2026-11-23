@@ -11,7 +11,13 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
 
 from .constants import DISCOVERY_CONFIG_TEST
-from ..fields import get_age_numeric_binned, get_field_options, get_categorical_stats, get_distinct_field_values, filter_queryset_field_value
+from ..fields import (
+    get_age_numeric_binned,
+    get_field_options,
+    get_categorical_stats,
+    get_distinct_field_values,
+    filter_queryset_field_value,
+)
 from ..pydantic_models import BinWithValue
 
 
