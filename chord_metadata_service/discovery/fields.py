@@ -237,17 +237,17 @@ async def get_age_numeric_binned(
     has two alternate formats (hence more complex and slower to process)
     """
     individuals_age = await get_field_bins(individual_queryset, "age_numeric", bin_size)
-    if None not in individuals_age:
-        return individuals_age
+    if None in individuals_age:
+        del individuals_age[None]
+        individuals_age = Counter(individuals_age)
+        individuals_age.update(
+            # single update instead of creating iterables in a loop
+            await compute_binned_ages(individual_queryset, bin_size)
+        )
 
-    del individuals_age[None]
-    individuals_age = Counter(individuals_age)
-    individuals_age.update(
-        # single update instead of creating iterables in a loop
-        await compute_binned_ages(individual_queryset, bin_size)
-    )
-
-    return {b: thresholded_count(bv, discovery, field_permissions) for b, bv in individuals_age.items()}
+    # Censor on both paths. Drop bins censored to 0: a 0 entry would still show that 1..threshold individuals exist.
+    censored = {b: thresholded_count(bv, discovery, field_permissions) for b, bv in individuals_age.items()}
+    return {b: bv for b, bv in censored.items() if bv != 0}
 
 
 def _month_start_end_from_stats(stats: dict[str, int], threshold: int) -> tuple[str | None, str | None]:
