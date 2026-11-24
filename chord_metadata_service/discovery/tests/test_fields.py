@@ -11,7 +11,13 @@ from chord_metadata_service.phenopackets.tests import constants as ph_c
 from chord_metadata_service.phenopackets import models as ph_m
 
 from .constants import DISCOVERY_CONFIG_TEST
-from ..fields import get_field_options, get_categorical_stats, get_distinct_field_values, filter_queryset_field_value
+from ..fields import (
+    get_age_numeric_binned,
+    get_field_options,
+    get_categorical_stats,
+    get_distinct_field_values,
+    filter_queryset_field_value,
+)
 from ..pydantic_models import BinWithValue
 
 
@@ -246,3 +252,49 @@ class TestJsonFieldArrayStats(ProjectTestCase, PermissionsTestCaseMixin):
             "phenopacket", base_qs_pheno, DISCOVERY_CONFIG_TEST.fields["diagnostic_markers"], 5
         )
         self.assertListEqual(dm_values_censored, [])
+
+
+class TestGetAgeNumericBinned(TransactionTestCase, PermissionsTestCaseMixin):
+    """Threshold is 5 in DISCOVERY_CONFIG_TEST: a bin needs more than 5 individuals to be shown."""
+
+    async def _make_individuals(self, prefix: str, age: int, n: int, with_age_numeric: bool = True):
+        for i in range(n):
+            await pa_m.Individual.objects.acreate(
+                id=f"{prefix}:{i}",
+                time_at_last_encounter={"age": {"iso8601duration": f"P{age}Y"}},
+                age_numeric=age if with_age_numeric else None,
+            )
+
+    async def test_age_numeric_path_censored(self):
+        await self._make_individuals("old", 85, 3)
+        await self._make_individuals("young", 25, 6)
+        qs = pa_m.Individual.objects.all()
+        self.assertFalse(await qs.filter(age_numeric__isnull=True).aexists())  # age_numeric path
+
+        res = await get_age_numeric_binned(qs, 10, DISCOVERY_CONFIG_TEST, self.permissions_counts)
+        self.assertDictEqual(res, {20: 6})  # no 80 bin, and no 0-count entry
+
+    async def test_age_numeric_path_full_permissions(self):
+        await self._make_individuals("old", 85, 3)
+        await self._make_individuals("young", 25, 6)
+        res = await get_age_numeric_binned(
+            pa_m.Individual.objects.all(), 10, DISCOVERY_CONFIG_TEST, self.permissions_full
+        )
+        self.assertDictEqual(res, {20: 6, 80: 3})
+
+    async def test_fallback_path_censored(self):
+        await self._make_individuals("old", 85, 3, with_age_numeric=False)
+        await self._make_individuals("young", 25, 6, with_age_numeric=False)
+        qs = pa_m.Individual.objects.all()
+
+        res = await get_age_numeric_binned(qs, 10, DISCOVERY_CONFIG_TEST, self.permissions_counts)
+        self.assertDictEqual(res, {20: 6})
+
+    async def test_fallback_path_full_permissions(self):
+        await self._make_individuals("old", 85, 3, with_age_numeric=False)
+        await self._make_individuals("young", 25, 6, with_age_numeric=False)
+
+        res = await get_age_numeric_binned(
+            pa_m.Individual.objects.all(), 10, DISCOVERY_CONFIG_TEST, self.permissions_full
+        )
+        self.assertDictEqual(res, {20: 6, 80: 3})
