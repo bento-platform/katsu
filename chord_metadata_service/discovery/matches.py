@@ -24,6 +24,7 @@ from chord_metadata_service.restapi import api_renderers as apir
 from .pydantic_models import (
     MatchBiosample,
     MatchExperiment,
+    MatchLink,
     ExperimentResultIndices,
     MatchExperimentResult,
     MatchPhenopacket,
@@ -109,6 +110,7 @@ async def experiment_result_matches(
                 usage=er.usage,
                 creation_date=er.creation_date,
                 created_by=er.created_by,
+                links=[MatchLink.model_validate(link) for link in er.links or []],
                 extra_properties=er.extra_properties,
                 # ------------------------------------------------------------------------------------------------------
                 experiments=[v async for v in er.experiments.values_list("id", flat=True)],
@@ -163,6 +165,7 @@ async def experiment_matches(
                     OntologyClass.model_validate(exp.molecule_ontology) if exp.molecule_ontology else None
                 ),
                 results=experiment_results,
+                links=[MatchLink.model_validate(link) for link in exp.links or []],
                 # ------------------------------------------------------------------------------------------------------
                 biosample=str(exp.biosample.id) if exp.biosample else None,
                 phenopacket=str(phenopacket.id) if phenopacket else None,
@@ -218,6 +221,7 @@ async def biosample_matches(
                 id=str(b.id),
                 individual_id=str(b.individual_id) if b.individual_id else None,
                 phenopacket=p,
+                links=[MatchLink.model_validate(link) for link in b.links or []],
                 experiments=experiments,
                 **(dict(project=scope.project_id, dataset=ds) if root else dict()),
             )
@@ -253,6 +257,7 @@ async def phenopacket_matches(
             MatchPhenopacket(
                 id=phe_id,
                 subject=s_id or None,
+                links=[MatchLink.model_validate(link) for link in phe.links or []],
                 biosamples=biosamples,
                 **(
                     dict(
@@ -289,11 +294,27 @@ async def individual_matches(
             {**ctx, "individual": ind_id},
         )
 
+        # Collect the links of all phenopackets, dropping duplicates but keeping the order they were first seen in
+        links: list[MatchLink] = []
+        for phe in phenopackets:
+            links.extend(link for link in phe.links if link not in links)
+
+        biosamples = await biosample_matches(
+            getattr(ind, "biosample_matches", ind.biosamples),
+            scope,
+            dt_permissions,
+            False,
+            {**ctx, "individual": ind_id},
+        )
+        biosamples.sort(key=lambda b: b.id)
+
         first_phenopacket = await ind.phenopackets.get_queryset().select_related("dataset").afirst()
 
         res.append(
             MatchIndividual(
                 id=ind_id,
+                links=links,
+                biosamples=biosamples,
                 phenopackets=phenopackets,
                 **(
                     dict(

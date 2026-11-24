@@ -88,6 +88,16 @@ class BaseMatchModel(BaseModel, abc.ABC):
     dataset: str | None = Field(default=None, title="Dataset ID")
 
 
+class MatchLink(BaseModel):
+    """
+    A link to an external web resource, as stored on phenopackets, biosamples, experiments and experiment results.
+    """
+
+    # url is kept as a plain string (not AnyUrl) so that the stored value is returned unchanged
+    label: str | None = Field(default=None, title="Label")
+    url: str = Field(..., title="URL")
+
+
 class ExperimentResultIndex(BaseModel):
     url: str
     format: Literal[
@@ -120,6 +130,7 @@ class MatchExperimentResult(BaseMatchModel):
     creation_date: str | None = Field(..., title="Creation date")
     created_by: str | None = Field(..., title="Created by")
     genome_assembly_id: str | None = Field(..., title="Genome assembly ID")
+    links: list[MatchLink] = Field(..., title="Links")
     extra_properties: dict = Field(..., title="Extra properties")
     # backlinks to linked experiments
     experiments: list[str] = Field(
@@ -142,6 +153,7 @@ class MatchExperiment(BaseMatchModel):
     molecule: str | None = Field(..., title="Molecule")
     molecule_ontology: OntologyClass | None = Field(..., title="Molecule (Ontology)")
     results: list[MatchExperimentResult]
+    links: list[MatchLink] = Field(..., title="Links")
     # backlinks:
     biosample: str | None = Field(..., title="Biosample ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
@@ -157,6 +169,7 @@ class MatchBiosample(BaseMatchModel):
     # sample_type: OntologyTerm | None
     individual_id: str | None = Field(..., title="Individual ID")
     phenopacket: str | None = Field(..., title="Phenopacket ID")
+    links: list[MatchLink] = Field(..., title="Links")
     experiments: list[MatchExperiment] | None
 
 
@@ -167,6 +180,7 @@ class MatchPhenopacket(BaseMatchModel):
 
     id: str = Field(..., title="Phenopacket ID")
     subject: str | None = Field(..., title="Subject ID")
+    links: list[MatchLink] = Field(..., title="Links")
     biosamples: list[MatchBiosample]
 
 
@@ -176,6 +190,10 @@ class MatchIndividual(BaseMatchModel):
     """
 
     id: str = Field(..., title="Subject ID")
+    # links collected from all of the individual's phenopackets (duplicates removed)
+    links: list[MatchLink] = Field(..., title="Links")
+    # all of the individual's biosamples; these are also nested under the corresponding phenopacket(s)
+    biosamples: list[MatchBiosample]
     phenopackets: list[MatchPhenopacket]
 
 

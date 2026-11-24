@@ -170,6 +170,7 @@ def get_or_create_biosample(bs: dict, lg: structlog.stdlib.BoundLogger) -> pm.Bi
         pathological_tnm_finding=bs.get("pathological_tnm_finding", []),
         diagnostic_markers=bs.get("diagnostic_markers", []),
         extra_properties=remove_computed_properties(bs.get("extra_properties", {})),
+        defaults={"links": bs.get("links", [])},  # non-Phenopackets-standard field; not part of the lookup
         **bs_query,
     )
 
@@ -414,6 +415,7 @@ def ingest_phenopacket(
     interpretations = phenopacket_data.get("interpretations", [])
     measurements = phenopacket_data.get("measurements", [])
     medical_actions = phenopacket_data.get("medical_actions", [])
+    links = phenopacket_data.get("links", [])  # non-Phenopackets-standard field
     # - non-Phenopackets-standard field:
     extra_properties = remove_computed_properties(phenopacket_data.get("extra_properties", {}))
 
@@ -459,6 +461,7 @@ def ingest_phenopacket(
         subject=subject_obj,
         measurements=measurements,
         medical_actions=medical_actions,
+        links=links,
         meta_data=meta_data_obj,
         dataset=Dataset.objects.get(identifier=dataset_id),
         extra_properties=extra_properties,

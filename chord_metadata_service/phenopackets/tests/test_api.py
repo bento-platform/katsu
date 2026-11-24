@@ -244,6 +244,7 @@ class BatchBiosamplesCSVTest(AuthzAPITestCase):
                 "created",
                 "updated",
                 "individual",
+                "links",
             ],
         )
 

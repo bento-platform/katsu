@@ -3,6 +3,7 @@
 # Portions of this text (c) Machine-Actionable Metadata Models for MIRcat (https://github.com/FAIRsharing/mircat)
 # Licensed under the BSD 3-Clause License
 
+from chord_metadata_service.phenopackets.descriptions import LINK
 from chord_metadata_service.restapi.description_utils import EXTRA_PROPERTIES, ontology_class
 
 
@@ -44,6 +45,10 @@ EXPERIMENT = {
         "experiment_results": "Related files containing the analysis of sequencing data.",
         "instrument": "The instrument used to sequence the biological specimens.",
         "biosample": "Biosample on which this experiment was done.",
+        "links": {
+            "description": "A list of links to external web resources related to the experiment.",
+            "items": LINK,
+        },
         **EXTRA_PROPERTIES,
     },
 }
@@ -76,6 +81,10 @@ EXPERIMENT_RESULT = {
         "usage": "Internal to the Bento: describe how data is used within Bento (visualized or can be downloaded).",
         "creation_date": "The date when the experiment result file was created.",
         "created_by": "Name/Username/Code of the person who prepared the sequencing data.",
+        "links": {
+            "description": "A list of links to external web resources related to the experiment result.",
+            "items": LINK,
+        },
         **EXTRA_PROPERTIES,
     },
 }
